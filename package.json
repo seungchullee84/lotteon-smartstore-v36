@@ -1,0 +1,17 @@
+{
+  "name": "giordano-lotte-register",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/*.test.mjs",
+    "setup": "playwright install chromium"
+  },
+  "dependencies": {
+    "cheerio": "1.1.2",
+    "playwright": "1.56.1",
+    "sharp": "0.34.4",
+    "tesseract.js": "6.0.1"
+  }
+}

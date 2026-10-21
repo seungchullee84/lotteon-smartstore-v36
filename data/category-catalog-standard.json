@@ -1,0 +1,856 @@
+{
+  "version": 1,
+  "source": "https://together.lotteshopping.com/EMDV3/index.html",
+  "collectedAt": "2026-10-20T05:04:41.000Z",
+  "scope": "브랜드여성의류·브랜드남성의류 중·소·세분류",
+  "complete": true,
+  "majors": [
+    {
+      "code": "BC34000000",
+      "name": "브랜드여성의류",
+      "middles": [
+        {
+          "code": "BC34010000",
+          "name": "가디건/조끼",
+          "smalls": [
+            {
+              "code": "BC34010100",
+              "name": "니트조끼",
+              "details": []
+            },
+            {
+              "code": "BC34010200",
+              "name": "라운드넥가디건",
+              "details": []
+            },
+            {
+              "code": "BC34010300",
+              "name": "브이넥가디건",
+              "details": []
+            },
+            {
+              "code": "BC34010400",
+              "name": "집업가디건",
+              "details": []
+            },
+            {
+              "code": "BC34010500",
+              "name": "캐쥬얼조끼",
+              "details": []
+            },
+            {
+              "code": "BC34010600",
+              "name": "테일러드조끼",
+              "details": []
+            },
+            {
+              "code": "BC34010700",
+              "name": "패딩조끼",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC34020000",
+          "name": "가죽/모피",
+          "smalls": [
+            {
+              "code": "BC34020100",
+              "name": "모피/퍼코트",
+              "details": []
+            },
+            {
+              "code": "BC34020200",
+              "name": "무스탕/가죽자켓",
+              "details": []
+            },
+            {
+              "code": "BC34020300",
+              "name": "퍼베스트",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC34030000",
+          "name": "기타",
+          "smalls": [
+            {
+              "code": "BC34030100",
+              "name": "기타",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC34040000",
+          "name": "니트/스웨터",
+          "smalls": [
+            {
+              "code": "BC34040100",
+              "name": "라운드넥니트",
+              "details": []
+            },
+            {
+              "code": "BC34040200",
+              "name": "브이넥니트",
+              "details": []
+            },
+            {
+              "code": "BC34040300",
+              "name": "집업니트",
+              "details": []
+            },
+            {
+              "code": "BC34040400",
+              "name": "터틀넥/폴라니트",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC34050000",
+          "name": "바지/레깅스",
+          "smalls": [
+            {
+              "code": "BC34050100",
+              "name": "레깅스",
+              "details": []
+            },
+            {
+              "code": "BC34050200",
+              "name": "면바지/밴딩팬츠",
+              "details": []
+            },
+            {
+              "code": "BC34050300",
+              "name": "반바지/치마바지",
+              "details": []
+            },
+            {
+              "code": "BC34050400",
+              "name": "슬랙스",
+              "details": []
+            },
+            {
+              "code": "BC34050500",
+              "name": "청반바지",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC34060000",
+          "name": "블라우스/셔츠",
+          "smalls": [
+            {
+              "code": "BC34060100",
+              "name": "데님셔츠",
+              "details": []
+            },
+            {
+              "code": "BC34060200",
+              "name": "레이스/프릴블라우스",
+              "details": []
+            },
+            {
+              "code": "BC34060300",
+              "name": "솔리드셔츠",
+              "details": []
+            },
+            {
+              "code": "BC34060400",
+              "name": "시폰블라우스",
+              "details": []
+            },
+            {
+              "code": "BC34060500",
+              "name": "체크셔츠",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC34070000",
+          "name": "스커트",
+          "smalls": [
+            {
+              "code": "BC34070100",
+              "name": "롱스커트",
+              "details": []
+            },
+            {
+              "code": "BC34070200",
+              "name": "미니스커트",
+              "details": []
+            },
+            {
+              "code": "BC34070300",
+              "name": "미디스커트",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC34080000",
+          "name": "시즌웨어",
+          "smalls": [
+            {
+              "code": "BC34080100",
+              "name": "비치웨어",
+              "details": []
+            },
+            {
+              "code": "BC34080200",
+              "name": "한복",
+              "details": []
+            },
+            {
+              "code": "BC34080300",
+              "name": "수영복",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC34090000",
+          "name": "원피스",
+          "smalls": [
+            {
+              "code": "BC34090100",
+              "name": "나시원피스",
+              "details": []
+            },
+            {
+              "code": "BC34090200",
+              "name": "니트원피스",
+              "details": []
+            },
+            {
+              "code": "BC34090300",
+              "name": "레이스원피스",
+              "details": []
+            },
+            {
+              "code": "BC34090400",
+              "name": "롱/맥시원피스",
+              "details": []
+            },
+            {
+              "code": "BC34090500",
+              "name": "미니원피스",
+              "details": []
+            },
+            {
+              "code": "BC34090600",
+              "name": "점프슈트",
+              "details": []
+            },
+            {
+              "code": "BC34090700",
+              "name": "트렌치원피스",
+              "details": []
+            },
+            {
+              "code": "BC34090800",
+              "name": "프릴원피스",
+              "details": []
+            },
+            {
+              "code": "BC34090900",
+              "name": "플라워/프린트원피스",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC34100000",
+          "name": "자켓/코트",
+          "smalls": [
+            {
+              "code": "BC34100100",
+              "name": "노카라자켓",
+              "details": []
+            },
+            {
+              "code": "BC34100200",
+              "name": "레인코트",
+              "details": []
+            },
+            {
+              "code": "BC34100300",
+              "name": "롱코트",
+              "details": []
+            },
+            {
+              "code": "BC34100400",
+              "name": "린넨/마자켓",
+              "details": []
+            },
+            {
+              "code": "BC34100500",
+              "name": "청자켓",
+              "details": []
+            },
+            {
+              "code": "BC34100600",
+              "name": "캐주얼자켓",
+              "details": []
+            },
+            {
+              "code": "BC34100700",
+              "name": "테일러드자켓",
+              "details": []
+            },
+            {
+              "code": "BC34100800",
+              "name": "트렌치코트",
+              "details": []
+            },
+            {
+              "code": "BC34100900",
+              "name": "트위드자켓",
+              "details": []
+            },
+            {
+              "code": "BC34101000",
+              "name": "하프코트",
+              "details": []
+            },
+            {
+              "code": "BC34101100",
+              "name": "데님점퍼",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC34110000",
+          "name": "점퍼/패딩/야상",
+          "smalls": [
+            {
+              "code": "BC34110100",
+              "name": "바람막이점퍼",
+              "details": []
+            },
+            {
+              "code": "BC34110200",
+              "name": "야상/사파리점퍼",
+              "details": []
+            },
+            {
+              "code": "BC34110300",
+              "name": "집업/야구/항공점퍼",
+              "details": []
+            },
+            {
+              "code": "BC34110400",
+              "name": "패딩/다운점퍼",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC34120000",
+          "name": "정장",
+          "smalls": [
+            {
+              "code": "BC34120100",
+              "name": "정장바지",
+              "details": []
+            },
+            {
+              "code": "BC34120200",
+              "name": "정장세트",
+              "details": []
+            },
+            {
+              "code": "BC34120300",
+              "name": "정장원피스",
+              "details": []
+            },
+            {
+              "code": "BC34120400",
+              "name": "정장자켓",
+              "details": []
+            },
+            {
+              "code": "BC34120500",
+              "name": "정장치마",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC34130000",
+          "name": "청바지",
+          "smalls": [
+            {
+              "code": "BC34130100",
+              "name": "부츠컷/와이드핏",
+              "details": []
+            },
+            {
+              "code": "BC34130200",
+              "name": "스키니/슬림핏",
+              "details": []
+            },
+            {
+              "code": "BC34130300",
+              "name": "스트레이트핏",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC34140000",
+          "name": "트레이닝복",
+          "smalls": [
+            {
+              "code": "BC34140100",
+              "name": "트레이닝상의",
+              "details": []
+            },
+            {
+              "code": "BC34140200",
+              "name": "트레이닝세트",
+              "details": []
+            },
+            {
+              "code": "BC34140300",
+              "name": "트레이닝하의",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC34150000",
+          "name": "티셔츠/맨투맨",
+          "smalls": [
+            {
+              "code": "BC34150100",
+              "name": "라운드넥티셔츠",
+              "details": []
+            },
+            {
+              "code": "BC34150200",
+              "name": "맨투맨",
+              "details": []
+            },
+            {
+              "code": "BC34150300",
+              "name": "민소매티셔츠",
+              "details": []
+            },
+            {
+              "code": "BC34150400",
+              "name": "브이넥티셔츠",
+              "details": []
+            },
+            {
+              "code": "BC34150500",
+              "name": "폴라티셔츠",
+              "details": []
+            },
+            {
+              "code": "BC34150600",
+              "name": "후드티/후드집업",
+              "details": []
+            }
+          ],
+          "complete": true
+        }
+      ]
+    },
+    {
+      "code": "BC31000000",
+      "name": "브랜드남성의류",
+      "middles": [
+        {
+          "code": "BC31010000",
+          "name": "가디건/조끼",
+          "smalls": [
+            {
+              "code": "BC31010100",
+              "name": "니트조끼",
+              "details": []
+            },
+            {
+              "code": "BC31010200",
+              "name": "라운드넥가디건",
+              "details": []
+            },
+            {
+              "code": "BC31010300",
+              "name": "브이넥가디건",
+              "details": []
+            },
+            {
+              "code": "BC31010400",
+              "name": "집업가디건",
+              "details": []
+            },
+            {
+              "code": "BC31010500",
+              "name": "캐쥬얼조끼",
+              "details": []
+            },
+            {
+              "code": "BC31010600",
+              "name": "테일러드조끼",
+              "details": []
+            },
+            {
+              "code": "BC31010700",
+              "name": "패딩조끼",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC31020000",
+          "name": "기타",
+          "smalls": [
+            {
+              "code": "BC31020100",
+              "name": "기타",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC31030000",
+          "name": "긴팔티셔츠/맨투맨",
+          "smalls": [
+            {
+              "code": "BC31030100",
+              "name": "라운드넥티셔츠",
+              "details": []
+            },
+            {
+              "code": "BC31030200",
+              "name": "맨투맨티셔츠",
+              "details": []
+            },
+            {
+              "code": "BC31030300",
+              "name": "브이넥티셔츠",
+              "details": []
+            },
+            {
+              "code": "BC31030400",
+              "name": "카라넥티셔츠",
+              "details": []
+            },
+            {
+              "code": "BC31030500",
+              "name": "폴라티셔츠",
+              "details": []
+            },
+            {
+              "code": "BC31030600",
+              "name": "프린트티셔츠",
+              "details": []
+            },
+            {
+              "code": "BC31030700",
+              "name": "후드집업",
+              "details": []
+            },
+            {
+              "code": "BC31030800",
+              "name": "후드티셔츠",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC31040000",
+          "name": "니트/스웨터",
+          "smalls": [
+            {
+              "code": "BC31040100",
+              "name": "라운드넥니트",
+              "details": []
+            },
+            {
+              "code": "BC31040200",
+              "name": "브이넥니트",
+              "details": []
+            },
+            {
+              "code": "BC31040300",
+              "name": "집업니트",
+              "details": []
+            },
+            {
+              "code": "BC31040400",
+              "name": "터틀넥/폴라니트",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC31050000",
+          "name": "바지",
+          "smalls": [
+            {
+              "code": "BC31050100",
+              "name": "기모팬츠",
+              "details": []
+            },
+            {
+              "code": "BC31050200",
+              "name": "면/린넨반바지",
+              "details": []
+            },
+            {
+              "code": "BC31050300",
+              "name": "슬랙스",
+              "details": []
+            },
+            {
+              "code": "BC31050400",
+              "name": "청반바지",
+              "details": []
+            },
+            {
+              "code": "BC31050500",
+              "name": "치노면바지",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC31060000",
+          "name": "반팔티셔츠",
+          "smalls": [
+            {
+              "code": "BC31060100",
+              "name": "라운드넥반팔티",
+              "details": []
+            },
+            {
+              "code": "BC31060200",
+              "name": "민소매티셔츠",
+              "details": []
+            },
+            {
+              "code": "BC31060300",
+              "name": "브이넥반팔티",
+              "details": []
+            },
+            {
+              "code": "BC31060400",
+              "name": "카라반팔티",
+              "details": []
+            },
+            {
+              "code": "BC31060500",
+              "name": "프린트반팔티",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC31070000",
+          "name": "시즌웨어",
+          "smalls": [
+            {
+              "code": "BC31070100",
+              "name": "수영복",
+              "details": []
+            },
+            {
+              "code": "BC31070200",
+              "name": "한복",
+              "details": []
+            },
+            {
+              "code": "BC31070300",
+              "name": "비치웨어",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC31080000",
+          "name": "자켓/코트",
+          "smalls": [
+            {
+              "code": "BC31080100",
+              "name": "가죽자켓",
+              "details": []
+            },
+            {
+              "code": "BC31080200",
+              "name": "데님자켓",
+              "details": []
+            },
+            {
+              "code": "BC31080300",
+              "name": "롱코트",
+              "details": []
+            },
+            {
+              "code": "BC31080400",
+              "name": "모직자켓",
+              "details": []
+            },
+            {
+              "code": "BC31080500",
+              "name": "야상자켓",
+              "details": []
+            },
+            {
+              "code": "BC31080600",
+              "name": "테일러드자켓",
+              "details": []
+            },
+            {
+              "code": "BC31080700",
+              "name": "트렌치코트",
+              "details": []
+            },
+            {
+              "code": "BC31080800",
+              "name": "패딩/다운코트",
+              "details": []
+            },
+            {
+              "code": "BC31080900",
+              "name": "하프코트",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC31090000",
+          "name": "점퍼/패딩/야상",
+          "smalls": [
+            {
+              "code": "BC31090100",
+              "name": "바람막이점퍼",
+              "details": []
+            },
+            {
+              "code": "BC31090200",
+              "name": "야상/사파리점퍼",
+              "details": []
+            },
+            {
+              "code": "BC31090300",
+              "name": "집업점퍼",
+              "details": []
+            },
+            {
+              "code": "BC31090400",
+              "name": "패딩/다운점퍼",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC31100000",
+          "name": "정장",
+          "smalls": [
+            {
+              "code": "BC31100100",
+              "name": "와이셔츠",
+              "details": []
+            },
+            {
+              "code": "BC31100200",
+              "name": "정장바지",
+              "details": []
+            },
+            {
+              "code": "BC31100300",
+              "name": "정장세트",
+              "details": []
+            },
+            {
+              "code": "BC31100400",
+              "name": "정장재킷",
+              "details": []
+            },
+            {
+              "code": "BC31100500",
+              "name": "정장조끼",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC31110000",
+          "name": "청바지",
+          "smalls": [
+            {
+              "code": "BC31110100",
+              "name": "부츠컷/와이드핏",
+              "details": []
+            },
+            {
+              "code": "BC31110200",
+              "name": "스키니/슬림핏",
+              "details": []
+            },
+            {
+              "code": "BC31110300",
+              "name": "스트레이트핏",
+              "details": []
+            }
+          ],
+          "complete": true
+        },
+        {
+          "code": "BC31120000",
+          "name": "캐주얼셔츠",
+          "smalls": [
+            {
+              "code": "BC31120100",
+              "name": "솔리드셔츠",
+              "details": []
+            },
+            {
+              "code": "BC31120200",
+              "name": "스트라이프셔츠",
+              "details": []
+            },
+            {
+              "code": "BC31120300",
+              "name": "체크셔츠",
+              "details": []
+            }
+          ],
+          "complete": true
+        }
+      ]
+    }
+  ],
+  "completedAt": "2026-10-20T05:07:58.551Z"
+}

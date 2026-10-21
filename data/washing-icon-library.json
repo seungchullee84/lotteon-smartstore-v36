@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "hash": "64072f22819e731827d7a497ec99b94a98f8a3a48f95d6fe1d68c3919af83210",
+      "meaning": "표백제금지",
+      "confirmedAt": "2026-10-20T10:34:10.618Z",
+      "confirmedBy": "user"
+    },
+    {
+      "hash": "d574e64cd6f7f7b16b7b6b7a3e386a93d69ac2761f5f6df752556cacbca2bcf1",
+      "meaning": "손세탁",
+      "confirmedAt": "2026-10-20T10:34:29.025Z",
+      "confirmedBy": "user"
+    },
+    {
+      "hash": "950bbd687c1c85a2ec040f6d4cf20c88880434b1ce9550c261eae4246cc870d8",
+      "meaning": "천대고다림질",
+      "confirmedAt": "2026-10-20T10:34:38.644Z",
+      "confirmedBy": "user"
+    },
+    {
+      "hash": "7e072a03de5eaa18b21e2ed007c616d62fa1f2ba5a69d45a6a995aafdbfd570d",
+      "meaning": "약하게짜기",
+      "confirmedAt": "2026-10-20T10:34:46.184Z",
+      "confirmedBy": "user"
+    },
+    {
+      "hash": "0c83f8097f9c290566a7e3349000956fff51ada954d1e99e2b9f3ca29b0b499f",
+      "meaning": "건조기금지",
+      "confirmedAt": "2026-10-20T10:34:52.441Z",
+      "confirmedBy": "user"
+    },
+    {
+      "hash": "1713ed676a2ff9104e0a73d722d0efb9ffbbe1f7038af74baa347f938e38cf49",
+      "meaning": "석유계드라이",
+      "confirmedAt": "2026-10-20T10:37:02.137Z",
+      "confirmedBy": "user"
+    },
+    {
+      "hash": "6d782daf2653c688ff11e4c77ba7b8cec877e34446941b63178460e78c8482da",
+      "meaning": "표백제금지",
+      "confirmedAt": "2026-10-20T10:37:07.629Z",
+      "confirmedBy": "user"
+    },
+    {
+      "hash": "013c0528d41917252a6d8f5fa4da519973c3d79c0559357c77ffe911e5f53adb",
+      "meaning": "천대고다림질",
+      "confirmedAt": "2026-10-20T10:37:34.466Z",
+      "confirmedBy": "user"
+    },
+    {
+      "hash": "abc822d6cfec8830330238570970249bdef80531c41e9a5813b98d6578dc59bb",
+      "meaning": "뉘어서그늘건조",
+      "confirmedAt": "2026-10-20T10:37:44.841Z",
+      "confirmedBy": "user"
+    },
+    {
+      "hash": "c7db89cc22bc6cce23b1ad3cc99dc07e59c66e89be34d5be7d80fcf2f7038db9",
+      "meaning": "건조기금지",
+      "confirmedAt": "2026-10-20T10:37:52.015Z",
+      "confirmedBy": "user"
+    },
+    {
+      "hash": "0b92374ddc13ac2c400aa9d98469eded0113f19764607347c5f4e95ec06beaa2",
+      "meaning": "손세탁",
+      "confirmedAt": "2026-10-21T04:23:13.628Z",
+      "confirmedBy": "user"
+    }
+  ]
+}
