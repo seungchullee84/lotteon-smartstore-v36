@@ -4,7 +4,7 @@
 
 ## 실행
 
-Windows, Node.js 20.19 이상 및 Microsoft Edge가 필요합니다.
+Windows, Node.js 20.19 이상 및 구글 크롬(Google Chrome)이 필요합니다.
 
 ```sh
 npm install
@@ -12,7 +12,7 @@ npm run setup
 npm start
 ```
 
-Windows에서는 `start.cmd`로도 실행할 수 있습니다. 판매자 계정은 실행 후 전용 브라우저에서 직접 로그인하세요. 실제 상품 등록 전 수집 정보와 입력 내용을 확인하세요.
+Windows에서는 `start.cmd`로도 실행할 수 있습니다. 판매자 계정은 실행 후 열리는 전용 크롬 창에서 직접 로그인하세요. 실제 상품 등록 전 수집 정보와 입력 내용을 확인하세요.
 
 ## 공개 범위
 
