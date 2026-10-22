@@ -1,4 +1,6 @@
 import {resolveCatalogCategory} from './category-catalog.mjs';
+import {officialColorChips,collectColorChips} from './color-chips.mjs';
+import {prepareMainImage} from './main-image.mjs';
 import {normalizeCountry} from './country.mjs';
 export {normalizeCountry} from './country.mjs';
 import * as cheerio from 'cheerio';
@@ -273,7 +275,9 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
   await page.locator('img[src*="'+style+'info."]').first().waitFor({state:'attached',timeout:20000});
 
   await page.waitForLoadState('load');
-  const product=parseProduct(await page.content(),url,style);
+  const detailHtml=await page.content();
+  const product=parseProduct(detailHtml,url,style);
+  product.colorChips=officialColorChips(detailHtml,url,product.colors);
   let originalDetailBytes;
   if(product.images.detail&&options.allowMissingDetail===true){
     originalDetailBytes=await inspectDetailSource(product,src=>context.request.get(src,{headers:{Referer:product.sourceUrl},timeout:20000}),true);
@@ -322,6 +326,13 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
   product.keywords=buildKeywords(product);
   if(cancelled())throw Error('사용자가 중단했습니다.');
   await writeFile(path.join(folder,'product.json'),JSON.stringify(product,null,2));
+  await collectColorChips(folder,product,src=>context.request.get(src,{headers:{Referer:product.sourceUrl},timeout:8000}),log);
+  if(cancelled()||signal?.aborted)throw Error('사용자가 중단했습니다.');
+  try{
+    await prepareMainImage(folder);
+    let chipStatus;try{chipStatus=JSON.parse(await readFile(path.join(folder,'colorchip-status.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+    if(chipStatus)log(chipStatus.position?'대표이미지 색상칩 자동 배치: '+(chipStatus.position==='bottom-right'?'오른쪽 하단':'오른쪽 중단'):chipStatus.reason);
+  }catch(e){log('대표이미지 색상칩 자동 처리 생략: '+e.message);}
   return product;
   } finally {signal?.removeEventListener('abort',abort);await browser.close().catch(()=>{});}
 }

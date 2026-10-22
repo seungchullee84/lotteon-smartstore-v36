@@ -1,4 +1,5 @@
 import sharp from 'sharp';
+import {decorateMainImage} from './color-chips.mjs';
 import path from 'node:path';
 import {readFile,writeFile,rename} from 'node:fs/promises';
 export function isPants(product){return /바지|팬츠|슬랙스|데님|청바지|레깅스|PANTS|DENIM|JEANS|SHORTS|TROUSERS/i.test([product.rawName,product.name,...(product.sourceCategory||[])].filter(Boolean).join(' '));}
@@ -25,12 +26,12 @@ export async function prepareMainImage(folder,key='main'){
  if(!['main','extra1','extra2'].includes(key))throw Error('잘못된 이미지 종류입니다.');
  const output=path.join(folder,key+'-1500.jpg');
  const composite=await backgroundImageStatus(folder,key);
- if(composite.ready)return composite.file;
+ if(composite.ready)return key==='main'?decorateMainImage(folder,composite.file):composite.file;
  if(key==='main'){
   const selectedProduct=JSON.parse(await readFile(path.join(folder,'product.json'),'utf8'));
   if(/^\d{6}$/.test(selectedProduct.style)){
    let approved;try{approved=await readFile(path.join(folder,'..','main-overrides',selectedProduct.style+'.jpg'));}catch(e){if(e.code!=='ENOENT')throw e;}
-   if(approved){const size=await sharp(approved).metadata();if(size.width!==1500||size.height!==1500)throw Error('승인 대표이미지 크기가 올바르지 않습니다.');await writeFile(output,approved);return output;}
+   if(approved){const size=await sharp(approved).metadata();if(size.width!==1500||size.height!==1500)throw Error('승인 대표이미지 크기가 올바르지 않습니다.');await writeFile(output,approved);return decorateMainImage(folder,output);}
   }
   let meta;try{meta=await sharp(path.join(folder,'detail.jpg')).metadata();}catch{throw Error('상세 원본 상단 사진이 없어 대표이미지를 만들 수 없습니다.');}
   if(!meta.width||meta.height<meta.width)throw Error('상세 상단 사진의 정사각형 영역을 확인해 주세요.');
@@ -40,7 +41,7 @@ export async function prepareMainImage(folder,key='main'){
  }else{
   await sharp(path.join(folder,key+'.jpg')).rotate().resize(1500,1500,{fit:'contain',background:'#ffffff'}).jpeg({quality:95}).toFile(output);
  }
- return output;
+ return key==='main'?decorateMainImage(folder,output):output;
 }
 
 export async function backgroundImageStatus(folder,key='main'){
