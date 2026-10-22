@@ -71,6 +71,17 @@ const server=http.createServer(async(req,res)=>{
       res.writeHead(200,{'Content-Type':png?'image/png':'image/jpeg','Cache-Control':'no-store'});return res.end(bytes);
     }
     if(req.method==='POST'){
+      if(url.pathname==='/api/background-request'){
+        if(!state.product||!state.folder)throw Error('먼저 상품을 수집해 주세요.');
+        const original=await readFile(path.join(state.folder,'main.jpg'));
+        const requestFolder=path.join(dataRoot,'background-requests',randomBytes(12).toString('hex'));
+        await mkdir(requestFolder,{recursive:true});
+        const imagePath=path.join(requestFolder,'original.jpg');
+        await writeFile(imagePath,original);
+        const prompt=`상품 ${state.product.style}의 대표사진 배경 늘리기 합성을 요청합니다. 원본 파일: ${imagePath}\n이 로컬 이미지를 먼저 확인하고 이미지 생성 도구로 인물과 옷의 형태, 색상, 무늬를 최대한 유지하면서 좌우 배경을 자연스럽게 늘린 1500×1500 시안을 만들어 주세요. 흰 테두리는 넣지 마세요. 생성 결과를 보여주고, 사용자 확인 전에는 등록기 대표이미지에 적용하거나 상품을 등록하지 마세요. 이번 상품에만 적용할 시안입니다.`;
+        const link=new URL('codex://new');link.searchParams.set('path',root);link.searchParams.set('prompt',prompt);
+        return json(res,200,{url:link.href});
+      }
       const b=await body(req);
       if(url.pathname==='/api/smartstore-open'){
         if(state.busy)throw Error('진행 중인 작업이 있습니다.');
