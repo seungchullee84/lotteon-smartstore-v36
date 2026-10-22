@@ -1,5 +1,6 @@
 import {generateBackground} from './background-image.mjs';
 import {createReleaseTracker} from './app-release.mjs';
+import {startGithubSync} from './github-sync.mjs';
 import {brandingLock} from './branding-lock.mjs';
 import {SmartstoreAutomation} from './smartstore-automation.mjs';
 import {smartstorePlan} from './smartstore-form.mjs';
@@ -18,6 +19,7 @@ import sharp from 'sharp';
 import {saveIconMeaning,iconWashingResult} from './washing-icons.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const releases=createReleaseTracker(root);await releases.get();
+const githubSync=startGithubSync(root,{beforeSync:()=>releases.get()});
 const dataRoot=path.join(root,'data');await mkdir(dataRoot,{recursive:true});
 const desktopSession=process.env.REGISTER_DESKTOP==='1'?JSON.parse(await readFile(path.join(dataRoot,'desktop-session.json'),'utf8')):null;
 const token=desktopSession?.token||randomBytes(24).toString('hex');
@@ -63,7 +65,7 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='GET'&&url.pathname==='/api/branding')return json(res,200,await protectedBranding.get());
     if(req.method==='GET'&&url.pathname==='/api/state'){
       const composite=state.folder?await backgroundImageStatus(state.folder):{ready:false};
-      return json(res,200,{...state,folder:undefined,mainImageVersion:composite.version||null,backgroundConfigured:!!backgroundApiKey,release:await releases.get()});
+      return json(res,200,{...state,folder:undefined,mainImageVersion:composite.version||null,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
     }
     if(req.method==='GET'&&url.pathname.startsWith('/image/')){
       if(/^\/image\/wash-icon-[1-9]\d*$/.test(url.pathname)&&state.folder){
