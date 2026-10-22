@@ -212,9 +212,9 @@ for(const button of document.querySelectorAll('.notice-copy'))button.onclick=()=
 
 $('openNoticeText').onclick=()=>{syncNoticeCopy();$('noticeCopyStatus').textContent='';$('noticeTextDialog').showModal();};$('closeNoticeText').onclick=()=>$('noticeTextDialog').close();
 
-$('extendBackground').onclick=()=>{if(!product){announce('먼저 상품을 수집해 주세요.','failed');return;}$('backgroundOriginal').src='/image/main-original?t='+Date.now();$('backgroundRequest').value='상품 '+product.style+'의 지오다노 공식몰 대표사진 원본으로 좌우 배경 늘리기 합성을 진행해 주세요. 인물과 옷은 원본을 그대로 보존하고, 흰 테두리 없는 1500×1500 시안을 만들어 주세요. 이번 상품만 예외 적용하고 시안 확인 후 등록기에 적용하겠습니다.';$('backgroundStatus').textContent='';$('backgroundDialog').showModal();};
+$('extendBackground').onclick=async()=>{if(!product){announce('먼저 상품을 수집해 주세요.','failed');return;}const link=$('openBackgroundRequest');link.hidden=true;link.removeAttribute('href');$('backgroundOriginal').src='/image/main-original?t='+Date.now();$('backgroundStatus').textContent='원본 사진과 합성 요청을 준비하고 있습니다…';$('backgroundDialog').showModal();try{const result=await post('background-request');link.href=result.url;link.hidden=false;$('backgroundStatus').textContent='아래 버튼으로 새 채팅을 연 뒤 전송 버튼을 눌러 주세요. 사진 복사는 필요 없습니다.';}catch(e){$('backgroundStatus').textContent=e.message;}};
 $('closeBackground').onclick=()=>$('backgroundDialog').close();
-$('copyBackgroundRequest').onclick=async()=>{const box=$('backgroundRequest');try{await navigator.clipboard.writeText(box.value);$('backgroundStatus').textContent='복사했습니다. 이 채팅에 붙여넣어 보내 주세요.';}catch{box.focus();box.select();let copied=false;try{copied=document.execCommand('copy');}catch{}$('backgroundStatus').textContent=copied?'복사했습니다. 이 채팅에 붙여넣어 보내 주세요.':'선택된 요청을 Ctrl+C로 복사해 주세요.';}};
+$('openBackgroundRequest').onclick=()=>{$('backgroundStatus').textContent='새 채팅이 열리면 준비된 요청을 전송해 주세요. 열리지 않으면 Codex 데스크톱 앱의 설치와 실행 상태를 확인해 주세요.';};
 
 // SmartStore is a separate no-save path; Lotte controls retain their behavior.
 $('smartstoreOpen').onclick=async()=>{try{await post('smartstore-open');announce('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.','success');}catch(e){$('error').textContent=e.message;}};
