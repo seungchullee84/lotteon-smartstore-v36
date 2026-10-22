@@ -1,3 +1,4 @@
+export function isSmartstoreInputUrl(url){return /^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/(?:create(?:[?]|$)|copy\/\d+(?:[?]|$))/.test(url);}
 import {buildDetailContent} from './detail-html.mjs';
 
 export function smartstorePlan(p,salePrice){
@@ -6,10 +7,9 @@ export function smartstorePlan(p,salePrice){
   for(const key of ['name','country','material','washing','manufactured'])if(!p[key])throw Error('수집 정보를 확인해 주세요: '+key);
   if(!/^20\d{2}-(0[1-9]|1[0-2])$/.test(p.manufactured))throw Error('제조연월은 YYYY-MM 형식이어야 합니다.');
   if(!p.colors?.length||!p.sizes?.length)throw Error('색상과 사이즈가 필요합니다.');
-  const category=p.gender==='여성'&&/패딩/.test(p.name)?['패션의류','여성의류','아우터','패딩']:null;
-  if(!category)throw Error('현재 스마트스토어 테스트는 여성 패딩 분류만 검증됐습니다.');
+  const category=null; // Keep the category selected in the copy form.
   if(!['미얀마','중국','베트남','방글라데시','인도네시아','캄보디아','인도','태국','필리핀','파키스탄','스리랑카','일본','대한민국','한국'].includes(p.country))throw Error('스마트스토어 제조국 선택을 먼저 검증해야 합니다.');
-  return {style:p.style,name:'지오다노 '+p.name.replace(/^지오다노\s*/,''),salePrice:+salePrice,consumerPrice:+p.consumerPrice,category,colors:[...p.colors],sizes:[...p.sizes],stockPerOption:10,expectedOptions:p.colors.length*p.sizes.length,material:p.material,country:p.country,washing:p.washing,manufactured:p.manufactured,html:buildDetailContent(p.images,p.colors,p.colorImages,p.originalDetailUrl).html.replace('max-width:900px','max-width:848px'),keywords:false,save:false};
+  return {style:p.style,name:'지오다노 '+p.name.replace(/^지오다노\s*/,'').replace(/(\S+)(?:\s+\1)+/g,'$1'),salePrice:+salePrice,consumerPrice:+p.consumerPrice,category,colors:[...p.colors],sizes:[...p.sizes],stockPerOption:10,expectedOptions:p.colors.length*p.sizes.length,material:p.material,country:p.country,washing:p.washing,manufactured:p.manufactured,html:buildDetailContent(p.images,p.colors,p.colorImages,p.originalDetailUrl).html.replace('max-width:900px','max-width:848px'),keywords:false,save:false};
 }
 
 export function verifySmartstoreOptions(plan,rows){
@@ -24,7 +24,7 @@ export function verifySmartstoreOptions(plan,rows){
 // There is deliberately no save, temporary-save, publish, tag, or SEO action.
 export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   const page=tab.playwright;
-  if(!(await tab.url()).startsWith('https://sell.smartstore.naver.com/#/products/create'))throw Error('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.');
+  if(!isSmartstoreInputUrl(await tab.url()))throw Error('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.');
   const fill=async(loc,value)=>{check();await loc.fill(String(value));await loc.press('Tab');const actual=await loc.evaluate(e=>e.value);if(actual!=='<redacted>'&&String(actual).replaceAll(',','')!==String(value).replaceAll(',',''))throw Error('입력값 확인 실패: '+String(value).slice(0,50));};
   const open=async(name,field)=>{if(!await field.isVisible())await page.getByRole('button',{name}).click();};
   const selectize=async(model,text)=>{
@@ -39,7 +39,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   log('카테고리 자동선택 중지 · 현재 선택된 분류 유지');
   await fill(page.locator('input[name="product.name"]'),plan.name);
   await fill(page.locator('#prd_price2'),plan.salePrice);
-  log('상품명·카테고리·테스트 판매가 '+plan.salePrice+'원 확인');
+  log('상품명·테스트 판매가 '+plan.salePrice+'원 확인');
   const optionName=page.locator('#choice_option_name0');
   if(!await page.locator('#option_choice_type_true').isVisible())await page.getByRole('button',{name:/^옵션 도움말/}).click();
   if(!await page.locator('#option_choice_type_true').evaluate(e=>e.checked))await page.locator('label[for="option_choice_type_true"]').click();

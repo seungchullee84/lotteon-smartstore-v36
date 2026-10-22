@@ -1,13 +1,13 @@
 import {BrowserAutomation} from './browser-connection.mjs';
-import {fillSmartstore,smartstorePlan} from './smartstore-form.mjs';
+import {fillSmartstore,smartstorePlan,isSmartstoreInputUrl} from './smartstore-form.mjs';
 import {prepareMainImage} from './main-image.mjs';
 import path from 'node:path';
 export class SmartstoreAutomation extends BrowserAutomation{
   async open(){
     await this.connectChrome('https://sell.smartstore.naver.com/#/products/create');
     const pages=this.context.pages().filter(p=>!p.isClosed());
-    this.page=pages.find(p=>p.url().startsWith('https://sell.smartstore.naver.com/#/products/create'))||pages.find(p=>p.url().startsWith('https://accounts.commerce.naver.com/'))||pages.find(p=>p.url().startsWith('https://sell.smartstore.naver.com/'))||await this.context.newPage();
-    if(!this.page.url().startsWith('https://sell.smartstore.naver.com/#/products/create')&&!this.page.url().startsWith('https://accounts.commerce.naver.com/')){
+    this.page=pages.find(p=>/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+(?:[?]|$)/.test(p.url()))||pages.find(p=>isSmartstoreInputUrl(p.url()))||pages.find(p=>p.url().startsWith('https://accounts.commerce.naver.com/'))||pages.find(p=>p.url().startsWith('https://sell.smartstore.naver.com/'))||await this.context.newPage();
+    if(!isSmartstoreInputUrl(this.page.url())&&!this.page.url().startsWith('https://accounts.commerce.naver.com/')){
       if(/#\/products\/(?:update|edit)/.test(this.page.url()))throw Error('수정 중인 상품 화면이 있습니다. 별도 상품 등록 화면을 열어 주세요.');
       await this.page.goto('https://sell.smartstore.naver.com/#/products/create',{waitUntil:'domcontentloaded'});
     }
