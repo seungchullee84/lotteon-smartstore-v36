@@ -35,7 +35,7 @@ const smartBot=new SmartstoreAutomation(dataRoot,log);
 function json(res,status,data){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));}
 async function body(req){let text='';for await(const chunk of req){text+=chunk;if(text.length>1600000)throw Error('요청이 너무 큽니다.');}return JSON.parse(text||'{}');}
 let activeAbort=null;
-function job(phase,fn){if(state.busy)throw Error('진행 중인 작업이 있습니다.');activeAbort=new AbortController();state.busy=true;state.phase=phase;state.error=null;Promise.resolve().then(fn).then(()=>{state.phase=bot.stopped?'stopped':'done';}).catch(e=>{state.error=bot.stopped?null:e.message;if(e.code==='DETAIL_SOURCE_MISSING'&&!bot.stopped)state.detailFallbackRequest={input:state.collectionInput};state.phase=bot.stopped?'stopped':'error';log(bot.stopped?'작업을 중단했습니다.':e.message);}).finally(()=>{state.busy=false;state.paused=null;activeAbort=null;});}
+function job(phase,fn){if(state.busy)throw Error('진행 중인 작업이 있습니다.');const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase=phase;state.error=null;Promise.resolve().then(fn).then(()=>{state.phase=controller.signal.aborted?'stopped':'done';}).catch(e=>{state.error=controller.signal.aborted?null:e.message;if(e.code==='DETAIL_SOURCE_MISSING'&&!controller.signal.aborted)state.detailFallbackRequest={input:state.collectionInput};state.phase=controller.signal.aborted?'stopped':'error';log(controller.signal.aborted?'작업을 중단했습니다.':e.message);}).finally(()=>{state.busy=false;state.paused=null;activeAbort=null;});}
 function validateProduct(p){
 
   repairCategoryFields(p);
@@ -207,7 +207,7 @@ const server=http.createServer(async(req,res)=>{
         state.product=p;job('register',()=>bot.run(p,state.folder,b.finalize===true));return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/continue'){state.paused=null;bot.resume();return json(res,200,{ok:true});}
-      if(url.pathname==='/api/stop'){if(state.busy){state.phase='stopping';state.paused=null;activeAbort?.abort();await bot.stop();await smartBot.stop();}return json(res,200,{ok:true});}
+      if(url.pathname==='/api/stop'){if(state.busy){const phase=state.phase;state.phase='stopping';state.paused=null;activeAbort?.abort();if(phase==='register')await bot.stop();if(phase==='smartstore')await smartBot.stop();}return json(res,200,{ok:true});}
     }
     if(req.method==='GET'&&url.pathname==='/detail-preview.html'){
       res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; img-src https://www.giordano.co.kr; style-src 'unsafe-inline'; frame-ancestors 'none'"});
