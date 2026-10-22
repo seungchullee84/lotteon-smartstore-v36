@@ -14,7 +14,7 @@ import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
 import {collect,parseProductInput,validateStyle,cleanMarketingText,buildKeywords,easyProductName,repairCategoryFields} from './product.mjs';
 import {LotteAutomation} from './automation.mjs';
-import {prepareMainImage,backgroundImageStatus} from './main-image.mjs';
+import {prepareMainImage,backgroundImageStatus,backgroundSelection} from './main-image.mjs';
 import sharp from 'sharp';
 import {saveIconMeaning,iconWashingResult} from './washing-icons.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
@@ -64,8 +64,10 @@ const server=http.createServer(async(req,res)=>{
     if(!cookie)return json(res,403,{error:'시작 화면의 전용 링크로 접속해 주세요.'});
     if(req.method==='GET'&&url.pathname==='/api/branding')return json(res,200,await protectedBranding.get());
     if(req.method==='GET'&&url.pathname==='/api/state'){
-      const composite=state.folder?await backgroundImageStatus(state.folder):{ready:false};
-      return json(res,200,{...state,folder:undefined,mainImageVersion:composite.version||null,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
+      const versions={};
+      for(const key of ['main','extra1','extra2'])versions[key]=state.folder?(await backgroundImageStatus(state.folder,key)).version||null:null;
+      const selected=state.folder?await backgroundSelection(state.folder):'main';
+      return json(res,200,{...state,folder:undefined,mainImageVersion:versions.main,imageVersions:versions,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
     }
     if(req.method==='GET'&&url.pathname.startsWith('/image/')){
       if(/^\/image\/wash-icon-[1-9]\d*$/.test(url.pathname)&&state.folder){
@@ -73,14 +75,22 @@ const server=http.createServer(async(req,res)=>{
         if(!state.product?.noticeAnalysis?.washingIcons?.some(i=>i.key===key))return json(res,404,{});
         res.writeHead(200,{'Content-Type':'image/png','Cache-Control':'no-store'});return res.end(await readFile(path.join(state.folder,key+'.png')));
       }
-      if(url.pathname==='/image/main-original'&&state.folder){res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'no-store'});return res.end(await readFile(path.join(state.folder,'main.jpg')));}
+      if(/^\/image\/(main|extra1|extra2)-original$/.test(url.pathname)&&state.folder){const key=url.pathname.slice(7).replace('-original','');res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'no-store'});return res.end(await readFile(path.join(state.folder,key+'.jpg')));}
       if(url.pathname==='/image/main'&&state.folder){const file=await prepareMainImage(state.folder);res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'no-store'});return res.end(await readFile(file));}
+      if(/^\/image\/extra[12]$/.test(url.pathname)&&state.folder){const composite=await backgroundImageStatus(state.folder,url.pathname.slice(7));if(composite.ready){res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'no-store'});return res.end(await readFile(composite.file));}}
       const name=url.pathname.slice(7);if((!['info','main','extra1','extra2','detail','size','check','ready','completed','stopped'].includes(name)&&!/^color[1-9]\d*_[12]$/.test(name))||!state.folder)return json(res,404,{});
       const png=['ready','completed','stopped'].includes(name);const bytes=await readFile(path.join(state.folder,name+(png?'.png':'.jpg')));
       res.writeHead(200,{'Content-Type':png?'image/png':'image/jpeg','Cache-Control':'no-store'});return res.end(bytes);
     }
     if(req.method==='POST'){
       const b=await body(req);
+      if(url.pathname==='/api/background-selection'){
+        if(!state.product||!state.folder||b.style!==state.product.style)throw Error('현재 상품을 다시 확인해 주세요.');
+        if(!['main','extra1','extra2'].includes(b.key)||!state.product.images[b.key])throw Error('선택할 이미지가 없습니다.');
+        await readFile(path.join(state.folder,b.key+'.jpg'));
+        await writeFile(path.join(state.folder,'background-selection.json'),JSON.stringify({key:b.key,style:state.product.style}));
+        return json(res,200,{ok:true,key:b.key});
+      }
       if(url.pathname==='/api/background-settings'){
         if(state.busy)throw Error('작업이 끝난 뒤 합성 설정을 변경해 주세요.');
         if(typeof b.apiKey!=='string'||!/^sk-[A-Za-z0-9_-]{16,}$/.test(b.apiKey.trim()))throw Error('올바른 OpenAI API 키를 입력해 주세요.');

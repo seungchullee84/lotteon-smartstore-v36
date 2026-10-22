@@ -24,9 +24,9 @@ export async function pantsCropTop(file,width,height){
 export async function prepareMainImage(folder,key='main'){
  if(!['main','extra1','extra2'].includes(key))throw Error('잘못된 이미지 종류입니다.');
  const output=path.join(folder,key+'-1500.jpg');
+ const composite=await backgroundImageStatus(folder,key);
+ if(composite.ready)return composite.file;
  if(key==='main'){
-  const composite=await backgroundImageStatus(folder);
-  if(composite.ready)return composite.file;
   const selectedProduct=JSON.parse(await readFile(path.join(folder,'product.json'),'utf8'));
   if(/^\d{6}$/.test(selectedProduct.style)){
    let approved;try{approved=await readFile(path.join(folder,'..','main-overrides',selectedProduct.style+'.jpg'));}catch(e){if(e.code!=='ENOENT')throw e;}
@@ -43,10 +43,12 @@ export async function prepareMainImage(folder,key='main'){
  return output;
 }
 
-export async function backgroundImageStatus(folder){
+export async function backgroundImageStatus(folder,key='main'){
+ if(!['main','extra1','extra2'].includes(key))throw Error('잘못된 이미지 종류입니다.');
  let request;
- try{request=JSON.parse(await readFile(path.join(folder,'background-image.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return {ready:false};throw e;}
- if(!/^main-composite-[a-f0-9]{24}\.jpg$/.test(request.file))throw Error('합성 이미지 경로가 올바르지 않습니다.');
+ const manifest=key==='main'?'background-image.json':'background-image-'+key+'.json';
+ try{request=JSON.parse(await readFile(path.join(folder,manifest),'utf8'));}catch(e){if(e.code==='ENOENT')return {ready:false};throw e;}
+ if(!new RegExp('^'+key+'-composite-[a-f0-9]{24}\\.jpg$').test(request.file))throw Error('합성 이미지 경로가 올바르지 않습니다.');
  const file=path.join(folder,request.file);
  try{
   const bytes=await readFile(file);
@@ -54,4 +56,9 @@ export async function backgroundImageStatus(folder){
   if(size.width!==1500||size.height!==1500)return {ready:false};
   return {ready:true,file,version:request.file};
  }catch(e){if(e.code==='ENOENT')return {ready:false};throw e;}
+}
+
+export async function backgroundSelection(folder){
+ try{const value=JSON.parse(await readFile(path.join(folder,'background-selection.json'),'utf8'));return ['main','extra1','extra2'].includes(value.key)?value.key:'main';}
+ catch(e){if(e.code==='ENOENT')return 'main';throw e;}
 }
