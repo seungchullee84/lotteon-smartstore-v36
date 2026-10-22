@@ -223,13 +223,15 @@ $('openNoticeText').onclick=()=>{syncNoticeCopy();$('noticeCopyStatus').textCont
 
 const backgroundLabels={main:'대표이미지',extra1:'추가이미지 1',extra2:'추가이미지 2'};
 function syncBackgroundImage(s){
+ const chip=s.colorChipStatus;
+ $('colorChipStatus').textContent=chip?(chip.position?'색상칩 자동 배치: 오른쪽 '+(chip.position==='bottom-right'?'하단':'중단'):'여백 부족으로 색상칩 생략'):'공식 색상칩은 수집 후 여백이 있을 때 자동 배치합니다.';
  if(!$('backgroundDialog').open)selectedBackgroundImage=s.backgroundSelection||'main';
  const versions=s.imageVersions||{main:s.mainImageVersion||null};
  for(const key of ['main','extra1','extra2']){
   const version=versions[key]||null;
   if(version===lastImageVersions[key])continue;
   lastImageVersions[key]=version;
-  if(version){$(key).src='/image/'+key+'?t='+Date.now();$('backgroundStatus').textContent='합성 완료 — '+backgroundLabels[key]+'를 변경했습니다.';announce('합성한 사진으로 '+backgroundLabels[key]+'를 변경했습니다.','success');}
+  if(version){$(key).src='/image/'+key+'?t='+Date.now();$('backgroundStatus').textContent='합성 완료 — '+backgroundLabels[key]+'를 변경했습니다.';announce(backgroundLabels[key]+'를 변경했습니다.','success');}
  }
 }
 function backgroundGuide(){return '선택한 사진: '+backgroundLabels[selectedBackgroundImage]+'. 현재 이 채팅창에 “합성해줘”라고 보내 주세요. 합성 결과는 항상 대표이미지로 적용합니다.';}

@@ -68,8 +68,11 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='GET'&&url.pathname==='/api/state'){
       const versions={};
       for(const key of ['main','extra1','extra2'])versions[key]=state.folder?(await backgroundImageStatus(state.folder,key)).version||null:null;
+      let colorChipStatus=null;
+      if(state.folder)try{colorChipStatus=JSON.parse(await readFile(path.join(state.folder,'colorchip-status.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+      if(colorChipStatus)versions.main=(versions.main||'original')+':'+colorChipStatus.hash;
       const selected=state.folder?await backgroundSelection(state.folder):'main';
-      return json(res,200,{...state,folder:undefined,mainImageVersion:versions.main,imageVersions:versions,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
+      return json(res,200,{...state,folder:undefined,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
     }
     if(req.method==='GET'&&url.pathname.startsWith('/image/')){
       if(/^\/image\/wash-icon-[1-9]\d*$/.test(url.pathname)&&state.folder){
