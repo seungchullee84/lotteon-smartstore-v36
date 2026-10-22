@@ -1,6 +1,6 @@
 import {resolveCatalogCategory} from './category-catalog.mjs';
 import {categoryKey,loadCategoryCache,saveCategoryMatch} from './category-cache.mjs';
-import {BrowserAutomation} from './browser-session.mjs';
+import {BrowserAutomation} from './browser-connection.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {OptionCoverage} from './option-coverage.mjs';

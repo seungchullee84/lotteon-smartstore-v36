@@ -1,4 +1,4 @@
-import {BrowserAutomation} from './browser-session.mjs';
+import {BrowserAutomation} from './browser-connection.mjs';
 import {fillSmartstore,smartstorePlan} from './smartstore-form.mjs';
 import {prepareMainImage} from './main-image.mjs';
 import path from 'node:path';
