@@ -29,3 +29,5 @@ test('불명확한 상품은 없는 세분류나 임의 경로를 만들지 않�
 test('여성 맨투맨을 남방셔츠로 분류하지 않음',()=>{const r=resolveCatalogCategory({gender:'여성',name:'여성 맨투맨',category:{channelMiddle:'티셔츠/맨투맨',channelSmall:'맨투맨'}});assert.equal(r.category.commonSmall,'00843 : 여성티셔츠/탑');});
 
 test('기모 데님은 기모팬츠 대신 청바지의 실제 핏 경로를 우선',()=>{for(const [title,fit] of [['NEW 브러시드 배럴핏 데님','부츠컷/와이드핏'],['브러시드 스트레이트 데님','스트레이트핏'],['기모 슬림 데님','스키니/슬림핏']]){const r=resolveCatalogCategory({gender:'여성',rawName:title,sourceCategory:['WOMEN','PANTS','데님'],category:{channelMiddle:'바지',channelSmall:'기모팬츠'}},catalog,common);assert.equal(r.category.channelMiddle,'청바지');assert.equal(r.category.channelSmall,fit);assert.equal(r.category.commonSmall,'00852 : 여성청바지');assert.ok(r.path);}});
+
+test('여성 기모 테리 조거는 트레이닝복과 실제 트레이닝하의로 연결',()=>{const r=resolveCatalogCategory({gender:'여성',name:'여성 기모 테리 조거 바지 416970',sourceCategory:['WOMEN','PANTS','트레이닝/스웻팬츠'],category:{channelMiddle:'바지/레깅스',channelSmall:'기모팬츠'}},catalog,common);assert.equal(r.category.channelMiddle,'트레이닝복');assert.equal(r.category.channelSmall,'트레이닝하의');assert.equal(r.category.channelCodes.small,'BC34140300');});

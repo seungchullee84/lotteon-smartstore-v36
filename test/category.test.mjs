@@ -39,3 +39,5 @@ test('하위 항목에 맞는 상위 경로를 함께 보정',async()=>{
 });
 
 test('기모 배럴핏 데님은 소재와 핏으로 분류',()=>{const p=productClassification('<div class="navi"><a>Home</a><a class="prdpath1">WOMEN</a><a>PANTS</a><a>데님</a><a>NEW 브러시드 배럴핏 데님</a></div>');assert.equal(p.category.channelMiddle,'청바지');assert.equal(p.category.channelSmall,'부츠컷/와이드핏');});
+
+test('기모보다 트레이닝 상품 종류를 우선',()=>{const p=productClassification('<div class="navi"><a>Home</a><a class="prdpath1">WOMEN</a><a>PANTS</a><a>트레이닝/스웻팬츠</a><a>브러시드 테리 조거 팬츠</a></div>');assert.equal(p.category.channelMiddle,'트레이닝복');assert.equal(p.category.channelSmall,'트레이닝하의');});

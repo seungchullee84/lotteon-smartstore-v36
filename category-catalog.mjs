@@ -46,15 +46,16 @@ export function resolveCatalogCategory(p,catalog=loadCatalog(),common=null){
  if(!common)try{common=JSON.parse(readFileSync(new URL('./data/category-catalog-common.json',import.meta.url),'utf8'));}catch{}
  const text=[p.rawName,p.name,...(p.sourceCategory||[])].join(' ');
  const denim=/데님|청바지|\bDENIM\b/i.test(text)&&/바지|팬츠|PANTS|청바지/i.test(text);
+ const training=!denim&&/바지|팬츠|PANTS/i.test(text)&&/트레이닝|스웻|스웨트|조거/.test(text);
  const denimFit=/와이드|부츠컷|배럴|벌룬/.test(text)?'부츠컷/와이드핏':/스키니|슬림/.test(text)?'스키니/슬림핏':'스트레이트핏';
- const paths=standardPaths(catalog,p.gender),wanted=denim?denimFit:strip(p.category?.channelSmall);
- let found=paths.filter(x=>strip(x.small.name)===wanted&&(denim||!p.category.channelDetail||x.detail?.name===p.category.channelDetail));
+ const paths=standardPaths(catalog,p.gender),wanted=denim?denimFit:training?(p.gender==='여성'?'트레이닝하의':'트레이닝바지'):strip(p.category?.channelSmall);
+ let found=paths.filter(x=>strip(x.small.name)===wanted&&(denim||training||!p.category.channelDetail||x.detail?.name===p.category.channelDetail));
  if(found.length!==1){
   const candidates=[];const prefer=(condition,...names)=>{if(condition)candidates.push(...names);};
   prefer(/무스탕|가죽/.test(text),'무스탕/가죽자켓','가죽자켓');
   prefer(/패딩|다운|푸퍼/.test(text),/조끼|베스트/.test(text)?'패딩조끼':'패딩/다운점퍼');
   prefer(/바람막이|윈드브레이커/.test(text),'바람막이점퍼');
-  prefer(/바지|팬츠|PANTS|슬랙스/.test(text),...(/데님|청바지/.test(text)?['청바지']:/슬랙스/.test(text)?['슬랙스']:/트레이닝|스웻|스웨트/.test(text)?['트레이닝바지']:['면바지/밴딩팬츠','치노면바지','면바지']));
+  prefer(/바지|팬츠|PANTS|슬랙스/.test(text),...(/데님|청바지/.test(text)?['청바지']:/슬랙스/.test(text)?['슬랙스']:/트레이닝|스웻|스웨트|조거/.test(text)?['트레이닝하의','트레이닝바지']:['면바지/밴딩팬츠','치노면바지','면바지']));
   prefer(/가디건|카디건/.test(text),/집업/.test(text)?'집업가디건':/브이|V넥/i.test(text)?'브이넥가디건':/라운드/.test(text)?'라운드넥가디건':'가디건');
   prefer(/데님|청바지/.test(text)&&/바지|팬츠|PANTS|청바지/.test(text),/와이드|부츠컷/.test(text)?'부츠컷/와이드핏':/스키니|슬림/.test(text)?'스키니/슬림핏':/스트레이트|일자/.test(text)?'스트레이트핏':'청바지');
   prefer(/셔츠|남방/.test(text)&&!/티셔츠|스웨트셔츠/.test(text),/체크/.test(text)?'체크셔츠':/스트라이프/.test(text)?'스트라이프셔츠':/솔리드/.test(text)?'솔리드셔츠':'셔츠');

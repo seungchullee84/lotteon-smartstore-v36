@@ -25,7 +25,7 @@ export function productClassification(html) {
   if(gender&&/벨트/.test(itemTitle))Object.assign(category,{commonMajor:'L0022 : 가방/피혁잡화',commonMiddle:'M0307 : 벨트',commonSmall:gender==='남성'?'01033 : 남성벨트':'01032 : 여성벨트',channelMajor:'브랜드가방',channelMiddle:'벨트',channelSmall:gender+'벨트'});
   if(gender&&sourceCategory.includes('PANTS')){
     const kind=sourceCategory.join(' ')+' '+nav.find('a').last().text();
-    Object.assign(category,{commonMiddle:gender+'의류하의',commonSmall:gender+'바지',channelMiddle:/데님|진/.test(kind)?'청바지':/트레이닝|스웻/.test(kind)?'트레이닝복':'바지',channelSmall:/데님|청바지|진/.test(kind)?(/와이드|부츠컷|배럴|벌룬/.test(kind)?'부츠컷/와이드핏':/스키니|슬림/.test(kind)?'스키니/슬림핏':'스트레이트핏'):/기모|브러시드|브러쉬드/.test(kind)?'기모팬츠':/트레이닝|스웻/.test(kind)?'트레이닝바지':/슬랙스/.test(kind)?'슬랙스':'면바지'});
+    Object.assign(category,{commonMiddle:gender+'의류하의',commonSmall:gender+'바지',channelMiddle:/데님|진/.test(kind)?'청바지':/트레이닝|스웻|스웨트|조거/.test(kind)?'트레이닝복':'바지',channelSmall:/데님|청바지|진/.test(kind)?(/와이드|부츠컷|배럴|벌룬/.test(kind)?'부츠컷/와이드핏':/스키니|슬림/.test(kind)?'스키니/슬림핏':'스트레이트핏'):/트레이닝|스웻|스웨트|조거/.test(kind)?'트레이닝하의':/기모|브러시드|브러쉬드/.test(kind)?'기모팬츠':/슬랙스/.test(kind)?'슬랙스':'면바지'});
   }
   if(gender&&sourceCategory.includes('OUTER')){const title=itemTitle;const small=/코트/.test(title)?'코트':/패딩|다운/.test(title)?'패딩':/무스탕/.test(title)?'무스탕':sourceCategory.some(x=>/캐주얼(?:자켓|재킷)/.test(x))?'캐주얼자켓':'재킷';Object.assign(category,{commonMiddle:gender+'의류아우터',commonSmall:gender+(/코트/.test(title)?'코트':'자켓'),channelMiddle:/코트|무스탕/.test(title)?'코트':/패딩|다운|점퍼|푸퍼/.test(title)?'점퍼/패딩/야상':'자켓/코트',channelSmall:small});}
   if(gender&&sourceCategory.includes('TOP')){
