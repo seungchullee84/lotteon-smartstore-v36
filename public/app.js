@@ -223,7 +223,7 @@ function syncBackgroundImage(s){
   if(version){$(key).src='/image/'+key+'?t='+Date.now();$('backgroundStatus').textContent='합성 완료 — '+backgroundLabels[key]+'를 변경했습니다.';announce('합성한 사진으로 '+backgroundLabels[key]+'를 변경했습니다.','success');}
  }
 }
-function backgroundGuide(){return '선택한 사진: '+backgroundLabels[selectedBackgroundImage]+'. 현재 이 채팅창에 “합성해줘”라고 보내 주세요. 합성 결과를 선택한 이미지 자리에 적용합니다.';}
+function backgroundGuide(){return '선택한 사진: '+backgroundLabels[selectedBackgroundImage]+'. 현재 이 채팅창에 “합성해줘”라고 보내 주세요. 합성 결과는 항상 대표이미지로 적용합니다.';}
 function showBackgroundChoice(){
  $('backgroundOriginal').src='/image/'+selectedBackgroundImage+'-original?t='+Date.now();
  $('backgroundOriginal').alt='합성할 '+backgroundLabels[selectedBackgroundImage]+' 원본';

@@ -34,3 +34,7 @@ Windows에서는 `start.cmd`로도 실행할 수 있습니다. 판매자 계정�
 로그인 프로필, 토큰, 환경변수 파일, 상품 사진·작업 기록과 data 폴더는 자동 업로드하지 않습니다. 인증 문자열로 보이는 내용이 발견되면 업로드를 중단합니다. 네트워크 오류는 다시 시도하며, 원격 변경과 충돌하면 덮어쓰지 않고 확인 메시지를 표시합니다.
 
 합성 선택은 현재 상품 폴더의 `background-selection.json`에 저장됩니다. 채팅에서 합성할 때 이 파일의 key(main/extra1/extra2)를 확인하여 해당 원본(key.jpg)을 사용합니다. 완성본은 key-composite-24자리소문자hex.jpg로 저장하며, 대표이미지는 background-image.json, 추가이미지는 background-image-extra1.json 또는 background-image-extra2.json에 {"file":"완성 파일명"}을 기록하면 해당 미리보기·저장·업로드에 반영됩니다.
+
+## 합성 결과 적용 원칙
+
+사용자가 대표이미지·추가이미지 1·추가이미지 2 중 어느 원본을 선택하더라도, 완성된 합성본은 항상 현재 상품의 대표이미지에 적용합니다. background-selection.json의 key는 합성에 사용할 원본만 정합니다. 결과는 main-composite-24자리소문자hex.jpg로 저장하고 background-image.json에 {"file":"완성 파일명"}을 기록합니다. 대표이미지 미리보기와 저장·업로드 파일까지 반영 여부를 확인합니다.
