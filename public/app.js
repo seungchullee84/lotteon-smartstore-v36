@@ -54,7 +54,7 @@ $('style').addEventListener('keydown',event=>{
  if(!event.repeat)$('collect').click();
 });
 action('run',()=>{if(!$('form').reportValidity())return;const f=new FormData($('form'));const p={...product};for(const key of ['name','gender','material','country','washing','manufactured','keywords'])p[key]=f.get(key).trim();p.consumerPrice=Number(f.get('consumerPrice'));p.colors=f.get('colors').split(',').map(x=>x.replace(/\s+/g,'')).filter(Boolean);p.sizes=f.get('sizes').split(',').map(x=>x.replace(/\s+/g,'')).filter(Boolean);p.category=Object.fromEntries(['commonMiddle','commonSmall','channelMiddle','channelSmall'].map(k=>[k,f.get(k).trim()]));return post('run',{product:p,finalize:$('finalize').checked});});
-function populate(p){p.country=['대한민국','한국','중국','베트남','방글라데시','미얀마','인도네시아','캄보디아','인도','태국','필리핀','파키스탄','스리랑카','말레이시아','일본','이탈리아','포르투갈','튀르키예','터키','미국','프랑스','대만','네팔','라오스'].includes(p.country)?p.country:'';product=p;const form=$('form');for(const key of ['name','gender','consumerPrice','material','country','washing','manufactured','keywords'])form.elements[key].value=p[key]||'';form.elements.colors.value=p.colors.join(',');form.elements.sizes.value=p.sizes.join(',');for(const key of ['commonMiddle','commonSmall','channelMiddle','channelSmall'])form.elements[key].value=p.category[key]||'';$('source').textContent='품번 '+p.style+' · '+p.rawName.replace(/\[[^\]]*\]/g,'').replace(/변우석|문가영|박현지/g,'').trim();$('warnings').textContent=(p.fieldStatus?Object.entries(p.fieldStatus).map(([k,v])=>({material:'소재',washing:'세탁방법',category:'상품분류'}[k]||k)+': '+v).join(' / ')+' — ':'')+p.warnings.join(' ');for(const k of ['material','washing'])form.elements[k].placeholder='확인 필요 — 공식 고시 원본과 대조';$('ocr').textContent=p.ocrText;$('info').src='/image/info?t='+Date.now();$('main').src='/image/main?t='+Date.now();$('extraImages').hidden=false;const extraCount=['extra1','extra2'].filter(k=>p.images[k]).length;$('extraImageStatus').textContent=extraCount?'공식몰 추가사진 '+extraCount+'장':'공식몰에 별도 추가사진이 없습니다. 대표사진 1장만 업로드합니다.';for(const key of ['extra1','extra2']){$(key).hidden=!p.images[key];if(p.images[key])$(key).src='/image/'+key+'?t='+Date.now();else $(key).removeAttribute('src');}$('review').hidden=false;syncNoticeCopy();}
+function populate(p){p.country=['대한민국','한국','중국','베트남','방글라데시','미얀마','인도네시아','캄보디아','인도','태국','필리핀','파키스탄','스리랑카','말레이시아','일본','이탈리아','포르투갈','튀르키예','터키','미국','프랑스','대만','네팔','라오스'].includes(p.country)?p.country:'';product=p;const form=$('form');for(const key of ['name','gender','consumerPrice','material','country','washing','manufactured','keywords'])form.elements[key].value=p[key]||'';form.elements.colors.value=p.colors.join(',');form.elements.sizes.value=p.sizes.join(',');for(const key of ['commonMiddle','commonSmall','channelMiddle','channelSmall'])form.elements[key].value=p.category[key]||'';$('source').textContent='품번 '+p.style+' · '+p.rawName.replace(/\[[^\]]*\]/g,'').replace(/변우석|문가영|박현지/g,'').trim();$('warnings').textContent=(p.fieldStatus?Object.entries(p.fieldStatus).map(([k,v])=>({material:'소재',washing:'세탁방법',category:'상품분류'}[k]||k)+': '+v).join(' / ')+' — ':'')+p.warnings.join(' ');for(const k of ['material','washing'])form.elements[k].placeholder='확인 필요 — 공식 고시 원본과 대조';$('ocr').textContent=p.ocrText;$('info').src='/image/info?t='+Date.now();$('main').src='/image/main?t='+Date.now();renderExtraImages(p);$('review').hidden=false;syncNoticeCopy();}
 const renderProduct=populate;
 function renderWashingIcons(p){
  const list=$('washingIconList');list.replaceChildren();
@@ -78,7 +78,7 @@ function renderWashingIcons(p){
 
 populate=function(p){renderProduct(p);$('categorySource').textContent='공식몰 상품 경로: '+(p.sourceCategory?.join(' → ')||'확인 필요')+(p.gender?' / 롯데 대분류: '+p.gender+'의류 · 브랜드'+p.gender+'의류':'');};
 $('form').elements.gender.onchange=()=>{const f=$('form');const gender=f.elements.gender.value;f.elements.name.value=f.elements.name.value.replace(/^(남성|여성)\s+/,'');if(gender)f.elements.name.value=gender+' '+f.elements.name.value;for(const key of ['commonMiddle','commonSmall','channelMiddle','channelSmall'])f.elements[key].value='';};
-async function refresh(){if(appClosed)return;try{const r=await fetch('/api/state',{signal:AbortSignal.timeout(5000)});const s=await r.json();if(!r.ok)throw Error(s.error);if(s.release){applyReleaseColor(s.release.version);$('releaseVersion').textContent='버전 '+s.release.version;$('releaseUpdated').textContent='최종 수정: '+s.release.displayDate;$('releaseUpdated').dateTime=s.release.updatedAt;}if(s.githubSync){$('githubSyncStatus').textContent=s.githubSync.message;$('githubSyncStatus').dataset.status=s.githubSync.status;}updateCollectionStatus(s);updateMissingDetailChoice(s);syncBackgroundImage(s);$('status').textContent=({idle:'대기',collect:'정보 수집 중',register:'등록 중',background:'배경 합성 중',smartstore:'스마트스토어 입력 테스트 중',done:'작업 종료',error:'확인 필요',stopping:'중단 중…',stopped:'중단됨'})[s.phase];$('logs').textContent=s.logs.map(x=>x.time+' '+x.message).join('\n');if(s.error)$('error').textContent=s.error;$('pause').hidden=!s.paused;$('pauseMessage').textContent=s.paused||'';serverBusy=s.busy;serverPhase=s.phase;syncButtons();if(s.product&&lastRevision!==s.revision){populate(s.product);lastRevision=s.revision;}}catch(e){$('error').textContent=e.message;}if(!appClosed)setTimeout(refresh,1200);}refresh();
+async function refresh(){if(appClosed)return;try{const r=await fetch('/api/state',{signal:AbortSignal.timeout(5000)});const s=await r.json();if(!r.ok)throw Error(s.error);if(s.release){applyReleaseColor(s.release.version);$('releaseVersion').textContent='버전 '+s.release.version;$('releaseUpdated').textContent='최종 수정: '+s.release.displayDate;$('releaseUpdated').dateTime=s.release.updatedAt;}if(s.githubSync){$('githubSyncStatus').textContent=s.githubSync.message;$('githubSyncStatus').dataset.status=s.githubSync.status;}updateCollectionStatus(s);updateMissingDetailChoice(s);syncBackgroundImage(s);syncExtraImages(s);$('status').textContent=({idle:'대기',collect:'정보 수집 중',register:'등록 중',background:'배경 합성 중',smartstore:'스마트스토어 입력 테스트 중',done:'작업 종료',error:'확인 필요',stopping:'중단 중…',stopped:'중단됨'})[s.phase];$('logs').textContent=s.logs.map(x=>x.time+' '+x.message).join('\n');if(s.error)$('error').textContent=s.error;$('pause').hidden=!s.paused;$('pauseMessage').textContent=s.paused||'';serverBusy=s.busy;serverPhase=s.phase;syncButtons();if(s.product&&lastRevision!==s.revision){populate(s.product);lastRevision=s.revision;}}catch(e){$('error').textContent=e.message;}if(!appClosed)setTimeout(refresh,1200);}refresh();
 
 // Distinguish missing values from OCR values that still need review.
 const reviewedFields=new Set();
@@ -288,3 +288,31 @@ function selectRegistrationChannel(channel){
 $('channelLotte').onclick=()=>selectRegistrationChannel('lotte');
 $('channelSmartstore').onclick=()=>selectRegistrationChannel('smartstore');
 try{if(sessionStorage.getItem('registrationChannel')==='smartstore')selectRegistrationChannel('smartstore');}catch{}
+
+function renderExtraImages(p){
+ $('extraImages').hidden=false;
+ const count=['extra1','extra2'].filter(k=>p.images[k]).length;
+ $('extraImageStatus').textContent=count?'추가이미지 '+count+'장 · × 버튼으로 제외할 수 있습니다.':'사용할 추가이미지가 없습니다. 대표이미지만 업로드합니다.';
+ for(const key of ['extra1','extra2']){
+  const present=!!p.images[key],number=key==='extra1'?'1':'2';
+  $(key+'Card').hidden=!present;$(key).hidden=!present;$('saveExtra'+number).hidden=!present;
+  if(present){if(!$(key).getAttribute('src'))$(key).src='/image/'+key+'?t='+Date.now();}
+  else $(key).removeAttribute('src');
+ }
+}
+function syncExtraImages(s){
+ if(!product||product.style!==s.product?.style)return;
+ if(['extra1','extra2'].some(key=>product.images[key]!==s.product.images[key])){
+  product.images={...s.product.images};renderExtraImages(product);
+ }
+}
+let removingExtra=false;
+async function removeExtraImage(key){
+ if(removingExtra||!product)return;removingExtra=true;
+ $('removeExtra1').disabled=true;$('removeExtra2').disabled=true;
+ try{const result=await post('exclude-extra-image',{style:product.style,key});product.images=result.images;renderExtraImages(product);announce((key==='extra1'?'추가이미지 1':'추가이미지 2')+'을 업로드 대상에서 제외했습니다.','success');}
+ catch(e){announce(e.message,'failed');}
+ finally{removingExtra=false;$('removeExtra1').disabled=false;$('removeExtra2').disabled=false;}
+}
+$('removeExtra1').onclick=()=>removeExtraImage('extra1');
+$('removeExtra2').onclick=()=>removeExtraImage('extra2');
