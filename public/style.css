@@ -243,3 +243,5 @@ body[data-channel="smartstore"] #collect{background:#087c42;box-shadow:0 3px 8px
 .background-request-link{display:inline-block;padding:12px 18px;background:var(--accent);color:white;border-radius:8px;text-decoration:none;font-weight:600}
 
 #githubSyncStatus{font-size:12px;color:#426e50}#githubSyncStatus[data-status="error"]{color:#a53d2b}#githubSyncStatus[data-status="pending"],#githubSyncStatus[data-status="syncing"]{color:#896221}
+
+header .release-info #releaseVersion{background:var(--release-bg,#ece4d8);color:var(--release-text,#203d63);border:1px solid var(--release-border,#c8b79e);transition:background-color .25s,color .25s,border-color .25s}
