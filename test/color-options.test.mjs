@@ -8,6 +8,12 @@ test('스톤은 사용자 지정에 따라 아이보리로 매칭',()=>{
   assert.equal(matchColor('03STONE',['아이보리','화이트']),'아이보리');
   assert.equal(matchColor('03스톤',['그레이','베이지']),null);
 });
+test('에크루는 사용자 지정에 따라 아이보리로 매칭',()=>{
+  assert.equal(matchColor('05에크루',['베이지','아이보리','크림','화이트']),'아이보리');
+  assert.equal(matchColor('05ECRU',['크림','아이보리']),'아이보리');
+  assert.equal(matchColor('05에크루',['베이지','크림','화이트']),null);
+});
+
 test('세이지는 연두를 우선하고 없으면 올리브로 연결',()=>{
   assert.equal(matchColor('03세이지',['올리브','블루','연두']),'연두');
   assert.equal(matchColor('03세이지',['그린','올리브']),'올리브');

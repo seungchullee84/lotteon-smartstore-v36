@@ -146,7 +146,7 @@ export function matchColor(raw, choices) {
     for(const preferred of ['인디고블루','네이비','블루','데님']){const match=choices.find(c=>norm(c)===preferred);if(match)return match;}
     return null;
   }
-  if(/^(스톤|STONE)$/.test(base))return choices.find(c=>norm(c)==='아이보리')||null;
+  if(/^(스톤|STONE|에크루|ECRU)$/.test(base))return choices.find(c=>norm(c)==='아이보리')||null;
   if(/세이지|SAGE/.test(base)){
     for(const preferred of ['연두','올리브']){const match=choices.find(c=>norm(c)===preferred);if(match)return match;}
   }
