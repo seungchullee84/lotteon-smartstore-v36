@@ -14,7 +14,7 @@ import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
 import {collect,parseProductInput,validateStyle,cleanMarketingText,buildKeywords,easyProductName,repairCategoryFields} from './product.mjs';
 import {LotteAutomation} from './automation.mjs';
-import {prepareMainImage,backgroundImageStatus,backgroundSelection} from './main-image.mjs';
+import {prepareMainImage,backgroundImageStatus,backgroundSelection,applyExtraExclusions,excludeExtraImage} from './main-image.mjs';
 import sharp from 'sharp';
 import {saveIconMeaning,iconWashingResult} from './washing-icons.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
@@ -27,6 +27,8 @@ let backgroundApiKey=process.env.OPENAI_API_KEY?.trim()||'';
 const protectedBranding=brandingLock(dataRoot);
 const state={busy:false,phase:'idle',logs:[],product:null,folder:null,error:null,paused:null,revision:0,collectionInput:null,detailFallbackRequest:null};
 if(process.env.REGISTER_RESTORE){const restored=path.resolve(process.env.REGISTER_RESTORE);if(restored.startsWith(dataRoot+path.sep)){state.product=JSON.parse(await readFile(restored,'utf8'));repairCategoryFields(state.product);if(state.product.categoryMatch){state.product.fieldStatus||={};state.product.fieldStatus.category=state.product.categoryMatch.status;}state.product.keywords=buildKeywords(state.product);state.folder=path.dirname(restored);state.phase='done';state.revision=1;}}
+if(state.product)await applyExtraExclusions(state.folder,state.product);
+let extraImageEdits=Promise.resolve();
 function log(message){state.logs.push({time:new Date().toLocaleTimeString('ko-KR'),message});state.logs=state.logs.slice(-300);console.log(message);}
 const bot=new LotteAutomation(dataRoot,log);bot.onPause=message=>{state.paused=message;};
 const smartBot=new SmartstoreAutomation(dataRoot,log);
@@ -84,6 +86,16 @@ const server=http.createServer(async(req,res)=>{
     }
     if(req.method==='POST'){
       const b=await body(req);
+      if(url.pathname==='/api/exclude-extra-image'){
+        const edit=extraImageEdits.then(async()=>{
+          if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 사진을 제외해 주세요.');
+          if(!state.product||!state.folder||b.style!==state.product.style)throw Error('현재 상품을 다시 확인해 주세요.');
+          await excludeExtraImage(state.folder,state.product,b.key);
+          return {...state.product.images};
+        });
+        extraImageEdits=edit.catch(()=>{});
+        return json(res,200,{ok:true,images:await edit});
+      }
       if(url.pathname==='/api/background-selection'){
         if(!state.product||!state.folder||b.style!==state.product.style)throw Error('현재 상품을 다시 확인해 주세요.');
         if(!['main','extra1','extra2'].includes(b.key)||!state.product.images[b.key])throw Error('선택할 이미지가 없습니다.');

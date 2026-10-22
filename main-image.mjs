@@ -1,6 +1,6 @@
 import sharp from 'sharp';
 import path from 'node:path';
-import {readFile,writeFile} from 'node:fs/promises';
+import {readFile,writeFile,rename} from 'node:fs/promises';
 export function isPants(product){return /바지|팬츠|슬랙스|데님|청바지|레깅스|PANTS|DENIM|JEANS|SHORTS|TROUSERS/i.test([product.rawName,product.name,...(product.sourceCategory||[])].filter(Boolean).join(' '));}
 export async function pantsCropTop(file,width,height){
  const scanHeight=Math.min(height,width*3);
@@ -61,4 +61,22 @@ export async function backgroundImageStatus(folder,key='main'){
 export async function backgroundSelection(folder){
  try{const value=JSON.parse(await readFile(path.join(folder,'background-selection.json'),'utf8'));return ['main','extra1','extra2'].includes(value.key)?value.key:'main';}
  catch(e){if(e.code==='ENOENT')return 'main';throw e;}
+}
+
+export async function applyExtraExclusions(folder,product){
+ let excluded;
+ try{excluded=JSON.parse(await readFile(path.join(folder,'excluded-extra-images.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return;throw e;}
+ product.images={...product.images};
+ for(const key of ['extra1','extra2'])if(excluded[key]===true)product.images[key]=null;
+}
+
+export async function excludeExtraImage(folder,product,key){
+ if(!['extra1','extra2'].includes(key))throw Error('추가이미지만 제외할 수 있습니다.');
+ let excluded={};
+ try{excluded=JSON.parse(await readFile(path.join(folder,'excluded-extra-images.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+ excluded[key]=true;
+ const temporary=path.join(folder,'excluded-extra-images.tmp');
+ await writeFile(temporary,JSON.stringify(excluded));
+ await rename(temporary,path.join(folder,'excluded-extra-images.json'));
+ await applyExtraExclusions(folder,product);
 }
