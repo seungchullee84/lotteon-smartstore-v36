@@ -2,6 +2,12 @@ import sharp from 'sharp';
 import {decorateMainImage} from './color-chips.mjs';
 import path from 'node:path';
 import {readFile,writeFile,rename} from 'node:fs/promises';
+import {randomBytes} from 'node:crypto';
+async function writePreparedImage(output,bytes){
+ const temporary=output+'.'+randomBytes(8).toString('hex')+'.tmp';
+ await writeFile(temporary,bytes);
+ await rename(temporary,output);
+}
 export function isPants(product){return /바지|팬츠|슬랙스|데님|청바지|레깅스|PANTS|DENIM|JEANS|SHORTS|TROUSERS/i.test([product.rawName,product.name,...(product.sourceCategory||[])].filter(Boolean).join(' '));}
 export async function pantsCropTop(file,width,height){
  const scanHeight=Math.min(height,width*3);
@@ -31,15 +37,15 @@ export async function prepareMainImage(folder,key='main'){
   const selectedProduct=JSON.parse(await readFile(path.join(folder,'product.json'),'utf8'));
   if(/^\d{6}$/.test(selectedProduct.style)){
    let approved;try{approved=await readFile(path.join(folder,'..','main-overrides',selectedProduct.style+'.jpg'));}catch(e){if(e.code!=='ENOENT')throw e;}
-   if(approved){const size=await sharp(approved).metadata();if(size.width!==1500||size.height!==1500)throw Error('승인 대표이미지 크기가 올바르지 않습니다.');await writeFile(output,approved);return decorateMainImage(folder,output);}
+   if(approved){const size=await sharp(approved).metadata();if(size.width!==1500||size.height!==1500)throw Error('승인 대표이미지 크기가 올바르지 않습니다.');await writePreparedImage(output,approved);return decorateMainImage(folder,output);}
   }
   let meta;try{meta=await sharp(path.join(folder,'detail.jpg')).metadata();}catch{throw Error('상세 원본 상단 사진이 없어 대표이미지를 만들 수 없습니다.');}
   if(!meta.width||meta.height<meta.width)throw Error('상세 상단 사진의 정사각형 영역을 확인해 주세요.');
   const product=JSON.parse(await readFile(path.join(folder,'product.json'),'utf8'));
   const top=isPants(product)?await pantsCropTop(path.join(folder,'detail.jpg'),meta.width,meta.height):0;
-  await sharp(path.join(folder,'detail.jpg')).extract({left:0,top,width:meta.width,height:meta.width}).resize(1500,1500).jpeg({quality:95}).toFile(output);
+  await writePreparedImage(output,await sharp(path.join(folder,'detail.jpg')).extract({left:0,top,width:meta.width,height:meta.width}).resize(1500,1500).jpeg({quality:95}).toBuffer());
  }else{
-  await sharp(path.join(folder,key+'.jpg')).rotate().resize(1500,1500,{fit:'contain',background:'#ffffff'}).jpeg({quality:95}).toFile(output);
+  await writePreparedImage(output,await sharp(path.join(folder,key+'.jpg')).rotate().resize(1500,1500,{fit:'contain',background:'#ffffff'}).jpeg({quality:95}).toBuffer());
  }
  return key==='main'?decorateMainImage(folder,output):output;
 }

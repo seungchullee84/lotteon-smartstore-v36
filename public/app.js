@@ -9,6 +9,16 @@ function applyReleaseColor(version){
  badge.dataset.version=String(number);
 }
 $('refreshPage').onclick=()=>window.location.reload();
+let mainImageRetryCount=0,mainImageRetryStyle='';
+$('main').onload=()=>{mainImageRetryCount=0;};
+$('main').onerror=()=>{
+ const style=product?.style||'';
+ if(mainImageRetryStyle!==style){mainImageRetryStyle=style;mainImageRetryCount=0;}
+ if(mainImageRetryCount>=3)return;
+ const expected=$('main').getAttribute('src'),attempt=++mainImageRetryCount;
+ setTimeout(()=>{if(!appClosed&&$('main').getAttribute('src')===expected&&product?.style===style)$('main').src='/image/main?t='+Date.now();},attempt*700);
+};
+
 async function post(endpoint,data={}){
  try{const r=await fetch('/api/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:AbortSignal.timeout(45000)});const b=await r.json();if(!r.ok)throw Error(b.error);return b;}
  catch(e){if(e.name==='TimeoutError')throw Error('서버 응답 시간이 초과됐습니다. 진행 기록에서 작업 상태를 확인해 주세요.');if(e instanceof TypeError)throw Error('등록기 서버와 연결되지 않았습니다. 잠시 후 새로고침해 주세요.');throw e;}
