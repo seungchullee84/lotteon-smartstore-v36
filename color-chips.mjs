@@ -42,7 +42,7 @@ export async function colorChipPosition(bytes,count){
  if(count<1||height>1480)return null;
  const positions=[{name:'bottom-right',left:1416,top:1490-height},{name:'middle-right',left:1416,top:Math.floor((1500-height)/2)}];
  for(const position of positions){
-  const {data,info}=await sharp(bytes).extract({left:1400,top:Math.max(0,position.top-8),width:100,height:Math.min(1500-position.top,height+8)}).removeAlpha().raw().toBuffer({resolveWithObject:true});
+  const {data,info}=await sharp(bytes).extract({left:1400,top:Math.max(0,position.top-8),width:100,height:Math.min(1500-position.top,height+8)}).toColourspace('srgb').removeAlpha().raw().toBuffer({resolveWithObject:true});
   let blank=true;
   for(let y=0;y<info.height&&blank;y+=10)for(let x=0;x<info.width&&blank;x+=10){
    let n=0,sum=0,sum2=0,min=255,max=0;
