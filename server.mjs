@@ -1,3 +1,4 @@
+import {requireChannel} from './channel-routing.mjs';
 import {generateBackground} from './background-image.mjs';
 import {createReleaseTracker} from './app-release.mjs';
 import {startGithubSync} from './github-sync.mjs';
@@ -89,6 +90,7 @@ const server=http.createServer(async(req,res)=>{
     }
     if(req.method==='POST'){
       const b=await body(req);
+      requireChannel(url.pathname.slice(5),b.channel);
       if(url.pathname==='/api/exclude-extra-image'){
         const edit=extraImageEdits.then(async()=>{
           if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 사진을 제외해 주세요.');

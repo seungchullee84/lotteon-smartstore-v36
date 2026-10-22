@@ -20,6 +20,9 @@ $('main').onerror=()=>{
 };
 
 async function post(endpoint,data={}){
+ const expected=({open:'lotte',run:'lotte','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-test':'smartstore'})[endpoint];
+ if(expected&&document.body.dataset.channel!==expected)throw Error('선택한 판매채널과 실행 버튼이 다릅니다. 판매채널을 확인해 주세요.');
+ if(expected)data={...data,channel:document.body.dataset.channel};
  try{const r=await fetch('/api/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:AbortSignal.timeout(45000)});const b=await r.json();if(!r.ok)throw Error(b.error);return b;}
  catch(e){if(e.name==='TimeoutError')throw Error('서버 응답 시간이 초과됐습니다. 진행 기록에서 작업 상태를 확인해 주세요.');if(e instanceof TypeError)throw Error('등록기 서버와 연결되지 않았습니다. 잠시 후 새로고침해 주세요.');throw e;}
 }
