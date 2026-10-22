@@ -1,3 +1,5 @@
+import {generateBackground} from './background-image.mjs';
+import {createReleaseTracker} from './app-release.mjs';
 import {brandingLock} from './branding-lock.mjs';
 import {SmartstoreAutomation} from './smartstore-automation.mjs';
 import {smartstorePlan} from './smartstore-form.mjs';
@@ -11,13 +13,15 @@ import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
 import {collect,parseProductInput,validateStyle,cleanMarketingText,buildKeywords,easyProductName,repairCategoryFields} from './product.mjs';
 import {LotteAutomation} from './automation.mjs';
-import {prepareMainImage} from './main-image.mjs';
+import {prepareMainImage,backgroundImageStatus} from './main-image.mjs';
 import sharp from 'sharp';
 import {saveIconMeaning,iconWashingResult} from './washing-icons.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
+const releases=createReleaseTracker(root);await releases.get();
 const dataRoot=path.join(root,'data');await mkdir(dataRoot,{recursive:true});
 const desktopSession=process.env.REGISTER_DESKTOP==='1'?JSON.parse(await readFile(path.join(dataRoot,'desktop-session.json'),'utf8')):null;
 const token=desktopSession?.token||randomBytes(24).toString('hex');
+let backgroundApiKey=process.env.OPENAI_API_KEY?.trim()||'';
 const protectedBranding=brandingLock(dataRoot);
 const state={busy:false,phase:'idle',logs:[],product:null,folder:null,error:null,paused:null,revision:0,collectionInput:null,detailFallbackRequest:null};
 if(process.env.REGISTER_RESTORE){const restored=path.resolve(process.env.REGISTER_RESTORE);if(restored.startsWith(dataRoot+path.sep)){state.product=JSON.parse(await readFile(restored,'utf8'));repairCategoryFields(state.product);if(state.product.categoryMatch){state.product.fieldStatus||={};state.product.fieldStatus.category=state.product.categoryMatch.status;}state.product.keywords=buildKeywords(state.product);state.folder=path.dirname(restored);state.phase='done';state.revision=1;}}
@@ -57,7 +61,10 @@ const server=http.createServer(async(req,res)=>{
     if(url.pathname==='/'&&url.searchParams.get('key')===token){res.writeHead(302,{'Set-Cookie':`session=${token}; HttpOnly; SameSite=Strict; Path=/`,'Location':'/'});return res.end();}
     if(!cookie)return json(res,403,{error:'시작 화면의 전용 링크로 접속해 주세요.'});
     if(req.method==='GET'&&url.pathname==='/api/branding')return json(res,200,await protectedBranding.get());
-    if(req.method==='GET'&&url.pathname==='/api/state')return json(res,200,{...state,folder:undefined});
+    if(req.method==='GET'&&url.pathname==='/api/state'){
+      const composite=state.folder?await backgroundImageStatus(state.folder):{ready:false};
+      return json(res,200,{...state,folder:undefined,mainImageVersion:composite.version||null,backgroundConfigured:!!backgroundApiKey,release:await releases.get()});
+    }
     if(req.method==='GET'&&url.pathname.startsWith('/image/')){
       if(/^\/image\/wash-icon-[1-9]\d*$/.test(url.pathname)&&state.folder){
         const key=url.pathname.slice(7);
@@ -71,18 +78,26 @@ const server=http.createServer(async(req,res)=>{
       res.writeHead(200,{'Content-Type':png?'image/png':'image/jpeg','Cache-Control':'no-store'});return res.end(bytes);
     }
     if(req.method==='POST'){
-      if(url.pathname==='/api/background-request'){
-        if(!state.product||!state.folder)throw Error('먼저 상품을 수집해 주세요.');
-        const original=await readFile(path.join(state.folder,'main.jpg'));
-        const requestFolder=path.join(dataRoot,'background-requests',randomBytes(12).toString('hex'));
-        await mkdir(requestFolder,{recursive:true});
-        const imagePath=path.join(requestFolder,'original.jpg');
-        await writeFile(imagePath,original);
-        const prompt=`상품 ${state.product.style}의 대표사진 배경 늘리기 합성을 요청합니다. 원본 파일: ${imagePath}\n이 로컬 이미지를 먼저 확인하고 이미지 생성 도구로 인물과 옷의 형태, 색상, 무늬를 최대한 유지하면서 좌우 배경을 자연스럽게 늘린 1500×1500 시안을 만들어 주세요. 흰 테두리는 넣지 마세요. 생성 결과를 보여주고, 사용자 확인 전에는 등록기 대표이미지에 적용하거나 상품을 등록하지 마세요. 이번 상품에만 적용할 시안입니다.`;
-        const link=new URL('codex://new');link.searchParams.set('path',root);link.searchParams.set('prompt',prompt);
-        return json(res,200,{url:link.href});
-      }
       const b=await body(req);
+      if(url.pathname==='/api/background-settings'){
+        if(state.busy)throw Error('작업이 끝난 뒤 합성 설정을 변경해 주세요.');
+        if(typeof b.apiKey!=='string'||!/^sk-[A-Za-z0-9_-]{16,}$/.test(b.apiKey.trim()))throw Error('올바른 OpenAI API 키를 입력해 주세요.');
+        backgroundApiKey=b.apiKey.trim();
+        return json(res,200,{ok:true,configured:true});
+      }
+      if(url.pathname==='/api/background-request'){
+        if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 합성을 요청해 주세요.');
+        if(!state.product||!state.folder)throw Error('먼저 상품을 수집해 주세요.');
+        if(!backgroundApiKey)throw Error('합성 설정에서 OpenAI API 키를 먼저 연결해 주세요.');
+        const folder=state.folder,key=backgroundApiKey;
+        bot.stopped=false;smartBot.stopped=false;
+        job('background',async()=>{
+          log('대표사진 배경 합성을 시작합니다.');
+          await generateBackground({folder,apiKey:key,signal:activeAbort.signal});
+          log('합성 완료. 대표이미지를 변경했습니다.');
+        });
+        return json(res,202,{ok:true});
+      }
       if(url.pathname==='/api/smartstore-open'){
         if(state.busy)throw Error('진행 중인 작업이 있습니다.');
         await smartBot.open();return json(res,200,{ok:true});
