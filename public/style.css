@@ -239,3 +239,5 @@ body[data-channel="smartstore"] #collectionStatus{border-color:#92c3a2;backgroun
 body[data-channel="smartstore"] .giordano-signature{border-color:#bddbc7}
 body[data-channel="smartstore"] button:focus-visible{outline-color:#73c992}
 body[data-channel="smartstore"] #collect{background:#087c42;box-shadow:0 3px 8px #146b3820}body[data-channel="smartstore"] #collect:not(:disabled):hover{background:#096b3b}body[data-channel="smartstore"] #collectionCard{border-left-color:#3d9b60}body[data-channel="smartstore"] #warnings{background:#edf8f0;border-color:#b3d6be;color:#345f44}body[data-channel="smartstore"] .form-section-title{border-color:#b2d6bf}
+
+.background-request-link{display:inline-block;padding:12px 18px;background:var(--accent);color:white;border-radius:8px;text-decoration:none;font-weight:600}
