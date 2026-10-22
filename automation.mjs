@@ -358,10 +358,12 @@ export class LotteAutomation {
       const mainUpload=await prepareMainImage(folder);this.check();
       this.log('대표이미지 1500×1500 변환 완료 · 원본 비율 유지 · 흰색 여백');
       const chooser=this.page.waitForEvent('filechooser');await imageButton.click();await (await chooser).setFiles(mainUpload);await this.settle();
-      for(let slot=1;slot<=2;slot++){
-        if(!p.images['extra'+slot])continue;
+      let uploadSlot=0;
+      for(const key of ['extra1','extra2']){
+        if(!p.images[key])continue;
+        const slot=++uploadSlot;
         this.check();const button=this.locator('ful_prd0'+slot+'_upfile0_fileitembutton');
-        const extraUpload=await prepareMainImage(folder,'extra'+slot);this.check();
+        const extraUpload=await prepareMainImage(folder,key);this.check();
         this.log('추가 상품이미지 '+slot+' 1500×1500 변환 완료');
         await this.reveal(button);const extraChooser=this.page.waitForEvent('filechooser');await button.click();
         await (await extraChooser).setFiles(extraUpload);await this.settle();await this.pace();
