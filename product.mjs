@@ -86,28 +86,59 @@ export function repairCategoryFields(product){
   if(matched.path){product.category=matched.category;product.categoryMatch={status:matched.status,path:matched.path};}
 }
 export function koreanTitle(raw, gender, style) {
-  return `${gender} ${easyProductName(raw).replace(/NEW/gi,'').replace(/[A-Za-z]+/g,'').replace(/\s+/g,' ').trim()} ${style}`;
+  const sex=String(gender||'').trim(),code=String(style||'').trim();
+  let name=easyProductName(raw).replace(/\bNEW\b/gi,'').replace(/[A-Za-z]+/g,'');
+  // Remove only the supplied gender and exact style token; keep other numbers and qualifiers.
+  if(sex==='남성'||sex==='여성')name=name.replace(new RegExp(sex+'(?=[^가-힣]|$|니트|가디건|카디건|맨투맨|패딩|티셔츠|긴팔티|반팔티|바지|슬랙스|셔츠|코트|자켓|재킷|후드|벨트)','g'),' ');
+  const words=name.split(/\s+/).filter(w=>w&&w!==code);
+  return uniqueTitleWords([sex,...words,code].filter(Boolean).join(' '));
+}
+function uniqueTitleWords(value){
+  return [...new Set(value.split(/\s+/).filter(Boolean))].join(' ');
 }
 export function easyProductName(value){
-  return cleanMarketingText(value).replace(/브러[시쉬]드|\bBRUSHED\b/gi,'기모').replace(/크루\s*넥|\bCREW\s*NECK\b/gi,'라운드').replace(/팬츠|\bPANTS\b/gi,'바지').replace(/스웨터/g,'니트');
+  return uniqueTitleWords(cleanMarketingText(value).replace(/브러[시쉬]드|\bBRUSHED\b/gi,'기모').replace(/크루\s*넥|\bCREW\s*NECK\b/gi,'라운드').replace(/\bV[\s-]*NECK\b|\bV[\s-]*넥/gi,'브이넥').replace(/팬츠|\bPANTS\b/gi,'바지').replace(/스웨터/g,'니트'));
 }
 export function cleanMarketingText(value) {
   return String(value).replace(/\[[^\]]*\]/g,'').replace(/변우석|문가영|박현지/g,'').replace(/[\[\]]/g,'').replace(/\s+/g,' ').trim();
 }
 export function buildKeywords(p) {
-  const name=cleanMarketingText(p.name||p.rawName||'').replace(/\d+|[A-Za-z]+/g,'').trim();
-  const sex=p.gender||'';
+  const name=easyProductName(String(p.name||'').trim()||p.rawName||'');
+  const sex=['남성','여성'].includes(p.gender)?p.gender:'';
   const words=['지오다노'];
   const add=s=>{s=s.replace(/\s+/g,'');if(s&&!words.includes(s)&&[...words,s].join(',').length<=35)words.push(s);};
-  if(/티셔츠|긴팔티|반팔티/.test(name)){
-    add(sex+'티셔츠');if(/긴팔/.test(name))add('긴팔티셔츠');if(/반팔/.test(name))add('반팔티셔츠');
-    if(/라운드|크루넥/.test(name))add('라운드티');
-    if(/^면\s*100\s*%$/.test(p.material||''))add('면티셔츠');
-  }else if(/맨투맨|후드/.test(name)){add(sex+(/후드/.test(name)?'후드티':'맨투맨'));add(/후드/.test(name)?'후드티셔츠':'맨투맨티셔츠');}
-  else if(/팬츠|바지|데님|슬랙스/.test(name)){add(sex+'바지');for(const w of ['데님','슬랙스','와이드','밴딩','기모'])if(name.includes(w))add(w+(w==='데님'?'팬츠':w==='슬랙스'?'':'바지'));}
-  else {add(sex+'의류');}
-  for(const w of name.replace(/^(남성|여성)\s*/,'').split(/\s+/))add(w);
-  add(sex+'캐주얼');add('데일리룩');add('캐주얼룩');
+  // Product types precede fabrics/details: e.g. 니트 배색 패딩 and 스웨트 바지.
+  // Rules use only supplied text, never search-volume or sales-effect assumptions.
+  const rules=[
+    [/벨트/,'벨트',[[/정장/,'정장벨트'],[/가죽/,'가죽벨트'],[/자동/,'자동벨트']]],
+    [/바지|슬랙스/,'바지',[[/데님|청바지/,'데님팬츠'],[/슬랙스/,'슬랙스'],[/트레이닝|스웨트|스웻/,'트레이닝바지'],[/와이드/,'와이드바지'],[/밴딩/,'밴딩바지'],[/기모/,'기모바지']]],
+    [/(?<!트리)코트/,'코트',[[/트렌치/,'트렌치코트'],[/하프/,'하프코트'],[/롱/,'롱코트'],[/패딩|다운/,'패딩코트']]],
+    [/패딩|푸퍼|다운/,'패딩',[[/경량/,'경량패딩'],[/베스트|조끼/,'패딩조끼'],[/후드/,'후드패딩'],[/숏|쇼트/,'숏패딩'],[/롱/,'롱패딩']]],
+    [/바람막이|윈드브레이커/,'바람막이',[[/후드/,'후드바람막이'],[/경량/,'경량바람막이']]],
+    [/자켓|재킷/,'자켓',[[/퀼팅/,'퀼팅자켓'],[/후드/,'후드자켓'],[/집업/,'집업자켓']]],
+    [/점퍼/,'점퍼',[[/후드/,'후드점퍼'],[/집업/,'집업점퍼']]],
+    [/가디건|카디건/,'가디건',[[/브이넥/,'브이넥가디건'],[/라운드/,'라운드가디건'],[/집업/,'집업가디건'],[/스트라이프/,'스트라이프가디건']]],
+    [/니트|풀오버/,'니트',[[/브이넥/,'브이넥니트'],[/터틀|폴라/,'터틀넥니트'],[/라운드/,'라운드니트'],[/집업/,'집업니트'],[/베스트|조끼/,'니트조끼'],[/아가일/,'아가일니트'],[/스트라이프/,'스트라이프니트']]],
+    [/후드/,'후드티',[[/집업/,'후드집업'],[/기모/,'기모후드티']]],
+    [/맨투맨|스웨트셔츠|스웻셔츠/,'맨투맨',[[/기모/,'기모맨투맨'],[/그래픽/,'그래픽맨투맨']]],
+    [/티셔츠|긴팔\s*티|반팔\s*티/,'티셔츠',[[/긴팔/,'긴팔티셔츠'],[/반팔/,'반팔티셔츠'],[/라운드/,'라운드티'],[/기모/,'기모티셔츠'],[/하프넥/,'하프넥티셔츠'],[/터틀|폴라/,'터틀넥티셔츠']]],
+    [/블라우스/,'블라우스',[]],
+    [/셔츠|남방/,'셔츠',[[/체크/,'체크셔츠'],[/옥스포드/,'옥스포드셔츠']]]
+  ];
+  // 버튼다운 is a shirt detail, not down insulation.
+  const typeName=name.replace(/버튼\s*다운/g,'');
+  const rule=rules.find(([pattern])=>pattern.test(typeName));
+  if(rule){
+    const [,kind,features]=rule;
+    add(sex+kind);
+    for(const [pattern,keyword] of features)if(pattern.test(name))add(keyword);
+    if(kind==='티셔츠'&&/^면\s*100\s*%$/.test(p.material||''))add('면티셔츠');
+  }else{
+    add(sex+'의류');
+    for(const word of name.split(/\s+/)){
+      if(/^[가-힣]+$/.test(word)&&!['남성','여성','지오다노'].includes(word))add(word);
+    }
+  }
   return words.join(',');
 }
 export function applyVerifiedNotice(product, bytes) {
