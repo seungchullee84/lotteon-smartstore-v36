@@ -37,3 +37,5 @@ test('하위 항목에 맞는 상위 경로를 함께 보정',async()=>{
  assert.equal(channelCategoryPath({channelMiddle:'바지/레깅스',channelSmall:'면바지/밴딩팬츠'}).channelMiddle,'바지/레깅스');
  assert.equal(channelCategoryPath({channelMiddle:'직접확인분류',channelSmall:'미확인상품'}).channelMiddle,'직접확인분류');
 });
+
+test('기모 배럴핏 데님은 소재와 핏으로 분류',()=>{const p=productClassification('<div class="navi"><a>Home</a><a class="prdpath1">WOMEN</a><a>PANTS</a><a>데님</a><a>NEW 브러시드 배럴핏 데님</a></div>');assert.equal(p.category.channelMiddle,'청바지');assert.equal(p.category.channelSmall,'부츠컷/와이드핏');});
