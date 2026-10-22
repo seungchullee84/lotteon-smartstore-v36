@@ -1,4 +1,4 @@
-const $=id=>document.getElementById(id);let product=null,lastRevision=-1,appClosed=false,lastMainImageVersion=null;
+const $=id=>document.getElementById(id);let product=null,lastRevision=-1,appClosed=false,lastImageVersions={},selectedBackgroundImage='main';
 $('refreshPage').onclick=()=>window.location.reload();
 async function post(endpoint,data={}){
  try{const r=await fetch('/api/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:AbortSignal.timeout(45000)});const b=await r.json();if(!r.ok)throw Error(b.error);return b;}
@@ -212,17 +212,44 @@ for(const button of document.querySelectorAll('.notice-copy'))button.onclick=()=
 
 $('openNoticeText').onclick=()=>{syncNoticeCopy();$('noticeCopyStatus').textContent='';$('noticeTextDialog').showModal();};$('closeNoticeText').onclick=()=>$('noticeTextDialog').close();
 
+const backgroundLabels={main:'대표이미지',extra1:'추가이미지 1',extra2:'추가이미지 2'};
 function syncBackgroundImage(s){
- const version=s.mainImageVersion||null;
- if(version===lastMainImageVersion)return;
- lastMainImageVersion=version;
- $('main').src='/image/main?t='+Date.now();
- if(version){$('backgroundStatus').textContent='합성 완료 — 대표이미지를 변경했습니다.';announce('합성한 이미지로 대표이미지를 변경했습니다.','success');}
+ if(!$('backgroundDialog').open)selectedBackgroundImage=s.backgroundSelection||'main';
+ const versions=s.imageVersions||{main:s.mainImageVersion||null};
+ for(const key of ['main','extra1','extra2']){
+  const version=versions[key]||null;
+  if(version===lastImageVersions[key])continue;
+  lastImageVersions[key]=version;
+  if(version){$(key).src='/image/'+key+'?t='+Date.now();$('backgroundStatus').textContent='합성 완료 — '+backgroundLabels[key]+'를 변경했습니다.';announce('합성한 사진으로 '+backgroundLabels[key]+'를 변경했습니다.','success');}
+ }
 }
-const backgroundChatGuide='현재 이 채팅창에 “합성해줘”라고 보내 주세요. 사진을 합성한 뒤 현재 상품의 대표이미지에 적용합니다.';
-$('extendBackground').onclick=()=>{if(!product){announce('먼저 상품을 수집해 주세요.','failed');return;}$('backgroundOriginal').src='/image/main-original?t='+Date.now();$('backgroundStatus').textContent=backgroundChatGuide;$('backgroundDialog').showModal();};
+function backgroundGuide(){return '선택한 사진: '+backgroundLabels[selectedBackgroundImage]+'. 현재 이 채팅창에 “합성해줘”라고 보내 주세요. 합성 결과를 선택한 이미지 자리에 적용합니다.';}
+function showBackgroundChoice(){
+ $('backgroundOriginal').src='/image/'+selectedBackgroundImage+'-original?t='+Date.now();
+ $('backgroundOriginal').alt='합성할 '+backgroundLabels[selectedBackgroundImage]+' 원본';
+ $('backgroundStatus').textContent=backgroundGuide();
+}
+$('extendBackground').onclick=()=>{
+ if(!product){announce('먼저 상품을 수집해 주세요.','failed');return;}
+ const choice=$('backgroundImageChoice');choice.replaceChildren();
+ for(const key of ['main','extra1','extra2']){const option=document.createElement('option');option.value=key;option.textContent=backgroundLabels[key]+(product.images[key]?'':' (사진 없음)');option.disabled=!product.images[key];choice.append(option);}
+ if(!product.images[selectedBackgroundImage])selectedBackgroundImage='main';
+ choice.value=selectedBackgroundImage;showBackgroundChoice();$('backgroundDialog').showModal();
+};
+$('backgroundImageChoice').onchange=async()=>{
+ const choice=$('backgroundImageChoice'),previous=selectedBackgroundImage,key=choice.value;
+ choice.disabled=true;$('openBackgroundRequest').disabled=true;
+ try{await post('background-selection',{style:product.style,key});selectedBackgroundImage=key;showBackgroundChoice();}
+ catch(e){choice.value=previous;$('backgroundStatus').textContent=e.message;}
+ finally{choice.disabled=false;$('openBackgroundRequest').disabled=false;}
+};
 $('closeBackground').onclick=()=>$('backgroundDialog').close();
-$('openBackgroundRequest').onclick=()=>{$('backgroundStatus').textContent=backgroundChatGuide;announce('이 채팅창에 “합성해줘”라고 보내 주세요.');};
+$('openBackgroundRequest').onclick=async()=>{
+ const button=$('openBackgroundRequest');button.disabled=true;
+ try{await post('background-selection',{style:product.style,key:selectedBackgroundImage});$('backgroundStatus').textContent=backgroundGuide();announce(backgroundLabels[selectedBackgroundImage]+' 선택됨 — 이 채팅창에 “합성해줘”라고 보내 주세요.');}
+ catch(e){$('backgroundStatus').textContent=e.message;}
+ finally{button.disabled=false;}
+};
 
 // SmartStore is a separate no-save path; Lotte controls retain their behavior.
 $('smartstoreOpen').onclick=async()=>{try{await post('smartstore-open');announce('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.','success');}catch(e){$('error').textContent=e.message;}};
