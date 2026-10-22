@@ -44,8 +44,11 @@ export function commonFor(path,gender,common){
 export function resolveCatalogCategory(p,catalog=loadCatalog(),common=null){
  if(!catalog)return {category:{...p.category},status:'목록 미수집'};
  if(!common)try{common=JSON.parse(readFileSync(new URL('./data/category-catalog-common.json',import.meta.url),'utf8'));}catch{}
- const paths=standardPaths(catalog,p.gender),wanted=strip(p.category?.channelSmall),text=[p.rawName,p.name,...(p.sourceCategory||[])].join(' ');
- let found=paths.filter(x=>strip(x.small.name)===wanted&&(!p.category.channelDetail||x.detail?.name===p.category.channelDetail));
+ const text=[p.rawName,p.name,...(p.sourceCategory||[])].join(' ');
+ const denim=/데님|청바지|\bDENIM\b/i.test(text)&&/바지|팬츠|PANTS|청바지/i.test(text);
+ const denimFit=/와이드|부츠컷|배럴|벌룬/.test(text)?'부츠컷/와이드핏':/스키니|슬림/.test(text)?'스키니/슬림핏':'스트레이트핏';
+ const paths=standardPaths(catalog,p.gender),wanted=denim?denimFit:strip(p.category?.channelSmall);
+ let found=paths.filter(x=>strip(x.small.name)===wanted&&(denim||!p.category.channelDetail||x.detail?.name===p.category.channelDetail));
  if(found.length!==1){
   const candidates=[];const prefer=(condition,...names)=>{if(condition)candidates.push(...names);};
   prefer(/무스탕|가죽/.test(text),'무스탕/가죽자켓','가죽자켓');

@@ -20,6 +20,7 @@ export function similarCategory(value,labels){
 export function channelCategoryPath(category){
  const leaf=String(category.channelSmall||'').replace(/^[^:：]*[:：]\s*/,'').replace(/^(남성|여성)/,'').trim();
  const paths=[
+  {leaves:['청바지','데님','데님팬츠','부츠컷/와이드핏','스키니/슬림핏','스트레이트핏'],middle:'청바지'},
   {leaves:['바람막이','바람막이점퍼','윈드브레이커','패딩','패딩/다운','패딩점퍼','다운점퍼','패딩/다운점퍼'],middle:'점퍼/패딩/야상'},
   {leaves:['코트','롱코트','하프코트','트렌치코트','재킷','자켓','캐주얼자켓','캐주얼재킷','트위드자켓','테일러드자켓','노카라자켓','린넨/마자켓'],middle:'자켓/코트'},
   {leaves:['면바지','면바지/밴딩팬츠','치노면바지','치노팬츠','코튼팬츠','슬랙스','기모팬츠','기모바지','브러시드팬츠'],middle:'바지'},
