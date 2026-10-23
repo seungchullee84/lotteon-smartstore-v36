@@ -126,6 +126,9 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   await open(/^판매자 코드/,page.locator('#seller-code1'));
   await fill(page.locator('#seller-code1'),sellerCode);
   log('판매자 상품코드 확인: '+sellerCode+' · 바코드·내부코드 유지');
+  await open(/^노출 채널/,page.locator('#material-detail'));
+  await fill(page.locator('#material-detail'),learned.material);
+  log('소재(설명)에 현재 상품 소재·혼용률 입력 확인');
   log('소재·색상·치수·제조국·세탁방법 입력 · A/S·품질보증·미성년자 구매 기존값 유지');
   log('입력 테스트 완료 · '+seen.size+'개 옵션 각 '+plan.stockPerOption+'개 재고 확인 · 저장/등록은 하지 않았습니다.');
   return {style:plan.style,salePrice:plan.salePrice,verifiedOptions:seen.size,stockPerOption:plan.stockPerOption,manufactureDate,imagesSkipped:!assets,saved:false,keywordsTouched:false,tags,searchTagsVerified:true,sellerCode};
