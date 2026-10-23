@@ -49,7 +49,7 @@ async function copyProgress(errorOnly=false){
  announce(errorOnly?'오류를 복사했습니다.':'진행 기록과 오류를 복사했습니다.','success');
 }
 $('copyError').onclick=()=>copyProgress(true);
-function syncButtons(){for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreOpen','smartstoreTest','smartstoreOptimizeTitle','smartstoreArrangeTitle','naverSettings'])if($(id))$(id).disabled=requestLock||serverBusy;}
+function syncButtons(){for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreOpen','smartstoreTest','smartstoreOptimizeTitle','naverSettings'])if($(id))$(id).disabled=requestLock||serverBusy;}
 function action(id,fn){$(id).onclick=async()=>{
  const primary=id in buttonLabels;if(primary&&(requestLock||serverBusy))return;
  if(id==='run'&&!$('form').reportValidity())return;
