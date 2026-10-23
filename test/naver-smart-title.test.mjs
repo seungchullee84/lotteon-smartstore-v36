@@ -4,6 +4,26 @@ import {expandedTitleCandidates,composePopularTitle,createExpandedTitleOptimizer
 import {assertSmartstoreTitleLength,smartstoreTitle} from '../smartstore-title.mjs';
 const product={style:'376922',name:'여성 후드 숏 푸퍼 자켓 376922',rawName:'NEW [문가영] CLOUD LIGHT 후드 숏 푸퍼 자켓',gender:'여성'};
 const credentials={clientId:'dummy-id',clientSecret:'dummy-secret'};
+test('울 폴로 풀 집 자켓의 실제 특성을 확장해 측정된 동의어만으로 27자를 작성',()=>{
+ const p={style:'076913',name:'남성 울 폴로 풀 집 자켓 076913',rawName:'NEW [변우석] 울 폴로 풀 집 자켓',gender:'남성',material:'캐시미어 5%',fieldStatus:{material:'원본 확인 필요'}};
+ const before=structuredClone(p),candidates=expandedTitleCandidates(p);
+ for(const keyword of ['울자켓','카라자켓','폴로카라자켓','집업자켓','풀집업자켓','남성용자켓'])assert(candidates.includes(keyword),keyword);
+ assert(!candidates.some(k=>/캐시미어|겨울|기모|오버핏/.test(k)));
+ const ranking=[{keyword:'자켓',score:10},{keyword:'남자자켓',score:2},{keyword:'울자켓',score:1},{keyword:'카라자켓',score:0.3},{keyword:'집업자켓',score:0.4},{keyword:'풀집업자켓',score:0.01},{keyword:'남성용자켓',score:0.02}];
+ const result=composePopularTitle(p,ranking);
+ assert.equal(result.title,'지오다노 남성용 울 카라 풀집업 자켓 076913');assert.equal(result.length,27);
+ assert.equal(smartstoreTitle({...p,smartstoreName:result.title}),result.title);
+ assert(!hasDuplicateTitleMeaning(p,result.title));assert.deepEqual(p,before);
+ assert.throws(()=>composePopularTitle(p,ranking.filter(e=>!['풀집업자켓','남성용자켓'].includes(e.keyword))),/27~39/,'자료 없는 긴 동의어를 채우지 않음');
+});
+test('핏·짜임·플리스 후보도 원문 근거가 있을 때만 확장',()=>{
+ const p={style:'123456',gender:'여성',name:'여성 케이블 레귤러핏 니트 123456',rawName:'여성 케이블 레귤러핏 니트'};
+ const candidates=expandedTitleCandidates(p);
+ for(const keyword of ['케이블니트','꽈배기니트','레귤러핏니트'])assert(candidates.includes(keyword));
+ assert(!candidates.some(k=>/플리스|캐시미어|슬림핏|기모/.test(k)));
+ const f=expandedTitleCandidates({...p,name:'여성 플리스 집업 자켓 123456',rawName:'플리스 집업 자켓'});
+ assert(f.includes('후리스자켓'));assert(f.includes('집업자켓'));assert(!f.includes('풀집업자켓'));
+});
 test('미검증 수식어로 채우지 않고 의류 문맥 검색지수와 검증 소재만 반영',()=>{
  const p={style:'026952',name:'남성 퍼펙트 라운드 긴팔티 026952',rawName:'NEW 퍼펙트 크루넥 긴팔티',gender:'남성',material:'면 100%',noticeVerified:true};
  const before=structuredClone(p);

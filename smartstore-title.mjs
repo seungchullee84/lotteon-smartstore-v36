@@ -19,7 +19,7 @@ export function smartstoreTitle(product){
   const words=[],seen=new Set();
   let namedGender='',genderLabel='';
   for(let word of normalized.split(/\s+/).filter(Boolean)){
-    const sex=({남자:'남성',여자:'여성',남성:'남성',여성:'여성'})[word];
+    const sex=({남자:'남성',여자:'여성',남성:'남성',여성:'여성',남성용:'남성',남자용:'남성',여성용:'여성',여자용:'여성'})[word];
     if(sex){
       if((gender&&sex!==gender)||(namedGender&&sex!==namedGender))throw Error('스마트스토어 상품명과 선택한 성별이 다릅니다. 상품명을 확인해 주세요.');
       namedGender=sex;if(!genderLabel)genderLabel=word;continue;
