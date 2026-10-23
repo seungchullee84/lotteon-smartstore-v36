@@ -8,6 +8,7 @@ const remote='https://github.com/seungchullee84/lotteon-smartstore-v36.git';
 export function publishable(file){
  if(file.includes('..')||file.includes('\\'))return false;
  if(['.gitignore','.gitattributes','.app-release.json','package.json','pnpm-lock.yaml'].includes(file))return true;
+ if(['data/category-catalog-common.json','data/category-catalog-standard.json','data/category-crosswalk.json','data/category-matches.json','data/washing-icon-library.json'].includes(file))return true;
  return /^(?:[^/.]+\.(?:mjs|js|md|ps1|cmd)|(?:public|test)\/(?:[^/]+\/)*[^/]+\.(?:mjs|js|html|css|md|svg))$/.test(file)&&!/(?:secret|credential|session|password|\.env)/i.test(file);
 }
 async function git(root,args){
@@ -33,6 +34,10 @@ export async function syncGithub(root,{expectedRemote=remote}={}){
   const version=JSON.parse(await readFile(path.join(root,'package.json'),'utf8')).version;
   await git(root,['commit','--only','-m',`Auto-sync project ${version}`,'--',...files]);
  }
+ // Refresh the remote before reporting success: a freshly copied checkout can
+ // have stale origin/main, especially after its remote URL has been changed.
+ await git(root,['fetch','origin','main']);
+ try{await git(root,['merge-base','--is-ancestor','origin/main','HEAD']);}catch{throw Error('GitHub에 다른 변경이 있습니다. 충돌 확인 후 다시 연결해 주세요.');}
  // Inspect every pending commit, including a previous failed push, before publishing.
  const commits=(await git(root,['rev-list','origin/main..HEAD'])).trim().split('\n').filter(Boolean);
  if(!commits.length)return {status:'synced',sha:(await git(root,['rev-parse','HEAD'])).trim()};
@@ -44,12 +49,10 @@ export async function syncGithub(root,{expectedRemote=remote}={}){
    if(sensitive.test(content))throw Error('커밋에 인증 정보로 보이는 내용이 있어 업로드를 중단했습니다.');
   }
  }
- await git(root,['fetch','origin','main']);
- try{await git(root,['merge-base','--is-ancestor','origin/main','HEAD']);}catch{throw Error('GitHub에 다른 변경이 있습니다. 충돌 확인 후 다시 연결해 주세요.');}
  await git(root,['push','origin','HEAD:refs/heads/main']);
  return {status:'synced',sha:(await git(root,['rev-parse','HEAD'])).trim(),syncedAt:new Date().toISOString()};
 }
-export function startGithubSync(root,{beforeSync=async()=>{},interval=10000,quietMs=5000}={}){
+export function startGithubSync(root,{beforeSync=async()=>{},interval=2000,quietMs=1000}={}){
  let busy=false,lastHash=null,changedAt=0,stopped=false;
  const state={status:'checking',message:'GitHub 연결 확인 중'};
  async function tick(){

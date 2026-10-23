@@ -20,10 +20,10 @@ $('main').onerror=()=>{
 };
 
 async function post(endpoint,data={}){
- const expected=({open:'lotte',run:'lotte','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-test':'smartstore','smartstore-optimize-title':'smartstore','naver-settings':'smartstore'})[endpoint];
+ const expected=({open:'lotte',run:'lotte','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-test':'smartstore','smartstore-optimize-title':'smartstore'})[endpoint];
  if(expected&&document.body.dataset.channel!==expected)throw Error('선택한 판매채널과 실행 버튼이 다릅니다. 판매채널을 확인해 주세요.');
  if(expected)data={...data,channel:document.body.dataset.channel};
- try{const r=await fetch('/api/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:AbortSignal.timeout(45000)});const b=await r.json();if(!r.ok)throw Error(b.error);return b;}
+ try{const r=await fetch('/api/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:AbortSignal.timeout(endpoint==='smartstore-optimize-title'?60000:45000)});const b=await r.json();if(!r.ok)throw Error(b.error);return b;}
  catch(e){if(e.name==='TimeoutError')throw Error('서버 응답 시간이 초과됐습니다. 진행 기록에서 작업 상태를 확인해 주세요.');if(e instanceof TypeError)throw Error('등록기 서버와 연결되지 않았습니다. 잠시 후 새로고침해 주세요.');throw e;}
 }
 let requestLock=false,serverBusy=false,serverPhase='idle';
@@ -49,7 +49,7 @@ async function copyProgress(errorOnly=false){
  announce(errorOnly?'오류를 복사했습니다.':'진행 기록과 오류를 복사했습니다.','success');
 }
 $('copyError').onclick=()=>copyProgress(true);
-function syncButtons(){for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreOpen','smartstoreTest','smartstoreOptimizeTitle','smartstoreArrangeTitle','naverSettings'])if($(id))$(id).disabled=requestLock||serverBusy;}
+function syncButtons(){for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreOpen','smartstoreTest','smartstoreOptimizeTitle','naverSettings'])if($(id))$(id).disabled=requestLock||serverBusy;}
 function action(id,fn){$(id).onclick=async()=>{
  const primary=id in buttonLabels;if(primary&&(requestLock||serverBusy))return;
  if(id==='run'&&!$('form').reportValidity())return;
@@ -282,6 +282,7 @@ $('smartstoreTest').onclick=async()=>{
  const f=new FormData($('form'));const p={...product};
  for(const k of ['name','gender','material','country','washing','manufactured'])p[k]=String(f.get(k)||'').trim();
  p.smartstoreName=$('smartstoreName').value.trim();
+ if(!p.smartstoreName||[...p.smartstoreName].length>39){$('error').textContent='스마트스토어 상품명은 품번·공백 포함 최대 39자로 작성해 주세요.';return;}
  p.consumerPrice=Number(f.get('consumerPrice'));p.colors=String(f.get('colors')||'').split(',').map(s=>s.trim()).filter(Boolean);p.sizes=String(f.get('sizes')||'').split(',').map(s=>s.trim()).filter(Boolean);
  requestLock=true;syncButtons();
  try{await post('smartstore-test',{product:p,salePrice:Number($('smartstorePrice').value),includeImages:$('smartstoreImages').checked});announce('스마트스토어 입력 테스트 시작 · 저장하지 않습니다.','success');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;syncButtons();}
@@ -292,29 +293,30 @@ async function arrangeSmartstoreTitle(useCurrent=true){
  const {smartstoreTitle}=await import('/smartstore-title.mjs');
  if(product!==current)return;
  field.value=smartstoreTitle({...current,name:$('form').elements.name.value,gender:$('form').elements.gender.value,smartstoreName:useCurrent?field.value:''});
- $('smartstoreNameStatus').textContent=[...field.value].length+'자 · 상품정보 기준 정리';
+ $('smartstoreNameStatus').textContent=[...field.value].length+'자 / 최대 39자 · 검색 관심도 우선 · 상품정보 기준 정리';
 }
-$('smartstoreArrangeTitle').onclick=async()=>{
- try{await arrangeSmartstoreTitle();$('error').textContent='';}catch(e){$('error').textContent=e.message;}
-};
-$('smartstoreName').oninput=()=>{$('smartstoreNameStatus').textContent=[...$('smartstoreName').value].length+'자 · 수정한 스마트스토어 상품명';};
+$('smartstoreName').oninput=()=>{$('smartstoreNameStatus').textContent=[...$('smartstoreName').value].length+'자 / 최대 39자 · 검색 관심도 우선 · 수정한 스마트스토어 상품명';};
 async function optimizeSmartstoreTitle(){
  if(requestLock||serverBusy||!product)return;
  const current=product,field=$('smartstoreName');
  const snapshot={style:product.style,name:$('form').elements.name.value,gender:$('form').elements.gender.value,smartstoreName:field.value};
- requestLock=true;syncButtons();$('naverTitleResult').textContent='네이버 검색 관심도를 조회하고 있습니다…';$('naverTitleCandidates').replaceChildren();
+ requestLock=true;syncButtons();$('smartstoreOptimizeTitle').textContent='상품명 최적화 중…';$('naverTitleResult').textContent='네이버 검색 관심도를 조회하고 있습니다…';$('naverTitleCandidates').replaceChildren();
  try{
    const result=await post('smartstore-optimize-title',{product:snapshot});
    const stale=product!==current||field.value!==snapshot.smartstoreName||$('form').elements.name.value!==snapshot.name||$('form').elements.gender.value!==snapshot.gender;
    if(stale){$('naverTitleResult').textContent='조회 중 상품명이 바뀌어 제안값을 적용하지 않았습니다. 다시 조회해 주세요.';return;}
-   if(result.hasData){field.value=result.title;$('smartstoreNameStatus').textContent=[...field.value].length+'자 · 네이버 데이터 참고 제안';}
-   $('naverTitleResult').textContent=result.source+' · '+result.period.startDate+' ~ '+result.period.endDate+(result.fromCache?' · 최근 조회 재사용':'')+' · '+(result.hasData?'성별 표현 비교 '+result.comparedDays+'일 / 특성 순서 비교 '+result.featureComparedDays+'일':'조회 자료가 없어 기존 상품명 유지')+' · '+result.note;
-   for(const entry of result.candidates){const li=document.createElement('li');li.textContent=entry.keyword+': '+(entry.mean===null?'자료 없음':'반환된 일별 상대지수 평균 '+entry.mean.toFixed(2)+' · '+entry.pointCount+'일');$('naverTitleCandidates').append(li);}
+   if(result.hasData){field.value=result.title;$('smartstoreNameStatus').textContent=[...field.value].length+'자 / 최대 39자 · 검색 관심도 우선 · 네이버 인기어 반영';}
+   $('naverTitleResult').textContent=result.source+' · '+result.period.startDate+' ~ '+result.period.endDate+(result.fromCache?' · 최근 조회 재사용':'')+' · '+(result.expanded?'인기 검색어 '+result.candidates.length+'개 비교 · '+result.length+'자':result.hasData?'성별 표현 비교 '+result.comparedDays+'일 / 특성 순서 비교 '+result.featureComparedDays+'일':'조회 자료가 없어 기존 상품명 유지')+' · '+result.note;
+   for(const entry of result.candidates){const li=document.createElement('li');li.textContent=entry.keyword+': '+(result.expanded?'비교 기준 대비 검색 관심도 '+entry.score.toFixed(3):entry.mean===null?'자료 없음':'반환된 일별 상대지수 평균 '+entry.mean.toFixed(2)+' · '+entry.pointCount+'일');$('naverTitleCandidates').append(li);}
    $('error').textContent='';
  }catch(e){$('naverTitleResult').textContent='네이버 조회 실패 · 기존 상품명 유지 · '+e.message;}
- finally{requestLock=false;syncButtons();}
+ finally{requestLock=false;$('smartstoreOptimizeTitle').textContent='상품명 자동 최적화';syncButtons();}
 }
-$('smartstoreOptimizeTitle').onclick=optimizeSmartstoreTitle;
+$('smartstoreOptimizeTitle').onclick=async()=>{
+ if(requestLock||serverBusy||!product)return;
+ try{await arrangeSmartstoreTitle();await optimizeSmartstoreTitle();}
+ catch(e){$('naverTitleResult').textContent=e.message;}
+};
 const autoNaverProducts=new WeakSet();
 async function autoOptimizeSmartstoreTitle(){
  if(!product||document.body.dataset.channel!=='smartstore'||requestLock||serverBusy||autoNaverProducts.has(product))return;
@@ -334,13 +336,13 @@ async function autoOptimizeSmartstoreTitle(){
 }
 $('naverSettings').onclick=async()=>{
  $('naverSettingsForm').reset();$('naverSettingsMessage').textContent='';$('naverSettingsDialog').showModal();
- try{const r=await fetch('/api/naver-status');if(!r.ok)throw Error('연결 상태를 확인하지 못했습니다.');const s=await r.json();$('naverSettingsMessage').textContent=s.configured?'키가 설정되어 있습니다. 실제 조회 성공 여부는 상품명 제안 버튼으로 확인하세요.':'기존 네이버 개발자센터 Client ID와 Client Secret을 입력해 주세요.';}catch(e){$('naverSettingsMessage').textContent=e.message;}
+ try{const r=await fetch('/api/naver-status');if(!r.ok)throw Error('연결 상태를 확인하지 못했습니다.');const s=await r.json();$('naverSettingsMessage').textContent=s.configured?'키가 설정되어 있습니다. 실제 조회 성공 여부는 상품명 제안 버튼으로 확인하세요.':'NAVER API HUB에서 발급한 Client ID와 Client Secret을 입력해 주세요.';}catch(e){$('naverSettingsMessage').textContent=e.message;}
 };
 $('closeNaverSettings').onclick=()=>{$('naverSettingsForm').reset();$('naverSettingsDialog').close();};
 $('naverSettingsDialog').addEventListener('close',()=>$('naverSettingsForm').reset());
 $('naverSettingsForm').onsubmit=async event=>{
  event.preventDefault();const button=event.submitter;button.disabled=true;
- try{await post('naver-settings',{clientId:$('naverClientId').value,clientSecret:$('naverClientSecret').value});$('naverSettingsForm').reset();$('naverSettingsDialog').close();$('naverTitleResult').textContent='네이버 API 키 설정 완료';if(product)autoNaverProducts.delete(product);await autoOptimizeSmartstoreTitle();}
+ try{await post('naver-settings',{clientId:$('naverClientId').value,clientSecret:$('naverClientSecret').value});showNaverConnection(true);$('naverSettingsForm').reset();$('naverSettingsDialog').close();$('naverTitleResult').textContent='네이버 API 키 설정 완료';if(product)autoNaverProducts.delete(product);await autoOptimizeSmartstoreTitle();void writePopularKeywords();}
  catch(e){$('naverSettingsMessage').textContent=e.message;}
  finally{button.disabled=false;}
 };
@@ -348,7 +350,7 @@ const beforeSmartstorePopulate=populate;populate=function(p){
  beforeSmartstorePopulate(p);$('smartstorePrice').value=p.consumerPrice||'';
  $('smartstoreName').value=p.smartstoreName||'';
  $('naverTitleResult').textContent='네이버 데이터 조회 전';$('naverTitleCandidates').replaceChildren();
- arrangeSmartstoreTitle().then(autoOptimizeSmartstoreTitle).catch(e=>{$('smartstoreNameStatus').textContent=e.message;});
+ void writePopularKeywords();arrangeSmartstoreTitle().then(autoOptimizeSmartstoreTitle).catch(e=>{$('smartstoreNameStatus').textContent=e.message;});
 };
 
 // Entering SmartStore may suggest a title; Lotte registration handlers stay unchanged.
@@ -396,3 +398,42 @@ async function removeExtraImage(key){
 }
 $('removeExtra1').onclick=()=>removeExtraImage('extra1');
 $('removeExtra2').onclick=()=>removeExtraImage('extra2');
+
+// Keyword requests never overwrite edits made while a request is running.
+let keywordRequest=0;
+async function writePopularKeywords(){
+ if(!product||serverBusy)return;
+ const current=product,field=$('form').elements.keywords,before=field.value,id=++keywordRequest;
+ $('keywordStatus').textContent='네이버에서 상품 관련 키워드의 검색 관심도를 비교하고 있습니다…';
+ try{
+  const result=await post('naver-keywords',{style:current.style});
+  if(id!==keywordRequest||product!==current||field.value!==before){if(id===keywordRequest)$('keywordStatus').textContent='조회 중 상품 또는 입력값이 바뀌어 자동 적용하지 않았습니다.';return;}
+  field.value=result.keywords;product.keywords=result.keywords;
+  $('keywordStatus').textContent=result.length+'자(쉼표 포함) · '+result.source+' · '+result.period.startDate+' ~ '+result.period.endDate+' · 월간 검색횟수 아님';
+ }catch(e){if(id===keywordRequest&&product===current)$('keywordStatus').textContent='기존 키워드 유지 · '+e.message;}
+}
+function showNaverConnection(connected,detail=''){
+ $('naverConnectionStatus').textContent=connected?'네이버 API 연결됨':'네이버 연결 확인 필요';
+ $('naverConnectionStatus').dataset.connected=String(connected);
+ $('naverConnectionDetail').textContent=detail;
+}
+async function verifyNaverConnection(){
+ $('naverVerify').disabled=true;
+ $('naverConnectionStatus').textContent='네이버 인증 확인 중…';
+ try{await post('naver-verify',{});showNaverConnection(true);}
+ catch(e){showNaverConnection(false,e.message);}
+ finally{$('naverVerify').disabled=false;}
+}
+$('naverVerify').onclick=async()=>{await verifyNaverConnection();};
+async function loadNaverConnection(){
+ try{
+  const response=await fetch('/api/naver-status',{signal:AbortSignal.timeout(5000)});
+  if(!response.ok)throw Error('연결 상태를 확인하지 못했습니다.');
+  const status=await response.json();
+  if(!status.configured){$('naverConnectionStatus').textContent='네이버 연결 설정 필요';return;}
+  if(status.verified)showNaverConnection(true);
+  else await verifyNaverConnection();
+ }catch(e){showNaverConnection(false,e.message);}
+};
+void loadNaverConnection();
+if(new URLSearchParams(location.search).get('settings')==='naver')$('naverSettings').click();

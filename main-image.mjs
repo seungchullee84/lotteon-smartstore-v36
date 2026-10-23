@@ -39,6 +39,12 @@ export async function prepareMainImage(folder,key='main'){
    let approved;try{approved=await readFile(path.join(folder,'..','main-overrides',selectedProduct.style+'.jpg'));}catch(e){if(e.code!=='ENOENT')throw e;}
    if(approved){const size=await sharp(approved).metadata();if(size.width!==1500||size.height!==1500)throw Error('승인 대표이미지 크기가 올바르지 않습니다.');await writePreparedImage(output,approved);return decorateMainImage(folder,output);}
   }
+  // Collection may explicitly approve official gallery photos when the detail
+  // source is missing. Preserve the whole photo rather than crop a missing file.
+  if(selectedProduct.detailFallbackApproved===true&&!selectedProduct.originalDetailUrl&&!selectedProduct.images?.detail){
+   await writePreparedImage(output,await sharp(path.join(folder,'main.jpg')).rotate().resize(1500,1500,{fit:'contain',background:'#ffffff'}).jpeg({quality:95}).toBuffer());
+   return decorateMainImage(folder,output);
+  }
   let meta;try{meta=await sharp(path.join(folder,'detail.jpg')).metadata();}catch{throw Error('상세 원본 상단 사진이 없어 대표이미지를 만들 수 없습니다.');}
   if(!meta.width||meta.height<meta.width)throw Error('상세 상단 사진의 정사각형 영역을 확인해 주세요.');
   const product=JSON.parse(await readFile(path.join(folder,'product.json'),'utf8'));

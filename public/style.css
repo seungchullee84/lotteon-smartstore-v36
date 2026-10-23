@@ -182,9 +182,16 @@ header .header-details{display:flex;align-items:center;justify-content:space-bet
 
 
 .smartstore-panel{border-top:1px solid #dbe4e0;margin-top:24px;padding-top:16px}.smartstore-panel h3{color:#178542}.smartstore-panel label{max-width:440px}.smartstore-panel small{display:block;color:#60716b;font-size:12px}.smartstore-panel .bar{flex-wrap:wrap;gap:8px;margin:14px 0}
+.smartstore-title-panel{margin:20px 0 0;padding:18px;border:1px solid #9ac7a9;border-radius:10px;background:#eaf8ef;min-width:0}.smartstore-title-panel h3{margin:0 0 14px;color:#178542;font-size:16px}.smartstore-title-panel label{display:block;margin:0 0 12px}.smartstore-title-panel input{width:100%;box-sizing:border-box}.smartstore-title-panel small{display:block;margin-top:6px;color:#60716b;font-size:12px}.smartstore-title-panel .bar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.smartstore-title-panel .note{margin-bottom:0}#smartstoreNameStatus{font-size:12px;color:#365a43}
 
 /* Visible channel separation; shared collection fields retain their values. */
 .channel-switcher{max-width:1168px;margin:16px auto 0;padding:18px 22px;border:1px solid #e6c5c9;border-radius:14px;background:#fff6f6}
+.naver-connection{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-top:12px}
+#naverConnectionStatus{margin:0;font-size:14px}
+#naverConnectionStatus[data-connected="true"]{color:#168447;font-weight:600}
+#naverConnectionMenu summary{cursor:pointer;font-size:14px}
+#naverConnectionMenu .bar{margin-top:10px;flex-wrap:wrap}
+#naverConnectionDetail:empty{display:none}
 .channel-buttons{display:flex;gap:10px}.channel-button{flex:1;min-height:48px;font-size:17px;background:#fff;color:#625b56;border:1px solid #c7bbae;box-shadow:none}
 .channel-lotte[aria-pressed="true"],.channel-lotte[aria-pressed="true"]:hover{background:#d3243b;color:white;border-color:#d3243b}
 .channel-smartstore[aria-pressed="true"],.channel-smartstore[aria-pressed="true"]:hover{background:#087c42;color:white;border-color:#087c42}
@@ -247,3 +254,5 @@ body[data-channel="smartstore"] #collect{background:#087c42;box-shadow:0 3px 8px
 header .release-info #releaseVersion{background:var(--release-bg,#ece4d8);color:var(--release-text,#203d63);border:1px solid var(--release-border,#c8b79e);transition:background-color .25s,color .25s,border-color .25s}
 
 .extra-image-card{position:relative}.extra-previews .remove-extra{position:absolute;z-index:1;right:6px;top:6px;width:28px;height:28px;padding:0;border-radius:50%;font-size:22px;line-height:24px;background:#fff5f2;color:#a53a2b;border:1px solid #dbada3;box-shadow:0 1px 4px #0002}.extra-previews .remove-extra:hover{background:#ffe0d9;color:#7d2117}
+
+body[data-channel=smartstore] .collection-tools{grid-template-columns:1fr}.collection-tools #smartstoreOpen{width:100%;justify-self:stretch;white-space:normal;padding:10px;font-size:12px}

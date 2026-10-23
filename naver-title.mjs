@@ -1,5 +1,5 @@
 import {smartstoreTitle} from './smartstore-title.mjs';
-export const NAVER_TREND_URL='https://openapi.naver.com/v1/datalab/search';
+export const NAVER_TREND_URL='https://naverapihub.apigw.ntruss.com/search-trend/v1/search';
 export function trendPeriod(now=new Date()){
   const korea=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
   const end=new Date(korea+'T00:00:00Z');end.setUTCDate(end.getUTCDate()-1);
@@ -69,15 +69,15 @@ export function createNaverTitleOptimizer({fetchImpl=fetch,clock=()=>new Date()}
   return async(product,credentials)=>{
     const {title,candidates}=titleCandidates(product),period=trendPeriod(clock());
     const {clientId,clientSecret}=credentials||{};
-    if(!clientId||!clientSecret)throw Error('스마트스토어의 네이버 API 연결 설정에서 Client ID와 Client Secret을 입력해 주세요.');
+    if(!clientId||!clientSecret)throw Error('네이버 API 연결 설정에서 NAVER API HUB의 Client ID와 Client Secret을 입력해 주세요.');
     const request={...period,keywordGroups:candidates.map(c=>({groupName:c.keyword,keywords:[c.keyword]}))};
     const key=JSON.stringify([clientId,clientSecret,request]);
     let saved=cache.get(key),fromCache=!!saved&&clock().getTime()-saved.time<3600000;
     if(!fromCache){
       let response;
-      try{response=await fetchImpl(NAVER_TREND_URL,{method:'POST',headers:{'Content-Type':'application/json','X-Naver-Client-Id':clientId,'X-Naver-Client-Secret':clientSecret},body:JSON.stringify(request),signal:AbortSignal.timeout(15000),redirect:'error'});}
+      try{response=await fetchImpl(NAVER_TREND_URL,{method:'POST',headers:{'Content-Type':'application/json','X-NCP-APIGW-API-KEY-ID':clientId,'X-NCP-APIGW-API-KEY':clientSecret},body:JSON.stringify(request),signal:AbortSignal.timeout(15000),redirect:'error'});}
       catch{throw Error('네이버 API에 연결하지 못했습니다. 기존 상품명을 유지합니다.');}
-      if(!response.ok){const messages={401:'네이버 API 인증 정보를 확인해 주세요.',403:'네이버 개발자센터에서 데이터랩 검색어트렌드 사용 권한을 확인해 주세요.',429:'네이버 API 호출 한도를 초과했습니다. 나중에 다시 시도해 주세요.'};throw Error(messages[response.status]||'네이버 API 조회 실패 (HTTP '+response.status+'). 기존 상품명을 유지합니다.');}
+      if(!response.ok){const messages={401:'NAVER API HUB의 인증 정보와 검색어 트렌드 사용 권한을 확인해 주세요.',403:'NAVER API HUB에서 검색어 트렌드 사용 권한을 확인해 주세요.',429:'네이버 API 호출 한도를 초과했습니다. 나중에 다시 시도해 주세요.'};throw Error(messages[response.status]||'네이버 API 조회 실패 (HTTP '+response.status+'). 기존 상품명을 유지합니다.');}
       let payload;try{payload=await response.json();}catch{throw Error('네이버 API 응답을 읽지 못했습니다. 기존 상품명을 유지합니다.');}
       const entries=interpretTrend(payload,request,candidates);
       saved={time:clock().getTime(),entries,queriedAt:clock().toISOString()};

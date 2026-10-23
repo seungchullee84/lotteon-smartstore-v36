@@ -8,7 +8,7 @@ import {smartstorePlan} from '../smartstore-form.mjs';
 
 test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저장 정책을 보존',async()=>{
  const product={style:'356956',rawName:'남성 아가일 브이넥 니트',name:'남성 아가일 브이넥 니트 356956',gender:'남성',consumerPrice:59800,colors:['01블랙'],sizes:['M'],material:'면 100%',country:'베트남',washing:'손세탁',manufactured:'2026-08',keywords:'지오다노,남성니트',category:{},images:{detail:'https://www.giordano.co.kr/detail.jpg'},warnings:[]};
- let fail=false,submitted=null,settings=null,configured=false,optimizeCalls=0,revision=1,currentProduct=product;
+ let fail=false,submitted=null,settings=null,configured=false,optimizeCalls=0,revision=1,currentProduct=product,keywordMode='fail';
  const optimize=createNaverTitleOptimizer({clock:()=>new Date('2026-10-22T16:00:00Z'),fetchImpl:async(_,config)=>{
   const request=JSON.parse(config.body);return Response.json({...request,results:request.keywordGroups.map(g=>({title:g.groupName,keywords:g.keywords,data:[{period:request.endDate,ratio:({남성니트:20,남자니트:80,브이넥니트:100,아가일니트:30})[g.groupName]||10}]}))});
  }});
@@ -21,7 +21,12 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
    if(url.pathname==='/api/naver-status')return respond(res,{configured});
    if(req.method==='POST'){
     let text='';for await(const chunk of req)text+=chunk;const body=JSON.parse(text);
-    assert.equal(body.channel,'smartstore');
+    if(url.pathname.startsWith('/api/smartstore-'))assert.equal(body.channel,'smartstore');
+    if(url.pathname==='/api/naver-keywords'){
+     if(keywordMode==='fail')return respond(res,{error:'테스트: 기존 키워드 유지'},503);
+     await new Promise(resolve=>setTimeout(resolve,200));
+     return respond(res,{keywords:'지오다노,'+'가'.repeat(35),length:40,source:'테스트 데이터랩',period:{startDate:'2026-09-25',endDate:'2026-10-22'}});
+    }
     if(url.pathname==='/api/naver-settings'){settings=body;configured=true;return respond(res,{configured:true});}
     if(url.pathname==='/api/smartstore-optimize-title'){
      optimizeCalls++;
@@ -55,14 +60,17 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   assert.equal(await page.locator('#naverTitleCandidates li').count(),4);
   await page.locator('#channelLotte').click();assert.equal(await page.locator('#smartstoreName').isVisible(),false);
   await page.locator('#channelSmartstore').click();
+  const allowedTitle='지오다노 남자 브이넥 아가일 니트 남성브이넥니트 356956';
+  await page.locator('#smartstoreName').fill(allowedTitle);
   await page.locator('#smartstoreTest').click();
   await page.waitForFunction(()=>document.getElementById('clickFeedback').textContent.includes('입력 테스트 시작'));
-  assert.equal(submitted.product.name,lotte);assert.equal(submitted.product.smartstoreName,'지오다노 남자 브이넥 아가일 니트 356956');
+  assert.equal(submitted.product.name,lotte);assert.equal(submitted.product.smartstoreName,allowedTitle);
   assert.equal(submitted.save,undefined);assert.equal(submitted.finalize,undefined);
+  await page.locator('#smartstoreName').fill('지오다노 남자 브이넥 아가일 니트 356956');
   fail=true;await page.locator('#smartstoreOptimizeTitle').click();
   await page.waitForFunction(()=>document.getElementById('naverTitleResult').textContent.includes('조회 실패'));
   assert.equal(await page.locator('#smartstoreName').inputValue(),'지오다노 남자 브이넥 아가일 니트 356956');
-  fail=false;await page.locator('#naverSettings').click();await page.locator('#naverClientId').fill('fake-id');await page.locator('#naverClientSecret').fill('fake-secret');
+  fail=false;await page.locator('#naverConnectionMenu summary').click();await page.locator('#naverSettings').click();await page.locator('#naverClientId').fill('fake-id');await page.locator('#naverClientSecret').fill('fake-secret');
   await page.locator('#naverSettingsForm button[type="submit"]').click();
   await page.waitForFunction(()=>!document.getElementById('naverSettingsDialog').open);
   assert.equal(settings.clientSecret,'fake-secret');assert.equal(await page.locator('#naverClientSecret').inputValue(),'');
@@ -80,6 +88,27 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   currentProduct={...product};revision++;
   await page.waitForFunction(()=>document.getElementById('smartstoreName').value==='지오다노 남자 브이넥 아가일 니트 356956');
   assert.equal(optimizeCalls,5,'스마트스토어 채널에서 상품 수집 완료 후 자동 조회');
+  await page.locator('#channelLotte').click();keywordMode='success';
+  currentProduct={...product};revision++;
+  await page.waitForFunction(()=>document.querySelector('textarea[name="keywords"]').value==='지오다노,'+'가'.repeat(35));
+  assert.match(await page.locator('#keywordStatus').innerText(),/쉼표 포함/);
+  const keywordField=page.locator('textarea[name="keywords"]');
+  assert.equal(await keywordField.getAttribute('maxlength'),'40');
+  for(const length of [39,40,41]){
+   await keywordField.fill('지오다노,'+'가'.repeat(length-5));
+   assert.equal((await keywordField.inputValue()).length,Math.min(length,40));
+  }
+  currentProduct={...product};revision++;
+  await page.waitForFunction(()=>document.getElementById('keywordStatus').textContent.includes('비교하고 있습니다'));
+  await page.locator('textarea[name="keywords"]').fill('지오다노,직접수정');
+  await page.waitForFunction(()=>document.getElementById('keywordStatus').textContent.includes('자동 적용하지 않았습니다'));
+  assert.equal(await page.locator('textarea[name="keywords"]').inputValue(),'지오다노,직접수정');
+  currentProduct={...product,style:'376922',name:'여성 후드 숏 푸퍼 자켓 376922',gender:'여성'};revision++;
+  await page.waitForFunction(()=>document.getElementById('smartstoreName').value==='지오다노 여성 후드 숏 패딩 자켓 376922');
+  await page.locator('#channelSmartstore').click();
+  await page.waitForFunction(()=>document.getElementById('naverTitleResult').textContent.includes('통합검색어 트렌드 API'));
+  assert.equal(await page.locator('input[name="name"]').inputValue(),currentProduct.name);
+  assert.equal(await page.locator('#smartstoreName').inputValue(),'지오다노 여성 후드 숏 패딩 자켓 376922');
   assert.doesNotMatch(await page.locator('body').innerText(),/fake-secret/);assert.deepEqual(errors,[]);
  }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
 });

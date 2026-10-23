@@ -1,11 +1,14 @@
+import {validateProduct} from './product-validation.mjs';
 import {requireChannel} from './channel-routing.mjs';
+import {verifyNaver,createKeywordOptimizer} from './naver-keywords.mjs';
 import {generateBackground} from './background-image.mjs';
 import {createReleaseTracker} from './app-release.mjs';
 import {startGithubSync} from './github-sync.mjs';
 import {brandingLock} from './branding-lock.mjs';
 import {SmartstoreAutomation} from './smartstore-automation.mjs';
 import {smartstorePlan} from './smartstore-form.mjs';
-import {createNaverTitleOptimizer} from './naver-title.mjs';
+import {createExpandedTitleOptimizer as createNaverTitleOptimizer,hasDuplicateTitleMeaning} from './naver-smart-title.mjs';
+import {smartstoreTitle,assertSmartstoreTitleLength} from './smartstore-title.mjs';
 import {saveLongDetailImage} from './long-detail-image.mjs';
 import http from 'node:http';
 import {randomBytes} from 'node:crypto';
@@ -14,20 +17,23 @@ import {buildDetailContent} from './detail-html.mjs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
-import {collect,parseProductInput,validateStyle,cleanMarketingText,buildKeywords,easyProductName,repairCategoryFields} from './product.mjs';
+import {collect,parseProductInput,buildKeywords,repairCategoryFields} from './product.mjs';
 import {LotteAutomation} from './automation.mjs';
 import {prepareMainImage,backgroundImageStatus,backgroundSelection,applyExtraExclusions,excludeExtraImage} from './main-image.mjs';
 import sharp from 'sharp';
 import {saveIconMeaning,iconWashingResult} from './washing-icons.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const releases=createReleaseTracker(root);await releases.get();
-const githubSync=startGithubSync(root,{beforeSync:()=>releases.get()});
+const githubSync=process.env.REGISTER_PORTABLE==='1'?{state:{status:'portable',message:'배포 실행판'},stop(){}}:startGithubSync(root,{beforeSync:()=>releases.get()});
 const dataRoot=path.join(root,'data');await mkdir(dataRoot,{recursive:true});
 let naverCredentials={clientId:process.env.NAVER_CLIENT_ID?.trim()||'',clientSecret:process.env.NAVER_CLIENT_SECRET?.trim()||''};
 if(!naverCredentials.clientId||!naverCredentials.clientSecret){
   try{const saved=JSON.parse(await readFile(path.join(dataRoot,'naver-api-settings.json'),'utf8'));naverCredentials={clientId:saved.clientId||'',clientSecret:saved.clientSecret||''};}catch(e){if(e.code!=='ENOENT')throw e;}
 }
 let optimizeNaverTitle=createNaverTitleOptimizer();
+let optimizeKeywords=createKeywordOptimizer();
+let naverVerification={verified:false};
+let naverLastAttempt=null;
 const desktopSession=process.env.REGISTER_DESKTOP==='1'?JSON.parse(await readFile(path.join(dataRoot,'desktop-session.json'),'utf8')):null;
 const token=desktopSession?.token||randomBytes(24).toString('hex');
 let backgroundApiKey=process.env.OPENAI_API_KEY?.trim()||'';
@@ -43,25 +49,6 @@ function json(res,status,data){res.writeHead(status,{'Content-Type':'application
 async function body(req){let text='';for await(const chunk of req){text+=chunk;if(text.length>1600000)throw Error('요청이 너무 큽니다.');}return JSON.parse(text||'{}');}
 let activeAbort=null;
 function job(phase,fn){if(state.busy)throw Error('진행 중인 작업이 있습니다.');const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase=phase;state.error=null;Promise.resolve().then(fn).then(()=>{state.phase=controller.signal.aborted?'stopped':'done';}).catch(e=>{state.error=controller.signal.aborted?null:e.message;if(e.code==='DETAIL_SOURCE_MISSING'&&!controller.signal.aborted)state.detailFallbackRequest={input:state.collectionInput};state.phase=controller.signal.aborted?'stopped':'error';log(controller.signal.aborted?'작업을 중단했습니다.':e.message);}).finally(()=>{state.busy=false;state.paused=null;activeAbort=null;});}
-function validateProduct(p){
-
-  repairCategoryFields(p);
-  p.country=String(p.country||'').replace(/[^가-힣A-Za-z\s]+/g,'').trim();
-  p.name=easyProductName(p.name);
-  p.keywords=cleanMarketingText(p.keywords).replace(/,{2,}/g,',').replace(/^,|,$/g,'');
-  validateStyle(p.style);
-  for(const key of ['name','gender','material','country','washing','manufactured','keywords'])if(!p[key]?.trim())throw Error('검토란을 입력해 주세요: '+key);
-  if(!['여성','남성'].includes(p.gender))throw Error('성별을 확인해 주세요.');
-  if(!p.name.startsWith(p.gender+' '))throw Error('선택한 성별과 상품명 앞의 남성/여성 표시가 다릅니다.');
-  if(p.gender==='남성'&&Object.values(p.category||{}).some(v=>/여성/.test(v))||p.gender==='여성'&&Object.values(p.category||{}).some(v=>/남성/.test(v)))throw Error('성별과 상품분류가 다릅니다. 분류를 다시 확인해 주세요.');
-  if(!Number.isInteger(+p.consumerPrice)||+p.consumerPrice<1000)throw Error('공식몰 소비자가를 확인해 주세요.');
-  if(!/^20\d{2}-(0[1-9]|1[0-2])$/.test(p.manufactured))throw Error('제조연월은 YYYY-MM 형식입니다.');
-  if(!p.colors?.length||!p.sizes?.length)throw Error('색상과 사이즈가 필요합니다.');
-  if(p.colors.some(v=>!/^\d{2}\S+$/.test(v)))throw Error('색상은 번호+색상명이며 공백이 없어야 합니다.');
-  for(const key of ['commonMiddle','commonSmall','channelMiddle','channelSmall'])if(!p.category?.[key]?.trim())throw Error('카테고리를 입력해 주세요: '+key);
-  if(p.keywords.length>40)throw Error('검색키워드는 쉼표·공백 포함 40자 이내로 입력해 주세요.');
-  if(!p.keywords.startsWith('지오다노'))throw Error('검색키워드는 지오다노로 시작해야 합니다.');
-}
 const server=http.createServer(async(req,res)=>{
   try{
     const url=new URL(req.url,'http://localhost');
@@ -72,7 +59,7 @@ const server=http.createServer(async(req,res)=>{
     if(url.pathname==='/'&&url.searchParams.get('key')===token){res.writeHead(302,{'Set-Cookie':`session=${token}; HttpOnly; SameSite=Strict; Path=/`,'Location':'/'});return res.end();}
     if(!cookie)return json(res,403,{error:'시작 화면의 전용 링크로 접속해 주세요.'});
     if(req.method==='GET'&&url.pathname==='/api/branding')return json(res,200,await protectedBranding.get());
-    if(req.method==='GET'&&url.pathname==='/api/naver-status')return json(res,200,{configured:!!(naverCredentials.clientId&&naverCredentials.clientSecret)});
+    if(req.method==='GET'&&url.pathname==='/api/naver-status')return json(res,200,{configured:!!(naverCredentials.clientId&&naverCredentials.clientSecret),...naverVerification,lastAttempt:naverLastAttempt});
     if(req.method==='GET'&&url.pathname==='/api/state'){
       const versions={};
       for(const key of ['main','extra1','extra2'])versions[key]=state.folder?(await backgroundImageStatus(state.folder,key)).version||null:null;
@@ -98,12 +85,26 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='POST'){
       const b=await body(req);
       requireChannel(url.pathname.slice(5),b.channel);
+      if(url.pathname==='/api/naver-verify'){
+        naverVerification=await verifyNaver(naverCredentials);return json(res,200,naverVerification);
+      }
+      if(url.pathname==='/api/naver-keywords'){
+        if(state.busy||!state.product||b.style!==state.product.style)throw Error('수집 완료 후 현재 상품으로 다시 조회해 주세요.');
+        const current=state.product;
+        const result=await optimizeKeywords(current,naverCredentials);
+        if(state.busy||state.product!==current)throw Error('상품이 변경되어 키워드를 적용하지 않았습니다.');
+        return json(res,200,result);
+      }
       if(url.pathname==='/api/naver-settings'){
         if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 연결해 주세요.');
         if(typeof b.clientId!=='string'||typeof b.clientSecret!=='string'||!/^\S{5,200}$/.test(b.clientId.trim())||!/^\S{5,200}$/.test(b.clientSecret.trim()))throw Error('네이버 Client ID와 Client Secret을 확인해 주세요.');
         const settings={clientId:b.clientId.trim(),clientSecret:b.clientSecret.trim()};
+        naverLastAttempt={attemptedAt:new Date().toISOString(),provider:'NAVER API HUB',clientIdLength:settings.clientId.length,clientSecretLength:settings.clientSecret.length,verified:false};
+        let verified;
+        try{verified=await verifyNaver(settings);naverLastAttempt.verified=true;}
+        catch(e){naverLastAttempt.httpStatus=e.httpStatus;naverLastAttempt.errorCode=e.apiCode;naverLastAttempt.error=e.message;throw e;}
         await writeFile(path.join(dataRoot,'naver-api-settings.json'),JSON.stringify(settings),{mode:0o600});
-        naverCredentials=settings;optimizeNaverTitle=createNaverTitleOptimizer();return json(res,200,{configured:true});
+        naverCredentials=settings;naverVerification=verified;optimizeNaverTitle=createNaverTitleOptimizer();optimizeKeywords=createKeywordOptimizer();return json(res,200,{configured:true,...verified});
       }
       if(url.pathname==='/api/smartstore-optimize-title'){
         if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 조회해 주세요.');
@@ -152,6 +153,8 @@ const server=http.createServer(async(req,res)=>{
         await smartBot.open();return json(res,200,{ok:true});
       }
       if(url.pathname==='/api/smartstore-plan'||url.pathname==='/api/smartstore-test'){
+        assertSmartstoreTitleLength(smartstoreTitle(b.product));
+        if(hasDuplicateTitleMeaning(b.product,smartstoreTitle(b.product)))throw Error('스마트스토어 상품명에 같은 의미의 단어가 반복됩니다. 중복 표현을 제거해 주세요.');
         if(state.busy)throw Error('진행 중인 작업이 있습니다.');
         if(!state.product||b.product?.style!==state.product.style)throw Error('먼저 해당 상품을 수집해 주세요.');
         if(b.finalize||b.save)throw Error('스마트스토어 연결은 저장 없는 입력 테스트만 지원합니다.');
