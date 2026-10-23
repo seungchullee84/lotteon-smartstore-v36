@@ -295,9 +295,6 @@ async function arrangeSmartstoreTitle(useCurrent=true){
  field.value=smartstoreTitle({...current,name:$('form').elements.name.value,gender:$('form').elements.gender.value,smartstoreName:useCurrent?field.value:''});
  $('smartstoreNameStatus').textContent=[...field.value].length+'자 / 허용 27~39자(품번·공백 포함) · 상품정보 기준 정리';
 }
-$('smartstoreArrangeTitle').onclick=async()=>{
- try{await arrangeSmartstoreTitle();$('error').textContent='';}catch(e){$('error').textContent=e.message;}
-};
 $('smartstoreName').oninput=()=>{$('smartstoreNameStatus').textContent=[...$('smartstoreName').value].length+'자 / 허용 27~39자(품번·공백 포함) · 수정한 스마트스토어 상품명';};
 async function optimizeSmartstoreTitle(){
  if(requestLock||serverBusy||!product)return;
@@ -315,7 +312,11 @@ async function optimizeSmartstoreTitle(){
  }catch(e){$('naverTitleResult').textContent='네이버 조회 실패 · 기존 상품명 유지 · '+e.message;}
  finally{requestLock=false;syncButtons();}
 }
-$('smartstoreOptimizeTitle').onclick=optimizeSmartstoreTitle;
+$('smartstoreOptimizeTitle').onclick=async()=>{
+ if(requestLock||serverBusy||!product)return;
+ try{await arrangeSmartstoreTitle();await optimizeSmartstoreTitle();}
+ catch(e){$('naverTitleResult').textContent=e.message;}
+};
 const autoNaverProducts=new WeakSet();
 async function autoOptimizeSmartstoreTitle(){
  if(!product||document.body.dataset.channel!=='smartstore'||requestLock||serverBusy||autoNaverProducts.has(product))return;
