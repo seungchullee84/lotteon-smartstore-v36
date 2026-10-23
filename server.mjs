@@ -6,7 +6,7 @@ import {startGithubSync} from './github-sync.mjs';
 import {brandingLock} from './branding-lock.mjs';
 import {SmartstoreAutomation} from './smartstore-automation.mjs';
 import {smartstorePlan} from './smartstore-form.mjs';
-import {createExpandedTitleOptimizer as createNaverTitleOptimizer} from './naver-smart-title.mjs';
+import {createExpandedTitleOptimizer as createNaverTitleOptimizer,hasDuplicateTitleMeaning} from './naver-smart-title.mjs';
 import {smartstoreTitle,assertSmartstoreTitleLength} from './smartstore-title.mjs';
 import {saveLongDetailImage} from './long-detail-image.mjs';
 import http from 'node:http';
@@ -172,6 +172,7 @@ const server=http.createServer(async(req,res)=>{
       }
       if(url.pathname==='/api/smartstore-plan'||url.pathname==='/api/smartstore-test'){
         assertSmartstoreTitleLength(smartstoreTitle(b.product));
+        if(hasDuplicateTitleMeaning(b.product,smartstoreTitle(b.product)))throw Error('스마트스토어 상품명에 같은 의미의 단어가 반복됩니다. 중복 표현을 제거해 주세요.');
         if(state.busy)throw Error('진행 중인 작업이 있습니다.');
         if(!state.product||b.product?.style!==state.product.style)throw Error('먼저 해당 상품을 수집해 주세요.');
         if(b.finalize||b.save)throw Error('스마트스토어 연결은 저장 없는 입력 테스트만 지원합니다.');

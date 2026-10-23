@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {expandedTitleCandidates,composePopularTitle,createExpandedTitleOptimizer} from '../naver-smart-title.mjs';
+import {expandedTitleCandidates,composePopularTitle,createExpandedTitleOptimizer,hasDuplicateTitleMeaning} from '../naver-smart-title.mjs';
 import {assertSmartstoreTitleLength,smartstoreTitle} from '../smartstore-title.mjs';
-const product={style:'376922',name:'여성 후드 숏 푸퍼 자켓 376922',gender:'여성'};
+const product={style:'376922',name:'여성 후드 숏 푸퍼 자켓 376922',rawName:'NEW [문가영] CLOUD LIGHT 후드 숏 푸퍼 자켓',gender:'여성'};
 const credentials={clientId:'dummy-id',clientSecret:'dummy-secret'};
 test('동의어·실제 특성 조합을 확장하고 없는 롱·경량·반대 성별은 제외',()=>{
  const candidates=expandedTitleCandidates(product);
@@ -19,7 +19,7 @@ test('공통 기준으로 실제 관심도를 비교하고 32~39자·품번·롯
   return Response.json({...request,results:request.keywordGroups.map(g=>({title:g.groupName,data:[{period:request.endDate,ratio:(values[g.groupName]||0.1)/max*100}]}))});
  }});
  const before=structuredClone(product),r=await optimize(product,credentials);
- assert(calls>1);assert(r.length>=32&&r.length<=39);assert(r.title.endsWith('376922'));assert(r.title.includes('후드'));assert(r.title.includes('숏'));assert(r.title.includes('패딩 자켓'));
+ assert(calls>1);assert(r.length>=32&&r.length<=39);assert(r.title.endsWith('376922'));assert(r.title.includes('후드'));assert(r.title.includes('숏'));assert(r.title.includes('CLOUD LIGHT'));assert.equal((r.title.match(/패딩/g)||[]).length,1);assert(!r.title.includes('아우터'));assert(!hasDuplicateTitleMeaning(product,r.title));
  assert(r.selectedTerms.includes('여성패딩'));assert(!r.title.includes('롱'));assert.deepEqual(product,before);
  assert.equal(smartstoreTitle({...product,smartstoreName:r.title}),r.title,'실제 입력 시 인기어와 길이를 그대로 보존');
  const prior=calls,r2=await optimize({...product,style:'000000'},credentials);assert.equal(calls,prior);assert(r2.title.endsWith('000000'));assert(r2.fromCache);
@@ -29,7 +29,20 @@ test('32자 미달·39자 초과를 차단하고 글자수 맞춤용 상품 특�
  assert.throws(()=>assertSmartstoreTitleLength('가'.repeat(40)),/32~39/);
  assert.equal(assertSmartstoreTitleLength('가'.repeat(32)).length,32);
  assert.equal(assertSmartstoreTitleLength('가'.repeat(39)).length,39);
- assert.throws(()=>composePopularTitle(product,[]),/32~39/);
+ assert.throws(()=>composePopularTitle({...product,rawName:''},[]),/32~39/);
+});
+test('띄어쓰기와 합성어 안의 성별·의류 중복도 검출하며 동의어를 추가하지 않음',()=>{
+ for(const title of ['지오다노 여성 패딩 여성패딩 376922','지오다노 여성 후드 패딩 후드패딩 376922','지오다노 여성 패딩 아우터 376922','지오다노 여성 패딩 푸퍼 376922'])assert(hasDuplicateTitleMeaning(product,title),title);
+ const r=composePopularTitle(product,[{keyword:'여성패딩',score:1},{keyword:'아우터',score:1000},{keyword:'후드패딩',score:2000}]);
+ assert(!hasDuplicateTitleMeaning(product,r.title));assert(!r.title.includes('아우터'));assert(!r.title.includes('문가영'));assert(!r.title.includes('NEW'));
+});
+test('점퍼와 패딩점퍼는 금지어가 아니며 관심도가 높으면 하나의 의류 표현으로 선택',()=>{
+ assert(expandedTitleCandidates(product).includes('점퍼'));
+ for(const keyword of ['점퍼','패딩점퍼']){
+  const r=composePopularTitle(product,[{keyword,score:100},{keyword:'패딩',score:1}]);
+  assert(r.title.split(' ').includes(keyword));assert(!hasDuplicateTitleMeaning(product,r.title));assert(r.length>=32&&r.length<=39);
+ }
+ assert(!expandedTitleCandidates({...product,name:'여성 패딩 조끼',rawName:'여성 패딩 베스트'}).includes('점퍼'));
 });
 test('API 실패와 검색 자료 없음은 인기어를 꾸며내지 않고 오류 반환',async()=>{
  await assert.rejects(createExpandedTitleOptimizer({fetchImpl:async()=>new Response('',{status:401})})(product,credentials),/인증 실패/);

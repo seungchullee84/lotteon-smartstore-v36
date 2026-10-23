@@ -4,65 +4,91 @@ import {keywordCandidates,createKeywordOptimizer} from './naver-keywords.mjs';
 
 const synonyms={니트:['니트','스웨터','풀오버'],가디건:['가디건','카디건'],자켓:['자켓','재킷'],바지:['바지','팬츠'],티셔츠:['티셔츠','티'],패딩:['패딩','푸퍼']};
 const featureWords=['브이넥','터틀넥','라운드','아가일','기모','경량','스트라이프','와이드','밴딩','체크','후드','집업','긴팔','반팔','숏','롱','데님','트레이닝','퀼팅'];
+function categoryAliases(product,kind){
+ if(kind==='패딩'&&!/베스트|조끼/.test(String(product.name||'')+' '+String(product.rawName||'')))return ['패딩','푸퍼','패딩점퍼','패딩자켓','점퍼'];
+ return synonyms[kind]||[kind];
+}
+// Compound search phrases are decomposed before comparing meanings. A gender
+// or garment repeated inside 여성패딩/후드패딩 still counts as repetition.
+function semanticAtoms(text,kind){
+ const groups=[['brand',['지오다노','GIORDANO']],['female',['여성','여자']],['male',['남성','남자']],['short',['쇼트','숏']],['hood',['후디','후드']],['line-cloud',['CLOUD','클라우드']],['line-light',['LIGHT','라이트']]];
+ groups.push(['garment',kind==='패딩'?['패딩자켓','패딩점퍼','패딩','푸퍼','재킷','자켓','점퍼','아우터']:kind==='자켓'?['재킷','자켓','아우터']:kind==='코트'?['코트','아우터']:[...(synonyms[kind]||[kind]),'의류']]);
+ const terms=groups.flatMap(([atom,names])=>names.map(name=>({name:name.toLowerCase(),atom}))).sort((a,b)=>b.name.length-a.name.length);
+ const result=[];
+ for(const token of text.toLowerCase().split(/\s+/).filter(Boolean)){
+  let rest=token;
+  while(rest){
+   const term=terms.find(t=>rest.startsWith(t.name));
+   if(term){result.push(term.atom);rest=rest.slice(term.name.length);continue;}
+   let end=1;while(end<rest.length&&!terms.some(t=>rest.slice(end).startsWith(t.name)))end++;
+   result.push('word:'+rest.slice(0,end));rest=rest.slice(end);
+  }
+ }
+ return result;
+}
+export function hasDuplicateTitleMeaning(product,title){
+ const kind=titleCandidates({...product,smartstoreName:''}).kind;
+ const atoms=semanticAtoms(title,kind);
+ return new Set(atoms).size!==atoms.length;
+}
 export function expandedTitleCandidates(product){
  const normalized=smartstoreTitle({...product,smartstoreName:''});
  const p={...product,name:normalized,smartstoreName:''},basic=titleCandidates(p),words=keywordCandidates(p);
- const aliases=synonyms[basic.kind]||[basic.kind];
+ const aliases=categoryAliases(product,basic.kind);
  const sexes=product.gender==='남성'?['남성','남자']:product.gender==='여성'?['여성','여자']:[];
  for(const alias of aliases){
   words.push(alias,...sexes.map(sex=>sex+alias));
   for(const feature of featureWords)if(normalized.includes(feature)&&!alias.includes(feature))words.push(feature+alias);
  }
- return [...new Set(words)].slice(0,21);
+ return [...new Set([words[0],...aliases,...words])].slice(0,21);
 }
 
 export function composePopularTitle(product,ranking){
  let base=smartstoreTitle({...product,smartstoreName:''});
  const kind=titleCandidates({...product,smartstoreName:''}).kind;
  const scores=new Map(ranking.map(e=>[e.keyword,e.score]));
- const aliases=synonyms[kind]||[kind];
+ const aliases=categoryAliases(product,kind);
  const currentSex=product.gender,otherSex=({남성:'남자',여성:'여자'})[currentSex];
  let sex=currentSex;
  if(otherSex&&(scores.get(otherSex+kind)||0)>(scores.get(currentSex+kind)||0))sex=otherSex;
  if(sex)base=base.replace(/^(지오다노) (남성|남자|여성|여자)(?= )/,'$1 '+sex);
  const primary=[...aliases].sort((a,b)=>(scores.get(b)||0)-(scores.get(a)||0))[0];
- const words=base.split(' '),style=words.pop(),prefix=words.splice(0,sex?2:1);
+ let words=base.split(' ');const style=words.pop(),prefix=words.splice(0,sex?2:1);
  // Replace an exact category synonym without changing fabric, fit or model facts.
  for(let i=0;i<words.length;i++)if(aliases.includes(words[i]))words[i]=primary;
+ const seen=new Set(semanticAtoms(prefix.join(' '),kind));
+ const unique=word=>{
+  const atoms=semanticAtoms(word,kind);
+  if(atoms.some(atom=>seen.has(atom))||new Set(atoms).size!==atoms.length)return false;
+  atoms.forEach(atom=>seen.add(atom));return true;
+ };
+ words=words.filter(unique);
+ // Only source-backed product-line words can supplement a short name. Never
+ // append a second garment synonym, gender phrase, or generic category.
+ const raw=String(product.rawName||'').replace(/\[[^\]]*\]|【[^】]*】/g,' ').replace(/문가영|변우석|박현지/g,'');
+ const promotions=new Set(['NEW','BEST','SALE','HOT','무료배송','당일배송','최저가','인기상품','지오다노','GIORDANO',style]);
+ const sourceWords=raw.split(/\s+/).filter(word=>/^[A-Za-z가-힣][A-Za-z가-힣0-9%-]*$/.test(word)&&!promotions.has(word.toUpperCase())&&!promotions.has(word));
+ const extras=sourceWords.filter(unique);
  const scoreWord=word=>Math.max(0,...ranking.filter(e=>e.keyword.includes(word)).map(e=>e.score));
  const featureSlots=words.map((w,i)=>i).filter(i=>featureWords.includes(words[i]));
  const ordered=featureSlots.map(i=>words[i]).sort((a,b)=>scoreWord(b)-scoreWord(a));
  featureSlots.forEach((position,i)=>{words[position]=ordered[i];});
- const render=extra=>smartstoreTitle({...product,smartstoreName:[...prefix,...words,...extra,style].join(' ')});
+ const render=()=>smartstoreTitle({...product,smartstoreName:[...prefix,...extras,...words,style].join(' ')});
  // Long source names may omit low-interest descriptive words, never cut tokens
  // or numeric/material specifications to fit the limit.
- while([...render([])].length>39){
+ while([...render()].length>39){
+  if(extras.length){extras.pop();continue;}
   const removable=words.map((word,i)=>({word,i})).filter(({word})=>!aliases.includes(word)&&!/\d|%|울|면|캐시미어|나일론|폴리에스터|오리털|거위털|구스|덕/.test(word)).sort((a,b)=>scoreWord(a.word)-scoreWord(b.word));
   if(!removable.length)throw Error('상품의 필수 정보를 보존하며 39자 이내로 작성할 수 없습니다. 스마트스토어 상품명을 직접 검토해 주세요.');
   words.splice(removable[0].i,1);
  }
- const compact=render([]).replace(/\s/g,'');
- const otherGender=sex===currentSex?otherSex:currentSex;
- const candidates=ranking.filter(e=>e.score>0&&!compact.includes(e.keyword)&&!(otherGender&&e.keyword.startsWith(otherGender))&&render([e.keyword])!==render([])).slice(0,18);
- let best=null;
- function visit(start,selected,utility){
-  const title=render(selected.map(e=>e.keyword)),length=[...title].length;
-  if(length>=32&&length<=39){
-   const value=utility-Math.abs(length-36)*0.001;
-   if(!best||value>best.value)best={title,length,value,selectedTerms:selected.map(e=>e.keyword)};
-  }
-  if(length>=39||selected.length>=2)return;
-  for(let i=start;i<candidates.length;i++){
-   const entry=candidates[i];
-   if(selected.some(e=>e.keyword.includes(entry.keyword)||entry.keyword.includes(e.keyword)))continue;
-   if([...render([...selected,entry].map(e=>e.keyword))].length>39)continue;
-   visit(i+1,[...selected,entry],utility+Math.log1p(entry.score));
-  }
- }
- visit(0,[],0);
- if(!best)throw Error('상품에 맞는 검색 자료만으로 품번·공백 포함 32~39자를 구성하지 못했습니다. 상품 특성을 확인하거나 상품명을 직접 작성해 주세요.');
- assertSmartstoreTitleLength(best.title);
- return {title:best.title,length:best.length,selectedTerms:best.selectedTerms};
+ const title=render(),length=[...title].length;
+ if(length<32)throw Error('중복 없는 상품명은 '+length+'자입니다: '+title+' — 공식 상품 정보만으로 32~39자를 채울 수 없어 검토가 필요합니다.');
+ assertSmartstoreTitleLength(title);
+ if(hasDuplicateTitleMeaning(product,title))throw Error('상품명에 의미가 중복된 표현이 있습니다. 직접 검토해 주세요.');
+ const titleAtoms=new Set(semanticAtoms(title,kind));
+ const selectedTerms=ranking.filter(entry=>entry.score>0&&semanticAtoms(entry.keyword,kind).every(atom=>titleAtoms.has(atom))).map(entry=>entry.keyword);
+ return {title,length,selectedTerms,sourceTerms:extras};
 }
 
 export function createExpandedTitleOptimizer(options={}){
