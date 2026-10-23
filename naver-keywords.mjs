@@ -40,20 +40,30 @@ export async function verifyNaver(credentials,fetchImpl=fetch){
  return {verified:true,verifiedAt:new Date().toISOString()};
 }
 export function createKeywordOptimizer({fetchImpl=fetch,clock=()=>new Date(),candidateFactory=keywordCandidates}={}){
- const cache=new Map();
+ const cache=new Map(),inFlight=new Map();
  return async(product,credentials)=>{
   const candidates=candidateFactory(product),period=trendPeriod(clock());
   if(!candidates.length)throw Error('상품 종류를 확인한 뒤 키워드를 조회해 주세요.');
   const cacheKey=JSON.stringify([credentials?.clientId,credentials?.clientSecret,period,candidates]);
   const saved=cache.get(cacheKey);if(saved&&clock().getTime()-saved.time<3600000)return {...saved.result,fromCache:true};
+  if(inFlight.has(cacheKey))return {...await inFlight.get(cacheKey),fromCache:true};
+  const pending=(async()=>{
   // Every batch shares one anchor and the same period. Normalize against its
   // summed index so separately normalized API responses remain comparable.
   const anchor=candidates[0],scores=new Map();
-  for(let i=1;i<candidates.length||i===1;i+=4){
-   const keywords=[anchor,...candidates.slice(i,i+4)];
-   const request={...period,keywordGroups:keywords.map(keyword=>({groupName:keyword,keywords:[keyword]}))};
-   const payload=await queryNaver(credentials,request,fetchImpl);
-   const entries=interpretTrend(payload,request,keywords.map(keyword=>({keyword})));
+  const batches=[];
+  for(let i=1;i<candidates.length||i===1;i+=4)batches.push([anchor,...candidates.slice(i,i+4)]);
+  const responses=new Array(batches.length);let next=0;
+  const workers=await Promise.allSettled(Array.from({length:Math.min(2,batches.length)},async()=>{
+   while(next<batches.length){
+    const index=next++,keywords=batches[index];
+    const request={...period,keywordGroups:keywords.map(keyword=>({groupName:keyword,keywords:[keyword]}))};
+    const payload=await queryNaver(credentials,request,fetchImpl);
+    responses[index]=interpretTrend(payload,request,keywords.map(keyword=>({keyword})));
+   }
+  }));
+  const failed=workers.find(result=>result.status==='rejected');if(failed)throw failed.reason;
+  for(const entries of responses){
    const anchorTotal=entries[0].points.reduce((n,p)=>n+p.ratio,0);
    if(!anchorTotal)throw Error('비교 기준 키워드의 검색 자료가 없어 인기도를 비교할 수 없습니다. 기존 키워드를 유지합니다.');
    for(const entry of entries)scores.set(entry.keyword,entry.points.reduce((n,p)=>n+p.ratio,0)/anchorTotal);
@@ -63,5 +73,8 @@ export function createKeywordOptimizer({fetchImpl=fetch,clock=()=>new Date(),can
   result.length=result.keywords.length;
   if(cache.size>=100)cache.delete(cache.keys().next().value);
   cache.set(cacheKey,{time:clock().getTime(),result});return result;
+  })();
+  inFlight.set(cacheKey,pending);
+  try{return await pending;}finally{inFlight.delete(cacheKey);}
  };
 }

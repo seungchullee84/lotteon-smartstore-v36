@@ -25,3 +25,13 @@ test('인증 오류와 기준 검색 자료가 없는 경우 인기 순위를 �
  const optimize=createKeywordOptimizer({fetchImpl:async(_url,config)=>{const req=JSON.parse(config.body);return Response.json({...req,results:req.keywordGroups.map(g=>({title:g.groupName,data:[]}))});}});
  await assert.rejects(optimize(product,credentials),/검색 자료가 없어/);
 });
+test('비교 요청은 두 개씩 병렬 처리하고 같은 동시 조회는 한 번만 실행',async()=>{
+ let active=0,maximum=0,calls=0;
+ const p={name:'여성 겨울 경량 후드 숏 패딩',gender:'여성'};
+ const optimize=createKeywordOptimizer({fetchImpl:async(_url,config)=>{
+  calls++;maximum=Math.max(maximum,++active);await new Promise(resolve=>setTimeout(resolve,5));active--;
+  const req=JSON.parse(config.body);return Response.json({...req,results:req.keywordGroups.map(g=>({title:g.groupName,data:[{period:req.endDate,ratio:10}]}))});
+ }});
+ const [first,second]=await Promise.all([optimize(p,credentials),optimize(p,credentials)]);
+ assert.equal(maximum,2);assert.equal(calls,Math.ceil((keywordCandidates(p).length-1)/4));assert.deepEqual(first.ranking,second.ranking);assert(second.fromCache);
+});
