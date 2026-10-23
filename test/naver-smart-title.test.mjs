@@ -4,6 +4,17 @@ import {expandedTitleCandidates,composePopularTitle,createExpandedTitleOptimizer
 import {assertSmartstoreTitleLength,smartstoreTitle} from '../smartstore-title.mjs';
 const product={style:'376922',name:'여성 후드 숏 푸퍼 자켓 376922',rawName:'NEW [문가영] CLOUD LIGHT 후드 숏 푸퍼 자켓',gender:'여성'};
 const credentials={clientId:'dummy-id',clientSecret:'dummy-secret'};
+test('미검증 수식어로 채우지 않고 의류 문맥 검색지수와 검증 소재만 반영',()=>{
+ const p={style:'026952',name:'남성 퍼펙트 라운드 긴팔티 026952',rawName:'NEW 퍼펙트 크루넥 긴팔티',gender:'남성',material:'면 100%',noticeVerified:true};
+ const before=structuredClone(p);
+ const ranking=[{keyword:'티셔츠',score:10},{keyword:'크루넥',score:20},{keyword:'라운드티셔츠',score:3},{keyword:'크루넥티셔츠',score:1},{keyword:'면티셔츠',score:2}];
+ const r=composePopularTitle(p,ranking);
+ assert.match(r.title,/라운드넥/);assert.match(r.title,/긴팔 티셔츠/);assert.match(r.title,/면100%/);
+ assert.doesNotMatch(r.title,/퍼펙트|크루넥|NEW/);assert.deepEqual(r.sourceTerms,[]);assert.deepEqual(p,before);
+ assert.throws(()=>composePopularTitle({...p,noticeVerified:false},ranking),/27~39/);
+ assert.throws(()=>composePopularTitle({...p,rawName:'퍼펙트 CLOUD LIGHT',name:'남성 티셔츠 026952'},[]),/27~39/);
+ const candidates=expandedTitleCandidates(p);assert(candidates.includes('크루넥티셔츠'));assert(candidates.includes('라운드티셔츠'));assert(!candidates.some(k=>k.includes('퍼펙트')));
+});
 test('동의어·실제 특성 조합을 확장하고 없는 롱·경량·반대 성별은 제외',()=>{
  const candidates=expandedTitleCandidates(product);
  assert(candidates.length>5);assert(candidates.includes('숏패딩'));assert(candidates.includes('푸퍼'));assert(candidates.includes('여성후드패딩'));
