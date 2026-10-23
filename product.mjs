@@ -106,7 +106,7 @@ export function buildKeywords(p) {
   const name=easyProductName(String(p.name||'').trim()||p.rawName||'');
   const sex=['남성','여성'].includes(p.gender)?p.gender:'';
   const words=['지오다노'];
-  const add=s=>{s=s.replace(/\s+/g,'');if(s&&!words.includes(s)&&[...words,s].join(',').length<=35)words.push(s);};
+  const add=s=>{s=s.replace(/\s+/g,'');if(s&&!words.includes(s)&&[...words,s].join(',').length<=40)words.push(s);};
   // Product types precede fabrics/details: e.g. 니트 배색 패딩 and 스웨트 바지.
   // Rules use only supplied text, never search-volume or sales-effect assumptions.
   const rules=[
