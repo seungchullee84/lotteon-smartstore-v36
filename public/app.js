@@ -282,7 +282,7 @@ $('smartstoreTest').onclick=async()=>{
  const f=new FormData($('form'));const p={...product};
  for(const k of ['name','gender','material','country','washing','manufactured'])p[k]=String(f.get(k)||'').trim();
  p.smartstoreName=$('smartstoreName').value.trim();
- if([...p.smartstoreName].length<27||[...p.smartstoreName].length>39){$('error').textContent='스마트스토어 상품명은 품번·공백 포함 27~39자로 작성해 주세요.';return;}
+ if(!p.smartstoreName||[...p.smartstoreName].length>39){$('error').textContent='스마트스토어 상품명은 품번·공백 포함 최대 39자로 작성해 주세요.';return;}
  p.consumerPrice=Number(f.get('consumerPrice'));p.colors=String(f.get('colors')||'').split(',').map(s=>s.trim()).filter(Boolean);p.sizes=String(f.get('sizes')||'').split(',').map(s=>s.trim()).filter(Boolean);
  requestLock=true;syncButtons();
  try{await post('smartstore-test',{product:p,salePrice:Number($('smartstorePrice').value),includeImages:$('smartstoreImages').checked});announce('스마트스토어 입력 테스트 시작 · 저장하지 않습니다.','success');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;syncButtons();}
@@ -293,9 +293,9 @@ async function arrangeSmartstoreTitle(useCurrent=true){
  const {smartstoreTitle}=await import('/smartstore-title.mjs');
  if(product!==current)return;
  field.value=smartstoreTitle({...current,name:$('form').elements.name.value,gender:$('form').elements.gender.value,smartstoreName:useCurrent?field.value:''});
- $('smartstoreNameStatus').textContent=[...field.value].length+'자 / 허용 27~39자(품번·공백 포함) · 상품정보 기준 정리';
+ $('smartstoreNameStatus').textContent=[...field.value].length+'자 / 최대 39자 · 검색 관심도 우선 · 상품정보 기준 정리';
 }
-$('smartstoreName').oninput=()=>{$('smartstoreNameStatus').textContent=[...$('smartstoreName').value].length+'자 / 허용 27~39자(품번·공백 포함) · 수정한 스마트스토어 상품명';};
+$('smartstoreName').oninput=()=>{$('smartstoreNameStatus').textContent=[...$('smartstoreName').value].length+'자 / 최대 39자 · 검색 관심도 우선 · 수정한 스마트스토어 상품명';};
 async function optimizeSmartstoreTitle(){
  if(requestLock||serverBusy||!product)return;
  const current=product,field=$('smartstoreName');
@@ -305,7 +305,7 @@ async function optimizeSmartstoreTitle(){
    const result=await post('smartstore-optimize-title',{product:snapshot});
    const stale=product!==current||field.value!==snapshot.smartstoreName||$('form').elements.name.value!==snapshot.name||$('form').elements.gender.value!==snapshot.gender;
    if(stale){$('naverTitleResult').textContent='조회 중 상품명이 바뀌어 제안값을 적용하지 않았습니다. 다시 조회해 주세요.';return;}
-   if(result.hasData){field.value=result.title;$('smartstoreNameStatus').textContent=[...field.value].length+'자 / 허용 27~39자(품번·공백 포함) · 네이버 인기어 반영';}
+   if(result.hasData){field.value=result.title;$('smartstoreNameStatus').textContent=[...field.value].length+'자 / 최대 39자 · 검색 관심도 우선 · 네이버 인기어 반영';}
    $('naverTitleResult').textContent=result.source+' · '+result.period.startDate+' ~ '+result.period.endDate+(result.fromCache?' · 최근 조회 재사용':'')+' · '+(result.expanded?'인기 검색어 '+result.candidates.length+'개 비교 · '+result.length+'자':result.hasData?'성별 표현 비교 '+result.comparedDays+'일 / 특성 순서 비교 '+result.featureComparedDays+'일':'조회 자료가 없어 기존 상품명 유지')+' · '+result.note;
    for(const entry of result.candidates){const li=document.createElement('li');li.textContent=entry.keyword+': '+(result.expanded?'비교 기준 대비 검색 관심도 '+entry.score.toFixed(3):entry.mean===null?'자료 없음':'반환된 일별 상대지수 평균 '+entry.mean.toFixed(2)+' · '+entry.pointCount+'일');$('naverTitleCandidates').append(li);}
    $('error').textContent='';

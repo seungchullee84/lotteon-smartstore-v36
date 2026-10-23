@@ -1,7 +1,7 @@
 // Shared by SmartStore preview and form input. Does not modify the Lotte product.
 export function assertSmartstoreTitleLength(title){
  const length=[...title].length;
- if(length<27||length>39)throw Error('스마트스토어 상품명은 품번·공백 포함 27~39자여야 합니다. 현재 '+length+'자입니다.');
+ if(!title.trim()||length>39)throw Error('스마트스토어 상품명은 품번·공백 포함 최대 39자입니다. 현재 '+length+'자입니다.');
  return title;
 }
 export function smartstoreTitle(product){

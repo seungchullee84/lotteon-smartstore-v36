@@ -69,7 +69,6 @@ export function expandedTitleCandidates(product){
  const aliases=categoryAliases(product,basic.kind);
  const necks=hasRoundNeck(product)?[...neckAliases.flatMap(neck=>[neck,neck+basic.kind]),'라운드'+basic.kind]:[];
  const sexes=product.gender==='남성'?['남성','남자']:product.gender==='여성'?['여성','여자']:[];
- const genderQueries=sexes.map(sex=>sex+'용'+basic.kind);
  const features=productFeatures(product);
  const queries=features.flatMap(f=>f.variants.flatMap(v=>{
   const term=v.replace(/100%$/,'');
@@ -80,7 +79,7 @@ export function expandedTitleCandidates(product){
   words.push(alias,...sexes.map(sex=>sex+alias));
   for(const feature of featureWords)if(normalized.includes(feature)&&!alias.includes(feature))words.push(feature+alias);
  }
- return [...new Set([words[0],...aliases,...necks,...genderQueries,...queries,...words,...combined])].slice(0,49);
+ return [...new Set([words[0],...aliases,...necks,...queries,...words,...combined])].slice(0,49);
 }
 
 export function composePopularTitle(product,ranking){
@@ -88,14 +87,11 @@ export function composePopularTitle(product,ranking){
  const kind=titleCandidates({...product,smartstoreName:''}).kind;
  const scores=new Map(ranking.map(e=>[e.keyword,e.score]));
  const aliases=categoryAliases(product,kind);
- const currentSex=product.gender,otherSex=({남성:'남자',여성:'여자'})[currentSex];
- let sex=currentSex;
- if(otherSex&&(scores.get(otherSex+kind)||0)>(scores.get(currentSex+kind)||0))sex=otherSex;
+ const sex=product.gender;
  if(sex)base=base.replace(/^(지오다노) (남성|남자|여성|여자)(?= )/,'$1 '+sex);
  const mainAliases=kind==='패딩'?['패딩','푸퍼']:aliases;
  const primary=[...mainAliases].sort((a,b)=>(scores.get(b)||0)-(scores.get(a)||0))[0];
  let words=base.split(' ');const style=words.pop(),prefix=words.splice(0,sex?2:1);
- const positive=keyword=>(scores.get(keyword)||0)>0;
  // Compare garment-specific phrases; bare neckline searches have other intents.
  const neckScore=word=>Math.max(scores.get(word+kind)||0,word==='라운드넥'?(scores.get('라운드'+kind)||0):0);
  const neck=hasRoundNeck(product)?neckAliases.filter(word=>neckScore(word)>0).sort((a,b)=>neckScore(b)-neckScore(a))[0]:undefined;
@@ -124,32 +120,12 @@ export function composePopularTitle(product,ranking){
   atoms.forEach(atom=>seen.add(atom));return true;
  };
  words=words.filter(unique);
- const initialLength=[...smartstoreTitle({...product,smartstoreName:[...prefix,...words,style].join(' ')})].length;
- if(initialLength<27&&words.includes('숏'))words=words.map(word=>word==='숏'?'숏기장':word);
  const extras=[]; // Never pad a short title with unverified product-line words.
  const scoreWord=word=>Math.max(0,...ranking.filter(e=>e.keyword.includes(word.replace(/기장$/,''))).map(e=>e.score));
  const featureSlots=words.map((w,i)=>i).filter(i=>featureWords.includes(words[i].replace(/기장$/,'')));
  const ordered=featureSlots.map(i=>words[i]).sort((a,b)=>scoreWord(b)-scoreWord(a));
  featureSlots.forEach((position,i)=>{words[position]=ordered[i];});
  const render=()=>smartstoreTitle({...product,smartstoreName:[...prefix,...extras,...words,style].join(' ')});
- // A longer synonym is allowed only when it too has positive measured interest.
- // Keep one expression per attribute; never append a repeated category phrase.
- if([...render()].length<27){
-  for(const choice of choices){
-   const index=words.findIndex(w=>choice.variants.includes(w));if(index<0)continue;
-   for(const alternative of choice.ranked){
-    if(alternative.length<=words[index].length)continue;
-    const proposed=[...render()].length+alternative.length-words[index].length;
-    if(proposed<=39)words[index]=alternative;
-    if([...render()].length>=27)break;
-   }
-   if([...render()].length>=27)break;
-  }
- }
- if([...render()].length<27&&sex){
-  const labels=[currentSex+'용',otherSex+'용'].filter(label=>positive(label+kind)).sort((a,b)=>(scores.get(b+kind)||0)-(scores.get(a+kind)||0));
-  if(labels.length)prefix[1]=labels[0];
- }
  // Long source names may omit low-interest descriptive words, never cut tokens
  // or numeric/material specifications to fit the limit.
  while([...render()].length>39){
@@ -159,7 +135,6 @@ export function composePopularTitle(product,ranking){
   words.splice(removable[0].i,1);
  }
  const title=render(),length=[...title].length;
- if(length<27)throw Error('중복 없는 상품명은 '+length+'자입니다: '+title+' — 공식 상품 정보만으로 27~39자를 채울 수 없어 검토가 필요합니다.');
  assertSmartstoreTitleLength(title);
  if(hasDuplicateTitleMeaning(product,title))throw Error('상품명에 의미가 중복된 표현이 있습니다. 직접 검토해 주세요.');
  const titleAtoms=new Set(semanticAtoms(title,kind));
@@ -173,6 +148,6 @@ export function createExpandedTitleOptimizer(options={}){
   const normalized={...product,name:smartstoreTitle({...product,smartstoreName:''}),smartstoreName:''};
   const result=await optimize(normalized,credentials);
   const proposal=composePopularTitle(product,result.ranking);
-  return {...proposal,originalTitle:smartstoreTitle(product),hasData:true,period:result.period,fromCache:result.fromCache,source:'네이버 데이터랩 통합검색어 트렌드 API',metric:'검색 상대지수',expanded:true,candidates:result.ranking,note:'상품 종류·동의어·성별·실제 특성의 검색 관심도를 공통 기준으로 비교했습니다. 품번·공백 포함 27~39자입니다. 월간 절대 검색량이나 노출 순위를 뜻하지 않습니다.'};
+  return {...proposal,originalTitle:smartstoreTitle(product),hasData:true,period:result.period,fromCache:result.fromCache,source:'네이버 데이터랩 통합검색어 트렌드 API',metric:'검색 상대지수',expanded:true,candidates:result.ranking,note:'상품 종류·동의어·성별·실제 특성의 검색 관심도를 공통 기준으로 비교했습니다. 검색 관심도를 글자 수보다 우선하며, 27~39자는 권장 길이입니다. 품번·공백 포함 최대 39자이고 27자 미만도 허용합니다. 월간 절대 검색량이나 노출 순위를 뜻하지 않습니다.'};
  };
 }
