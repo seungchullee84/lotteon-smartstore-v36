@@ -59,7 +59,7 @@ function validateProduct(p){
   if(!p.colors?.length||!p.sizes?.length)throw Error('색상과 사이즈가 필요합니다.');
   if(p.colors.some(v=>!/^\d{2}\S+$/.test(v)))throw Error('색상은 번호+색상명이며 공백이 없어야 합니다.');
   for(const key of ['commonMiddle','commonSmall','channelMiddle','channelSmall'])if(!p.category?.[key]?.trim())throw Error('카테고리를 입력해 주세요: '+key);
-  if(p.keywords.length>35)throw Error('검색키워드는 쉼표·공백 포함 35자 이내로 입력해 주세요.');
+  if(p.keywords.length>40)throw Error('검색키워드는 쉼표·공백 포함 40자 이내로 입력해 주세요.');
   if(!p.keywords.startsWith('지오다노'))throw Error('검색키워드는 지오다노로 시작해야 합니다.');
 }
 const server=http.createServer(async(req,res)=>{
