@@ -12,5 +12,5 @@ for(const p of examples){
   const keywords=buildKeywords({...p,name});
   console.log('\n원본명: '+p.rawName+' / 성별: '+p.gender+' / 품번: '+p.style);
   console.log('상품명: '+name);
-  console.log('검색키워드: '+keywords+' ('+keywords.length+'/35자)');
+  console.log('검색키워드: '+keywords+' ('+keywords.length+'/40자)');
 }
