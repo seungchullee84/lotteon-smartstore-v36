@@ -1,11 +1,13 @@
 import {requireChannel} from './channel-routing.mjs';
+import {verifyNaver,createKeywordOptimizer} from './naver-keywords.mjs';
 import {generateBackground} from './background-image.mjs';
 import {createReleaseTracker} from './app-release.mjs';
 import {startGithubSync} from './github-sync.mjs';
 import {brandingLock} from './branding-lock.mjs';
 import {SmartstoreAutomation} from './smartstore-automation.mjs';
 import {smartstorePlan} from './smartstore-form.mjs';
-import {createNaverTitleOptimizer} from './naver-title.mjs';
+import {createExpandedTitleOptimizer as createNaverTitleOptimizer} from './naver-smart-title.mjs';
+import {smartstoreTitle,assertSmartstoreTitleLength} from './smartstore-title.mjs';
 import {saveLongDetailImage} from './long-detail-image.mjs';
 import http from 'node:http';
 import {randomBytes} from 'node:crypto';
@@ -28,6 +30,9 @@ if(!naverCredentials.clientId||!naverCredentials.clientSecret){
   try{const saved=JSON.parse(await readFile(path.join(dataRoot,'naver-api-settings.json'),'utf8'));naverCredentials={clientId:saved.clientId||'',clientSecret:saved.clientSecret||''};}catch(e){if(e.code!=='ENOENT')throw e;}
 }
 let optimizeNaverTitle=createNaverTitleOptimizer();
+let optimizeKeywords=createKeywordOptimizer();
+let naverVerification={verified:false};
+let naverLastAttempt=null;
 const desktopSession=process.env.REGISTER_DESKTOP==='1'?JSON.parse(await readFile(path.join(dataRoot,'desktop-session.json'),'utf8')):null;
 const token=desktopSession?.token||randomBytes(24).toString('hex');
 let backgroundApiKey=process.env.OPENAI_API_KEY?.trim()||'';
@@ -59,7 +64,7 @@ function validateProduct(p){
   if(!p.colors?.length||!p.sizes?.length)throw Error('색상과 사이즈가 필요합니다.');
   if(p.colors.some(v=>!/^\d{2}\S+$/.test(v)))throw Error('색상은 번호+색상명이며 공백이 없어야 합니다.');
   for(const key of ['commonMiddle','commonSmall','channelMiddle','channelSmall'])if(!p.category?.[key]?.trim())throw Error('카테고리를 입력해 주세요: '+key);
-  if(p.keywords.length>35)throw Error('검색키워드는 쉼표·공백 포함 35자 이내로 입력해 주세요.');
+  if(p.keywords.length>36)throw Error('검색키워드는 쉼표·공백 포함 36자 이내로 입력해 주세요.');
   if(!p.keywords.startsWith('지오다노'))throw Error('검색키워드는 지오다노로 시작해야 합니다.');
 }
 const server=http.createServer(async(req,res)=>{
@@ -72,7 +77,7 @@ const server=http.createServer(async(req,res)=>{
     if(url.pathname==='/'&&url.searchParams.get('key')===token){res.writeHead(302,{'Set-Cookie':`session=${token}; HttpOnly; SameSite=Strict; Path=/`,'Location':'/'});return res.end();}
     if(!cookie)return json(res,403,{error:'시작 화면의 전용 링크로 접속해 주세요.'});
     if(req.method==='GET'&&url.pathname==='/api/branding')return json(res,200,await protectedBranding.get());
-    if(req.method==='GET'&&url.pathname==='/api/naver-status')return json(res,200,{configured:!!(naverCredentials.clientId&&naverCredentials.clientSecret)});
+    if(req.method==='GET'&&url.pathname==='/api/naver-status')return json(res,200,{configured:!!(naverCredentials.clientId&&naverCredentials.clientSecret),...naverVerification,lastAttempt:naverLastAttempt});
     if(req.method==='GET'&&url.pathname==='/api/state'){
       const versions={};
       for(const key of ['main','extra1','extra2'])versions[key]=state.folder?(await backgroundImageStatus(state.folder,key)).version||null:null;
@@ -98,12 +103,26 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='POST'){
       const b=await body(req);
       requireChannel(url.pathname.slice(5),b.channel);
+      if(url.pathname==='/api/naver-verify'){
+        naverVerification=await verifyNaver(naverCredentials);return json(res,200,naverVerification);
+      }
+      if(url.pathname==='/api/naver-keywords'){
+        if(state.busy||!state.product||b.style!==state.product.style)throw Error('수집 완료 후 현재 상품으로 다시 조회해 주세요.');
+        const current=state.product;
+        const result=await optimizeKeywords(current,naverCredentials);
+        if(state.busy||state.product!==current)throw Error('상품이 변경되어 키워드를 적용하지 않았습니다.');
+        return json(res,200,result);
+      }
       if(url.pathname==='/api/naver-settings'){
         if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 연결해 주세요.');
         if(typeof b.clientId!=='string'||typeof b.clientSecret!=='string'||!/^\S{5,200}$/.test(b.clientId.trim())||!/^\S{5,200}$/.test(b.clientSecret.trim()))throw Error('네이버 Client ID와 Client Secret을 확인해 주세요.');
         const settings={clientId:b.clientId.trim(),clientSecret:b.clientSecret.trim()};
+        naverLastAttempt={attemptedAt:new Date().toISOString(),provider:'NAVER API HUB',clientIdLength:settings.clientId.length,clientSecretLength:settings.clientSecret.length,verified:false};
+        let verified;
+        try{verified=await verifyNaver(settings);naverLastAttempt.verified=true;}
+        catch(e){naverLastAttempt.httpStatus=e.httpStatus;naverLastAttempt.errorCode=e.apiCode;naverLastAttempt.error=e.message;throw e;}
         await writeFile(path.join(dataRoot,'naver-api-settings.json'),JSON.stringify(settings),{mode:0o600});
-        naverCredentials=settings;optimizeNaverTitle=createNaverTitleOptimizer();return json(res,200,{configured:true});
+        naverCredentials=settings;naverVerification=verified;optimizeNaverTitle=createNaverTitleOptimizer();optimizeKeywords=createKeywordOptimizer();return json(res,200,{configured:true,...verified});
       }
       if(url.pathname==='/api/smartstore-optimize-title'){
         if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 조회해 주세요.');
@@ -152,6 +171,7 @@ const server=http.createServer(async(req,res)=>{
         await smartBot.open();return json(res,200,{ok:true});
       }
       if(url.pathname==='/api/smartstore-plan'||url.pathname==='/api/smartstore-test'){
+        assertSmartstoreTitleLength(smartstoreTitle(b.product));
         if(state.busy)throw Error('진행 중인 작업이 있습니다.');
         if(!state.product||b.product?.style!==state.product.style)throw Error('먼저 해당 상품을 수집해 주세요.');
         if(b.finalize||b.save)throw Error('스마트스토어 연결은 저장 없는 입력 테스트만 지원합니다.');

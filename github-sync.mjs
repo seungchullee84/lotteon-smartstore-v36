@@ -8,6 +8,7 @@ const remote='https://github.com/seungchullee84/lotteon-smartstore-v36.git';
 export function publishable(file){
  if(file.includes('..')||file.includes('\\'))return false;
  if(['.gitignore','.gitattributes','.app-release.json','package.json','pnpm-lock.yaml'].includes(file))return true;
+ if(['data/category-catalog-common.json','data/category-catalog-standard.json','data/category-crosswalk.json','data/category-matches.json','data/washing-icon-library.json'].includes(file))return true;
  return /^(?:[^/.]+\.(?:mjs|js|md|ps1|cmd)|(?:public|test)\/(?:[^/]+\/)*[^/]+\.(?:mjs|js|html|css|md|svg))$/.test(file)&&!/(?:secret|credential|session|password|\.env)/i.test(file);
 }
 async function git(root,args){
@@ -49,7 +50,7 @@ export async function syncGithub(root,{expectedRemote=remote}={}){
  await git(root,['push','origin','HEAD:refs/heads/main']);
  return {status:'synced',sha:(await git(root,['rev-parse','HEAD'])).trim(),syncedAt:new Date().toISOString()};
 }
-export function startGithubSync(root,{beforeSync=async()=>{},interval=10000,quietMs=5000}={}){
+export function startGithubSync(root,{beforeSync=async()=>{},interval=2000,quietMs=1000}={}){
  let busy=false,lastHash=null,changedAt=0,stopped=false;
  const state={status:'checking',message:'GitHub 연결 확인 중'};
  async function tick(){

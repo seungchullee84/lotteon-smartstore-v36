@@ -13,7 +13,7 @@ function fakePayload(request,{empty=false,ratios={}}={}){
 function fixture(options={}){
  let calls=0,lastRequest;
  const optimize=createNaverTitleOptimizer({clock:now,fetchImpl:async(url,config)=>{
-  calls++;assert.equal(url,NAVER_TREND_URL);assert.equal(config.headers['X-Naver-Client-Id'],credentials.clientId);assert.equal(config.headers['X-Naver-Client-Secret'],credentials.clientSecret);assert.equal(config.redirect,'error');
+  calls++;assert.equal(url,NAVER_TREND_URL);assert.equal(config.headers['X-NCP-APIGW-API-KEY-ID'],credentials.clientId);assert.equal(config.headers['X-NCP-APIGW-API-KEY'],credentials.clientSecret);assert.equal(config.redirect,'error');
   lastRequest=JSON.parse(config.body);return Response.json(fakePayload(lastRequest,options));
  }});
  return {optimize,get calls(){return calls;},get request(){return lastRequest;}};
@@ -24,6 +24,16 @@ test('스마트스토어 전용 상품명은 브랜드·성별·단어·품번�
  assert.equal(smartstoreTitle({...p,smartstoreName:smartstoreTitle(p)}),smartstoreTitle(p));
  assert.equal(smartstoreTitle({...product,gender:'여성',smartstoreName:'여성 니트'}).includes('여성'),true);
 });
+test('푸퍼를 패딩으로 자동 정리하고 네이버 제안과 입력 계획에서도 롯데 상품명을 보존',async()=>{
+ const p={...product,style:'376922',name:'여성 후드 숏 푸퍼 자켓 376922',gender:'여성'};
+ const before=structuredClone(p),expected='지오다노 여성 후드 숏 패딩 자켓 376922';
+ assert.equal(smartstoreTitle(p),expected);
+ assert.equal(smartstoreTitle({...p,smartstoreName:expected}),expected);
+ assert.equal((await fixture().optimize(p,credentials)).title,expected);
+ assert.equal(smartstorePlan(p,54800).name,expected);
+ assert.deepEqual(p,before);
+});
+
 test('성별 충돌·내용 없는 상품명·100자 초과는 잘라내지 않고 확인 요청',()=>{
  for(const smartstoreName of ['여성 니트','남성 여성 니트','지오다노 남성 356956','긴팔'.repeat(60)])assert.throws(()=>smartstoreTitle({...product,smartstoreName}));
  assert.equal(smartstoreTitle({...product,smartstoreName:'가'.repeat(85)}).length,100);
@@ -84,6 +94,8 @@ test('API 응답 기간·그룹·지수 이상은 사용하지 않음',async()=>
   await assert.rejects(()=>optimize(product,credentials));
  }
 });
-test('네이버 조회와 설정 경로는 롯데ON 채널에서 호출 불가',()=>{
- for(const endpoint of ['smartstore-optimize-title','naver-settings']){assert.equal(requireChannel(endpoint,'smartstore'),'smartstore');assert.throws(()=>requireChannel(endpoint,'lotte'));}
+test('상품명 조회는 스마트스토어 전용이고 API 설정은 공통',()=>{
+ assert.equal(requireChannel('smartstore-optimize-title','smartstore'),'smartstore');
+ assert.throws(()=>requireChannel('smartstore-optimize-title','lotte'));
+ assert.equal(requireChannel('naver-settings','lotte'),undefined);
 });

@@ -74,9 +74,9 @@ test('키워드 예산 초과 시 단어 중간 절단 없이 브랜드·핵심 
  const result=buildKeywords({name:'남성 브이넥 집업 아가일 스트라이프 니트 베스트',gender:'남성'});
  assert.equal(result,'지오다노,남성니트,브이넥니트,집업니트,니트조끼,아가일니트');
  assert.ok(result.length<=35);
- const exact=buildKeywords({name:'가'.repeat(25),gender:'남성'});
- assert.equal(exact.length,35,'쉼표를 포함해 정확히 35자까지 허용');
- assert.equal(buildKeywords({name:'가'.repeat(26),gender:'남성'}),'지오다노,남성의류','초과 단어는 통째로 제외');
+ const exact=buildKeywords({name:'가'.repeat(26),gender:'남성'});
+ assert.equal(exact.length,36,'쉼표를 포함해 정확히 36자까지 허용');
+ assert.equal(buildKeywords({name:'가'.repeat(27),gender:'남성'}),'지오다노,남성의류','초과 단어는 통째로 제외');
 });
 test('키워드는 입력에 없는 기능·소재·성별을 추가하지 않음',()=>{
  assert.equal(buildKeywords({name:'남성 니트',gender:'남성',material:'울 100%'}),'지오다노,남성니트');

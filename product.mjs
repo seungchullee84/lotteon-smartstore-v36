@@ -102,11 +102,11 @@ export function easyProductName(value){
 export function cleanMarketingText(value) {
   return String(value).replace(/\[[^\]]*\]/g,'').replace(/변우석|문가영|박현지/g,'').replace(/[\[\]]/g,'').replace(/\s+/g,' ').trim();
 }
-export function buildKeywords(p) {
+export function buildKeywords(p,maxLength=36) {
   const name=easyProductName(String(p.name||'').trim()||p.rawName||'');
   const sex=['남성','여성'].includes(p.gender)?p.gender:'';
   const words=['지오다노'];
-  const add=s=>{s=s.replace(/\s+/g,'');if(s&&!words.includes(s)&&[...words,s].join(',').length<=35)words.push(s);};
+  const add=s=>{s=s.replace(/\s+/g,'');if(s&&!words.includes(s)&&[...words,s].join(',').length<=maxLength)words.push(s);};
   // Product types precede fabrics/details: e.g. 니트 배색 패딩 and 스웨트 바지.
   // Rules use only supplied text, never search-volume or sales-effect assumptions.
   const rules=[
