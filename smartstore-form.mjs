@@ -1,6 +1,7 @@
 export function isSmartstoreInputUrl(url){return /^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/(?:create(?:[?]|$)|copy\/\d+(?:[?]|$))/.test(url);}
 import {buildDetailContent} from './detail-html.mjs';
 import {smartstoreTitle} from './smartstore-title.mjs';
+import {learnedFields,fillLearnedAttributes,fillDictionaryTags} from './smartstore-learned.mjs';
 
 export function smartstorePlan(p,salePrice){
   if(!/^\d{6}$/.test(p?.style))throw Error('먼저 상품을 수집해 주세요.');
@@ -22,10 +23,13 @@ export function verifySmartstoreOptions(plan,rows){
 }
 
 // The same visible-UI driver runs in the app's Playwright browser and in CUA tests.
-// There is deliberately no save, temporary-save, publish, tag, or SEO action.
+// No save, temporary-save or publish action. Unspecified copied settings stay intact.
 export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   const page=tab.playwright;
   if(!isSmartstoreInputUrl(await tab.url()))throw Error('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.');
+  if(!/\/products\/copy\/\d+/.test(await tab.url()))throw Error('기본설정을 복사한 복사등록 화면에서 실행해 주세요.');
+  const learned=learnedFields(plan);
+  if(learned.tags.length!==10||!learned.sleeve||!learned.neckline)throw Error('이 상품의 태그 10개·소매기장·네크라인 규칙을 먼저 검토해 주세요.');
   const fill=async(loc,value)=>{check();await loc.fill(String(value));await loc.press('Tab');const actual=await loc.evaluate(e=>e.value);if(actual!=='<redacted>'&&String(actual).replaceAll(',','')!==String(value).replaceAll(',',''))throw Error('입력값 확인 실패: '+String(value).slice(0,50));};
   const open=async(name,field)=>{if(!await field.isVisible())await page.getByRole('button',{name}).click();};
   const selectize=async(model,text)=>{
@@ -36,7 +40,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
     await box.locator('.selectize-dropdown-content').getByText(text,{exact:true}).click();
     if((await box.locator('.selectize-input').innerText()).trim()!==text)throw Error('선택 확인 실패: '+text);
   };
-  log('스마트스토어 입력 테스트 시작 · 키워드 제외 · 저장/등록 안 함');
+  log('스마트스토어 복사등록 입력 · 사전 태그 검증 · 저장/등록 안 함');
   log('카테고리 자동선택 중지 · 현재 선택된 분류 유지');
   await fill(page.locator('input[name="product.name"]'),plan.name);
   await fill(page.locator('#prd_price2'),plan.salePrice);
@@ -82,21 +86,19 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
     await container.locator('img').first().waitFor({state:'visible',timeout:30000});
   }
   if(assets){await upload('representImage',[assets.main]);await upload('optionalImages',assets.extras);log('대표·추가 이미지 업로드 완료');}
-  await page.getByRole('tab',{name:'HTML 작성',exact:true}).click();
-  await fill(page.locator('textarea[ng-model="vm.editorContent"]'),plan.html);
-  log('공식몰 상세·사이즈·고시 HTML 입력 확인');
+  log('복사된 상세설명 유지 · 별도로 지시한 이미지 입력만 수행');
   await open(/^상품 주요정보/,page.getByRole('textbox',{name:'품번',exact:true}));
-  await fill(page.getByRole('textbox',{name:'품번',exact:true}),plan.style);
-  const brand=page.getByRole('button',{name:'지오다노 (365) 추천',exact:true});if(await brand.isVisible())await brand.click();
-  await fill(page.getByPlaceholder('제조사를 입력해주세요.',{exact:true}),'지오다노');
+  await fillLearnedAttributes(page,learned,check);
   if(plan.country==='대한민국'||plan.country==='한국')await selectize('vm.viewData.originAreaInfo.originAreaExposureType','국산');
-  else{
+  // Preserve an existing matching direct-entry origin; otherwise choose the actual country.
+  const originText=page.locator('input').filter({visible:true});
+  const hasCountry=await originText.evaluateAll((es,country)=>es.some(e=>e.value===country),plan.country);
+  if(!hasCountry&&plan.country!=='대한민국'&&plan.country!=='한국'){
     await selectize('vm.viewData.originAreaInfo.originAreaExposureType','수입산');
     await selectize('vm.viewData.originAreaInfo.firstSubOriginAreaType','아시아');
     await selectize('vm.viewData.originAreaInfo.secondSubOriginAreaType',plan.country);
-    await fill(page.getByPlaceholder('수입사입력',{exact:true}),'지오다노');
   }
-  const manufactureDate=plan.manufactured+'-15';
+  const manufactureDate=learned.manufactureDate;
   const date=page.locator('input[name="product.detailAttribute.manufactureDate"]');
   const displayed=await date.evaluate(e=>e.value);
   if(displayed!==manufactureDate.replaceAll('-','.')+'.'){
@@ -111,15 +113,16 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
     }
     await calendar.getByText(year,{exact:true}).click();
     await calendar.getByText(Number(plan.manufactured.slice(5))+'월',{exact:true}).click();
-    await calendar.getByRole('cell',{name:'15',exact:true}).click();
-    if(await date.evaluate(e=>e.value)!==manufactureDate.replaceAll('-','.')+'.')throw Error('제조일자 15일 입력 확인 실패');
+    await calendar.locator('td.day:not(.past):not(.future)').getByText('1',{exact:true}).click();
+    if(await date.evaluate(e=>e.value)!==manufactureDate.replaceAll('-','.')+'.')throw Error('제조일자 1일 입력 확인 실패');
   }
   await open(/^상품정보제공고시/,page.locator('#prd'));
-  for(const [selector,value] of [['#prd',plan.material],['#prd_col',plan.colors.join(',')],['#prd_size',plan.sizes.join(',')],['#prd_caution',plan.washing],['#prd_quality','관련법 및 소비자분쟁해결 기준에 따름'],['#prd_as','지오다노 / 080-934-3000']])await fill(page.locator(selector),value);
-  const directDate=page.getByRole('radio',{name:'직접입력',exact:true}).first();
+  for(const [selector,value] of [['#prd',learned.material],['#prd_col',plan.colors.join(',')],['#prd_size',plan.sizes.join(',')],['#prd_caution',learned.washing]])await fill(page.locator(selector),value);
+  const directDate=page.getByRole('radio',{name:'직접입력',exact:true}).filter({visible:true}).first();
   if(!await directDate.evaluate(e=>e.checked))await directDate.locator('..').click();
-  await fill(page.locator('input[ng-model="vm.dateText"]'),manufactureDate);
-  log('소재·색상·치수·제조국·세탁방법·A/S 입력 확인');
+  await fill(page.locator('input[ng-model="vm.dateText"]'),plan.manufactured);
+  const tags=await fillDictionaryTags(page,learned.tags,log,check);
+  log('소재·색상·치수·제조국·세탁방법 입력 · A/S·품질보증·미성년자 구매 기존값 유지');
   log('입력 테스트 완료 · '+seen.size+'개 옵션 각 '+plan.stockPerOption+'개 재고 확인 · 저장/등록은 하지 않았습니다.');
-  return {style:plan.style,salePrice:plan.salePrice,verifiedOptions:seen.size,stockPerOption:plan.stockPerOption,manufactureDate,imagesSkipped:!assets,saved:false,keywordsTouched:false};
+  return {style:plan.style,salePrice:plan.salePrice,verifiedOptions:seen.size,stockPerOption:plan.stockPerOption,manufactureDate,imagesSkipped:!assets,saved:false,keywordsTouched:false,tags,searchTagsVerified:true};
 }
