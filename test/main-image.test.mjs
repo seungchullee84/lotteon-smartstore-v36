@@ -9,3 +9,22 @@ test('합성 완료 파일만 현재 상품의 대표이미지에 적용',async(
 test('추가이미지 합성은 선택한 자리만 변경하고 원본을 보존',async()=>{const {mkdir,writeFile,readFile}=await import('node:fs/promises');const {prepareMainImage,backgroundImageStatus,backgroundSelection}=await import('../main-image.mjs');const dir=await mkdtemp(path.join(os.tmpdir(),'extra-composite-'));try{assert.equal(await backgroundSelection(dir),'main');await writeFile(path.join(dir,'background-selection.json'),JSON.stringify({key:'extra2'}));assert.equal(await backgroundSelection(dir),'extra2');const original=await sharp({create:{width:100,height:150,channels:3,background:'#eee'}}).jpeg().toBuffer();await writeFile(path.join(dir,'extra1.jpg'),original);await writeFile(path.join(dir,'extra2.jpg'),original);const file='extra2-composite-'+'b'.repeat(24)+'.jpg';const image=await sharp({create:{width:1500,height:1500,channels:3,background:'#458'}}).jpeg().toBuffer();await writeFile(path.join(dir,file),image);await writeFile(path.join(dir,'background-image-extra2.json'),JSON.stringify({file}));assert.equal((await backgroundImageStatus(dir,'extra2')).ready,true);assert.equal((await backgroundImageStatus(dir,'extra1')).ready,false);assert.equal((await backgroundImageStatus(dir)).ready,false);assert.deepEqual(await readFile(await prepareMainImage(dir,'extra2')),image);assert.notEqual(await prepareMainImage(dir,'extra1'),path.join(dir,file));assert.deepEqual(await readFile(path.join(dir,'extra2.jpg')),original);}finally{await rm(dir,{recursive:true,force:true});}});
 
 test('추가사진 제외 상태는 재시작 후 유지되고 원본과 대표사진은 보존',async()=>{const {writeFile,readFile}=await import('node:fs/promises');const {excludeExtraImage,applyExtraExclusions}=await import('../main-image.mjs');const folder=await mkdtemp(path.join(os.tmpdir(),'extra-exclusion-'));try{await writeFile(path.join(folder,'extra1.jpg'),'original');const p={images:{main:'main-url',extra1:'one',extra2:'two'}};await excludeExtraImage(folder,p,'extra1');assert.equal(p.images.extra1,null);assert.equal(p.images.extra2,'two');assert.equal(p.images.main,'main-url');assert.equal(await readFile(path.join(folder,'extra1.jpg'),'utf8'),'original');const restored={images:{main:'main-url',extra1:'one',extra2:'two'}};await applyExtraExclusions(folder,restored);assert.equal(restored.images.extra1,null);await excludeExtraImage(folder,restored,'extra2');assert.equal(restored.images.extra2,null);await assert.rejects(excludeExtraImage(folder,restored,'main'),/추가이미지/);}finally{await rm(folder,{recursive:true,force:true});}});
+test('상세 원본 누락 대체가 승인된 경우 공식 대표사진 전체로 1500 이미지를 생성',async()=>{
+ const {writeFile,readFile}=await import('node:fs/promises');
+ const {prepareMainImage}=await import('../main-image.mjs');
+ const folder=await mkdtemp(path.join(os.tmpdir(),'approved-gallery-main-'));
+ try{
+  const original=await sharp({create:{width:300,height:600,channels:3,background:'#335577'}}).jpeg().toBuffer();
+  await writeFile(path.join(folder,'main.jpg'),original);
+  const p={style:'026993',detailFallbackApproved:true,originalDetailUrl:null,images:{main:'official.jpg'}};
+  await writeFile(path.join(folder,'product.json'),JSON.stringify(p));
+  const file=await prepareMainImage(folder),meta=await sharp(file).metadata();
+  assert.equal(meta.width,1500);assert.equal(meta.height,1500);
+  const {data}=await sharp(file).raw().toBuffer({resolveWithObject:true});assert(data[0]>245,'portrait photo is contained with white side margins');
+  assert.deepEqual(await readFile(path.join(folder,'main.jpg')),original);
+  for(const blocked of [{...p,detailFallbackApproved:false},{...p,originalDetailUrl:'https://official/detail.jpg'},{...p,images:{detail:'https://official/detail.jpg'}}]){
+   await writeFile(path.join(folder,'product.json'),JSON.stringify(blocked));
+   await assert.rejects(prepareMainImage(folder),/상세 원본/);
+  }
+ }finally{await rm(folder,{recursive:true,force:true});}
+});
