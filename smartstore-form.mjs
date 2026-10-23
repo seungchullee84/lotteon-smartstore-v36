@@ -29,7 +29,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   if(!isSmartstoreInputUrl(await tab.url()))throw Error('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.');
   if(!/\/products\/copy\/\d+/.test(await tab.url()))throw Error('기본설정을 복사한 복사등록 화면에서 실행해 주세요.');
   const learned=learnedFields(plan);
-  if(learned.tags.length!==10||!learned.sleeve||!learned.neckline)throw Error('이 상품의 태그 10개·소매기장·네크라인 규칙을 먼저 검토해 주세요.');
+  if(learned.tags.length<10||!learned.sleeve||!learned.neckline)throw Error('이 상품의 태그 후보·소매기장·네크라인 규칙을 먼저 검토해 주세요.');
   const fill=async(loc,value)=>{check();await loc.fill(String(value));await loc.press('Tab');const actual=await loc.evaluate(e=>e.value);if(actual!=='<redacted>'&&String(actual).replaceAll(',','')!==String(value).replaceAll(',',''))throw Error('입력값 확인 실패: '+String(value).slice(0,50));};
   const open=async(name,field)=>{if(!await field.isVisible())await page.getByRole('button',{name}).click();};
   const selectize=async(model,text)=>{

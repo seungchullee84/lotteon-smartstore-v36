@@ -1,6 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {learnedFields,assertDictionaryTags,verifySearchTagGroups,sellerProductCode} from '../smartstore-learned.mjs';
+import {learnedFields,assertDictionaryTags,verifySearchTagGroups,sellerProductCode,tagCandidates,planTagChanges} from '../smartstore-learned.mjs';
+test('gender and season tags follow product evidence rather than the current month',()=>{
+ const summer=tagCandidates({style:'123456',gender:'여성',name:'여성 여름 반팔 가디건',material:'면100%'});
+ assert.ok(summer.includes('여자니트'));assert.ok(summer.includes('여름가디건'));assert.ok(!summer.some(t=>t.includes('겨울')));
+ const winter=tagCandidates({style:'123456',gender:'남성',name:'남성 긴팔 기모 니트',material:'면100%'});
+ assert.ok(winter.includes('남자니트'));assert.ok(winter.includes('겨울니트'));assert.ok(!winter.some(t=>/여자|여성/.test(t)));
+ const uncertain=tagCandidates({style:'123456',name:'긴팔 가디건',material:'아크릴100%'});
+ assert.ok(!uncertain.some(t=>/겨울|여름|여자|여성|남자|남성/.test(t)));
+});
+test('356938 retains all ten valid tags even when their order differs',()=>{
+ const names=tagCandidates({style:'356938',name:'여성 카라 긴팔 가디건'}).slice(0,10);
+ const existing=[...names].reverse().map((name,i)=>({name,id:String(i+1)}));
+ assert.equal(planTagChanges(existing,names).filter(t=>t.keep).length,10);
+ const changed=[...existing.slice(1),{name:'관계없는태그',id:'999'}];
+ assert.equal(planTagChanges(changed,names).filter(t=>!t.keep).length,1);
+});
+test('free text and duplicated dictionary ids are never retained for speed',()=>{
+ assert.deepEqual(planTagChanges([{name:'a',id:''},{name:'b',id:'1'},{name:'a',id:'1'}],['a','b']).map(t=>t.keep),[false,true,false]);
+});
 test('seller code preserves six digit style and limits only the short name to seven characters',()=>{
  assert.equal(sellerProductCode({style:'356944',name:'지오다노 여성 집업 긴팔 꽈배기 가디건 356944'}),'356944 꽈배기가디건');
  assert.equal(sellerProductCode({style:'356956',name:'지오다노 남성 아가일 브이넥 니트 356956'}),'356956 아가일니트');
