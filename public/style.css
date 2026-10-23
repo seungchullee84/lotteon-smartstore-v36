@@ -182,6 +182,7 @@ header .header-details{display:flex;align-items:center;justify-content:space-bet
 
 
 .smartstore-panel{border-top:1px solid #dbe4e0;margin-top:24px;padding-top:16px}.smartstore-panel h3{color:#178542}.smartstore-panel label{max-width:440px}.smartstore-panel small{display:block;color:#60716b;font-size:12px}.smartstore-panel .bar{flex-wrap:wrap;gap:8px;margin:14px 0}
+.smartstore-title-panel{margin:20px 0 0;padding:18px;border:1px solid #9ac7a9;border-radius:10px;background:#eaf8ef;min-width:0}.smartstore-title-panel h3{margin:0 0 14px;color:#178542;font-size:16px}.smartstore-title-panel label{display:block;margin:0 0 12px}.smartstore-title-panel input{width:100%;box-sizing:border-box}.smartstore-title-panel small{display:block;margin-top:6px;color:#60716b;font-size:12px}.smartstore-title-panel .bar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.smartstore-title-panel .note{margin-bottom:0}#smartstoreNameStatus{font-size:12px;color:#365a43}
 
 /* Visible channel separation; shared collection fields retain their values. */
 .channel-switcher{max-width:1168px;margin:16px auto 0;padding:18px 22px;border:1px solid #e6c5c9;border-radius:14px;background:#fff6f6}
