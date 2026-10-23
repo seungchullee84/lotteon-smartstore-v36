@@ -1,3 +1,4 @@
+import {auditItemscoutKeywords,eligibleItemscoutKeywords} from '../itemscout-categories.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {keywordCandidates,packKeywords,createKeywordOptimizer,verifyNaver} from '../naver-keywords.mjs';
@@ -33,5 +34,5 @@ test('비교 요청은 두 개씩 병렬 처리하고 같은 동시 조회는 �
   const req=JSON.parse(config.body);return Response.json({...req,results:req.keywordGroups.map(g=>({title:g.groupName,data:[{period:req.endDate,ratio:10}]}))});
  }});
  const [first,second]=await Promise.all([optimize(p,credentials),optimize(p,credentials)]);
- assert.equal(maximum,2);assert.equal(calls,Math.ceil((keywordCandidates(p).length-1)/4));assert.deepEqual(first.ranking,second.ranking);assert(second.fromCache);
+ assert.equal(maximum,2);assert.equal(calls,Math.ceil((eligibleItemscoutKeywords(auditItemscoutKeywords(p,keywordCandidates(p))).length-1)/4));assert.deepEqual(first.ranking,second.ranking);assert(second.fromCache);
 });

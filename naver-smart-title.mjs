@@ -148,6 +148,6 @@ export function createExpandedTitleOptimizer(options={}){
   const normalized={...product,name:smartstoreTitle({...product,smartstoreName:''}),smartstoreName:''};
   const result=await optimize(normalized,credentials);
   const proposal=composePopularTitle(product,result.ranking);
-  return {...proposal,originalTitle:smartstoreTitle(product),hasData:true,period:result.period,fromCache:result.fromCache,source:'네이버 데이터랩 통합검색어 트렌드 API',metric:'검색 상대지수',expanded:true,candidates:result.ranking,note:'상품 종류·동의어·성별·실제 특성의 검색 관심도를 공통 기준으로 비교했습니다. 검색 관심도를 글자 수보다 우선하며, 27~39자는 권장 길이입니다. 품번·공백 포함 최대 39자이고 27자 미만도 허용합니다. 월간 절대 검색량이나 노출 순위를 뜻하지 않습니다.'};
+  return {...proposal,originalTitle:smartstoreTitle(product),hasData:true,period:result.period,fromCache:result.fromCache,source:'네이버 데이터랩 통합검색어 트렌드 API',metric:'검색 상대지수',expanded:true,categoryAudit:result.categoryAudit,candidates:result.ranking,note:result.categoryAudit.note+' 상품 종류·동의어·성별·실제 특성의 검색 관심도를 공통 기준으로 비교했습니다. 검색 관심도를 글자 수보다 우선하며, 27~39자는 권장 길이입니다. 품번·공백 포함 최대 39자이고 27자 미만도 허용합니다. 월간 절대 검색량이나 노출 순위를 뜻하지 않습니다.'};
  };
 }

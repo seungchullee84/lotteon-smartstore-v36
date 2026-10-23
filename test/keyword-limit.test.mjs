@@ -29,12 +29,12 @@ for(const length of [39,40,41]){
  test(`네이버 자동 추천은 ${length}자 후보를 단어 단위로 처리`,async()=>{
   const word='가'.repeat(length-5);
   const optimize=createKeywordOptimizer({candidateFactory:()=>[word,'니트',word],fetchImpl:trendFetch(k=>k===word?100:50)});
-  const result=await optimize({},credentials);
+  const result=await optimize({gender:'여성',name:'여성 니트'},credentials);
   assert.equal(result.ranking[0].keyword,word,'관심도 우선순위 유지');
   assert.equal(result.keywords,length<=40?'지오다노,'+word:'지오다노,니트');
   assert.equal(result.length,result.keywords.length);
   assert(result.length<=40);
-  const cached=await optimize({},credentials);assert(cached.fromCache);assert.equal(cached.keywords,result.keywords);
+  const cached=await optimize({gender:'여성',name:'여성 니트'},credentials);assert(cached.fromCache);assert.equal(cached.keywords,result.keywords);
  });
 }
 test('쉼표와 공백도 서버 길이 제한에 포함하고 조립 시 같은 키워드를 반복하지 않음',()=>{

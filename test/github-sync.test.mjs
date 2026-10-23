@@ -7,7 +7,7 @@ import os from 'node:os';
 import {publishable,syncGithub} from '../github-sync.mjs';
 const git=(cwd,args)=>execFileSync('git',args,{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe'],windowsHide:true});
 test('자동 반영 범위는 소스만 포함하고 개인 데이터와 인증 파일 제외',()=>{
- for(const file of ['public/app.js','test/check.test.mjs','server.mjs','.app-release.json','package.json','data/category-matches.json','data/washing-icon-library.json'])assert.equal(publishable(file),true,file);
+ for(const file of ['public/app.js','test/check.test.mjs','server.mjs','.app-release.json','package.json','data/category-matches.json','data/category-itemscout-verified.json','data/washing-icon-library.json'])assert.equal(publishable(file),true,file);
  for(const file of ['data/desktop-session.json','data/product.json','data/naver-api-settings.json','data/category-secrets.json','.env','node_modules/a.js','credentials.mjs','private/password.js','../outside.mjs'])assert.equal(publishable(file),false,file);
 });
 test('자동 커밋과 push, 인증 문자열 차단, 원격 변경을 덮어쓰지 않음',async()=>{

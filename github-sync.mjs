@@ -8,7 +8,7 @@ const remote='https://github.com/seungchullee84/lotteon-smartstore-v36.git';
 export function publishable(file){
  if(file.includes('..')||file.includes('\\'))return false;
  if(['.gitignore','.gitattributes','.app-release.json','package.json','pnpm-lock.yaml'].includes(file))return true;
- if(['data/category-catalog-common.json','data/category-catalog-standard.json','data/category-crosswalk.json','data/category-matches.json','data/washing-icon-library.json'].includes(file))return true;
+ if(['data/category-catalog-common.json','data/category-catalog-standard.json','data/category-crosswalk.json','data/category-matches.json','data/category-itemscout-verified.json','data/washing-icon-library.json'].includes(file))return true;
  return /^(?:[^/.]+\.(?:mjs|js|md|ps1|cmd)|(?:public|test)\/(?:[^/]+\/)*[^/]+\.(?:mjs|js|html|css|md|svg))$/.test(file)&&!/(?:secret|credential|session|password|\.env)/i.test(file);
 }
 async function git(root,args){

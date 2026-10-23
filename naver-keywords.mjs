@@ -1,3 +1,4 @@
+import {auditItemscoutKeywords,eligibleItemscoutKeywords} from './itemscout-categories.mjs';
 import {buildKeywords,SEARCH_KEYWORDS_MAX_LENGTH} from './product.mjs';
 import {NAVER_TREND_URL,trendPeriod,interpretTrend} from './naver-title.mjs';
 
@@ -42,9 +43,10 @@ export async function verifyNaver(credentials,fetchImpl=fetch){
 export function createKeywordOptimizer({fetchImpl=fetch,clock=()=>new Date(),candidateFactory=keywordCandidates}={}){
  const cache=new Map(),inFlight=new Map();
  return async(product,credentials)=>{
-  const candidates=candidateFactory(product),period=trendPeriod(clock());
+  const categoryAudit=auditItemscoutKeywords(product,candidateFactory(product));
+  const candidates=eligibleItemscoutKeywords(categoryAudit),period=trendPeriod(clock());
   if(!candidates.length)throw Error('상품 종류를 확인한 뒤 키워드를 조회해 주세요.');
-  const cacheKey=JSON.stringify([credentials?.clientId,credentials?.clientSecret,period,candidates]);
+  const cacheKey=JSON.stringify([credentials?.clientId,credentials?.clientSecret,period,candidates,categoryAudit]);
   const saved=cache.get(cacheKey);if(saved&&clock().getTime()-saved.time<3600000)return {...saved.result,fromCache:true};
   if(inFlight.has(cacheKey))return {...await inFlight.get(cacheKey),fromCache:true};
   const pending=(async()=>{
@@ -69,7 +71,7 @@ export function createKeywordOptimizer({fetchImpl=fetch,clock=()=>new Date(),can
    for(const entry of entries)scores.set(entry.keyword,entry.points.reduce((n,p)=>n+p.ratio,0)/anchorTotal);
   }
   const ranked=[...scores].filter(([,score])=>score>0).sort((a,b)=>b[1]-a[1]);
-  const result={keywords:packKeywords(ranked.map(([k])=>k)),length:0,period,source:'네이버 데이터랩 검색 상대지수',ranking:ranked.map(([keyword,score])=>({keyword,score})),fromCache:false};
+  const result={keywords:packKeywords(ranked.map(([k])=>k)),length:0,period,source:'네이버 데이터랩 검색 상대지수',ranking:ranked.map(([keyword,score])=>({keyword,score})),categoryAudit,fromCache:false};
   result.length=result.keywords.length;
   if(cache.size>=100)cache.delete(cache.keys().next().value);
   cache.set(cacheKey,{time:clock().getTime(),result});return result;

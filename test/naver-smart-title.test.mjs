@@ -50,7 +50,7 @@ test('공통 기준으로 관심도를 비교하고 최대 39자·품번·롯데
   return Response.json({...request,results:request.keywordGroups.map(g=>({title:g.groupName,data:[{period:request.endDate,ratio:(values[g.groupName]||0.1)/max*100}]}))});
  }});
  const before=structuredClone(product),r=await optimize(product,credentials);
- assert(calls>1);assert(r.length>0&&r.length<=39);assert(r.title.endsWith('376922'));assert(r.title.includes('후드'));assert(r.title.includes('숏'));assert(!r.title.includes('CLOUD LIGHT'));assert(r.title.includes('점퍼'));assert.equal((r.title.match(/패딩/g)||[]).length,1);assert(!r.title.includes('아우터'));assert(!hasDuplicateTitleMeaning(product,r.title));
+ assert(calls>1);assert(r.length>0&&r.length<=39);assert(r.title.endsWith('376922'));assert(r.title.includes('후드'));assert(r.title.includes('숏'));assert(!r.title.includes('CLOUD LIGHT'));assert(r.title.includes('점퍼'));assert.equal((r.title.match(/패딩|푸퍼/g)||[]).length,1);assert.equal(r.categoryAudit.entries.find(e=>e.keyword==='패딩').status,'excluded');assert(!requests.some(req=>req.keywordGroups.some(g=>g.groupName==='패딩')));assert(!r.title.includes('아우터'));assert(!hasDuplicateTitleMeaning(product,r.title));
  assert(r.selectedTerms.includes('여성패딩'));assert(!r.title.includes('롱'));assert.deepEqual(product,before);
  assert.equal(smartstoreTitle({...product,smartstoreName:r.title}),r.title,'실제 입력 시 인기어와 길이를 그대로 보존');
  const prior=calls,r2=await optimize({...product,style:'000000'},credentials);assert.equal(calls,prior);assert(r2.title.endsWith('000000'));assert(r2.fromCache);
