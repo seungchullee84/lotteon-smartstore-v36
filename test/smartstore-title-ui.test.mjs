@@ -89,10 +89,11 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   await page.waitForFunction(()=>document.getElementById('smartstoreName').value==='지오다노 남자 브이넥 아가일 니트 356956');
   assert.equal(optimizeCalls,5,'스마트스토어 채널에서 상품 수집 완료 후 자동 조회');
   await page.locator('#channelLotte').click();keywordMode='success';
-  await page.locator('#naverKeywordRefresh').click();
+  currentProduct={...product};revision++;
   await page.waitForFunction(()=>document.querySelector('textarea[name="keywords"]').value==='지오다노,남자니트,브이넥니트');
   assert.match(await page.locator('#keywordStatus').innerText(),/쉼표 포함/);
-  await page.locator('#naverKeywordRefresh').click();
+  currentProduct={...product};revision++;
+  await page.waitForFunction(()=>document.getElementById('keywordStatus').textContent.includes('비교하고 있습니다'));
   await page.locator('textarea[name="keywords"]').fill('지오다노,직접수정');
   await page.waitForFunction(()=>document.getElementById('keywordStatus').textContent.includes('자동 적용하지 않았습니다'));
   assert.equal(await page.locator('textarea[name="keywords"]').inputValue(),'지오다노,직접수정');

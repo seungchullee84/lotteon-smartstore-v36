@@ -412,7 +412,6 @@ async function writePopularKeywords(){
   $('keywordStatus').textContent=result.length+'자(쉼표 포함) · '+result.source+' · '+result.period.startDate+' ~ '+result.period.endDate+' · 월간 검색횟수 아님';
  }catch(e){if(id===keywordRequest&&product===current)$('keywordStatus').textContent='기존 키워드 유지 · '+e.message;}
 }
-$('naverKeywordRefresh').onclick=()=>void writePopularKeywords();
 function showNaverConnection(connected,detail=''){
  $('naverConnectionStatus').textContent=connected?'네이버 API 연결됨':'네이버 연결 확인 필요';
  $('naverConnectionStatus').dataset.connected=String(connected);
