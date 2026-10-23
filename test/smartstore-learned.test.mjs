@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {learnedFields,assertDictionaryTags,verifySearchTagGroups} from '../smartstore-learned.mjs';
+import {learnedFields,assertDictionaryTags,verifySearchTagGroups,sellerProductCode} from '../smartstore-learned.mjs';
+test('seller code preserves six digit style and limits only the short name to seven characters',()=>{
+ assert.equal(sellerProductCode({style:'356944',name:'지오다노 여성 집업 긴팔 꽈배기 가디건 356944'}),'356944 꽈배기가디건');
+ assert.equal(sellerProductCode({style:'356956',name:'지오다노 남성 아가일 브이넥 니트 356956'}),'356956 아가일니트');
+ assert.ok(sellerProductCode({style:'123456',name:'아주긴상품명테스트입니다'}).split(' ')[1].length<=7);
+ assert.throws(()=>sellerProductCode({style:'12345',name:'니트'}));
+});
 test('verified copy product uses actual materials, stand collar, long sleeves and first day',()=>{
  const f=learnedFields({style:'356944',material:'아크릴 54%, 폴리에스터 26%, 나일론 20%',manufactured:'2026-08'});
  assert.deepEqual(f.materials,['아크릴','폴리에스테르','나일론']);

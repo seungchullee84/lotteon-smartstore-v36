@@ -1,7 +1,7 @@
 export function isSmartstoreInputUrl(url){return /^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/(?:create(?:[?]|$)|copy\/\d+(?:[?]|$))/.test(url);}
 import {buildDetailContent} from './detail-html.mjs';
 import {smartstoreTitle} from './smartstore-title.mjs';
-import {learnedFields,fillLearnedAttributes,fillDictionaryTags} from './smartstore-learned.mjs';
+import {learnedFields,fillLearnedAttributes,fillDictionaryTags,sellerProductCode} from './smartstore-learned.mjs';
 
 export function smartstorePlan(p,salePrice){
   if(!/^\d{6}$/.test(p?.style))throw Error('먼저 상품을 수집해 주세요.');
@@ -122,7 +122,11 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   if(!await directDate.evaluate(e=>e.checked))await directDate.locator('..').click();
   await fill(page.locator('input[ng-model="vm.dateText"]'),plan.manufactured);
   const tags=await fillDictionaryTags(page,learned.tags,log,check);
+  const sellerCode=sellerProductCode(plan);
+  await open(/^판매자 코드/,page.locator('#seller-code1'));
+  await fill(page.locator('#seller-code1'),sellerCode);
+  log('판매자 상품코드 확인: '+sellerCode+' · 바코드·내부코드 유지');
   log('소재·색상·치수·제조국·세탁방법 입력 · A/S·품질보증·미성년자 구매 기존값 유지');
   log('입력 테스트 완료 · '+seen.size+'개 옵션 각 '+plan.stockPerOption+'개 재고 확인 · 저장/등록은 하지 않았습니다.');
-  return {style:plan.style,salePrice:plan.salePrice,verifiedOptions:seen.size,stockPerOption:plan.stockPerOption,manufactureDate,imagesSkipped:!assets,saved:false,keywordsTouched:false,tags,searchTagsVerified:true};
+  return {style:plan.style,salePrice:plan.salePrice,verifiedOptions:seen.size,stockPerOption:plan.stockPerOption,manufactureDate,imagesSkipped:!assets,saved:false,keywordsTouched:false,tags,searchTagsVerified:true,sellerCode};
 }

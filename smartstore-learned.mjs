@@ -1,5 +1,15 @@
 // Verified copy-form workflow. No save, publish, category, delivery or age actions.
 export const copyStartUrl='https://sell.smartstore.naver.com/#/products/copy/13755624427';
+export function sellerProductCode(p){
+ if(!/^\d{6}$/.test(p.style||''))throw Error('판매자 상품코드 품번을 확인해 주세요.');
+ const title=String(p.name||'').replace(/지오다노|여성|남성|남녀공용|NEW|\d{6}/gi,'').trim();
+ const kind=title.match(/가디건|카디건|티셔츠|스웨터|원피스|스커트|슬랙스|청바지|맨투맨|조끼|베스트|자켓|재킷|점퍼|패딩|팬츠|바지|니트|셔츠|코트/)?.[0];
+ const feature=title.match(/꽈배기|아가일|노르딕|브이넥|라운드|후드|기모|집업|와이드|슬림|경량/)?.[0]||'';
+ const short=p.style==='356944'?'꽈배기가디건':kind?(feature+kind):title.replace(/\s/g,'');
+ const name=Array.from(short).slice(0,7).join('');
+ if(!name)throw Error('판매자 상품코드용 간단한 상품명을 확인해 주세요.');
+ return p.style+' '+name;
+}
 const verified={
  '356944':{neckline:'스텐드/차이나칼라',sleeve:'긴팔',material:'아크릴 54%, 폴리에스터 26%, 나일론 20%',washing:'손세탁, 표백제 금지, 천 대고 다림질(80~120℃), 뉘어서 그늘건조, 건조기 사용금지',tags:['니트집업','꽈배기가디건','집업가디건','긴팔니트','긴팔가디건','니트집업가디건','꽈배기니트가디건','꽈배기니트','집업니트','니트코디']}
 };
