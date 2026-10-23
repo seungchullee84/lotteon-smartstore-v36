@@ -38,7 +38,7 @@ test('성별 충돌·내용 없는 상품명·100자 초과는 잘라내지 않�
  for(const smartstoreName of ['여성 니트','남성 여성 니트','지오다노 남성 356956','긴팔'.repeat(60)])assert.throws(()=>smartstoreTitle({...product,smartstoreName}));
  assert.equal(smartstoreTitle({...product,smartstoreName:'가'.repeat(85)}).length,100);
 });
-test('스마트스토어 이름과 API 제안이 롯데ON 상품명·35자 키워드를 변경하지 않음',async()=>{
+test('스마트스토어 이름과 API 제안이 롯데ON 상품명·40자 키워드를 변경하지 않음',async()=>{
  const p=structuredClone(product),before=structuredClone(p);
  const plan=smartstorePlan({...p,smartstoreName:'남자 브이넥 아가일 니트'},54800);
  assert.equal(plan.name,'지오다노 남자 브이넥 아가일 니트 356956');

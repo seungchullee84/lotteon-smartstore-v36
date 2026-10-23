@@ -25,7 +25,7 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
     if(url.pathname==='/api/naver-keywords'){
      if(keywordMode==='fail')return respond(res,{error:'테스트: 기존 키워드 유지'},503);
      await new Promise(resolve=>setTimeout(resolve,200));
-     return respond(res,{keywords:'지오다노,남자니트,브이넥니트',length:17,source:'테스트 데이터랩',period:{startDate:'2026-09-25',endDate:'2026-10-22'}});
+     return respond(res,{keywords:'지오다노,'+'가'.repeat(35),length:40,source:'테스트 데이터랩',period:{startDate:'2026-09-25',endDate:'2026-10-22'}});
     }
     if(url.pathname==='/api/naver-settings'){settings=body;configured=true;return respond(res,{configured:true});}
     if(url.pathname==='/api/smartstore-optimize-title'){
@@ -90,8 +90,14 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   assert.equal(optimizeCalls,5,'스마트스토어 채널에서 상품 수집 완료 후 자동 조회');
   await page.locator('#channelLotte').click();keywordMode='success';
   currentProduct={...product};revision++;
-  await page.waitForFunction(()=>document.querySelector('textarea[name="keywords"]').value==='지오다노,남자니트,브이넥니트');
+  await page.waitForFunction(()=>document.querySelector('textarea[name="keywords"]').value==='지오다노,'+'가'.repeat(35));
   assert.match(await page.locator('#keywordStatus').innerText(),/쉼표 포함/);
+  const keywordField=page.locator('textarea[name="keywords"]');
+  assert.equal(await keywordField.getAttribute('maxlength'),'40');
+  for(const length of [39,40,41]){
+   await keywordField.fill('지오다노,'+'가'.repeat(length-5));
+   assert.equal((await keywordField.inputValue()).length,Math.min(length,40));
+  }
   currentProduct={...product};revision++;
   await page.waitForFunction(()=>document.getElementById('keywordStatus').textContent.includes('비교하고 있습니다'));
   await page.locator('textarea[name="keywords"]').fill('지오다노,직접수정');

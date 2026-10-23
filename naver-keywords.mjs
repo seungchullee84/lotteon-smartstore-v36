@@ -1,4 +1,4 @@
-import {buildKeywords} from './product.mjs';
+import {buildKeywords,SEARCH_KEYWORDS_MAX_LENGTH} from './product.mjs';
 import {NAVER_TREND_URL,trendPeriod,interpretTrend} from './naver-title.mjs';
 
 export function keywordCandidates(product){
@@ -16,7 +16,7 @@ export function keywordCandidates(product){
  if(/겨울|동절기/.test(name)&&/패딩|점퍼|자켓|코트/.test(kind||''))base.push('겨울점퍼','겨울아우터');
  return [...new Set(base)].slice(0,16);
 }
-export function packKeywords(ranked,max=36){
+export function packKeywords(ranked,max=SEARCH_KEYWORDS_MAX_LENGTH){
  const words=['지오다노'];
  for(const keyword of ranked){if(keyword&&!words.includes(keyword)&&[...words,keyword].join(',').length<=max)words.push(keyword);}
  return words.join(',');

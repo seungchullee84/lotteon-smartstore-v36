@@ -1,3 +1,4 @@
+import {validateProduct} from './product-validation.mjs';
 import {requireChannel} from './channel-routing.mjs';
 import {verifyNaver,createKeywordOptimizer} from './naver-keywords.mjs';
 import {generateBackground} from './background-image.mjs';
@@ -16,7 +17,7 @@ import {buildDetailContent} from './detail-html.mjs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
-import {collect,parseProductInput,validateStyle,cleanMarketingText,buildKeywords,easyProductName,repairCategoryFields} from './product.mjs';
+import {collect,parseProductInput,buildKeywords,repairCategoryFields} from './product.mjs';
 import {LotteAutomation} from './automation.mjs';
 import {prepareMainImage,backgroundImageStatus,backgroundSelection,applyExtraExclusions,excludeExtraImage} from './main-image.mjs';
 import sharp from 'sharp';
@@ -48,25 +49,6 @@ function json(res,status,data){res.writeHead(status,{'Content-Type':'application
 async function body(req){let text='';for await(const chunk of req){text+=chunk;if(text.length>1600000)throw Error('요청이 너무 큽니다.');}return JSON.parse(text||'{}');}
 let activeAbort=null;
 function job(phase,fn){if(state.busy)throw Error('진행 중인 작업이 있습니다.');const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase=phase;state.error=null;Promise.resolve().then(fn).then(()=>{state.phase=controller.signal.aborted?'stopped':'done';}).catch(e=>{state.error=controller.signal.aborted?null:e.message;if(e.code==='DETAIL_SOURCE_MISSING'&&!controller.signal.aborted)state.detailFallbackRequest={input:state.collectionInput};state.phase=controller.signal.aborted?'stopped':'error';log(controller.signal.aborted?'작업을 중단했습니다.':e.message);}).finally(()=>{state.busy=false;state.paused=null;activeAbort=null;});}
-function validateProduct(p){
-
-  repairCategoryFields(p);
-  p.country=String(p.country||'').replace(/[^가-힣A-Za-z\s]+/g,'').trim();
-  p.name=easyProductName(p.name);
-  p.keywords=cleanMarketingText(p.keywords).replace(/,{2,}/g,',').replace(/^,|,$/g,'');
-  validateStyle(p.style);
-  for(const key of ['name','gender','material','country','washing','manufactured','keywords'])if(!p[key]?.trim())throw Error('검토란을 입력해 주세요: '+key);
-  if(!['여성','남성'].includes(p.gender))throw Error('성별을 확인해 주세요.');
-  if(!p.name.startsWith(p.gender+' '))throw Error('선택한 성별과 상품명 앞의 남성/여성 표시가 다릅니다.');
-  if(p.gender==='남성'&&Object.values(p.category||{}).some(v=>/여성/.test(v))||p.gender==='여성'&&Object.values(p.category||{}).some(v=>/남성/.test(v)))throw Error('성별과 상품분류가 다릅니다. 분류를 다시 확인해 주세요.');
-  if(!Number.isInteger(+p.consumerPrice)||+p.consumerPrice<1000)throw Error('공식몰 소비자가를 확인해 주세요.');
-  if(!/^20\d{2}-(0[1-9]|1[0-2])$/.test(p.manufactured))throw Error('제조연월은 YYYY-MM 형식입니다.');
-  if(!p.colors?.length||!p.sizes?.length)throw Error('색상과 사이즈가 필요합니다.');
-  if(p.colors.some(v=>!/^\d{2}\S+$/.test(v)))throw Error('색상은 번호+색상명이며 공백이 없어야 합니다.');
-  for(const key of ['commonMiddle','commonSmall','channelMiddle','channelSmall'])if(!p.category?.[key]?.trim())throw Error('카테고리를 입력해 주세요: '+key);
-  if(p.keywords.length>36)throw Error('검색키워드는 쉼표·공백 포함 36자 이내로 입력해 주세요.');
-  if(!p.keywords.startsWith('지오다노'))throw Error('검색키워드는 지오다노로 시작해야 합니다.');
-}
 const server=http.createServer(async(req,res)=>{
   try{
     const url=new URL(req.url,'http://localhost');
