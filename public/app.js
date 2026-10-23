@@ -298,7 +298,7 @@ $('smartstoreArrangeTitle').onclick=async()=>{
  try{await arrangeSmartstoreTitle();$('error').textContent='';}catch(e){$('error').textContent=e.message;}
 };
 $('smartstoreName').oninput=()=>{$('smartstoreNameStatus').textContent=[...$('smartstoreName').value].length+'자 · 수정한 스마트스토어 상품명';};
-$('smartstoreOptimizeTitle').onclick=async()=>{
+async function optimizeSmartstoreTitle(){
  if(requestLock||serverBusy||!product)return;
  const current=product,field=$('smartstoreName');
  const snapshot={style:product.style,name:$('form').elements.name.value,gender:$('form').elements.gender.value,smartstoreName:field.value};
@@ -313,7 +313,25 @@ $('smartstoreOptimizeTitle').onclick=async()=>{
    $('error').textContent='';
  }catch(e){$('naverTitleResult').textContent='네이버 조회 실패 · 기존 상품명 유지 · '+e.message;}
  finally{requestLock=false;syncButtons();}
-};
+}
+$('smartstoreOptimizeTitle').onclick=optimizeSmartstoreTitle;
+const autoNaverProducts=new WeakSet();
+async function autoOptimizeSmartstoreTitle(){
+ if(!product||document.body.dataset.channel!=='smartstore'||requestLock||serverBusy||autoNaverProducts.has(product))return;
+ const current=product;
+ autoNaverProducts.add(current);
+ try{
+   if(!$('smartstoreName').value.trim())await arrangeSmartstoreTitle();
+   const before={name:$('form').elements.name.value,gender:$('form').elements.gender.value,title:$('smartstoreName').value};
+   const response=await fetch('/api/naver-status',{signal:AbortSignal.timeout(5000)});
+   if(!response.ok)throw Error('네이버 연결 상태를 확인하지 못했습니다. 제안 버튼으로 다시 조회해 주세요.');
+   const status=await response.json();
+   if(product!==current||document.body.dataset.channel!=='smartstore'||requestLock||serverBusy)return;
+   if(before.name!==$('form').elements.name.value||before.gender!==$('form').elements.gender.value||before.title!==$('smartstoreName').value)return;
+   if(!status.configured){$('naverTitleResult').textContent='네이버 API 키를 처음 한 번 연결하면 상품 수집 후 상품명을 자동으로 제안합니다.';return;}
+   await optimizeSmartstoreTitle();
+ }catch(e){if(product===current&&document.body.dataset.channel==='smartstore')$('naverTitleResult').textContent=e.message;}
+}
 $('naverSettings').onclick=async()=>{
  $('naverSettingsForm').reset();$('naverSettingsMessage').textContent='';$('naverSettingsDialog').showModal();
  try{const r=await fetch('/api/naver-status');if(!r.ok)throw Error('연결 상태를 확인하지 못했습니다.');const s=await r.json();$('naverSettingsMessage').textContent=s.configured?'키가 설정되어 있습니다. 실제 조회 성공 여부는 상품명 제안 버튼으로 확인하세요.':'기존 네이버 개발자센터 Client ID와 Client Secret을 입력해 주세요.';}catch(e){$('naverSettingsMessage').textContent=e.message;}
@@ -322,7 +340,7 @@ $('closeNaverSettings').onclick=()=>{$('naverSettingsForm').reset();$('naverSett
 $('naverSettingsDialog').addEventListener('close',()=>$('naverSettingsForm').reset());
 $('naverSettingsForm').onsubmit=async event=>{
  event.preventDefault();const button=event.submitter;button.disabled=true;
- try{await post('naver-settings',{clientId:$('naverClientId').value,clientSecret:$('naverClientSecret').value});$('naverSettingsForm').reset();$('naverSettingsDialog').close();$('naverTitleResult').textContent='네이버 API 키 설정 완료 · 상품명 제안 버튼을 눌러 조회해 주세요.';}
+ try{await post('naver-settings',{clientId:$('naverClientId').value,clientSecret:$('naverClientSecret').value});$('naverSettingsForm').reset();$('naverSettingsDialog').close();$('naverTitleResult').textContent='네이버 API 키 설정 완료';if(product)autoNaverProducts.delete(product);await autoOptimizeSmartstoreTitle();}
  catch(e){$('naverSettingsMessage').textContent=e.message;}
  finally{button.disabled=false;}
 };
@@ -330,10 +348,10 @@ const beforeSmartstorePopulate=populate;populate=function(p){
  beforeSmartstorePopulate(p);$('smartstorePrice').value=p.consumerPrice||'';
  $('smartstoreName').value=p.smartstoreName||'';
  $('naverTitleResult').textContent='네이버 데이터 조회 전';$('naverTitleCandidates').replaceChildren();
- arrangeSmartstoreTitle().catch(e=>{$('smartstoreNameStatus').textContent=e.message;});
+ arrangeSmartstoreTitle().then(autoOptimizeSmartstoreTitle).catch(e=>{$('smartstoreNameStatus').textContent=e.message;});
 };
 
-// Channel selection changes visibility only; registration handlers stay unchanged.
+// Entering SmartStore may suggest a title; Lotte registration handlers stay unchanged.
 function selectRegistrationChannel(channel){
  if(requestLock||serverBusy){announce('진행 중인 작업이 끝난 뒤 채널을 전환해 주세요.','failed');return;}
  const smart=channel==='smartstore';
@@ -345,6 +363,7 @@ function selectRegistrationChannel(channel){
  $('channelSummary').textContent=smart?'현재 작업 채널: 스마트스토어 · 저장 없는 입력 테스트':'현재 작업 채널: 롯데ON · 기존 등록 방식';
  document.title=smart?'스마트스토어 상품등록기':'롯데ON 상품등록기';
  try{sessionStorage.setItem('registrationChannel',smart?'smartstore':'lotte');}catch{}
+ if(smart)void autoOptimizeSmartstoreTitle();
 }
 $('channelLotte').onclick=()=>selectRegistrationChannel('lotte');
 $('channelSmartstore').onclick=()=>selectRegistrationChannel('smartstore');
