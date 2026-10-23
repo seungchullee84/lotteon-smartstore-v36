@@ -5,6 +5,7 @@ import {startGithubSync} from './github-sync.mjs';
 import {brandingLock} from './branding-lock.mjs';
 import {SmartstoreAutomation} from './smartstore-automation.mjs';
 import {smartstorePlan} from './smartstore-form.mjs';
+import {createNaverTitleOptimizer} from './naver-title.mjs';
 import {saveLongDetailImage} from './long-detail-image.mjs';
 import http from 'node:http';
 import {randomBytes} from 'node:crypto';
@@ -22,6 +23,11 @@ const root=path.dirname(fileURLToPath(import.meta.url));
 const releases=createReleaseTracker(root);await releases.get();
 const githubSync=startGithubSync(root,{beforeSync:()=>releases.get()});
 const dataRoot=path.join(root,'data');await mkdir(dataRoot,{recursive:true});
+let naverCredentials={clientId:process.env.NAVER_CLIENT_ID?.trim()||'',clientSecret:process.env.NAVER_CLIENT_SECRET?.trim()||''};
+if(!naverCredentials.clientId||!naverCredentials.clientSecret){
+  try{const saved=JSON.parse(await readFile(path.join(dataRoot,'naver-api-settings.json'),'utf8'));naverCredentials={clientId:saved.clientId||'',clientSecret:saved.clientSecret||''};}catch(e){if(e.code!=='ENOENT')throw e;}
+}
+let optimizeNaverTitle=createNaverTitleOptimizer();
 const desktopSession=process.env.REGISTER_DESKTOP==='1'?JSON.parse(await readFile(path.join(dataRoot,'desktop-session.json'),'utf8')):null;
 const token=desktopSession?.token||randomBytes(24).toString('hex');
 let backgroundApiKey=process.env.OPENAI_API_KEY?.trim()||'';
@@ -66,6 +72,7 @@ const server=http.createServer(async(req,res)=>{
     if(url.pathname==='/'&&url.searchParams.get('key')===token){res.writeHead(302,{'Set-Cookie':`session=${token}; HttpOnly; SameSite=Strict; Path=/`,'Location':'/'});return res.end();}
     if(!cookie)return json(res,403,{error:'시작 화면의 전용 링크로 접속해 주세요.'});
     if(req.method==='GET'&&url.pathname==='/api/branding')return json(res,200,await protectedBranding.get());
+    if(req.method==='GET'&&url.pathname==='/api/naver-status')return json(res,200,{configured:!!(naverCredentials.clientId&&naverCredentials.clientSecret)});
     if(req.method==='GET'&&url.pathname==='/api/state'){
       const versions={};
       for(const key of ['main','extra1','extra2'])versions[key]=state.folder?(await backgroundImageStatus(state.folder,key)).version||null:null;
@@ -91,6 +98,19 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='POST'){
       const b=await body(req);
       requireChannel(url.pathname.slice(5),b.channel);
+      if(url.pathname==='/api/naver-settings'){
+        if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 연결해 주세요.');
+        if(typeof b.clientId!=='string'||typeof b.clientSecret!=='string'||!/^\S{5,200}$/.test(b.clientId.trim())||!/^\S{5,200}$/.test(b.clientSecret.trim()))throw Error('네이버 Client ID와 Client Secret을 확인해 주세요.');
+        const settings={clientId:b.clientId.trim(),clientSecret:b.clientSecret.trim()};
+        await writeFile(path.join(dataRoot,'naver-api-settings.json'),JSON.stringify(settings),{mode:0o600});
+        naverCredentials=settings;optimizeNaverTitle=createNaverTitleOptimizer();return json(res,200,{configured:true});
+      }
+      if(url.pathname==='/api/smartstore-optimize-title'){
+        if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 조회해 주세요.');
+        if(!state.product||b.product?.style!==state.product.style)throw Error('현재 수집한 상품을 다시 확인해 주세요.');
+        const p={...state.product,name:b.product.name,gender:b.product.gender,smartstoreName:b.product.smartstoreName};
+        return json(res,200,await optimizeNaverTitle(p,naverCredentials));
+      }
       if(url.pathname==='/api/exclude-extra-image'){
         const edit=extraImageEdits.then(async()=>{
           if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 사진을 제외해 주세요.');
@@ -216,6 +236,10 @@ const server=http.createServer(async(req,res)=>{
       return res.end(await readFile(path.join(root,'public','detail-preview.html')));
     }
     if(req.method==='GET'&&url.pathname==='/giordano-official-logo.png'){res.writeHead(200,{'Content-Type':'image/png','Cache-Control':'no-store'});return res.end(await readFile(path.join(root,'public','giordano-official-logo.png')));}
+    if(req.method==='GET'&&url.pathname==='/smartstore-title.mjs'){
+      res.writeHead(200,{'Content-Type':'text/javascript; charset=utf-8','Cache-Control':'no-store'});
+      return res.end(await readFile(path.join(root,'smartstore-title.mjs')));
+    }
     if(req.method==='GET'&&['/','/app.js','/style.css'].includes(url.pathname)){
       const name=url.pathname==='/'?'index.html':url.pathname.slice(1);
       const types={'index.html':'text/html','app.js':'text/javascript','style.css':'text/css'};
