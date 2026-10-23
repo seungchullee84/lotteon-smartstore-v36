@@ -186,6 +186,12 @@ header .header-details{display:flex;align-items:center;justify-content:space-bet
 
 /* Visible channel separation; shared collection fields retain their values. */
 .channel-switcher{max-width:1168px;margin:16px auto 0;padding:18px 22px;border:1px solid #e6c5c9;border-radius:14px;background:#fff6f6}
+.naver-connection{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-top:12px}
+#naverConnectionStatus{margin:0;font-size:14px}
+#naverConnectionStatus[data-connected="true"]{color:#168447;font-weight:600}
+#naverConnectionMenu summary{cursor:pointer;font-size:14px}
+#naverConnectionMenu .bar{margin-top:10px;flex-wrap:wrap}
+#naverConnectionDetail:empty{display:none}
 .channel-buttons{display:flex;gap:10px}.channel-button{flex:1;min-height:48px;font-size:17px;background:#fff;color:#625b56;border:1px solid #c7bbae;box-shadow:none}
 .channel-lotte[aria-pressed="true"],.channel-lotte[aria-pressed="true"]:hover{background:#d3243b;color:white;border-color:#d3243b}
 .channel-smartstore[aria-pressed="true"],.channel-smartstore[aria-pressed="true"]:hover{background:#087c42;color:white;border-color:#087c42}

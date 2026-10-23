@@ -342,7 +342,7 @@ $('closeNaverSettings').onclick=()=>{$('naverSettingsForm').reset();$('naverSett
 $('naverSettingsDialog').addEventListener('close',()=>$('naverSettingsForm').reset());
 $('naverSettingsForm').onsubmit=async event=>{
  event.preventDefault();const button=event.submitter;button.disabled=true;
- try{await post('naver-settings',{clientId:$('naverClientId').value,clientSecret:$('naverClientSecret').value});$('naverSettingsForm').reset();$('naverSettingsDialog').close();$('naverTitleResult').textContent='네이버 API 키 설정 완료';if(product)autoNaverProducts.delete(product);await autoOptimizeSmartstoreTitle();void writePopularKeywords();}
+ try{await post('naver-settings',{clientId:$('naverClientId').value,clientSecret:$('naverClientSecret').value});showNaverConnection(true);$('naverSettingsForm').reset();$('naverSettingsDialog').close();$('naverTitleResult').textContent='네이버 API 키 설정 완료';if(product)autoNaverProducts.delete(product);await autoOptimizeSmartstoreTitle();void writePopularKeywords();}
  catch(e){$('naverSettingsMessage').textContent=e.message;}
  finally{button.disabled=false;}
 };
@@ -413,9 +413,28 @@ async function writePopularKeywords(){
  }catch(e){if(id===keywordRequest&&product===current)$('keywordStatus').textContent='기존 키워드 유지 · '+e.message;}
 }
 $('naverKeywordRefresh').onclick=()=>void writePopularKeywords();
-$('naverVerify').onclick=async()=>{
+function showNaverConnection(connected,detail=''){
+ $('naverConnectionStatus').textContent=connected?'네이버 연결됨':'네이버 연결 확인 필요';
+ $('naverConnectionStatus').dataset.connected=String(connected);
+ $('naverConnectionDetail').textContent=detail;
+}
+async function verifyNaverConnection(){
+ $('naverVerify').disabled=true;
  $('naverConnectionStatus').textContent='네이버 인증 확인 중…';
- try{await post('naver-verify',{});$('naverConnectionStatus').textContent='네이버 데이터랩 연결 성공';void writePopularKeywords();}
- catch(e){$('naverConnectionStatus').textContent=e.message;}
+ try{await post('naver-verify',{});showNaverConnection(true);}
+ catch(e){showNaverConnection(false,e.message);}
+ finally{$('naverVerify').disabled=false;}
+}
+$('naverVerify').onclick=async()=>{await verifyNaverConnection();};
+async function loadNaverConnection(){
+ try{
+  const response=await fetch('/api/naver-status',{signal:AbortSignal.timeout(5000)});
+  if(!response.ok)throw Error('연결 상태를 확인하지 못했습니다.');
+  const status=await response.json();
+  if(!status.configured){$('naverConnectionStatus').textContent='네이버 연결 설정 필요';return;}
+  if(status.verified)showNaverConnection(true);
+  else await verifyNaverConnection();
+ }catch(e){showNaverConnection(false,e.message);}
 };
+void loadNaverConnection();
 if(new URLSearchParams(location.search).get('settings')==='naver')$('naverSettings').click();
