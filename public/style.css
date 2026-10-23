@@ -248,3 +248,5 @@ body[data-channel="smartstore"] #collect{background:#087c42;box-shadow:0 3px 8px
 header .release-info #releaseVersion{background:var(--release-bg,#ece4d8);color:var(--release-text,#203d63);border:1px solid var(--release-border,#c8b79e);transition:background-color .25s,color .25s,border-color .25s}
 
 .extra-image-card{position:relative}.extra-previews .remove-extra{position:absolute;z-index:1;right:6px;top:6px;width:28px;height:28px;padding:0;border-radius:50%;font-size:22px;line-height:24px;background:#fff5f2;color:#a53a2b;border:1px solid #dbada3;box-shadow:0 1px 4px #0002}.extra-previews .remove-extra:hover{background:#ffe0d9;color:#7d2117}
+
+body[data-channel=smartstore] .collection-tools{grid-template-columns:1fr}.collection-tools #smartstoreOpen{width:100%;justify-self:stretch;white-space:normal;padding:10px;font-size:12px}
