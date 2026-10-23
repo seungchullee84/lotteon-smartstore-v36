@@ -414,7 +414,7 @@ async function writePopularKeywords(){
 }
 $('naverKeywordRefresh').onclick=()=>void writePopularKeywords();
 function showNaverConnection(connected,detail=''){
- $('naverConnectionStatus').textContent=connected?'네이버 연결됨':'네이버 연결 확인 필요';
+ $('naverConnectionStatus').textContent=connected?'네이버 API 연결됨':'네이버 연결 확인 필요';
  $('naverConnectionStatus').dataset.connected=String(connected);
  $('naverConnectionDetail').textContent=detail;
 }
