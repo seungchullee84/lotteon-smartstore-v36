@@ -70,7 +70,7 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   fail=true;await page.locator('#smartstoreOptimizeTitle').click();
   await page.waitForFunction(()=>document.getElementById('naverTitleResult').textContent.includes('조회 실패'));
   assert.equal(await page.locator('#smartstoreName').inputValue(),'지오다노 남자 브이넥 아가일 니트 356956');
-  fail=false;await page.locator('#naverSettings').click();await page.locator('#naverClientId').fill('fake-id');await page.locator('#naverClientSecret').fill('fake-secret');
+  fail=false;await page.locator('#naverConnectionMenu summary').click();await page.locator('#naverSettings').click();await page.locator('#naverClientId').fill('fake-id');await page.locator('#naverClientSecret').fill('fake-secret');
   await page.locator('#naverSettingsForm button[type="submit"]').click();
   await page.waitForFunction(()=>!document.getElementById('naverSettingsDialog').open);
   assert.equal(settings.clientSecret,'fake-secret');assert.equal(await page.locator('#naverClientSecret').inputValue(),'');
