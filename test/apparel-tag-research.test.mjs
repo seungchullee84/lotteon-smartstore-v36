@@ -35,12 +35,10 @@ test('조사자료는 원본 ID·명칭·근거를 검사해 로컬 인덱스로
  }finally{await rm(root,{recursive:true,force:true});}
 });
 
-test('API 키가 없어도 조사 근거로 상품명을 정리하며 인기도를 만들지 않는다',async()=>{
+test('조사자료는 상품명 후보를 보강하고 API 비교가 없으면 인기어 상품명을 확정하지 않는다',async()=>{
  const before=structuredClone(p),research={count:4804,candidates:matchResearchTags(p,index),titleTerms:['기모슬랙스','테이퍼드슬랙스','밴딩슬랙스']};
  const optimize=createExpandedTitleOptimizer({researchProvider:()=>research,fetchImpl:()=>assert.fail('로컬 정리에 원격 호출 없음')});
- const result=await optimize(p,{});
- assert.equal(result.hasData,false);assert.equal(result.researchUsed,true);assert.equal(result.period,null);
- assert.match(result.title,/테이퍼드/);assert.match(result.title,/히든밴딩/);assert.match(result.title,/슬랙스/);assert(result.title.endsWith('115915'));assert([...result.title].length<=39);
- assert.doesNotMatch(result.title,/겨울|와이드|울/);assert.deepEqual(p,before);assert.deepEqual(result.referenceTerms,research.titleTerms);
+ await assert.rejects(optimize(p,{}),/Client ID.*Client Secret/);
+ assert.deepEqual(p,before);
  assert(expandedTitleCandidates(p).includes('슬랙스'));
 });

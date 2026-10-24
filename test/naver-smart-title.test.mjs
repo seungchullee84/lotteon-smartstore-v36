@@ -24,6 +24,27 @@ test('핏·짜임·플리스 후보도 원문 근거가 있을 때만 확장',()
  const f=expandedTitleCandidates({...p,name:'여성 플리스 집업 자켓 123456',rawName:'플리스 집업 자켓'});
  assert(f.includes('후리스자켓'));assert(f.includes('집업자켓'));assert(!f.includes('풀집업자켓'));
 });
+
+test('기모와 브러시드는 같은 품목의 API 지수를 비교해 높은 표현 하나만 선택한다',async()=>{
+ const p={style:'115915',name:'남성 테이퍼드 히든밴딩 브러시드 슬랙스',rawName:'테이퍼드 히든밴딩 브러시드 슬랙스',gender:'남성'};
+ const before=structuredClone(p);
+ for(const popular of ['기모','브러시드']){
+  const requested=new Set();
+  const optimize=createExpandedTitleOptimizer({researchProvider:()=>({candidates:[],titleTerms:[]}),fetchImpl:async(_,config)=>{
+   const request=JSON.parse(config.body);
+   const value=word=>word===popular+'슬랙스'?90:word===(['기모','브러시드'].find(w=>w!==popular))+'슬랙스'?3:10;
+   const max=Math.max(...request.keywordGroups.map(g=>value(g.groupName)));
+   return Response.json({...request,results:request.keywordGroups.map(g=>{requested.add(g.groupName);return {title:g.groupName,data:[{period:request.endDate,ratio:value(g.groupName)/max*100}]};})});
+  }});
+  const result=await optimize(p,credentials);
+  assert(requested.has('기모슬랙스'));assert(requested.has('브러시드슬랙스'));
+  assert(result.title.includes(popular));assert(!result.title.includes(popular==='기모'?'브러시드':'기모'));
+  assert(result.length>=27&&result.length<=39);assert(!hasDuplicateTitleMeaning(p,result.title));
+  assert(result.selectedTerms.includes(popular+'슬랙스'));assert.deepEqual(p,before);
+ }
+ assert(hasDuplicateTitleMeaning(p,'지오다노 남성 기모 브러시드 슬랙스 115915'));
+ assert(!expandedTitleCandidates({...p,name:'남성 히든밴딩 슬랙스',rawName:'히든밴딩 슬랙스'}).some(k=>/기모|브러시드/.test(k)));
+});
 test('미검증 수식어로 채우지 않고 의류 문맥 검색지수와 검증 소재만 반영',()=>{
  const p={style:'026952',name:'남성 퍼펙트 라운드 긴팔티 026952',rawName:'NEW 퍼펙트 크루넥 긴팔티',gender:'남성',material:'면 100%',noticeVerified:true};
  const before=structuredClone(p);
@@ -107,4 +128,6 @@ test('API 실패와 검색 자료 없음은 인기어를 꾸며내지 않고 오
  await assert.rejects(createExpandedTitleOptimizer({researchProvider:()=>({candidates:[],titleTerms:[]}),fetchImpl:async()=>new Response('',{status:401})})(product,credentials),/인증 실패/);
  const optimize=createExpandedTitleOptimizer({researchProvider:()=>({candidates:[],titleTerms:[]}),fetchImpl:async(_,config)=>{const request=JSON.parse(config.body);return Response.json({...request,results:request.keywordGroups.map(g=>({title:g.groupName,data:[]}))});}});
  await assert.rejects(optimize(product,credentials),/검색 자료가 없어/);
+ const researchProvider=()=>({candidates:[{name:'후드패딩'}],titleTerms:['후드패딩']});
+ await assert.rejects(createExpandedTitleOptimizer({researchProvider,fetchImpl:async()=>new Response('',{status:401})})(product,credentials),/인증 실패/);
 });
