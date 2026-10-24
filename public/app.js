@@ -21,7 +21,7 @@ $('main').onerror=()=>{
 };
 
 async function post(endpoint,data={}){
- const expected=({open:'lotte',run:'lotte','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-test':'smartstore','smartstore-auto':'smartstore','smartstore-ai-settings':'smartstore','smartstore-optimize-title':'smartstore'})[endpoint];
+ const expected=({open:'lotte',run:'lotte','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-auto':'smartstore','smartstore-optimize-title':'smartstore'})[endpoint];
  if(expected&&document.body.dataset.channel!==expected)throw Error('선택한 판매채널과 실행 버튼이 다릅니다. 판매채널을 확인해 주세요.');
  if(expected)data={...data,channel:document.body.dataset.channel};
  try{const r=await fetch('/api/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:AbortSignal.timeout(endpoint==='smartstore-optimize-title'?60000:45000)});const b=await r.json();if(!r.ok)throw Error(b.error);return b;}
@@ -50,7 +50,7 @@ async function copyProgress(errorOnly=false){
  announce(errorOnly?'오류를 복사했습니다.':'진행 기록과 오류를 복사했습니다.','success');
 }
 $('copyError').onclick=()=>copyProgress(true);
-function syncButtons(){if($('smartstoreStart'))$('smartstoreStart').textContent=serverBusy&&serverPhase==='smartstore-auto'?'자동 작업 진행 중…':'▶ 시작 · 상세페이지 제작·업로드';for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreOpen','smartstoreTest','smartstoreOptimizeTitle','naverSettings','smartstoreStart','smartstoreAISettings'])if($(id))$(id).disabled=requestLock||serverBusy;}
+function syncButtons(){if($('smartstoreStart'))$('smartstoreStart').textContent=serverBusy&&serverPhase==='smartstore-auto'?'자동 작업 진행 중…':'▶ 시작 · 상세페이지 제작·업로드';for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreOpen','smartstoreOptimizeTitle','naverSettings','smartstoreStart'])if($(id))$(id).disabled=requestLock||serverBusy;}
 function action(id,fn){$(id).onclick=async()=>{
  const primary=id in buttonLabels;if(primary&&(requestLock||serverBusy))return;
  if(id==='run'&&!$('form').reportValidity())return;
@@ -286,16 +286,6 @@ $('openBackgroundRequest').onclick=async()=>{
 
 // SmartStore is a separate no-save path; Lotte controls retain their behavior.
 $('smartstoreOpen').onclick=async()=>{try{await post('smartstore-open');announce('로그인 후 원하는 상품의 복사등록 화면을 직접 열고 시작을 눌러 주세요.','success');}catch(e){$('error').textContent=e.message;}};
-$('smartstoreTest').onclick=async()=>{
- if(requestLock||serverBusy||!product)return;
- const f=new FormData($('form'));const p={...product};
- for(const k of ['name','gender','material','country','washing','manufactured'])p[k]=String(f.get(k)||'').trim();
- p.smartstoreName=$('smartstoreName').value.trim();
- if(!p.smartstoreName||[...p.smartstoreName].length>39){$('error').textContent='스마트스토어 상품명은 품번·공백 포함 최대 39자로 작성해 주세요.';return;}
- p.consumerPrice=Number(f.get('consumerPrice'));p.colors=String(f.get('colors')||'').split(',').map(s=>s.trim()).filter(Boolean);p.sizes=String(f.get('sizes')||'').split(',').map(s=>s.trim()).filter(Boolean);
- requestLock=true;syncButtons();
- try{await post('smartstore-test',{product:p,salePrice:Number($('smartstorePrice').value),includeImages:$('smartstoreImages').checked});announce('스마트스토어 입력 테스트 시작 · 저장하지 않습니다.','success');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;syncButtons();}
-};
 async function arrangeSmartstoreTitle(useCurrent=true){
  if(!product)return;
  const current=product,field=$('smartstoreName');
@@ -393,10 +383,6 @@ $('smartstoreStart').onclick=async()=>{
  try{await post('smartstore-auto',{style});announce('자동 작업 시작 · 선택한 복사등록 화면에 업로드합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;$('smartstoreStart').disabled=false;syncButtons();}
 };
 const autoStageLabels={connect:'로그인 확인',collect:'공식몰 수집',prepare:'사진·색상 대조',compose:'사진 합성',detail:'상세페이지 제작',upload:'스마트스토어 업로드',done:'업로드 완료'};
-async function openSmartstoreAISettings(){const s=await(await fetch('/api/state')).json();$('smartstoreAIKey').value='';$('smartstoreAIMessage').textContent=s.backgroundConfigured?'자동 제작 API 키가 저장되어 있습니다. 키를 바꾸려면 입력하세요.':'OpenAI API 키를 한 번 연결해 주세요. 이 PC의 Windows 계정으로 암호화하여 저장합니다.';$('smartstoreAIDialog').showModal();};
-$('smartstoreAISettings').onclick=openSmartstoreAISettings;
-$('closeSmartstoreAI').onclick=()=>$('smartstoreAIDialog').close();
-$('smartstoreAIForm').onsubmit=async e=>{e.preventDefault();try{await post('smartstore-ai-settings',{apiKey:$('smartstoreAIKey').value});$('smartstoreAIKey').value='';$('smartstoreAIDialog').close();announce('자동 제작 API 키를 저장했습니다. 품번으로 실행할 수 있습니다.','success');}catch(err){$('smartstoreAIMessage').textContent=err.message;}};
 try{if(sessionStorage.getItem('registrationChannel')==='smartstore')selectRegistrationChannel('smartstore');}catch{}
 
 function renderExtraImages(p,refresh=false){

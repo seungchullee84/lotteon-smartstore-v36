@@ -264,3 +264,5 @@ body[data-channel=smartstore] .collection-tools{grid-template-columns:1fr}.colle
 body[data-channel="smartstore"] .classification-detail .detail-preview-scroll{height:1000px}
 body[data-channel="smartstore"] .smartstore-template-preview{height:100%}
 @media(max-width:650px){body[data-channel="smartstore"] .classification-detail .detail-preview-scroll{height:780px}}
+
+body[data-channel=smartstore] .collection-tools #smartstoreOpen{font-size:13px;font-weight:700;padding:11px 17px;box-shadow:0 3px 8px #087c421a}

@@ -4,11 +4,10 @@ import http from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {createNaverTitleOptimizer} from '../naver-title.mjs';
-import {smartstorePlan} from '../smartstore-form.mjs';
 
 test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저장 정책을 보존',async()=>{
  const product={style:'356956',rawName:'남성 아가일 브이넥 니트',name:'남성 아가일 브이넥 니트 356956',gender:'남성',consumerPrice:59800,colors:['01블랙'],sizes:['M'],material:'면 100%',country:'베트남',washing:'손세탁',manufactured:'2026-08',keywords:'지오다노,남성니트',category:{},images:{detail:'https://www.giordano.co.kr/detail.jpg'},warnings:[]};
- let fail=false,submitted=null,settings=null,configured=false,optimizeCalls=0,revision=1,currentProduct=product,keywordMode='fail';
+ let fail=false,settings=null,configured=false,optimizeCalls=0,revision=1,currentProduct=product,keywordMode='fail';
  const optimize=createNaverTitleOptimizer({clock:()=>new Date('2026-10-22T16:00:00Z'),fetchImpl:async(_,config)=>{
   const request=JSON.parse(config.body);return Response.json({...request,results:request.keywordGroups.map(g=>({title:g.groupName,keywords:g.keywords,data:[{period:request.endDate,ratio:({남성니트:20,남자니트:80,브이넥니트:100,아가일니트:30})[g.groupName]||10}]}))});
  }});
@@ -33,7 +32,6 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
      if(fail)return respond(res,{error:'테스트: API 연결 실패'},503);
      return respond(res,await optimize(body.product,{clientId:'fake-id',clientSecret:'fake-secret'}));
     }
-    if(url.pathname==='/api/smartstore-test'){submitted=body;smartstorePlan(body.product,body.salePrice);return respond(res,{ok:true});}
    }
    const files={'/':'public/index.html','/app.js':'public/app.js','/style.css':'public/style.css','/smartstore-title.mjs':'smartstore-title.mjs'};
    if(files[url.pathname]){res.setHeader('Content-Type',url.pathname==='/'?'text/html':url.pathname.endsWith('.css')?'text/css':'text/javascript');return res.end(await readFile(new URL('../'+files[url.pathname],import.meta.url)));}
@@ -62,10 +60,13 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   await page.locator('#channelSmartstore').click();
   const allowedTitle='지오다노 남자 브이넥 아가일 니트 남성브이넥니트 356956';
   await page.locator('#smartstoreName').fill(allowedTitle);
-  await page.locator('#smartstoreTest').click();
-  await page.waitForFunction(()=>document.getElementById('clickFeedback').textContent.includes('입력 테스트 시작'));
-  assert.equal(submitted.product.name,lotte);assert.equal(submitted.product.smartstoreName,allowedTitle);
-  assert.equal(submitted.save,undefined);assert.equal(submitted.finalize,undefined);
+  assert.equal(await page.locator('#smartstoreTest,#smartstoreImages,#smartstoreAISettings,#smartstoreAIDialog').count(),0);
+  assert.equal(await page.locator('#smartstoreOpen').innerText(),'1. 스마트스토어 로그인 창 열기');
+  const login=await page.locator('#smartstoreOpen').evaluate(el=>({weight:getComputedStyle(el).fontWeight,background:getComputedStyle(el).backgroundColor}));
+  const collect=await page.locator('#collect').evaluate(el=>({weight:getComputedStyle(el).fontWeight,background:getComputedStyle(el).backgroundColor}));
+  assert.deepEqual(login,collect);
+  assert.equal(await page.locator('#smartstoreStart').isVisible(),true);
+  assert.equal(await page.locator('#smartstoreName').inputValue(),allowedTitle);
   await page.locator('#smartstoreName').fill('지오다노 남자 브이넥 아가일 니트 356956');
   fail=true;await page.locator('#smartstoreOptimizeTitle').click();
   await page.waitForFunction(()=>document.getElementById('naverTitleResult').textContent.includes('조회 실패'));
