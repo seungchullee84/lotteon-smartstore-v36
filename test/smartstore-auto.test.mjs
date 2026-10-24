@@ -40,6 +40,8 @@ test('업로드용 조각은 브랜드 소개·본문을 빠짐없이 보존하�
  const {files}=await smartstoreUploadParts(png,root,brand);let height=0;
  for(const file of files){const m=await sharp(file).metadata();assert.equal(m.width,860);height+=m.height;assert.ok((await readFile(file)).length<20000000);}
  assert.equal(files.length,4);assert.equal(height,18500);assert.equal((await sharp(png).metadata()).height,18500);
+ const noVideo=await smartstoreUploadParts(png,root,brand,{includeVideo:false});
+ assert.equal(noVideo.includeVideo,false);assert.equal(noVideo.video,null);assert.deepEqual(noVideo.files,files);
  }finally{await rm(root,{recursive:true,force:true});}
 });
 test('사진 내용이 같으면 재실행 시 확인된 색상을 유지하고 공식 품번은 다시 검증한다',async()=>{
@@ -55,8 +57,12 @@ test('사진 내용이 같으면 재실행 시 확인된 색상을 유지하고 
    const analysis={points:[{title:'경량',description:'가벼운 나일론 원단.',evidence:'가벼운 나일론 원단'}],photos:supplied.photoIds.map((id,i)=>({id,color:'05블랙',confidence:.99,sameProduct:true,role:i===0?'front':'side'}))};
    return Response.json({status:'completed',output:[{content:[{type:'output_text',text:JSON.stringify(analysis)}]}]});
   };
-  for(let i=0;i<2;i++){const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,apiKey:'private',photoRoots:[pictures],fetchImpl});assert.equal(prepared.smartstoreDetail.photoCount,2);assert.ok(prepared.smartstoreDetail.colorImages['05블랙']);}
+  const draftFile=path.join(dataRoot,'smartstore-details',product.style,'draft.json');
+  for(let i=0;i<2;i++){const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,apiKey:'private',photoRoots:[pictures],fetchImpl});assert.equal(prepared.smartstoreDetail.photoCount,2);assert.ok(prepared.smartstoreDetail.colorImages['05블랙']);if(i===0){const draft=JSON.parse(await readFile(draftFile));await writeFile(draftFile,JSON.stringify({...draft,includeBrandVideo:false}));}else assert.equal(prepared.smartstoreDetail.includeBrandVideo,false);}
   assert.deepEqual(photoCounts,[2]);assert.throws(()=>officialDescription('<body>STYLE. 05326920</body>',product),/품번/);
+  await writeFile(path.join(folder,'detail.jpg'),await sharp({create:{width:180,height:240,channels:3,background:'#678'}}).jpeg().toBuffer());
+  const reanalysed=await prepareSmartstoreAuto(product,folder,{dataRoot,apiKey:'private',photoRoots:[pictures],fetchImpl});
+  assert.equal(reanalysed.smartstoreDetail.includeBrandVideo,false);
  }finally{await rm(root,{recursive:true,force:true});}
 });
 test('Windows API 연결은 평문 대신 현재 사용자 암호화로 저장한다',{skip:process.platform!=='win32'},async()=>{

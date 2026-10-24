@@ -10,6 +10,13 @@ import {buildDetailContent} from '../detail-html.mjs';
 import {smartstorePlan} from '../smartstore-form.mjs';
 import {publishable} from '../github-sync.mjs';
 const product={style:'375908',name:'여성 경량 패딩 자켓 375908',rawName:'여성 경량 패딩 자켓',gender:'여성',colors:['01핑크','02화이트'],sizes:['S','M'],material:'나일론100%',country:'미얀마',washing:'손세탁',manufactured:'2025-08',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=sample',originalDetailUrl:'https://www.giordano.co.kr/detail.jpg',images:{detail:'https://www.giordano.co.kr/detail.jpg',size:'https://www.giordano.co.kr/size.jpg',info:'https://www.giordano.co.kr/info.jpg'}};
+
+test('상품별 시즌 영상 제외 설정은 해당 상품에만 적용한다',()=>{
+ const p={...product,smartstoreDetail:{style:product.style,includeBrandVideo:false}};
+ assert.doesNotMatch(buildSmartstoreDetail(p).html,/youtube|<iframe|2026 F\/W FILM/);
+ assert.match(buildSmartstoreDetail(p).html,/brand-intro\.jpg|PRODUCT DETAIL/);
+ assert.match(buildSmartstoreDetail(product).html,/youtube\.com/);
+});
 test('스마트스토어에만 확정 템플릿·영상·공식 원본·INFORMATION 뒤 혜택 적용',()=>{
  const approved=buildSmartstoreDetail(product).html;const lotte=buildDetailContent(product.images,product.colors,{},product.originalDetailUrl).html;
  assert.match(smartstorePlan(product,50000).html,/data-smartstore-template=/);
@@ -55,5 +62,12 @@ test('다른 품번·색상·외부 경로는 차단하고 사진 매핑과 상�
   await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...draft,headline:'변경한 상품 소개'}));
   const changed=await saveSmartstoreDetail(product,folder,path.join(root,'changed.png'),{dataRoot});assert.equal(changed.renderCacheHit,false);
   assert.notDeepEqual(await readFile(out),await readFile(path.join(root,'changed.png')));
+  await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...draft,includeBrandVideo:false}));
+  const withoutVideo=await prepareSmartstoreDetail(product,folder,{dataRoot});
+  assert.equal(withoutVideo.smartstoreDetail.includeBrandVideo,false);
+  assert.doesNotMatch(localSmartstorePreview(withoutVideo).html,/youtube|<iframe|2026 F\/W FILM/);
+  const noVideoResult=await saveSmartstoreDetail(product,folder,path.join(root,'no-season-video.png'),{dataRoot});
+  assert.equal(noVideoResult.includeVideo,false);assert.equal(noVideoResult.videoPath,null);
+  assert.doesNotMatch(await readFile(noVideoResult.htmlPath,'utf8'),/youtube|<iframe|2026 F\/W FILM/);
  }finally{await rm(root,{recursive:true,force:true});}
 });
