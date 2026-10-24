@@ -309,6 +309,7 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
   await page.waitForLoadState('load');
   const detailHtml=await page.content();
   const product=parseProduct(detailHtml,url,style);
+  if(options.saveSmartstoreSource===true)await writeFile(path.join(folder,'smartstore-official.html'),detailHtml);
   product.colorChips=officialColorChips(detailHtml,url,product.colors);
   let originalDetailBytes;
   if(product.images.detail&&options.allowMissingDetail===true){

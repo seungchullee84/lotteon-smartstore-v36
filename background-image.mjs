@@ -4,9 +4,10 @@ import {randomBytes} from 'node:crypto';
 import sharp from 'sharp';
 
 // The API key stays in server memory and is never included in product files.
-export async function generateBackground({folder,apiKey,signal,fetchImpl=fetch}){
+export async function generateBackground({folder,apiKey,sourceKey='main',signal,fetchImpl=fetch}){
  if(!apiKey)throw Error('합성 설정에서 OpenAI API 키를 먼저 연결해 주세요.');
- const original=await readFile(path.join(folder,'main.jpg'));
+ if(!['main','extra1','extra2'].includes(sourceKey))throw Error('합성 원본 선택을 확인해 주세요.');
+ const original=await readFile(path.join(folder,sourceKey+'.jpg'));
  const form=new FormData();
  form.set('model','gpt-image-1.5');
  form.set('image',new Blob([original],{type:'image/jpeg'}),'original.jpg');

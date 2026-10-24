@@ -1,4 +1,4 @@
-const routes={open:'lotte',run:'lotte','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-test':'smartstore','smartstore-optimize-title':'smartstore'};
+const routes={open:'lotte',run:'lotte','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-test':'smartstore','smartstore-auto':'smartstore','smartstore-optimize-title':'smartstore','smartstore-ai-settings':'smartstore'};
 export function requireChannel(endpoint,channel){
  const expected=routes[endpoint];
  // Older open tabs omit channel; their endpoint already fixes the destination.

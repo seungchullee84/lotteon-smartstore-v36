@@ -1,3 +1,4 @@
+let smartstoreListingState=null;
 const $=id=>document.getElementById(id);let product=null,lastRevision=-1,appClosed=false,lastImageVersions={},selectedBackgroundImage='main';
 function applyReleaseColor(version){
  const badge=$('releaseVersion'),number=Number(version);
@@ -20,7 +21,7 @@ $('main').onerror=()=>{
 };
 
 async function post(endpoint,data={}){
- const expected=({open:'lotte',run:'lotte','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-test':'smartstore','smartstore-optimize-title':'smartstore'})[endpoint];
+ const expected=({open:'lotte',run:'lotte','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-test':'smartstore','smartstore-auto':'smartstore','smartstore-ai-settings':'smartstore','smartstore-optimize-title':'smartstore'})[endpoint];
  if(expected&&document.body.dataset.channel!==expected)throw Error('선택한 판매채널과 실행 버튼이 다릅니다. 판매채널을 확인해 주세요.');
  if(expected)data={...data,channel:document.body.dataset.channel};
  try{const r=await fetch('/api/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:AbortSignal.timeout(endpoint==='smartstore-optimize-title'?60000:45000)});const b=await r.json();if(!r.ok)throw Error(b.error);return b;}
@@ -49,7 +50,7 @@ async function copyProgress(errorOnly=false){
  announce(errorOnly?'오류를 복사했습니다.':'진행 기록과 오류를 복사했습니다.','success');
 }
 $('copyError').onclick=()=>copyProgress(true);
-function syncButtons(){for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreOpen','smartstoreTest','smartstoreOptimizeTitle','naverSettings'])if($(id))$(id).disabled=requestLock||serverBusy;}
+function syncButtons(){if($('smartstoreStart'))$('smartstoreStart').textContent=serverBusy&&serverPhase==='smartstore-auto'?'자동 작업 진행 중…':'▶ 시작 · 상세페이지 제작·업로드';for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreOpen','smartstoreTest','smartstoreOptimizeTitle','naverSettings','smartstoreStart','smartstoreAISettings'])if($(id))$(id).disabled=requestLock||serverBusy;}
 function action(id,fn){$(id).onclick=async()=>{
  const primary=id in buttonLabels;if(primary&&(requestLock||serverBusy))return;
  if(id==='run'&&!$('form').reportValidity())return;
@@ -91,7 +92,7 @@ function renderWashingIcons(p){
 
 populate=function(p){renderProduct(p);$('categorySource').textContent='공식몰 상품 경로: '+(p.sourceCategory?.join(' → ')||'확인 필요')+(p.gender?' / 롯데 대분류: '+p.gender+'의류 · 브랜드'+p.gender+'의류':'');};
 $('form').elements.gender.onchange=()=>{const f=$('form');const gender=f.elements.gender.value;f.elements.name.value=f.elements.name.value.replace(/^(남성|여성)\s+/,'');if(gender)f.elements.name.value=gender+' '+f.elements.name.value;for(const key of ['commonMiddle','commonSmall','channelMiddle','channelSmall'])f.elements[key].value='';};
-async function refresh(){if(appClosed)return;try{const r=await fetch('/api/state',{signal:AbortSignal.timeout(5000)});const s=await r.json();if(!r.ok)throw Error(s.error);if(s.release){applyReleaseColor(s.release.version);$('releaseVersion').textContent='버전 '+s.release.version;$('releaseUpdated').textContent='최종 수정: '+s.release.displayDate;$('releaseUpdated').dateTime=s.release.updatedAt;}if(s.githubSync){$('githubSyncStatus').textContent=s.githubSync.message;$('githubSyncStatus').dataset.status=s.githubSync.status;}updateCollectionStatus(s);updateMissingDetailChoice(s);syncBackgroundImage(s);syncExtraImages(s);$('status').textContent=({idle:'대기',collect:'정보 수집 중',register:'등록 중',background:'배경 합성 중',smartstore:'스마트스토어 입력 테스트 중','smartstore-detail':'스마트스토어 상세페이지 만드는 중',done:'작업 종료',error:'확인 필요',stopping:'중단 중…',stopped:'중단됨'})[s.phase];$('logs').textContent=s.logs.map(x=>x.time+' '+x.message).join('\n');if(s.error)$('error').textContent=s.error;$('pause').hidden=!s.paused;$('pauseMessage').textContent=s.paused||'';serverBusy=s.busy;serverPhase=s.phase;syncButtons();if(s.product&&lastRevision!==s.revision){populate(s.product);lastRevision=s.revision;}}catch(e){$('error').textContent=e.message;}if(!appClosed)setTimeout(refresh,1200);}refresh();
+async function refresh(){if(appClosed)return;try{const r=await fetch('/api/state',{signal:AbortSignal.timeout(5000)});const s=await r.json();if(!r.ok)throw Error(s.error);if(s.release){applyReleaseColor(s.release.version);$('releaseVersion').textContent='버전 '+s.release.version;$('releaseUpdated').textContent='최종 수정: '+s.release.displayDate;$('releaseUpdated').dateTime=s.release.updatedAt;}if(s.githubSync){$('githubSyncStatus').textContent=s.githubSync.message;$('githubSyncStatus').dataset.status=s.githubSync.status;}updateCollectionStatus(s);updateMissingDetailChoice(s);syncBackgroundImage(s);syncExtraImages(s);$('status').textContent=({idle:'대기',collect:'정보 수집 중',register:'등록 중',background:'배경 합성 중',smartstore:'스마트스토어 입력 테스트 중','smartstore-auto':'자동 진행 · '+(autoStageLabels[s.autoStep]||'시작 중'),'smartstore-detail':'스마트스토어 상세페이지 만드는 중',done:'작업 종료',error:'확인 필요',stopping:'중단 중…',stopped:'중단됨'})[s.phase];$('logs').textContent=s.logs.map(x=>x.time+' '+x.message).join('\n');if(s.error)$('error').textContent=s.error;$('pause').hidden=!s.paused;$('pauseMessage').textContent=s.paused||'';serverBusy=s.busy;serverPhase=s.phase;syncButtons();if(s.product&&lastRevision!==s.revision){populate(s.product);lastRevision=s.revision;}smartstoreListingState=s;syncListingImages(s);}catch(e){$('error').textContent=e.message;}if(!appClosed)setTimeout(refresh,1200);}refresh();
 
 // Distinguish missing values from OCR values that still need review.
 const reviewedFields=new Set();
@@ -122,7 +123,7 @@ if($('info').src&&$('info').complete&&!$('info').naturalWidth)$('infoImageError'
 
 async function saveSelectedImage(key,button){
  if(button.disabled)return;button.disabled=true;
- try{await post('save-main-image',{image:key});announce('선택한 이미지 1장을 바탕화면의 이미지다운 폴더에 저장했습니다.','success');}
+ try{await post('save-main-image',{image:key,channel:document.body.dataset.channel});announce('선택한 이미지 1장을 바탕화면의 이미지다운 폴더에 저장했습니다.','success');}
  catch(e){announce(e.message,'failed');}finally{button.disabled=false;}
 }
 $('downloadMain1500').onclick=()=>saveSelectedImage('main',$('downloadMain1500'));
@@ -284,7 +285,7 @@ $('openBackgroundRequest').onclick=async()=>{
 };
 
 // SmartStore is a separate no-save path; Lotte controls retain their behavior.
-$('smartstoreOpen').onclick=async()=>{try{await post('smartstore-open');announce('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.','success');}catch(e){$('error').textContent=e.message;}};
+$('smartstoreOpen').onclick=async()=>{try{await post('smartstore-open');announce('로그인 후 원하는 상품의 복사등록 화면을 직접 열고 시작을 눌러 주세요.','success');}catch(e){$('error').textContent=e.message;}};
 $('smartstoreTest').onclick=async()=>{
  if(requestLock||serverBusy||!product)return;
  const f=new FormData($('form'));const p={...product};
@@ -365,20 +366,37 @@ const beforeSmartstorePopulate=populate;populate=function(p){
 function selectRegistrationChannel(channel){
  if(requestLock||serverBusy){announce('진행 중인 작업이 끝난 뒤 채널을 전환해 주세요.','failed');return;}
  const smart=channel==='smartstore';
+ buttonLabels.collect='2. 공식몰 정보 수집';
+ busyLabels.collect='공식몰 정보 수집 중…';
  document.body.dataset.channel=smart?'smartstore':'lotte';
  $('channelLotte').setAttribute('aria-pressed',String(!smart));
  $('channelSmartstore').setAttribute('aria-pressed',String(smart));
  $('activeChannelName').textContent=smart?'스마트스토어':'롯데ON';
  $('activeChannelName').className=smart?'smartstore-brand':'lotteon-brand';
- $('channelSummary').textContent=smart?'현재 작업 채널: 스마트스토어 · 저장 없는 입력 테스트':'현재 작업 채널: 롯데ON · 기존 등록 방식';
+ $('channelSummary').textContent=smart?'현재 작업 채널: 스마트스토어 · 품번으로 사진 합성·상세페이지 제작·업로드':'현재 작업 채널: 롯데ON · 기존 등록 방식';
  document.title=smart?'스마트스토어 상품등록기':'롯데ON 상품등록기';
  try{sessionStorage.setItem('registrationChannel',smart?'smartstore':'lotte');}catch{}
  $('saveDetailImages').textContent=smart?'스마트스토어 상세페이지 만들기·저장':'상세이미지 저장';
+ syncButtons();
  if(product)renderDetailPreview(product);
  if(smart)void autoOptimizeSmartstoreTitle();
+ if(smartstoreListingState)syncListingImages(smartstoreListingState);
+ if(!smart&&product)$('main').src='/image/main?t='+Date.now();
 }
 $('channelLotte').onclick=()=>selectRegistrationChannel('lotte');
 $('channelSmartstore').onclick=()=>selectRegistrationChannel('smartstore');
+$('smartstoreStart').onclick=async()=>{
+ if(requestLock||serverBusy)return;
+ const style=$('style').value.trim()||product?.style;
+ if(!style){$('error').textContent='품번 또는 공식몰 상품 URL을 먼저 입력해 주세요.';return;}
+ requestLock=true;$('smartstoreStart').disabled=true;syncButtons();
+ try{await post('smartstore-auto',{style});announce('자동 작업 시작 · 선택한 복사등록 화면에 업로드합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;$('smartstoreStart').disabled=false;syncButtons();}
+};
+const autoStageLabels={connect:'로그인 확인',collect:'공식몰 수집',prepare:'사진·색상 대조',compose:'사진 합성',detail:'상세페이지 제작',upload:'스마트스토어 업로드',done:'업로드 완료'};
+async function openSmartstoreAISettings(){const s=await(await fetch('/api/state')).json();$('smartstoreAIKey').value='';$('smartstoreAIMessage').textContent=s.backgroundConfigured?'자동 제작 API 키가 저장되어 있습니다. 키를 바꾸려면 입력하세요.':'OpenAI API 키를 한 번 연결해 주세요. 이 PC의 Windows 계정으로 암호화하여 저장합니다.';$('smartstoreAIDialog').showModal();};
+$('smartstoreAISettings').onclick=openSmartstoreAISettings;
+$('closeSmartstoreAI').onclick=()=>$('smartstoreAIDialog').close();
+$('smartstoreAIForm').onsubmit=async e=>{e.preventDefault();try{await post('smartstore-ai-settings',{apiKey:$('smartstoreAIKey').value});$('smartstoreAIKey').value='';$('smartstoreAIDialog').close();announce('자동 제작 API 키를 저장했습니다. 품번으로 실행할 수 있습니다.','success');}catch(err){$('smartstoreAIMessage').textContent=err.message;}};
 try{if(sessionStorage.getItem('registrationChannel')==='smartstore')selectRegistrationChannel('smartstore');}catch{}
 
 function renderExtraImages(p,refresh=false){
@@ -450,3 +468,19 @@ if(new URLSearchParams(location.search).get('settings')==='naver')$('naverSettin
 
 let smartstoreDetailTimer;
 $('form').addEventListener('input',event=>{if(!['name','gender','material','colors','sizes'].includes(event.target.name)||document.body.dataset.channel!=='smartstore')return;clearTimeout(smartstoreDetailTimer);smartstoreDetailTimer=setTimeout(()=>{if(product&&!serverBusy&&document.body.dataset.channel==='smartstore')renderDetailPreview(product);},700);});
+
+function syncListingImages(state){
+ const custom=$('smartstoreListingExtras'),original=$('originalExtraPreviews');
+ const listing=state.smartstoreListing,smart=document.body.dataset.channel==='smartstore';
+ custom.hidden=!smart||!listing;original.hidden=smart&&!!listing;$('extraImages').querySelector('h3').textContent=smart?'추가이미지':'추가이미지 (최대 2장)';
+ if(!smart||!listing||!product||product.style!==state.product?.style)return;
+ const base='/smartstore-listing/',query='?style='+encodeURIComponent(product.style);
+ const main=base+'main'+query;if($('main').getAttribute('src')!==main)$('main').src=main;
+ const stamp=product.style+JSON.stringify(listing);
+ if(custom.dataset.stamp!==stamp){
+  custom.dataset.stamp=stamp;custom.replaceChildren();
+  listing.extraColors.forEach((color,i)=>{const card=document.createElement('div');card.className='extra-image-card';const img=document.createElement('img');img.src=base+'extra-'+i+query;img.alt=color+(i===0?' 옆면':' 정면');const name=document.createElement('p');name.textContent=color+(i===0?' · 옆면':' · 정면');const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='이미지 저장';button.onclick=()=>saveSelectedImage('extra-'+i,button);card.append(img,name,button);custom.append(card);});
+ }
+ $('extraImageStatus').textContent='대표: '+listing.mainColor+' (1번 사진) · 추가 '+listing.extraColors.length+'장 · 대표 색상 옆면 + 나머지 색상 정면';
+ $('extraImages').hidden=false;
+}
