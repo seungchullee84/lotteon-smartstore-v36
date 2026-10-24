@@ -4,9 +4,9 @@ export function sellerProductCode(p){
  if(!/^\d{6}$/.test(p.style||''))throw Error('판매자 상품코드 품번을 확인해 주세요.');
  const title=String(p.name||'').replace(/지오다노|여성|남성|남녀공용|NEW|\d{6}/gi,'').trim();
  const kind=title.match(/가디건|카디건|티셔츠|스웨터|원피스|스커트|슬랙스|청바지|맨투맨|조끼|베스트|자켓|재킷|점퍼|패딩|팬츠|바지|니트|셔츠|코트/)?.[0];
- const feature=title.match(/꽈배기|아가일|노르딕|브이넥|라운드|후드|기모|집업|와이드|슬림|경량/)?.[0]||'';
+ const feature=title.match(/꽈배기|아가일|노르딕|브이넥|라운드|후드|기모|집업|와이드|슬림|경량|숏/)?.[0]||'';
  const short=p.style==='356944'?'꽈배기가디건':kind?(feature+kind):title.replace(/\s/g,'');
- const name=Array.from(short).slice(0,7).join('');
+ const name=Array.from(short).slice(0,6).join('');
  if(!name)throw Error('판매자 상품코드용 간단한 상품명을 확인해 주세요.');
  return p.style+' '+name;
 }
@@ -40,7 +40,7 @@ export function planTagChanges(existing,candidates){
 export function learnedFields(p){
  const known=verified[p.style]||{},title=p.name||'';
  const material=p.material||known.material||'';
- const materials=[['아크릴',/아크릴/],['폴리에스테르',/폴리에[스]?터|폴리에스테르|플리에스터/],['나일론',/나일론/],['폴리우레탄',/폴리우레탄/],['면',/면\s*\d/],['울/모',/(?:울|모)\s*\d/],['레이온/인견',/레이온|인견/],['캐시미어',/캐시미어/]].filter(([,re])=>re.test(material)).map(([name])=>name);
+ const materials=[['인조가죽(합성피혁)',/인조가죽|합성피혁|합성가죽/],['아크릴',/아크릴/],['폴리에스테르',/폴리에[스]?터|폴리에스테르|플리에스터/],['나일론',/나일론/],['폴리우레탄',/폴리우레탄/],['면',/면\s*\d/],['울/모',/(?:울|모)\s*\d/],['레이온/인견',/레이온|인견/],['캐시미어',/캐시미어/]].filter(([,re])=>re.test(material)).map(([name])=>name);
  const sleeve=known.sleeve||(/긴팔/.test(title)?'긴팔':/반팔/.test(title)?'반팔':null);
  const neckline=known.neckline||(/카라|칼라|폴로넥/.test(title)?'칼라넥':/라운드/.test(title)?'라운드넥':/브이넥|V넥/i.test(title)?'V넥':/터틀넥/.test(title)?'터틀넥':/후드/.test(title)?'후드넥':null);
  // Tag candidates are deliberately excluded: the user handles tags manually.

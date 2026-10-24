@@ -19,10 +19,11 @@ test('356938 retains all ten valid tags even when their order differs',()=>{
 test('free text and duplicated dictionary ids are never retained for speed',()=>{
  assert.deepEqual(planTagChanges([{name:'a',id:''},{name:'b',id:'1'},{name:'a',id:'1'}],['a','b']).map(t=>t.keep),[false,true,false]);
 });
-test('seller code preserves six digit style and limits only the short name to seven characters',()=>{
+test('seller code preserves six digit style and limits only the short name to six characters',()=>{
  assert.equal(sellerProductCode({style:'356944',name:'지오다노 여성 집업 긴팔 꽈배기 가디건 356944'}),'356944 꽈배기가디건');
  assert.equal(sellerProductCode({style:'356956',name:'지오다노 남성 아가일 브이넥 니트 356956'}),'356956 아가일니트');
- assert.ok(sellerProductCode({style:'123456',name:'아주긴상품명테스트입니다'}).split(' ')[1].length<=7);
+ assert.equal(sellerProductCode({style:'376921',name:'지오다노 여성 숏 패딩 러버 자켓 376921'}),'376921 숏패딩');
+ assert.ok(sellerProductCode({style:'123456',name:'아주긴상품명테스트입니다'}).split(' ')[1].length<=6);
  assert.throws(()=>sellerProductCode({style:'12345',name:'니트'}));
 });
 test('verified copy product uses actual materials, stand collar, long sleeves and first day',()=>{
@@ -69,6 +70,10 @@ test('376921 has photo-reviewed long sleeves even when the title omits sleeve le
  assert.equal(assertLearnedFields(f,['주요소재','소매기장']),f);
  const other=learnedFields({style:'123456',name:'여성 자켓',material:'폴리우레탄 100%'});
  assert.equal(other.sleeve,null);assert.throws(()=>assertLearnedFields(other,['소매기장']),/소매기장/);
+});
+test('a synthetic leather shell remains a selected material alongside polyester lining without claiming genuine leather',()=>{
+ const fields=learnedFields({style:'376921',name:'여성 숏 패딩 러버 자켓',material:'겉감:인조가죽100 / 안감:폴리에스터100 / 충전재:폴리에스터100'});
+ assert.deepEqual(fields.materials,['인조가죽(합성피혁)','폴리에스테르']);assert.ok(!fields.materials.includes('가죽'));
 });
 test('absent sleeve and neckline rows are skipped without touching copied category attributes',async()=>{
  const fields={materials:['폴리에스테르'],sleeve:'긴팔',neckline:'스텐드/차이나칼라'};const inspected=[];

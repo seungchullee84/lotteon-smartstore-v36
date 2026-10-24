@@ -4,6 +4,18 @@ import path from 'node:path';
 import sharp from 'sharp';
 import {createHash} from 'node:crypto';
 const VIDEO='https://www.youtube.com/watch?v=nRI2390T5GQ';
+export async function openSmartstoreEditor(page,{check=()=>{}}={}){
+ check();
+ const input=page.locator('button[data-nclicks-code="descrip.sebtn"]');
+ if(!await input.isVisible()){
+  const heading=page.getByRole('button',{name:/^상세설명/});
+  if(await heading.isVisible())await heading.click();
+ }
+ // ONE can rebuild/disable the launch button while applying its document to the form.
+ await input.waitFor({state:'visible',timeout:30000});check();
+ const [editor]=await Promise.all([page.waitForEvent('popup',{timeout:45000}),input.click({timeout:30000})]);
+ await editor.bringToFront();return editor;
+}
 export async function smartstoreUploadParts(png,folder,brandFile){
  const meta=await sharp(png,{limitInputPixels:false}).metadata();
  const brand=await sharp(brandFile).metadata();const firstHeight=Math.round(meta.width*brand.height/brand.width);
@@ -32,9 +44,7 @@ export async function insertSmartstoreVideo(editor,{check=()=>{}}={}){
 export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}}={}){
  if(!/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+/.test(page.url()))throw Error('상세페이지는 스마트스토어 복사등록 화면에서만 교체합니다.');
  check();
- const input=page.getByRole('button',{name:/^\s*스마트\s*에디터\s*ONE\s*으로\s*(?:작성|수정)\s*$/});
- if(!await input.isVisible())await page.getByRole('button',{name:/^상세설명/}).click();
- const popup=page.waitForEvent('popup',{timeout:15000});await input.click();const editor=await popup;
+ const editor=await openSmartstoreEditor(page,{check});
  await editor.bringToFront();
  await editor.locator('iframe[id^="input_buffer"]').waitFor({state:'attached',timeout:30000});
  await editor.locator('.se-text-paragraph').first().waitFor({state:'visible',timeout:30000});check();
@@ -89,12 +99,15 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  for(const file of parts.files.slice(1))await choose(file);
  const order=await editor.locator('.se-component').evaluateAll(ns=>ns.filter(n=>/se-image|se-video|se-oembed/.test(n.className)).map(n=>n.className));
  if(order.length!==parts.files.length+1||!order[0].includes('se-image')||!/se-video|se-oembed/.test(order[1])||order.slice(2).some(c=>!c.includes('se-image')))throw Error('브랜드 소개·영상·상품상세 순서를 확인해 주세요.');
- check();await editor.getByRole('button',{name:'등록',exact:true}).click();
- await editor.waitForEvent('close',{timeout:15000}).catch(async()=>{if(!editor.isClosed())throw Error('편집창 등록 결과를 확인하지 못했습니다.');});
+ check();await Promise.all([editor.waitForEvent('close',{timeout:30000}),editor.getByRole('button',{name:'등록',exact:true}).click()]);
  const content=await page.locator('textarea[name="editorContent"]').inputValue();
  if(content!=='true')throw Error('판매자센터 상세설명 반영 결과를 확인하지 못했습니다.');
  // Reopen the saved ONE document to verify persistence, rather than trust its boolean placeholder.
- const verifying=page.waitForEvent('popup',{timeout:15000});await input.click();const verified=await verifying;
+ return verifySmartstoreDetail(page,parts,{check,log});
+}
+export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}}={}){
+ check();
+ const verified=await openSmartstoreEditor(page,{check});
  await verified.locator('.se-component.se-image img').nth(parts.files.length-1).waitFor({state:'visible',timeout:30000});
  const expected=parts.files.map(file=>path.basename(file));
  const names=[];
