@@ -10,7 +10,7 @@ import {smartstorePlan} from './smartstore-form.mjs';
 import {createExpandedTitleOptimizer as createNaverTitleOptimizer,hasDuplicateTitleMeaning} from './naver-smart-title.mjs';
 import {smartstoreTitle,assertSmartstoreTitleLength} from './smartstore-title.mjs';
 import {saveLongDetailImage} from './long-detail-image.mjs';
-import {detailImageDownloadFolder} from './desktop-downloads.mjs';
+import {imageDownloadFolder} from './desktop-downloads.mjs';
 import http from 'node:http';
 import {randomBytes} from 'node:crypto';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
@@ -187,7 +187,7 @@ const server=http.createServer(async(req,res)=>{
         if(state.busy)return json(res,409,{error:'작업이 끝난 뒤 상세이미지를 저장해 주세요.'});
         if(!state.product||!state.folder)return json(res,400,{error:'먼저 상품 정보를 수집해 주세요.'});
         const p=state.product;
-        const saveFolder=await detailImageDownloadFolder();
+        const saveFolder=await imageDownloadFolder();
         const filename=String(p.style).replace(/[^a-zA-Z0-9_-]/g,'')+'_상세전체_'+Date.now()+'.png';
         const savedPath=path.join(saveFolder,filename);
         const dimensions=await saveLongDetailImage(p,state.folder,savedPath);
@@ -201,8 +201,7 @@ const server=http.createServer(async(req,res)=>{
       if(url.pathname==='/api/save-main-image'){
         if(state.busy)return json(res,409,{error:'작업이 끝난 뒤 대표이미지를 저장해 주세요.'});
         if(!state.product||!state.folder)return json(res,400,{error:'먼저 상품 정보를 수집해 주세요.'});
-        const saveFolder=path.resolve(root,'..','대표이미지컷 폴더');
-        await mkdir(saveFolder,{recursive:true});
+        const saveFolder=await imageDownloadFolder();
         const key=b.image||'main';
         if(!['main','extra1','extra2'].includes(key)||!state.product.images[key])return json(res,400,{error:'저장할 이미지를 확인해 주세요.'});
         const filename=String(state.product.style).replace(/[^a-zA-Z0-9_-]/g,'')+'_'+key+'_1500x1500_'+Date.now()+'.jpg';

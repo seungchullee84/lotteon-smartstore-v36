@@ -122,7 +122,7 @@ if($('info').src&&$('info').complete&&!$('info').naturalWidth)$('infoImageError'
 
 async function saveSelectedImage(key,button){
  if(button.disabled)return;button.disabled=true;
- try{await post('save-main-image',{image:key});announce('선택한 이미지 1장을 대표이미지컷 폴더에 저장했습니다.','success');}
+ try{await post('save-main-image',{image:key});announce('선택한 이미지 1장을 바탕화면의 이미지다운 폴더에 저장했습니다.','success');}
  catch(e){announce(e.message,'failed');}finally{button.disabled=false;}
 }
 $('downloadMain1500').onclick=()=>saveSelectedImage('main',$('downloadMain1500'));

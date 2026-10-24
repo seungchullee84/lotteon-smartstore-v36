@@ -6,7 +6,7 @@ import {mkdir} from 'node:fs/promises';
 
 const run=promisify(execFile);
 
-export async function detailImageDownloadFolder(){
+export async function imageDownloadFolder(){
  let desktop=path.join(os.homedir(),'Desktop');
  if(process.platform==='win32'){
   const {stdout}=await run('powershell.exe',['-NoProfile','-NonInteractive','-Command',"[Console]::OutputEncoding=[System.Text.Encoding]::UTF8; [Environment]::GetFolderPath('DesktopDirectory')"],{windowsHide:true,encoding:'utf8',timeout:10000});
