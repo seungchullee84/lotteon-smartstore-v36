@@ -130,7 +130,7 @@ $('saveExtra1').onclick=()=>saveSelectedImage('extra1',$('saveExtra1'));
 $('saveExtra2').onclick=()=>saveSelectedImage('extra2',$('saveExtra2'));
 $('saveDetailImages').onclick=async()=>{
  const button=$('saveDetailImages');if(button.disabled)return;button.disabled=true;
- try{await post('save-detail-images',{});announce('상세이미지를 긴 사진 한 장으로 대표이미지컷 폴더에 저장했습니다.','success');}
+ try{await post('save-detail-images',{});announce('상세이미지를 긴 사진 한 장으로 바탕화면의 이미지다운 폴더에 저장했습니다.','success');}
  catch(e){announce(e.message,'failed');}finally{button.disabled=false;}
 };
 
