@@ -1,4 +1,4 @@
-let smartstoreListingState=null;
+let smartstoreListingState=null,tagResearchReady=false;
 const $=id=>document.getElementById(id);let product=null,lastRevision=-1,appClosed=false,lastImageVersions={},selectedBackgroundImage='main';
 function applyReleaseColor(version){
  const badge=$('releaseVersion'),number=Number(version);
@@ -50,7 +50,7 @@ async function copyProgress(errorOnly=false){
  announce(errorOnly?'오류를 복사했습니다.':'진행 기록과 오류를 복사했습니다.','success');
 }
 $('copyError').onclick=()=>copyProgress(true);
-function syncButtons(){if($('smartstoreStart'))$('smartstoreStart').textContent=smartstoreStarting?'시작 요청 중…':serverBusy&&serverPhase==='smartstore-auto'?'자동 작업 진행 중…':'▶ 시작 · 상세페이지 제작·업로드';for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreOpen','smartstoreOptimizeTitle','naverSettings','smartstoreStart','smartstoreAutoTags'])if($(id))$(id).disabled=requestLock||serverBusy;}
+function syncButtons(){if($('smartstoreStart'))$('smartstoreStart').textContent=smartstoreStarting?'시작 요청 중…':serverBusy&&serverPhase==='smartstore-auto'?'자동 작업 진행 중…':'▶ 시작 · 상세페이지 제작·업로드';for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreOpen','smartstoreOptimizeTitle','naverSettings','smartstoreStart','smartstoreAutoTags'])if($(id))$(id).disabled=requestLock||serverBusy||id==='smartstoreAutoTags'&&!tagResearchReady;}
 function action(id,fn){$(id).onclick=async()=>{
  const primary=id in buttonLabels;if(primary&&(requestLock||serverBusy))return;
  if(id==='run'&&!$('form').reportValidity())return;
@@ -481,7 +481,7 @@ function syncListingImages(state){
 
 function renderResearchTags(state){
  const panel=$('researchTagStatus');if(!panel)return;
- const research=state.tagResearch,container=$('researchTagCandidates');
+ const research=state.tagResearch,container=$('researchTagCandidates');tagResearchReady=!!research?.candidates?.length;
  $('smartstoreAutoTags').disabled=requestLock||state.busy||!research?.candidates?.length;
  const names=research?.candidates?.slice(0,10).map(t=>t.name)||[],key=JSON.stringify(names);
  if(container.dataset.names!==key){container.dataset.names=key;container.replaceChildren();for(const name of names){const chip=document.createElement('span');chip.textContent='#'+name;container.append(chip);}}

@@ -77,7 +77,7 @@ test('점퍼와 패딩점퍼는 금지어가 아니며 관심도가 높으면 �
  assert(!expandedTitleCandidates({...product,name:'여성 패딩 조끼',rawName:'여성 패딩 베스트'}).includes('점퍼'));
 });
 test('API 실패와 검색 자료 없음은 인기어를 꾸며내지 않고 오류 반환',async()=>{
- await assert.rejects(createExpandedTitleOptimizer({fetchImpl:async()=>new Response('',{status:401})})(product,credentials),/인증 실패/);
- const optimize=createExpandedTitleOptimizer({fetchImpl:async(_,config)=>{const request=JSON.parse(config.body);return Response.json({...request,results:request.keywordGroups.map(g=>({title:g.groupName,data:[]}))});}});
+ await assert.rejects(createExpandedTitleOptimizer({researchProvider:()=>({candidates:[],titleTerms:[]}),fetchImpl:async()=>new Response('',{status:401})})(product,credentials),/인증 실패/);
+ const optimize=createExpandedTitleOptimizer({researchProvider:()=>({candidates:[],titleTerms:[]}),fetchImpl:async(_,config)=>{const request=JSON.parse(config.body);return Response.json({...request,results:request.keywordGroups.map(g=>({title:g.groupName,data:[]}))});}});
  await assert.rejects(optimize(product,credentials),/검색 자료가 없어/);
 });
