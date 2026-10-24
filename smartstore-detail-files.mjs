@@ -6,6 +6,7 @@ import sharp from 'sharp';
 import {chromium} from 'playwright';
 import {imageDownloadFolder} from './desktop-downloads.mjs';
 import {smartstoreDetailDocument,TEMPLATE_ASSET_NAMES,TEMPLATE_ASSET_BASE,OFFICIAL_BRAND_VIDEO} from './smartstore-detail.mjs';
+import {renderCacheKey,restoreRenderedDetail,cacheRenderedDetail} from './smartstore-render-cache.mjs';
 const appRoot=path.dirname(fileURLToPath(import.meta.url));
 const assetsRoot=path.join(appRoot,'public/smartstore-template');
 const inside=(root,file)=>file.startsWith(root+path.sep);
@@ -78,22 +79,29 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
  const imageUrl=src=>{if(!data.has(src))throw Error('현재 상품에 연결되지 않은 상세 이미지: '+src);return data.get(src);};
  const fontUrl='data:font/ttf;base64,'+(await readFile(path.join(assetsRoot,'GowunDodum-Regular.ttf'))).toString('base64');
  const document=smartstoreDetailDocument(p,{imageUrl,fontUrl,includeVideo:false,includeNavigation:false});
+ const cacheRoot=path.join(options.dataRoot||path.join(appRoot,'data'),'smartstore-render-cache');
+ const cacheKey=await renderCacheKey(document.html);let height,renderCacheHit=false;
  let browser;const close=()=>browser?.close().catch(()=>{});signal?.addEventListener('abort',close,{once:true});
  const partial=output+'.partial';
  try{
+  const cached=await restoreRenderedDetail(cacheRoot,p.style,cacheKey,output);check();
+  if(cached){height=cached.height;renderCacheHit=true;options.log?.('사진·문구·템플릿 일치 · 상세이미지 재사용');}
+  else{
   browser=await chromium.launch({headless:true});check();
   const page=await browser.newPage({viewport:{width:860,height:1200},deviceScaleFactor:1});
   await page.setContent(document.html);await page.evaluate(()=>Promise.all([document.fonts.ready,...[...document.images].map(i=>i.decode())]));check();
-  const height=await page.evaluate(()=>document.documentElement.scrollHeight);
+  height=await page.evaluate(()=>document.documentElement.scrollHeight);
   if(height>150000)throw Error('상세페이지가 너무 깁니다. 사진 개수와 원본 길이를 확인해 주세요.');
   const layers=[];for(let top=0;top<height;top+=4096){check();layers.push({input:await page.screenshot({type:'png',fullPage:true,clip:{x:0,y:top,width:860,height:Math.min(4096,height-top)}}),left:0,top});}
   await sharp({create:{width:860,height,channels:3,background:'#fff'},limitInputPixels:false}).composite(layers).png().toFile(partial);check();
   const {rename}=await import('node:fs/promises');await rename(partial,output);
+  await cacheRenderedDetail(cacheRoot,p.style,cacheKey,output,height);
+  }
   const stem=output.replace(/\.[^.]+$/,'');
   await writeFile(stem+'.html',smartstoreDetailDocument(p,{imageUrl,fontUrl}).html);
   const videoHtml=`<iframe width="848" height="477" style="width:100%;aspect-ratio:16/9;height:auto;border:0" src="${OFFICIAL_BRAND_VIDEO.replaceAll('&','&amp;')}" title="지오다노 공식 브랜드 영상" allow="autoplay;encrypted-media;fullscreen;picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
   await writeFile(stem+'_영상HTML.txt',videoHtml);
-  const result={width:860,height,template:document.template,photoCount:p.smartstoreDetail.photoCount,points:document.points,htmlPath:stem+'.html',videoPath:stem+'_영상HTML.txt'};
+  const result={width:860,height,template:document.template,photoCount:p.smartstoreDetail.photoCount,points:document.points,htmlPath:stem+'.html',videoPath:stem+'_영상HTML.txt',renderCacheHit};
   await writeFile(stem+'_제작정보.json',JSON.stringify({style:p.style,sourceUrl:p.sourceUrl,...result},null,2));return result;
  }finally{signal?.removeEventListener('abort',close);await close();await unlink(partial).catch(e=>{if(e.code!=='ENOENT')throw e;});}
 }

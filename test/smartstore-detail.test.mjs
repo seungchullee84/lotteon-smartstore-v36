@@ -49,5 +49,11 @@ test('다른 품번·색상·외부 경로는 차단하고 사진 매핑과 상�
   const meta=await sharp(out,{limitInputPixels:false}).metadata();assert.equal(meta.width,860);assert.ok(meta.height>4000);assert.equal(result.photoCount,1);
   assert.match(await readFile(result.htmlPath,'utf8'),/data:image\/jpeg;base64,/);assert.match(await readFile(result.videoPath,'utf8'),/playsinline=1&amp;rel=0&amp;controls=1/);
   assert.ok(result.points.every(p=>!/모달|기모/.test(p.title+p.description)));
+  const repeated=await saveSmartstoreDetail(product,folder,path.join(root,'repeated.png'),{dataRoot});
+  assert.equal(result.renderCacheHit,false);assert.equal(repeated.renderCacheHit,true);
+  assert.deepEqual(await readFile(out),await readFile(path.join(root,'repeated.png')));
+  await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...draft,headline:'변경한 상품 소개'}));
+  const changed=await saveSmartstoreDetail(product,folder,path.join(root,'changed.png'),{dataRoot});assert.equal(changed.renderCacheHit,false);
+  assert.notDeepEqual(await readFile(out),await readFile(path.join(root,'changed.png')));
  }finally{await rm(root,{recursive:true,force:true});}
 });

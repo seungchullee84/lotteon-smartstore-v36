@@ -9,6 +9,7 @@ import {createHash} from 'node:crypto';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import {analyzeNotice} from './notice.mjs';
+import {analyzeNoticeCached} from './notice-cache.mjs';
 import {readSourceImage,inspectDetailSource} from './source-image.mjs';
 
 export const OFFICIAL = 'https://www.giordano.co.kr';
@@ -283,6 +284,7 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
   try {
   const context=await browser.newContext();const page=await context.newPage();
   let url=input.url;
+  if(!url&&options.sourceUrlHint){url=parseProductInput(options.sourceUrlHint).url;log('확인된 공식 상품 주소로 바로 연결 · 품번 재검증');}
   if(!url){
   await page.goto(searchUrl,{waitUntil:'domcontentloaded'});
   await page.locator('a[href*="detail.php?pno="]').first().waitFor({timeout:20000}).catch(()=>{});
@@ -345,7 +347,7 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
   if(product.colorImages){const available=new Set(Object.values(product.images));for(const color of Object.keys(product.colorImages))product.colorImages[color]=product.colorImages[color].filter(src=>available.has(src));}
   log('공식 고시 이미지에서 글자 인식 중 (첫 실행은 한국어 모델 다운로드)');
   try {
-    const notice=await analyzeNotice(path.join(folder,'info.jpg'),log,signal);
+    const notice=options.noticeCacheRoot?await analyzeNoticeCached(path.join(folder,'info.jpg'),{cacheRoot:options.noticeCacheRoot,log,signal}):await analyzeNotice(path.join(folder,'info.jpg'),log,signal);
     applyOCR(product,notice.ocrText);
     Object.assign(product,{country:notice.country||product.country,material:notice.material,washing:notice.washing,fieldStatus:notice.fieldStatus,noticeAnalysis:notice});
     if(notice.material)product.warnings=product.warnings.filter(w=>!w.startsWith('소재 혼용률')); 
@@ -361,7 +363,7 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
   await writeFile(path.join(folder,'product.json'),JSON.stringify(product,null,2));
   await collectColorChips(folder,product,src=>context.request.get(src,{headers:{Referer:product.sourceUrl},timeout:8000}),log);
   if(cancelled()||signal?.aborted)throw Error('사용자가 중단했습니다.');
-  try{
+  if(options.prepareMain!==false)try{
     await prepareMainImage(folder);
     let chipStatus;try{chipStatus=JSON.parse(await readFile(path.join(folder,'colorchip-status.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
     if(chipStatus)log(chipStatus.position?'대표이미지 색상칩 자동 배치: '+(chipStatus.position==='bottom-right'?'오른쪽 하단':'오른쪽 중단'):chipStatus.reason);

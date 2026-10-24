@@ -180,14 +180,14 @@ const server=http.createServer(async(req,res)=>{
       if(url.pathname==='/api/smartstore-auto'){
         if(state.busy)throw Error('진행 중인 작업이 있습니다.');
         parseProductInput(b.style);
-        const input=b.style,key=backgroundApiKey;smartBot.stopped=false;bot.stopped=false;
+        const input=b.style,key=backgroundApiKey;const previous=state.product;const parsedInput=parseProductInput(input);const sourceUrlHint=previous&&(parsedInput.style===previous.style||parsedInput.url===previous.sourceUrl)?previous.sourceUrl:null;smartBot.stopped=false;bot.stopped=false;
         job('smartstore-auto',async()=>{
           const signal=activeAbort.signal;
           const result=await runSmartstoreAuto({input,apiKey:key,signal,log,step:name=>{state.autoStep=name;},
             preflight:()=>smartBot.preflight(),
             collect:async value=>{
               const folder=path.join(dataRoot,'smartstore-auto-'+Date.now());
-              const product=await collect(value,folder,log,()=>signal.aborted,signal,{saveSmartstoreSource:true});
+              const product=await collect(value,folder,log,()=>signal.aborted,signal,{saveSmartstoreSource:true,sourceUrlHint,noticeCacheRoot:path.join(dataRoot,'smartstore-notice-cache'),prepareMain:false});
               product.keywords=buildKeywords(product);product.smartstoreName=smartstoreTitle(product);
               smartstorePlan(product,product.consumerPrice);
               return {product,folder};
@@ -197,7 +197,7 @@ const server=http.createServer(async(req,res)=>{
             includeMain:false,
             render:async(p,folder)=>{
               const output=path.join(await imageDownloadFolder(),p.style+'_스마트스토어자동상세_'+Date.now()+'.png');
-              const detail=await saveSmartstoreDetail(p,folder,output,{signal});return {...detail,path:output};
+              const detail=await saveSmartstoreDetail(p,folder,output,{signal,log});return {...detail,path:output};
             },
             upload:async(p,folder,{main,detail})=>{
               const selected=await prepareListingImages(p,folder,{dataRoot});
@@ -314,7 +314,7 @@ const server=http.createServer(async(req,res)=>{
         if(state.busy)return json(res,409,{error:'진행 중인 작업이 있습니다.'});
         if(b.allowMissingDetail===true&&state.detailFallbackRequest?.input!==b.style)return json(res,400,{error:'먼저 일반 수집으로 해당 상품의 상세 원본 누락을 확인해 주세요.'});
         const input=parseProductInput(b.style);const style=input.style||"url";bot.stopped=false;state.collectionInput=b.style;state.detailFallbackRequest=null;
-        job('collect',async()=>{const folder=path.join(dataRoot,style+'-'+new Date().toISOString().replace(/[:.]/g,'-'));const product=await collect(b.style,folder,log,()=>bot.stopped,activeAbort.signal,{allowMissingDetail:b.allowMissingDetail===true});product.keywords=buildKeywords(product);state.product=product;state.folder=folder;state.revision++;log('수집 완료. 고시 이미지와 입력값을 검토해 주세요.');});return json(res,202,{ok:true});
+        job('collect',async()=>{const folder=path.join(dataRoot,style+'-'+new Date().toISOString().replace(/[:.]/g,'-'));const product=await collect(b.style,folder,log,()=>bot.stopped,activeAbort.signal,{allowMissingDetail:b.allowMissingDetail===true,saveSmartstoreSource:b.channel==='smartstore',noticeCacheRoot:b.channel==='smartstore'?path.join(dataRoot,'smartstore-notice-cache'):undefined,prepareMain:b.channel!=='smartstore'});product.keywords=buildKeywords(product);state.product=product;state.folder=folder;state.revision++;log('수집 완료. 고시 이미지와 입력값을 검토해 주세요.');});return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/run'){
         if(state.busy)return json(res,409,{error:'진행 중인 작업이 있습니다.'});
