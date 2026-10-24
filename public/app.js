@@ -21,7 +21,7 @@ $('main').onerror=()=>{
 };
 
 async function post(endpoint,data={}){
- const expected=({open:'lotte',run:'lotte','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-auto':'smartstore','smartstore-tags':'smartstore','smartstore-optimize-title':'smartstore'})[endpoint];
+ const expected=({open:'lotte',run:'lotte','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-auto':'smartstore','smartstore-tags-validate':'smartstore','smartstore-tags':'smartstore','smartstore-optimize-title':'smartstore'})[endpoint];
  if(expected&&document.body.dataset.channel!==expected)throw Error('선택한 판매채널과 실행 버튼이 다릅니다. 판매채널을 확인해 주세요.');
  if(expected)data={...data,channel:document.body.dataset.channel};
  try{const r=await fetch('/api/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:AbortSignal.timeout(endpoint==='smartstore-optimize-title'?60000:45000)});const b=await r.json();if(!r.ok)throw Error(b.error);return b;}
@@ -50,7 +50,7 @@ async function copyProgress(errorOnly=false){
  announce(errorOnly?'오류를 복사했습니다.':'진행 기록과 오류를 복사했습니다.','success');
 }
 $('copyError').onclick=()=>copyProgress(true);
-function syncButtons(){if($('smartstoreStart'))$('smartstoreStart').textContent=smartstoreStarting?'시작 요청 중…':serverBusy&&serverPhase==='smartstore-auto'?'자동 작업 진행 중…':'▶ 시작 · 상세페이지 제작·업로드';for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreOpen','smartstoreOptimizeTitle','naverSettings','smartstoreStart','smartstoreAutoTags'])if($(id))$(id).disabled=requestLock||serverBusy||id==='smartstoreAutoTags'&&!tagResearchReady;}
+function syncButtons(){if($('smartstoreStart'))$('smartstoreStart').textContent=smartstoreStarting?'시작 요청 중…':serverBusy&&serverPhase==='smartstore-auto'?'자동 작업 진행 중…':'▶ 시작 · 상세페이지 제작·업로드';for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreOpen','smartstoreOptimizeTitle','naverSettings','smartstoreStart','smartstoreAutoTags','smartstoreValidateTags'])if($(id))$(id).disabled=requestLock||serverBusy||['smartstoreAutoTags','smartstoreValidateTags'].includes(id)&&!tagResearchReady;}
 function action(id,fn){$(id).onclick=async()=>{
  const primary=id in buttonLabels;if(primary&&(requestLock||serverBusy))return;
  if(id==='run'&&!$('form').reportValidity())return;
@@ -482,11 +482,12 @@ function syncListingImages(state){
 function renderResearchTags(state){
  const panel=$('researchTagStatus');if(!panel)return;
  const research=state.tagResearch,container=$('researchTagCandidates');tagResearchReady=!!research?.candidates?.length;
- $('smartstoreAutoTags').disabled=requestLock||state.busy||!research?.candidates?.length;
+ $('smartstoreAutoTags').disabled=requestLock||state.busy||!research?.candidates?.length;$('smartstoreValidateTags').disabled=$('smartstoreAutoTags').disabled;
  const report=state.tagResult?.style===state.product?.style?state.tagResult:null;
- const names=(report?.selectedTags||research?.candidates||[]).slice(0,10).map(t=>t.name),key=JSON.stringify(names);
+ const validation=state.tagValidation?.style===state.product?.style?state.tagValidation:null;
+ const names=(report?.selectedTags||validation?.selectedTags||research?.candidates||[]).slice(0,10).map(t=>t.name),key=JSON.stringify(names);
  if(container.dataset.names!==key){container.dataset.names=key;container.replaceChildren();for(const name of names){const chip=document.createElement('span');chip.textContent='#'+name;container.append(chip);}}
- panel.textContent=state.busy&&state.phase==='smartstore-tags'?'현재 상품의 태그를 입력·확인하고 있습니다…':report?'자동입력 '+report.tagCount+'개 · '+(report.searchTagsVerified?'검색 적용 확인 완료':'진행 기록 확인'):'조사 자료 '+(research?.count||0).toLocaleString()+'개 · '+(names.length?'상품 연관 후보 '+names.length+'개':'상품 근거에 맞는 후보를 확인해 주세요.');
+ panel.textContent=state.busy&&state.phase==='smartstore-tags'?'현재 상품의 태그를 입력·확인하고 있습니다…':report?'자동입력 '+report.tagCount+'/10개 · '+(report.tagCount<10?(10-report.tagCount)+'개 보강 필요':report.searchTagsVerified?'검색 적용 확인 완료':'진행 기록 확인'):validation?'검증 '+validation.tagCount+'/10개 · 기존 폼 태그 복원 완료':'조사 자료 '+(research?.count||0).toLocaleString()+'개 · '+(names.length?'상품 연관 후보 '+names.length+'개':'상품 근거에 맞는 후보를 확인해 주세요.');
 }
 $('smartstoreAutoTags').onclick=async()=>{
  if(requestLock||serverBusy||!product||document.body.dataset.channel!=='smartstore')return;
@@ -495,3 +496,5 @@ $('smartstoreAutoTags').onclick=async()=>{
  catch(e){$('error').textContent=e.message;}
  finally{requestLock=false;syncButtons();}
 };
+
+$('smartstoreValidateTags').onclick=async()=>{if(requestLock||serverBusy||!product||document.body.dataset.channel!=='smartstore')return;requestLock=true;syncButtons();try{await post('smartstore-tags-validate',{style:product.style});serverBusy=true;serverPhase='smartstore-tags';$('error').textContent='';announce('태그 검증 시작 · 검증 뒤 기존 폼 태그를 복원합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;syncButtons();}};

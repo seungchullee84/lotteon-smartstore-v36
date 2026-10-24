@@ -150,14 +150,14 @@ const server=http.createServer(async(req,res)=>{
         const p={...state.product,name:b.product.name,gender:b.product.gender,smartstoreName:b.product.smartstoreName};
         return json(res,200,await optimizeNaverTitle(p,naverCredentials));
       }
-      if(url.pathname==='/api/smartstore-tags'){
+      if(['/api/smartstore-tags','/api/smartstore-tags-validate'].includes(url.pathname)){
         if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 실행해 주세요.');
         if(!state.product||b.style!==state.product.style)throw Error('현재 상품 품번을 확인해 주세요.');
         const current=state.product,folder=state.folder;
         job('smartstore-tags',async()=>{
-          const report=await smartBot.runTags(current);
+          const report=await smartBot.runTags(current,{validateOnly,folder});
           if(state.product!==current)throw Error('작업 중 상품이 변경되었습니다.');
-          state.tagResult=report;await writeFile(path.join(folder,'smartstore-tags-result.json'),JSON.stringify(report,null,2));
+          if(validateOnly)state.tagValidation=report;else state.tagResult=report;await writeFile(path.join(folder,'smartstore-tags-result.json'),JSON.stringify(report,null,2));
         });return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/exclude-extra-image'){

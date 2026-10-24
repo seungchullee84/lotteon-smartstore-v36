@@ -33,13 +33,29 @@ export class SmartstoreAutomation extends BrowserAutomation{
     this.page.setDefaultTimeout(8000);await this.page.bringToFront();
     this.log('스마트스토어 연결 · 원하는 상품의 복사등록 화면을 직접 선택한 뒤 등록기에서 시작을 누르세요.');
   }
-  async runTags(product){
+  async runTags(product,{validateOnly=false,folder}={}){
     this.stopped=false;await this.preflight();
     const url=this.copyFormUrl,check=()=>{this.check();if(this.page.isClosed()||this.page.url()!==url)throw Error('등록 화면이 변경되었습니다.');};
     const entered=await this.page.locator('input[name="product.name"]').inputValue();
-    if(!entered.includes(product.style))throw Error('복사등록 화면의 상품명 품번이 현재 상품과 다릅니다.');
-    const report=await fillResearchTags(this.page,researchForProduct(product),this.log,check);
-    return {...report,style:product.style,saved:false,published:false};
+    if(!validateOnly&&!entered.includes(product.style))throw Error('복사등록 화면의 상품명 품번이 현재 상품과 다릅니다. 태그 검증만 버튼으로 원래 태그를 보존하며 검증할 수 있습니다.');
+    if(!validateOnly){const report=await fillResearchTags(this.page,researchForProduct(product),this.log,check);return {...report,style:product.style,saved:false,published:false};}
+    const selected=this.page.locator('span.choice-label').filter({has:this.page.locator('strong')});
+    const read=()=>selected.evaluateAll(es=>es.map(e=>({name:e.querySelector('strong')?.textContent.replace(/^#\s*/,'').trim(),id:e.querySelector('.sub-text')?.textContent.replace(/\D/g,'')})));
+    const original=await read();
+    if(original.length>10||original.some(t=>!/^\d+$/.test(t.id)||!t.name))throw Error('원래 태그를 안전하게 복원할 수 있도록 사전 ID를 먼저 확인해 주세요.');
+    const {writeFile}=await import('node:fs/promises');
+    if(folder)await writeFile(path.join(folder,'tag-validation-original.json'),JSON.stringify({style:product.style,formTitle:entered,original},null,2));
+    let report;
+    try{report=await fillResearchTags(this.page,researchForProduct(product),this.log,check);}
+    finally{
+      if(original.length)await fillResearchTags(this.page,{configured:true,candidates:original},()=>{},check,{verifySearch:false});
+      else while(await selected.count()){check();await selected.last().getByRole('button').click();}
+      const pairs=tags=>tags.map(t=>t.id+'\t'+t.name).sort();
+      if(JSON.stringify(pairs(await read()))!==JSON.stringify(pairs(original)))throw Error('원래 태그 복원을 확인해 주세요. 복원 자료는 현재 상품 data 폴더에 보관했습니다.');
+      if(await this.page.locator('input[name="product.name"]').inputValue()!==entered)throw Error('검증 중 상품명이 변경되었습니다.');
+      this.log('태그 검증 종료 · 기존 폼의 태그 '+original.length+'개 복원 확인');
+    }
+    return {...report,style:product.style,validationOnly:true,originalTagsRestored:true,applied:false,saved:false,published:false};
   }
   async bindCopyForm(){
     await this.connectChrome(SMARTSTORE_HOME);

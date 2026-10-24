@@ -1,9 +1,9 @@
 import {openTagVerification} from './smartstore-learned.mjs';
 
 const escape=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-export async function fillResearchTags(page,research,log=()=>{},check=()=>{}){
+export async function fillResearchTags(page,research,log=()=>{},check=()=>{},{verifySearch=true}={}){
  if(!research.configured||!research.candidates.length){log(research.configured?'상품 근거에 맞는 조사 태그 없음 · 기존 태그 유지':'태그 조사 자료 연결 필요 · 기존 태그 유지');return {tagsTouched:false,tagMode:'research',tagCount:0,searchTagsVerified:false,tagStatus:'no-candidates'};}
- const started=Date.now(),pool=research.candidates.slice(0,30),wanted=new Map(pool.map(t=>[t.id,t.name]));
+ const started=Date.now(),pool=research.candidates.slice(0,60),wanted=new Map(pool.map(t=>[t.id,t.name]));
  if(pool.some(t=>!/^\d+$/.test(t.id)||!t.name)||wanted.size!==pool.length)throw Error('조사 태그 ID·명칭을 확인해 주세요.');
  check();const field=page.getByRole('textbox',{name:'태그를 입력해주세요.',exact:true});
  if(!await field.isVisible())await page.getByRole('button',{name:/^검색설정 도움말/}).click();
@@ -13,7 +13,7 @@ export async function fillResearchTags(page,research,log=()=>{},check=()=>{}){
  for(let i=existing.length-1;i>=0;i--){check();const t=existing[i];if(wanted.get(t.id)===t.name&&!retained.has(t.id)&&retained.size<10)retained.add(t.id);else await selected.nth(i).getByRole('button').click();}
  const used=new Set(retained),rejected=new Set();let verified=[],exhausted=false;
  const control=field.locator('../..');
- for(let round=0;round<3;round++){
+ for(let round=0;round<=pool.length;round++){
   for(const tag of pool){
    check();if((await read()).length>=10)break;if(used.has(tag.id))continue;used.add(tag.id);
    await field.fill('');await field.pressSequentially(tag.name,{delay:0});await field.press('End');searches++;
@@ -25,6 +25,7 @@ export async function fillResearchTags(page,research,log=()=>{},check=()=>{}){
    if(await modal.isVisible()){await modal.getByRole('button',{name:'확인',exact:true}).click();rejected.add(tag.id);log('현재 사용 불가 태그 생략: '+tag.name);}
   }
   const tags=await read();exhausted=pool.every(t=>used.has(t.id));
+  if(!verifySearch){await field.fill('');await field.press('Escape');await field.press('Tab');return {selectedTags:tags,tagCount:tags.length};}
   if(!tags.length){log('확인 가능한 사전 태그 없음 · 상품 저장 안 함');return {tagsTouched:existing.length>0,tagMode:'research',tagCount:0,searchTagsVerified:false,tagStatus:'unavailable',rejectedIds:[...rejected],searches};}
   if(tags.length>10||new Set(tags.map(t=>t.id)).size!==tags.length||tags.some(t=>wanted.get(t.id)!==t.name))throw Error('입력 태그가 조사 ID·명칭과 다릅니다.');
   check();await openTagVerification(page,field);
@@ -40,6 +41,6 @@ export async function fillResearchTags(page,research,log=()=>{},check=()=>{}){
  await field.fill('');await field.press('Escape');await field.press('Tab');
  const actual=await read();if(actual.some(t=>!verified.some(v=>v.id===t.id&&v.name===t.name)))throw Error('태그 검색 적용 검증을 마치지 못했습니다.');
  const count=actual.length;
- log('조사 태그 '+count+'개 검색 적용 확인 · 기존 '+retained.size+'개 재사용 · 검색 '+searches+'회 · '+((Date.now()-started)/1000).toFixed(1)+'초 · 상품 저장 안 함');
- return {tagsTouched:true,tagMode:'research',tagCount:count,selectedTags:actual,searchTagsVerified:count>0,tagStatus:count===10?'complete':'partial',rejectedIds:[...rejected],searches,retained:retained.size};
+ log('조사 태그 '+count+'/10개 검색 적용 확인'+(count<10?' · '+(10-count)+'개 보강 필요':'')+' · 기존 '+retained.size+'개 재사용 · 검색 '+searches+'회 · '+((Date.now()-started)/1000).toFixed(1)+'초 · 상품 저장 안 함');
+ return {tagsTouched:true,tagMode:'research',tagCount:count,tagTarget:10,tagMissing:Math.max(0,10-count),selectedTags:actual,searchTagsVerified:count>0,tagStatus:count===10?'complete':'needs-review',rejectedIds:[...rejected],searches,retained:retained.size};
 }
