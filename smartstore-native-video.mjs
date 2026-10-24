@@ -29,7 +29,7 @@ export async function assertNativeVideoToolbar(editor){
 }
 
 // Use ONE's file attachment UI. Never convert a localhost/file URL into seller HTML.
-// The live SmartStore uploader remains unverified until its native component is observed.
+// Report success only after ONE creates a native component with a stable identity.
 export async function insertNativeBrandVideo(editor,{check=()=>{},dataRoot,videoOptions,timeout=120000}={}){
  check();const {file,sha256}=await requireBrandVideo(dataRoot,videoOptions);
  const before=await editor.locator('.se-component.se-video').count();
