@@ -6,11 +6,16 @@ import {researchForProduct} from './apparel-tag-research.mjs';
 const synonyms={니트:['니트','스웨터','풀오버'],가디건:['가디건','카디건'],자켓:['자켓','재킷'],바지:['바지','팬츠'],티셔츠:['티셔츠','티'],패딩:['패딩','푸퍼']};
 const featureWords=['브이넥','터틀넥','라운드','아가일','기모','경량','스트라이프','와이드','밴딩','체크','후드','집업','긴팔','반팔','숏','롱','데님','트레이닝','퀼팅'];
 const neckAliases=['라운드넥','크루넥'];
-const hasRoundNeck=product=>/크루넥|라운드(?:넥)?/.test(product.name+' '+product.rawName);
-// Expand only attributes stated in the official name. Material OCR is used
-// only after verification; seasons and intended uses are never inferred.
+function officialTitleFacts(product){
+ const facts=product.researchFacts;
+ const matched=facts&&facts.style===product.style&&facts.sourceUrl===product.sourceUrl;
+ return [product.name,product.rawName,product.officialDescription,...(matched?[...(facts.features||[]),...(facts.visualFeatures||[])]:[])].filter(Boolean).join(' ');
+}
+const hasRoundNeck=product=>/크루\s*넥|라운드\s*넥/.test(officialTitleFacts(product))||/라운드/.test(product.name+' '+product.rawName);
+// Use official descriptions and same-product reviewed image facts as well as
+// names. Material OCR still requires verification; seasons are not inferred.
 function productFeatures(product){
- const source=String(product.name||'')+' '+String(product.rawName||'');
+ const source=officialTitleFacts(product);
  const rules=[
   ['collar',/폴로|카라|칼라/,['카라','폴로카라','카라넥']],
   ['zip',/풀\s*(?:집|집업|지퍼)|full\s*zip/i,['집업','풀집업']],
@@ -25,6 +30,7 @@ function productFeatures(product){
   ['fit',/슬림\s*핏|슬림핏/,['슬림핏']],
   ['cable',/케이블|꽈배기/,['케이블','꽈배기']],
   ['rib',/골지|리브드/,['골지','리브드']],
+  ['terry',/프렌치\s*테리|french\s*terry|쭈리/i,['프렌치테리','쭈리']],
  ];
  const found=rules.filter(([,pattern])=>pattern.test(source)).map(([id,,variants])=>({id,variants}));
  if(!found.some(f=>f.id==='zip')&&/집업|지퍼/.test(source))found.push({id:'zip',variants:['집업']});
@@ -98,7 +104,7 @@ export function composePopularTitle(product,ranking){
  let words=base.split(' ');const style=words.pop(),prefix=words.splice(0,sex?2:1);
  // Compare garment-specific phrases; bare neckline searches have other intents.
  const neckScore=word=>Math.max(scores.get(word+kind)||0,word==='라운드넥'?(scores.get('라운드'+kind)||0):0);
- const neck=hasRoundNeck(product)?neckAliases.filter(word=>neckScore(word)>0).sort((a,b)=>neckScore(b)-neckScore(a))[0]:undefined;
+ const neck=hasRoundNeck(product)?[...neckAliases].sort((a,b)=>neckScore(b)-neckScore(a))[0]:undefined;
  words=words.filter(word=>!/(?:크루넥|라운드(?:넥)?)/.test(word));
  if(neck)words.unshift(neck);
  const features=productFeatures(product);
@@ -124,12 +130,39 @@ export function composePopularTitle(product,ranking){
   atoms.forEach(atom=>seen.add(atom));return true;
  };
  words=words.filter(unique);
- const extras=[]; // Never pad a short title with unverified product-line words.
+ const extras=[];
  const scoreWord=word=>Math.max(0,...ranking.filter(e=>e.keyword.includes(word.replace(/기장$/,''))).map(e=>e.score));
  const featureSlots=words.map((w,i)=>i).filter(i=>featureWords.includes(words[i].replace(/기장$/,'')));
  const ordered=featureSlots.map(i=>words[i]).sort((a,b)=>scoreWord(b)-scoreWord(a));
  featureSlots.forEach((position,i)=>{words[position]=ordered[i];});
  const render=()=>smartstoreTitle({...product,smartstoreName:[...prefix,...extras,...words,style].join(' ')});
+ // Meet the minimum with distinct, evidenced facts. A measured synonym may be
+ // replaced by a longer evidenced equivalent, never appended as a duplicate.
+ const tryWords=candidate=>{
+  const proposed=smartstoreTitle({...product,smartstoreName:[...prefix,...extras,...candidate,style].join(' ')});
+  if([...proposed].length>39||hasDuplicateTitleMeaning(product,proposed))return false;
+  words=candidate;return true;
+ };
+ for(const feature of features){
+  if([...render()].length>=27)break;
+  const variants=[...feature.variants].sort((a,b)=>featureScore(b)-featureScore(a));
+  if(variants.some(word=>words.includes(word)))continue;
+  for(const word of variants)if(tryWords([word,...words]))break;
+ }
+ if([...render()].length<27&&/\bCLOUD\s+LIGHT\b/i.test(product.rawName||'')){
+  extras.push('CLOUD LIGHT');
+  if([...render()].length>39)extras.pop();
+ }
+ for(const feature of features){
+  if([...render()].length>=27)break;
+  const position=words.findIndex(word=>feature.variants.includes(word));
+  if(position<0)continue;
+  for(const word of [...feature.variants].sort((a,b)=>b.length-a.length)){
+   if(word.length<=words[position].length)continue;
+   const candidate=[...words];candidate[position]=word;
+   if(tryWords(candidate))break;
+  }
+ }
  // Long source names may omit low-interest descriptive words, never cut tokens
  // or numeric/material specifications to fit the limit.
  while([...render()].length>39){
@@ -160,6 +193,6 @@ export function createExpandedTitleOptimizer(options={}){
   let result;
   try{result=await optimize(normalized,credentials);}catch(e){if(research.candidates.length)return referenceOnly();throw e;}
   const proposal=composePopularTitle(product,result.ranking);
-  return {...proposal,originalTitle:smartstoreTitle(product),hasData:true,researchUsed:research.candidates.length>0,referenceTerms:research.titleTerms,period:result.period,fromCache:result.fromCache,source:'네이버 데이터랩 통합검색어 트렌드 API',metric:'검색 상대지수',expanded:true,categoryAudit:result.categoryAudit,candidates:result.ranking,note:result.categoryAudit.note+' 상품 종류·동의어·성별·실제 특성의 검색 관심도를 공통 기준으로 비교했습니다. 검색 관심도를 글자 수보다 우선하며, 27~39자는 권장 길이입니다. 품번·공백 포함 최대 39자이고 27자 미만도 허용합니다. 월간 절대 검색량이나 노출 순위를 뜻하지 않습니다.'};
+  return {...proposal,originalTitle:smartstoreTitle(product),hasData:true,researchUsed:research.candidates.length>0,referenceTerms:research.titleTerms,period:result.period,fromCache:result.fromCache,source:'네이버 데이터랩 통합검색어 트렌드 API',metric:'검색 상대지수',expanded:true,categoryAudit:result.categoryAudit,candidates:result.ranking,note:result.categoryAudit.note+' 상품 종류·동의어·성별·실제 특성의 검색 관심도를 공통 기준으로 비교했습니다. 품번·공백 포함 27~39자를 충족하는 상품명만 제안합니다. 길이 보강에도 공식 상품 근거만 사용합니다. 월간 절대 검색량이나 노출 순위를 뜻하지 않습니다.'};
  };
 }
