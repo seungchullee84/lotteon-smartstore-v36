@@ -28,11 +28,11 @@ test('seller code preserves six digit style and limits only the short name to se
 test('verified copy product uses actual materials, stand collar, long sleeves and first day',()=>{
  const f=learnedFields({style:'356944',material:'아크릴 54%, 폴리에스터 26%, 나일론 20%',manufactured:'2026-08'});
  assert.deepEqual(f.materials,['아크릴','폴리에스테르','나일론']);
- assert.equal(f.neckline,'스텐드/차이나칼라');assert.equal(f.sleeve,'긴팔');assert.equal(f.manufactureDate,'2026-08-01');assert.equal(new Set(f.tags).size,10);
+ assert.equal(f.neckline,'스텐드/차이나칼라');assert.equal(f.sleeve,'긴팔');assert.equal(f.manufactureDate,'2026-08-01');assert.equal(f.tags,undefined);
 });
 test('a different product never inherits cardigan tags or a guessed neckline',()=>{
  const f=learnedFields({style:'123456',name:'반팔 티셔츠',material:'면 100%',manufactured:'2025-01'});
- assert.deepEqual(f.tags,[]);assert.equal(f.neckline,null);assert.equal(f.sleeve,'반팔');assert.deepEqual(f.materials,['면']);
+ assert.equal(f.tags,undefined);assert.equal(f.neckline,null);assert.equal(f.sleeve,'반팔');assert.deepEqual(f.materials,['면']);
 });
 test('free text, duplicate ids and incomplete tag sets are rejected',()=>{
  const good=Array.from({length:10},(_,i)=>({name:'tag'+i,id:String(i+1)}));assert.equal(assertDictionaryTags(good).length,10);
@@ -51,14 +51,16 @@ test('search applicability rejects X and missing tags even with valid dictionary
 test('076931 uses reviewed padded outerwear attributes without knit, genuine leather or feather tags',()=>{
  const f=learnedFields({style:'076931',name:'남성 스웨이드 목넥 패딩 푸퍼 076931',material:'폴리에스터 100%',manufactured:'2026-09'});
  assert.equal(f.sleeve,'긴팔');assert.equal(f.neckline,'스텐드/차이나칼라');assert.deepEqual(f.materials,['폴리에스테르']);
- assert.ok(f.tags.length>=10);assert.ok(f.tags.includes('남성패딩'));assert.ok(!f.tags.some(t=>/니트|가디건|여성|여자|가죽|구스|덕다운|오리털|거위털/.test(t)));
+ assert.equal(f.tags,undefined);
 });
 test('only attributes exposed by the selected copy category are required',()=>{
  const fields={materials:['폴리에스테르'],tags:Array.from({length:10},(_,i)=>'t'+i),sleeve:null,neckline:null};
  assert.equal(assertLearnedFields(fields,['주요소재','총기장','종류','핏','충전재']),fields);
  assert.throws(()=>assertLearnedFields(fields,['소매기장']),/소매기장/);
  assert.throws(()=>assertLearnedFields({...fields,sleeve:'긴팔'},['소매기장','네크라인']),/네크라인/);
- assert.throws(()=>assertLearnedFields({...fields,tags:[]},[]),/태그 후보/);
+ assert.equal(assertLearnedFields({...fields,tags:[]},[]).tags.length,0);
+ const {tags,...withoutTags}=fields;assert.equal(assertLearnedFields(withoutTags,[]),withoutTags);
+ assert.throws(()=>assertLearnedFields({...withoutTags,materials:[]},[]),/소재/);
 });
 test('absent sleeve and neckline rows are skipped without touching copied category attributes',async()=>{
  const fields={materials:['폴리에스테르'],sleeve:'긴팔',neckline:'스텐드/차이나칼라'};const inspected=[];

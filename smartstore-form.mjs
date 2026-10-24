@@ -2,7 +2,7 @@ export function isSmartstoreInputUrl(url){return /^https:\/\/sell\.smartstore\.n
 import {buildSmartstoreDetail} from './smartstore-detail.mjs';
 import {fillAdditionalAttributes} from './smartstore-attributes.mjs';
 import {smartstoreTitle} from './smartstore-title.mjs';
-import {learnedFields,assertLearnedFields,fillLearnedAttributes,fillDictionaryTags,sellerProductCode} from './smartstore-learned.mjs';
+import {learnedFields,assertLearnedFields,fillLearnedAttributes,sellerProductCode} from './smartstore-learned.mjs';
 
 export function smartstorePlan(p,salePrice){
   if(!/^\d{6}$/.test(p?.style))throw Error('먼저 상품을 수집해 주세요.');
@@ -61,7 +61,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   assertLearnedFields(learned,await page.getByRole('table',{name:'상품속성 선택 테이블'}).getByRole('row').allTextContents());
   const fill=async(loc,value)=>{check();await loc.fill(String(value));await loc.press('Tab');const actual=await loc.evaluate(e=>e.value);if(actual!=='<redacted>'&&String(actual).replaceAll(',','')!==String(value).replaceAll(',',''))throw Error('입력값 확인 실패: '+String(value).slice(0,50));};
   const open=async(name,field)=>{if(!await field.isVisible())await page.getByRole('button',{name}).click();};
-  log('스마트스토어 복사등록 입력 · 사전 태그 검증 · 저장/등록 안 함');
+  log('스마트스토어 복사등록 입력 · 태그는 사용자 직접 입력·저장 · 저장/등록 안 함');
   log('카테고리 자동선택 중지 · 현재 선택된 분류 유지');
   await fill(page.locator('input[name="product.name"]'),plan.name);
   await fill(page.locator('#prd_price2'),plan.salePrice);
@@ -123,7 +123,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   const directDate=page.getByRole('radio',{name:'직접입력',exact:true}).filter({visible:true}).first();
   if(!await directDate.evaluate(e=>e.checked))await directDate.locator('..').click();
   await fill(page.locator('input[ng-model="vm.dateText"]'),plan.manufactured);
-  const tags=await fillDictionaryTags(page,learned.tags,log,check);
+  // Tags are entered and saved manually by the user. Leave the entire tag control untouched.
   const sellerCode=sellerProductCode(plan);
   await open(/^판매자 코드/,page.locator('#seller-code1'));
   await fill(page.locator('#seller-code1'),sellerCode);
@@ -134,7 +134,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   log('소재(설명)에 현재 상품 소재·혼용률 입력 확인');
   log('소재·색상·치수·제조국·세탁방법 입력 · A/S·품질보증·미성년자 구매 기존값 유지');
   log('입력 테스트 완료 · '+seen.size+'개 옵션 각 '+plan.stockPerOption+'개 재고 확인 · 저장/등록은 하지 않았습니다.');
-  return {style:plan.style,salePrice:plan.salePrice,verifiedOptions:seen.size,stockPerOption:plan.stockPerOption,manufactureDate,imagesSkipped:!assets,saved:false,keywordsTouched:false,tags,searchTagsVerified:true,sellerCode,origin};
+  return {style:plan.style,salePrice:plan.salePrice,verifiedOptions:seen.size,stockPerOption:plan.stockPerOption,manufactureDate,imagesSkipped:!assets,saved:false,keywordsTouched:false,tagsTouched:false,searchTagsVerified:false,tagMode:'manual',sellerCode,origin};
 }
 
 export async function uploadSmartstoreImages(page,assets,check=()=>{}){

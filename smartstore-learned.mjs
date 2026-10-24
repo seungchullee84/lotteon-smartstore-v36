@@ -41,11 +41,10 @@ export function learnedFields(p){
  const materials=[['아크릴',/아크릴/],['폴리에스테르',/폴리에[스]?터|폴리에스테르|플리에스터/],['나일론',/나일론/],['폴리우레탄',/폴리우레탄/],['면',/면\s*\d/],['울/모',/(?:울|모)\s*\d/],['레이온/인견',/레이온|인견/],['캐시미어',/캐시미어/]].filter(([,re])=>re.test(material)).map(([name])=>name);
  const sleeve=known.sleeve||(/긴팔/.test(title)?'긴팔':/반팔/.test(title)?'반팔':null);
  const neckline=known.neckline||(/카라|칼라|폴로넥/.test(title)?'칼라넥':/라운드/.test(title)?'라운드넥':/브이넥|V넥/i.test(title)?'V넥':/터틀넥/.test(title)?'터틀넥':/후드/.test(title)?'후드넥':null);
- // Only verified candidates for this product. Other styles require review rather than unrelated filler.
- return {materials,sleeve,neckline,attributes:{...known.attributes,...(sleeve?{'소매기장':sleeve}:{}),...(neckline?{'네크라인':neckline}:{}),...(/남성|남자/.test(p.gender||title)?{'사용대상':'남성용'}:/여성|여자/.test(p.gender||title)?{'사용대상':'여성용'}:{})},tags:tagCandidates(p),manufactureDate:p.manufactured+'-01',material:material||known.material,washing:p.washing||known.washing};
+ // Tag candidates are deliberately excluded: the user handles tags manually.
+ return {materials,sleeve,neckline,attributes:{...known.attributes,...(sleeve?{'소매기장':sleeve}:{}),...(neckline?{'네크라인':neckline}:{}),...(/남성|남자/.test(p.gender||title)?{'사용대상':'남성용'}:/여성|여자/.test(p.gender||title)?{'사용대상':'여성용'}:{})},manufactureDate:p.manufactured+'-01',material:material||known.material,washing:p.washing||known.washing};
 }
 export function assertLearnedFields(fields,attributeRows){
- if(fields.tags.length<10)throw Error('이 상품의 관련 태그 후보가 부족합니다. 상품 특성을 먼저 검토해 주세요.');
  if(!fields.materials.length)throw Error('상품 소재를 확인해 주세요.');
  for(const [label,key] of [['소매기장','sleeve'],['네크라인','neckline']]){
   if(attributeRows.some(row=>row.includes(label))&&!fields[key])throw Error(label+'을 상품 사진과 대조해 주세요.');
