@@ -42,6 +42,7 @@ export async function applySmartstoreImageLayout(editor,image,{check=()=>{}}={})
   const top=Math.max(box.y,160),bottom=Math.min(box.y+box.height,viewportHeight-40);
   if(bottom<=top)throw Error('상세이미지 선택 위치를 확인하지 못했습니다.');
   await editor.mouse.click(box.x+box.width/2,Math.min(bottom-5,top+40));
+  await editor.waitForFunction(id=>!!document.getElementById(id)?.querySelector('.se-section-image.se-is-selected'),componentId,{timeout:15000});
  };
  await select();
  const extend=editor.locator('button[data-name="content-mode-without-pagefull"][data-value="extend"]').filter({visible:true}).first();
