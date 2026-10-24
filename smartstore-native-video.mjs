@@ -2,6 +2,10 @@ import {requireBrandVideo} from './smartstore-brand-video.mjs';
 
 export async function nativeVideoIdentity(component){
  return component.evaluate(node=>{
+  // ONE retains its document component ID across reentry, including while the
+  // transcoder is still replacing the temporary thumbnail with a hosted image.
+  const componentId=node.getAttribute('data-compid');
+  if(/^SE-[a-f0-9-]{36}$/i.test(componentId||''))return ['component:'+componentId];
   const ids=new Set();
   const scan=value=>{if(!value||typeof value!=='object')return;for(const [key,v] of Object.entries(value)){if(/^(vid|videoId)$/i.test(key)&&typeof v==='string'&&v)ids.add(v);else if(v&&typeof v==='object')scan(v);}};
   for(const n of [node,...node.querySelectorAll('[data-module],[data-video-id],iframe,video')]){
