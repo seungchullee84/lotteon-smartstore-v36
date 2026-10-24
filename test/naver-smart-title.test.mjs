@@ -32,15 +32,15 @@ test('기모와 브러시드는 같은 품목의 API 지수를 비교해 높은 
   const requested=new Set();
   const optimize=createExpandedTitleOptimizer({researchProvider:()=>({candidates:[],titleTerms:[]}),fetchImpl:async(_,config)=>{
    const request=JSON.parse(config.body);
-   const value=word=>word===popular+'슬랙스'?90:word===(['기모','브러시드'].find(w=>w!==popular))+'슬랙스'?3:10;
+   const value=word=>word==='남성'+popular+'슬랙스'?90:word==='남성'+(['기모','브러시드'].find(w=>w!==popular))+'슬랙스'?3:10;
    const max=Math.max(...request.keywordGroups.map(g=>value(g.groupName)));
    return Response.json({...request,results:request.keywordGroups.map(g=>{requested.add(g.groupName);return {title:g.groupName,data:[{period:request.endDate,ratio:value(g.groupName)/max*100}]};})});
   }});
   const result=await optimize(p,credentials);
-  assert(requested.has('기모슬랙스'));assert(requested.has('브러시드슬랙스'));
+  assert(requested.has('남성기모슬랙스'));assert(requested.has('남성브러시드슬랙스'));
   assert(result.title.includes(popular));assert(!result.title.includes(popular==='기모'?'브러시드':'기모'));
   assert(result.length>=27&&result.length<=39);assert(!hasDuplicateTitleMeaning(p,result.title));
-  assert(result.selectedTerms.includes(popular+'슬랙스'));assert.deepEqual(p,before);
+  assert(result.selectedTerms.includes('남성'+popular+'슬랙스'));assert.deepEqual(p,before);
  }
  assert(hasDuplicateTitleMeaning(p,'지오다노 남성 기모 브러시드 슬랙스 115915'));
  assert(!expandedTitleCandidates({...p,name:'남성 히든밴딩 슬랙스',rawName:'히든밴딩 슬랙스'}).some(k=>/기모|브러시드/.test(k)));

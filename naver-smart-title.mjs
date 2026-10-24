@@ -93,7 +93,10 @@ export function expandedTitleCandidates(product){
   words.push(alias,...sexes.map(sex=>sex+alias));
   for(const feature of featureWords)if(normalized.includes(feature)&&!alias.includes(feature))words.push(feature+alias);
  }
- const variantPairs=features.filter(f=>f.variants.length>1).flatMap(f=>f.variants.map(v=>v.replace(/100%$/,'')+(aliases[0]||basic.kind)));
+ const variantPairs=features.filter(f=>f.variants.length>1).flatMap(f=>f.variants.flatMap(v=>{
+  const term=v.replace(/100%$/,'')+(aliases[0]||basic.kind);
+  return sexes.length?[sexes[0]+term,term]:[term];
+ }));
  return [...new Set([words[0],...aliases,...variantPairs,...researchForProduct(product).titleTerms,...necks,...queries,...words,...combined])].slice(0,49);
 }
 
