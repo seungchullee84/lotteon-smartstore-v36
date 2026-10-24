@@ -153,7 +153,7 @@ const server=http.createServer(async(req,res)=>{
       if(['/api/smartstore-tags','/api/smartstore-tags-validate'].includes(url.pathname)){
         if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 실행해 주세요.');
         if(!state.product||b.style!==state.product.style)throw Error('현재 상품 품번을 확인해 주세요.');
-        const current=state.product,folder=state.folder;
+        const current=state.product,folder=state.folder,validateOnly=url.pathname.endsWith('-validate');
         job('smartstore-tags',async()=>{
           const report=await smartBot.runTags(current,{validateOnly,folder});
           if(state.product!==current)throw Error('작업 중 상품이 변경되었습니다.');

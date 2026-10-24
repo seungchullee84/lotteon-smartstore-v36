@@ -80,11 +80,11 @@ export function matchResearchTags(product,index,{limit=60}={}){
  const result=[];
  for(const tag of index.tags){
   const scopeException=tag.reason==='explicit_skirt_dress'&&['원피스','스커트'].includes(kind[0]);
-  if(tag.decision!=='include'&&!scopeException||tag.conflict||!/^\d+$/.test(tag.id)||!['garment','conditional_attribute'].includes(tag.kind))continue;
+  if((tag.decision!=='include'&&!scopeException)||tag.conflict||!/^\d+$/.test(tag.id)||(!scopeException&&!['garment','conditional_attribute'].includes(tag.kind)))continue;
   let rest=normalize(tag.name),parts=[],valid=true;
   while(rest){const token=tokens.find(t=>rest.startsWith(t.name));if(!token||!token.allowed){valid=false;break;}parts.push(token);rest=rest.slice(token.name.length);}
   const garment=parts.some(t=>t.type==='garment');
-  if(!valid||!parts.length||(tag.kind==='garment'&&!garment)||(tag.kind==='conditional_attribute'&&(garment||!parts.some(t=>t.type==='feature'))))continue;
+  if(!valid||!parts.length||((tag.kind==='garment'||scopeException)&&!garment)||(tag.kind==='conditional_attribute'&&(garment||!parts.some(t=>t.type==='feature'))))continue;
   const features=parts.filter(t=>t.type==='feature').map(t=>t.name);
   result.push({id:tag.id,name:tag.name,recordId:tag.recordId,features,score:features.length*10+(normalize(tag.name).endsWith(normalize(kind[0]))?20:0)+parts.filter(t=>t.type==='gender').length*8-Math.max(0,parts.filter(t=>t.type==='garment').length-1)*3});
  }

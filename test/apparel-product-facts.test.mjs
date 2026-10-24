@@ -41,4 +41,7 @@ test('맨투맨뿐 아니라 셔츠·니트·아우터·하의·블라우스·�
  const names=matchResearchTags(sweatshirt,{tags:candidates}).map(t=>t.name);
  for(const name of ['남성티셔츠','긴팔티셔츠','봄맨투맨','가을맨투맨','쭈리맨투맨'])assert(names.includes(name),name);
  for(const name of ['여름맨투맨','겨울맨투맨'])assert(!names.includes(name),name);
+ const dress={style:'123456',rawName:'여성 데님 원피스',gender:'여성'},scope={tags:[{id:'3688',name:'데님원피스',decision:'exclude',reason:'explicit_skirt_dress',kind:'excluded_garment'}]};
+ assert.equal(matchResearchTags(dress,scope)[0].name,'데님원피스');
+ assert.equal(matchResearchTags({...dress,rawName:'여성 데님 자켓'},scope).length,0);
 });
