@@ -18,6 +18,8 @@ test('품목·성별·핏·소재를 대조하고 미확인 계절·울·와이�
  assert(!matchResearchTags({...p,rawName:'데님 자켓',name:'남성 데님 자켓'},index).some(t=>t.name==='데님팬츠'));
  assert(!matchResearchTags({...p,rawName:'반팔 티셔츠',name:'남성 반팔 티셔츠'},index).some(t=>t.name==='셔츠'));
  assert(!matchResearchTags({...p,noticeVerified:false},index).some(t=>t.name==='스판슬랙스'));
+ assert(!matchResearchTags({...p,rawName:'기모 없는 슬랙스'},index).some(t=>t.name==='기모슬랙스'));
+ assert(!matchResearchTags({...p,rawName:'니트릴장갑'}, {tags:[tag('니트',1)]}).length);
  assert.equal(matchResearchTags(p,index,{limit:2}).length,2);
 });
 

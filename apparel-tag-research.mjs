@@ -42,8 +42,8 @@ export function matchResearchTags(product,index,{limit=30}={}){
  const source=normalize(product.rawName||product.name),description=normalize(product.officialDescription),facts=source+description;
  const verified=product.noticeVerified||product.fieldStatus?.material==='공식 이미지 대조 완료';
  const material=verified?normalize(product.material):'';
- const tokens=[];const add=(names,allowed,type='feature')=>{for(const name of names)tokens.push({name:normalize(name),allowed:!!allowed,type});};
- const kinds=[['슬랙스',/슬랙스/,['슬랙스','팬츠','바지']],['청바지',/청바지|데님팬츠|데님바지/,['청바지','데님팬츠','데님바지','팬츠','바지']],['맨투맨',/맨투맨|스웨트셔츠/,['맨투맨','스웨트셔츠']],['가디건',/가디건|카디건/,['가디건','카디건']],['조끼',/조끼|베스트/,['조끼','베스트']],['티셔츠',/티셔츠|긴팔티|반팔티/,['티셔츠','티']],['니트',/니트|스웨터|풀오버/,['니트','스웨터','풀오버']],['셔츠',/(?<!티)셔츠/,['셔츠']],['패딩',/패딩|푸퍼|다운자켓|다운점퍼/,['패딩','푸퍼']],['코트',/코트/,['코트']],['자켓',/자켓|재킷|점퍼/,['자켓','재킷','점퍼']],['바지',/팬츠|바지/,['바지','팬츠']]];
+ const tokens=[];const add=(names,allowed,type='feature')=>{for(const name of names){const term=normalize(name),negative=new RegExp('(?:무|비|노)'+term+'|'+term+'(?:이|가|는|은)?(?:없|아님|아닌|미사용|불포함|제외)');tokens.push({name:term,allowed:!!allowed&&!negative.test(facts),type});}};
+ const kinds=[['슬랙스',/슬랙스/,['슬랙스','팬츠','바지']],['청바지',/청바지|데님팬츠|데님바지/,['청바지','데님팬츠','데님바지','팬츠','바지']],['맨투맨',/맨투맨|스웨트셔츠/,['맨투맨','스웨트셔츠']],['가디건',/가디건|카디건/,['가디건','카디건']],['조끼',/조끼|베스트/,['조끼','베스트']],['티셔츠',/티셔츠|긴팔티|반팔티/,['티셔츠','티']],['니트',/니트(?!릴)|스웨터|풀오버/,['니트','스웨터','풀오버']],['셔츠',/(?<!티)셔츠/,['셔츠']],['패딩',/패딩|푸퍼|다운자켓|다운점퍼/,['패딩','푸퍼']],['코트',/코트/,['코트']],['자켓',/자켓|재킷|점퍼/,['자켓','재킷','점퍼']],['바지',/팬츠|바지/,['바지','팬츠']]];
  const kind=kinds.find(([,re])=>re.test(source));if(!kind)return [];
  const garments=new Set(kind[2]);
  if(kind[0]==='가디건'&&/니트|스웨터/.test(source))garments.add('니트');
