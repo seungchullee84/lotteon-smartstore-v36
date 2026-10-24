@@ -204,10 +204,8 @@ const server=http.createServer(async(req,res)=>{
               const folder=path.join(dataRoot,'smartstore-auto-'+Date.now());
               const product=await collect(value,folder,log,()=>signal.aborted,signal,{saveSmartstoreSource:true,sourceUrlHint,noticeCacheRoot:path.join(dataRoot,'smartstore-notice-cache'),prepareMain:false});
               product.keywords=buildKeywords(product);product.smartstoreName=smartstoreTitle(product);
-              if(researchForProduct(product).candidates.length||naverCredentials.clientId&&naverCredentials.clientSecret){
-                try{const optimized=await optimizeNaverTitle(product,naverCredentials);product.smartstoreName=optimized.title;log('상품명 자동 최적화 · '+optimized.source);}
-                catch(e){log('상품명 참고 조회 확인 필요 · 공식 상품명 유지');}
-              }
+              const optimized=await optimizeNaverTitle(product,naverCredentials);
+              product.smartstoreName=optimized.title;log('상품명 자동 최적화 · '+optimized.source);
               assertSmartstoreTitleLength(product.smartstoreName);
               smartstorePlan(product,product.consumerPrice);
               return {product,folder};

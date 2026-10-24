@@ -23,6 +23,7 @@ function productFeatures(product){
   ['collar',/폴로|카라|칼라/,['카라','폴로카라','카라넥']],
   ['zip',/풀\s*(?:집|집업|지퍼)|full\s*zip/i,['집업','풀집업']],
   ['fleece',/플리스|후리스|fleece/i,['플리스','후리스']],
+  ['brushed',/기모|브러시드|brushed/i,['기모','브러시드']],
   ['wool',/(?<!겨)울|모직|wool/i,['울']],
   ['tapered',/테이퍼드/,['테이퍼드']],
   ['banding',/히든\s*밴딩/,['히든밴딩','밴딩']],
@@ -55,7 +56,7 @@ function categoryAliases(product,kind){
 // Compound search phrases are decomposed before comparing meanings. A gender
 // or garment repeated inside 여성패딩/후드패딩 still counts as repetition.
 function semanticAtoms(text,kind){
- const groups=[['brand',['지오다노','GIORDANO']],['female',['여성용','여자용','여성','여자']],['male',['남성용','남자용','남성','남자']],['short',['숏기장','쇼트','숏']],['hood',['후디','후드']],['collar',['폴로카라','카라넥','폴로','카라']],['zip',['풀집업','집업']],['fleece',['플리스','후리스']],['long-sleeve',['긴소매','긴팔']],['short-sleeve',['반소매','반팔']],['cotton',['면','코튼']],['fit',['오버사이즈','오버핏','레귤러핏','슬림핏','테이퍼드']],['banding',['히든밴딩','밴딩']],['cable',['케이블','꽈배기']],['rib',['골지','리브드']],['linen',['린넨','리넨']],['line-cloud',['CLOUD','클라우드']],['line-light',['LIGHT','라이트']]];
+ const groups=[['brand',['지오다노','GIORDANO']],['female',['여성용','여자용','여성','여자']],['male',['남성용','남자용','남성','남자']],['short',['숏기장','쇼트','숏']],['hood',['후디','후드']],['collar',['폴로카라','카라넥','폴로','카라']],['zip',['풀집업','집업']],['fleece',['플리스','후리스']],['brushed',['브러시드','기모']],['long-sleeve',['긴소매','긴팔']],['short-sleeve',['반소매','반팔']],['cotton',['면','코튼']],['fit',['오버사이즈','오버핏','레귤러핏','슬림핏','테이퍼드']],['banding',['히든밴딩','밴딩']],['cable',['케이블','꽈배기']],['rib',['골지','리브드']],['linen',['린넨','리넨']],['line-cloud',['CLOUD','클라우드']],['line-light',['LIGHT','라이트']]];
  if(kind==='패딩')groups.push(['insulation',['패딩','푸퍼']]);
  groups.push(['garment',kind==='패딩'?['재킷','자켓','점퍼','아우터']:kind==='자켓'?['재킷','자켓','아우터']:kind==='코트'?['코트','아우터']:[...(synonyms[kind]||[kind]),...(kind==='바지'?['슬랙스','청바지']:[]),'의류']]);
  const terms=groups.flatMap(([atom,names])=>names.map(name=>({name:name.toLowerCase(),atom}))).sort((a,b)=>b.name.length-a.name.length);
@@ -85,14 +86,15 @@ export function expandedTitleCandidates(product){
  const features=productFeatures(product);
  const queries=features.flatMap(f=>f.variants.flatMap(v=>{
   const term=v.replace(/100%$/,'');
-  return [term+basic.kind,...sexes.map(sex=>sex+term+basic.kind)];
+  return [...new Set([basic.kind,...aliases])].flatMap(kind=>[term+kind,...sexes.map(sex=>sex+term+kind)]);
  }));
  const combined=features.flatMap((f,i)=>features.slice(i+1).map(g=>f.variants[0].replace(/100%$/,'')+g.variants[0].replace(/100%$/,'')+basic.kind));
  for(const alias of aliases){
   words.push(alias,...sexes.map(sex=>sex+alias));
   for(const feature of featureWords)if(normalized.includes(feature)&&!alias.includes(feature))words.push(feature+alias);
  }
- return [...new Set([words[0],...aliases,...researchForProduct(product).titleTerms,...necks,...queries,...words,...combined])].slice(0,49);
+ const variantPairs=features.filter(f=>f.variants.length>1).flatMap(f=>f.variants.map(v=>v.replace(/100%$/,'')+(aliases[0]||basic.kind)));
+ return [...new Set([words[0],...aliases,...variantPairs,...researchForProduct(product).titleTerms,...necks,...queries,...words,...combined])].slice(0,49);
 }
 
 export function composePopularTitle(product,ranking){
@@ -111,7 +113,7 @@ export function composePopularTitle(product,ranking){
  words=words.filter(word=>!/(?:크루넥|라운드(?:넥)?)/.test(word));
  if(neck)words.unshift(neck);
  const features=productFeatures(product);
- const featureScore=word=>Math.max(0,...ranking.filter(e=>e.keyword.endsWith(kind)&&e.keyword.includes(word.replace(/100%$/,''))).map(e=>e.score));
+ const featureScore=word=>Math.max(0,...ranking.filter(e=>[kind,...aliases].some(alias=>e.keyword.endsWith(alias))&&e.keyword.includes(word.replace(/100%$/,''))).map(e=>e.score));
  const choices=features.map(f=>({...f,ranked:f.variants.filter(v=>featureScore(v)>0).sort((a,b)=>featureScore(b)-featureScore(a))})).filter(f=>f.ranked.length);
  // Remove compound source spellings before adding their measured equivalent.
  words=words.join(' ').replace(/풀\s*(?:집업|집|지퍼)/g,'풀집업').split(' ');
@@ -146,7 +148,7 @@ export function composePopularTitle(product,ranking){
   if([...proposed].length>39||hasDuplicateTitleMeaning(product,proposed))return false;
   words=candidate;return true;
  };
- for(const feature of features){
+ for(const feature of [...features].sort((a,b)=>Math.max(...b.variants.map(featureScore))-Math.max(...a.variants.map(featureScore)))){
   if([...render()].length>=27)break;
   const variants=[...feature.variants].sort((a,b)=>featureScore(b)-featureScore(a));
   if(variants.some(word=>words.includes(word)))continue;
@@ -187,14 +189,8 @@ export function createExpandedTitleOptimizer(options={}){
  const optimize=createKeywordOptimizer({...options,candidateFactory:expandedTitleCandidates});
  return async(product,credentials)=>{
   const research=researchProvider(product);
-  const referenceOnly=()=>{
-   const proposal=composePopularTitle(product,[]);
-   return {...proposal,originalTitle:smartstoreTitle(product),hasData:false,researchUsed:true,researchCount:research.count,referenceTerms:research.titleTerms,candidates:[],source:'연결된 의류 태그 조사자료',period:null,note:'공식 상품 근거와 조사 명칭으로 정리했습니다. 검색량·인기도 순위가 아닙니다. 네이버 API 연결 시 검색 상대지수도 함께 비교합니다.'};
-  };
-  if(research.candidates.length&&(!credentials?.clientId||!credentials?.clientSecret))return referenceOnly();
   const normalized={...product,name:smartstoreTitle({...product,smartstoreName:''}),smartstoreName:''};
-  let result;
-  try{result=await optimize(normalized,credentials);}catch(e){if(research.candidates.length)return referenceOnly();throw e;}
+  const result=await optimize(normalized,credentials);
   const proposal=composePopularTitle(product,result.ranking);
   return {...proposal,originalTitle:smartstoreTitle(product),hasData:true,researchUsed:research.candidates.length>0,referenceTerms:research.titleTerms,period:result.period,fromCache:result.fromCache,source:'네이버 데이터랩 통합검색어 트렌드 API',metric:'검색 상대지수',expanded:true,categoryAudit:result.categoryAudit,candidates:result.ranking,note:result.categoryAudit.note+' 상품 종류·동의어·성별·실제 특성의 검색 관심도를 공통 기준으로 비교했습니다. 품번·공백 포함 27~39자를 충족하는 상품명만 제안합니다. 길이 보강에도 공식 상품 근거만 사용합니다. 월간 절대 검색량이나 노출 순위를 뜻하지 않습니다.'};
  };
