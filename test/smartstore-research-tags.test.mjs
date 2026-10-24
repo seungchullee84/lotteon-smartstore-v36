@@ -32,7 +32,7 @@ test('관련 사전 ID만 입력하고 기존 태그를 재사용하며 10개 �
   const candidates=[{name:'기모슬랙스',id:'1'},{name:'밴딩슬랙스',id:'2'},{name:'테이퍼드핏',id:'3'}];
   await fixture(page,{candidates,existing:[candidates[0],{name:'다른상품',id:'999'}]});
   const research={configured:true,candidates},result=await fillResearchTags(page,research);
-  assert.equal(result.tagCount,3);assert.equal(result.retained,1);assert.equal(result.searches,2);assert.equal(result.searchTagsVerified,true);assert.equal(result.tagStatus,'partial');
+  assert.equal(result.tagCount,3);assert.equal(result.retained,1);assert.equal(result.searches,2);assert.equal(result.searchTagsVerified,true);assert.equal(result.tagStatus,'needs-review');assert.equal(result.tagMissing,7);
   const repeated=await fillResearchTags(page,research);assert.equal(repeated.retained,3);assert.equal(repeated.searches,0);assert.equal(await page.evaluate(()=>window.saves),0);
   await assert.rejects(fillResearchTags(page,research,()=>{},()=>{throw Error('중단');}),/중단/);
  }finally{await browser.close();}

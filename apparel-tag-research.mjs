@@ -19,7 +19,7 @@ export async function importTagResearch(source,destination=RESEARCH_INDEX){
  }
  const tags=d.inferred_classifications.map(c=>{
   const t=observed.get(c.tag_record_id);if(!t||t.id!==c.id||t.observed_name!==c.observed_name)throw Error('태그 분류와 원본 명칭이 다릅니다.');
-  return {id:t.id,name:t.observed_name,recordId:t.tag_record_id,evidenceIds:t.evidence_ids,decision:c.decision,kind:c.kind,conflict:!!t.conflict};
+  return {id:t.id,name:t.observed_name,recordId:t.tag_record_id,evidenceIds:t.evidence_ids,decision:c.decision,reason:c.reason_code,kind:c.kind,conflict:!!t.conflict};
  });
  if(tags.length!==observed.size||new Set(tags.map(t=>t.id)).size!==tags.length)throw Error('태그 분류 수가 원본과 다릅니다.');
  const index={schema:'apparel-tag-local-index/1',sourceHash:createHash('sha256').update(bytes).digest('hex'),generatedAt:d.export_metadata?.generated_at,importedAt:new Date().toISOString(),observedCount:tags.length,tags};
@@ -45,11 +45,12 @@ export function matchResearchTags(product,index,{limit=60}={}){
  const verified=product.noticeVerified||product.fieldStatus?.material==='공식 이미지 대조 완료';
  const material=verified?normalize(product.material):'';
  const tokens=[];const add=(names,allowed,type='feature')=>{for(const name of names){const term=normalize(name),negative=new RegExp('(?:무|비|노)'+term+'|'+term+'(?:이|가|는|은)?(?:없|아님|아닌|미사용|불포함|제외)');tokens.push({name:term,allowed:!!allowed&&!negative.test(facts),type});}};
- const kinds=[['반바지',/반바지|쇼츠/,['반바지','쇼츠','팬츠','바지']],['슬랙스',/슬랙스/,['슬랙스','팬츠','바지']],['청바지',/청바지|데님팬츠|데님바지/,['청바지','데님팬츠','데님바지','팬츠','바지']],['맨투맨',/맨투맨|스웨트셔츠|스웻셔츠/,['맨투맨','스웨트셔츠','스웻셔츠','티셔츠','티']],['가디건',/가디건|카디건/,['가디건','카디건']],['조끼',/조끼|베스트/,['조끼','베스트']],['후드티',/후드티|후디/,['후드티','티셔츠','티']],['티셔츠',/티셔츠|긴팔티|반팔티/,['티셔츠','티']],['니트',/니트(?!릴)|스웨터|풀오버/,['니트','스웨터','풀오버']],['셔츠',/(?<!티)셔츠/,['셔츠']],['패딩',/패딩|푸퍼|다운자켓|다운점퍼/,['패딩','푸퍼']],['코트',/코트/,['코트']],['자켓',/자켓|재킷|점퍼/,['자켓','재킷','점퍼']],['바지',/팬츠|바지/,['바지','팬츠']]];
+ const kinds=[['원피스',/원피스|드레스/,['원피스','드레스']],['스커트',/스커트|치마/,['스커트','치마']],['레깅스',/레깅스/,['레깅스','팬츠','바지']],['래쉬가드',/래쉬가드|래시가드/,['래쉬가드','래시가드','수영복']],['수영복',/수영복/,['수영복']],['잠옷',/잠옷|파자마/,['잠옷','파자마','홈웨어']],['블라우스',/블라우스/,['블라우스','셔츠','상의']],['바람막이',/바람막이|윈드브레이커/,['바람막이','윈드브레이커','자켓','재킷','점퍼','아우터']],['조거팬츠',/조거팬츠|조거바지/,['조거팬츠','조거바지','팬츠','바지']],['반바지',/반바지|쇼츠/,['반바지','쇼츠','팬츠','바지']],['슬랙스',/슬랙스/,['슬랙스','팬츠','바지']],['청바지',/청바지|데님팬츠|데님바지/,['청바지','데님팬츠','데님바지','팬츠','바지']],['맨투맨',/맨투맨|스웨트셔츠|스웻셔츠/,['맨투맨','스웨트셔츠','스웻셔츠','티셔츠','티']],['가디건',/가디건|카디건/,['가디건','카디건']],['조끼',/조끼|베스트/,['조끼','베스트']],['후드티',/후드티|후디/,['후드티','티셔츠','티']],['티셔츠',/티셔츠|긴팔티|반팔티/,['티셔츠','티']],['니트',/니트(?!릴)|스웨터|풀오버/,['니트','스웨터','풀오버']],['셔츠',/(?<!티)셔츠|남방/,['셔츠','남방']],['패딩',/패딩|푸퍼|다운자켓|다운점퍼/,['패딩','푸퍼']],['코트',/코트/,['코트']],['자켓',/자켓|재킷|점퍼/,['자켓','재킷','점퍼']],['바지',/팬츠|바지/,['바지','팬츠']]];
  const kind=kinds.find(([,re])=>re.test(source));if(!kind)return [];
  const garments=new Set(kind[2]);
  if(kind[0]==='가디건'&&/니트|스웨터/.test(source))garments.add('니트');
  if(['코트','자켓','가디건'].includes(kind[0]))garments.add('아우터');
+ if(['맨투맨','티셔츠','니트','가디건','셔츠','블라우스','후드티'].includes(kind[0]))garments.add('상의');
  if(kind[0]==='패딩'&&!/조끼|베스트/.test(source))for(const word of ['점퍼','자켓','재킷','아우터'])garments.add(word);
  const allGarments=new Set(kinds.flatMap(k=>k[2]).concat(['아우터','원피스','스커트','레깅스','잠옷','수영복','수트','정장','세트','가디건']));
  for(const g of allGarments)add([g],garments.has(g),'garment');
@@ -70,7 +71,8 @@ export function matchResearchTags(product,index,{limit=60}={}){
  tokens.sort((a,b)=>b.name.length-a.name.length);
  const result=[];
  for(const tag of index.tags){
-  if(tag.decision!=='include'||tag.conflict||!/^\d+$/.test(tag.id)||!['garment','conditional_attribute'].includes(tag.kind))continue;
+  const scopeException=tag.reason==='explicit_skirt_dress'&&['원피스','스커트'].includes(kind[0]);
+  if(tag.decision!=='include'&&!scopeException||tag.conflict||!/^\d+$/.test(tag.id)||!['garment','conditional_attribute'].includes(tag.kind))continue;
   let rest=normalize(tag.name),parts=[],valid=true;
   while(rest){const token=tokens.find(t=>rest.startsWith(t.name));if(!token||!token.allowed){valid=false;break;}parts.push(token);rest=rest.slice(token.name.length);}
   const garment=parts.some(t=>t.type==='garment');
