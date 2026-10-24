@@ -74,7 +74,11 @@ export function expandedTitleCandidates(product){
   return sexes.length?[sexes[0]+term,term]:[term];
  })));
  const mandatory=[...new Set([words[0],...aliases.flatMap(alias=>[alias,...sexes.map(sex=>sex+alias)]),...variantPairs])];
- const researchTerms=researchForProduct(product).titleTerms.filter(term=>!featureSynonyms.some(group=>group.variants.some(word=>word.length>1&&term.includes(word))&&!features.some(f=>f.id===group.id)));
+ const excludedAliases=(synonyms[basic.kind]||[]).filter(alias=>!aliases.includes(alias));
+ const researchTerms=researchForProduct(product).titleTerms.filter(term=>
+  !(excludedAliases.some(alias=>term.includes(alias))&&!aliases.some(alias=>term.includes(alias)))&&
+  !featureSynonyms.some(group=>group.variants.some(word=>word.length>1&&term.includes(word))&&!features.some(f=>f.id===group.id))
+ );
  const optional=[...new Set([...researchTerms,...necks,...queries,...words,...combined])].filter(term=>!mandatory.includes(term));
  return [...mandatory,...optional.slice(0,Math.max(0,49-mandatory.length))];
 }
