@@ -45,6 +45,7 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   browser=await chromium.launch({headless:true});const page=await browser.newPage();page.setDefaultTimeout(8000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('http://127.0.0.1:'+server.address().port);
+  await page.addStyleTag({content:'*,*::before,*::after{transition:none!important}'});
   await page.locator('#channelSmartstore').click();
   await page.waitForFunction(()=>document.getElementById('smartstoreName').value.includes('356956'));
   await page.waitForFunction(()=>document.getElementById('naverTitleResult').textContent.includes('처음 한 번'));
@@ -66,6 +67,21 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   const collect=await page.locator('#collect').evaluate(el=>({weight:getComputedStyle(el).fontWeight,background:getComputedStyle(el).backgroundColor}));
   assert.deepEqual(login,collect);
   assert.equal(await page.locator('#smartstoreStart').isVisible(),true);
+  assert.equal(await page.locator('#collectionCard #smartstoreStart').count(),0);
+  assert.equal(await page.locator('#review .registration-footer .register-actions #smartstoreStart').count(),1);
+  for(const width of [1400,800,390]){
+   await page.setViewportSize({width,height:900});
+   const smartButton=await page.locator('#smartstoreStart').boundingBox();
+   assert.ok(smartButton.x>=0&&smartButton.x+smartButton.width<=width,'시작 버튼이 화면 너비에 맞음');
+   await page.locator('#channelLotte').click();
+   assert.equal(await page.locator('#smartstoreStart').isVisible(),false);
+   const lotteButton=await page.locator('#run').boundingBox();
+   assert.equal(smartButton.width,lotteButton.width,'두 채널의 시작 버튼 너비가 같음');
+   assert.equal(smartButton.height,lotteButton.height,'두 채널의 시작 버튼 높이가 같음');
+   await page.locator('#channelSmartstore').click();
+   assert.equal(await page.locator('#run').isVisible(),false);
+  }
+  await page.setViewportSize({width:1280,height:900});
   assert.equal(await page.locator('#smartstoreName').inputValue(),allowedTitle);
   await page.locator('#smartstoreName').fill('지오다노 남자 브이넥 아가일 니트 356956');
   fail=true;await page.locator('#smartstoreOptimizeTitle').click();
