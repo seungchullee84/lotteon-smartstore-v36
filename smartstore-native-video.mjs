@@ -9,11 +9,17 @@ export async function nativeVideoIdentity(component){
    try{scan(JSON.parse(n.getAttribute('data-module')));}catch{}
    if(n.matches('iframe,video'))try{const u=new URL(n.getAttribute('src'),location.href);const vid=u.searchParams.get('vid')||u.searchParams.get('videoId');if(vid)ids.add(vid);}catch{}
   }
+  // ONE's edit surface exposes a native thumbnail instead of a player/vid attribute.
+  // Its uploaded public resource is stable when the same document is reopened.
+  if(!ids.size)for(const image of node.querySelectorAll('img.se-video-thumbnail-resource'))try{
+   const u=new URL(image.src);if(u.protocol==='https:'&&u.hostname.endsWith('.pstatic.net'))ids.add('thumbnail:'+u.origin+u.pathname);
+  }catch{}
   return [...ids].sort();
  });
 }
 export async function assertNativeVideoToolbar(editor){
- const button=editor.getByRole('button',{name:/^동영상$/});
+ const toolbar=editor.locator('button[data-name="video"][data-group="documentToolbar"]');
+ const button=await toolbar.count()===1?toolbar:editor.getByRole('button',{name:/^동영상$/});
  if(await button.count()!==1||!await button.isVisible())throw Error('ONE의 동영상 첨부 버튼을 확인하지 못했습니다. 기존 상세를 교체하지 않았습니다.');
  return button;
 }
@@ -41,12 +47,19 @@ export async function insertNativeBrandVideo(editor,{check=()=>{},dataRoot,video
     // Some upload windows expose an untyped single file input. Only use it in a new video popup.
     if(!await inputs.count()&&popupPages.includes(scope.page())&&/동영상/.test(await scope.locator('body').innerText().catch(()=>'')))inputs=scope.locator('input[type="file"]');
     if(await inputs.count()===1){check();await inputs.setInputFiles(file);attached=true;break;}
-    const add=scope.getByRole('button',{name:'동영상 추가',exact:true});
-    if(await add.count()===1&&await add.isVisible()){check();await add.click();break;}
+    const uploader=scope.locator('#video-uploader-wrap');
+    const add=uploader.getByRole('button',{name:'동영상 추가',exact:true});
+    if(await add.count()===1&&await add.isVisible()){
+     check();const [chooser]=await Promise.all([scope.page().waitForEvent('filechooser',{timeout:10000}),add.click()]);
+     await chooser.setFiles(file);attached=true;break;
+    }
    }else if(!completed){
     // Restrict completion to the upload dialog or popup, never the seller form's Register button.
-    const areas=popupPages.includes(scope.page())?[scope]:await scope.getByRole('dialog').all();
+    const uploader=scope.locator('#video-uploader-wrap');
+    const nativeUploader=await uploader.count()===1&&await uploader.isVisible();
+    const areas=nativeUploader?[uploader]:popupPages.includes(scope.page())?[scope]:await scope.getByRole('dialog').all();
     for(const area of areas){
+     if(nativeUploader&&!await area.getByText('업로드 완료',{exact:true}).isVisible())continue;
      const done=area.getByRole('button',{name:/^(완료|올리기|동영상 올리기|첨부)$/});
      if(await done.count()===1&&await done.isVisible()&&await done.isEnabled()){
       check();await done.click();completed=true;break;
