@@ -10,6 +10,7 @@ import path from 'node:path';
 import { chromium } from 'playwright';
 import {analyzeNotice} from './notice.mjs';
 import {analyzeNoticeCached} from './notice-cache.mjs';
+import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 import {readSourceImage,inspectDetailSource} from './source-image.mjs';
 
 export const OFFICIAL = 'https://www.giordano.co.kr';
@@ -236,7 +237,7 @@ export function parseProduct(html, detailUrl, style) {
   if(!consumerPrice)warnings.push('공식몰 소비자가를 직접 확인해 주세요.');
   if(!gender)warnings.push('상품 경로에서 성별을 확정하지 못했습니다. 성별을 직접 선택해야 등록할 수 있습니다.');
   if(!category.commonMiddle)warnings.push('롯데 상품분류 대응이 검증되지 않아 공란으로 두었습니다. 아래 공식몰 상품 경로를 참고해 선택해 주세요.');
-  return {style,sourceUrl:detailUrl,originalDetailUrl:detail||null,rawName:raw,gender,sourceCategory,name:koreanTitle(raw,gender,style).trim(),consumerPrice,colors,sizes,material:'',country:'',washing:'',manufactured:'',images:{main,...(detail?{detail}:{}),...(size?{size}:{}),...(check?{check}:{}),info,...Object.fromEntries(gallery.map((src,i)=>["extra"+(i+1),src]))},category,ocrText:'',warnings};
+  return {style,sourceUrl:detailUrl,officialDescription:$('.prd_detail_content_gio').first().text().replace(/\s+/g,' ').trim().slice(0,12000),originalDetailUrl:detail||null,rawName:raw,gender,sourceCategory,name:koreanTitle(raw,gender,style).trim(),consumerPrice,colors,sizes,material:'',country:'',washing:'',manufactured:'',images:{main,...(detail?{detail}:{}),...(size?{size}:{}),...(check?{check}:{}),info,...Object.fromEntries(gallery.map((src,i)=>["extra"+(i+1),src]))},category,ocrText:'',warnings};
 }
 export function applyOCR(product, text) {
   const clean=text.replace(/\r/g,'');
