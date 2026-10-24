@@ -14,7 +14,7 @@ async function fixture(page,{candidates,existing=[],invalid=[],wrongId=false}){
    if(e.key==='Escape'){menu.hidden=true;return;}
    if(e.key!=='End')return;window.searches++;menu.replaceChildren();menu.hidden=false;
    const tag=candidates.find(t=>t.name===field.value);if(!tag)return;
-   const option=document.createElement('div');option.dataset.selectable='';option.dataset.value=wrongId?'99999':tag.id;option.textContent=tag.name;option.onclick=()=>{add(tag);field.value='';menu.hidden=true;};menu.append(option);
+   const option=document.createElement('div');option.dataset.selectable='';option.dataset.value=wrongId?'99999':tag.id;option.textContent=tag.name;option.onmousedown=e=>e.preventDefault();option.onclick=()=>{add(tag);field.value='';menu.hidden=true;};menu.append(option);
   });field.addEventListener('blur',()=>{menu.hidden=true;});
   document.querySelector('a').onclick=()=>{
    const names=Array.from(selected.querySelectorAll('strong')).map(e=>e.textContent.slice(1)),modal=document.createElement('div');modal.className='modal-content';
