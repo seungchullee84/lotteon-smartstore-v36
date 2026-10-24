@@ -3,7 +3,7 @@ import {buildDetailContent} from './detail-html.mjs';
 export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-approved-20261024';
 export const TEMPLATE_ASSET_NAMES=['brand-intro.jpg','benefits.jpg','shipping.jpg','returns.jpg','store.jpg','GowunDodum-Regular.ttf'];
 export const TEMPLATE_ASSET_BASE='https://raw.githubusercontent.com/seungchullee84/lotteon-smartstore-v36/main/public/smartstore-template/';
-export const OFFICIAL_BRAND_VIDEO='https://www.youtube.com/embed/nRI2390T5GQ?playsinline=1&rel=0&autoplay=1&mute=1&controls=1';
+export const OFFICIAL_BRAND_VIDEO='https://www.youtube.com/embed/nRI2390T5GQ?playsinline=1&rel=0&controls=1';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const style='font-family:GowunDodum,\'Malgun Gothic\',sans-serif;color:#293f33;word-break:keep-all;overflow-wrap:anywhere;line-height:1.85;';
 function safeImage(src){
@@ -23,7 +23,7 @@ export function productSellingPoints(p){
  return points.slice(0,3);
 }
 
-export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=src=>src,includeVideo=true,includeNavigation=true}={}){
+export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=src=>src,includeVideo=true,includeNavigation=false}={}){
  if(!p?.images)throw Error('먼저 상품 정보를 수집해 주세요.');
  const original=buildDetailContent(p.images,p.colors,p.colorImages,p.originalDetailUrl);
  const draft=p.smartstoreDetail;
@@ -40,7 +40,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  body+=`<section style="padding:60px 6%;background:#f1f1e9;"><p style="margin:0 0 30px;text-align:center;font-size:21px;">롯데백화점 동탄점</p><h1 style="font-size:46px;line-height:1.5;margin:0 0 24px;font-weight:700;">${esc(draft?.headline||name)}</h1><p style="font-size:23px;margin:0;">STYLE ${esc(p.style)} · ${esc(p.colors?.length||0)} COLORS</p><p style="font-size:21px;margin:12px 0 0;">${esc((p.sizes||[]).join(' · '))}</p></section>`;
  body+=`<section style="padding:48px 6%;">${header('PRODUCT POINT','고를 때 확인할 포인트.')}<div style="display:flex;gap:20px;align-items:start;">${points.map((point,i)=>`<div style="flex:1;min-width:0;border-top:0.5px solid #cbd1c3;padding-top:18px;"><span style="font-size:17px;color:#6b785f;">${String(i+1).padStart(2,'0')}</span><h3 style="font-size:25px;line-height:1.6;margin:10px 0;">${esc(point.title)}</h3><p style="font-size:20px;margin:0;">${esc(point.description)}</p></div>`).join('')}</div></section>`;
  if(groups.length){
-  body+=`<section style="padding:28px 6% 44px;">${header('COLOR PALETTE','취향에 맞춰, '+esc(groups.length)+'가지.')}${includeNavigation?'<p style="padding:12px 16px;background:#fff1e7;color:#a43c23;border-left:3px solid #c35b36;font-size:19px;font-weight:700;">색상 사진을 클릭하면 해당 색상으로 이동합니다.</p>':''}<div style="display:flex;gap:12px;align-items:start;">${groups.map(g=>`<a href="#smartstore-color-${g.index}" style="flex:1;min-width:0;text-decoration:none;color:inherit;">${photo(g.urls[0],g.color,'aspect-ratio:3/4;object-fit:cover;')}<b style="display:block;font-size:21px;margin-top:14px;">${esc(g.color)}</b></a>`).join('')}</div><p style="font-size:19px;margin:24px 0 0;">촬영 조명과 화면 설정에 따라 실제 색상과 차이가 있을 수 있습니다. 공식 상품 이미지도 함께 확인해 주세요.</p></section>`;
+  body+=`<section style="padding:28px 6% 44px;">${header('COLOR PALETTE','취향에 맞춰, '+esc(groups.length)+'가지.')}${includeNavigation?'<p style="padding:12px 16px;background:#fff1e7;color:#a43c23;border-left:3px solid #c35b36;font-size:19px;font-weight:700;">색상 사진을 클릭하면 해당 색상으로 이동합니다.</p>':''}<div style="display:flex;gap:12px;align-items:start;">${groups.map(g=>`<${includeNavigation?'a href="#smartstore-color-'+g.index+'"':'div'} style="flex:1;min-width:0;text-decoration:none;color:inherit;">${photo(g.urls[0],g.color,'aspect-ratio:3/4;object-fit:cover;')}<b style="display:block;font-size:21px;margin-top:14px;">${esc(g.color)}</b></${includeNavigation?'a':'div'}>`).join('')}</div><p style="font-size:19px;margin:24px 0 0;">촬영 조명과 화면 설정에 따라 실제 색상과 차이가 있을 수 있습니다. 공식 상품 이미지도 함께 확인해 주세요.</p></section>`;
   for(const group of groups)body+=`<section id="smartstore-color-${group.index}" style="padding:40px 4%;background:${group.index%2?'#f6f3ef':'#fff'};">${header('COLOR '+String(group.index+1).padStart(2,'0'),esc(group.color))}<div style="display:flex;gap:8px;align-items:start;"><div style="flex:1.15;min-width:0;">${photo(group.urls[0],group.color+' 착용 모습')}</div>${group.urls.length>1?`<div style="flex:1;min-width:0;">${group.urls.slice(1).map(url=>photo(url,group.color+' 디테일','margin-bottom:8px;')).join('')}<p style="font-size:19px;margin:16px 0 0;">DETAIL<br>정면과 다른 각도의 착용 모습을 함께 담았습니다.</p></div>`:''}</div></section>`;
  }
  body+=`<section style="padding:40px 6%;background:#f6f3ef;">${header('MATERIAL & SIZE','상품 정보를 확인해 주세요.')}<p style="font-size:23px;margin:0;">${esc(p.material||'소재는 아래 공식 상품고시를 확인해 주세요.')}</p><p style="font-size:21px;margin:12px 0 0;">사이즈 ${esc((p.sizes||[]).join(' · '))}</p></section>`;

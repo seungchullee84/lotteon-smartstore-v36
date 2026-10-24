@@ -1,3 +1,4 @@
+import {OFFICIAL_BRAND_VIDEO} from './smartstore-detail.mjs';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
@@ -18,6 +19,15 @@ export async function smartstoreUploadParts(png,folder,brandFile){
   await writeFile(file,bytes);parts.push(file);top+=height;
  }
  return {files:parts,video:VIDEO,hash:digest};
+}
+export async function insertSmartstoreVideo(editor,{check=()=>{}}={}){
+ check();const before=await editor.locator('.se-component.se-oembed').count();
+ await editor.locator('button[data-name="shopping-html"]').click();
+ const field=editor.locator('textarea[title="HTML 변환"]');await field.waitFor({state:'visible'});
+ await field.fill('<iframe width="848" height="477" src="'+OFFICIAL_BRAND_VIDEO.replaceAll('&','&amp;')+'" allow="encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>');
+ await editor.getByRole('button',{name:'변환',exact:true}).click();await field.waitFor({state:'hidden'});
+ await editor.waitForFunction(count=>document.querySelectorAll('.se-component.se-oembed').length===count+1,before,{timeout:45000});
+ if(await editor.locator('.se-component.se-text').evaluateAll(ns=>ns.some(n=>n.innerText.includes('youtube.com/')||n.innerText.includes('youtu.be/'))))throw Error('영상 주소가 본문에 남아 있습니다.');
 }
 export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}}={}){
  if(!/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+/.test(page.url()))throw Error('상세페이지는 스마트스토어 복사등록 화면에서만 교체합니다.');
@@ -73,10 +83,9 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
   check();
  };
  await choose(parts.files[0]);log('브랜드 소개 이미지 업로드');
- // Pasting a YouTube URL + Enter creates ONE's native oEmbed video block.
+ // HTML conversion creates ONE's native video without retaining a URL paragraph.
  await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});
- await editor.keyboard.insertText(parts.video);await editor.keyboard.press('Enter');
- await editor.locator('.se-component.se-oembed').first().waitFor({state:'visible',timeout:45000});
+ await insertSmartstoreVideo(editor,{check});
  for(const file of parts.files.slice(1))await choose(file);
  const order=await editor.locator('.se-component').evaluateAll(ns=>ns.filter(n=>/se-image|se-video|se-oembed/.test(n.className)).map(n=>n.className));
  if(order.length!==parts.files.length+1||!order[0].includes('se-image')||!/se-video|se-oembed/.test(order[1])||order.slice(2).some(c=>!c.includes('se-image')))throw Error('브랜드 소개·영상·상품상세 순서를 확인해 주세요.');
@@ -95,8 +104,10 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
   names.push(await image.evaluate(n=>decodeURIComponent(new URL(n.src).pathname.split('/').at(-1))));
  }
  const video=await verified.locator('.se-component.se-oembed').first().innerHTML();
+ const leftoverUrl=await verified.locator('.se-component.se-text').evaluateAll(ns=>ns.some(n=>/youtube\.com\/|youtu\.be\//.test(n.innerText)));
+ if(leftoverUrl)throw Error('저장된 상세페이지에 영상 주소 문장이 남아 있습니다.');
  if(JSON.stringify(names)!==JSON.stringify(expected)||await verified.locator('.se-component.se-image .se-component-content-fit').count()!==expected.length||!video.includes('nRI2390T5GQ'))throw Error('저장된 상세페이지의 이미지·영상·문서 너비 설정 대조 결과가 다릅니다.');
  await verified.close();
  log('상세페이지 이미지 '+parts.files.length+'장 및 공식 영상 반영 확인');
- return {detailUploaded:true,detailParts:parts.files.length,videoUploaded:true,imageLayout:'fit'};
+ return {detailUploaded:true,detailParts:parts.files.length,videoUploaded:true,videoPlayback:'click-to-play',colorNavigation:false,imageLayout:'fit'};
 }

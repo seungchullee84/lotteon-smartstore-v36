@@ -16,7 +16,7 @@ test('스마트스토어에만 확정 템플릿·영상·공식 원본·INFORMAT
  assert.doesNotMatch(lotte,/smartstore-template|youtube|benefits/);
  assert.ok(approved.indexOf('brand-intro.jpg')<approved.indexOf('youtube.com/embed'));
  assert.ok(approved.indexOf('/info.jpg')<approved.indexOf('benefits.jpg'));
- assert.match(approved,/autoplay=1&amp;mute=1/);assert.doesNotMatch(approved,/26920|모달|기모|CARE GUIDE/);
+ assert.match(approved,/playsinline=1&amp;rel=0&amp;controls=1/);assert.doesNotMatch(approved,/autoplay=1|클릭하면 해당 색상|href="#smartstore-color-/);assert.doesNotMatch(approved,/26920|모달|기모|CARE GUIDE/);
  assert.deepEqual(productSellingPoints(product).map(p=>p.title),['경량','2 COLORS','SIZE']);
  assert.equal((approved.match(/\/detail.jpg/g)||[]).length,1);
  assert.throws(()=>buildSmartstoreDetail({...product,images:{main:'https://www.giordano.co.kr/main.jpg'}}),/중단/);
@@ -47,7 +47,7 @@ test('다른 품번·색상·외부 경로는 차단하고 사진 매핑과 상�
   assert.match(localSmartstorePreview(p).html,/smartstore-photo\/[a-f0-9]{24}/);assert.doesNotMatch(localSmartstorePreview(p).html,/기모/);
   const out=path.join(root,'detail.png');const result=await saveSmartstoreDetail(product,folder,out,{dataRoot});
   const meta=await sharp(out,{limitInputPixels:false}).metadata();assert.equal(meta.width,860);assert.ok(meta.height>4000);assert.equal(result.photoCount,1);
-  assert.match(await readFile(result.htmlPath,'utf8'),/data:image\/jpeg;base64,/);assert.match(await readFile(result.videoPath,'utf8'),/autoplay=1&amp;mute=1/);
+  assert.match(await readFile(result.htmlPath,'utf8'),/data:image\/jpeg;base64,/);assert.match(await readFile(result.videoPath,'utf8'),/playsinline=1&amp;rel=0&amp;controls=1/);
   assert.ok(result.points.every(p=>!/모달|기모/.test(p.title+p.description)));
  }finally{await rm(root,{recursive:true,force:true});}
 });
