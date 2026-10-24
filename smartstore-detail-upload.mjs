@@ -41,7 +41,9 @@ export async function applySmartstoreImageLayout(editor,image,{check=()=>{}}={})
   const box=await image.boundingBox(),viewportHeight=await editor.evaluate(()=>innerHeight);
   const top=Math.max(box.y,160),bottom=Math.min(box.y+box.height,viewportHeight-40);
   if(bottom<=top)throw Error('상세이미지 선택 위치를 확인하지 못했습니다.');
-  await editor.mouse.click(box.x+box.width/2,Math.min(bottom-5,top+40));
+  // Locator-relative input keeps the selected image correct for tall PNGs and
+  // browser zoom, instead of clicking near the fixed toolbar with page coordinates.
+  await image.click({position:{x:box.width/2,y:(top+bottom)/2-box.y}});
   await editor.waitForFunction(id=>!!document.getElementById(id)?.querySelector('.se-section-image.se-is-selected'),componentId,{timeout:15000});
  };
  await select();
