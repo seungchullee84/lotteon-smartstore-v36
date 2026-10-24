@@ -5,7 +5,8 @@ import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 import {chromium} from 'playwright';
 import {imageDownloadFolder} from './desktop-downloads.mjs';
-import {smartstoreDetailDocument,TEMPLATE_ASSET_NAMES,TEMPLATE_ASSET_BASE,OFFICIAL_BRAND_VIDEO} from './smartstore-detail.mjs';
+import {smartstoreDetailDocument,TEMPLATE_ASSET_NAMES,TEMPLATE_ASSET_BASE} from './smartstore-detail.mjs';
+import {exportBrandVideo,requireBrandVideo} from './smartstore-brand-video.mjs';
 import {renderCacheKey,restoreRenderedDetail,cacheRenderedDetail} from './smartstore-render-cache.mjs';
 const appRoot=path.dirname(fileURLToPath(import.meta.url));
 const assetsRoot=path.join(appRoot,'public/smartstore-template');
@@ -18,9 +19,8 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  const style=validStyle(product);const draftRoot=path.join(dataRoot,'smartstore-details',style);
  let draft=null;try{draft=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(draft&&(String(draft.style)!==style||draft.sourceUrl!==product.sourceUrl))throw Error('상세페이지 준비 자료의 품번·공식 출처가 현재 상품과 다릅니다.');
- const prepared={style,colorImages:{},sellingPoints:[],photoCount:0,photoFiles:{},sourceUrl:product.sourceUrl};
+ const prepared={style,includeBrandVideo:true,colorImages:{},sellingPoints:[],photoCount:0,photoFiles:{},sourceUrl:product.sourceUrl};
  if(draft){
-  if(draft.includeBrandVideo===false)prepared.includeBrandVideo=false;
   if(draft.headline)prepared.headline=String(draft.headline).slice(0,200);
   if(draft.sellingPoints){if(!Array.isArray(draft.sellingPoints)||draft.sellingPoints.some(p=>!p.title||!p.description||!p.evidence))throw Error('소구점의 공식 확인 근거를 함께 저장해 주세요.');prepared.sellingPoints=draft.sellingPoints.slice(0,3);}
  }
@@ -69,6 +69,7 @@ export function localSmartstorePreview(p){
 }
 
 export async function saveSmartstoreDetail(product,folder,output,{signal,...options}={}){
+ await requireBrandVideo(options.dataRoot,options.videoOptions);
  const p=await prepareSmartstoreDetail(product,folder,options);const data=new Map();
  const check=()=>{if(signal?.aborted)throw Error('상세페이지 만들기를 중단했습니다.');};check();
  for(const name of TEMPLATE_ASSET_NAMES.filter(n=>!n.endsWith('.ttf')))data.set(TEMPLATE_ASSET_BASE+name,'data:image/jpeg;base64,'+(await readFile(path.join(assetsRoot,name))).toString('base64'));
@@ -99,11 +100,11 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
   await cacheRenderedDetail(cacheRoot,p.style,cacheKey,output,height);
   }
   const stem=output.replace(/\.[^.]+$/,'');
-  await writeFile(stem+'.html',smartstoreDetailDocument(p,{imageUrl,fontUrl}).html);
-  const includeVideo=p.smartstoreDetail.includeBrandVideo!==false;
-  const videoPath=includeVideo?stem+'_영상HTML.txt':null;
-  if(includeVideo){const videoHtml=`<iframe width="848" height="477" style="width:100%;aspect-ratio:16/9;height:auto;border:0" src="${OFFICIAL_BRAND_VIDEO.replaceAll('&','&amp;')}" title="지오다노 공식 브랜드 영상" allow="autoplay;encrypted-media;fullscreen;picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;await writeFile(videoPath,videoHtml);}
-  const result={width:860,height,template:document.template,photoCount:p.smartstoreDetail.photoCount,points:document.points,htmlPath:stem+'.html',includeVideo,videoPath,renderCacheHit};
+  const video=await exportBrandVideo(stem,options.dataRoot,options.videoOptions);check();
+  await writeFile(stem+'.html',smartstoreDetailDocument(p,{imageUrl,fontUrl,videoUrl:encodeURIComponent(video.filename)}).html);
+  const videoGuidePath=stem+'_영상안내.txt';
+  await writeFile(videoGuidePath,'공통 MP4: '+video.filename+'\n브랜드 소개 이미지 다음에 SmartEditor ONE 동영상 첨부로 넣습니다.\n긴 PNG에는 동영상이 들어가지 않습니다. HTML은 로컬 미리보기용이며 판매자센터 동영상 업로드를 대신하지 않습니다.\n로컬 미리보기: 무음 자동재생·반복. 네이버 판매페이지 자동재생: 미검증.\n');
+  const result={width:860,height,template:document.template,photoCount:p.smartstoreDetail.photoCount,points:document.points,htmlPath:stem+'.html',includeVideo:true,videoPath:video.path,videoSha256:video.sha256,videoGuidePath,previewVideoPlayback:video.previewPlayback,storeVideoPlayback:video.storePlayback,renderCacheHit};
   await writeFile(stem+'_제작정보.json',JSON.stringify({style:p.style,sourceUrl:p.sourceUrl,...result},null,2));return result;
  }finally{signal?.removeEventListener('abort',close);await close();await unlink(partial).catch(e=>{if(e.code!=='ENOENT')throw e;});}
 }

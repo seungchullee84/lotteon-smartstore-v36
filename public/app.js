@@ -160,7 +160,7 @@ function smartstoreDetailFields(){
 function renderDetailPreview(p){
  const box=$('detailPreview');box.replaceChildren();box.scrollTop=0;
  if(document.body.dataset.channel==='smartstore'){
-  $('detailPreviewStatus').textContent='확정 템플릿 자동 적용 · 상품별 사진·공식 상세정보·소구점 구성';
+  $('detailPreviewStatus').textContent='공통 MP4 적용 · 미리보기 무음 자동재생·반복 · 판매페이지 자동재생 미검증';
   const frame=document.createElement('iframe');frame.className='smartstore-template-preview';frame.title='스마트스토어 확정 템플릿 상세페이지';frame.allow='autoplay; fullscreen; picture-in-picture';
   frame.src='/smartstore-detail-preview.html?style='+encodeURIComponent(p.style)+'&fields='+encodeURIComponent(JSON.stringify(smartstoreDetailFields()));box.append(frame);return;
  }

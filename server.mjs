@@ -1,6 +1,7 @@
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
+import {serveBrandVideo} from './smartstore-brand-video.mjs';
 import {runSmartstoreAuto} from './smartstore-auto.mjs';
 import {prepareSmartstoreAuto} from './smartstore-auto-prepare.mjs';
 import {loadSmartstoreAIKey,saveSmartstoreAIKey} from './smartstore-ai-settings.mjs';
@@ -72,6 +73,7 @@ const server=http.createServer(async(req,res)=>{
     const cookie=(req.headers.cookie||'').split(';').map(s=>s.trim()).includes('session='+token);
     if(url.pathname==='/'&&url.searchParams.get('key')===token){res.writeHead(302,{'Set-Cookie':`session=${token}; HttpOnly; SameSite=Strict; Path=/`,'Location':'/'});return res.end();}
     if(!cookie)return json(res,403,{error:'시작 화면의 전용 링크로 접속해 주세요.'});
+    if(['GET','HEAD'].includes(req.method)&&url.pathname==='/smartstore-brand-video.mp4')return await serveBrandVideo(req,res,dataRoot);
     if(req.method==='GET'&&url.pathname==='/api/branding')return json(res,200,await protectedBranding.get());
     if(req.method==='GET'&&url.pathname==='/api/naver-status')return json(res,200,{configured:!!(naverCredentials.clientId&&naverCredentials.clientSecret),...naverVerification,researchConfigured:state.product?researchForProduct(state.product).configured:false,lastAttempt:naverLastAttempt});
     if(req.method==='GET'&&url.pathname==='/api/state'){
@@ -108,7 +110,7 @@ const server=http.createServer(async(req,res)=>{
       for(const key of ['colors','sizes'])if(Array.isArray(fields[key])&&fields[key].length<=100&&fields[key].every(v=>typeof v==='string'&&v.length<100))edits[key]=fields[key];
       const p=await prepareSmartstoreDetail({...current,...edits},state.folder);
       if(state.product!==current)return json(res,409,{error:'상품이 변경되었습니다.'});
-      res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; img-src 'self'; font-src 'self'; style-src 'unsafe-inline'; frame-src https://www.youtube.com; frame-ancestors 'self'; base-uri 'none'"});
+      res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; img-src 'self'; media-src 'self'; font-src 'self'; style-src 'unsafe-inline'; frame-ancestors 'self'; base-uri 'none'"});
       return res.end(localSmartstorePreview(p).html);
     }
     if(req.method==='GET'&&url.pathname.startsWith('/image/')){

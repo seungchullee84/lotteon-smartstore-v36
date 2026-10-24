@@ -9,21 +9,24 @@ import {prepareSmartstoreDetail,saveSmartstoreDetail,localSmartstorePreview} fro
 import {buildDetailContent} from '../detail-html.mjs';
 import {smartstorePlan} from '../smartstore-form.mjs';
 import {publishable} from '../github-sync.mjs';
+import {prepareVideo,videoOptions,fixtureVideo} from './helpers/brand-video.mjs';
 const product={style:'375908',name:'여성 경량 패딩 자켓 375908',rawName:'여성 경량 패딩 자켓',gender:'여성',colors:['01핑크','02화이트'],sizes:['S','M'],material:'나일론100%',country:'미얀마',washing:'손세탁',manufactured:'2025-08',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=sample',originalDetailUrl:'https://www.giordano.co.kr/detail.jpg',images:{detail:'https://www.giordano.co.kr/detail.jpg',size:'https://www.giordano.co.kr/size.jpg',info:'https://www.giordano.co.kr/info.jpg'}};
 
-test('상품별 시즌 영상 제외 설정은 해당 상품에만 적용한다',()=>{
+test('새 공통 MP4는 과거 시즌 제외 상품을 포함해 전체에 적용한다',()=>{
  const p={...product,smartstoreDetail:{style:product.style,includeBrandVideo:false}};
  assert.doesNotMatch(buildSmartstoreDetail(p).html,/youtube|<iframe|2026 F\/W FILM/);
  assert.match(buildSmartstoreDetail(p).html,/brand-intro\.jpg|PRODUCT DETAIL/);
- assert.match(buildSmartstoreDetail(product).html,/youtube\.com/);
+ assert.match(buildSmartstoreDetail(p).html,/<video /);
+ assert.match(buildSmartstoreDetail(product).html,/smartstore-brand-video\.mp4/);
+ assert.doesNotMatch(buildSmartstoreDetail(p,{includeVideo:false}).html,/<video/);
 });
 test('스마트스토어에만 확정 템플릿·영상·공식 원본·INFORMATION 뒤 혜택 적용',()=>{
  const approved=buildSmartstoreDetail(product).html;const lotte=buildDetailContent(product.images,product.colors,{},product.originalDetailUrl).html;
  assert.match(smartstorePlan(product,50000).html,/data-smartstore-template=/);
  assert.doesNotMatch(lotte,/smartstore-template|youtube|benefits/);
- assert.ok(approved.indexOf('brand-intro.jpg')<approved.indexOf('youtube.com/embed'));
+ assert.ok(approved.indexOf('brand-intro.jpg')<approved.indexOf('<video '));
  assert.ok(approved.indexOf('/info.jpg')<approved.indexOf('benefits.jpg'));
- assert.match(approved,/playsinline=1&amp;rel=0&amp;controls=1/);assert.doesNotMatch(approved,/autoplay=1|클릭하면 해당 색상|href="#smartstore-color-/);assert.doesNotMatch(approved,/26920|모달|기모|CARE GUIDE/);
+ assert.match(approved,/controls autoplay muted loop playsinline/);assert.doesNotMatch(approved,/youtube|클릭하면 해당 색상|href="#smartstore-color-/);assert.doesNotMatch(approved,/26920|모달|기모|CARE GUIDE/);
  assert.deepEqual(productSellingPoints(product).map(p=>p.title),['경량','2 COLORS','SIZE']);
  assert.equal((approved.match(/\/detail.jpg/g)||[]).length,1);
  assert.throws(()=>buildSmartstoreDetail({...product,images:{main:'https://www.giordano.co.kr/main.jpg'}}),/중단/);
@@ -42,7 +45,7 @@ test('공통 템플릿 파일만 동기화하고 마네킨 컷과 상품 초안�
 test('다른 품번·색상·외부 경로는 차단하고 사진 매핑과 상품별 소구점으로 저장',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-template-'));const folder=path.join(root,'product'),dataRoot=path.join(root,'data'),draftRoot=path.join(dataRoot,'smartstore-details',product.style);
  try{
-  await mkdir(folder,{recursive:true});await mkdir(draftRoot,{recursive:true});
+  await mkdir(folder,{recursive:true});await mkdir(draftRoot,{recursive:true});await prepareVideo(dataRoot);
   for(const key of ['detail','size','info'])await sharp({create:{width:120,height:key==='detail'?300:100,channels:3,background:key==='detail'?'#ac3c56':'white'}}).jpeg().toFile(path.join(folder,key+'.jpg'));
   await sharp({create:{width:300,height:400,channels:3,background:'pink'}}).jpeg().toFile(path.join(draftRoot,'front.jpg'));
   const draft={style:product.style,sourceUrl:product.sourceUrl,photos:[{color:'01핑크',files:['front.jpg']}],sellingPoints:[{title:'경량 패딩',description:'공식 상품명에 확인된 경량 패딩',evidence:'공식 상품명'}]};
@@ -52,22 +55,24 @@ test('다른 품번·색상·외부 경로는 차단하고 사진 매핑과 상�
   await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft));
   const p=await prepareSmartstoreDetail(product,folder,{dataRoot});assert.equal(p.smartstoreDetail.photoCount,1);assert.equal(p.smartstoreDetail.sellingPoints[0].title,'경량 패딩');
   assert.match(localSmartstorePreview(p).html,/smartstore-photo\/[a-f0-9]{24}/);assert.doesNotMatch(localSmartstorePreview(p).html,/기모/);
-  const out=path.join(root,'detail.png');const result=await saveSmartstoreDetail(product,folder,out,{dataRoot});
+  const out=path.join(root,'detail.png');const result=await saveSmartstoreDetail(product,folder,out,{dataRoot,videoOptions});
   const meta=await sharp(out,{limitInputPixels:false}).metadata();assert.equal(meta.width,860);assert.ok(meta.height>4000);assert.equal(result.photoCount,1);
-  assert.match(await readFile(result.htmlPath,'utf8'),/data:image\/jpeg;base64,/);assert.match(await readFile(result.videoPath,'utf8'),/playsinline=1&amp;rel=0&amp;controls=1/);
+  assert.match(await readFile(result.htmlPath,'utf8'),/data:image\/jpeg;base64,/);assert.deepEqual(await readFile(result.videoPath),fixtureVideo);
+  assert.match(await readFile(result.htmlPath,'utf8'),/detail_%EB%B8%8C%EB%9E%9C%EB%93%9C%EC%98%81%EC%83%81\.mp4/);
+  assert.equal(result.storeVideoPlayback,'unverified');
   assert.ok(result.points.every(p=>!/모달|기모/.test(p.title+p.description)));
-  const repeated=await saveSmartstoreDetail(product,folder,path.join(root,'repeated.png'),{dataRoot});
+  const repeated=await saveSmartstoreDetail(product,folder,path.join(root,'repeated.png'),{dataRoot,videoOptions});
   assert.equal(result.renderCacheHit,false);assert.equal(repeated.renderCacheHit,true);
   assert.deepEqual(await readFile(out),await readFile(path.join(root,'repeated.png')));
   await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...draft,headline:'변경한 상품 소개'}));
-  const changed=await saveSmartstoreDetail(product,folder,path.join(root,'changed.png'),{dataRoot});assert.equal(changed.renderCacheHit,false);
+  const changed=await saveSmartstoreDetail(product,folder,path.join(root,'changed.png'),{dataRoot,videoOptions});assert.equal(changed.renderCacheHit,false);
   assert.notDeepEqual(await readFile(out),await readFile(path.join(root,'changed.png')));
   await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...draft,includeBrandVideo:false}));
   const withoutVideo=await prepareSmartstoreDetail(product,folder,{dataRoot});
-  assert.equal(withoutVideo.smartstoreDetail.includeBrandVideo,false);
+  assert.equal(withoutVideo.smartstoreDetail.includeBrandVideo,true);
   assert.doesNotMatch(localSmartstorePreview(withoutVideo).html,/youtube|<iframe|2026 F\/W FILM/);
-  const noVideoResult=await saveSmartstoreDetail(product,folder,path.join(root,'no-season-video.png'),{dataRoot});
-  assert.equal(noVideoResult.includeVideo,false);assert.equal(noVideoResult.videoPath,null);
+  const noVideoResult=await saveSmartstoreDetail(product,folder,path.join(root,'no-season-video.png'),{dataRoot,videoOptions});
+  assert.equal(noVideoResult.includeVideo,true);assert.deepEqual(await readFile(noVideoResult.videoPath),fixtureVideo);
   assert.doesNotMatch(await readFile(noVideoResult.htmlPath,'utf8'),/youtube|<iframe|2026 F\/W FILM/);
  }finally{await rm(root,{recursive:true,force:true});}
 });

@@ -9,6 +9,7 @@ import {validateAnalysis,requestSmartstoreAnalysis,officialDescription,prepareSm
 import {smartstoreUploadParts} from '../smartstore-detail-upload.mjs';
 import {requireChannel} from '../channel-routing.mjs';
 import {loadSmartstoreAIKey,saveSmartstoreAIKey} from '../smartstore-ai-settings.mjs';
+import {prepareVideo} from './helpers/brand-video.mjs';
 const product={style:'375908',name:'여성 경량 패딩 375908',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=test',colors:['02화이트','05블랙'],images:{detail:'https://www.giordano.co.kr/_gio_on/2025/05375908.jpg'}};
 const description='가벼운 나일론 원단을 사용한 경량 패딩입니다.';
 test('수집·사진대조·합성·상세생성 성공 후에만 업로드 완료를 알린다',async()=>{
@@ -37,7 +38,7 @@ test('업로드용 조각은 브랜드 소개·본문을 빠짐없이 보존하�
  const png=path.join(root,'long.png'),brand=path.join(root,'brand.jpg');
  await sharp({create:{width:860,height:18500,channels:3,background:'#eee'}}).png().toFile(png);
  await sharp({create:{width:860,height:1173,channels:3,background:'#ddd'}}).jpeg().toFile(brand);
- const {files}=await smartstoreUploadParts(png,root,brand);let height=0;
+ const {files}=await smartstoreUploadParts(png,root,brand,await prepareVideo(root));let height=0;
  for(const file of files){const m=await sharp(file).metadata();assert.equal(m.width,860);height+=m.height;assert.ok((await readFile(file)).length<20000000);}
  assert.equal(files.length,4);assert.equal(height,18500);assert.equal((await sharp(png).metadata()).height,18500);
  const noVideo=await smartstoreUploadParts(png,root,brand,{includeVideo:false});
@@ -58,11 +59,11 @@ test('사진 내용이 같으면 재실행 시 확인된 색상을 유지하고 
    return Response.json({status:'completed',output:[{content:[{type:'output_text',text:JSON.stringify(analysis)}]}]});
   };
   const draftFile=path.join(dataRoot,'smartstore-details',product.style,'draft.json');
-  for(let i=0;i<2;i++){const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,apiKey:'private',photoRoots:[pictures],fetchImpl});assert.equal(prepared.smartstoreDetail.photoCount,2);assert.ok(prepared.smartstoreDetail.colorImages['05블랙']);if(i===0){const draft=JSON.parse(await readFile(draftFile));await writeFile(draftFile,JSON.stringify({...draft,includeBrandVideo:false}));}else assert.equal(prepared.smartstoreDetail.includeBrandVideo,false);}
+  for(let i=0;i<2;i++){const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,apiKey:'private',photoRoots:[pictures],fetchImpl});assert.equal(prepared.smartstoreDetail.photoCount,2);assert.ok(prepared.smartstoreDetail.colorImages['05블랙']);if(i===0){const draft=JSON.parse(await readFile(draftFile));await writeFile(draftFile,JSON.stringify({...draft,includeBrandVideo:false}));}else assert.equal(prepared.smartstoreDetail.includeBrandVideo,true);}
   assert.deepEqual(photoCounts,[2]);assert.throws(()=>officialDescription('<body>STYLE. 05326920</body>',product),/품번/);
   await writeFile(path.join(folder,'detail.jpg'),await sharp({create:{width:180,height:240,channels:3,background:'#678'}}).jpeg().toBuffer());
   const reanalysed=await prepareSmartstoreAuto(product,folder,{dataRoot,apiKey:'private',photoRoots:[pictures],fetchImpl});
-  assert.equal(reanalysed.smartstoreDetail.includeBrandVideo,false);
+  assert.equal(reanalysed.smartstoreDetail.includeBrandVideo,true);
  }finally{await rm(root,{recursive:true,force:true});}
 });
 test('Windows API 연결은 평문 대신 현재 사용자 암호화로 저장한다',{skip:process.platform!=='win32'},async()=>{

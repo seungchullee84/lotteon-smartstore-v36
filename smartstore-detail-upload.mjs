@@ -1,9 +1,9 @@
-import {OFFICIAL_BRAND_VIDEO} from './smartstore-detail.mjs';
+import {requireBrandVideo} from './smartstore-brand-video.mjs';
+import {insertNativeBrandVideo,assertNativeVideoToolbar,nativeVideoIdentity} from './smartstore-native-video.mjs';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 import {createHash} from 'node:crypto';
-const VIDEO='https://www.youtube.com/watch?v=nRI2390T5GQ';
 export async function openSmartstoreEditor(page,{check=()=>{}}={}){
  check();
  const input=page.locator('button[data-nclicks-code="descrip.sebtn"]');
@@ -16,7 +16,8 @@ export async function openSmartstoreEditor(page,{check=()=>{}}={}){
  const [editor]=await Promise.all([page.waitForEvent('popup',{timeout:45000}),input.click({timeout:30000})]);
  await editor.bringToFront();return editor;
 }
-export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true}={}){
+export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,videoOptions}={}){
+ const video=includeVideo?await requireBrandVideo(dataRoot,videoOptions):null;
  const meta=await sharp(png,{limitInputPixels:false}).metadata();
  const brand=await sharp(brandFile).metadata();const firstHeight=Math.round(meta.width*brand.height/brand.width);
  if(meta.width!==860||meta.height<=firstHeight)throw Error('상세페이지 이미지 크기를 확인해 주세요.');
@@ -30,21 +31,14 @@ export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=t
   if(bytes.length>19000000)throw Error('상세이미지 조각 용량을 확인해 주세요.');
   await writeFile(file,bytes);parts.push(file);top+=height;
  }
- return {files:parts,video:includeVideo?VIDEO:null,includeVideo,hash:digest};
+ return {files:parts,video:video?{file:video.file,sha256:video.sha256}:null,includeVideo,hash:digest};
 }
-export async function insertSmartstoreVideo(editor,{check=()=>{}}={}){
- check();const before=await editor.locator('.se-component.se-oembed').count();
- await editor.locator('button[data-name="shopping-html"]').click();
- const field=editor.locator('textarea[title="HTML 변환"]');await field.waitFor({state:'visible'});
- await field.fill('<iframe width="848" height="477" src="'+OFFICIAL_BRAND_VIDEO.replaceAll('&','&amp;')+'" allow="encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>');
- await editor.getByRole('button',{name:'변환',exact:true}).click();await field.waitFor({state:'hidden'});
- await editor.waitForFunction(count=>document.querySelectorAll('.se-component.se-oembed').length===count+1,before,{timeout:45000});
- if(await editor.locator('.se-component.se-text').evaluateAll(ns=>ns.some(n=>n.innerText.includes('youtube.com/')||n.innerText.includes('youtu.be/'))))throw Error('영상 주소가 본문에 남아 있습니다.');
-}
+export const insertSmartstoreVideo=insertNativeBrandVideo;
 export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}}={}){
  if(!/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+/.test(page.url()))throw Error('상세페이지는 스마트스토어 복사등록 화면에서만 교체합니다.');
  check();
  const editor=await openSmartstoreEditor(page,{check});
+ if(parts.includeVideo!==false){await requireBrandVideo();await assertNativeVideoToolbar(editor);}
  await editor.bringToFront();
  await editor.locator('iframe[id^="input_buffer"]').waitFor({state:'attached',timeout:30000});
  await editor.locator('.se-text-paragraph').first().waitFor({state:'visible',timeout:30000});check();
@@ -93,8 +87,7 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
   check();
  };
  await choose(parts.files[0]);log('브랜드 소개 이미지 업로드');
- // HTML conversion creates ONE's native video without retaining a URL paragraph.
- if(parts.includeVideo!==false){await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});await insertSmartstoreVideo(editor,{check});}
+ if(parts.includeVideo!==false){await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});parts.videoIdentity=await insertSmartstoreVideo(editor,{check});}
  for(const file of parts.files.slice(1))await choose(file);
  const order=await editor.locator('.se-component').evaluateAll(ns=>ns.filter(n=>/se-image|se-video|se-oembed/.test(n.className)).map(n=>n.className));
  const includeVideo=parts.includeVideo!==false;
@@ -118,11 +111,11 @@ export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  }
  const includeVideo=parts.includeVideo!==false;
  const videoCount=await verified.locator('.se-component.se-oembed,.se-component.se-video').count();
- const video=includeVideo?await verified.locator('.se-component.se-oembed').first().innerHTML():'';
+ const video=includeVideo&&videoCount===1&&await verified.locator('.se-component.se-video').count()===1?await nativeVideoIdentity(verified.locator('.se-component.se-video')):[];
  const leftoverUrl=await verified.locator('.se-component.se-text').evaluateAll(ns=>ns.some(n=>/youtube\.com\/|youtu\.be\//.test(n.innerText)));
  if(leftoverUrl)throw Error('저장된 상세페이지에 영상 주소 문장이 남아 있습니다.');
- if(JSON.stringify(names)!==JSON.stringify(expected)||await verified.locator('.se-component.se-image .se-component-content-fit').count()!==expected.length||(includeVideo?!video.includes('nRI2390T5GQ'):videoCount!==0))throw Error('저장된 상세페이지의 이미지·영상·문서 너비 설정 대조 결과가 다릅니다.');
+ if(JSON.stringify(names)!==JSON.stringify(expected)||await verified.locator('.se-component.se-image .se-component-content-fit').count()!==expected.length||(includeVideo?!video.length||JSON.stringify(video)!==JSON.stringify(parts.videoIdentity?.identity):videoCount!==0))throw Error('저장된 상세페이지의 이미지·MP4 영상·문서 너비 설정 대조 결과가 다릅니다.');
  await verified.close();
- log('상세페이지 이미지 '+parts.files.length+'장 반영 확인 · '+(includeVideo?'공식 영상 포함':'시즌 영상 제외'));
- return {detailUploaded:true,detailParts:parts.files.length,videoUploaded:includeVideo,videoPlayback:includeVideo?'click-to-play':null,colorNavigation:false,imageLayout:'fit'};
+ log('상세페이지 이미지 '+parts.files.length+'장 반영 확인 · '+(includeVideo?'공통 MP4 포함 · 판매페이지 자동재생 미검증':'영상 제외'));
+ return {detailUploaded:true,detailParts:parts.files.length,videoUploaded:includeVideo,videoSha256:parts.videoIdentity?.sha256,videoPlayback:includeVideo?'unverified':null,colorNavigation:false,imageLayout:'fit'};
 }

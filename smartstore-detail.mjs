@@ -1,9 +1,9 @@
 import {buildDetailContent} from './detail-html.mjs';
+import {brandVideoHtml} from './smartstore-brand-video.mjs';
 
 export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-approved-20261024';
 export const TEMPLATE_ASSET_NAMES=['brand-intro.jpg','benefits.jpg','shipping.jpg','returns.jpg','store.jpg','GowunDodum-Regular.ttf'];
 export const TEMPLATE_ASSET_BASE='https://raw.githubusercontent.com/seungchullee84/lotteon-smartstore-v36/main/public/smartstore-template/';
-export const OFFICIAL_BRAND_VIDEO='https://www.youtube.com/embed/nRI2390T5GQ?playsinline=1&rel=0&controls=1';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const style='font-family:GowunDodum,\'Malgun Gothic\',sans-serif;color:#293f33;word-break:keep-all;overflow-wrap:anywhere;line-height:1.85;';
 function safeImage(src){
@@ -23,7 +23,7 @@ export function productSellingPoints(p){
  return points.slice(0,3);
 }
 
-export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=src=>src,includeVideo=true,includeNavigation=false}={}){
+export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=src=>src,includeVideo=true,videoUrl,includeNavigation=false}={}){
  if(!p?.images)throw Error('먼저 상품 정보를 수집해 주세요.');
  const original=buildDetailContent(p.images,p.colors,p.colorImages,p.originalDetailUrl);
  const draft=p.smartstoreDetail;
@@ -37,7 +37,8 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  const divider='<div role="separator" style="height:0;margin:0 6%;border-top:1px solid #dce1d9;"></div>';
  const name=p.name||p.rawName||'지오다노';
  let body=common('brand-intro.jpg','지오다노 공식 로고와 남녀 모델 브랜드 소개');
- if(includeVideo&&draft?.includeBrandVideo!==false)body+=`<section style="padding:28px;background:#f4f3ec;"><h2 style="text-align:center;font-size:22px;margin:0 0 18px;">GIORDANO 2026 F/W FILM</h2><iframe width="860" height="484" style="width:100%;aspect-ratio:16/9;height:auto;border:0;" src="${esc(OFFICIAL_BRAND_VIDEO)}" title="지오다노 공식 남녀 모델 영상" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe></section>`;
+ // 2026-10-25: the new common MP4 applies to every product, including old season-video exclusions.
+ if(includeVideo)body+=brandVideoHtml(videoUrl);
  body+=`<section style="padding:60px 6%;background:#f1f1e9;"><p style="margin:0 0 30px;text-align:center;font-size:21px;">롯데백화점 동탄점</p><h1 style="font-size:46px;line-height:1.5;margin:0 0 24px;font-weight:700;">${esc(draft?.headline||name)}</h1><p style="font-size:23px;margin:0;">STYLE ${esc(p.style)} · ${esc(p.colors?.length||0)} COLORS</p><p style="font-size:21px;margin:12px 0 0;">${esc((p.sizes||[]).join(' · '))}</p></section>`;
  body+=divider+`<section style="padding:48px 6%;">${header('PRODUCT POINT','고를 때 확인할 포인트.')}<div style="display:flex;gap:20px;align-items:start;">${points.map((point,i)=>`<div style="flex:1;min-width:0;border-top:0.5px solid #cbd1c3;padding-top:18px;"><span style="font-size:17px;color:#6b785f;">${String(i+1).padStart(2,'0')}</span><h3 style="font-size:25px;line-height:1.6;margin:10px 0;">${esc(point.title)}</h3><p style="font-size:20px;margin:0;">${esc(point.description)}</p></div>`).join('')}</div></section>`;
  if(groups.length){
