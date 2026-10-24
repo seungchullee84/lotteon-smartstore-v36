@@ -5,7 +5,7 @@ import {runSmartstoreAuto} from './smartstore-auto.mjs';
 import {prepareSmartstoreAuto} from './smartstore-auto-prepare.mjs';
 import {loadSmartstoreAIKey,saveSmartstoreAIKey} from './smartstore-ai-settings.mjs';
 import {smartstoreUploadParts} from './smartstore-detail-upload.mjs';
-import {listingManifest,prepareListingImages} from './smartstore-listing-images.mjs';
+import {listingPreview,originalListingMain,prepareListingImages} from './smartstore-listing-images.mjs';
 import {validateProduct} from './product-validation.mjs';
 import {requireChannel} from './channel-routing.mjs';
 import {verifyNaver,createKeywordOptimizer} from './naver-keywords.mjs';
@@ -76,12 +76,12 @@ const server=http.createServer(async(req,res)=>{
       if(state.folder)try{colorChipStatus=JSON.parse(await readFile(path.join(state.folder,'colorchip-status.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
       if(colorChipStatus)versions.main=(versions.main||'original')+':'+colorChipStatus.hash;
       const selected=state.folder?await backgroundSelection(state.folder):'main';
-      const listing=state.product?await listingManifest(state.product,{dataRoot}):null;
-      return json(res,200,{...state,folder:undefined,smartstoreListing:listing?{mainColor:listing.main.color,extraColors:listing.extras.map(p=>p.color),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
+      const listing=state.product?await listingPreview(state.product,{dataRoot}):null;
+      return json(res,200,{...state,folder:undefined,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,mainColor:listing.main.color,extraColors:listing.extras.map(p=>p.color),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
     }
     if(req.method==='GET'&&/^\/smartstore-listing\/(?:main|extra-\d+)$/.test(url.pathname)){
       if(!state.product||url.searchParams.get('style')!==state.product.style)throw Error('현재 품번을 확인해 주세요.');
-      const files=await prepareListingImages(state.product,state.folder,{dataRoot});const key=url.pathname.split('/').at(-1);const file=key==='main'?files.main:files.extras[Number(key.slice(6))];
+      const key=url.pathname.split('/').at(-1);const file=key==='main'?await originalListingMain(state.product,{dataRoot}):(await prepareListingImages(state.product,state.folder,{dataRoot})).extras[Number(key.slice(6))];
       if(!file)return json(res,404,{});res.writeHead(200,{'Content-Type':({'.png':'image/png','.webp':'image/webp'})[path.extname(file).toLowerCase()]||'image/jpeg','Cache-Control':'no-store'});return res.end(await readFile(file));
     }
     if(req.method==='GET'&&url.pathname.startsWith('/smartstore-template/')){

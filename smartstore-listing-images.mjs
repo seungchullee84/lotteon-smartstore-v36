@@ -24,6 +24,17 @@ export async function listingManifest(product,{dataRoot}){
  if(String(draft.style)!==String(product.style)||draft.sourceUrl!==product.sourceUrl)return null;
  return draft.listingImages||null;
 }
+export async function listingPreview(product,options){
+ const manifest=await listingManifest(product,options);if(manifest)return manifest;
+ const photos=await findPhotos(product,options),main=photos.filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name));
+ if(main.length!==1)return null;
+ return {main:{sourceName:main[0].name,color:'색상 대조 전'},extras:[],previewOnly:true};
+}
+export async function originalListingMain(product,options){
+ const originals=(await findPhotos(product,options)).filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name));
+ if(originals.length!==1)throw Error('바탕화면 상품등록기사진폴더의 해당 품번 폴더에서 1.jpg 또는 1번.jpg 한 장을 확인해 주세요.');
+ return originals[0].file;
+}
 export async function prepareListingImages(product,folder,{dataRoot,...photoOptions}){
  const manifest=await listingManifest(product,{dataRoot});if(!manifest)throw Error('대표·추가이미지 사진 선택을 먼저 준비해 주세요.');
  if(!manifest.main||!Array.isArray(manifest.extras)||manifest.extras.length>9)throw Error('스마트스토어 이미지 선택 자료를 확인해 주세요.');

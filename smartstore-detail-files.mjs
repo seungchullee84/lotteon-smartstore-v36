@@ -41,7 +41,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
    await attach(group.color,path.resolve(draftRoot,relative),draftRoot);
   }}
  }else{
-  if(!mannequinRoots){const desktop=path.dirname(await imageDownloadFolder());mannequinRoots=['마네킨 컷','마네킹 컷','마네킨컷','마네킹컷'].map(name=>path.join(desktop,name));}
+  if(!mannequinRoots){const desktop=path.dirname(await imageDownloadFolder());mannequinRoots=[path.join(desktop,'상품등록기사진폴더')];}
   for(const root of mannequinRoots){
    const productRoot=path.join(root,style);let entries;
    try{entries=await readdir(productRoot,{withFileTypes:true});}catch(e){if(e.code==='ENOENT')continue;throw e;}

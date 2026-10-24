@@ -1,12 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {chooseListingPhotos,saveListingSelection,prepareListingImages} from '../smartstore-listing-images.mjs';
+import {chooseListingPhotos,saveListingSelection,prepareListingImages,listingPreview,originalListingMain} from '../smartstore-listing-images.mjs';
 import {mkdtemp,mkdir,writeFile,readFile,rm,unlink} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import sharp from 'sharp';
 import {findPhotos} from '../smartstore-photo-files.mjs';
 const photo=(name,color,role,id)=>({name,color,role,bytes:Buffer.from(id)});
+test('새 사진 경로에서 품번을 정확히 찾고 분석 전에도 1번 원본을 미리보기한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-photo-path-'));
+ try{
+  const product={style:'376921',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=path',colors:['01블랙']};
+  const chosen=path.join(root,'상품등록기사진폴더',product.style),other=path.join(root,'상품등록기사진폴더','076931'),old=path.join(root,product.style);
+  for(const folder of [chosen,other,old])await mkdir(folder,{recursive:true});
+  await writeFile(path.join(chosen,'1.jpg'),Buffer.from('current-original'));
+  await writeFile(path.join(chosen,'옆면.jpg'),Buffer.from('current-side'));
+  await writeFile(path.join(other,'1.jpg'),Buffer.from('other-product'));
+  await writeFile(path.join(old,'1.jpg'),Buffer.from('old-location'));
+  const options={desktop:root,dataRoot:path.join(root,'data')};
+  const found=await findPhotos(product,options);assert.equal(found.length,2);assert.ok(found.every(p=>p.file.startsWith(chosen+path.sep)));
+  const preview=await listingPreview(product,options);assert.equal(preview.main.sourceName,'1.jpg');assert.equal(preview.previewOnly,true);
+  assert.deepEqual(await readFile(await originalListingMain(product,options)),Buffer.from('current-original'));
+  await assert.rejects(prepareListingImages(product,root,options),/선택을 먼저/);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
 test('1번 대표 + 같은 색상 옆면 + 다른 색상 정면만 고르고 대표 중복을 빼며 색상 순서를 지킨다',()=>{
  const photos=[photo('dark.jpg','01다크브라운','front','dark-front'),photo('1.jpg','02카멜','front','main'),photo('close.jpg','02카멜','detail','detail'),photo('camel-side.jpg','02카멜','side','side'),photo('dark-side.jpg','01다크브라운','side','dark-side')];
  const result=chooseListingPhotos(photos,{colors:['01다크브라운','02카멜']});assert.equal(result.main.name,'1.jpg');assert.deepEqual(result.extras.map(p=>p.name),['camel-side.jpg','dark.jpg']);assert.ok(!result.extras.some(p=>p.bytes.equals(result.main.bytes)));
