@@ -78,6 +78,12 @@
       "meaning": "건조기금지",
       "confirmedAt": "2026-10-24T12:21:31.876Z",
       "confirmedBy": "user"
+    },
+    {
+      "hash": "65256c13a843d0f81842129e600b766466eeefc6653e8ac226df3c66cd2a0cec",
+      "meaning": "세탁기로 약하게세탁",
+      "confirmedAt": "2026-10-24T12:21:43.731Z",
+      "confirmedBy": "user"
     }
   ]
 }
