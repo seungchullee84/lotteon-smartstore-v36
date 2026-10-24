@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {fillResearchTags} from '../smartstore-research-tags.mjs';
+import {SmartstoreAutomation} from '../smartstore-automation.mjs';
 
 async function fixture(page,{candidates,existing=[],invalid=[],wrongId=false}){
  await page.setContent('<div class="control"><div><input aria-label="태그를 입력해주세요."></div><div class="selectize-dropdown-content"></div><div id="selected"></div></div><a>검색에 적용되는 태그 확인</a><div id="dialog"></div>');
@@ -49,5 +50,22 @@ test('미등록 태그를 제거하고 다음 관련 후보로 교체하며 ID�
   await fixture(page,{candidates:candidates.slice(0,1),wrongId:true});
   const wrong=await fillResearchTags(page,{configured:true,candidates:candidates.slice(0,1)});
   assert.equal(wrong.tagCount,0);assert.equal(wrong.searchTagsVerified,false);assert.equal(await page.locator('span.choice-label').count(),0);
+ }finally{await browser.close();}
+});
+
+
+test('다른 품번의 태그 검증은 원래 폼의 이름과 태그를 복원하고 자동입력은 품번 불일치를 차단한다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const page=await browser.newPage();page.setDefaultTimeout(2500);
+  const original=[{name:'원래상품태그',id:'900'}],candidates=[{name:'검증후보1',id:'1'},{name:'검증후보2',id:'2'}];
+  await fixture(page,{candidates:[...candidates,...original],existing:original});
+  await page.locator('body').evaluate(e=>{const input=document.createElement('input');input.name='product.name';input.value='기존상품 115915';e.append(input);});
+  const bot=new SmartstoreAutomation('.',()=>{});bot.preflight=async()=>{bot.page=page;bot.copyFormUrl=page.url();};
+  const product={style:'375908'},research={configured:true,candidates};
+  await assert.rejects(bot.runTags(product,{research}),/품번이 현재 상품과 다릅니다/);
+  const report=await bot.runTags(product,{research,validateOnly:true});
+  assert.equal(report.validationOnly,true);assert.equal(report.originalTagsRestored,true);assert.equal(report.applied,false);assert.equal(report.saved,false);
+  assert.deepEqual(await page.locator('span.choice-label strong').allTextContents(),['#원래상품태그']);assert.equal(await page.locator('input[name="product.name"]').inputValue(),'기존상품 115915');
  }finally{await browser.close();}
 });
