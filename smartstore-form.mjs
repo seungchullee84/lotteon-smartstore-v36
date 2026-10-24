@@ -18,9 +18,28 @@ export function smartstorePlan(p,salePrice){
 export function verifySmartstoreOptions(plan,rows){
   const seen=new Map();
   for(const row of rows){const key=row.color+'\t'+row.size;if(seen.has(key))throw Error('중복 옵션: '+key);seen.set(key,row.stock);}
-  if(seen.size!==plan.expectedOptions)throw Error('옵션 개수가 다릅니다.');
+  if(seen.size!==plan.expectedOptions)throw Error('옵션 개수가 다릅니다. 예상 '+plan.expectedOptions+'개 / 확인 '+seen.size+'개');
   for(const color of plan.colors)for(const size of plan.sizes)if(seen.get(color+'\t'+size)!==plan.stockPerOption)throw Error('옵션 재고 확인 실패: '+color+' / '+size);
   return seen.size;
+}
+
+export async function readSmartstoreOptionRows(page,plan,check=()=>{}){
+  const rows=new Map();
+  const cell=index=>page.locator('[role="row"][row-index="'+index+'"] [col-id="optionName1"]');
+  const remember=async()=>{
+    const rendered=await page.locator('[role="row"][row-index]').evaluateAll(es=>es.filter(e=>e.querySelector('[col-id="optionName1"]')&&e.querySelector('[col-id="optionName2"]')&&e.querySelector('[col-id="stockQuantity"]')).map(e=>({index:Number(e.getAttribute('row-index')),color:e.querySelector('[col-id="optionName1"]').textContent.trim(),size:e.querySelector('[col-id="optionName2"]').textContent.trim(),stock:Number(e.querySelector('[col-id="stockQuantity"]').textContent.trim())})));
+    for(const row of rendered)rows.set(row.index,row);
+  };
+  check();await page.locator('[role="gridcell"][col-id="optionName1"]').first().press('Control+Home');
+  await cell(0).waitFor({state:'visible',timeout:8000});await remember();
+  // Virtual grids remove off-screen rows. Move through each missing range instead
+  // of jumping straight to the end and losing the middle combinations.
+  for(let index=1;index<plan.expectedOptions;index++){
+    check();if(rows.has(index))continue;
+    await cell(index-1).press('ArrowDown');
+    await cell(index).waitFor({state:'visible',timeout:8000});await remember();
+  }
+  return [...rows.values()];
 }
 
 // The same visible-UI driver runs in the app's Playwright browser and in CUA tests.
@@ -83,15 +102,8 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   if(!await header.evaluate(e=>e.checked))throw Error('옵션 전체선택 확인 실패');
   await fill(page.locator('input[ng-model="vm.bulkStockQuantity"]'),plan.stockPerOption);
   await page.getByRole('button',{name:'선택목록 일괄수정',exact:true}).click();
-  const readRows=()=>page.locator('[role="row"][row-index]').evaluateAll(es=>es.filter(e=>e.querySelector('[col-id="optionName1"]')).map(e=>({color:e.querySelector('[col-id="optionName1"]').textContent.trim(),size:e.querySelector('[col-id="optionName2"]').textContent.trim(),stock:Number(e.querySelector('[col-id="stockQuantity"]').textContent.trim())})));
-  const seen=new Map();const remember=rows=>rows.forEach(r=>seen.set(r.color+'\t'+r.size,r.stock));
-  let cell=page.locator('[role="gridcell"][col-id="optionName1"]').first();await cell.press('Control+Home');
-  await page.locator('[role="row"][row-index="0"] [col-id="optionName1"]').waitFor({state:'visible',timeout:8000});
-  remember(await readRows());
-  cell=page.locator('[role="gridcell"][col-id="optionName1"]').first();await cell.press('Control+End');
-  await page.locator('[role="row"][row-index="'+(plan.expectedOptions-1)+'"] [col-id="optionName1"]').waitFor({state:'visible',timeout:8000});
-  remember(await readRows());
-  verifySmartstoreOptions(plan,[...seen].map(([key,stock])=>{const [color,size]=key.split('\t');return {color,size,stock};}));
+  const rows=await readSmartstoreOptionRows(page,plan,check);
+  const verifiedOptions=verifySmartstoreOptions(plan,rows);
   log('색상 '+plan.colors.length+' × 사이즈 '+plan.sizes.length+' 옵션 조합 생성');
   if(assets&&(assets.main||Array.isArray(assets.extras))){await uploadSmartstoreImages(page,assets,check);log(assets.main?'대표·추가 이미지 업로드 완료':'추가이미지 정리 완료 · 대표이미지 교체 제외');}
   if(!assets?.detail)log('복사된 상세설명 유지 · 별도로 지시한 이미지 입력만 수행');
@@ -133,8 +145,8 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   if(Object.hasOwn(assets||{},'careLabels')){await uploadSmartstoreImageSlot(page,'tagImages',assets.careLabels,{replaceImages:true},check);log(assets.careLabels.length?'현재 품번 택/케어라벨 '+assets.careLabels.length+'장 교체 완료':'품번 폴더에 택/케어라벨 없음 · 복사된 기존 라벨 삭제 완료');}
   log('소재(설명)에 현재 상품 소재·혼용률 입력 확인');
   log('소재·색상·치수·제조국·세탁방법 입력 · A/S·품질보증·미성년자 구매 기존값 유지');
-  log('입력 테스트 완료 · '+seen.size+'개 옵션 각 '+plan.stockPerOption+'개 재고 확인 · 저장/등록은 하지 않았습니다.');
-  return {style:plan.style,salePrice:plan.salePrice,verifiedOptions:seen.size,stockPerOption:plan.stockPerOption,manufactureDate,imagesSkipped:!assets,saved:false,keywordsTouched:false,tagsTouched:false,searchTagsVerified:false,tagMode:'manual',sellerCode,origin};
+  log('입력 테스트 완료 · '+verifiedOptions+'개 옵션 각 '+plan.stockPerOption+'개 재고 확인 · 저장/등록은 하지 않았습니다.');
+  return {style:plan.style,salePrice:plan.salePrice,verifiedOptions,stockPerOption:plan.stockPerOption,manufactureDate,imagesSkipped:!assets,saved:false,keywordsTouched:false,tagsTouched:false,searchTagsVerified:false,tagMode:'manual',sellerCode,origin};
 }
 
 export async function uploadSmartstoreImages(page,assets,check=()=>{}){
