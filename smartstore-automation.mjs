@@ -3,6 +3,8 @@ import {BrowserAutomation} from './browser-connection.mjs';
 import {fillSmartstore,smartstorePlan,isSmartstoreInputUrl} from './smartstore-form.mjs';
 import {prepareListingImages} from './smartstore-listing-images.mjs';
 import path from 'node:path';
+import {researchForProduct} from './apparel-tag-research.mjs';
+import {fillResearchTags} from './smartstore-research-tags.mjs';
 export const SMARTSTORE_HOME='https://sell.smartstore.naver.com/';
 import {uploadSmartstoreDetail} from './smartstore-detail-upload.mjs';
 export class SmartstoreAutomation extends BrowserAutomation{
@@ -14,7 +16,7 @@ export class SmartstoreAutomation extends BrowserAutomation{
     if(!/\/products\/copy\/\d+/.test(this.page.url()))throw Error('복사등록 화면에서 실행해 주세요.');
   }
   async uploadPrepared(p,folder,{main,extras,detailParts,careLabels=[]}){
-    this.check();const plan=smartstorePlan(p,p.consumerPrice);
+    this.check();const plan={...smartstorePlan(p,p.consumerPrice),tagResearch:researchForProduct(p)};
     if(!this.page||this.page.isClosed()||this.page.url()!==this.copyFormUrl||!/\/products\/copy\/\d+/.test(this.page.url()))throw Error('자동화 중 등록 화면이 변경됐습니다.');
     const check=()=>{this.check();if(this.page.isClosed()||this.page.url()!==this.copyFormUrl)throw Error('등록 화면이 변경되어 업로드를 중단했습니다.');};
     const report=await fillSmartstore({playwright:this.page,url:()=>this.page.url()},plan,{main,extras,careLabels,replaceImages:true,detail:true},this.log,check);
@@ -31,6 +33,14 @@ export class SmartstoreAutomation extends BrowserAutomation{
     this.page.setDefaultTimeout(8000);await this.page.bringToFront();
     this.log('스마트스토어 연결 · 원하는 상품의 복사등록 화면을 직접 선택한 뒤 등록기에서 시작을 누르세요.');
   }
+  async runTags(product){
+    this.stopped=false;await this.preflight();
+    const url=this.copyFormUrl,check=()=>{this.check();if(this.page.isClosed()||this.page.url()!==url)throw Error('등록 화면이 변경되었습니다.');};
+    const entered=await this.page.locator('input[name="product.name"]').inputValue();
+    if(!entered.includes(product.style))throw Error('복사등록 화면의 상품명 품번이 현재 상품과 다릅니다.');
+    const report=await fillResearchTags(this.page,researchForProduct(product),this.log,check);
+    return {...report,style:product.style,saved:false,published:false};
+  }
   async bindCopyForm(){
     await this.connectChrome(SMARTSTORE_HOME);
     const copies=this.context.pages().filter(p=>!p.isClosed()&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+(?:[?]|$)/.test(p.url()));
@@ -39,7 +49,7 @@ export class SmartstoreAutomation extends BrowserAutomation{
     this.copyFormUrl=this.page.url();
   }
   async run(p,folder,salePrice,includeImages=false){
-    this.stopped=false;const plan=smartstorePlan(p,salePrice);
+    this.stopped=false;const plan={...smartstorePlan(p,salePrice),tagResearch:researchForProduct(p)};
     await this.open();
     try{await this.page.locator('input[name="product.name"]').waitFor({state:'visible',timeout:8000});}catch{const url=new URL(this.page.url());throw Error('등록기 전용 크롬에서 네이버 로그인 후 상품 등록 화면을 열고 다시 실행해 주세요. 현재 화면: '+url.origin+url.pathname+url.hash.split('?')[0]);}
     const selected=includeImages?await prepareListingImages(p,folder,{dataRoot:this.root}):null;

@@ -15,6 +15,7 @@ import {startGithubSync} from './github-sync.mjs';
 import {brandingLock} from './branding-lock.mjs';
 import {SmartstoreAutomation} from './smartstore-automation.mjs';
 import {smartstorePlan} from './smartstore-form.mjs';
+import {researchForProduct} from './apparel-tag-research.mjs';
 import {createExpandedTitleOptimizer as createNaverTitleOptimizer,hasDuplicateTitleMeaning} from './naver-smart-title.mjs';
 import {smartstoreTitle,assertSmartstoreTitleLength} from './smartstore-title.mjs';
 import {saveLongDetailImage} from './long-detail-image.mjs';
@@ -77,7 +78,7 @@ const server=http.createServer(async(req,res)=>{
       if(colorChipStatus)versions.main=(versions.main||'original')+':'+colorChipStatus.hash;
       const selected=state.folder?await backgroundSelection(state.folder):'main';
       const listing=state.product?await listingPreview(state.product,{dataRoot}):null;
-      return json(res,200,{...state,folder:undefined,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,mainColor:listing.main.color,extraColors:listing.extras.map(p=>p.color),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
+      return json(res,200,{...state,folder:undefined,tagResearch:state.product?researchForProduct(state.product):null,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,mainColor:listing.main.color,extraColors:listing.extras.map(p=>p.color),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
     }
     if(req.method==='GET'&&/^\/smartstore-listing\/(?:main|extra-\d+)$/.test(url.pathname)){
       if(!state.product||url.searchParams.get('style')!==state.product.style)throw Error('현재 품번을 확인해 주세요.');
@@ -149,6 +150,16 @@ const server=http.createServer(async(req,res)=>{
         const p={...state.product,name:b.product.name,gender:b.product.gender,smartstoreName:b.product.smartstoreName};
         return json(res,200,await optimizeNaverTitle(p,naverCredentials));
       }
+      if(url.pathname==='/api/smartstore-tags'){
+        if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 실행해 주세요.');
+        if(!state.product||b.style!==state.product.style)throw Error('현재 상품 품번을 확인해 주세요.');
+        const current=state.product,folder=state.folder;
+        job('smartstore-tags',async()=>{
+          const report=await smartBot.runTags(current);
+          if(state.product!==current)throw Error('작업 중 상품이 변경되었습니다.');
+          state.tagResult=report;await writeFile(path.join(folder,'smartstore-tags-result.json'),JSON.stringify(report,null,2));
+        });return json(res,202,{ok:true});
+      }
       if(url.pathname==='/api/exclude-extra-image'){
         const edit=extraImageEdits.then(async()=>{
           if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 사진을 제외해 주세요.');
@@ -189,6 +200,10 @@ const server=http.createServer(async(req,res)=>{
               const folder=path.join(dataRoot,'smartstore-auto-'+Date.now());
               const product=await collect(value,folder,log,()=>signal.aborted,signal,{saveSmartstoreSource:true,sourceUrlHint,noticeCacheRoot:path.join(dataRoot,'smartstore-notice-cache'),prepareMain:false});
               product.keywords=buildKeywords(product);product.smartstoreName=smartstoreTitle(product);
+              if(researchForProduct(product).candidates.length||naverCredentials.clientId&&naverCredentials.clientSecret){
+                try{const optimized=await optimizeNaverTitle(product,naverCredentials);product.smartstoreName=optimized.title;log('상품명 자동 최적화 · '+optimized.source);}
+                catch(e){log('상품명 참고 조회 확인 필요 · 공식 상품명 유지');}
+              }
               smartstorePlan(product,product.consumerPrice);
               return {product,folder};
             },
