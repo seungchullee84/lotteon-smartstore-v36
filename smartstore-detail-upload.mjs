@@ -16,7 +16,7 @@ export async function openSmartstoreEditor(page,{check=()=>{}}={}){
  const [editor]=await Promise.all([page.waitForEvent('popup',{timeout:45000}),input.click({timeout:30000})]);
  await editor.bringToFront();return editor;
 }
-export async function smartstoreUploadParts(png,folder,brandFile){
+export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true}={}){
  const meta=await sharp(png,{limitInputPixels:false}).metadata();
  const brand=await sharp(brandFile).metadata();const firstHeight=Math.round(meta.width*brand.height/brand.width);
  if(meta.width!==860||meta.height<=firstHeight)throw Error('상세페이지 이미지 크기를 확인해 주세요.');
@@ -30,7 +30,7 @@ export async function smartstoreUploadParts(png,folder,brandFile){
   if(bytes.length>19000000)throw Error('상세이미지 조각 용량을 확인해 주세요.');
   await writeFile(file,bytes);parts.push(file);top+=height;
  }
- return {files:parts,video:VIDEO,hash:digest};
+ return {files:parts,video:includeVideo?VIDEO:null,includeVideo,hash:digest};
 }
 export async function insertSmartstoreVideo(editor,{check=()=>{}}={}){
  check();const before=await editor.locator('.se-component.se-oembed').count();
@@ -94,11 +94,11 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  };
  await choose(parts.files[0]);log('브랜드 소개 이미지 업로드');
  // HTML conversion creates ONE's native video without retaining a URL paragraph.
- await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});
- await insertSmartstoreVideo(editor,{check});
+ if(parts.includeVideo!==false){await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});await insertSmartstoreVideo(editor,{check});}
  for(const file of parts.files.slice(1))await choose(file);
  const order=await editor.locator('.se-component').evaluateAll(ns=>ns.filter(n=>/se-image|se-video|se-oembed/.test(n.className)).map(n=>n.className));
- if(order.length!==parts.files.length+1||!order[0].includes('se-image')||!/se-video|se-oembed/.test(order[1])||order.slice(2).some(c=>!c.includes('se-image')))throw Error('브랜드 소개·영상·상품상세 순서를 확인해 주세요.');
+ const includeVideo=parts.includeVideo!==false;
+ if(order.length!==parts.files.length+Number(includeVideo)||!order[0].includes('se-image')||(includeVideo?!/se-video|se-oembed/.test(order[1])||order.slice(2).some(c=>!c.includes('se-image')):order.some(c=>!c.includes('se-image'))))throw Error('브랜드 소개·상품상세 및 영상 설정에 맞는 순서를 확인해 주세요.');
  check();await Promise.all([editor.waitForEvent('close',{timeout:30000}),editor.getByRole('button',{name:'등록',exact:true}).click()]);
  const content=await page.locator('textarea[name="editorContent"]').inputValue();
  if(content!=='true')throw Error('판매자센터 상세설명 반영 결과를 확인하지 못했습니다.');
@@ -116,11 +116,13 @@ export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
   await verified.waitForFunction(i=>/^https:\/\//.test(document.querySelectorAll('.se-component.se-image img')[i]?.src||''),i,{timeout:30000});
   names.push(await image.evaluate(n=>decodeURIComponent(new URL(n.src).pathname.split('/').at(-1))));
  }
- const video=await verified.locator('.se-component.se-oembed').first().innerHTML();
+ const includeVideo=parts.includeVideo!==false;
+ const videoCount=await verified.locator('.se-component.se-oembed,.se-component.se-video').count();
+ const video=includeVideo?await verified.locator('.se-component.se-oembed').first().innerHTML():'';
  const leftoverUrl=await verified.locator('.se-component.se-text').evaluateAll(ns=>ns.some(n=>/youtube\.com\/|youtu\.be\//.test(n.innerText)));
  if(leftoverUrl)throw Error('저장된 상세페이지에 영상 주소 문장이 남아 있습니다.');
- if(JSON.stringify(names)!==JSON.stringify(expected)||await verified.locator('.se-component.se-image .se-component-content-fit').count()!==expected.length||!video.includes('nRI2390T5GQ'))throw Error('저장된 상세페이지의 이미지·영상·문서 너비 설정 대조 결과가 다릅니다.');
+ if(JSON.stringify(names)!==JSON.stringify(expected)||await verified.locator('.se-component.se-image .se-component-content-fit').count()!==expected.length||(includeVideo?!video.includes('nRI2390T5GQ'):videoCount!==0))throw Error('저장된 상세페이지의 이미지·영상·문서 너비 설정 대조 결과가 다릅니다.');
  await verified.close();
- log('상세페이지 이미지 '+parts.files.length+'장 및 공식 영상 반영 확인');
- return {detailUploaded:true,detailParts:parts.files.length,videoUploaded:true,videoPlayback:'click-to-play',colorNavigation:false,imageLayout:'fit'};
+ log('상세페이지 이미지 '+parts.files.length+'장 반영 확인 · '+(includeVideo?'공식 영상 포함':'시즌 영상 제외'));
+ return {detailUploaded:true,detailParts:parts.files.length,videoUploaded:includeVideo,videoPlayback:includeVideo?'click-to-play':null,colorNavigation:false,imageLayout:'fit'};
 }
