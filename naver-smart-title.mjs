@@ -37,7 +37,7 @@ function productFeatures(product){
  return found;
 }
 // Official naming is evidence of product facts, never evidence of popularity.
-const factualWord=/^(?:브이넥|터틀넥|아가일|기모|경량|스트라이프|와이드|밴딩|체크|후드|집업|긴팔|반팔|숏|숏기장|롱|데님|트레이닝|퀼팅|슬림|레귤러|오버핏|코튼|면|울|캐시미어|나일론|폴리에스터|오리털|거위털|구스|덕|스판|린넨|\d+%)+$/;
+const factualWord=/^(?:브이넥|터틀넥|아가일|기모|경량|스트라이프|와이드|테이퍼드|히든밴딩|밴딩|브러시드|체크|후드|집업|긴팔|반팔|숏|숏기장|롱|데님|트레이닝|퀼팅|슬림|레귤러|오버핏|코튼|면|울|캐시미어|나일론|폴리에스터|오리털|거위털|구스|덕|스판|린넨|\d+%)+$/;
 function categoryAliases(product,kind){
  if(kind==='바지'&&/슬랙스/.test((product.rawName||'')+' '+product.name))return ['슬랙스','바지','팬츠'];
  if(kind==='패딩'&&!/베스트|조끼/.test(String(product.name||'')+' '+String(product.rawName||'')))return ['패딩','푸퍼','패딩점퍼','패딩자켓','점퍼'];
@@ -46,9 +46,9 @@ function categoryAliases(product,kind){
 // Compound search phrases are decomposed before comparing meanings. A gender
 // or garment repeated inside 여성패딩/후드패딩 still counts as repetition.
 function semanticAtoms(text,kind){
- const groups=[['brand',['지오다노','GIORDANO']],['female',['여성용','여자용','여성','여자']],['male',['남성용','남자용','남성','남자']],['short',['숏기장','쇼트','숏']],['hood',['후디','후드']],['collar',['폴로카라','카라넥','폴로','카라']],['zip',['풀집업','집업']],['fleece',['플리스','후리스']],['long-sleeve',['긴소매','긴팔']],['short-sleeve',['반소매','반팔']],['cotton',['면','코튼']],['fit',['오버사이즈','오버핏','레귤러핏','슬림핏']],['cable',['케이블','꽈배기']],['rib',['골지','리브드']],['linen',['린넨','리넨']],['line-cloud',['CLOUD','클라우드']],['line-light',['LIGHT','라이트']]];
+ const groups=[['brand',['지오다노','GIORDANO']],['female',['여성용','여자용','여성','여자']],['male',['남성용','남자용','남성','남자']],['short',['숏기장','쇼트','숏']],['hood',['후디','후드']],['collar',['폴로카라','카라넥','폴로','카라']],['zip',['풀집업','집업']],['fleece',['플리스','후리스']],['long-sleeve',['긴소매','긴팔']],['short-sleeve',['반소매','반팔']],['cotton',['면','코튼']],['fit',['오버사이즈','오버핏','레귤러핏','슬림핏','테이퍼드']],['banding',['히든밴딩','밴딩']],['cable',['케이블','꽈배기']],['rib',['골지','리브드']],['linen',['린넨','리넨']],['line-cloud',['CLOUD','클라우드']],['line-light',['LIGHT','라이트']]];
  if(kind==='패딩')groups.push(['insulation',['패딩','푸퍼']]);
- groups.push(['garment',kind==='패딩'?['재킷','자켓','점퍼','아우터']:kind==='자켓'?['재킷','자켓','아우터']:kind==='코트'?['코트','아우터']:[...(synonyms[kind]||[kind]),'의류']]);
+ groups.push(['garment',kind==='패딩'?['재킷','자켓','점퍼','아우터']:kind==='자켓'?['재킷','자켓','아우터']:kind==='코트'?['코트','아우터']:[...(synonyms[kind]||[kind]),...(kind==='바지'?['슬랙스','청바지']:[]),'의류']]);
  const terms=groups.flatMap(([atom,names])=>names.map(name=>({name:name.toLowerCase(),atom}))).sort((a,b)=>b.name.length-a.name.length);
  const result=[];
  for(const token of text.toLowerCase().split(/\s+/).filter(Boolean)){
@@ -160,6 +160,6 @@ export function createExpandedTitleOptimizer(options={}){
   let result;
   try{result=await optimize(normalized,credentials);}catch(e){if(research.candidates.length)return referenceOnly();throw e;}
   const proposal=composePopularTitle(product,result.ranking);
-  return {...proposal,originalTitle:smartstoreTitle(product),hasData:true,period:result.period,fromCache:result.fromCache,source:'네이버 데이터랩 통합검색어 트렌드 API',metric:'검색 상대지수',expanded:true,categoryAudit:result.categoryAudit,candidates:result.ranking,note:result.categoryAudit.note+' 상품 종류·동의어·성별·실제 특성의 검색 관심도를 공통 기준으로 비교했습니다. 검색 관심도를 글자 수보다 우선하며, 27~39자는 권장 길이입니다. 품번·공백 포함 최대 39자이고 27자 미만도 허용합니다. 월간 절대 검색량이나 노출 순위를 뜻하지 않습니다.'};
+  return {...proposal,originalTitle:smartstoreTitle(product),hasData:true,researchUsed:research.candidates.length>0,referenceTerms:research.titleTerms,period:result.period,fromCache:result.fromCache,source:'네이버 데이터랩 통합검색어 트렌드 API',metric:'검색 상대지수',expanded:true,categoryAudit:result.categoryAudit,candidates:result.ranking,note:result.categoryAudit.note+' 상품 종류·동의어·성별·실제 특성의 검색 관심도를 공통 기준으로 비교했습니다. 검색 관심도를 글자 수보다 우선하며, 27~39자는 권장 길이입니다. 품번·공백 포함 최대 39자이고 27자 미만도 허용합니다. 월간 절대 검색량이나 노출 순위를 뜻하지 않습니다.'};
  };
 }
