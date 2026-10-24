@@ -36,6 +36,7 @@ export async function insertNativeBrandVideo(editor,{check=()=>{},dataRoot,video
   check();
   const videos=editor.locator('.se-component.se-video');
   if(attached&&await videos.count()===before+1){
+   await videos.last().scrollIntoViewIfNeeded();
    const identity=await nativeVideoIdentity(videos.last());
    if(identity.length)return {sha256,identity,storePlayback:'unverified'};
   }
