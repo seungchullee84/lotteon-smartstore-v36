@@ -41,6 +41,7 @@ test('기모와 브러시드는 같은 품목의 API 지수를 비교해 높은 
   assert(result.title.includes(popular));assert(!result.title.includes(popular==='기모'?'브러시드':'기모'));
   assert(result.length>=27&&result.length<=39);assert(!hasDuplicateTitleMeaning(p,result.title));
   assert(result.selectedTerms.includes('남성'+popular+'슬랙스'));assert.deepEqual(p,before);
+  assert(!result.selectedTerms.some(word=>word.includes(popular==='기모'?'브러시드':'기모')));
  }
  assert(hasDuplicateTitleMeaning(p,'지오다노 남성 기모 브러시드 슬랙스 115915'));
  assert(!expandedTitleCandidates({...p,name:'남성 히든밴딩 슬랙스',rawName:'히든밴딩 슬랙스'}).some(k=>/기모|브러시드/.test(k)));

@@ -183,7 +183,11 @@ export function composePopularTitle(product,ranking){
  assertSmartstoreTitleLength(title);
  if(hasDuplicateTitleMeaning(product,title))throw Error('상품명에 의미가 중복된 표현이 있습니다. 직접 검토해 주세요.');
  const titleAtoms=new Set(semanticAtoms(title,kind));
- const selectedTerms=ranking.filter(entry=>entry.score>0&&semanticAtoms(entry.keyword,kind).every(atom=>titleAtoms.has(atom))).map(entry=>entry.keyword);
+ const selectedTerms=ranking.filter(entry=>entry.score>0&&semanticAtoms(entry.keyword,kind).every(atom=>titleAtoms.has(atom))&&features.every(feature=>{
+  const variants=[...feature.variants].sort((a,b)=>b.length-a.length);
+  const mentioned=variants.find(word=>entry.keyword.includes(word.replace(/100%$/,'')));
+  return !mentioned||mentioned===variants.find(word=>title.includes(word));
+ })).map(entry=>entry.keyword);
  return {title,length,selectedTerms,sourceTerms:extras};
 }
 
