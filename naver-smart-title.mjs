@@ -1,6 +1,7 @@
 import {smartstoreTitle,assertSmartstoreTitleLength} from './smartstore-title.mjs';
 import {titleCandidates} from './naver-title.mjs';
 import {keywordCandidates,createKeywordOptimizer} from './naver-keywords.mjs';
+import {researchForProduct} from './apparel-tag-research.mjs';
 
 const synonyms={니트:['니트','스웨터','풀오버'],가디건:['가디건','카디건'],자켓:['자켓','재킷'],바지:['바지','팬츠'],티셔츠:['티셔츠','티'],패딩:['패딩','푸퍼']};
 const featureWords=['브이넥','터틀넥','라운드','아가일','기모','경량','스트라이프','와이드','밴딩','체크','후드','집업','긴팔','반팔','숏','롱','데님','트레이닝','퀼팅'];
@@ -14,7 +15,9 @@ function productFeatures(product){
   ['collar',/폴로|카라|칼라/,['카라','폴로카라','카라넥']],
   ['zip',/풀\s*(?:집|집업|지퍼)|full\s*zip/i,['집업','풀집업']],
   ['fleece',/플리스|후리스|fleece/i,['플리스','후리스']],
-  ['wool',/울|모직|wool/i,['울']],
+  ['wool',/(?<!겨)울|모직|wool/i,['울']],
+  ['tapered',/테이퍼드/,['테이퍼드']],
+  ['banding',/히든\s*밴딩/,['히든밴딩','밴딩']],
   ['long-sleeve',/긴팔|긴소매/,['긴팔','긴소매']],
   ['short-sleeve',/반팔|반소매/,['반팔','반소매']],
   ['fit',/오버핏|오버사이즈/,['오버핏','오버사이즈']],
@@ -36,6 +39,7 @@ function productFeatures(product){
 // Official naming is evidence of product facts, never evidence of popularity.
 const factualWord=/^(?:브이넥|터틀넥|아가일|기모|경량|스트라이프|와이드|밴딩|체크|후드|집업|긴팔|반팔|숏|숏기장|롱|데님|트레이닝|퀼팅|슬림|레귤러|오버핏|코튼|면|울|캐시미어|나일론|폴리에스터|오리털|거위털|구스|덕|스판|린넨|\d+%)+$/;
 function categoryAliases(product,kind){
+ if(kind==='바지'&&/슬랙스/.test((product.rawName||'')+' '+product.name))return ['슬랙스','바지','팬츠'];
  if(kind==='패딩'&&!/베스트|조끼/.test(String(product.name||'')+' '+String(product.rawName||'')))return ['패딩','푸퍼','패딩점퍼','패딩자켓','점퍼'];
  return synonyms[kind]||[kind];
 }
@@ -79,7 +83,7 @@ export function expandedTitleCandidates(product){
   words.push(alias,...sexes.map(sex=>sex+alias));
   for(const feature of featureWords)if(normalized.includes(feature)&&!alias.includes(feature))words.push(feature+alias);
  }
- return [...new Set([words[0],...aliases,...necks,...queries,...words,...combined])].slice(0,49);
+ return [...new Set([words[0],...aliases,...researchForProduct(product).titleTerms,...necks,...queries,...words,...combined])].slice(0,49);
 }
 
 export function composePopularTitle(product,ranking){
@@ -143,10 +147,18 @@ export function composePopularTitle(product,ranking){
 }
 
 export function createExpandedTitleOptimizer(options={}){
+ const researchProvider=options.researchProvider||researchForProduct;
  const optimize=createKeywordOptimizer({...options,candidateFactory:expandedTitleCandidates});
  return async(product,credentials)=>{
+  const research=researchProvider(product);
+  const referenceOnly=()=>{
+   const proposal=composePopularTitle(product,[]);
+   return {...proposal,originalTitle:smartstoreTitle(product),hasData:false,researchUsed:true,researchCount:research.count,referenceTerms:research.titleTerms,candidates:[],source:'연결된 의류 태그 조사자료',period:null,note:'공식 상품 근거와 조사 명칭으로 정리했습니다. 검색량·인기도 순위가 아닙니다. 네이버 API 연결 시 검색 상대지수도 함께 비교합니다.'};
+  };
+  if(research.candidates.length&&(!credentials?.clientId||!credentials?.clientSecret))return referenceOnly();
   const normalized={...product,name:smartstoreTitle({...product,smartstoreName:''}),smartstoreName:''};
-  const result=await optimize(normalized,credentials);
+  let result;
+  try{result=await optimize(normalized,credentials);}catch(e){if(research.candidates.length)return referenceOnly();throw e;}
   const proposal=composePopularTitle(product,result.ranking);
   return {...proposal,originalTitle:smartstoreTitle(product),hasData:true,period:result.period,fromCache:result.fromCache,source:'네이버 데이터랩 통합검색어 트렌드 API',metric:'검색 상대지수',expanded:true,categoryAudit:result.categoryAudit,candidates:result.ranking,note:result.categoryAudit.note+' 상품 종류·동의어·성별·실제 특성의 검색 관심도를 공통 기준으로 비교했습니다. 검색 관심도를 글자 수보다 우선하며, 27~39자는 권장 길이입니다. 품번·공백 포함 최대 39자이고 27자 미만도 허용합니다. 월간 절대 검색량이나 노출 순위를 뜻하지 않습니다.'};
  };
