@@ -46,9 +46,11 @@ export function titleFeatureGroups(source,product){
  if(!found.some(g=>g.id==='banding')&&/밴딩/.test(source))found.push({id:'banding',variants:['밴딩']});
  if(!found.some(g=>['zip','half-zip'].includes(g.id))&&/집업|지퍼/.test(source))found.push({id:'zip',variants:['집업','지퍼']});
  const verified=product.noticeVerified||product.fieldStatus?.material==='공식 이미지 대조 완료';
- const material=verified?String(product.material||''):'';
- if(/^면\s*100\s*%$/.test(material))found.push({id:'cotton',variants:['면100%','코튼100%']});
- else if(/코튼|(?:^|\s)면(?:\s|티|혼방)/.test(source)||/면\s*\d/.test(material))found.push({id:'cotton',variants:['면','코튼']});
+ const material=verified?String(product.material||'').normalize('NFKC').trim():'';
+ // The API compares the two Korean search expressions for each product.
+ // Only a verified pure-cotton specification may carry the 100% claim.
+ if(/^(?:면|코튼|cotton)\s*100\s*%$/i.test(material))found.push({id:'cotton',variants:['면100%','코튼100%']});
+ else if(/코튼|(?:^|\s)면(?:\s|티|혼방)/.test(source)||/(?:면|코튼|cotton)\s*\d/i.test(material))found.push({id:'cotton',variants:['면','코튼']});
  if(/캐시미어/.test(source+material))found.push({id:'cashmere',variants:['캐시미어']});
  if(/린넨|리넨/.test(material)&&!found.some(g=>g.id==='linen'))found.push({id:'linen',variants:['린넨','리넨']});
  return found;

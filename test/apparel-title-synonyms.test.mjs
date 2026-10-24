@@ -58,3 +58,28 @@ test('다른 품목·반대 의미와 미확인 특성을 동의어로 바꾸지
  const plain=product('티셔츠');
  assert(!expandedTitleCandidates(plain).some(word=>/민소매|슬리브리스|목폴라|누빔|퀼팅/.test(word)));
 });
+
+test('면·코튼은 각 상품과 품목의 API 순위에 따라 자동 선택하고 면100% 사실을 보존한다',async()=>{
+ for(const [i,kind] of ['티셔츠','맨투맨','니트','슬랙스'].entries())for(const winner of ['면','코튼']){
+  const p=product('레귤러핏 '+kind,String(510000+i)),before=structuredClone(p),requested=new Set();
+  const result=await mockOptimizer('여성'+winner+kind,requested)(p,credentials);
+  for(const alias of ['면','코튼'])assert(requested.has('여성'+alias+kind),kind+' '+alias);
+  assert(result.title.split(' ').includes(winner+'100%'),result.title);
+  assert(!result.title.split(' ').includes((winner==='면'?'코튼':'면')+'100%'));
+  assert(result.length>=27&&result.length<=39);assert.deepEqual(p,before);
+ }
+});
+
+test('코튼 표기·전각 문자도 검증 소재를 보존하며 혼방과 미확인 소재를 면100%로 바꾸지 않는다',()=>{
+ const p=product('레귤러핏 티셔츠');
+ for(const material of ['면 100%','코튼 100%','COTTON 100%','면 １００％']){
+  const cotton=titleFeatureGroups('',{...p,material}).find(g=>g.id==='cotton');
+  assert.deepEqual(cotton.variants,['면100%','코튼100%']);
+ }
+ for(const material of ['면 60%, 폴리에스터 40%','코튼 60%, 폴리에스터 40%']){
+  const cotton=titleFeatureGroups('',{...p,material}).find(g=>g.id==='cotton');
+  assert.deepEqual(cotton.variants,['면','코튼']);
+ }
+ assert(!titleFeatureGroups('',{...p,noticeVerified:false}).some(g=>g.id==='cotton'));
+ assert(!titleFeatureGroups('',{...p,material:'폴리에스터 100%'}).some(g=>g.id==='cotton'));
+});
