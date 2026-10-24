@@ -72,6 +72,15 @@ test('376501의 23자 이름은 공식 설명의 크루넥으로 28자로 보강
  assert(expandedTitleCandidates(p).includes('크루넥자켓'));
 });
 
+test('서로 다른 품번의 맨투맨·니트·바지·가디건·셔츠·자켓에 27~39자를 공통 적용한다',()=>{
+ const names=['남성 프렌치 테리 레귤러핏 크루넥 맨투맨','여성 케이블 레귤러핏 브이넥 니트','남성 테이퍼드 히든밴딩 기모 슬랙스','여성 캐시미어 브이넥 긴팔 가디건','남성 레귤러핏 긴팔 카라 셔츠','여성 퀼팅 경량 자켓'];
+ for(const [i,name] of names.entries()){
+  const p={style:String(100000+i),name,rawName:name,gender:name.slice(0,2),officialDescription:i===5?'클래식한 크루넥 경량 자켓입니다.':''};
+  const before=structuredClone(p),r=composePopularTitle(p,[]);
+  assert(r.length>=27&&r.length<=39,name);assert(r.title.endsWith(p.style));assert(!hasDuplicateTitleMeaning(p,r.title));assert.deepEqual(p,before);
+ }
+});
+
 test('공식 설명과 같은 상품의 검증된 이미지 특성만 길이 보강에 사용한다',()=>{
  const p={style:'026958',sourceUrl:'https://example.test/026958',name:'남성 맨투맨 026958',rawName:'프렌치 테리 맨투맨',gender:'남성',officialDescription:'CVC 프렌치 테리 원단에 레귤러 핏을 적용한 크루넥 맨투맨입니다.'};
  const r=composePopularTitle(p,[]);assert(r.length>=27&&r.length<=39);assert.match(r.title,/레귤러핏|프렌치테리/);assert.match(r.title,/라운드넥/);assert(!hasDuplicateTitleMeaning(p,r.title));

@@ -11,3 +11,11 @@ test('복사등록과 신규만 허용하고 수정 화면은 거부',()=>{for(c
 test('27자 미만 상품명은 판매자 폼을 조작하기 전에 차단한다',async()=>{
  await assert.rejects(fillSmartstore(null,{name:'지오다노 여성 자켓 376501'},{}),/27~39/);
 });
+
+test('품번·의류 종류와 관계없이 짧거나 긴 수동 상품명은 실제 입력 전에 차단한다',async()=>{
+ for(const [i,kind] of ['맨투맨','니트','셔츠','가디건','바지','반바지','자켓','코트','패딩','원피스','스커트'].entries()){
+  const title='지오다노 여성 '+kind+' '+String(200000+i);
+  await assert.rejects(fillSmartstore(null,{name:title},{}),/27~39/,kind);
+  await assert.rejects(fillSmartstore(null,{name:title+'가'.repeat(40)},{}),/27~39/,kind);
+ }
+});
