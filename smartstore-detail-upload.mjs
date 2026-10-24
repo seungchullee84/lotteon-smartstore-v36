@@ -36,6 +36,7 @@ export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=t
 export const insertSmartstoreVideo=insertNativeBrandVideo;
 export async function applySmartstoreImageLayout(editor,image,{check=()=>{}}={}){
  check();await image.scrollIntoViewIfNeeded();await editor.bringToFront();
+ const componentId=await image.evaluate(n=>n.closest('.se-component.se-image').id);
  const select=async()=>{
   const box=await image.boundingBox(),viewportHeight=await editor.evaluate(()=>innerHeight);
   const top=Math.max(box.y,160),bottom=Math.min(box.y+box.height,viewportHeight-40);
@@ -46,7 +47,7 @@ export async function applySmartstoreImageLayout(editor,image,{check=()=>{}}={})
  const extend=editor.locator('button[data-name="content-mode-without-pagefull"][data-value="extend"]').filter({visible:true}).first();
  try{await extend.waitFor({state:'visible',timeout:1500});}catch{check();await select();}
  await extend.click();
- await editor.waitForFunction(()=>[...document.querySelectorAll('button[data-name="content-mode-without-pagefull"][data-value="extend"]')].some(n=>n.classList.contains('se-is-selected')));
+ await editor.waitForFunction(id=>!!document.getElementById(id)?.querySelector('.se-component-content-extend'),componentId,{timeout:15000});
  check();
 }
 export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}}={}){
