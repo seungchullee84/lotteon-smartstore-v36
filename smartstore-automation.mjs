@@ -39,6 +39,8 @@ export class SmartstoreAutomation extends BrowserAutomation{
     const entered=await this.page.locator('input[name="product.name"]').inputValue();
     if(!validateOnly&&!entered.includes(product.style))throw Error('복사등록 화면의 상품명 품번이 현재 상품과 다릅니다. 태그 검증만 버튼으로 원래 태그를 보존하며 검증할 수 있습니다.');
     if(!validateOnly){const report=await fillResearchTags(this.page,research,this.log,check);return {...report,style:product.style,saved:false,published:false};}
+    const tagField=this.page.getByRole('textbox',{name:'태그를 입력해주세요.',exact:true});
+    if(!await tagField.isVisible()){check();await this.page.getByRole('button',{name:/^검색설정 도움말/}).click();}
     const selected=this.page.locator('span.choice-label').filter({has:this.page.locator('strong')});
     const read=()=>selected.evaluateAll(es=>es.map(e=>({name:e.querySelector('strong')?.textContent.replace(/^#\s*/,'').trim(),id:e.querySelector('.sub-text')?.textContent.replace(/\D/g,'')})));
     const original=await read();
