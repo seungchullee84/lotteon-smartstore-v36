@@ -2,8 +2,9 @@ import {smartstoreTitle,assertSmartstoreTitleLength} from './smartstore-title.mj
 import {titleCandidates} from './naver-title.mjs';
 import {keywordCandidates,createKeywordOptimizer} from './naver-keywords.mjs';
 import {researchForProduct} from './apparel-tag-research.mjs';
+import {garmentSynonyms,featureSynonyms,titleFeatureGroups,titleCategoryAliases,featureQueryForms,mentionedFeatureVariant} from './apparel-title-synonyms.mjs';
 
-const synonyms={니트:['니트','스웨터','풀오버'],가디건:['가디건','카디건'],자켓:['자켓','재킷'],바지:['바지','팬츠'],티셔츠:['티셔츠','티'],패딩:['패딩','푸퍼']};
+const synonyms=garmentSynonyms;
 const featureWords=['브이넥','터틀넥','라운드','아가일','기모','경량','스트라이프','와이드','밴딩','체크','후드','집업','긴팔','반팔','숏','롱','데님','트레이닝','퀼팅'];
 const neckAliases=['라운드넥','크루넥'];
 function officialTitleFacts(product){
@@ -11,52 +12,28 @@ function officialTitleFacts(product){
  const matched=facts&&facts.style===product.style&&product.sourceUrl&&facts.sourceUrl===product.sourceUrl;
  // Styling examples describe other garments; negative clauses do not prove a
  // positive attribute of this garment.
- const description=String(product.officialDescription||'').split(/[.!?。\n]+/).filter(text=>!/코디|매치|어울리|없|아닌|않|미사용/.test(text)).join(' ');
+ const mixedPattern=/(?:솔리드|무지).*(?:스트라이프|단가라|줄무늬)|(?:스트라이프|단가라|줄무늬).*(?:솔리드|무지)/.test(product.officialDescription||'');
+ const description=String(product.officialDescription||'').split(/[.!?。\n]+/).filter(text=>!/코디|매치|어울리|없|아닌|않|미사용/.test(text)&&!(mixedPattern&&/스트라이프|단가라|줄무늬/.test(text))).join(' ');
  return [product.name,product.rawName,description,...(matched?[...(facts.features||[]),...(facts.visualFeatures||[])]:[])].filter(Boolean).join(' ');
 }
 const hasRoundNeck=product=>/크루\s*넥|라운드\s*넥/.test(officialTitleFacts(product))||/라운드/.test(product.name+' '+product.rawName);
 // Use official descriptions and same-product reviewed image facts as well as
 // names. Material OCR still requires verification; seasons are not inferred.
 function productFeatures(product){
- const source=officialTitleFacts(product);
- const rules=[
-  ['collar',/폴로|카라|칼라/,['카라','폴로카라','카라넥']],
-  ['zip',/풀\s*(?:집|집업|지퍼)|full\s*zip/i,['집업','풀집업']],
-  ['fleece',/플리스|후리스|fleece/i,['플리스','후리스']],
-  ['brushed',/기모|브러시드|brushed/i,['기모','브러시드']],
-  ['wool',/(?<!겨)울|모직|wool/i,['울']],
-  ['tapered',/테이퍼드/,['테이퍼드']],
-  ['banding',/히든\s*밴딩/,['히든밴딩','밴딩']],
-  ['long-sleeve',/긴팔|긴소매/,['긴팔','긴소매']],
-  ['short-sleeve',/반팔|반소매/,['반팔','반소매']],
-  ['fit',/오버핏|오버사이즈/,['오버핏','오버사이즈']],
-  ['fit',/레귤러\s*핏|레귤러핏/,['레귤러핏']],
-  ['fit',/슬림\s*핏|슬림핏/,['슬림핏']],
-  ['cable',/케이블|꽈배기/,['케이블','꽈배기']],
-  ['rib',/골지|리브드/,['골지','리브드']],
-  ['terry',/프렌치\s*테리|french\s*terry|쭈리/i,['프렌치테리','쭈리']],
- ];
- const found=rules.filter(([,pattern])=>pattern.test(source)).map(([id,,variants])=>({id,variants}));
- if(!found.some(f=>f.id==='zip')&&/집업|지퍼/.test(source))found.push({id:'zip',variants:['집업']});
- const verified=product.noticeVerified||product.fieldStatus?.material==='공식 이미지 대조 완료';
- if(verified){
-  for(const [id,pattern,variants] of [['cotton',/^면\s*100\s*%$/,['면100%','코튼100%']],['cashmere',/캐시미어/,['캐시미어']],['linen',/린넨|리넨/,['린넨','리넨']]]){
-   if(pattern.test(product.material||''))found.push({id,variants});
-  }
- }
- return found;
+ return titleFeatureGroups(officialTitleFacts(product),product);
 }
 // Official naming is evidence of product facts, never evidence of popularity.
 const factualWord=/^(?:브이넥|터틀넥|아가일|기모|경량|스트라이프|와이드|테이퍼드|히든밴딩|밴딩|브러시드|체크|후드|집업|긴팔|반팔|숏|숏기장|롱|데님|트레이닝|퀼팅|슬림|레귤러|오버핏|코튼|면|울|캐시미어|나일론|폴리에스터|오리털|거위털|구스|덕|스판|린넨|\d+%)+$/;
-function categoryAliases(product,kind){
- if(kind==='바지'&&/슬랙스/.test((product.rawName||'')+' '+product.name))return ['슬랙스','바지','팬츠'];
- if(kind==='패딩'&&!/베스트|조끼/.test(String(product.name||'')+' '+String(product.rawName||'')))return ['패딩','푸퍼','패딩점퍼','패딩자켓','점퍼'];
- return synonyms[kind]||[kind];
-}
+const categoryAliases=titleCategoryAliases;
 // Compound search phrases are decomposed before comparing meanings. A gender
 // or garment repeated inside 여성패딩/후드패딩 still counts as repetition.
 function semanticAtoms(text,kind){
  const groups=[['brand',['지오다노','GIORDANO']],['female',['여성용','여자용','여성','여자']],['male',['남성용','남자용','남성','남자']],['short',['숏기장','쇼트','숏']],['hood',['후디','후드']],['collar',['폴로카라','카라넥','폴로','카라']],['zip',['풀집업','집업']],['fleece',['플리스','후리스']],['brushed',['브러시드','기모']],['long-sleeve',['긴소매','긴팔']],['short-sleeve',['반소매','반팔']],['cotton',['면','코튼']],['fit',['오버사이즈','오버핏','레귤러핏','슬림핏','테이퍼드']],['banding',['히든밴딩','밴딩']],['cable',['케이블','꽈배기']],['rib',['골지','리브드']],['linen',['린넨','리넨']],['line-cloud',['CLOUD','클라우드']],['line-light',['LIGHT','라이트']]];
+ for(const group of featureSynonyms){
+  const id=group.id==='short-length'?'short':group.id;
+  const existing=groups.find(([atom])=>atom===id),variants=[...group.variants,...(group.extend?.('폴로')||[])];
+  if(existing)existing[1]=[...new Set([...existing[1],...variants])];else groups.push([id,variants]);
+ }
  if(kind==='패딩')groups.push(['insulation',['패딩','푸퍼']]);
  groups.push(['garment',kind==='패딩'?['재킷','자켓','점퍼','아우터']:kind==='자켓'?['재킷','자켓','아우터']:kind==='코트'?['코트','아우터']:[...(synonyms[kind]||[kind]),...(kind==='바지'?['슬랙스','청바지']:[]),'의류']]);
  const terms=groups.flatMap(([atom,names])=>names.map(name=>({name:name.toLowerCase(),atom}))).sort((a,b)=>b.name.length-a.name.length);
@@ -84,20 +61,22 @@ export function expandedTitleCandidates(product){
  const necks=hasRoundNeck(product)?[...neckAliases.flatMap(neck=>[neck,neck+basic.kind]),'라운드'+basic.kind]:[];
  const sexes=product.gender==='남성'?['남성','남자']:product.gender==='여성'?['여성','여자']:[];
  const features=productFeatures(product);
- const queries=features.flatMap(f=>f.variants.flatMap(v=>{
-  const term=v.replace(/100%$/,'');
-  return [...new Set([basic.kind,...aliases])].flatMap(kind=>[term+kind,...sexes.map(sex=>sex+term+kind)]);
- }));
+ const queries=features.flatMap(f=>f.variants.flatMap(v=>featureQueryForms(v).flatMap(term=>
+  [...new Set([basic.kind,...aliases])].flatMap(kind=>[term+kind,...sexes.map(sex=>sex+term+kind)])
+ )));
  const combined=features.flatMap((f,i)=>features.slice(i+1).map(g=>f.variants[0].replace(/100%$/,'')+g.variants[0].replace(/100%$/,'')+basic.kind));
  for(const alias of aliases){
   words.push(alias,...sexes.map(sex=>sex+alias));
   for(const feature of featureWords)if(normalized.includes(feature)&&!alias.includes(feature))words.push(feature+alias);
  }
- const variantPairs=features.filter(f=>f.variants.length>1).flatMap(f=>f.variants.flatMap(v=>{
-  const term=v.replace(/100%$/,'')+(aliases[0]||basic.kind);
+ const variantPairs=features.filter(f=>f.variants.length>1).flatMap(f=>f.variants.flatMap(v=>featureQueryForms(v).flatMap(form=>{
+  const term=form+(aliases[0]||basic.kind);
   return sexes.length?[sexes[0]+term,term]:[term];
- }));
- return [...new Set([words[0],...aliases,...variantPairs,...researchForProduct(product).titleTerms,...necks,...queries,...words,...combined])].slice(0,49);
+ })));
+ const mandatory=[...new Set([words[0],...aliases.flatMap(alias=>[alias,...sexes.map(sex=>sex+alias)]),...variantPairs])];
+ const researchTerms=researchForProduct(product).titleTerms.filter(term=>!featureSynonyms.some(group=>group.variants.some(word=>word.length>1&&term.includes(word))&&!features.some(f=>f.id===group.id)));
+ const optional=[...new Set([...researchTerms,...necks,...queries,...words,...combined])].filter(term=>!mandatory.includes(term));
+ return [...mandatory,...optional.slice(0,Math.max(0,49-mandatory.length))];
 }
 
 export function composePopularTitle(product,ranking){
@@ -108,7 +87,8 @@ export function composePopularTitle(product,ranking){
  const sex=product.gender;
  if(sex)base=base.replace(/^(지오다노) (남성|남자|여성|여자)(?= )/,'$1 '+sex);
  const mainAliases=kind==='패딩'?['패딩','푸퍼']:aliases;
- const primary=[...mainAliases].sort((a,b)=>(scores.get(b)||0)-(scores.get(a)||0))[0];
+ const aliasScore=alias=>Math.max(0,...ranking.filter(entry=>entry.keyword.endsWith(alias)).map(entry=>entry.score));
+ const primary=[...mainAliases].sort((a,b)=>aliasScore(b)-aliasScore(a))[0];
  let words=base.split(' ');const style=words.pop(),prefix=words.splice(0,sex?2:1);
  // Compare garment-specific phrases; bare neckline searches have other intents.
  const neckScore=word=>Math.max(scores.get(word+kind)||0,word==='라운드넥'?(scores.get('라운드'+kind)||0):0);
@@ -116,7 +96,10 @@ export function composePopularTitle(product,ranking){
  words=words.filter(word=>!/(?:크루넥|라운드(?:넥)?)/.test(word));
  if(neck)words.unshift(neck);
  const features=productFeatures(product);
- const featureScore=word=>Math.max(0,...ranking.filter(e=>[kind,...aliases].some(alias=>e.keyword.endsWith(alias))&&e.keyword.includes(word.replace(/100%$/,''))).map(e=>e.score));
+ const featureScore=word=>{
+  const group=features.find(feature=>feature.variants.includes(word));
+  return Math.max(0,...ranking.filter(e=>[kind,...aliases].some(alias=>e.keyword.endsWith(alias))&&(group?mentionedFeatureVariant(e.keyword,group)===word:e.keyword.includes(word))).map(e=>e.score));
+ };
  const choices=features.map(f=>({...f,ranked:f.variants.filter(v=>featureScore(v)>0).sort((a,b)=>featureScore(b)-featureScore(a))})).filter(f=>f.ranked.length);
  // Remove compound source spellings before adding their measured equivalent.
  words=words.join(' ').replace(/풀\s*(?:집업|집|지퍼)/g,'풀집업').split(' ');
@@ -184,9 +167,8 @@ export function composePopularTitle(product,ranking){
  if(hasDuplicateTitleMeaning(product,title))throw Error('상품명에 의미가 중복된 표현이 있습니다. 직접 검토해 주세요.');
  const titleAtoms=new Set(semanticAtoms(title,kind));
  const selectedTerms=ranking.filter(entry=>entry.score>0&&semanticAtoms(entry.keyword,kind).every(atom=>titleAtoms.has(atom))&&features.every(feature=>{
-  const variants=[...feature.variants].sort((a,b)=>b.length-a.length);
-  const mentioned=variants.find(word=>entry.keyword.includes(word.replace(/100%$/,'')));
-  return !mentioned||mentioned===variants.find(word=>title.includes(word));
+  const mentioned=mentionedFeatureVariant(entry.keyword,feature);
+  return !mentioned||mentioned===mentionedFeatureVariant(title,feature);
  })).map(entry=>entry.keyword);
  return {title,length,selectedTerms,sourceTerms:extras};
 }
