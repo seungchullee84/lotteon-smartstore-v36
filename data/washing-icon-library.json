@@ -72,6 +72,12 @@
       "meaning": "표백제금지",
       "confirmedAt": "2026-10-24T12:21:22.037Z",
       "confirmedBy": "user"
+    },
+    {
+      "hash": "1e061de461f2763cd5417c4614f42ad78d3cd11c86a0dc9102befb4bbd726b7f",
+      "meaning": "건조기금지",
+      "confirmedAt": "2026-10-24T12:21:31.876Z",
+      "confirmedBy": "user"
     }
   ]
 }
