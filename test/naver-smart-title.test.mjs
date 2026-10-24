@@ -5,13 +5,13 @@ import {assertSmartstoreTitleLength,smartstoreTitle} from '../smartstore-title.m
 const product={style:'376922',name:'여성 후드 숏 푸퍼 자켓 376922',rawName:'NEW [문가영] CLOUD LIGHT 후드 숏 푸퍼 자켓',gender:'여성'};
 const credentials={clientId:'dummy-id',clientSecret:'dummy-secret'};
 test('27자 이상을 지키며 근거 있는 동의어와 남성 표기를 보존',()=>{
- const p={style:'076913',name:'남성 울 폴로 풀 집 자켓 076913',rawName:'NEW [변우석] 울 폴로 풀 집 자켓',gender:'남성',material:'캐시미어 5%',fieldStatus:{material:'원본 확인 필요'}};
+ const p={style:'076913',name:'남성 울 폴로 풀 집 자켓 076913',rawName:'NEW [변우석] 울 폴로 풀 집 자켓',gender:'남성',officialDescription:'레귤러 핏 자켓입니다.',material:'캐시미어 5%',fieldStatus:{material:'원본 확인 필요'}};
  const before=structuredClone(p),candidates=expandedTitleCandidates(p);
  for(const keyword of ['울자켓','카라자켓','폴로카라자켓','집업자켓','풀집업자켓'])assert(candidates.includes(keyword),keyword);
  assert(!candidates.some(k=>/캐시미어|겨울|기모|오버핏/.test(k)));
  const ranking=[{keyword:'자켓',score:10},{keyword:'남자자켓',score:2},{keyword:'울자켓',score:1},{keyword:'카라자켓',score:0.3},{keyword:'집업자켓',score:0.4},{keyword:'풀집업자켓',score:0.01},{keyword:'남성용자켓',score:0.02}];
  const result=composePopularTitle(p,ranking);
- assert.equal(result.title,'지오다노 남성 울 폴로카라 집업 자켓 076913');assert(result.length>=27&&result.length<=39);assert.doesNotMatch(result.title,/남성용|남자|풀집업/);
+ assert.match(result.title,/지오다노 남자/);assert(result.length>=27&&result.length<=39);assert.match(result.title,/카라/);assert.match(result.title,/레귤러핏/);assert.doesNotMatch(result.title,/남성용|폴로카라|풀집업/);
  assert.equal(smartstoreTitle({...p,smartstoreName:result.title}),result.title);
  assert(!hasDuplicateTitleMeaning(p,result.title));assert.deepEqual(p,before);
  assert.equal(composePopularTitle(p,ranking.filter(e=>!['풀집업자켓','남성용자켓'].includes(e.keyword))).title,result.title,'낮은 관심도의 긴 표현이 없어도 결과 유지');

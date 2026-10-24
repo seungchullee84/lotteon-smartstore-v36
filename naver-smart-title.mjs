@@ -90,6 +90,9 @@ export function composePopularTitle(product,ranking){
  const aliasScore=alias=>Math.max(0,...ranking.filter(entry=>entry.keyword.endsWith(alias)).map(entry=>entry.score));
  const primary=[...mainAliases].sort((a,b)=>aliasScore(b)-aliasScore(a))[0];
  let words=base.split(' ');const style=words.pop(),prefix=words.splice(0,sex?2:1);
+ const genderVariants=sex==='남성'?['남성','남자']:sex==='여성'?['여성','여자']:[];
+ const genderScore=word=>Math.max(0,...ranking.filter(entry=>entry.keyword.startsWith(word)&&aliases.some(alias=>entry.keyword.endsWith(alias))).map(entry=>entry.score));
+ if(sex)prefix[1]=[...genderVariants].sort((a,b)=>genderScore(b)-genderScore(a))[0];
  // Compare garment-specific phrases; bare neckline searches have other intents.
  const neckScore=word=>Math.max(scores.get(word+kind)||0,word==='라운드넥'?(scores.get('라운드'+kind)||0):0);
  const neck=hasRoundNeck(product)?[...neckAliases].sort((a,b)=>neckScore(b)-neckScore(a))[0]:undefined;
@@ -127,8 +130,8 @@ export function composePopularTitle(product,ranking){
  const ordered=featureSlots.map(i=>words[i]).sort((a,b)=>scoreWord(b)-scoreWord(a));
  featureSlots.forEach((position,i)=>{words[position]=ordered[i];});
  const render=()=>smartstoreTitle({...product,smartstoreName:[...prefix,...extras,...words,style].join(' ')});
- // Meet the minimum with distinct, evidenced facts. A measured synonym may be
- // replaced by a longer evidenced equivalent, never appended as a duplicate.
+ // Meet the minimum with distinct evidenced facts, preserving the API winner
+ // of each synonym group rather than substituting a less popular long word.
  const tryWords=candidate=>{
   const proposed=smartstoreTitle({...product,smartstoreName:[...prefix,...extras,...candidate,style].join(' ')});
   if([...proposed].length>39||hasDuplicateTitleMeaning(product,proposed))return false;
@@ -144,16 +147,6 @@ export function composePopularTitle(product,ranking){
   extras.push('CLOUD LIGHT');
   if([...render()].length>39)extras.pop();
  }
- for(const feature of features){
-  if([...render()].length>=27)break;
-  const position=words.findIndex(word=>feature.variants.includes(word));
-  if(position<0)continue;
-  for(const word of [...feature.variants].sort((a,b)=>b.length-a.length)){
-   if(word.length<=words[position].length)continue;
-   const candidate=[...words];candidate[position]=word;
-   if(tryWords(candidate))break;
-  }
- }
  // Long source names may omit low-interest descriptive words, never cut tokens
  // or numeric/material specifications to fit the limit.
  while([...render()].length>39){
@@ -166,7 +159,9 @@ export function composePopularTitle(product,ranking){
  assertSmartstoreTitleLength(title);
  if(hasDuplicateTitleMeaning(product,title))throw Error('상품명에 의미가 중복된 표현이 있습니다. 직접 검토해 주세요.');
  const titleAtoms=new Set(semanticAtoms(title,kind));
- const selectedTerms=ranking.filter(entry=>entry.score>0&&semanticAtoms(entry.keyword,kind).every(atom=>titleAtoms.has(atom))&&features.every(feature=>{
+ const selectedTerms=ranking.filter(entry=>entry.score>0&&semanticAtoms(entry.keyword,kind).every(atom=>titleAtoms.has(atom))&&
+  (!genderVariants.some(word=>entry.keyword.startsWith(word))||entry.keyword.startsWith(prefix[1]))&&
+  !mainAliases.some(alias=>alias!==primary&&entry.keyword.endsWith(alias)&&!entry.keyword.endsWith(primary))&&features.every(feature=>{
   const mentioned=mentionedFeatureVariant(entry.keyword,feature);
   return !mentioned||mentioned===mentionedFeatureVariant(title,feature);
  })).map(entry=>entry.keyword);
