@@ -59,7 +59,7 @@ export function matchResearchTags(product,index,{limit=30}={}){
   [['라운드','라운드넥','크루넥'],/라운드|크루넥/.test(facts)],[['브이넥','v넥'],/브이넥|v넥/.test(facts)],[['터틀넥','목폴라'],/터틀넥|목폴라/.test(facts)],
   [['꽈배기','케이블'],/꽈배기|케이블/.test(facts)],[['골지','리브드'],/골지|리브드/.test(facts)],[['체크'],/체크/.test(facts)],[['스트라이프','단가라'],/스트라이프|단가라/.test(facts)],
   [['숏','쇼트'],/숏|쇼트/.test(facts)],[['롱'],/롱/.test(facts)],[['경량'],/경량/.test(facts)],[['단추','버튼'],/단추|버튼/.test(facts)],[['빅사이즈'],/빅사이즈/.test(facts)],
-  [['면','코튼'],/코튼|면\d/.test(facts+material)],[['울','모직'],/울|모직/.test(facts)||/(?:^|,)모\d/.test(material)],[['캐시미어'],/캐시미어/.test(facts+material)],[['린넨','리넨'],/린넨|리넨/.test(facts+material)],
+  [['면','코튼'],/코튼|면\d/.test(facts+material)],[['울','모직'],/(?<!겨)울|모직/.test(facts)||/(?:^|,)모\d/.test(material)],[['캐시미어'],/캐시미어/.test(facts+material)],[['린넨','리넨'],/린넨|리넨/.test(facts+material)],
   [['스판','스트레치'],/스판|스트레치/.test(facts)||/폴리우레탄[1-9]/.test(material)],[['데님'],/데님|청바지/.test(facts)],[['플리스','후리스'],/플리스|후리스/.test(facts)],
   [['봄'],/봄(?!버)/.test(facts)],[['여름','썸머'],/여름|썸머/.test(facts)],[['가을'],/가을/.test(facts)],[['겨울'],/겨울/.test(facts)]
  ];
