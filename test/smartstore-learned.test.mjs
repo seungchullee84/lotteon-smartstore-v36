@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {learnedFields,assertDictionaryTags,verifySearchTagGroups,sellerProductCode,tagCandidates,planTagChanges} from '../smartstore-learned.mjs';
+import {learnedFields,assertLearnedFields,fillLearnedAttributes,assertDictionaryTags,verifySearchTagGroups,sellerProductCode,tagCandidates,planTagChanges} from '../smartstore-learned.mjs';
 test('gender and season tags follow product evidence rather than the current month',()=>{
  const summer=tagCandidates({style:'123456',gender:'여성',name:'여성 여름 반팔 가디건',material:'면100%'});
  assert.ok(summer.includes('여자니트'));assert.ok(summer.includes('여름가디건'));assert.ok(!summer.some(t=>t.includes('겨울')));
@@ -46,4 +46,27 @@ test('search applicability rejects X and missing tags even with valid dictionary
  assert.equal(verifySearchTagGroups(tags,[valid]),true);
  assert.throws(()=>verifySearchTagGroups(tags,[{...valid,status:'태그사전에 등록되어 있지 않습니다. 미등록'}]));
  assert.throws(()=>verifySearchTagGroups(tags,[{...valid,tags:tags.slice(1).map(t=>'#'+t.name).join('')}]));
+});
+
+test('076931 uses reviewed padded outerwear attributes without knit, genuine leather or feather tags',()=>{
+ const f=learnedFields({style:'076931',name:'남성 스웨이드 목넥 패딩 푸퍼 076931',material:'폴리에스터 100%',manufactured:'2026-09'});
+ assert.equal(f.sleeve,'긴팔');assert.equal(f.neckline,'스텐드/차이나칼라');assert.deepEqual(f.materials,['폴리에스테르']);
+ assert.ok(f.tags.length>=10);assert.ok(f.tags.includes('남성패딩'));assert.ok(!f.tags.some(t=>/니트|가디건|여성|여자|가죽|구스|덕다운|오리털|거위털/.test(t)));
+});
+test('only attributes exposed by the selected copy category are required',()=>{
+ const fields={materials:['폴리에스테르'],tags:Array.from({length:10},(_,i)=>'t'+i),sleeve:null,neckline:null};
+ assert.equal(assertLearnedFields(fields,['주요소재','총기장','종류','핏','충전재']),fields);
+ assert.throws(()=>assertLearnedFields(fields,['소매기장']),/소매기장/);
+ assert.throws(()=>assertLearnedFields({...fields,sleeve:'긴팔'},['소매기장','네크라인']),/네크라인/);
+ assert.throws(()=>assertLearnedFields({...fields,tags:[]},[]),/태그 후보/);
+});
+test('absent sleeve and neckline rows are skipped without touching copied category attributes',async()=>{
+ const fields={materials:['폴리에스테르'],sleeve:'긴팔',neckline:'스텐드/차이나칼라'};const inspected=[];
+ const page={getByRole:()=>({getByRole:()=>({filter:({hasText})=>{inspected.push(hasText);if(hasText==='주요소재')return {getByRole:()=>({count:async()=>0})};return {count:async()=>0};}})})};
+ await fillLearnedAttributes(page,fields);assert.deepEqual(inspected,['주요소재','소매기장','네크라인']);
+});
+
+test('additional attributes follow the verified style and never carry heavy-down or an invented filling weight',()=>{
+ const f=learnedFields({style:'076931',name:'남성 스웨이드 목넥 패딩 푸퍼',material:'폴리에스터 100%'});assert.equal(f.attributes['충전재'],'솜/폴리에스테르');assert.deepEqual(f.attributes['특징'],['경량','방풍']);assert.equal(f.attributes['충전량(최소)'],undefined);
+ const other=learnedFields({style:'123456',name:'남성 패딩',material:'폴리에스터 100%'});assert.equal(other.attributes['핏'],undefined);assert.equal(other.attributes['특징'],undefined);assert.equal(other.attributes['사용대상'],'남성용');
 });

@@ -11,6 +11,8 @@ export function sellerProductCode(p){
  return p.style+' '+name;
 }
 const verified={
+ // 076931: official 01076931.jpg confirms stand neck, long sleeves, faux suede and micro-ball padding.
+ '076931':{neckline:'스텐드/차이나칼라',sleeve:'긴팔',attributes:{'총기장':'기본/하프','종류':['패딩/다운점퍼'],'핏':'루즈핏/오버핏','충전재':'솜/폴리에스테르','사용대상':'남성용','특징':['경량','방풍']},tags:["남성패딩","남자패딩","겨울패딩","남성겨울패딩","남자겨울패딩","솜패딩","스웨이드점퍼","패딩점퍼","남성패딩점퍼","남자패딩점퍼","겨울점퍼","남성점퍼","남자점퍼","남성겨울점퍼","남자겨울점퍼","캐주얼점퍼","남성아우터","남자아우터","겨울아우터","패딩","패딩코디"]},
  '356937':{neckline:'라운드넥',sleeve:'긴팔',tags:['여자니트','겨울니트','긴팔니트','긴팔가디건','라운드넥가디건','단추가디건','단추니트','데일리가디건','데일리니트','울가디건','울니트','겨울가디건','가을가디건','니트코디']},
  '356944':{neckline:'스텐드/차이나칼라',sleeve:'긴팔',material:'아크릴 54%, 폴리에스터 26%, 나일론 20%',washing:'손세탁, 표백제 금지, 천 대고 다림질(80~120℃), 뉘어서 그늘건조, 건조기 사용금지',tags:['여자니트','겨울니트','니트집업','꽈배기가디건','집업가디건','긴팔니트','긴팔가디건','니트집업가디건','꽈배기니트가디건','꽈배기니트']},
  '356938':{neckline:'칼라넥',sleeve:'긴팔',tags:['여자니트','겨울니트','긴팔니트','긴팔가디건','카라니트','카라넥니트','단추가디건','단추니트','데일리가디건','데일리니트']}
@@ -40,7 +42,15 @@ export function learnedFields(p){
  const sleeve=known.sleeve||(/긴팔/.test(title)?'긴팔':/반팔/.test(title)?'반팔':null);
  const neckline=known.neckline||(/카라|칼라|폴로넥/.test(title)?'칼라넥':/라운드/.test(title)?'라운드넥':/브이넥|V넥/i.test(title)?'V넥':/터틀넥/.test(title)?'터틀넥':/후드/.test(title)?'후드넥':null);
  // Only verified candidates for this product. Other styles require review rather than unrelated filler.
- return {materials,sleeve,neckline,tags:tagCandidates(p),manufactureDate:p.manufactured+'-01',material:material||known.material,washing:p.washing||known.washing};
+ return {materials,sleeve,neckline,attributes:{...known.attributes,...(sleeve?{'소매기장':sleeve}:{}),...(neckline?{'네크라인':neckline}:{}),...(/남성|남자/.test(p.gender||title)?{'사용대상':'남성용'}:/여성|여자/.test(p.gender||title)?{'사용대상':'여성용'}:{})},tags:tagCandidates(p),manufactureDate:p.manufactured+'-01',material:material||known.material,washing:p.washing||known.washing};
+}
+export function assertLearnedFields(fields,attributeRows){
+ if(fields.tags.length<10)throw Error('이 상품의 관련 태그 후보가 부족합니다. 상품 특성을 먼저 검토해 주세요.');
+ if(!fields.materials.length)throw Error('상품 소재를 확인해 주세요.');
+ for(const [label,key] of [['소매기장','sleeve'],['네크라인','neckline']]){
+  if(attributeRows.some(row=>row.includes(label))&&!fields[key])throw Error(label+'을 상품 사진과 대조해 주세요.');
+ }
+ return fields;
 }
 export function assertDictionaryTags(tags){
  if(tags.length!==10||new Set(tags.map(t=>t.name)).size!==10||new Set(tags.map(t=>t.id)).size!==10||tags.some(t=>!/^\d+$/.test(t.id)))throw Error('사전 태그 10개의 이름·숫자 ID·중복을 확인해 주세요.');
@@ -64,8 +74,10 @@ export async function fillLearnedAttributes(page,fields,check=()=>{}){
   if(await box.isChecked()!==wanted)throw Error('소재 선택 확인 실패: '+name);
  }
  for(const [label,value] of [['소매기장',fields.sleeve],['네크라인',fields.neckline]]){
+  const row=table.getByRole('row').filter({hasText:label});
+  if(!await row.count())continue; // Outerwear categories omit these selectors.
   if(!value)throw Error(label+'을 상품 사진과 대조해 주세요.');
-  const row=table.getByRole('row').filter({hasText:label}),input=row.locator('.selectize-input');
+  const input=row.locator('.selectize-input');
   if((await input.innerText()).trim()!==value){await input.click();await row.locator('.selectize-dropdown-content').getByText(value,{exact:true}).click();}
   if((await input.innerText()).trim()!==value)throw Error(label+' 선택 확인 실패');
  }
@@ -86,11 +98,13 @@ export async function fillDictionaryTags(page,candidates,log=()=>{},check=()=>{}
  for(const name of candidates){
    if(result.length===10)break;
    if(result.some(t=>t.name===name))continue;
-   check();await field.fill('');await field.pressSequentially(name,{delay:0});searches++;
+   check();await field.fill('');await field.pressSequentially(name,{delay:0});await field.press('End');searches++;
    const option=control.locator('.selectize-dropdown-content [data-selectable][data-value]').filter({hasText:new RegExp('^'+name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$')});
    try{await option.waitFor({state:'visible',timeout:1800});}catch{check();log('사전 후보 없음: '+name+' · 다음 관련 후보 확인');continue;}
    const id=await option.getAttribute('data-value');if(!/^\d+$/.test(id||'')||result.some(t=>t.id===id))continue;
    await option.click();
+   await page.waitForFunction(name=>[...document.querySelectorAll('span.choice-label strong')].some(e=>e.textContent.replace(/^#\s*/,'').trim()===name)||[...document.querySelectorAll('.modal-content')].some(e=>e.getBoundingClientRect().height&&e.textContent.includes('태그로 등록할 수 없는 단어')),name,{timeout:5000});
+
    const rejected=page.locator('.modal-content').filter({hasText:'태그로 등록할 수 없는 단어'});
    if(await rejected.isVisible()){await rejected.getByRole('button',{name:'확인',exact:true}).click();log('사용 불가 태그 제외: '+name);continue;}
    const added=await selected.evaluateAll(es=>es.map(e=>e.querySelector('strong')?.textContent.replace(/^#\s*/,'').trim()));

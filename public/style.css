@@ -260,3 +260,7 @@ body[data-channel=smartstore] .collection-tools{grid-template-columns:1fr}.colle
 .naver-api-link{display:inline-flex;align-items:center;justify-content:center;min-height:43px;border:1px solid var(--line);border-radius:9px;padding:11px 17px;font:500 13px/1.5 'Segoe UI','Malgun Gothic',sans-serif;text-decoration:none}.naver-api-link:focus-visible{outline:3px solid #bcb7fa;outline-offset:3px}
 
 .smartstore-template-preview{display:block;width:100%;height:550px;border:0;background:#fff}.detail-preview-scroll:has(.smartstore-template-preview){padding:0;overflow:hidden}
+
+body[data-channel="smartstore"] .classification-detail .detail-preview-scroll{height:1000px}
+body[data-channel="smartstore"] .smartstore-template-preview{height:100%}
+@media(max-width:650px){body[data-channel="smartstore"] .classification-detail .detail-preview-scroll{height:780px}}

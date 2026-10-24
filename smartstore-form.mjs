@@ -1,7 +1,8 @@
 export function isSmartstoreInputUrl(url){return /^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/(?:create(?:[?]|$)|copy\/\d+(?:[?]|$))/.test(url);}
 import {buildSmartstoreDetail} from './smartstore-detail.mjs';
+import {fillAdditionalAttributes} from './smartstore-attributes.mjs';
 import {smartstoreTitle} from './smartstore-title.mjs';
-import {learnedFields,fillLearnedAttributes,fillDictionaryTags,sellerProductCode} from './smartstore-learned.mjs';
+import {learnedFields,assertLearnedFields,fillLearnedAttributes,fillDictionaryTags,sellerProductCode} from './smartstore-learned.mjs';
 
 export function smartstorePlan(p,salePrice){
   if(!/^\d{6}$/.test(p?.style))throw Error('먼저 상품을 수집해 주세요.');
@@ -29,7 +30,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   if(!isSmartstoreInputUrl(await tab.url()))throw Error('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.');
   if(!/\/products\/copy\/\d+/.test(await tab.url()))throw Error('기본설정을 복사한 복사등록 화면에서 실행해 주세요.');
   const learned=learnedFields(plan);
-  if(learned.tags.length<10||!learned.sleeve||!learned.neckline)throw Error('이 상품의 태그 후보·소매기장·네크라인 규칙을 먼저 검토해 주세요.');
+  assertLearnedFields(learned,await page.getByRole('table',{name:'상품속성 선택 테이블'}).getByRole('row').allTextContents());
   const fill=async(loc,value)=>{check();await loc.fill(String(value));await loc.press('Tab');const actual=await loc.evaluate(e=>e.value);if(actual!=='<redacted>'&&String(actual).replaceAll(',','')!==String(value).replaceAll(',',''))throw Error('입력값 확인 실패: '+String(value).slice(0,50));};
   const open=async(name,field)=>{if(!await field.isVisible())await page.getByRole('button',{name}).click();};
   const selectize=async(model,text)=>{
@@ -74,10 +75,11 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   remember(await readRows());
   verifySmartstoreOptions(plan,[...seen].map(([key,stock])=>{const [color,size]=key.split('\t');return {color,size,stock};}));
   log('색상 '+plan.colors.length+' × 사이즈 '+plan.sizes.length+' 옵션 조합 생성');
-  if(assets){await uploadSmartstoreImages(page,assets,check);log(assets.main?'대표·추가 이미지 업로드 완료':'추가이미지 정리 완료 · 대표이미지 교체 제외');}
+  if(assets&&(assets.main||Array.isArray(assets.extras))){await uploadSmartstoreImages(page,assets,check);log(assets.main?'대표·추가 이미지 업로드 완료':'추가이미지 정리 완료 · 대표이미지 교체 제외');}
   if(!assets?.detail)log('복사된 상세설명 유지 · 별도로 지시한 이미지 입력만 수행');
   await open(/^상품 주요정보/,page.getByRole('textbox',{name:'품번',exact:true}));
   await fillLearnedAttributes(page,learned,check);
+  await fillAdditionalAttributes(page,learned,log,check);
   if(plan.country==='대한민국'||plan.country==='한국')await selectize('vm.viewData.originAreaInfo.originAreaExposureType','국산');
   // Preserve an existing matching direct-entry origin; otherwise choose the actual country.
   const originText=page.locator('input').filter({visible:true});
@@ -117,6 +119,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   log('판매자 상품코드 확인: '+sellerCode+' · 바코드·내부코드 유지');
   await open(/^노출 채널/,page.locator('#material-detail'));
   await fill(page.locator('#material-detail'),learned.material);
+  if(Object.hasOwn(assets||{},'careLabels')){await uploadSmartstoreImageSlot(page,'tagImages',assets.careLabels,{replaceImages:true},check);log(assets.careLabels.length?'현재 품번 택/케어라벨 '+assets.careLabels.length+'장 교체 완료':'품번 폴더에 택/케어라벨 없음 · 복사된 기존 라벨 삭제 완료');}
   log('소재(설명)에 현재 상품 소재·혼용률 입력 확인');
   log('소재·색상·치수·제조국·세탁방법 입력 · A/S·품질보증·미성년자 구매 기존값 유지');
   log('입력 테스트 완료 · '+seen.size+'개 옵션 각 '+plan.stockPerOption+'개 재고 확인 · 저장/등록은 하지 않았습니다.');
@@ -124,14 +127,19 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
 }
 
 export async function uploadSmartstoreImages(page,assets,check=()=>{}){
-  async function upload(id,files){
-    if(!files?.length&&!assets.replaceImages)return;
-    check();const container=page.locator('#'+id);
-    if(assets.replaceImages===true){
+ const upload=(id,files)=>uploadSmartstoreImageSlot(page,id,files,assets,check);
+ if(assets.main)await upload('representImage',[assets.main]);
+ await upload('optionalImages',assets.extras);
+}
+
+export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=false}={},check=()=>{}){
+    if(!files?.length&&!replaceImages)return;
+    check();const container=page.locator('ncp-product-temp-photo-infra-image-upload#'+id);
+    if(replaceImages===true){
       while(await container.locator('img').count()){
         check();const count=await container.locator('img').count();
         await container.getByRole('button',{name:'이미지 삭제',exact:true}).first().click();
-        await page.waitForFunction(({id,count})=>document.getElementById(id).querySelectorAll('img').length<count,{id,count});
+        await page.waitForFunction(({id,count})=>document.querySelector('ncp-product-temp-photo-infra-image-upload#'+id).querySelectorAll('img').length<count,{id,count});
       }
     }else if(await container.locator('img').count())throw Error('기존 '+id+' 이미지가 있어 덮어쓰지 않았습니다. 새 입력 화면에서 실행해 주세요.');
     if(!files?.length)return;
@@ -140,8 +148,12 @@ export async function uploadSmartstoreImages(page,assets,check=()=>{}){
     const choosing=page.waitForEvent('filechooser');await dialog.getByRole('button',{name:'내 사진',exact:true}).click();
     await (await choosing).setFiles(files);
     await container.locator('img').first().waitFor({state:'visible',timeout:30000});
-    await page.waitForFunction(({id,count})=>{const images=[...document.getElementById(id).querySelectorAll('img')];return images.length===count&&images.every(n=>/naver\.net|pstatic\.net/.test(n.src));},{id,count:files.length},{timeout:60000});
+    await page.waitForFunction(({id,count})=>{const images=[...document.querySelector('ncp-product-temp-photo-infra-image-upload#'+id).querySelectorAll('img')];return images.length===count&&images.every(n=>/naver\.net|pstatic\.net/.test(n.src));},{id,count:files.length},{timeout:60000});
+    if(id==='tagImages'){
+      const progress=page.locator('.modal-content').filter({hasText:'상품정보 추출 중입니다.'});
+      if(await progress.isVisible())await progress.getByRole('button',{name:'확인',exact:true}).click();
+      await page.waitForFunction(()=>[...document.querySelectorAll('.modal-content')].some(e=>e.getBoundingClientRect().height&&e.textContent.includes('택/케어라벨 이미지 분석 추출 결과'))||/분석실패|결과없음/.test(document.querySelector('ncp-product-temp-photo-infra-image-upload#tagImages')?.textContent||''),null,{timeout:60000});
+      const result=page.locator('.modal-content').filter({hasText:'택/케어라벨 이미지 분석 추출 결과'});
+      if(await result.isVisible()){check();await result.getByRole('button',{name:'닫기',exact:true}).click();await result.waitFor({state:'hidden'});}
+    }
   }
- if(assets.main)await upload('representImage',[assets.main]);
- await upload('optionalImages',assets.extras);
-}

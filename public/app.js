@@ -472,6 +472,11 @@ $('form').addEventListener('input',event=>{if(!['name','gender','material','colo
 function syncListingImages(state){
  const custom=$('smartstoreListingExtras'),original=$('originalExtraPreviews');
  const listing=state.smartstoreListing,smart=document.body.dataset.channel==='smartstore';
+ const note=$('mainSourceNote');if(!note.dataset.original)note.dataset.original=note.textContent;
+ note.textContent=smart?(listing?'대표사진: '+listing.sourceNames[0]+' · '+listing.mainColor+' · 바탕화면 품번 폴더의 1번 사진을 사용합니다.':'바탕화면의 해당 품번 폴더에 1.jpg 또는 1번.jpg를 넣어 주세요. 시작 시 색상을 대조해 대표로 적용합니다.'):note.dataset.original;
+ $('main').hidden=smart&&!listing;
+ document.querySelector('.main-image-heading h3').textContent=smart?'대표이미지 · 폴더 1번':'대표이미지';
+
  custom.hidden=!smart||!listing;original.hidden=smart&&!!listing;$('extraImages').querySelector('h3').textContent=smart?'추가이미지':'추가이미지 (최대 2장)';
  if(!smart||!listing||!product||product.style!==state.product?.style)return;
  const base='/smartstore-listing/',query='?style='+encodeURIComponent(product.style);

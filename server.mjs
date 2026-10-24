@@ -1,3 +1,4 @@
+import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
 import {runSmartstoreAuto} from './smartstore-auto.mjs';
@@ -201,7 +202,8 @@ const server=http.createServer(async(req,res)=>{
             upload:async(p,folder,{main,detail})=>{
               const selected=await prepareListingImages(p,folder,{dataRoot});
               const detailParts=await smartstoreUploadParts(detail.path,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'));
-              return smartBot.uploadPrepared(p,folder,{main:selected.main,extras:selected.extras,detailParts});
+              const careLabels=await prepareCareLabelImages(p,folder,{dataRoot});
+              return smartBot.uploadPrepared(p,folder,{main:selected.main,extras:selected.extras,detailParts,careLabels});
             }
           });
           state.autoStep='done';await writeFile(path.join(result.folder,'smartstore-auto-completed.json'),JSON.stringify(result,null,2));
