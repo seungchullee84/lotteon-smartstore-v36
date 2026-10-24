@@ -21,6 +21,14 @@ test('식별자가 없는 영상 요소를 업로드 완료나 자동재생 확�
  try{const options=await prepareVideo(root),page=await browser.newPage();await page.setContent(`<button>동영상</button><input type=file accept="video/mp4" onchange="const n=document.createElement('div');n.className='se-component se-video';document.body.append(n)">`);await assert.rejects(insertSmartstoreVideo(page,{...options,timeout:800}),/식별자/);}
  finally{await browser.close();await rm(root,{recursive:true,force:true});}
 });
+test('실제 ONE 버튼 이름·파일 선택기·업로드 완료 상태·네이티브 섬네일 구조를 처리한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'native-video-'));const browser=await chromium.launch({headless:true});
+ try{
+  const options=await prepareVideo(root),page=await browser.newPage();await page.route('https://phinf.pstatic.net/**',r=>r.abort());
+  await page.setContent(`<button data-name=video data-group=documentToolbar onclick="document.querySelector('#video-uploader-wrap').hidden=false">동영상<span>동영상 추가</span></button><div id=video-uploader-wrap hidden><button onclick="document.querySelector('input').click()">동영상 추가</button><input type=file hidden onchange="setTimeout(()=>{document.querySelector('#status').textContent='업로드 완료'},500)"><p id=status>대기중</p><button onclick="if(document.querySelector('#status').textContent!=='업로드 완료')window.early=true;const n=document.createElement('div');n.className='se-component se-video';n.innerHTML='<img class=se-video-thumbnail-resource src=https://phinf.pstatic.net/image.nmv/new-native-video.jpg>';document.body.append(n);document.querySelector('#video-uploader-wrap').hidden=true">완료</button></div>`);
+  const result=await insertSmartstoreVideo(page,options);assert.deepEqual(result.identity,['thumbnail:https://phinf.pstatic.net/image.nmv/new-native-video.jpg']);assert.equal(await page.evaluate(()=>window.early),undefined);
+ }finally{await browser.close();await rm(root,{recursive:true,force:true});}
+});
 test('ONE reentry waits for the asynchronously rebuilt launch button instead of the old eight-second timeout',async()=>{
  const browser=await chromium.launch({headless:true});try{
   const page=await browser.newPage();page.setDefaultTimeout(8000);
