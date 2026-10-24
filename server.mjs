@@ -51,6 +51,10 @@ const protectedBranding=brandingLock(dataRoot);
 const state={busy:false,phase:'idle',logs:[],product:null,folder:null,error:null,paused:null,revision:0,collectionInput:null,detailFallbackRequest:null};
 if(process.env.REGISTER_RESTORE){const restored=path.resolve(process.env.REGISTER_RESTORE);if(restored.startsWith(dataRoot+path.sep)){state.product=JSON.parse(await readFile(restored,'utf8'));repairCategoryFields(state.product);if(state.product.categoryMatch){state.product.fieldStatus||={};state.product.fieldStatus.category=state.product.categoryMatch.status;}state.product.keywords=buildKeywords(state.product);state.folder=path.dirname(restored);state.phase='done';state.revision=1;}}
 if(state.product)await applyExtraExclusions(state.folder,state.product);
+if(state.product&&state.folder){
+  try{const previous=JSON.parse(await readFile(path.join(state.folder,'smartstore-tags-result.json'),'utf8'));if(previous.style===state.product.style){if(previous.validationOnly)state.tagValidation=previous;else state.tagResult=previous;}}
+  catch(e){if(e.code!=='ENOENT')throw e;}
+}
 let extraImageEdits=Promise.resolve();
 function log(message){state.logs.push({time:new Date().toLocaleTimeString('ko-KR'),message});state.logs=state.logs.slice(-300);console.log(message);}
 const bot=new LotteAutomation(dataRoot,log);bot.onPause=message=>{state.paused=message;};

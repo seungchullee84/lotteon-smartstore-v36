@@ -6,7 +6,7 @@ import {explicitDetailFacts,selectedSeasonsFromTable,enrichOfficialProductFacts}
 import {matchResearchTags} from '../apparel-tag-research.mjs';
 
 test('시즌 명시와 표의 단순 선택지를 구분하고 봄버·기모로 계절을 추정하지 않는다',()=>{
- assert(!explicitDetailFacts('착용시기\n봄 여름 가을 겨울').includes('겨울'));
+ assert.deepEqual(explicitDetailFacts('착용시기\n봄 여름 가을 겨울'),[]);
  assert.deepEqual(explicitDetailFacts('기모 봄버 자켓').filter(t=>['봄','여름','가을','겨울'].includes(t)),[]);
  assert(explicitDetailFacts('가을 시즌에 착용').includes('가을'));
  assert.deepEqual(explicitDetailFacts('2026 S/S collection').sort(),['봄','여름'].sort());
