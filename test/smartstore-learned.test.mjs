@@ -62,6 +62,14 @@ test('only attributes exposed by the selected copy category are required',()=>{
  const {tags,...withoutTags}=fields;assert.equal(assertLearnedFields(withoutTags,[]),withoutTags);
  assert.throws(()=>assertLearnedFields({...withoutTags,materials:[]},[]),/소재/);
 });
+
+test('376921 has photo-reviewed long sleeves even when the title omits sleeve length, without generating tags',()=>{
+ const f=learnedFields({style:'376921',name:'여성 숏 푸퍼 러버 자켓',material:'폴리우레탄 100%',get smartstoreTags(){throw Error('Manual tags must not be read');}});
+ assert.equal(f.sleeve,'긴팔');assert.equal(f.neckline,'스텐드/차이나칼라');assert.equal(f.tags,undefined);
+ assert.equal(assertLearnedFields(f,['주요소재','소매기장']),f);
+ const other=learnedFields({style:'123456',name:'여성 자켓',material:'폴리우레탄 100%'});
+ assert.equal(other.sleeve,null);assert.throws(()=>assertLearnedFields(other,['소매기장']),/소매기장/);
+});
 test('absent sleeve and neckline rows are skipped without touching copied category attributes',async()=>{
  const fields={materials:['폴리에스테르'],sleeve:'긴팔',neckline:'스텐드/차이나칼라'};const inspected=[];
  const page={getByRole:()=>({getByRole:()=>({filter:({hasText})=>{inspected.push(hasText);if(hasText==='주요소재')return {getByRole:()=>({count:async()=>0})};return {count:async()=>0};}})})};

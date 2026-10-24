@@ -11,6 +11,8 @@ export function sellerProductCode(p){
  return p.style+' '+name;
 }
 const verified={
+ // 376921: official 05376921.jpg and Desktop/상품등록기사진폴더/376921 photos confirm full-length sleeves and a stand collar.
+ '376921':{sleeve:'긴팔',neckline:'스텐드/차이나칼라'},
  // 076931: official 01076931.jpg confirms stand neck, long sleeves, faux suede and micro-ball padding.
  '076931':{neckline:'스텐드/차이나칼라',sleeve:'긴팔',attributes:{'총기장':'기본/하프','종류':['패딩/다운점퍼'],'핏':'루즈핏/오버핏','충전재':'솜/폴리에스테르','사용대상':'남성용','특징':['경량','방풍']},tags:["남성패딩","남자패딩","겨울패딩","남성겨울패딩","남자겨울패딩","솜패딩","스웨이드점퍼","패딩점퍼","남성패딩점퍼","남자패딩점퍼","겨울점퍼","남성점퍼","남자점퍼","남성겨울점퍼","남자겨울점퍼","캐주얼점퍼","남성아우터","남자아우터","겨울아우터","패딩","패딩코디"]},
  '356937':{neckline:'라운드넥',sleeve:'긴팔',tags:['여자니트','겨울니트','긴팔니트','긴팔가디건','라운드넥가디건','단추가디건','단추니트','데일리가디건','데일리니트','울가디건','울니트','겨울가디건','가을가디건','니트코디']},
