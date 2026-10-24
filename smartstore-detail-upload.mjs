@@ -34,6 +34,21 @@ export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=t
  return {files:parts,video:video?{file:video.file,sha256:video.sha256}:null,includeVideo,hash:digest};
 }
 export const insertSmartstoreVideo=insertNativeBrandVideo;
+export async function applySmartstoreImageLayout(editor,image,{check=()=>{}}={}){
+ check();await image.scrollIntoViewIfNeeded();await editor.bringToFront();
+ const select=async()=>{
+  const box=await image.boundingBox(),viewportHeight=await editor.evaluate(()=>innerHeight);
+  const top=Math.max(box.y,160),bottom=Math.min(box.y+box.height,viewportHeight-40);
+  if(bottom<=top)throw Error('상세이미지 선택 위치를 확인하지 못했습니다.');
+  await editor.mouse.click(box.x+box.width/2,Math.min(bottom-5,top+40));
+ };
+ await select();
+ const extend=editor.locator('button[data-name="content-mode-without-pagefull"][data-value="extend"]').filter({visible:true}).first();
+ try{await extend.waitFor({state:'visible',timeout:1500});}catch{check();await select();}
+ await extend.click();
+ await editor.waitForFunction(()=>[...document.querySelectorAll('button[data-name="content-mode-without-pagefull"][data-value="extend"]')].some(n=>n.classList.contains('se-is-selected')));
+ check();
+}
 export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}}={}){
  if(!/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+/.test(page.url()))throw Error('상세페이지는 스마트스토어 복사등록 화면에서만 교체합니다.');
  check();
@@ -69,22 +84,7 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
   const lastImage=editor.locator('.se-component.se-image img').last();
   await lastImage.scrollIntoViewIfNeeded();
   await editor.waitForFunction(()=>/^https:\/\//.test([...document.querySelectorAll('.se-component.se-image img')].at(-1)?.src||''),null,{timeout:60000});
-  await editor.bringToFront();
-  // A tall image's centre/top may be outside the viewport. Click its visible
-  // part below ONE's fixed toolbar, using the current measured image bounds.
-  const box=await lastImage.boundingBox(),viewportHeight=await editor.evaluate(()=>innerHeight);
-  const top=Math.max(box.y,160),bottom=Math.min(box.y+box.height,viewportHeight-40);
-  if(bottom<=top)throw Error('상세이미지 선택 위치를 확인하지 못했습니다.');
-  await editor.mouse.click(box.x+box.width/2,Math.min(bottom-5,top+40));
-  const fit=editor.locator('button[data-name="content-mode-without-pagefull"][data-value="fit"]').filter({visible:true}).first();
-  try{await fit.waitFor({state:'visible',timeout:1500});}catch{
-   check();const rect=await lastImage.boundingBox();const upper=Math.max(rect.y,160),lower=Math.min(rect.y+rect.height,viewportHeight-40);
-   if(lower<=upper)throw Error('상세이미지 선택 위치를 확인하지 못했습니다.');
-   await editor.mouse.click(rect.x+rect.width/2,Math.min(lower-5,upper+40));
-  }
-  await fit.click();
-  await editor.waitForFunction(()=>[...document.querySelectorAll('button[data-name="content-mode-without-pagefull"][data-value="fit"]')].some(n=>n.classList.contains('se-is-selected')));
-  check();
+  await applySmartstoreImageLayout(editor,lastImage,{check});
  };
  await choose(parts.files[0]);log('브랜드 소개 이미지 업로드');
  if(parts.includeVideo!==false){await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});parts.videoIdentity=await insertSmartstoreVideo(editor,{check});}
@@ -114,8 +114,8 @@ export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  const video=includeVideo&&videoCount===1&&await verified.locator('.se-component.se-video').count()===1?await nativeVideoIdentity(verified.locator('.se-component.se-video')):[];
  const leftoverUrl=await verified.locator('.se-component.se-text').evaluateAll(ns=>ns.some(n=>/youtube\.com\/|youtu\.be\//.test(n.innerText)));
  if(leftoverUrl)throw Error('저장된 상세페이지에 영상 주소 문장이 남아 있습니다.');
- if(JSON.stringify(names)!==JSON.stringify(expected)||await verified.locator('.se-component.se-image .se-component-content-fit').count()!==expected.length||(includeVideo?!video.length||JSON.stringify(video)!==JSON.stringify(parts.videoIdentity?.identity):videoCount!==0))throw Error('저장된 상세페이지의 이미지·MP4 영상·문서 너비 설정 대조 결과가 다릅니다.');
+ if(JSON.stringify(names)!==JSON.stringify(expected)||await verified.locator('.se-component.se-image .se-component-content-extend').count()!==expected.length||(includeVideo?!video.length||JSON.stringify(video)!==JSON.stringify(parts.videoIdentity?.identity):videoCount!==0))throw Error('저장된 상세페이지의 이미지·MP4 영상·옆트임 설정 대조 결과가 다릅니다.');
  await verified.close();
  log('상세페이지 이미지 '+parts.files.length+'장 반영 확인 · '+(includeVideo?'공통 MP4 포함 · 판매페이지 자동재생 미검증':'영상 제외'));
- return {detailUploaded:true,detailParts:parts.files.length,videoUploaded:includeVideo,videoSha256:parts.videoIdentity?.sha256,videoPlayback:includeVideo?'unverified':null,colorNavigation:false,imageLayout:'fit'};
+ return {detailUploaded:true,detailParts:parts.files.length,videoUploaded:includeVideo,videoSha256:parts.videoIdentity?.sha256,videoPlayback:includeVideo?'unverified':null,colorNavigation:false,imageLayout:'extend'};
 }
