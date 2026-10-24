@@ -1,7 +1,7 @@
 export function isSmartstoreInputUrl(url){return /^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/(?:create(?:[?]|$)|copy\/\d+(?:[?]|$))/.test(url);}
 import {buildSmartstoreDetail} from './smartstore-detail.mjs';
 import {fillAdditionalAttributes} from './smartstore-attributes.mjs';
-import {smartstoreTitle} from './smartstore-title.mjs';
+import {smartstoreTitle,assertSmartstoreTitleLength} from './smartstore-title.mjs';
 import {learnedFields,assertLearnedFields,fillLearnedAttributes,sellerProductCode} from './smartstore-learned.mjs';
 import {researchForProduct} from './apparel-tag-research.mjs';
 import {fillResearchTags} from './smartstore-research-tags.mjs';
@@ -75,6 +75,7 @@ export async function fillSmartstoreOrigin(page,country,check=()=>{}){
  return {type:'수입산',region:'아시아',country,importer:'지오다노'};
 }
 export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
+  assertSmartstoreTitleLength(plan.name);
   const page=tab.playwright;
   if(!isSmartstoreInputUrl(await tab.url()))throw Error('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.');
   if(!/\/products\/copy\/\d+/.test(await tab.url()))throw Error('기본설정을 복사한 복사등록 화면에서 실행해 주세요.');

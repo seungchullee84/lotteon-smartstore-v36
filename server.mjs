@@ -208,6 +208,7 @@ const server=http.createServer(async(req,res)=>{
                 try{const optimized=await optimizeNaverTitle(product,naverCredentials);product.smartstoreName=optimized.title;log('상품명 자동 최적화 · '+optimized.source);}
                 catch(e){log('상품명 참고 조회 확인 필요 · 공식 상품명 유지');}
               }
+              assertSmartstoreTitleLength(product.smartstoreName);
               smartstorePlan(product,product.consumerPrice);
               return {product,folder};
             },

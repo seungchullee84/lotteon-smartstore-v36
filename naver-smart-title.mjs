@@ -8,8 +8,11 @@ const featureWords=['브이넥','터틀넥','라운드','아가일','기모','�
 const neckAliases=['라운드넥','크루넥'];
 function officialTitleFacts(product){
  const facts=product.researchFacts;
- const matched=facts&&facts.style===product.style&&facts.sourceUrl===product.sourceUrl;
- return [product.name,product.rawName,product.officialDescription,...(matched?[...(facts.features||[]),...(facts.visualFeatures||[])]:[])].filter(Boolean).join(' ');
+ const matched=facts&&facts.style===product.style&&product.sourceUrl&&facts.sourceUrl===product.sourceUrl;
+ // Styling examples describe other garments; negative clauses do not prove a
+ // positive attribute of this garment.
+ const description=String(product.officialDescription||'').split(/[.!?。\n]+/).filter(text=>!/코디|매치|어울리|없|아닌|않|미사용/.test(text)).join(' ');
+ return [product.name,product.rawName,description,...(matched?[...(facts.features||[]),...(facts.visualFeatures||[])]:[])].filter(Boolean).join(' ');
 }
 const hasRoundNeck=product=>/크루\s*넥|라운드\s*넥/.test(officialTitleFacts(product))||/라운드/.test(product.name+' '+product.rawName);
 // Use official descriptions and same-product reviewed image facts as well as
