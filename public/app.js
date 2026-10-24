@@ -487,7 +487,7 @@ function renderResearchTags(state){
  const validation=state.tagValidation?.style===state.product?.style?state.tagValidation:null;
  const names=(report?.selectedTags||validation?.selectedTags||research?.candidates||[]).slice(0,10).map(t=>t.name),key=JSON.stringify(names);
  if(container.dataset.names!==key){container.dataset.names=key;container.replaceChildren();for(const name of names){const chip=document.createElement('span');chip.textContent='#'+name;container.append(chip);}}
- panel.textContent=state.busy&&state.phase==='smartstore-tags'?'현재 상품의 태그를 입력·확인하고 있습니다…':report?'자동입력 '+report.tagCount+'/10개 · '+(report.tagCount<10?(10-report.tagCount)+'개 보강 필요':report.searchTagsVerified?'검색 적용 확인 완료':'진행 기록 확인'):validation?'검증 '+validation.tagCount+'/10개 · 기존 폼 태그 복원 완료':'조사 자료 '+(research?.count||0).toLocaleString()+'개 · '+(names.length?'상품 연관 후보 '+names.length+'개':'상품 근거에 맞는 후보를 확인해 주세요.');
+ panel.textContent=state.busy&&state.phase==='smartstore-tags'?'현재 상품의 태그를 입력·확인하고 있습니다…':report?'자동입력 '+report.tagCount+'/10개 · '+(report.tagCount<10?(10-report.tagCount)+'개 보강 필요':report.searchTagsVerified?'검색 적용 확인 완료':'진행 기록 확인'):validation?'검증 '+validation.tagCount+'/10개 · 기존 폼 태그 복원 완료':'조사 자료 '+(research?.count||0).toLocaleString()+'개 · '+(names.length?'상품 연관 후보 '+research.candidates.length+'개 · 상위 '+names.length+'개 표시':'상품 근거에 맞는 후보를 확인해 주세요.');
 }
 $('smartstoreAutoTags').onclick=async()=>{
  if(requestLock||serverBusy||!product||document.body.dataset.channel!=='smartstore')return;
