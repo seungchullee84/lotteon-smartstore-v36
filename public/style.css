@@ -268,3 +268,5 @@ body[data-channel="smartstore"] .smartstore-template-preview{height:100%}
 body[data-channel=smartstore] .collection-tools #smartstoreOpen{font-size:13px;font-weight:700;padding:11px 17px;box-shadow:0 3px 8px #087c421a}
 
 body[data-channel="smartstore"] #smartstoreStart{background:#087c42}body[data-channel="smartstore"] #smartstoreStart:not(:disabled):hover{background:#096b3b}
+
+.research-tag-panel{margin-top:20px;padding-top:18px;border-top:1px solid #b2d6bf}.research-tag-panel h3{margin:0 0 8px}.research-tag-candidates{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 14px}.research-tag-candidates span{padding:4px 9px;border:1px solid #a8cdb5;background:#fafffb;border-radius:12px;font-size:12px}.research-tag-panel small{display:block;margin-top:10px}
