@@ -38,6 +38,21 @@ export async function ensureSmartstoreOptionMode(page,check=()=>{}){
   if(!await radio.isChecked())throw Error('옵션 입력 방식 확인 실패: '+name);
  }
 }
+export async function fillSmartstoreOrigin(page,country,check=()=>{}){
+ const select=async(field,text)=>{
+  check();const box=page.locator('select[ng-model="vm.viewData.originAreaInfo.'+field+'"]').locator('..');
+  const input=box.locator('.selectize-input');await input.waitFor({state:'visible'});
+  if((await input.innerText()).trim()!==text){await input.click();await box.locator('.selectize-dropdown-content').getByText(text,{exact:true}).click();}
+  if((await input.innerText()).trim()!==text)throw Error('원산지 선택 확인 실패: '+text);
+ };
+ if(country==='대한민국'||country==='한국'){await select('originAreaExposureType','국산');return {type:'국산',country:'대한민국'};}
+ await select('originAreaExposureType','수입산');await select('firstSubOriginAreaType','아시아');await select('secondSubOriginAreaType',country);
+ const importer=page.locator('input[ng-model="vm.viewData.originAreaInfo.importer"]');
+ check();await importer.fill('지오다노');await importer.press('Tab');
+ if(await importer.inputValue()!=='지오다노')throw Error('원산지 수입사 입력 확인 실패');
+ await page.waitForFunction(()=>{const input=document.querySelector('input[ng-model="vm.viewData.originAreaInfo.importer"]');return input?.value==='지오다노'&&!input.classList.contains('ng-invalid');},null,{timeout:8000});
+ return {type:'수입산',region:'아시아',country,importer:'지오다노'};
+}
 export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   const page=tab.playwright;
   if(!isSmartstoreInputUrl(await tab.url()))throw Error('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.');
@@ -46,14 +61,6 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   assertLearnedFields(learned,await page.getByRole('table',{name:'상품속성 선택 테이블'}).getByRole('row').allTextContents());
   const fill=async(loc,value)=>{check();await loc.fill(String(value));await loc.press('Tab');const actual=await loc.evaluate(e=>e.value);if(actual!=='<redacted>'&&String(actual).replaceAll(',','')!==String(value).replaceAll(',',''))throw Error('입력값 확인 실패: '+String(value).slice(0,50));};
   const open=async(name,field)=>{if(!await field.isVisible())await page.getByRole('button',{name}).click();};
-  const selectize=async(model,text)=>{
-    check();const box=page.locator(`select[ng-model="${model}"]`).locator('..');
-    const current=await box.locator('.selectize-input').innerText();
-    if(current.trim()===text)return;
-    await box.locator('.selectize-input').click();
-    await box.locator('.selectize-dropdown-content').getByText(text,{exact:true}).click();
-    if((await box.locator('.selectize-input').innerText()).trim()!==text)throw Error('선택 확인 실패: '+text);
-  };
   log('스마트스토어 복사등록 입력 · 사전 태그 검증 · 저장/등록 안 함');
   log('카테고리 자동선택 중지 · 현재 선택된 분류 유지');
   await fill(page.locator('input[name="product.name"]'),plan.name);
@@ -91,15 +98,8 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   await open(/^상품 주요정보/,page.getByRole('textbox',{name:'품번',exact:true}));
   await fillLearnedAttributes(page,learned,check);
   await fillAdditionalAttributes(page,learned,log,check);
-  if(plan.country==='대한민국'||plan.country==='한국')await selectize('vm.viewData.originAreaInfo.originAreaExposureType','국산');
-  // Preserve an existing matching direct-entry origin; otherwise choose the actual country.
-  const originText=page.locator('input').filter({visible:true});
-  const hasCountry=await originText.evaluateAll((es,country)=>es.some(e=>e.value===country),plan.country);
-  if(!hasCountry&&plan.country!=='대한민국'&&plan.country!=='한국'){
-    await selectize('vm.viewData.originAreaInfo.originAreaExposureType','수입산');
-    await selectize('vm.viewData.originAreaInfo.firstSubOriginAreaType','아시아');
-    await selectize('vm.viewData.originAreaInfo.secondSubOriginAreaType',plan.country);
-  }
+  const origin=await fillSmartstoreOrigin(page,plan.country,check);
+  log('원산지 확인: '+origin.type+' · '+origin.country+(origin.importer?' · 수입사 '+origin.importer:''));
   const manufactureDate=learned.manufactureDate;
   const date=page.locator('input[name="product.detailAttribute.manufactureDate"]');
   const displayed=await date.evaluate(e=>e.value);
@@ -134,7 +134,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   log('소재(설명)에 현재 상품 소재·혼용률 입력 확인');
   log('소재·색상·치수·제조국·세탁방법 입력 · A/S·품질보증·미성년자 구매 기존값 유지');
   log('입력 테스트 완료 · '+seen.size+'개 옵션 각 '+plan.stockPerOption+'개 재고 확인 · 저장/등록은 하지 않았습니다.');
-  return {style:plan.style,salePrice:plan.salePrice,verifiedOptions:seen.size,stockPerOption:plan.stockPerOption,manufactureDate,imagesSkipped:!assets,saved:false,keywordsTouched:false,tags,searchTagsVerified:true,sellerCode};
+  return {style:plan.style,salePrice:plan.salePrice,verifiedOptions:seen.size,stockPerOption:plan.stockPerOption,manufactureDate,imagesSkipped:!assets,saved:false,keywordsTouched:false,tags,searchTagsVerified:true,sellerCode,origin};
 }
 
 export async function uploadSmartstoreImages(page,assets,check=()=>{}){
