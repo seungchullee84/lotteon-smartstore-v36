@@ -1,3 +1,5 @@
+import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail} from './smartstore-detail-files.mjs';
+import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
 import {validateProduct} from './product-validation.mjs';
 import {requireChannel} from './channel-routing.mjs';
 import {verifyNaver,createKeywordOptimizer} from './naver-keywords.mjs';
@@ -69,6 +71,28 @@ const server=http.createServer(async(req,res)=>{
       if(colorChipStatus)versions.main=(versions.main||'original')+':'+colorChipStatus.hash;
       const selected=state.folder?await backgroundSelection(state.folder):'main';
       return json(res,200,{...state,folder:undefined,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
+    }
+    if(req.method==='GET'&&url.pathname.startsWith('/smartstore-template/')){
+      const name=url.pathname.slice('/smartstore-template/'.length);
+      if(!TEMPLATE_ASSET_NAMES.includes(name))return json(res,404,{error:'없는 템플릿 파일'});
+      res.writeHead(200,{'Content-Type':name.endsWith('.ttf')?'font/ttf':'image/jpeg','Cache-Control':'no-store'});
+      return res.end(await readFile(path.join(root,'public','smartstore-template',name)));
+    }
+    if(req.method==='GET'&&/^\/smartstore-photo\/[a-f0-9]{24}$/.test(url.pathname)){
+      if(!state.folder)return json(res,404,{});
+      res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'no-store'});
+      return res.end(await readFile(path.join(state.folder,'smartstore-photo-'+url.pathname.split('/').at(-1)+'.jpg')));
+    }
+    if(req.method==='GET'&&url.pathname==='/smartstore-detail-preview.html'){
+      const current=state.product;if(!current||!state.folder)return json(res,400,{error:'먼저 상품을 수집해 주세요.'});
+      if(url.searchParams.get('style')!==current.style)return json(res,409,{error:'상품이 변경되었습니다. 상세 미리보기를 다시 열어 주세요.'});
+      const fields=JSON.parse(url.searchParams.get('fields')||'{}');
+      const edits={};for(const key of ['name','gender','material'])if(typeof fields[key]==='string'&&fields[key].length<500)edits[key]=fields[key];
+      for(const key of ['colors','sizes'])if(Array.isArray(fields[key])&&fields[key].length<=100&&fields[key].every(v=>typeof v==='string'&&v.length<100))edits[key]=fields[key];
+      const p=await prepareSmartstoreDetail({...current,...edits},state.folder);
+      if(state.product!==current)return json(res,409,{error:'상품이 변경되었습니다.'});
+      res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; img-src 'self'; font-src 'self'; style-src 'unsafe-inline'; frame-src https://www.youtube.com; frame-ancestors 'self'; base-uri 'none'"});
+      return res.end(localSmartstorePreview(p).html);
     }
     if(req.method==='GET'&&url.pathname.startsWith('/image/')){
       if(/^\/image\/wash-icon-[1-9]\d*$/.test(url.pathname)&&state.folder){
@@ -186,7 +210,22 @@ const server=http.createServer(async(req,res)=>{
       if(url.pathname==='/api/save-detail-images'){
         if(state.busy)return json(res,409,{error:'작업이 끝난 뒤 상세이미지를 저장해 주세요.'});
         if(!state.product||!state.folder)return json(res,400,{error:'먼저 상품 정보를 수집해 주세요.'});
-        const p=state.product;
+        const current=state.product;
+        if(b.channel==='smartstore'){
+          if(b.product?.style!==current.style)throw Error('현재 상품을 다시 확인해 주세요.');
+          const edits={};for(const key of ['name','gender','material'])if(typeof b.product[key]==='string')edits[key]=b.product[key].slice(0,500);
+          for(const key of ['colors','sizes'])if(Array.isArray(b.product[key])&&b.product[key].length<=100&&b.product[key].every(v=>typeof v==='string'&&v.length<100))edits[key]=b.product[key];
+          const p={...current,...edits};const saveFolder=await imageDownloadFolder();
+          const savedPath=path.join(saveFolder,p.style+'_스마트스토어상세_'+Date.now()+'.png');
+          const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase='smartstore-detail';state.error=null;
+          try{
+            const dimensions=await saveSmartstoreDetail(p,state.folder,savedPath,{signal:controller.signal});
+            state.phase='done';log('스마트스토어 확정 템플릿 상세페이지 저장 완료 · 품번 '+p.style);
+            return json(res,200,{ok:true,path:savedPath,...dimensions});
+          }catch(e){state.phase=controller.signal.aborted?'stopped':'error';state.error=controller.signal.aborted?null:e.message;throw e;}
+          finally{state.busy=false;activeAbort=null;}
+        }
+        const p=current;
         const saveFolder=await imageDownloadFolder();
         const filename=String(p.style).replace(/[^a-zA-Z0-9_-]/g,'')+'_상세전체_'+Date.now()+'.png';
         const savedPath=path.join(saveFolder,filename);

@@ -1,5 +1,5 @@
 export function isSmartstoreInputUrl(url){return /^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/(?:create(?:[?]|$)|copy\/\d+(?:[?]|$))/.test(url);}
-import {buildDetailContent} from './detail-html.mjs';
+import {buildSmartstoreDetail} from './smartstore-detail.mjs';
 import {smartstoreTitle} from './smartstore-title.mjs';
 import {learnedFields,fillLearnedAttributes,fillDictionaryTags,sellerProductCode} from './smartstore-learned.mjs';
 
@@ -11,7 +11,7 @@ export function smartstorePlan(p,salePrice){
   if(!p.colors?.length||!p.sizes?.length)throw Error('색상과 사이즈가 필요합니다.');
   const category=null; // Keep the category selected in the copy form.
   if(!['미얀마','중국','베트남','방글라데시','인도네시아','캄보디아','인도','태국','필리핀','파키스탄','스리랑카','일본','대한민국','한국'].includes(p.country))throw Error('스마트스토어 제조국 선택을 먼저 검증해야 합니다.');
-  return {style:p.style,name:smartstoreTitle(p),salePrice:+salePrice,consumerPrice:+p.consumerPrice,category,colors:[...p.colors],sizes:[...p.sizes],stockPerOption:10,expectedOptions:p.colors.length*p.sizes.length,material:p.material,country:p.country,washing:p.washing,manufactured:p.manufactured,html:buildDetailContent(p.images,p.colors,p.colorImages,p.originalDetailUrl).html.replace('max-width:900px','max-width:848px'),keywords:false,save:false};
+  return {style:p.style,name:smartstoreTitle(p),salePrice:+salePrice,consumerPrice:+p.consumerPrice,category,colors:[...p.colors],sizes:[...p.sizes],stockPerOption:10,expectedOptions:p.colors.length*p.sizes.length,material:p.material,country:p.country,washing:p.washing,manufactured:p.manufactured,html:buildSmartstoreDetail(p).html,keywords:false,save:false};
 }
 
 export function verifySmartstoreOptions(plan,rows){

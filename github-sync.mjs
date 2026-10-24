@@ -6,6 +6,7 @@ import {createHash} from 'node:crypto';
 const exec=promisify(execFile);
 const remote='https://github.com/seungchullee84/lotteon-smartstore-v36.git';
 export function publishable(file){
+ if(['brand-intro.jpg','benefits.jpg','shipping.jpg','returns.jpg','store.jpg','GowunDodum-Regular.ttf'].some(name=>file==='public/smartstore-template/'+name))return true;
  if(file.includes('..')||file.includes('\\'))return false;
  if(['.gitignore','.gitattributes','.app-release.json','package.json','pnpm-lock.yaml'].includes(file))return true;
  if(['data/category-catalog-common.json','data/category-catalog-standard.json','data/category-crosswalk.json','data/category-matches.json','data/category-itemscout-verified.json','data/washing-icon-library.json'].includes(file))return true;
