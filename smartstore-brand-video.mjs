@@ -8,6 +8,7 @@ export const BRAND_VIDEO_HASH='de5190da3e0320e926d4a5393451210420cf8a032df1a4ea3
 export const BRAND_VIDEO_URL='/smartstore-brand-video.mp4?v='+BRAND_VIDEO_HASH.slice(0,16);
 export const BRAND_VIDEO_FILENAME='common.mp4';
 export const BRAND_VIDEO_TITLE='GIORDANO BRAND FILM';
+export const BRAND_VIDEO_HEADING_HEIGHT=88;
 export const brandVideoFile=(dataRoot=path.join(root,'data'))=>path.join(dataRoot,'brand-video',BRAND_VIDEO_FILENAME);
 
 // The user's original MP4 stays local; do not publish it or substitute the old YouTube clip.
@@ -18,8 +19,11 @@ export async function requireBrandVideo(dataRoot,{expectedHash=BRAND_VIDEO_HASH}
  return {file,bytes,sha256:expectedHash,size:bytes.length};
 }
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export function brandVideoHeadingHtml(){
+ return `<section data-brand-video-heading style="height:${BRAND_VIDEO_HEADING_HEIGHT}px;display:flex;align-items:center;justify-content:center;background:#f4f3ec;text-align:center;"><h2 style="font-size:22px;line-height:1.5;font-weight:700;margin:0;">${BRAND_VIDEO_TITLE}</h2></section>`;
+}
 export function brandVideoHtml(src=BRAND_VIDEO_URL){
- return `<section data-brand-video="mp4" style="padding:28px;background:#f4f3ec;"><h2 style="text-align:center;font-size:22px;margin:0 0 18px;">${BRAND_VIDEO_TITLE}</h2><video src="${escape(src)}" title="지오다노 공통 브랜드 영상" controls autoplay muted loop playsinline preload="metadata" width="720" height="1280" style="display:block;width:100%;max-width:480px;height:auto;aspect-ratio:9/16;margin:0 auto;background:#000;"></video></section>`;
+ return brandVideoHeadingHtml()+`<section data-brand-video="mp4" style="padding:0 28px 28px;background:#f4f3ec;"><video src="${escape(src)}" title="지오다노 공통 브랜드 영상" controls autoplay muted loop playsinline preload="metadata" width="720" height="1280" style="display:block;width:100%;max-width:480px;height:auto;aspect-ratio:9/16;margin:0 auto;background:#000;"></video></section>`;
 }
 export async function exportBrandVideo(stem,dataRoot,videoOptions){
  const {file,sha256}=await requireBrandVideo(dataRoot,videoOptions);const output=stem+'_브랜드영상.mp4';

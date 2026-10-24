@@ -1,4 +1,4 @@
-import {requireBrandVideo} from './smartstore-brand-video.mjs';
+import {requireBrandVideo,BRAND_VIDEO_HEADING_HEIGHT} from './smartstore-brand-video.mjs';
 import {insertNativeBrandVideo,assertNativeVideoToolbar,nativeVideoIdentity} from './smartstore-native-video.mjs';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
@@ -19,7 +19,7 @@ export async function openSmartstoreEditor(page,{check=()=>{}}={}){
 export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,videoOptions}={}){
  const video=includeVideo?await requireBrandVideo(dataRoot,videoOptions):null;
  const meta=await sharp(png,{limitInputPixels:false}).metadata();
- const brand=await sharp(brandFile).metadata();const firstHeight=Math.round(meta.width*brand.height/brand.width);
+ const brand=await sharp(brandFile).metadata();const firstHeight=Math.round(meta.width*brand.height/brand.width)+BRAND_VIDEO_HEADING_HEIGHT;
  if(meta.width!==860||meta.height<=firstHeight)throw Error('상세페이지 이미지 크기를 확인해 주세요.');
  const dest=path.join(folder,'smartstore-upload');await mkdir(dest,{recursive:true});
  const digest=createHash('sha256').update(await readFile(png)).digest('hex').slice(0,16);
