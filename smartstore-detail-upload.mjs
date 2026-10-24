@@ -38,10 +38,10 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  if(!/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+/.test(page.url()))throw Error('상세페이지는 스마트스토어 복사등록 화면에서만 교체합니다.');
  check();
  const editor=await openSmartstoreEditor(page,{check});
- if(parts.includeVideo!==false){await requireBrandVideo();await assertNativeVideoToolbar(editor);}
  await editor.bringToFront();
  await editor.locator('iframe[id^="input_buffer"]').waitFor({state:'attached',timeout:30000});
  await editor.locator('.se-text-paragraph').first().waitFor({state:'visible',timeout:30000});check();
+ if(parts.includeVideo!==false){await requireBrandVideo();await assertNativeVideoToolbar(editor);}
  // The restored document and ONE's input buffer initialise asynchronously.
  await editor.waitForFunction(()=>{
    const signature=[...document.querySelectorAll('.se-component')].map(n=>n.id).join('|');
