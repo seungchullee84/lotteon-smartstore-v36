@@ -473,8 +473,8 @@ function syncListingImages(state){
  const stamp=product.style+JSON.stringify(listing);
  if(custom.dataset.stamp!==stamp){
   custom.dataset.stamp=stamp;custom.replaceChildren();
-  listing.extraColors.forEach((color,i)=>{const card=document.createElement('div');card.className='extra-image-card';const img=document.createElement('img');img.src=base+'extra-'+i+query;img.alt=color+(i===0?' 옆면':' 정면');const name=document.createElement('p');name.textContent=color+(i===0?' · 옆면':' · 정면');const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='원본 이미지 저장';button.onclick=()=>saveSelectedImage('extra-'+i,button);card.append(img,name,button);custom.append(card);});
+  listing.extraColors.forEach((color,i)=>{const card=document.createElement('div');card.className='extra-image-card';const img=document.createElement('img');img.src=base+'extra-'+i+query;const angle=color===listing.mainColor?'옆면':'정면';img.alt=color+' '+angle;const name=document.createElement('p');name.textContent=color+' · '+angle;const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='원본 이미지 저장';button.onclick=()=>saveSelectedImage('extra-'+i,button);card.append(img,name,button);custom.append(card);});
  }
- $('extraImageStatus').textContent=listing.previewOnly?'폴더 1번 원본을 표시 중입니다. 추가·상세 사진은 색상 대조 후 반영됩니다.':'대표: '+listing.mainColor+' (1번 사진) · 추가 '+listing.extraColors.length+'장 · 대표 색상 옆면 + 나머지 색상 정면';
+ $('extraImageStatus').textContent=listing.previewOnly?'폴더 1번 원본을 표시 중입니다. 추가·상세 사진은 색상 대조 후 반영됩니다.':'대표: '+listing.mainColor+' (1번 사진) · 추가 '+listing.extraColors.length+'장 · 확인된 옆면(있는 경우) + 다른 색상 정면';
  $('extraImages').hidden=false;
 }

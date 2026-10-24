@@ -8,8 +8,7 @@ export function chooseListingPhotos(photos,product){
  if(main.length!==1)throw Error('품번 폴더에서 대표로 사용할 사진 한 장의 파일명을 1.jpg 또는 1번.jpg로 지정해 주세요.');
  const selected=main[0],same=p=>hash(p.bytes)===hash(selected.bytes);
  const side=photos.find(p=>p.color===selected.color&&p.role==='side'&&!same(p));
- if(!side)throw Error('대표 색상의 옆면 사진이 필요합니다. 품번 폴더에 사진을 추가해 주세요.');
- const extras=[side];
+ const extras=side?[side]:[];
  for(const color of product.colors.filter(color=>color!==selected.color&&photos.some(p=>p.color===color))){const front=photos.find(p=>p.color===color&&p.role==='front'&&!same(p));if(!front)throw Error(color+' 정면 사진이 필요합니다.');extras.push(front);}
  if(extras.length>9)throw Error('스마트스토어 추가이미지는 9장까지 구성할 수 있습니다. 사용할 색상 사진을 정리해 주세요.');
  return {main:selected,extras};

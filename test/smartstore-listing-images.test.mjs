@@ -28,8 +28,17 @@ test('1번 대표 + 같은 색상 옆면 + 다른 색상 정면만 고르고 대
  const photos=[photo('dark.jpg','01다크브라운','front','dark-front'),photo('1.jpg','02카멜','front','main'),photo('close.jpg','02카멜','detail','detail'),photo('camel-side.jpg','02카멜','side','side'),photo('dark-side.jpg','01다크브라운','side','dark-side')];
  const result=chooseListingPhotos(photos,{colors:['01다크브라운','02카멜']});assert.equal(result.main.name,'1.jpg');assert.deepEqual(result.extras.map(p=>p.name),['camel-side.jpg','dark.jpg']);assert.ok(!result.extras.some(p=>p.bytes.equals(result.main.bytes)));
 });
-test('대표 1번이나 같은 색상 옆면이 빠졌을 때 임의로 다른 사진을 쓰지 않는다',()=>{
- const p={colors:['01블랙']};assert.throws(()=>chooseListingPhotos([photo('front.jpg','01블랙','front','a')],p),/1.jpg/);assert.throws(()=>chooseListingPhotos([photo('1.jpg','01블랙','front','a')],p),/옆면/);
+test('대표 1번은 필수지만 옆면이 없으면 대표만으로 진행한다',()=>{
+ const p={colors:['01블랙']};assert.throws(()=>chooseListingPhotos([photo('front.jpg','01블랙','front','a')],p),/1.jpg/);
+ const result=chooseListingPhotos([photo('1.jpg','01블랙','front','a'),photo('detail.jpg','01블랙','detail','b')],p);
+ assert.equal(result.main.name,'1.jpg');assert.deepEqual(result.extras,[]);
+});
+
+test('옆면 없이도 다른 색상 정면만 공식 색상 순서로 추가하고 중복·디테일은 넣지 않는다',()=>{
+ const photos=[photo('1.jpg','02차콜','front','main'),photo('brown.jpg','03브라운','front','brown'),photo('black.jpg','01블랙','front','black'),photo('duplicate.jpg','01블랙','front','main'),photo('detail.jpg','02차콜','detail','detail')];
+ const result=chooseListingPhotos(photos,{colors:['01블랙','02차콜','03브라운']});
+ assert.deepEqual(result.extras.map(p=>p.name),['black.jpg','brown.jpg']);
+ assert.ok(result.extras.every(p=>p.role==='front'&&!p.bytes.equals(result.main.bytes)));
 });
 
 test('smartstore main and extras preserve exact original bytes, format, dimensions and EXIF',async()=>{
