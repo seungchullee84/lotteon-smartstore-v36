@@ -53,7 +53,7 @@ test('미검증 수식어로 채우지 않고 의류 문맥 검색지수와 검�
  const r=composePopularTitle(p,ranking);
  assert.match(r.title,/라운드넥/);assert.match(r.title,/긴팔 티셔츠/);assert.match(r.title,/면100%/);
  assert.doesNotMatch(r.title,/퍼펙트|크루넥|NEW/);assert.deepEqual(r.sourceTerms,[]);assert.deepEqual(p,before);
- assert.doesNotMatch(composePopularTitle({...p,noticeVerified:false},ranking).title,/면100%/);
+ assert.throws(()=>composePopularTitle({...p,noticeVerified:false},ranking),/27~39/,'소재 근거 없이 인기 동의어를 긴 표현으로 바꿔 글자 수를 채우지 않음');
  const line=composePopularTitle({...p,rawName:'퍼펙트 CLOUD LIGHT',name:'남성 티셔츠 026952'},[]);
  assert.match(line.title,/CLOUD LIGHT/);assert.doesNotMatch(line.title,/퍼펙트/);assert(line.length>=27&&line.length<=39);
  const candidates=expandedTitleCandidates(p);assert(candidates.includes('크루넥티셔츠'));assert(candidates.includes('라운드티셔츠'));assert(!candidates.some(k=>k.includes('퍼펙트')));
