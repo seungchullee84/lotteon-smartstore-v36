@@ -1,6 +1,16 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {chromium} from 'playwright';import {insertSmartstoreVideo,openSmartstoreEditor} from '../smartstore-detail-upload.mjs';
 import {mkdtemp,rm} from 'node:fs/promises';import os from 'node:os';import path from 'node:path';
 import {prepareVideo,fixtureVideo} from './helpers/brand-video.mjs';
+import {nativeVideoIdentity} from '../smartstore-native-video.mjs';
+test('네이버 변환 대기 섬네일이 바뀌어도 같은 문서 영상 요소를 재확인한다',async()=>{
+ const browser=await chromium.launch({headless:true});try{
+  const page=await browser.newPage();await page.route('https://phinf.pstatic.net/**',r=>r.abort());
+  await page.setContent('<div class="se-component se-video" data-compid="SE-98bb2cab-3434-48be-bdaa-84ba88bfe976"><img class="se-video-thumbnail-resource" src="data:image/svg+xml,test"></div>');
+  const before=await nativeVideoIdentity(page.locator('.se-video'));
+  await page.locator('img').evaluate(n=>n.src='https://phinf.pstatic.net/image.nmv/encoded.jpg');
+  assert.deepEqual(await nativeVideoIdentity(page.locator('.se-video')),before);assert.deepEqual(before,['component:SE-98bb2cab-3434-48be-bdaa-84ba88bfe976']);
+ }finally{await browser.close();}
+});
 test('MP4 원본 첨부·네이티브 식별자 확인, HTML 변환·판매자 저장 버튼은 사용하지 않음',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'native-video-'));const browser=await chromium.launch({headless:true});
  try{
