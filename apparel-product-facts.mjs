@@ -4,13 +4,13 @@ import path from 'node:path';
 import sharp from 'sharp';
 import {createWorker} from 'tesseract.js';
 
-const VERSION='official-detail-facts-2';
+const VERSION='official-detail-facts-3';
 export function explicitDetailFacts(text){
  const clean=String(text||'').normalize('NFKC');const found=[];
  const add=(feature,pattern,negative)=>{if(pattern.test(clean)&&!negative?.test(clean))found.push(feature);};
  // Bare labels can be unselected choices in a CHECK UP table. Require an
  // affirmative phrase here; table selections are read from their filled dots.
- for(const [name,pattern] of [['봄',/봄\s*(?:용|시즌|착용|추천)|(?:시즌|계절|착용시기)\s*[:：]?\s*봄|봄\s*[\/·,]\s*가을|\bspring\s*(?:season|collection)\b/i],['여름',/여름\s*(?:용|시즌|착용|추천)|(?:시즌|계절|착용시기)\s*[:：]?\s*여름|\bsummer\s*(?:season|collection)\b/i],['가을',/가을\s*(?:용|시즌|착용|추천)|(?:시즌|계절|착용시기)\s*[:：]?\s*가을|봄\s*[\/·,]\s*가을|\b(?:autumn|fall)\s*(?:season|collection)\b/i],['겨울',/겨울\s*(?:용|시즌|착용|추천)|(?:시즌|계절|착용시기)\s*[:：]?\s*겨울|\bwinter\s*(?:season|collection)\b/i]])add(name,pattern);
+ for(const [name,pattern] of [['봄',/봄\s*(?:용|시즌|착용|추천)|(?:시즌|계절|착용시기)\s*[:：]\s*봄|봄\s*[\/·,]\s*가을|\bspring\s*(?:season|collection)\b/i],['여름',/여름\s*(?:용|시즌|착용|추천)|(?:시즌|계절|착용시기)\s*[:：]\s*여름|\bsummer\s*(?:season|collection)\b/i],['가을',/가을\s*(?:용|시즌|착용|추천)|(?:시즌|계절|착용시기)\s*[:：]\s*가을|봄\s*[\/·,]\s*가을|\b(?:autumn|fall)\s*(?:season|collection)\b/i],['겨울',/겨울\s*(?:용|시즌|착용|추천)|(?:시즌|계절|착용시기)\s*[:：]\s*겨울|\bwinter\s*(?:season|collection)\b/i]])add(name,pattern);
  if(/\bS\s*[\/.&]\s*S\b/i.test(clean))found.push('봄','여름');
  if(/\bF\s*[\/.&]\s*W\b/i.test(clean))found.push('가을','겨울');
  for(const [name,pattern,negative] of [
