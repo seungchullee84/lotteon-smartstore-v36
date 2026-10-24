@@ -25,6 +25,19 @@ export function verifySmartstoreOptions(plan,rows){
 
 // The same visible-UI driver runs in the app's Playwright browser and in CUA tests.
 // No save, temporary-save or publish action. Unspecified copied settings stay intact.
+export async function ensureSmartstoreOptionMode(page,check=()=>{}){
+ const panel=page.locator('ui-view[name="option"]');
+ const enabled=panel.locator('#option_choice_type_true'),enabledLabel=panel.locator('label[for="option_choice_type_true"]');
+ // The styled radio itself can be hidden even when the whole option panel is open.
+ if(!await enabledLabel.isVisible()){check();await panel.getByRole('button',{name:/^옵션 도움말/}).click();}
+ await enabledLabel.waitFor({state:'visible'});
+ if(!await enabled.isChecked()){check();await enabledLabel.click();}
+ for(const name of ['직접 입력하기','조합형']){
+  const radio=panel.getByRole('radio',{name,exact:true});await radio.waitFor({state:'attached'});
+  if(!await radio.isChecked()){check();await radio.locator('..').click();}
+  if(!await radio.isChecked())throw Error('옵션 입력 방식 확인 실패: '+name);
+ }
+}
 export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   const page=tab.playwright;
   if(!isSmartstoreInputUrl(await tab.url()))throw Error('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.');
@@ -47,9 +60,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   await fill(page.locator('#prd_price2'),plan.salePrice);
   log('상품명·테스트 판매가 '+plan.salePrice+'원 확인');
   const optionName=page.locator('#choice_option_name0');
-  if(!await page.locator('#option_choice_type_true').isVisible())await page.getByRole('button',{name:/^옵션 도움말/}).click();
-  if(!await page.locator('#option_choice_type_true').evaluate(e=>e.checked))await page.locator('label[for="option_choice_type_true"]').click();
-  for(const name of ['직접 입력하기','조합형']){const radio=page.getByRole('radio',{name,exact:true});if(!await radio.evaluate(e=>e.checked))await radio.locator('..').click();}
+  await ensureSmartstoreOptionMode(page,check);
   const optionCount=page.locator('input[ng-model="vm.choiceOptionNameCount"]').locator('..');
   if((await optionCount.locator('.selectize-input').innerText()).trim()!=='2개'){
     await optionCount.locator('.selectize-input').click();await optionCount.locator('.selectize-dropdown-content').getByText('2개',{exact:true}).click();
