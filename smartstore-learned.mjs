@@ -82,6 +82,13 @@ export async function fillLearnedAttributes(page,fields,check=()=>{}){
   if((await input.innerText()).trim()!==value)throw Error(label+' 선택 확인 실패');
  }
 }
+export async function openTagVerification(page,field){
+ // Clearing text alone can leave an asynchronously loaded dropdown over the button.
+ await field.fill('');await field.press('End');await field.press('Escape');await field.press('Tab');
+ const button=page.getByText('검색에 적용되는 태그 확인',{exact:true});
+ await button.evaluate(e=>e.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'}));
+ await button.click();
+}
 export async function fillDictionaryTags(page,candidates,log=()=>{},check=()=>{}){
  candidates=[...new Set(candidates)];
  if(candidates.length<10)throw Error('이 상품의 관련 태그 후보가 부족합니다. 상품 특성을 먼저 검토해 주세요.');
@@ -112,7 +119,7 @@ export async function fillDictionaryTags(page,candidates,log=()=>{},check=()=>{}
  }
  await field.fill('');assertDictionaryTags(result);
  const tags=assertDictionaryTags(await selected.evaluateAll(es=>es.map(e=>({name:e.querySelector('strong')?.textContent.replace(/^#\s*/, '').trim(),id:e.querySelector('.sub-text')?.textContent.replace(/\D/g,'')}))));
- await page.getByText('검색에 적용되는 태그 확인',{exact:true}).click();
+ await openTagVerification(page,field);
  const dialog=page.locator('.modal-content').filter({hasText:'검색 적용 태그 확인'});
  await dialog.getByRole('heading',{name:'검색 적용 태그 확인'}).waitFor({state:'visible'});
  const groups=await dialog.locator('dl').evaluateAll(es=>es.flatMap(e=>Array.from(e.children).filter(c=>c.tagName==='DT').map(dt=>({status:dt.textContent,tags:dt.nextElementSibling?.textContent||''}))));
