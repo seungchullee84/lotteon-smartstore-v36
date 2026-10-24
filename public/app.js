@@ -17,7 +17,7 @@ $('main').onerror=()=>{
  if(mainImageRetryStyle!==style){mainImageRetryStyle=style;mainImageRetryCount=0;}
  if(mainImageRetryCount>=3)return;
  const expected=$('main').getAttribute('src'),attempt=++mainImageRetryCount;
- setTimeout(()=>{if(!appClosed&&$('main').getAttribute('src')===expected&&product?.style===style)$('main').src='/image/main?t='+Date.now();},attempt*700);
+ setTimeout(()=>{if(!appClosed&&$('main').getAttribute('src')===expected&&product?.style===style)$('main').src=expected?.startsWith('/smartstore-listing/')?expected+'&retry='+attempt:'/image/main?t='+Date.now();},attempt*700);
 };
 
 async function post(endpoint,data={}){
@@ -473,8 +473,11 @@ function syncListingImages(state){
  const custom=$('smartstoreListingExtras'),original=$('originalExtraPreviews');
  const listing=state.smartstoreListing,smart=document.body.dataset.channel==='smartstore';
  const note=$('mainSourceNote');if(!note.dataset.original)note.dataset.original=note.textContent;
- note.textContent=smart?(listing?'대표사진: '+listing.sourceNames[0]+' · '+listing.mainColor+' · 바탕화면 품번 폴더의 1번 사진을 사용합니다.':'바탕화면의 해당 품번 폴더에 1.jpg 또는 1번.jpg를 넣어 주세요. 시작 시 색상을 대조해 대표로 적용합니다.'):note.dataset.original;
+ note.textContent=smart?(listing?'대표사진: '+listing.sourceNames[0]+' · '+listing.mainColor+' · 대표·추가 모두 폴더 원본 그대로 · 색상칩·크기 변환·재압축 없음':'바탕화면의 해당 품번 폴더에 1.jpg 또는 1번.jpg를 넣어 주세요. 시작 시 색상을 대조해 대표로 적용합니다.'):note.dataset.original;
  $('main').hidden=smart&&!listing;
+ $('colorChipStatus').hidden=smart;$('extendBackground').hidden=smart;
+ $('downloadMain1500').textContent=smart?'대표이미지 원본 저장':'대표이미지 1500×1500 저장';
+ $('main').alt=smart?'품번 폴더 1번 원본 대표이미지':'1500×1500 대표이미지';
  document.querySelector('.main-image-heading h3').textContent=smart?'대표이미지 · 폴더 1번':'대표이미지';
 
  custom.hidden=!smart||!listing;original.hidden=smart&&!!listing;$('extraImages').querySelector('h3').textContent=smart?'추가이미지':'추가이미지 (최대 2장)';
@@ -484,7 +487,7 @@ function syncListingImages(state){
  const stamp=product.style+JSON.stringify(listing);
  if(custom.dataset.stamp!==stamp){
   custom.dataset.stamp=stamp;custom.replaceChildren();
-  listing.extraColors.forEach((color,i)=>{const card=document.createElement('div');card.className='extra-image-card';const img=document.createElement('img');img.src=base+'extra-'+i+query;img.alt=color+(i===0?' 옆면':' 정면');const name=document.createElement('p');name.textContent=color+(i===0?' · 옆면':' · 정면');const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='이미지 저장';button.onclick=()=>saveSelectedImage('extra-'+i,button);card.append(img,name,button);custom.append(card);});
+  listing.extraColors.forEach((color,i)=>{const card=document.createElement('div');card.className='extra-image-card';const img=document.createElement('img');img.src=base+'extra-'+i+query;img.alt=color+(i===0?' 옆면':' 정면');const name=document.createElement('p');name.textContent=color+(i===0?' · 옆면':' · 정면');const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='원본 이미지 저장';button.onclick=()=>saveSelectedImage('extra-'+i,button);card.append(img,name,button);custom.append(card);});
  }
  $('extraImageStatus').textContent='대표: '+listing.mainColor+' (1번 사진) · 추가 '+listing.extraColors.length+'장 · 대표 색상 옆면 + 나머지 색상 정면';
  $('extraImages').hidden=false;

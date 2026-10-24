@@ -1,8 +1,7 @@
-import {readFile,writeFile,mkdir,realpath,access} from 'node:fs/promises';
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
-import sharp from 'sharp';
 import {createHash} from 'node:crypto';
-import {decorateMainImage} from './color-chips.mjs';
+import {findPhotos} from './smartstore-photo-files.mjs';
 const hash=b=>createHash('sha256').update(b).digest('hex');
 export function chooseListingPhotos(photos,product){
  const main=photos.filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name||''));
@@ -17,7 +16,7 @@ export function chooseListingPhotos(photos,product){
 }
 export async function saveListingSelection(root,selection){
  await mkdir(path.join(root,'listing'),{recursive:true});
- const save=async(p,name)=>{const file='listing/'+name+'.jpg';await writeFile(path.join(root,file),await sharp(p.bytes).rotate().jpeg({quality:98}).toBuffer());return {file,color:p.color,role:p.role,sourceName:p.name};};
+ const save=async(p,name)=>{const file='listing/'+name+path.extname(p.name).toLowerCase();await writeFile(path.join(root,file),p.bytes);return {file,color:p.color,role:p.role,sourceName:p.name,sourceHash:hash(p.bytes)};};
  return {main:await save(selection.main,'main'),extras:await Promise.all(selection.extras.map((p,i)=>save(p,'extra-'+(i+1))))};
 }
 export async function listingManifest(product,{dataRoot}){
@@ -25,17 +24,18 @@ export async function listingManifest(product,{dataRoot}){
  if(String(draft.style)!==String(product.style)||draft.sourceUrl!==product.sourceUrl)return null;
  return draft.listingImages||null;
 }
-export async function prepareListingImages(product,folder,{dataRoot}){
+export async function prepareListingImages(product,folder,{dataRoot,...photoOptions}){
  const manifest=await listingManifest(product,{dataRoot});if(!manifest)throw Error('대표·추가이미지 사진 선택을 먼저 준비해 주세요.');
  if(!manifest.main||!Array.isArray(manifest.extras)||manifest.extras.length>9)throw Error('스마트스토어 이미지 선택 자료를 확인해 주세요.');
- const root=await realpath(path.join(dataRoot,'smartstore-details',product.style));
- const prepare=async(p,key)=>{
-  if(!product.colors.includes(p.color)||typeof p.file!=='string'||path.isAbsolute(p.file)||p.file.split(/[\\/]/).includes('..'))throw Error('선택 사진의 색상·위치를 확인해 주세요.');
-  const file=await realpath(path.join(root,p.file));if(!file.startsWith(root+path.sep))throw Error('선택 사진은 품번 자료 폴더 안에서만 사용합니다.');
-  const bytes=await readFile(file);const output=path.join(folder,'smartstore-listing-'+key+'-'+hash(bytes).slice(0,20)+'.jpg');
-  try{await access(output);}catch{await sharp(bytes).rotate().resize(1500,1500,{fit:'contain',background:'#ffffff'}).jpeg({quality:96}).toFile(output);}
-  return key==='main'?decorateMainImage(folder,output):output;
- };
- const main=await prepare(manifest.main,'main'),extras=[];for(const [i,p]of manifest.extras.entries())extras.push(await prepare(p,'extra-'+i));
+ const photos=await findPhotos(product,photoOptions);
+ const originals=photos.filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name||''));
+ if(originals.length!==1)throw Error('품번 폴더의 원본 1.jpg 또는 1번.jpg 한 장을 확인해 주세요.');
+ const main=originals[0].file,extras=[];
+ for(const entry of manifest.extras){
+  if(!product.colors.includes(entry.color))throw Error('추가사진의 색상을 확인해 주세요.');
+  const matches=photos.filter(p=>entry.sourceHash?hash(p.bytes)===entry.sourceHash:p.name===entry.sourceName);
+  if(matches.length!==1)throw Error('품번 폴더에서 추가사진 원본을 확인해 주세요: '+entry.sourceName);
+  extras.push(matches[0].file);
+ }
  return {main,extras,manifest};
 }

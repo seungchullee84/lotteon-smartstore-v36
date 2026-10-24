@@ -82,7 +82,7 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='GET'&&/^\/smartstore-listing\/(?:main|extra-\d+)$/.test(url.pathname)){
       if(!state.product||url.searchParams.get('style')!==state.product.style)throw Error('현재 품번을 확인해 주세요.');
       const files=await prepareListingImages(state.product,state.folder,{dataRoot});const key=url.pathname.split('/').at(-1);const file=key==='main'?files.main:files.extras[Number(key.slice(6))];
-      if(!file)return json(res,404,{});res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'no-store'});return res.end(await readFile(file));
+      if(!file)return json(res,404,{});res.writeHead(200,{'Content-Type':({'.png':'image/png','.webp':'image/webp'})[path.extname(file).toLowerCase()]||'image/jpeg','Cache-Control':'no-store'});return res.end(await readFile(file));
     }
     if(req.method==='GET'&&url.pathname.startsWith('/smartstore-template/')){
       const name=url.pathname.slice('/smartstore-template/'.length);
@@ -291,11 +291,11 @@ const server=http.createServer(async(req,res)=>{
         if(!state.product||!state.folder)return json(res,400,{error:'먼저 상품 정보를 수집해 주세요.'});
         const saveFolder=await imageDownloadFolder();
         const key=b.image||'main';
-        if(b.channel==='smartstore'&&await listingManifest(state.product,{dataRoot})){
+        if(b.channel==='smartstore'){
           const files=await prepareListingImages(state.product,state.folder,{dataRoot});
           const file=key==='main'?files.main:/^extra-\d+$/.test(key)?files.extras[Number(key.slice(6))]:null;
           if(!file)throw Error('저장할 스마트스토어 사진을 확인해 주세요.');
-          const savedPath=path.join(saveFolder,state.product.style+'_스마트스토어_'+key+'_'+Date.now()+'.jpg');await writeFile(savedPath,await readFile(file));return json(res,200,{ok:true,path:savedPath});
+          const savedPath=path.join(saveFolder,state.product.style+'_스마트스토어_'+key+'_'+Date.now()+path.extname(file).toLowerCase());await writeFile(savedPath,await readFile(file));return json(res,200,{ok:true,path:savedPath});
         }
         if(!['main','extra1','extra2'].includes(key)||!state.product.images[key])return json(res,400,{error:'저장할 이미지를 확인해 주세요.'});
         const filename=String(state.product.style).replace(/[^a-zA-Z0-9_-]/g,'')+'_'+key+'_1500x1500_'+Date.now()+'.jpg';
