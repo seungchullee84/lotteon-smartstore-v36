@@ -25,7 +25,7 @@ export function smartstoreTitle(product){
       namedGender=sex;if(!genderLabel)genderLabel=word;continue;
     }
     if(word===style||word==='('+style+')'||promotions.has(word.toUpperCase()))continue;
-    word=word.replace(/^V[ -]?(?:NECK|넥)$/i,'브이넥');
+    if(!product.smartstoreName?.trim())word=word.replace(/^V[ -]?(?:NECK|넥)$/i,'브이넥');
     // Collapse exact words and established aliases, keeping the first wording.
     const key=({스웨터:'니트',카디건:'가디건'})[word]||word.toLocaleLowerCase('en');
     if(!seen.has(key)){seen.add(key);words.push(word);}
