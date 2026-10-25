@@ -211,7 +211,7 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  const prepared=await commitSmartstoreEditor(page,editor,parts.files.length,{check,log,applyEditor,bannerIndex:parts.bannerLink?.index});
  if(!applyEditor)return {...prepared,detailParts:parts.files.length,bannerLinkStatus:parts.bannerLinkSubmitted?'submitted-unverified':'unverified',videoUploaded:parts.includeVideo!==false};
  // Reopen the saved ONE document to verify persistence, rather than trust its boolean placeholder.
- return verifySmartstoreDetail(page,parts,{check,log});
+ return verifySmartstoreDetail(page,parts,{check,log,applyEditor});
 }
 export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{},repairAttempt=0,applyEditor=false}={}){
  check();
@@ -222,7 +222,7 @@ export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  const pending=await images.evaluateAll(ns=>ns.flatMap((n,i)=>/^https:\/\//.test(n.src)?[]:[i]));
  // Hosted images need no scrolling or repeated per-image browser calls.
  for(const i of pending){check();await images.nth(i).scrollIntoViewIfNeeded();await verified.waitForFunction(i=>/^https:\/\//.test(document.querySelectorAll('.se-component.se-image img')[i]?.src||''),i,{timeout:30000});}
- const snapshot=await images.evaluateAll(ns=>ns.map(n=>({name:decodeURIComponent(new URL(n.src).pathname.split('/').at(-1)),src:n.src,link:n.closest('a')?.href||null,extended:!!n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend')})));
+ const snapshot=await images.evaluateAll(ns=>ns.map(n=>({name:decodeURIComponent(new URL(n.src).pathname.split('/').at(-1)),src:n.src,link:n.closest('a')?.href||null,extended:!!n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend'),fitted:!!n.closest('.se-component.se-image')?.querySelector('.se-component-content-fit')})));
  const names=snapshot.map(n=>n.name);
  const includeVideo=parts.includeVideo!==false;
  const videoCount=await verified.locator('.se-component.se-oembed,.se-component.se-video').count();
@@ -235,13 +235,13 @@ export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  const bannerLinkStatus=!parts.bannerLink?'not-applicable':bannerLinkVerified?'verified':parts.bannerLinkSubmitted?'submitted-unverified':'unverified';
  // User confirmed that ONE applies the link even when its bitmap wrapper has
  // no readable href. This observation is recorded, but does not block layout.
- if(snapshot.length!==expected.length||snapshot.some((n,i)=>i===parts.bannerLink?.index?n.extended:!n.extended))mismatch.push('옆트임 배치');
+ if(snapshot.length!==expected.length||snapshot.some((n,i)=>i===parts.bannerLink?.index?!n.fitted:!n.extended))mismatch.push('옆트임 배치');
  if(includeVideo?!video.length||JSON.stringify(video)!==JSON.stringify(parts.videoIdentity?.identity):videoCount!==0)mismatch.push('MP4 영상 식별자');
  const verification={expected,names,images:snapshot,videoCount,videoIdentity:video,expectedVideoIdentity:parts.videoIdentity?.identity,bannerLinkStatus,bannerLinkVerified,mismatch,repairAttempt};
  await writeFile(path.join(path.dirname(parts.files[0]),'detail-verification.json'),JSON.stringify(verification,null,2));
  if(mismatch.length===1&&mismatch[0]==='옆트임 배치'&&repairAttempt===0){
   log('이미지·영상 일치 · 옆트임 미반영 '+snapshot.filter(n=>!n.extended).length+'장만 재적용 · 파일 재업로드 없음');
-  for(let i=0;i<snapshot.length;i++)if(i===parts.bannerLink?.index?snapshot[i].extended:!snapshot[i].extended){check();await applySmartstoreImageLayout(verified,images.nth(i),{check,layout:i===parts.bannerLink?.index?'fit':'extend'});}
+  for(let i=0;i<snapshot.length;i++)if(i===parts.bannerLink?.index?!snapshot[i].fitted:!snapshot[i].extended){check();await applySmartstoreImageLayout(verified,images.nth(i),{check,layout:i===parts.bannerLink?.index?'fit':'extend'});}
   const prepared=await commitSmartstoreEditor(page,verified,expected.length,{check,log,applyEditor,bannerIndex:parts.bannerLink?.index});
   if(!applyEditor)return {...prepared,detailParts:parts.files.length};
   return verifySmartstoreDetail(page,parts,{check,log,repairAttempt:1,applyEditor});

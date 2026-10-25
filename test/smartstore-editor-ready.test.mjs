@@ -10,7 +10,7 @@ test('최종 반영 전에 업로드 완료와 옆트임 누락 보정을 나누
   let registered=false;await editor.exposeFunction('recordReady',()=>{registered=true;});
   await editor.setContent(`<style>img{display:block;width:500px;height:200px}.se-component{margin-top:100px}</style><button data-name=content-mode-without-pagefull data-value=extend onclick="document.querySelector('.se-section-image.se-is-selected').parentElement.classList.add('se-component-content-extend')">옆트임</button><div class="se-component se-image" id=first><div class="se-component-content se-component-content-extend"><div class=se-section-image><img src="https://example.com/a.png"></div></div></div><div class="se-component se-image" id=last><div class=se-component-content><div class=se-section-image><img src="https://example.com/b.png" onclick="this.parentElement.classList.add('se-is-selected')"></div></div></div><button onclick="if(document.querySelectorAll('.se-component-content-extend').length!==2)throw Error('누락');recordReady().then(()=>window.close())">등록</button>`);
   const logs=[];await commitSmartstoreEditor(page,editor,2,{log:x=>logs.push(x)});
-  assert.equal(registered,true);assert.ok(logs.some(x=>x.includes('누락 1장만 보정')));
+  assert.equal(registered,false);assert.equal(editor.isClosed(),false);assert.equal(await editor.locator('.se-component-content-extend').count(),2);assert.ok(logs.some(x=>x.includes('누락 1장만 보정')));
  }finally{await browser.close();}
 });
 for(const confirm of ['적용','<svg width=16 height=16><path d="M2,8L6,12L14,2" /></svg>'])test('배너 파일 대조 후 링크 주소 오른쪽 '+(confirm==='적용'?'적용':'무명 체크')+' 버튼으로 연결한다',async()=>{
@@ -36,4 +36,8 @@ test('오른쪽 체크로 링크를 적용했지만 href가 노출되지 않아�
   assert.equal(parts.bannerLinkSubmitted,true);
   assert.equal(await page.locator('a').count(),0);
  }finally{await browser.close();}
+});
+
+test('링크 배너만 문서 너비로 두고 등록 버튼 전 멈춘다',async()=>{
+ const b=await chromium.launch({headless:true});try{const page=await b.newPage();await page.setContent('<style>img{display:block;width:200px;height:100px}.se-component{margin-top:30px}</style><button data-name="content-mode-without-pagefull" data-value="fit" onclick="document.querySelector('.selected').className='se-component-content-fit'">문서 너비</button><div class="se-component se-image" id="top"><div class="se-component-content-extend"><img src="https://example.com/a.png"></div></div><div class="se-component se-image" id="banner"><div class="se-component-content-extend"><img src="https://example.com/b.png" onclick="this.parentElement.classList.add('selected')"></div></div><div class="se-component se-image" id="footer"><div class="se-component-content-extend"><img src="https://example.com/c.png"></div></div><button onclick="window.registered=true">등록</button>');const result=await commitSmartstoreEditor(page,page,3,{bannerIndex:1});assert.equal(result.editorPrepared,true);assert.equal(result.editorApplied,false);assert.equal(result.detailUploaded,false);assert.equal(await page.evaluate(()=>window.registered),undefined);assert.equal(await page.locator('#banner .se-component-content-fit').count(),1);assert.equal(await page.locator('#footer .se-component-content-extend').count(),1);}finally{await b.close();}
 });

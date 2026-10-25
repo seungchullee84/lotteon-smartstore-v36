@@ -39,15 +39,15 @@ test('ONE의 id 속성도 문서 영상 식별자로 사용해 썸네일 교체 
 test('재진입 검증은 이미지 순서·영상·옆트임을 모두 대조하고 다른 영상은 성공 처리하지 않는다',()=>browserTest(async page=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-verify-'));
  try{
- let videoId='SE-98bb2cab-3434-48be-bdaa-84ba88bfe976';
+ let videoId='SE-98bb2cab-3434-48be-bdaa-84ba88bfe976',bannerFit=false;
  await page.route('https://sell.smartstore.naver.com/**',r=>r.fulfill({contentType:'text/html',body:'<button data-nclicks-code="descrip.sebtn" onclick="window.open(\'https://example.com/editor\')">편집기</button>'}));
  await page.context().route('https://phinf.pstatic.net/**',r=>r.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a9xkAAAAASUVORK5CYII=','base64')}));
- await page.context().route('https://example.com/editor',r=>r.fulfill({contentType:'text/html',body:'<div class="se-component se-image"><div class=se-component-content-extend><img width=50 height=50 src="https://phinf.pstatic.net/a.png"></div></div><div class="se-component se-video" id="'+videoId+'"></div><div class="se-component se-image"><div class=se-component-content-extend><img width=50 height=50 src="https://phinf.pstatic.net/b.png"></div></div>'}));
+ await page.context().route('https://example.com/editor',r=>r.fulfill({contentType:'text/html',body:'<div class="se-component se-image"><div class=se-component-content-extend><img width=50 height=50 src="https://phinf.pstatic.net/a.png"></div></div><div class="se-component se-video" id="'+videoId+'"></div><div class="se-component se-image"><div class=se-component-content-'+(bannerFit?'fit':'extend')+'><img width=50 height=50 src="https://phinf.pstatic.net/b.png"></div></div>'}));
  await page.goto('https://sell.smartstore.naver.com/#/products/copy/1');
  const parts={files:[path.join(root,'a.png'),path.join(root,'b.png')],includeVideo:true,videoIdentity:{identity:['component:'+videoId]}};
  assert.equal((await verifySmartstoreDetail(page,parts)).detailUploaded,true);
- const linked=await verifySmartstoreDetail(page,{...parts,bannerLinkSubmitted:true,bannerLink:{index:1,file:parts.files[1],url:'https://shopping.naver.com/window/department/store/101731950'}});assert.equal(linked.detailUploaded,true);assert.equal(linked.bannerLinkVerified,false);assert.equal(linked.bannerLinkStatus,'submitted-unverified');
- videoId='SE-00000000-3434-48be-bdaa-84ba88bfe976';await assert.rejects(()=>verifySmartstoreDetail(page,parts),/MP4 영상 식별자/);
+ bannerFit=true;const linked=await verifySmartstoreDetail(page,{...parts,bannerLinkSubmitted:true,bannerLink:{index:1,file:parts.files[1],url:'https://shopping.naver.com/window/department/store/101731950'}});assert.equal(linked.detailUploaded,true);assert.equal(linked.bannerLinkVerified,false);assert.equal(linked.bannerLinkStatus,'submitted-unverified');
+ bannerFit=false;videoId='SE-00000000-3434-48be-bdaa-84ba88bfe976';await assert.rejects(()=>verifySmartstoreDetail(page,parts),/MP4 영상 식별자/);
  const report=JSON.parse(await readFile(path.join(root,'detail-verification.json'),'utf8'));assert.deepEqual(report.mismatch,['MP4 영상 식별자']);assert.deepEqual(report.names,['a.png','b.png']);
  }finally{await rm(root,{recursive:true,force:true});}
 }));
@@ -66,10 +66,10 @@ test('마지막 이미지의 옆트임만 빠졌으면 파일을 다시 올리�
  });
  await page.goto('https://sell.smartstore.naver.com/#/products/copy/1');
  const parts={files:[path.join(root,'a.png'),path.join(root,'b.png')],includeVideo:true,videoIdentity:{identity:['component:'+id]}},logs=[];
- assert.equal((await verifySmartstoreDetail(page,parts,{log:x=>logs.push(x)})).detailUploaded,true);
+ assert.equal((await verifySmartstoreDetail(page,parts,{log:x=>logs.push(x),applyEditor:true})).detailUploaded,true);
  assert.equal(applied,1);assert.equal(opened,2);assert(logs.some(x=>x.includes('파일 재업로드 없음')));
  const report=JSON.parse(await readFile(path.join(root,'detail-verification.json'),'utf8'));assert.deepEqual(report.mismatch,[]);assert.equal(report.repairAttempt,1);
   fixed=false;persist=false;opened=0;applied=0;
-  await assert.rejects(()=>verifySmartstoreDetail(page,parts),/옆트임 배치/);assert.equal(applied,1,'실패해도 배치 수정은 한 번만 시도');assert.equal(opened,2);
+  await assert.rejects(()=>verifySmartstoreDetail(page,parts,{applyEditor:true}),/옆트임 배치/);assert.equal(applied,1,'실패해도 배치 수정은 한 번만 시도');assert.equal(opened,2);
  }finally{await rm(root,{recursive:true,force:true});}
 }));

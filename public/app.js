@@ -403,7 +403,7 @@ $('smartstoreDetailOnly').onclick=async()=>{
  requestLock=true;$('error').textContent='';syncButtons();announce('조회/수정 화면의 상세설명만 교체 요청 중…');
  try{await post('smartstore-detail-only',{product:smartstoreDetailFields()});serverBusy=true;serverPhase='smartstore-detail-only';announce('상세설명만 교체 중 · 다른 항목과 상품 저장은 건드리지 않습니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;syncButtons();}
 };
-const autoStageLabels={connect:'로그인 확인',collect:'공식몰 수집',prepare:'사진·색상 대조',compose:'사진 합성',detail:'상세페이지 제작',upload:'스마트스토어 업로드',done:'업로드 완료'};
+const autoStageLabels={connect:'로그인 확인',collect:'공식몰 수집',prepare:'사진·색상 대조',compose:'사진 합성',detail:'상세페이지 제작',upload:'스마트스토어 업로드',done:'편집기 준비 완료'};
 try{if(sessionStorage.getItem('registrationChannel')==='smartstore')selectRegistrationChannel('smartstore');}catch{}
 
 function renderExtraImages(p,refresh=false){
