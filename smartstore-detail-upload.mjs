@@ -62,18 +62,27 @@ export async function applySmartstoreImageLayout(editor,image,{check=()=>{}}={})
  await editor.waitForFunction(id=>!!document.getElementById(id)?.querySelector('.se-component-content-extend'),componentId,{timeout:15000});
  check();
 }
-export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{}}={}){
+export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{},log=()=>{}}={}){
  check();
  // ONE can render the layout before its document model has finished updating.
  // Wait for a stable, fully hosted image set once, immediately before applying.
- await editor.waitForFunction(count=>{
+ try{await editor.waitForFunction(count=>{
   const images=[...document.querySelectorAll('.se-component.se-image img')];
-  if(images.length!==count||images.some(n=>!/^https:\/\//.test(n.src)||!n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend'))){delete window.__smartstoreLayoutReady;return false;}
+  if(images.length!==count||images.some(n=>!/^https:\/\//.test(n.src))){delete window.__smartstoreLayoutReady;return false;}
   const signature=images.map(n=>n.closest('.se-component.se-image').id+'|'+n.src).join('\n');
   const before=window.__smartstoreLayoutReady;
   if(!before||before.signature!==signature){window.__smartstoreLayoutReady={signature,since:performance.now()};return false;}
   return performance.now()-before.since>=200;
- },imageCount,{timeout:5000});
+ },imageCount,{timeout:30000});}catch(error){
+  const observed=await editor.locator('.se-component.se-image img').evaluateAll(ns=>({count:ns.length,pending:ns.flatMap((n,i)=>/^https:\/\//.test(n.src)?[]:[i+1])}));
+  throw Error('상세이미지 업로드 준비 확인 실패: 예상 '+imageCount+'장 / 현재 '+observed.count+'장 / 업로드 대기 '+(observed.pending.join(',')||'없음')+' · '+error.message);
+ }
+ const images=editor.locator('.se-component.se-image img');
+ const missing=await images.evaluateAll(ns=>ns.flatMap((n,i)=>n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend')?[]:[i]));
+ if(missing.length)log('최종 반영 전 옆트임 누락 '+missing.length+'장만 보정 · 파일 재업로드 없음');
+ for(const i of missing){check();await applySmartstoreImageLayout(editor,images.nth(i),{check});}
+ const ready=await images.evaluateAll(ns=>ns.every(n=>/^https:\/\//.test(n.src)&&n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend')));
+ if(await images.count()!==imageCount||!ready)throw Error('최종 반영 전 상세이미지 개수·옆트임을 확인하지 못했습니다. 편집기 내용은 유지했습니다.');
  check();await Promise.all([editor.waitForEvent('close',{timeout:30000}),editor.getByRole('button',{name:'등록',exact:true}).click()]);
  if(await page.locator('textarea[name="editorContent"]').inputValue()!=='true')throw Error('판매자센터 상세설명 반영 결과를 확인하지 못했습니다.');
 }
@@ -120,7 +129,8 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  const order=await editor.locator('.se-component').evaluateAll(ns=>ns.filter(n=>/se-image|se-video|se-oembed/.test(n.className)).map(n=>n.className));
  const includeVideo=parts.includeVideo!==false;
  if(order.length!==parts.files.length+Number(includeVideo)||!order[0].includes('se-image')||(includeVideo?!/se-video|se-oembed/.test(order[1])||order.slice(2).some(c=>!c.includes('se-image')):order.some(c=>!c.includes('se-image'))))throw Error('브랜드 소개·상품상세 및 영상 설정에 맞는 순서를 확인해 주세요.');
- await commitSmartstoreEditor(page,editor,parts.files.length,{check});
+ log('상세이미지 '+parts.files.length+'장 첨부 완료 · 최종 반영 전 확인');
+ await commitSmartstoreEditor(page,editor,parts.files.length,{check,log});
  // Reopen the saved ONE document to verify persistence, rather than trust its boolean placeholder.
  return verifySmartstoreDetail(page,parts,{check,log});
 }
@@ -149,7 +159,7 @@ export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  if(mismatch.length===1&&mismatch[0]==='옆트임 배치'&&repairAttempt===0){
   log('이미지·영상 일치 · 옆트임 미반영 '+snapshot.filter(n=>!n.extended).length+'장만 재적용 · 파일 재업로드 없음');
   for(let i=0;i<snapshot.length;i++)if(!snapshot[i].extended){check();await applySmartstoreImageLayout(verified,images.nth(i),{check});}
-  await commitSmartstoreEditor(page,verified,expected.length,{check});
+  await commitSmartstoreEditor(page,verified,expected.length,{check,log});
   return verifySmartstoreDetail(page,parts,{check,log,repairAttempt:1});
  }
  if(mismatch.length){log('상세 대조 차이: '+mismatch.join(' · '));throw Error('상세페이지 확인 불일치: '+mismatch.join(' · ')+'. 상품은 저장하지 않았습니다.');}
