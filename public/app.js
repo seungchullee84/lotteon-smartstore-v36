@@ -61,7 +61,7 @@ function action(id,fn){$(id).onclick=async()=>{
  }catch(e){$('error').textContent=e.message;announce('처리하지 못했습니다: '+e.message,'failed');}
  finally{if(primary){requestLock=false;delete $(id).dataset.pending;syncButtons();}}
  };}
-action('open',()=>post('open'));action('collect',()=>post('collect',{style:$('style').value.trim(),allowMissingDetail:false,channel:document.body.dataset.channel}));action('stop',async()=>{const b=$('stop');if(b.disabled)return;b.disabled=true;b.textContent='중단 중…';announce('중단 요청 중 — 추가 입력을 취소합니다');try{await post('stop');announce('중단 요청을 전달했습니다','success');}finally{b.disabled=false;b.textContent='중단';}});action('continue',()=>post('continue'));
+action('open',()=>post('open'));action('collect',()=>post('collect',{style:$('style').value.trim(),allowMissingDetail:false,channel:document.body.dataset.channel,edits:currentProductEdits()}));action('stop',async()=>{const b=$('stop');if(b.disabled)return;b.disabled=true;b.textContent='중단 중…';announce('중단 요청 중 — 추가 입력을 취소합니다');try{await post('stop');announce('중단 요청을 전달했습니다','success');}finally{b.disabled=false;b.textContent='중단';}});action('continue',()=>post('continue'));
 $('style').addEventListener('keydown',event=>{
  if(event.key!=='Enter'||event.isComposing||event.keyCode===229)return;
  event.preventDefault();
@@ -214,7 +214,7 @@ $('retryMissingDetail').onclick=async()=>{
  if(!missingDetailRequest||requestLock||serverBusy)return;
  if(!window.confirm('상세 원본 누락이 확인된 상품만 대표·색상별 사진으로 구성합니다. 진행할까요?'))return;
  const input=missingDetailRequest.input;requestLock=true;$('retryMissingDetail').disabled=true;syncButtons();
- try{await post('collect',{style:input,allowMissingDetail:true,channel:document.body.dataset.channel});serverBusy=true;serverPhase='collect';$('missingDetailChoice').hidden=true;announce('승인한 상품을 대체 구성으로 다시 수집합니다.');}
+ try{await post('collect',{style:input,allowMissingDetail:true,channel:document.body.dataset.channel,edits:currentProductEdits()});serverBusy=true;serverPhase='collect';$('missingDetailChoice').hidden=true;announce('승인한 상품을 대체 구성으로 다시 수집합니다.');}
  catch(e){$('error').textContent=e.message;announce(e.message,'failed');}
  finally{requestLock=false;syncButtons();}
 };
@@ -308,7 +308,7 @@ function smartstoreTitleStatus(title,note){
  return length+'자 / 27~39자 · '+(length<27?'보강 필요 · ':length>39?'길이 초과 · ':'')+note;
 }
 $('smartstoreName').oninput=()=>{if(product){product.smartstoreNameUserEdited=true;product.smartstoreName=$('smartstoreName').value;}$('smartstoreNameStatus').textContent=[...$('smartstoreName').value].length+'자 · 수정한 상품명 그대로 사용';};
-async function optimizeSmartstoreTitle(){
+async function optimizeSmartstoreTitle({remember=false}={}){
  if(requestLock||serverBusy||!product)return;
  const current=product,field=$('smartstoreName');
  const snapshot={style:product.style,name:$('form').elements.name.value,gender:$('form').elements.gender.value,smartstoreName:field.value};
@@ -318,6 +318,7 @@ async function optimizeSmartstoreTitle(){
    const stale=product!==current||field.value!==snapshot.smartstoreName||$('form').elements.name.value!==snapshot.name||$('form').elements.gender.value!==snapshot.gender;
    if(stale){$('naverTitleResult').textContent='조회 중 상품명이 바뀌어 제안값을 적용하지 않았습니다. 다시 조회해 주세요.';return;}
    if(result.hasData||result.researchUsed){current.smartstoreNameUserEdited=false;current.smartstoreName=result.title;field.value=result.title;$('smartstoreNameStatus').textContent=smartstoreTitleStatus(field.value,result.hasData?'네이버 검색 관심도 비교':'연결 자료·공식 상품 근거 참고');}
+   if(remember&&(result.hasData||result.researchUsed))rememberProductField('smartstoreName',field.value);
    $('naverTitleResult').textContent=result.period?result.source+' · '+result.period.startDate+' ~ '+result.period.endDate+(result.fromCache?' · 최근 조회 재사용':'')+' · '+(result.expanded?'인기 검색어 '+result.candidates.length+'개 비교 · '+result.length+'자':result.hasData?'성별 표현 비교 '+result.comparedDays+'일 / 특성 순서 비교 '+result.featureComparedDays+'일':'조회 자료가 없어 기존 상품명 유지')+' · '+result.note:result.source+' · '+result.note+' 참고 표현: '+(result.referenceTerms||[]).join(', ');
    for(const entry of result.candidates){const li=document.createElement('li');li.textContent=entry.keyword+': '+(result.expanded?'비교 기준 대비 검색 관심도 '+entry.score.toFixed(3):entry.mean===null?'자료 없음':'반환된 일별 상대지수 평균 '+entry.mean.toFixed(2)+' · '+entry.pointCount+'일');$('naverTitleCandidates').append(li);}
    $('error').textContent='';
@@ -326,7 +327,7 @@ async function optimizeSmartstoreTitle(){
 }
 $('smartstoreOptimizeTitle').onclick=async()=>{
  if(requestLock||serverBusy||!product)return;
- try{await arrangeSmartstoreTitle();await optimizeSmartstoreTitle();}
+ try{await arrangeSmartstoreTitle();await optimizeSmartstoreTitle({remember:true});}
  catch(e){$('naverTitleResult').textContent=e.message;}
 };
 const autoNaverProducts=new WeakSet();
@@ -394,7 +395,7 @@ $('smartstoreStart').onclick=async()=>{
  const style=$('style').value.trim()||product?.style;
  if(!style){$('error').textContent='품번 또는 공식몰 상품 URL을 먼저 입력해 주세요.';return;}
  requestLock=true;smartstoreStarting=true;$('error').textContent='';$('smartstoreStart').disabled=true;syncButtons();announce('시작 요청 접수 중 · 복사등록 화면을 확인합니다.');
- try{await post('smartstore-auto',{style,selectedTitle:product?{style:product.style,title:$('smartstoreName').value}:undefined});serverBusy=true;serverPhase='smartstore-auto';announce('자동 작업 시작 · 선택한 복사등록 화면에 업로드합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;smartstoreStarting=false;syncButtons();}
+ try{await post('smartstore-auto',{style,selectedTitle:product?{style:product.style,title:$('smartstoreName').value}:undefined,edits:currentProductEdits()});serverBusy=true;serverPhase='smartstore-auto';announce('자동 작업 시작 · 선택한 복사등록 화면에 업로드합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;smartstoreStarting=false;syncButtons();}
 };
 const autoStageLabels={connect:'로그인 확인',collect:'공식몰 수집',prepare:'사진·색상 대조',compose:'사진 합성',detail:'상세페이지 제작',upload:'스마트스토어 업로드',done:'업로드 완료'};
 try{if(sessionStorage.getItem('registrationChannel')==='smartstore')selectRegistrationChannel('smartstore');}catch{}
