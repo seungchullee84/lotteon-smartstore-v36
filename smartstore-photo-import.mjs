@@ -17,7 +17,8 @@ export function editorPhotoPositions(colors){
   const text=(c.innerText||'').trim();
   if(/◆\s*상세페이지\s*◆|^PRODUCT DETAIL$|^디테일까지/.test(text))break;
   if(c.classList.contains('se-text')){
-   const match=colors.find(v=>compact(v)===compact(text));
+   const matches=colors.filter(v=>compact(v)===compact(text)||/^\d{2}[^\d]/.test(compact(text))&&v.slice(0,2)===compact(text).slice(0,2));
+   const match=matches.length===1?matches[0]:null;
    if(match)color=match;else if(/^\d{2}\s*[^\d\n]{1,35}$/.test(text))color='';
   }
   if(!color||!c.matches('.se-image,.se-imageStrip'))continue;
@@ -38,9 +39,13 @@ export async function findPhotoSourceForm(context,style,{check=()=>{},log=()=>{}
  safeStyle(style);check();
  const lists=context.pages().filter(p=>!p.isClosed()&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/origin-list(?:\?|$)/.test(p.url()));
  if(lists.length>1)throw Error('상품조회 창이 여러 개입니다. 검색할 상품조회 창 하나만 남겨 주세요.');
+ if(!lists.length){
+  for(const p of context.pages().filter(p=>!p.isClosed()&&isSmartstoreDetailEditUrl(p.url()))){try{const sellerCode=await readDetailOnlySellerCode(p);assertDetailOnlyProduct(sellerCode,style);return {page:p,sellerCode};}catch{check();}}
+  const list=await context.newPage();await list.goto('https://sell.smartstore.naver.com/#/products/origin-list',{waitUntil:'domcontentloaded'});check();lists.push(list);
+ }
  if(lists.length){
   const list=lists[0];await list.bringToFront();check();
-  await list.getByRole('button',{name:'초기화',exact:true}).click();check();
+  try{await list.getByRole('button',{name:'초기화',exact:true}).click({timeout:15000});}catch{check();throw Error('등록기 전용 크롬에서 스마트스토어 로그인을 완료해 주세요. 현재 로그인 세션을 재사용하며 상품 저장은 하지 않습니다.');}check();
   await list.getByRole('radio',{name:'판매자상품코드',exact:true}).check();
   await list.getByRole('textbox',{name:'검색어 입력',exact:true}).fill(style);
   const all=list.getByRole('checkbox',{name:'전체',exact:true}).first();if(await all.isVisible())await all.check();
@@ -100,7 +105,7 @@ export async function stageImportedPhotos(source,folder,{fetchImpl=fetch,signal}
  if(!candidates.length)throw Error('가져올 수 있는 개별 상품사진이 없습니다.');
  const result={...source,candidates,createdAt:new Date().toISOString(),status:'review'};await writeFile(path.join(dir,'manifest.json'),JSON.stringify(result,null,2));return result;
 }
-export async function applyImportedPhotos(product,folder,choices,{dataRoot,desktop,signal}={}){
+export async function applyImportedPhotos(product,folder,choices,{dataRoot,desktop,signal,automatic=false}={}){
  const stage=JSON.parse(await readFile(path.join(folder,'smartstore-photo-import/manifest.json'),'utf8'));
  if(stage.style!==product.style||stage.sourceUrl!==product.sourceUrl)throw Error('사진을 수집한 품번·공식 출처와 현재 상품이 다릅니다.');
  assertDetailOnlyProduct(stage.sellerCode,product.style);
@@ -113,17 +118,30 @@ export async function applyImportedPhotos(product,folder,choices,{dataRoot,deskt
  // Validate the entire batch before touching the style folder. Existing photos are never overwritten.
  desktop||=path.dirname(await imageDownloadFolder());const target=path.join(desktop,'상품등록기사진폴더',product.style);await mkdir(target,{recursive:true});
  const originals=await findPhotos(product,{desktop});let hasMain=originals.some(p=>/^1(?:번)?\.(jpe?g|png|webp)$/i.test(p.name));
- if(!hasMain&&!selected.some(p=>p.role==='front'))throw Error('대표사진이 없으므로 정면 사진을 한 장 선택해 주세요.');
+ if(!automatic&&!hasMain&&!selected.some(p=>p.role==='front'))throw Error('대표사진이 없으므로 정면 사진을 한 장 선택해 주세요.');
  const root=path.join(dataRoot,'smartstore-details',product.style);await mkdir(root,{recursive:true});let old;
  try{old=JSON.parse(await readFile(path.join(root,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(old&&(old.style!==product.style||old.sourceUrl!==product.sourceUrl))throw Error('기존 사진 매칭 자료의 품번·출처를 다시 확인해 주세요.');
  const records=[...(old?.photoMapping?.files||[])];let count=0;
  for(const p of selected){
   signal?.throwIfAborted();const known=originals.find(f=>hash(f.bytes)===p.sha256);let name=known?.name;
-  if(!name){name=!hasMain&&p.role==='front'?'1'+path.extname(p.file):'기존상품_'+p.color.slice(0,2)+'_'+p.id+path.extname(p.file);await writeFile(path.join(target,name),p.bytes,{flag:'wx'}).catch(async e=>{if(e.code!=='EEXIST'||hash(await readFile(path.join(target,name)))!==p.sha256)throw e;});if(/^1\./.test(name))hasMain=true;count++;}
+  if(!name){name=!hasMain&&(automatic||p.role==='front')?'1'+path.extname(p.file):'기존상품_'+p.color.slice(0,2)+'_'+p.id+path.extname(p.file);await writeFile(path.join(target,name),p.bytes,{flag:'wx'}).catch(async e=>{if(e.code!=='EEXIST'||hash(await readFile(path.join(target,name)))!==p.sha256)throw e;});if(/^1\./.test(name))hasMain=true;count++;}
   const record={name,hash:p.sha256,color:p.color,role:p.role,source:'seller-detail',sourceUrl:p.url};const i=records.findIndex(r=>r.hash===p.sha256);if(i>=0)records[i]=record;else records.push(record);
  }
- const draft={...old,style:product.style,sourceUrl:product.sourceUrl,photoMapping:{...old?.photoMapping,files:records}};
+ const importedColorPhotos=[];for(const p of selected){let group=importedColorPhotos.find(g=>g.color===p.color);if(!group){group={color:p.color,hashes:[]};importedColorPhotos.push(group);}group.hashes.push(p.sha256);}
+ const draft={...old,style:product.style,sourceUrl:product.sourceUrl,importedColorPhotos,photoMapping:{...old?.photoMapping,files:records}};
  await writeFile(path.join(root,'draft.json.tmp'),JSON.stringify(draft,null,2));await rename(path.join(root,'draft.json.tmp'),path.join(root,'draft.json'));
  return {count,selectedCount:selected.length,target};
+}
+
+export function allImportedPhotoChoices(stage,product,known=[]){
+ if(stage.style!==product.style||stage.sourceUrl!==product.sourceUrl)throw Error('현재 품번과 사진 출처가 다릅니다.');
+ assertDetailOnlyProduct(stage.sellerCode,product.style);const counts=new Map();
+ return stage.candidates.map(p=>{
+  if(!product.colors.includes(p.colorHint))throw Error('사진 위 색상명이 현재 상품 색상과 다릅니다.');
+  counts.set(p.colorHint,(counts.get(p.colorHint)||0)+1);if(counts.get(p.colorHint)>3)throw Error(p.colorHint+' 사진이 3컷을 초과합니다. 색상 구간을 확인해 주세요.');
+  const prior=known.find(k=>k.hash===p.sha256&&k.color===p.colorHint&&['front','side','back','detail'].includes(k.role));
+  // Source order is enough for the detail template, but never invent a front/side angle.
+  return {id:p.id,color:p.colorHint,role:prior?.role||'detail'};
+ });
 }
