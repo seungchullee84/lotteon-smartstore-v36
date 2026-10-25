@@ -476,6 +476,7 @@ function syncListingImages(state){
  const main=base+'main'+query;if($('main').getAttribute('src')!==main)$('main').src=main;
  const stamp=product.style+JSON.stringify(listing);
  if(custom.dataset.stamp!==stamp){
+  if(!state.busy)renderDetailPreview(product);
   custom.dataset.stamp=stamp;custom.replaceChildren();
   listing.extraColors.forEach((color,i)=>{const card=document.createElement('div');card.className='extra-image-card';const img=document.createElement('img');img.src=base+'extra-'+i+query;const angle=color===listing.mainColor?'옆면':'정면';img.alt=color+' '+angle;const name=document.createElement('p');name.textContent=color+' · '+angle;const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='원본 이미지 저장';button.onclick=()=>saveSelectedImage('extra-'+i,button);card.append(img,name,button);custom.append(card);});
  }

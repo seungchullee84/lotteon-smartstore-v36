@@ -21,7 +21,7 @@ export async function saveListingSelection(root,selection){
 export async function listingManifest(product,{dataRoot}){
  let draft;try{draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'draft.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return null;throw e;}
  if(String(draft.style)!==String(product.style)||draft.sourceUrl!==product.sourceUrl)return null;
- return draft.listingImages||null;
+ return draft.listingImages?{...draft.listingImages,detailRevision:hash(Buffer.from(JSON.stringify(draft)))}:null;
 }
 export async function listingPreview(product,options){
  const manifest=await listingManifest(product,options);if(manifest)return manifest;
