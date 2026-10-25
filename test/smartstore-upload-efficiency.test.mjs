@@ -54,19 +54,21 @@ test('재진입 검증은 이미지 순서·영상·옆트임을 모두 대조�
 test('마지막 이미지의 옆트임만 빠졌으면 파일을 다시 올리지 않고 해당 배치만 고쳐 재진입 확인한다',()=>browserTest(async page=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-layout-repair-'));
  try{
- let fixed=false,opened=0,applied=0;
+ let fixed=false,opened=0,applied=0,persist=true;
  const id='SE-98bb2cab-3434-48be-bdaa-84ba88bfe976';
- await page.context().exposeBinding('recordLayoutApply',()=>{applied++;fixed=true;});
+ await page.context().route('https://example.com/applied',r=>{applied++;fixed=persist;return r.fulfill({contentType:'text/plain',body:'ok'});});
  await page.route('https://sell.smartstore.naver.com/**',r=>r.fulfill({contentType:'text/html',body:'<textarea name="editorContent">true</textarea><button data-nclicks-code="descrip.sebtn" onclick="window.open(\'https://example.com/editor\')">편집기</button>'}));
  await page.context().route('https://phinf.pstatic.net/**',r=>r.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a9xkAAAAASUVORK5CYII=','base64')}));
  await page.context().route('https://example.com/editor',r=>{
   opened++;
-  return r.fulfill({contentType:'text/html',body:`<style>body{margin:0}.se-component{margin:200px 0 0}img{width:300px;height:300px}</style><button data-name=content-mode-without-pagefull data-value=extend onclick="document.querySelector('.se-section-image.se-is-selected').parentElement.className='se-component-content-extend'">옆트임</button><div class="se-component se-image" id=first><div class=se-component-content-extend><div class=se-section-image><img src="https://phinf.pstatic.net/a.png"></div></div></div><div class="se-component se-video" id="${id}"></div><div class="se-component se-image" id=last><div class="${fixed?'se-component-content-extend':'se-component-content-fit'}"><div class=se-section-image><img src="https://phinf.pstatic.net/b.png" onclick="this.parentElement.classList.add('se-is-selected')"></div></div></div><button onclick="window.recordLayoutApply().then(()=>window.close())">등록</button>`});
+  return r.fulfill({contentType:'text/html',body:`<style>body{margin:0}.se-component{margin:200px 0 0}img{width:300px;height:300px}</style><button data-name=content-mode-without-pagefull data-value=extend onclick="document.querySelector('.se-section-image.se-is-selected').parentElement.className='se-component-content-extend'">옆트임</button><div class="se-component se-image" id=first><div class=se-component-content-extend><div class=se-section-image><img src="https://phinf.pstatic.net/a.png"></div></div></div><div class="se-component se-video" id="${id}"></div><div class="se-component se-image" id=last><div class="${fixed?'se-component-content-extend':'se-component-content-fit'}"><div class=se-section-image><img src="https://phinf.pstatic.net/b.png" onclick="this.parentElement.classList.add('se-is-selected')"></div></div></div><button onclick="fetch('/applied').then(()=>window.close())">등록</button>`});
  });
  await page.goto('https://sell.smartstore.naver.com/#/products/copy/1');
  const parts={files:[path.join(root,'a.png'),path.join(root,'b.png')],includeVideo:true,videoIdentity:{identity:['component:'+id]}},logs=[];
  assert.equal((await verifySmartstoreDetail(page,parts,{log:x=>logs.push(x)})).detailUploaded,true);
  assert.equal(applied,1);assert.equal(opened,2);assert(logs.some(x=>x.includes('파일 재업로드 없음')));
  const report=JSON.parse(await readFile(path.join(root,'detail-verification.json'),'utf8'));assert.deepEqual(report.mismatch,[]);assert.equal(report.repairAttempt,1);
+  fixed=false;persist=false;opened=0;applied=0;
+  await assert.rejects(()=>verifySmartstoreDetail(page,parts),/옆트임 배치/);assert.equal(applied,1,'실패해도 배치 수정은 한 번만 시도');assert.equal(opened,2);
  }finally{await rm(root,{recursive:true,force:true});}
 }));
