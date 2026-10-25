@@ -269,6 +269,32 @@ const server=http.createServer(async(req,res)=>{
           state.autoStep='done';await writeFile(path.join(result.folder,'smartstore-auto-completed.json'),JSON.stringify(result,null,2));
         });return json(res,202,{ok:true});
       }
+      if(url.pathname==='/api/smartstore-import-photos'){
+        if(state.busy)throw Error('현재 작업이 끝난 뒤 사진을 가져와 주세요.');
+        if(!state.product||!state.folder||b.style!==state.product.style)throw Error('가져올 품번의 공식몰 정보를 먼저 수집해 주세요.');
+        if(b.edits)await productEdits.save(b.edits,state.product.style);
+        const product=await productEdits.apply(state.product),folder=state.folder;
+        job('smartstore-import-photos',async()=>{
+          const signal=activeAbort.signal;log('기존 상품 착용사진 수집 · 판매자 상품코드로 조회');
+          const source=await smartBot.importExistingPhotos(product,{signal});signal.throwIfAborted();
+          const stage=await stageImportedPhotos(source,folder,{signal});signal.throwIfAborted();
+          if(state.product.style!==product.style||state.folder!==folder)throw Error('현재 상품이 변경되어 수집 사진을 적용하지 않았습니다.');
+          state.photoImport=stage;log('기존 상품 사진 '+stage.candidates.length+'장 수집 · 등록기에서 착용사진·색상·각도를 확인 후 적용해 주세요. 상품 저장 안 함');
+        });return json(res,202,{ok:true});
+      }
+      if(url.pathname==='/api/smartstore-import-photos-apply'){
+        if(state.busy)throw Error('현재 작업이 끝난 뒤 사진을 적용해 주세요.');
+        if(!state.product||!state.folder||b.style!==state.product.style||state.photoImport?.style!==b.style)throw Error('사진을 가져온 현재 품번을 확인해 주세요.');
+        const product=await productEdits.apply(state.product),folder=state.folder;
+        job('smartstore-import-photos',async()=>{
+          const signal=activeAbort.signal;
+          const result=await applyImportedPhotos(product,folder,b.photos,{dataRoot,signal});signal.throwIfAborted();
+          const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,signal,log});signal.throwIfAborted();
+          await writeFile(path.join(folder,'product.json'),JSON.stringify(prepared,null,2));await publishPhotoPreview(prepared,folder);
+          state.photoImport={...state.photoImport,status:'applied',selectedCount:result.selectedCount};
+          log('착용사진 '+result.selectedCount+'장 적용 · 품번 폴더 보관 · 추가이미지와 색상별 상세 템플릿 반영 · 판매자센터 저장 안 함');
+        });return json(res,202,{ok:true});
+      }
       if(url.pathname==='/api/smartstore-detail-only'){
         if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 상세설명만 교체해 주세요.');
         if(!state.product||!state.folder)throw Error('먼저 현재 상품 정보와 상세 미리보기를 준비해 주세요.');
