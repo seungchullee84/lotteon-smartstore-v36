@@ -37,3 +37,20 @@ test('추가 6종은 공식 화보 출처와 원본 해시를 기록하고 모�
  assert.equal(manifest.additionalVariants.length,6);
  for(const item of manifest.additionalVariants){assert.equal(new URL(item.url).hostname,'m.giordano.co.kr');assert.match(item.sha256,/^[a-f0-9]{64}$/);assert.equal(item.modelAltered,false);}
 });
+
+test('분위기 대신 성별·공식 품목과 화보 착장의 연관성을 우선한다',()=>{
+ for(const [gender,rawName,file]of [
+  ['남성','기모 테리 패치 후드티','store-discovery-men.jpg'],
+  ['남성','코튼 맨투맨 스웨트셔츠','store-discovery-men-3.jpg'],
+  ['남성','메리노울 니트 스웨터','store-discovery-men-2.jpg'],
+  ['남성','울 코트','store-discovery-men-4.jpg'],
+  ['여성','니트 가디건','store-discovery-women.jpg'],
+  ['여성','퀼팅 패딩 자켓','store-discovery-women-2.jpg'],
+  ['여성','메리노울 터틀넥 니트','store-discovery-women-3.jpg'],
+  ['여성','코튼 긴팔 티셔츠','store-discovery-women-4.jpg']
+ ])for(const style of ['026982','356954','999999']){
+  assert.equal(storeBannerAsset({style,gender,rawName}),file);
+  assert.equal(storeBannerAsset({style,gender,rawName,name:'수정한 상품명 겨울 코트'}),file);
+ }
+ assert.equal(storeBannerAsset({style:'123456',gender:'남성',rawName:'공식 상품',sourceCategory:['MEN','맨투맨']}),'store-discovery-men-3.jpg');
+});
