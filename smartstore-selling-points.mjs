@@ -1,23 +1,31 @@
 // Product copy is derived from explicit official sentences, never from an SKU or season guess.
 export function officialSellingPoints(description){
- const text=String(description||'').replace(/\s+/g,' ');const points=[];
+ const text=String(description||'').replace(/\s+/g,' ');const points=[],covered=new Set();
  const fabric=text.match(/\d+g\/(?:㎡|m2)의[^.\n]*?(?:실키한|실키)[^.\n]*(?:특징|제공합니다)/);
  if(fabric&&/저지/.test(fabric[0])&&/부드럽|소프트/.test(fabric[0])){
   const weight=fabric[0].match(/\d+g\/(?:㎡|m2)/)[0].replace('m2','㎡');
   points.push({title:/가볍/.test(fabric[0])?'가볍고, 실키하게':'부드럽고, 실키하게',description:weight+' 저지 원단의 부드러운 터치.',evidence:fabric[0]});
+  covered.add('원단');
+ }
+ const rib=text.match(/\d+g\/(?:㎡|m2)의[^.\n]*?립 원단[^.\n]*?톡톡한 두께감[^.\n]*/);
+ if(!covered.has('원단')&&rib&&/소프트|부드러/.test(rib[0])){
+  const weight=rib[0].match(/\d+g\/(?:㎡|m2)/)[0].replace('m2','㎡');
+  points.push({title:'톡톡하고, 부드럽게',description:weight+' 립 원단의 소프트한 두께감.',evidence:rib[0]});covered.add('원단');
  }
  const slim=text.match(/몸에 자연스럽게 밀착되는 슬림한 실루엣으로[^.\n]*(?:활용하기 좋습니다|적합)/);
- if(slim&&/레이어드/.test(slim[0]))points.push({title:'슬림하게, 레이어드',description:'몸에 자연스럽게 밀착되는 슬림 실루엣.',evidence:slim[0]});
+ if(slim&&/레이어드/.test(slim[0])){points.push({title:'슬림하게, 레이어드',description:'몸에 자연스럽게 밀착되는 슬림 실루엣.',evidence:slim[0]});covered.add('실루엣');covered.add('핏');}
  const neck=text.match(/적당한 폭의 터틀넥[^.\n]*?(?:착용감[^.\n]*?(?:더했으며|제공)|착용감)/);
- if(neck)points.push({title:'부담 적은 터틀넥',description:'적당한 폭으로 편안한 착용감.',evidence:neck[0]});
- if(points.length)return points.slice(0,3);
+ if(neck){points.push({title:'부담 적은 터틀넥',description:'적당한 폭으로 편안한 착용감.',evidence:neck[0]});covered.add('디테일');covered.add('네크라인');}
+ if(points.length>=3)return points.slice(0,3);
  // Keep the official POINT headings and wording for other clothing categories.
  const original=String(description||'').replace(/\\n/g,'\n');
  const blocks=[...original.matchAll(/POINT\s*0?[1-9]\s*(?:[（(]([^）)]+)[）)])?\s*([\s\S]*?)(?=POINT\s*0?[1-9]|\n\s*\*|$)/gi)];
  for(const block of blocks){
+  if(covered.has(block[1]?.trim()))continue;
   const lines=block[2].split(/\n+/).map(s=>s.trim()).filter(Boolean);if(!lines.length)continue;
   const first=lines[0],sentence=(lines.slice(1).join(' ')||first).split(/(?<=[.!?])\s+/)[0];
   points.push({title:first.length<=28?first:(block[1]||first.slice(0,27)+'…'),description:sentence.length<=90?sentence:sentence.slice(0,89)+'…',evidence:block[2].trim()});
+  if(points.length>=3)break;
  }
  if(points.length)return points.slice(0,3);
  // With no POINT blocks, quote an actual official sentence rather than fill cards
