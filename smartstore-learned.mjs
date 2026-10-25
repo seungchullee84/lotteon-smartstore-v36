@@ -11,6 +11,8 @@ export function sellerProductCode(p){
  return p.style+' '+name;
 }
 const verified={
+ // 026982: reviewed official 01026982 detail and current folder front/side photos show wrist-length ribbed sleeves and a hood.
+ '026982':{sleeve:'긴팔',neckline:'후드넥'},
  // 376921: official 05376921.jpg and Desktop/상품등록기사진폴더/376921 photos confirm full-length sleeves and a stand collar.
  '376921':{sleeve:'긴팔',neckline:'스텐드/차이나칼라'},
  // 076931: official 01076931.jpg confirms stand neck, long sleeves, faux suede and micro-ball padding.
