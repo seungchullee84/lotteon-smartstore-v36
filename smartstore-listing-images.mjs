@@ -36,7 +36,7 @@ export async function listingPreview(product,options){
  const manifest=await listingManifest(product,options);if(manifest)return manifest;
  const photos=await findPhotos(product,options),main=photos.filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name));
  if(main.length!==1)return null;
- return withOfficialMain(product,{main:{sourceName:main[0].name,color:'색상 대조 전'},extras:[],previewOnly:true});
+ return {main:{sourceName:main[0].name,color:'색상 대조 전'},extras:[],previewOnly:true};
 }
 export async function originalListingMain(product,options){
  const originals=(await findPhotos(product,options)).filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name));
