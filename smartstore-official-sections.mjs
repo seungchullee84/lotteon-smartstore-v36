@@ -2,7 +2,7 @@ import {readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
-const width=96,rule='full-width-pixel-inclusion-1';
+const width=96,rule='full-width-pixel-inclusion-2';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 async function pixels(bytes,height){return sharp(bytes,{limitInputPixels:false}).flatten({background:'#fff'}).resize(width,height,{fit:'fill'}).greyscale().raw().toBuffer();}
 function rows(bytes,height){const out=new Float64Array(height);for(let y=0;y<height;y++)for(let x=0;x<width;x++)out[y]+=255-bytes[y*width+x];return out;}
@@ -21,7 +21,9 @@ export async function officialSectionMatch(detail,section){
  let best={included:false};
  for(const candidate of candidates){
   let loss=0;for(let i=0;i<b.length;i++)loss+=Math.abs(a[candidate.top*width+i]-b[i]);
-  const error=loss/ink;if(best.error===undefined||error<best.error)best={included:error<=.08,top:candidate.top,height,error};
+  // The official standalone size chart can blank out unavailable size columns.
+  // Keep the complete original chart when the same full-width section matches.
+  const error=loss/ink;if(best.error===undefined||error<best.error)best={included:error<=.16,top:candidate.top,height,error};
  }
  return best;
 }

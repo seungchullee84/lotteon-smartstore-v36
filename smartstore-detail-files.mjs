@@ -9,6 +9,7 @@ import {smartstoreDetailDocument,TEMPLATE_ASSET_NAMES,TEMPLATE_ASSET_BASE} from 
 import {exportBrandVideo,requireBrandVideo,productVideoOptions} from './smartstore-brand-video.mjs';
 import {renderCacheKey,restoreRenderedDetail,cacheRenderedDetail} from './smartstore-render-cache.mjs';
 import {workingProductPhoto} from './smartstore-photo-work.mjs';
+import {embeddedOfficialSections} from './smartstore-official-sections.mjs';
 const appRoot=path.dirname(fileURLToPath(import.meta.url));
 const assetsRoot=path.join(appRoot,'public/smartstore-template');
 const inside=(root,file)=>file.startsWith(root+path.sep);
@@ -81,6 +82,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
    prepared.colorSources[group.color]='official';
   }
  }
+ prepared.embeddedOfficialSections=await embeddedOfficialSections(product,folder);
  const p={...product,smartstoreDetail:prepared};
  return p;
 }
