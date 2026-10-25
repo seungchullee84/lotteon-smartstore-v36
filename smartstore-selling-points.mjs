@@ -1,8 +1,28 @@
-// Product copy is derived from explicit official sentences, never from an SKU or season guess.
+// Display copy is brief; full official sentences remain in evidence only.
+export function compactSellingPoint(point){
+ return !!point?.title&&!!point?.description&&point.title.length<=18&&point.description.length<=42&&point.title!==point.description&&!/[.…]$/.test(point.title)&&!/[.…]$/.test(point.description.replace(/\.$/,''));
+}
 export function officialSellingPoints(description){
  const text=String(description||'').replace(/\s+/g,' ');const points=[],covered=new Set(),labels=new Map();
  const sections=[...String(description||'').matchAll(/POINT\s*0?[1-9]\s*[（(]([^）)]+)[）)]/gi)].map(m=>m[1].trim());
- const finish=()=>points.sort((a,b)=>{const rank=p=>{const i=sections.indexOf(labels.get(p));return i<0?99:i;};return rank(a)-rank(b);}).slice(0,3);
+ const finish=()=>points.filter(compactSellingPoint).sort((a,b)=>{const rank=p=>{const i=sections.indexOf(labels.get(p));return i<0?99:i;};return rank(a)-rank(b);}).slice(0,3);
+ // Shared apparel features: use only an affirmative, explicit source sentence.
+ const sentences=text.replace(/\\n/g,' ').split(/(?<=[.!?])\s+/);
+ for(const [pattern,title,copy,label] of [
+  [/히든\s*밴딩[^.]*?(?:편안|유연|착용감)/,'히든밴딩, 편안하게','허리 안쪽 밴딩으로 편안하게.','디테일'],
+  [/(?:사방\s*스판|가로\s*\/\s*세로\s*양방향)/,'사방으로, 유연하게','가로·세로로 늘어나는 사방 스판.','신축성'],
+  [/(?:브러쉬드|브러시드|기모)[^.]*?(?:보온|따뜻)/,'부드럽고, 따뜻하게','브러쉬드 가공으로 더한 보온성.','보온'],
+  [/테이퍼드[^.]*?(?:실루엣|라인)|밑단으로[^.]*?좁아지는/,'깔끔한 테이퍼드핏','밑단으로 갈수록 슬림한 라인.','핏'],
+  [/와이드\s*(?:핏|실루엣)/,'여유로운 와이드핏','넉넉하게 떨어지는 와이드 실루엣.','핏'],
+  [/(?:가먼트\s*워싱)[^.]*?(?:수축[^.]*?최소)/,'워싱으로, 안정감 있게','가먼트 워싱으로 수축을 최소화.','가공'],
+  [/캥거루\s*(?:포켓|주머니)/,'가볍게 챙기는 실용성','편리하게 사용하는 캥거루 포켓.','디테일'],
+  [/(?:메리노\s*울)[^.]*?(?:부드러|소프트)/,'부드러운 메리노울','메리노울의 부드러운 촉감.','원단'],
+ ]){
+  const evidence=sentences.find(s=>pattern.test(s)&&!/(?:아닌|없습니다|없음)/.test(s));if(!evidence)continue;
+  const description=/^부드럽고, 따뜻하게$/.test(title)&&/기모/.test(evidence)&&!/브러쉬드|브러시드/.test(evidence)?'기모 가공으로 더한 보온성.':copy;
+  points.push({title,description,evidence});labels.set(points.at(-1),label);covered.add(label);
+  if(points.length>=3)return finish();
+ }
  const fabric=text.match(/\d+g\/(?:㎡|m2)의[^.\n]*?(?:실키한|실키)[^.\n]*(?:특징|제공합니다)/);
  if(fabric&&/저지/.test(fabric[0])&&/부드럽|소프트/.test(fabric[0])){
   const weight=fabric[0].match(/\d+g\/(?:㎡|m2)/)[0].replace('m2','㎡');
@@ -27,17 +47,16 @@ export function officialSellingPoints(description){
   if(covered.has(block[1]?.trim()))continue;
   const lines=block[2].split(/\n+/).map(s=>s.trim()).filter(Boolean);if(!lines.length)continue;
   const first=lines[0],sentence=(lines.slice(1).join(' ')||first).split(/(?<=[.!?])\s+/)[0];
-  points.push({title:first.length<=28?first:(block[1]||first.slice(0,27)+'…'),description:sentence.length<=90?sentence:sentence.slice(0,89)+'…',evidence:block[2].trim()});
+  const point={title:first,description:sentence,evidence:block[2].trim()};
+  if(!compactSellingPoint(point))continue;points.push(point);
   labels.set(points.at(-1),block[1]?.trim());
   if(points.length>=3)break;
  }
  if(points.length)return finish();
- // With no POINT blocks, quote an actual official sentence rather than fill cards
- // with a product name, color count, size list, or a material-check instruction.
- for(const sentence of text.split(/(?<=[.!?])\s+/).filter(s=>s.length>=10&&!/^(?:\*|※)|주의|비침이 있을|참고 부탁/.test(s)).slice(0,3))points.push({title:sentence.length<=28?sentence:sentence.slice(0,27)+'…',description:sentence.length<=90?sentence:sentence.slice(0,89)+'…',evidence:sentence});
- return points;
+ // Unknown prose needs source review; never display a copied paragraph as a card.
+ return [];
 }
 export function usableSellingPoints(points,source){
  const compact=s=>String(s).replace(/\s+/g,'');
- return Array.isArray(points)&&points.length>0&&points.every(p=>p.title&&p.description&&p.evidence&&!/^혼용 소재$|^\d+ COLORS$|^SIZE$|^PRODUCT$/.test(p.title)&&!/혼용 여부는.*확인해/.test(p.description)&&(source===undefined||compact(source).includes(compact(p.evidence.split(/\s+\/\s+https?:\/\//)[0]))));
+ return Array.isArray(points)&&points.length>0&&points.every(p=>compactSellingPoint(p)&&p.evidence&&!/^혼용 소재$|^\d+ COLORS$|^SIZE$|^PRODUCT$/.test(p.title)&&!/혼용 여부는.*확인해/.test(p.description)&&(source===undefined||compact(source).includes(compact(p.evidence.split(/\s+\/\s+https?:\/\//)[0]))));
 }
