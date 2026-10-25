@@ -13,13 +13,14 @@ test('최종 반영 전에 업로드 완료와 옆트임 누락 보정을 나누
   assert.equal(registered,true);assert.ok(logs.some(x=>x.includes('누락 1장만 보정')));
  }finally{await browser.close();}
 });
-test('배너 파일을 대조한 뒤 그 이미지 하나에만 스토어 링크를 입력한다',async()=>{
+for(const confirm of ['적용','<svg width=16 height=16><path d="M2,8L6,12L14,2" /></svg>'])test('배너 파일 대조 후 링크 주소 오른쪽 '+(confirm==='적용'?'적용':'무명 체크')+' 버튼으로 연결한다',async()=>{
  const browser=await chromium.launch({headless:true});try{
   const page=await browser.newPage();
-  await page.setContent(`<style>img{display:block;width:300px;height:100px}</style><div class="se-component se-image"><a href="https://example.com/keep"><img src="https://example.com/main.png"></a></div><div class="se-component se-image"><a id=banner><img src="https://example.com/banner.png"></a></div><button data-name=image-link onclick="document.querySelector('#popup').hidden=false">링크</button><div id=popup hidden><input type=url placeholder=URL><button onclick="document.querySelector('#banner').href=document.querySelector('input').value;document.querySelector('#popup').hidden=true">적용</button></div>`);
+  await page.setContent(`<style>img{display:block;width:300px;height:100px}</style><div class="se-component se-image"><a href="https://example.com/keep"><img src="https://example.com/main.png"></a></div><div class="se-component se-image"><a id=banner><img src="https://example.com/banner.png"></a></div><button data-name=image-link onclick="document.querySelector('#popup').hidden=false">링크</button><button id=unrelated onclick="this.dataset.clicked='yes'">적용</button><div id=popup hidden><input type=url placeholder=URL><button onclick="document.querySelector('#banner').href=document.querySelector('input').value;document.querySelector('#popup').hidden=true">${confirm}</button></div>`);
   const parts={files:['main.png','banner.png'],bannerLink:{index:1,file:'banner.png',url:STORE_BANNER_URL}};
   await applySmartstoreBannerLink(page,parts);
   assert.equal(await page.locator('#banner').getAttribute('href'),STORE_BANNER_URL);
+  assert.equal(await page.locator('#unrelated').getAttribute('data-clicked'),null);
   assert.equal(await page.locator('a').first().getAttribute('href'),'https://example.com/keep');
   await assert.rejects(applySmartstoreBannerLink(page,{...parts,bannerLink:{...parts.bannerLink,file:'wrong.png'}}),/확인/);
  }finally{await browser.close();}

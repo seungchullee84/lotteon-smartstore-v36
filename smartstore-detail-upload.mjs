@@ -58,9 +58,23 @@ export async function applySmartstoreBannerLink(editor,parts,{check=()=>{},log=(
   await input.waitFor({state:'visible',timeout:5000});
   if(await input.count()!==1)throw Error('배너 링크 주소 입력란을 한 곳으로 확인하지 못했습니다.');
   check();await input.fill(link.url);
-  const apply=editor.getByRole('button',{name:/^(적용|확인)$/,exact:true}).filter({visible:true});
-  if(await apply.count()!==1)throw Error('배너 링크 적용 버튼을 확인하지 못했습니다.');
-  await apply.click();
+  // ONE uses an icon-only check button immediately to the right of this input.
+  // Resolve it inside the input's row rather than another dialog's Apply button.
+  const buttonIndex=await input.evaluate(n=>{
+   const controls=[...document.querySelectorAll('button,[role="button"]')],r=n.getBoundingClientRect();
+   for(let scope=n.parentElement,depth=0;scope&&depth<4;scope=scope.parentElement,depth++){
+    const nearby=[...scope.querySelectorAll('button,[role="button"]')].filter(b=>{
+     const s=b.getBoundingClientRect();return s.width>0&&s.height>0&&!b.disabled&&b.getAttribute('aria-disabled')!=='true'&&s.left>=r.right-3&&s.left-r.right<120&&Math.abs((s.top+s.bottom-r.top-r.bottom)/2)<Math.max(20,r.height);
+    });
+    const checks=nearby.filter(b=>/적용|확인|완료|apply|confirm|check/i.test([b.textContent,b.getAttribute('aria-label'),b.title,b.className,b.getAttribute('data-name'),...[...b.querySelectorAll('[class]')].map(e=>e.getAttribute('class'))].join(' ')));
+    if(checks.length===1)return controls.indexOf(checks[0]);
+    if(nearby.length===1)return controls.indexOf(nearby[0]);
+    if(nearby.length>1)return -1;
+   }
+   return -1;
+  });
+  if(buttonIndex<0)throw Error('링크 주소 오른쪽 체크 버튼을 확인하지 못했습니다.');
+  check();await editor.locator('button,[role="button"]').nth(buttonIndex).click();
   await editor.waitForFunction(({index,url})=>document.querySelectorAll('.se-component.se-image img')[index]?.closest('a')?.href===url,{index:link.index,url:link.url},{timeout:5000});
  }catch(error){throw Error('배너 링크 연결 확인 실패: '+error.message);}
  log('배너 이미지에 스토어 링크 연결 확인 · 다른 이미지 링크 변경 없음');
