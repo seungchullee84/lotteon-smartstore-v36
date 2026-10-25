@@ -361,6 +361,7 @@ $('naverSettingsForm').onsubmit=async event=>{
 const beforeSmartstorePopulate=populate;populate=function(p){
  beforeSmartstorePopulate(p);$('smartstorePrice').value=p.consumerPrice||'';
  $('smartstoreName').value=p.smartstoreName||'';
+ if(p.smartstoreNameUserEdited)$('smartstoreNameStatus').textContent=[...$('smartstoreName').value].length+'자 · 수정한 상품명 그대로 사용';
  $('naverTitleResult').textContent='네이버 데이터 조회 전';$('naverTitleCandidates').replaceChildren();
  void writePopularKeywords();arrangeSmartstoreTitle().then(autoOptimizeSmartstoreTitle).catch(e=>{$('smartstoreNameStatus').textContent=e.message;});
 };
