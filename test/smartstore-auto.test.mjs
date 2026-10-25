@@ -93,3 +93,26 @@ test('채팅에서 원본 바이트로 확인한 사진은 변환 해시 없이�
  const saved=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));assert.equal(saved.listingImages.extras.length,1);assert.equal(saved.listingImages.extras[0].role,'side');assert.equal(p.smartstoreDetail.photoCount,2);assert.deepEqual(saved.sellingPoints,draft.sellingPoints);
  }finally{await rm(root,{recursive:true,force:true});}
 });
+
+test('첫 품번도 사진을 자동 분석해 저장하고 상세 최대 컷을 넘는 사진까지 다음 시작에서 재사용한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'all-style-photos-'));try{
+  const folder=path.join(root,'product'),photos=path.join(root,'photos'),dataRoot=path.join(root,'data');await mkdir(folder);await mkdir(photos);await mkdir(dataRoot);
+  await writeFile(path.join(folder,'detail.jpg'),await sharp({create:{width:80,height:100,channels:3,background:'#eee'}}).jpeg().toBuffer());
+  await writeFile(path.join(folder,'smartstore-official.html'),'<body>STYLE. 05375908<div class="prd_detail_content_gio">'+description+'</div></body>');
+  for(let i=0;i<4;i++)await writeFile(path.join(photos,i===0?'1.jpg':'date-'+i+'.jpg'),await sharp({create:{width:80,height:100,channels:3,background:['#123','#234','#345','#456'][i]}}).jpeg().toBuffer());
+  let calls=0;const fetchImpl=async(_,request)=>{calls++;const body=JSON.parse(request.body),input=JSON.parse(body.input[0].content[0].text);return Response.json({status:'completed',output:[{content:[{type:'output_text',text:JSON.stringify({attributes:{sleeve:'긴팔',neckline:'스텐드/차이나칼라',evidence:'공식·실사 사진 대조'},points:[{title:'경량',description:'가벼운 나일론 원단.',evidence:'가벼운 나일론 원단'}],photos:input.photoIds.map((id,i)=>({id,color:'05블랙',role:i===0?'front':'detail',sameProduct:true,confidence:1}))})}]}]});};
+  const options={dataRoot,photoRoots:[photos],apiKey:'test',fetchImpl};
+  const first=await prepareSmartstoreAuto(product,folder,options);assert.equal(first.smartstoreDetail.photoCount,3);
+  const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'draft.json'),'utf8'));assert.equal(draft.photoMapping.files.length,4,'화면에 선택되지 않은 확인 사진도 해시별로 저장');
+  const second=await prepareSmartstoreAuto(product,folder,options);assert.equal(second.smartstoreDetail.photoCount,3);assert.equal(calls,1,'같은 사진은 매번 다시 외부 분석하지 않음');
+ }finally{await rm(root,{recursive:true,force:true});}
+});
+
+test('새 사진이 있고 분석 연결만 없는 상태를 사진 없음과 구분한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'photo-analysis-required-'));try{
+  const folder=path.join(root,'product'),photos=path.join(root,'photos'),dataRoot=path.join(root,'data');await mkdir(folder);await mkdir(photos);
+  await writeFile(path.join(folder,'smartstore-official.html'),'<body>STYLE. 05375908<div class="prd_detail_content_gio">'+description+'</div></body>');
+  const bytes=await sharp({create:{width:80,height:100,channels:3,background:'#123'}}).jpeg().toBuffer();await writeFile(path.join(folder,'detail.jpg'),bytes);await writeFile(path.join(photos,'1.jpg'),bytes);
+  await assert.rejects(()=>prepareSmartstoreAuto(product,folder,{dataRoot,photoRoots:[photos],apiKey:''}),e=>e.code==='PHOTO_ANALYSIS_REQUIRED'&&e.photoCount===1&&e.unknownCount===1);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
