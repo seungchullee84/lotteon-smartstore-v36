@@ -4,7 +4,7 @@ import {editorPhotoPositions,naverPhotoUrl,exactSellerRows,stageImportedPhotos,a
 import {prepareTrustedFolder} from '../smartstore-folder-trust.mjs';
 import {findPhotos} from '../smartstore-photo-files.mjs';
 test('판매자 코드 숫자를 정확히 대조하고 같은 코드 중 하나만 선택할 수 있다',()=>{
- const rows=[{code:'326922 설명A'},{code:'326922 설명B'},{code:'1326922'},{code:'326923'},{code:'326922 356954'}];assert.deepEqual(exactSellerRows(rows,'326922'),rows.slice(0,2));
+ const rows=[{code:'326922 설명A'},{code:'326922 설명B'},{code:'1326922'},{code:'326923'},{code:'326922 356954'}];assert.deepEqual(exactSellerRows(rows,'326922'),[rows[0],rows[1],rows[4]]);
  for(const u of ['https://evil.test/a.jpg','http://127.0.0.1/a.jpg','https://shop-phinf.pstatic.net@evil.test/a'])assert.throws(()=>naverPhotoUrl(u));
  assert.equal(naverPhotoUrl('http://shop1.phinf.naver.net/a.jpg?type=w860'),'https://shop1.phinf.naver.net/a.jpg?type=w860');
 });

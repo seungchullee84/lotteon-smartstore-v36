@@ -17,7 +17,8 @@ test('상세 전용 연결은 단일 조회/수정 창의 판매자 상품코드
 test('판매자 코드의 품번만 맞으면 뒤 문구와 상품명에 관계없이 진행한다',()=>{
  for(const code of ['326931','326931 다른 상품 설명','남성티셔츠 326931','326931_새 문구 26FW'])assert.doesNotThrow(()=>assertDetailOnlyProduct(code,'326931'));
  assert.doesNotThrow(()=>assertDetailOnlyProduct('26982 후드티','026982'));
- for(const code of ['','326932 다른상품','1326931','326931 356954'])assert.throws(()=>assertDetailOnlyProduct(code,'326931'),/판매자 상품코드/);
+ for(const code of ['326931 356954','구품번 356954 / 신품번 326931','326931·356954'])assert.doesNotThrow(()=>assertDetailOnlyProduct(code,'326931'));
+ for(const code of ['','326932 다른상품','1326931','326932 356954','326931356954'])assert.throws(()=>assertDetailOnlyProduct(code,'326931'),/판매자 상품코드/);
 });
 test('상세 전용 실행은 현재 자료로 연결·제작·상세 업로드만 호출하고 제품 데이터를 바꾸지 않는다',async()=>{
  const product={style:'026982',name:'사용자 상품명',price:77700,options:['보존'],tags:['보존'],images:{main:'원본 대표'}};
