@@ -5,7 +5,7 @@ import {colorCaption} from './smartstore-color-copy.mjs';
 import {brandVideoHtml,brandVideoHeadingHtml,productVideoUrl} from './smartstore-brand-video.mjs';
 
 export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-approved-20261024';
-export const TEMPLATE_ASSET_NAMES=['brand-intro.jpg','benefits.jpg','shipping.jpg','returns.jpg','store.jpg',...STORE_BANNER_ASSET_NAMES,'GowunDodum-Regular.ttf'];
+export const TEMPLATE_ASSET_NAMES=['brand-intro.jpg','lotte-department-official.png','benefits.jpg','shipping.jpg','returns.jpg','store.jpg',...STORE_BANNER_ASSET_NAMES,'GowunDodum-Regular.ttf'];
 export const TEMPLATE_ASSET_BASE='https://raw.githubusercontent.com/seungchullee84/lotteon-smartstore-v36/main/public/smartstore-template/';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const style='font-family:GowunDodum,\'Malgun Gothic\',sans-serif;color:#25372e;word-break:keep-all;overflow-wrap:break-word;line-height:2.1;';
@@ -59,7 +59,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
 
  // 2026-10-25: the new common MP4 applies to every product, including old season-video exclusions.
  body+=includeVideo?brandVideoHtml(videoUrl||productVideoUrl(p)):brandVideoHeadingHtml();
- body+=`<section data-product-intro style="padding:88px 6% 64px;background:#fff;"><p style="margin:0 0 22px;text-align:left;font-size:18px;font-weight:600;letter-spacing:.8px;color:#53694d;">롯데백화점 동탄점</p><h1 style="font-size:48px;line-height:1.45;letter-spacing:-.4px;margin:0 0 22px;font-weight:700;">${esc(draft?.headline||name)}</h1></section>`;
+ body+=`<section data-product-intro style="padding:88px 6% 64px;background:#fff;"><div data-lotte-logo style="margin:0 0 24px;">${photo(assetBase+'lotte-department-official.png','롯데백화점 공식 로고','width:320px;max-width:100%;height:auto;')}</div><p style="margin:0 0 22px;text-align:left;font-size:18px;font-weight:600;letter-spacing:.8px;color:#53694d;">롯데백화점 동탄점</p><h1 style="font-size:48px;line-height:1.45;letter-spacing:-.4px;margin:0 0 22px;font-weight:700;">${esc(draft?.headline||name)}</h1></section>`;
  if(groups.length){
   body+=divider;
   body+=`<section style="padding:64px 6% 88px;">${header('COLOR PALETTE','취향에 맞춰, '+esc(groups.length)+'가지.')}${includeNavigation?'<p style="padding:12px 16px;background:#fff1e7;color:#a43c23;border-left:3px solid #c35b36;font-size:19px;font-weight:700;">색상 사진을 클릭하면 해당 색상으로 이동합니다.</p>':''}<div style="display:flex;gap:12px;align-items:start;">${groups.map(g=>`<${includeNavigation?'a href="#smartstore-color-'+g.index+'"':'div'} style="flex:1;min-width:0;text-decoration:none;color:inherit;">${photo(g.urls[0],g.color,'aspect-ratio:3/4;object-fit:cover;border-radius:10px;')}<b style="display:block;font-size:22px;line-height:1.65;margin-top:20px;">${esc(g.color)}</b></${includeNavigation?'a':'div'}>`).join('')}</div><p style="font-size:20px;line-height:1.9;margin:36px 0 0;color:#465149;">촬영 조명과 화면 설정에 따라 실제 색상과 차이가 있을 수 있습니다. 공식 상품 이미지도 함께 확인해 주세요.</p></section>`;
