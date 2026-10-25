@@ -42,7 +42,7 @@ export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=t
 export async function applyStoreBannerLink(editor,image,url,{check=()=>{}}={}){
  if(url!==STORE_BANNER_URL)throw Error('스토어 배너 연결 주소가 다릅니다.');
  check();await image.scrollIntoViewIfNeeded();
- const box=await image.boundingBox();await image.click({position:{x:box.width/2,y:Math.min(box.height/2,100)}});
+ await selectSmartstoreImage(editor,image,{check});
  await editor.locator('button[data-name="image-link"]').filter({visible:true}).click();
  const input=editor.locator('input').filter({visible:true}).filter({hasNot:editor.locator('[type="hidden"]')});
  const urlInput=editor.locator('input[type="url"],input[placeholder*="URL"],input[placeholder*="주소"],input[placeholder*="http"]').filter({visible:true});
@@ -53,17 +53,33 @@ export async function applyStoreBannerLink(editor,image,url,{check=()=>{}}={}){
  check();
 }
 export const insertSmartstoreVideo=insertNativeBrandVideo;
+export async function selectSmartstoreImage(editor,image,{check=()=>{}}={}){
+ // Use one DOM coordinate system for the image, viewport and hit test. A fixed
+ // 160px toolbar cutoff incorrectly rejects short banners and zoomed editors.
+ for(const alignment of [null,'center','start']){
+  check();await image.scrollIntoViewIfNeeded();
+  if(alignment)await image.evaluate((n,block)=>n.scrollIntoView({block,inline:'nearest',behavior:'instant'}),alignment);
+  const point=await image.evaluate(n=>{
+   const r=n.getBoundingClientRect(),left=Math.max(0,r.left),right=Math.min(innerWidth,r.right),top=Math.max(0,r.top),bottom=Math.min(innerHeight,r.bottom);
+   if(right-left<2||bottom-top<2)return null;
+   for(const yf of [.5,.75,.9,.25,.1])for(const xf of [.5,.25,.75]){
+    const x=left+(right-left)*xf,y=top+(bottom-top)*yf,hit=document.elementFromPoint(x,y);
+    if(hit===n||n.contains(hit))return {x:x-r.left,y:y-r.top};
+   }
+   return null;
+  });
+  if(point){await image.click({position:point});return;}
+ }
+ throw Error('상세이미지가 편집기 도구에 가려져 선택하지 못했습니다. 편집기 창을 넓힌 뒤 다시 시작해 주세요.');
+}
 export async function applySmartstoreImageLayout(editor,image,{check=()=>{}}={}){
  check();if(await image.evaluate(n=>!!n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend')))return;
  await image.scrollIntoViewIfNeeded();await editor.bringToFront();
  const componentId=await image.evaluate(n=>n.closest('.se-component.se-image').id);
  const select=async()=>{
-  const box=await image.boundingBox(),viewportHeight=await editor.evaluate(()=>innerHeight);
-  const top=Math.max(box.y,160),bottom=Math.min(box.y+box.height,viewportHeight-40);
-  if(bottom<=top)throw Error('상세이미지 선택 위치를 확인하지 못했습니다.');
   // Locator-relative input keeps the selected image correct for tall PNGs and
   // browser zoom, instead of clicking near the fixed toolbar with page coordinates.
-  await image.click({position:{x:box.width/2,y:(top+bottom)/2-box.y}});
+  await selectSmartstoreImage(editor,image,{check});
   await editor.waitForFunction(id=>!!document.getElementById(id)?.querySelector('.se-section-image.se-is-selected'),componentId,{timeout:15000});
  };
  await select();
