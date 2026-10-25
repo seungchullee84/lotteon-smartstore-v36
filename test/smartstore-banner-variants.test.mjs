@@ -1,0 +1,38 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import sharp from 'sharp';
+import {storeBannerAsset,STORE_BANNER_ASSETS,STORE_BANNER_ASSET_NAMES} from '../smartstore-store-banner.mjs';
+import {TEMPLATE_ASSET_NAMES,buildSmartstoreDetail} from '../smartstore-detail.mjs';
+import {publishable} from '../github-sync.mjs';
+test('남녀 각 4종 모두 기존과 동일한 860×420 JPG이며 공통 템플릿과 배포에 포함된다',async()=>{
+ for(const gender of ['men','women']){
+  assert.equal(STORE_BANNER_ASSETS[gender].length,4);
+  assert.equal(new Set(STORE_BANNER_ASSETS[gender]).size,4);
+  for(const file of STORE_BANNER_ASSETS[gender]){
+   const meta=await sharp(new URL('../public/smartstore-template/'+file,import.meta.url).pathname.replace(/^\/([A-Z]:)/i,'$1')).metadata();
+   assert.equal(meta.width,860);assert.equal(meta.height,420);assert.equal(meta.format,'jpeg');
+   assert.ok(TEMPLATE_ASSET_NAMES.includes(file));assert.equal(publishable('public/smartstore-template/'+file),true);
+  }
+ }
+ assert.equal(STORE_BANNER_ASSET_NAMES.length,9);
+});
+test('품번별 선택은 재실행·수정 후에도 고정되고 같은 성별 4종만 고른다',()=>{
+ for(const gender of ['남성','여성']){
+  const used=new Set();for(let i=1;i<=128;i++){
+   const p={style:String(i).padStart(6,'0'),gender};const first=storeBannerAsset(p);used.add(first);
+   assert.equal(storeBannerAsset({...p,name:'수정한 상품명',material:'소재 수정'}),first);
+   assert.ok(STORE_BANNER_ASSETS[gender==='남성'?'men':'women'].includes(first));
+   const html=buildSmartstoreDetail({...p,images:{detail:'https://www.giordano.co.kr/detail.jpg'}}).html;
+   assert.ok(html.includes(first));
+  }
+  assert.equal(used.size,4);
+ }
+ assert.equal(storeBannerAsset({gender:'남녀공용',style:'026982'}),'store-discovery-unisex.jpg');
+ assert.equal(storeBannerAsset({gender:'여성'}),'store-discovery-women.jpg');
+});
+test('추가 6종은 공식 화보 출처와 원본 해시를 기록하고 모델 합성이 없다',async()=>{
+ const manifest=JSON.parse(await readFile(new URL('../public/smartstore-template/store-discovery-sources.json',import.meta.url),'utf8'));
+ assert.equal(manifest.additionalVariants.length,6);
+ for(const item of manifest.additionalVariants){assert.equal(new URL(item.url).hostname,'m.giordano.co.kr');assert.match(item.sha256,/^[a-f0-9]{64}$/);assert.equal(item.modelAltered,false);}
+});
