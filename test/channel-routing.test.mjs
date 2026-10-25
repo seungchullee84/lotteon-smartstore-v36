@@ -36,10 +36,3 @@ test('시작은 사용자가 직접 연 복사등록 한 곳에만 연결하고 
  const missing=attach(new SmartstoreAutomation('.',()=>{}),[home]);await assert.rejects(()=>missing.bindCopyForm(),/직접 열고/);assert.deepEqual(home.gotos,[]);
  const duplicate=attach(new SmartstoreAutomation('.',()=>{}),[chosen,page('https://sell.smartstore.naver.com/#/products/copy/123')]);await assert.rejects(()=>duplicate.bindCopyForm(),/여러 개/);
 });
-
-
-test('조회·수정 한 곳에도 이동 없이 연결하고 복사등록과 함께 열려 있으면 임의 선택하지 않는다',async()=>{
- const edit=page('https://sell.smartstore.naver.com/#/products/edit/13770263563');
- const bot=attach(new SmartstoreAutomation('.',()=>{}),[page(SMARTSTORE_HOME),edit]);await bot.bindCopyForm();assert.equal(bot.page,edit);assert.equal(bot.copyFormUrl,edit.url());assert.deepEqual(edit.gotos,[]);
- const mixed=attach(new SmartstoreAutomation('.',()=>{}),[edit,page('https://sell.smartstore.naver.com/#/products/copy/123')]);await assert.rejects(()=>mixed.bindCopyForm(),/여러 개/);
-});
