@@ -9,12 +9,22 @@ export const BRAND_VIDEO_URL='/smartstore-brand-video.mp4?v='+BRAND_VIDEO_HASH.s
 export const BRAND_VIDEO_FILENAME='common.mp4';
 export const BRAND_VIDEO_TITLE='GIORDANO BRAND FILM';
 export const BRAND_VIDEO_HEADING_HEIGHT=88;
-export const brandVideoFile=(dataRoot=path.join(root,'data'))=>path.join(dataRoot,'brand-video',BRAND_VIDEO_FILENAME);
+export const WOMEN_VIDEO_HASH='fe6e9b1ba13962a619459029971c21495b9682fb1b8d5e4feba6475fac7625b9';
+export function productVideoOptions(product){
+ const gender=String(product?.gender||'').trim();
+ return /^(여성|여자|women|woman|female)$/i.test(gender)?{filename:'women.mp4',expectedHash:WOMEN_VIDEO_HASH}:{};
+}
+export function productVideoUrl(product){
+ const selected=productVideoOptions(product);
+ return selected.filename?'/smartstore-brand-video.mp4?variant=women&v='+selected.expectedHash.slice(0,16):BRAND_VIDEO_URL;
+}
+export const brandVideoFile=(dataRoot=path.join(root,'data'),filename=BRAND_VIDEO_FILENAME)=>path.join(dataRoot,'brand-video',filename);
 
 // The user's original MP4 stays local; do not publish it or substitute the old YouTube clip.
-export async function requireBrandVideo(dataRoot,{expectedHash=BRAND_VIDEO_HASH}={}){
- const file=brandVideoFile(dataRoot);let bytes;
- try{bytes=await readFile(file);}catch(e){if(e.code==='ENOENT')throw Error('공통 MP4가 없습니다. data/brand-video/common.mp4에 확인된 원본을 준비해 주세요.');throw e;}
+export async function requireBrandVideo(dataRoot,{expectedHash=BRAND_VIDEO_HASH,filename=BRAND_VIDEO_FILENAME}={}){
+ if(!['common.mp4','women.mp4'].includes(filename))throw Error('브랜드 영상 종류를 확인해 주세요.');
+ const file=brandVideoFile(dataRoot,filename);let bytes;
+ try{bytes=await readFile(file);}catch(e){if(e.code==='ENOENT')throw Error('공통 MP4가 없습니다. data/brand-video/'+filename+'에 확인된 원본을 준비해 주세요.');throw e;}
  if(bytes.length<12||bytes.toString('ascii',4,8)!=='ftyp'||createHash('sha256').update(bytes).digest('hex')!==expectedHash)throw Error('공통 MP4가 확인된 원본과 다릅니다. 영상 파일을 다시 확인해 주세요.');
  return {file,bytes,sha256:expectedHash,size:bytes.length};
 }
