@@ -32,7 +32,7 @@ test('공식몰 링크·암호화 연결창·태그 검색/삭제/선택과 시�
   await page.getByRole('button',{name:'여성후드티 추천에서 삭제',exact:true}).click();await page.waitForFunction(()=>!document.querySelector('#researchTagCandidates').textContent.includes('여성후드티'));assert.equal(removed.id,'1');
   await page.locator('#manualTagQuery').fill('후드');await page.locator('#manualTagQuery').press('Enter');await page.getByRole('checkbox',{name:'여성후드티 선택',exact:true}).waitFor();assert.equal(await page.getByRole('checkbox',{name:'여성니트 선택',exact:true}).isEnabled(),false);await page.getByRole('checkbox',{name:'여성후드티 선택',exact:true}).check();
   await page.locator('#applyManualTags').click();await page.waitForFunction(()=>!document.querySelector('#smartstoreStart').disabled);assert.deepEqual(selectedRequest.tags.map(t=>t.id).sort(),['1','2']);
-  await page.getByRole('button',{name:'여성후드티 선택 취소',exact:true}).click();await page.locator('#smartstoreStart').click();await page.waitForResponse(r=>r.url().endsWith('/api/smartstore-auto')).catch(()=>{});
+  await page.getByRole('button',{name:'여성후드티 선택 취소',exact:true}).click();await Promise.all([page.waitForResponse(r=>r.url().endsWith('/api/smartstore-auto')),page.locator('#smartstoreStart').click()]);
   assert.deepEqual(startRequest.selectedTags,[{id:'2',name:'기모후드티'}]);assert.equal(startRequest.selectedTitle.title,product.smartstoreName);assert.deepEqual(errors,[]);
  }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
 });
