@@ -108,18 +108,24 @@ export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  const verified=await openSmartstoreEditor(page,{check});
  await verified.locator('.se-component.se-image img').nth(parts.files.length-1).waitFor({state:'visible',timeout:30000});
  const expected=parts.files.map(file=>path.basename(file));
- const names=[];
- for(let i=0;i<expected.length;i++){
-  check();const image=verified.locator('.se-component.se-image img').nth(i);await image.scrollIntoViewIfNeeded();
-  await verified.waitForFunction(i=>/^https:\/\//.test(document.querySelectorAll('.se-component.se-image img')[i]?.src||''),i,{timeout:30000});
-  names.push(await image.evaluate(n=>decodeURIComponent(new URL(n.src).pathname.split('/').at(-1))));
- }
+ const images=verified.locator('.se-component.se-image img');
+ const pending=await images.evaluateAll(ns=>ns.flatMap((n,i)=>/^https:\/\//.test(n.src)?[]:[i]));
+ // Hosted images need no scrolling or repeated per-image browser calls.
+ for(const i of pending){check();await images.nth(i).scrollIntoViewIfNeeded();await verified.waitForFunction(i=>/^https:\/\//.test(document.querySelectorAll('.se-component.se-image img')[i]?.src||''),i,{timeout:30000});}
+ const snapshot=await images.evaluateAll(ns=>ns.map(n=>({name:decodeURIComponent(new URL(n.src).pathname.split('/').at(-1)),src:n.src,extended:!!n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend')})));
+ const names=snapshot.map(n=>n.name);
  const includeVideo=parts.includeVideo!==false;
  const videoCount=await verified.locator('.se-component.se-oembed,.se-component.se-video').count();
  const video=includeVideo&&videoCount===1&&await verified.locator('.se-component.se-video').count()===1?await nativeVideoIdentity(verified.locator('.se-component.se-video')):[];
  const leftoverUrl=await verified.locator('.se-component.se-text').evaluateAll(ns=>ns.some(n=>/youtube\.com\/|youtu\.be\//.test(n.innerText)));
  if(leftoverUrl)throw Error('저장된 상세페이지에 영상 주소 문장이 남아 있습니다.');
- if(JSON.stringify(names)!==JSON.stringify(expected)||await verified.locator('.se-component.se-image .se-component-content-extend').count()!==expected.length||(includeVideo?!video.length||JSON.stringify(video)!==JSON.stringify(parts.videoIdentity?.identity):videoCount!==0))throw Error('저장된 상세페이지의 이미지·MP4 영상·옆트임 설정 대조 결과가 다릅니다.');
+ const mismatch=[];
+ if(JSON.stringify(names)!==JSON.stringify(expected))mismatch.push('이미지 파일명·순서');
+ if(snapshot.length!==expected.length||snapshot.some(n=>!n.extended))mismatch.push('옆트임 배치');
+ if(includeVideo?!video.length||JSON.stringify(video)!==JSON.stringify(parts.videoIdentity?.identity):videoCount!==0)mismatch.push('MP4 영상 식별자');
+ const verification={expected,names,images:snapshot,videoCount,videoIdentity:video,expectedVideoIdentity:parts.videoIdentity?.identity,mismatch};
+ await writeFile(path.join(path.dirname(parts.files[0]),'detail-verification.json'),JSON.stringify(verification,null,2));
+ if(mismatch.length){log('상세 대조 차이: '+mismatch.join(' · '));throw Error('상세페이지 확인 불일치: '+mismatch.join(' · ')+'. 상품은 저장하지 않았습니다.');}
  await verified.close();
  log('상세페이지 이미지 '+parts.files.length+'장 반영 확인 · '+(includeVideo?'공통 MP4 포함 · 판매페이지 자동재생 미검증':'영상 제외'));
  return {detailUploaded:true,detailParts:parts.files.length,videoUploaded:includeVideo,videoSha256:parts.videoIdentity?.sha256,videoPlayback:includeVideo?'unverified':null,colorNavigation:false,imageLayout:'extend'};
