@@ -28,3 +28,22 @@ test('작은 배너가 160px 위에 있어도 실제 노출된 이미지를 선�
  assert.equal(await page.locator('#short .se-component-content-extend').count(),1);
  }finally{await browser.close();}
 });
+
+for(const mode of ['selection-overlay','pointer-events-none'])test('ONE '+mode+' 위에서도 해당 이미지 선택과 옆트임을 확인한다',async()=>{
+ const browser=await chromium.launch({headless:true});try{
+  const page=await browser.newPage({viewport:{width:900,height:600}});
+  await page.setContent(`<style>body{margin:0}.se-component{width:600px;margin:auto}.se-section-image{position:relative}img{display:block;width:600px;height:300px;${mode==='pointer-events-none'?'pointer-events:none':''}}.selection-layer{position:absolute;inset:0}</style><div class="se-component se-image" id=target><div class=se-component-content><div class=se-section-image onclick="this.classList.add('se-is-selected')"><img>${mode==='selection-overlay'?'<div class=selection-layer></div>':''}</div></div></div><div class="se-component se-image" id=other><img style="height:50px"></div><button data-name=content-mode-without-pagefull data-value=extend onclick="document.querySelector('#target .se-section-image.se-is-selected').parentElement.classList.add('se-component-content-extend')">옆트임</button>`);
+  await applySmartstoreImageLayout(page,page.locator('#target img'));
+  assert.equal(await page.locator('#target .se-component-content-extend').count(),1);
+  assert.equal(await page.locator('#other .se-is-selected').count(),0);
+ }finally{await browser.close();}
+});
+
+test('다른 이미지가 타깃을 완전히 가리면 클릭하지 않는다',async()=>{
+ const browser=await chromium.launch({headless:true});try{
+  const page=await browser.newPage({viewport:{width:900,height:600}});
+  await page.setContent(`<style>body{margin:0}.se-component{position:absolute;inset:0;background:white}img{width:600px;height:300px}</style><div class="se-component se-image" id=target><img></div><div class="se-component se-image" id=other onclick="this.dataset.clicked='yes'"><img></div>`);
+  await assert.rejects(selectSmartstoreImage(page,page.locator('#target img')),/가려져/);
+  assert.equal(await page.locator('#other').getAttribute('data-clicked'),null);
+ }finally{await browser.close();}
+});

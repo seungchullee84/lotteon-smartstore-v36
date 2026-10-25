@@ -60,15 +60,20 @@ export async function selectSmartstoreImage(editor,image,{check=()=>{}}={}){
   check();await image.scrollIntoViewIfNeeded();
   if(alignment)await image.evaluate((n,block)=>n.scrollIntoView({block,inline:'nearest',behavior:'instant'}),alignment);
   const point=await image.evaluate(n=>{
-   const r=n.getBoundingClientRect(),left=Math.max(0,r.left),right=Math.min(innerWidth,r.right),top=Math.max(0,r.top),bottom=Math.min(innerHeight,r.bottom);
+   const r=n.getBoundingClientRect(),component=n.closest('.se-component.se-image'),left=Math.max(0,r.left),right=Math.min(innerWidth,r.right),top=Math.max(0,r.top),bottom=Math.min(innerHeight,r.bottom);
    if(right-left<2||bottom-top<2)return null;
    for(const yf of [.5,.75,.9,.25,.1])for(const xf of [.5,.25,.75]){
     const x=left+(right-left)*xf,y=top+(bottom-top)*yf,hit=document.elementFromPoint(x,y);
-    if(hit===n||n.contains(hit))return {x:x-r.left,y:y-r.top};
+    // ONE can put its selection layer/link wrapper above the bitmap, or set
+    // pointer-events:none on the bitmap itself. Both belong to the same image.
+    // Never click a neighbouring image, floating toolbar or control instead.
+    const sameImage=component&&hit?.closest('.se-component.se-image')===component;
+    const control=hit?.closest('button,input,textarea,select,[role="button"],[role="toolbar"],.se-toolbar');
+    if(hit===n||n.contains(hit)||sameImage&&!control)return {x:x-r.left,y:y-r.top,overlay:hit!==n&&!n.contains(hit)};
    }
    return null;
   });
-  if(point){await image.click({position:point});return;}
+  if(point){const {overlay,...position}=point;await image.click({position,force:overlay});return;}
  }
  throw Error('상세이미지가 편집기 도구에 가려져 선택하지 못했습니다. 편집기 창을 넓힌 뒤 다시 시작해 주세요.');
 }
