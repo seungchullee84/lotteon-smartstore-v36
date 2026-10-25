@@ -1,5 +1,5 @@
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
-import {stageImportedPhotos,applyImportedPhotos,allImportedPhotoChoices} from './smartstore-photo-import.mjs';
+import {stageImportedPhotos,applyImportedPhotos,allImportedPhotoChoices,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
 import {serveBrandVideo,WOMEN_VIDEO_HASH} from './smartstore-brand-video.mjs';
@@ -291,6 +291,7 @@ const server=http.createServer(async(req,res)=>{
           const result=await applyImportedPhotos(product,folder,choices,{dataRoot,signal,automatic:true});signal.throwIfAborted();
           const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,signal,log});signal.throwIfAborted();
           await writeFile(path.join(folder,'product.json'),JSON.stringify(prepared,null,2));await publishPhotoPreview(prepared,folder);
+          assertImportedPhotoCoverage(stage,prepared);
           state.photoImport={...stage,status:'applied',selectedCount:result.selectedCount};
           log('색상별 사진 전체 '+result.selectedCount+'장 자동 반영 완료 · 상세 템플릿 업데이트 · 상품 저장 안 함');
         });return json(res,202,{ok:true});

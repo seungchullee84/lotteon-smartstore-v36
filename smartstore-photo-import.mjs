@@ -176,3 +176,9 @@ export function allImportedPhotoChoices(stage,product,known=[]){
   return {id:p.id,color:p.colorHint,role:prior?.role||'detail'};
  });
 }
+
+export function assertImportedPhotoCoverage(stage,prepared){
+ const expected=new Map();for(const p of stage.candidates)expected.set(p.colorHint,(expected.get(p.colorHint)||0)+1);
+ for(const [color,count] of expected)if(prepared.smartstoreDetail?.colorImages?.[color]?.length!==count)throw Error(color+' 사진 반영 수가 수집 결과와 다릅니다.');
+ if(!prepared.smartstoreDetail?.sellingPoints?.length)throw Error('공식 원문 소구점 확인이 필요합니다. 소구점 없는 상세페이지는 완료 처리하지 않습니다.');
+}

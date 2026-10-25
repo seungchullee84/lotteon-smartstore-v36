@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {mkdtemp,readFile,mkdir,readdir,writeFile,rm} from 'node:fs/promises';import os from 'node:os';import path from 'node:path';import sharp from 'sharp';import {chromium} from 'playwright';
-import {editorPhotoPositions,naverPhotoUrl,exactSellerRows,stageImportedPhotos,applyImportedPhotos,allImportedPhotoChoices,settledEditorPhotoPositions,selectSearchChoice} from '../smartstore-photo-import.mjs';
+import {editorPhotoPositions,naverPhotoUrl,exactSellerRows,stageImportedPhotos,applyImportedPhotos,allImportedPhotoChoices,assertImportedPhotoCoverage,settledEditorPhotoPositions,selectSearchChoice} from '../smartstore-photo-import.mjs';
 import {prepareTrustedFolder} from '../smartstore-folder-trust.mjs';
 import {findPhotos} from '../smartstore-photo-files.mjs';
 test('판매자 코드 숫자를 정확히 대조하고 같은 코드 중 하나만 선택할 수 있다',()=>{
@@ -55,4 +55,11 @@ test('편집기의 늦게 복원되는 마지막 브라운 구간과 추가 묶�
  const result=await settledEditorPhotoPositions(page,['03라이트베이지','12브라운'],{pause:async()=>{if(++tick===3)await page.evaluate(()=>document.body.insertAdjacentHTML('beforeend','<div class="se-component se-text">12브라운</div><div class="se-component se-imageStrip"><img><img></div>'));}});
  assert.deepEqual(result,[{index:0,colorHint:'03라이트베이지'},{index:1,colorHint:'12브라운'},{index:2,colorHint:'12브라운'}]);assert(tick>=8);
  }finally{await browser.close();}
+});
+
+test('색상 사진이나 소구점이 누락되면 완료 처리하지 않는다',()=>{
+ const stage={candidates:[{colorHint:'12브라운'},{colorHint:'12브라운'}]};
+ assert.throws(()=>assertImportedPhotoCoverage(stage,{smartstoreDetail:{colorImages:{'12브라운':['a']},sellingPoints:[{}]}}),/사진 반영 수/);
+ assert.throws(()=>assertImportedPhotoCoverage(stage,{smartstoreDetail:{colorImages:{'12브라운':['a','b']},sellingPoints:[]}}),/소구점/);
+ assert.doesNotThrow(()=>assertImportedPhotoCoverage(stage,{smartstoreDetail:{colorImages:{'12브라운':['a','b']},sellingPoints:[{}]}}));
 });
