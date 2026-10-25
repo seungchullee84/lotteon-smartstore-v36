@@ -63,6 +63,7 @@ let extraImageEdits=Promise.resolve();
 function log(message){state.logs.push({time:new Date().toLocaleTimeString('ko-KR'),message});state.logs=state.logs.slice(-300);console.log(message);}
 const bot=new LotteAutomation(dataRoot,log);bot.onPause=message=>{state.paused=message;};
 const smartBot=new SmartstoreAutomation(dataRoot,log);
+async function publishPhotoPreview(product,folder){const listing=await prepareListingImages(product,folder,{dataRoot});if(!product.smartstoreDetail?.photoCount)throw Error('상세사진 연결을 확인하지 못했습니다. 업로드하지 않았습니다.');state.product=product;state.folder=folder;state.photoPreparation={style:product.style,status:'ready',mainCount:1,extraCount:listing.extras.length,detailCount:product.smartstoreDetail.photoCount};state.revision++;log('미리보기 반영 완료 · 대표 1장 · 추가 '+listing.extras.length+'장 · 상세사진 '+product.smartstoreDetail.photoCount+'장');}
 function json(res,status,data){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));}
 async function body(req){let text='';for await(const chunk of req){text+=chunk;if(text.length>1600000)throw Error('요청이 너무 큽니다.');}return JSON.parse(text||'{}');}
 let activeAbort=null;
@@ -87,7 +88,7 @@ const server=http.createServer(async(req,res)=>{
       if(colorChipStatus)versions.main=(versions.main||'original')+':'+colorChipStatus.hash;
       const selected=state.folder?await backgroundSelection(state.folder):'main';
       const listing=state.product?await listingPreview(state.product,{dataRoot}):null;
-      return json(res,200,{...state,folder:undefined,capabilities:{manualTags:true,photoAnalysisSettings:true},tagResearch:state.product?selectedProductTagResearch(state.product,{dataRoot}):null,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,detailRevision:listing.detailRevision,mainColor:listing.main.color,extraColors:listing.extras.map(p=>p.color),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
+      return json(res,200,{...state,folder:undefined,capabilities:{manualTags:true,photoAnalysisSettings:true},tagResearch:state.product?selectedProductTagResearch(state.product,{dataRoot}):null,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,detailRevision:listing.detailRevision,mainColor:listing.main.color||'품번 폴더 사진',extraColors:listing.extras.map(p=>p.color||'제공한 상품사진'),extraRoles:listing.extras.map(p=>p.role),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
     }
     if(req.method==='GET'&&/^\/smartstore-listing\/(?:main|extra-\d+)$/.test(url.pathname)){
       if(!state.product||url.searchParams.get('style')!==state.product.style)throw Error('현재 품번을 확인해 주세요.');
@@ -244,7 +245,7 @@ const server=http.createServer(async(req,res)=>{
               return {product,folder};
             },
             onProduct:async(product,folder)=>{state.product=product;state.folder=folder;state.photoPreparation={style:product.style,status:'preparing'};state.revision++;},
-            onPrepared:async(product,folder)=>{const listing=await prepareListingImages(product,folder,{dataRoot});if(!product.smartstoreDetail?.photoCount)throw Error('상세 착용컷 연결을 확인하지 못했습니다. 업로드하지 않았습니다.');state.product=product;state.folder=folder;state.photoPreparation={style:product.style,status:'ready',mainCount:1,extraCount:listing.extras.length,detailCount:product.smartstoreDetail.photoCount};state.revision++;log('미리보기 반영 완료 · 대표 1장 · 추가 '+listing.extras.length+'장 · 상세 착용컷 '+product.smartstoreDetail.photoCount+'장');},
+            onPrepared:publishPhotoPreview,
             prepare:(p,folder)=>prepareSmartstoreAuto(p,folder,{dataRoot,apiKey:key,signal,log}),
             includeMain:false,
             render:async(p,folder)=>{
@@ -367,7 +368,7 @@ const server=http.createServer(async(req,res)=>{
         if(b.allowMissingDetail===true&&state.detailFallbackRequest?.input!==b.style)return json(res,400,{error:'먼저 일반 수집으로 해당 상품의 상세 원본 누락을 확인해 주세요.'});
         const input=parseProductInput(b.style);const style=input.style||"url";bot.stopped=false;state.collectionInput=b.style;state.detailFallbackRequest=null;
         if(b.edits)await productEdits.save(b.edits,state.product?.style);
-        job('collect',async()=>{const folder=path.join(dataRoot,style+'-'+new Date().toISOString().replace(/[:.]/g,'-'));let product=await collect(b.style,folder,log,()=>bot.stopped,activeAbort.signal,{allowMissingDetail:b.allowMissingDetail===true,saveSmartstoreSource:b.channel==='smartstore',noticeCacheRoot:b.channel==='smartstore'?path.join(dataRoot,'smartstore-notice-cache'):undefined,prepareMain:b.channel!=='smartstore'});product.keywords=buildKeywords(product);product=await productEdits.apply(product);state.product=product;state.folder=folder;state.revision++;log('수집 완료. 고시 이미지와 입력값을 검토해 주세요.'+(Object.keys(product.userEditedFields||{}).length?' · 직접 수정한 항목 유지':''));});return json(res,202,{ok:true});
+        job('collect',async()=>{const folder=path.join(dataRoot,style+'-'+new Date().toISOString().replace(/[:.]/g,'-'));let product=await collect(b.style,folder,log,()=>bot.stopped,activeAbort.signal,{allowMissingDetail:b.allowMissingDetail===true,saveSmartstoreSource:b.channel==='smartstore',noticeCacheRoot:b.channel==='smartstore'?path.join(dataRoot,'smartstore-notice-cache'):undefined,prepareMain:b.channel!=='smartstore'});product.keywords=buildKeywords(product);product=await productEdits.apply(product);state.product=product;state.folder=folder;state.photoPreparation=null;state.revision++;if(b.channel==='smartstore'){state.photoPreparation={style:product.style,status:'preparing'};try{const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,apiKey:backgroundApiKey,signal:activeAbort.signal,log});await publishPhotoPreview(prepared,folder);}catch(error){if(error.code!=='PHOTO_FOLDER_EMPTY')throw error;state.photoPreparation={style:product.style,status:'missing',message:error.message};log(error.message);}}log('수집 완료. 고시 이미지와 입력값을 검토해 주세요.'+(Object.keys(product.userEditedFields||{}).length?' · 직접 수정한 항목 유지':''));});return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/run'){
         if(state.busy)return json(res,409,{error:'진행 중인 작업이 있습니다.'});

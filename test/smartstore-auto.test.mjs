@@ -67,10 +67,10 @@ test('사진 내용이 같으면 재실행 시 확인된 색상을 유지하고 
    return Response.json({status:'completed',output:[{content:[{type:'output_text',text:JSON.stringify(analysis)}]}]});
   };
   const draftFile=path.join(dataRoot,'smartstore-details',product.style,'draft.json');
-  for(let i=0;i<2;i++){const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,apiKey:'private',photoRoots:[pictures],fetchImpl});assert.equal(prepared.smartstoreDetail.photoCount,2);assert.ok(prepared.smartstoreDetail.colorImages['05블랙']);if(i===0){const draft=JSON.parse(await readFile(draftFile));await writeFile(draftFile,JSON.stringify({...draft,includeBrandVideo:false}));}else assert.equal(prepared.smartstoreDetail.includeBrandVideo,true);}
+  for(let i=0;i<2;i++){const prepared=await prepareSmartstoreAuto(product,folder,{trustFolder:false,dataRoot,apiKey:'private',photoRoots:[pictures],fetchImpl});assert.equal(prepared.smartstoreDetail.photoCount,2);assert.ok(prepared.smartstoreDetail.colorImages['05블랙']);if(i===0){const draft=JSON.parse(await readFile(draftFile));await writeFile(draftFile,JSON.stringify({...draft,includeBrandVideo:false}));}else assert.equal(prepared.smartstoreDetail.includeBrandVideo,true);}
   assert.deepEqual(photoCounts,[2]);assert.throws(()=>officialDescription('<body>STYLE. 05326920</body>',product),/품번/);
   await writeFile(path.join(folder,'detail.jpg'),await sharp({create:{width:180,height:240,channels:3,background:'#678'}}).jpeg().toBuffer());
-  const reanalysed=await prepareSmartstoreAuto(product,folder,{dataRoot,apiKey:'private',photoRoots:[pictures],fetchImpl});
+  const reanalysed=await prepareSmartstoreAuto(product,folder,{trustFolder:false,dataRoot,apiKey:'private',photoRoots:[pictures],fetchImpl});
   assert.equal(reanalysed.smartstoreDetail.includeBrandVideo,true);
  }finally{await rm(root,{recursive:true,force:true});}
 });
@@ -89,7 +89,7 @@ test('채팅에서 원본 바이트로 확인한 사진은 변환 해시 없이�
  for(const [name,bytes]of [['1.jpg',front],['side.jpg',side]]){await writeFile(path.join(photos,name),bytes);await writeFile(path.join(draftRoot,name),bytes);}
  const draft={style:product.style,sourceUrl:product.sourceUrl,officialDetailHash:digest(front),photos:[{color:'05블랙',files:['1.jpg','side.jpg']}],sellingPoints:[{title:'경량',description:'가벼운 원단',evidence:description}],photoMapping:{files:[{hash:digest(front),color:'05블랙',role:'front'},{hash:digest(side),color:'05블랙',role:'side'}]}};
  await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft));
- const p=await prepareSmartstoreAuto(product,folder,{dataRoot,photoRoots:[photos],fetchImpl:()=>{throw Error('API를 호출하면 안 됨');}});
+ const p=await prepareSmartstoreAuto(product,folder,{trustFolder:false,dataRoot,photoRoots:[photos],fetchImpl:()=>{throw Error('API를 호출하면 안 됨');}});
  const saved=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));assert.equal(saved.listingImages.extras.length,1);assert.equal(saved.listingImages.extras[0].role,'side');assert.equal(p.smartstoreDetail.photoCount,2);assert.deepEqual(saved.sellingPoints,draft.sellingPoints);
  }finally{await rm(root,{recursive:true,force:true});}
 });
@@ -101,7 +101,7 @@ test('첫 품번도 사진을 자동 분석해 저장하고 상세 최대 컷을
   await writeFile(path.join(folder,'smartstore-official.html'),'<body>STYLE. 05375908<div class="prd_detail_content_gio">'+description+'</div></body>');
   for(let i=0;i<4;i++)await writeFile(path.join(photos,i===0?'1.jpg':'date-'+i+'.jpg'),await sharp({create:{width:80,height:100,channels:3,background:['#123','#234','#345','#456'][i]}}).jpeg().toBuffer());
   let calls=0;const fetchImpl=async(_,request)=>{calls++;const body=JSON.parse(request.body),input=JSON.parse(body.input[0].content[0].text);return Response.json({status:'completed',output:[{content:[{type:'output_text',text:JSON.stringify({attributes:{sleeve:'긴팔',neckline:'스텐드/차이나칼라',evidence:'공식·실사 사진 대조'},points:[{title:'경량',description:'가벼운 나일론 원단.',evidence:'가벼운 나일론 원단'}],photos:input.photoIds.map((id,i)=>({id,color:'05블랙',role:i===0?'front':'detail',sameProduct:true,confidence:1}))})}]}]});};
-  const options={dataRoot,photoRoots:[photos],apiKey:'test',fetchImpl};
+  const options={trustFolder:false,dataRoot,photoRoots:[photos],apiKey:'test',fetchImpl};
   const first=await prepareSmartstoreAuto(product,folder,options);assert.equal(first.smartstoreDetail.photoCount,3);
   const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'draft.json'),'utf8'));assert.equal(draft.photoMapping.files.length,4,'화면에 선택되지 않은 확인 사진도 해시별로 저장');
   const second=await prepareSmartstoreAuto(product,folder,options);assert.equal(second.smartstoreDetail.photoCount,3);assert.equal(calls,1,'같은 사진은 매번 다시 외부 분석하지 않음');
@@ -113,6 +113,6 @@ test('새 사진이 있고 분석 연결만 없는 상태를 사진 없음과 �
   const folder=path.join(root,'product'),photos=path.join(root,'photos'),dataRoot=path.join(root,'data');await mkdir(folder);await mkdir(photos);
   await writeFile(path.join(folder,'smartstore-official.html'),'<body>STYLE. 05375908<div class="prd_detail_content_gio">'+description+'</div></body>');
   const bytes=await sharp({create:{width:80,height:100,channels:3,background:'#123'}}).jpeg().toBuffer();await writeFile(path.join(folder,'detail.jpg'),bytes);await writeFile(path.join(photos,'1.jpg'),bytes);
-  await assert.rejects(()=>prepareSmartstoreAuto(product,folder,{dataRoot,photoRoots:[photos],apiKey:''}),e=>e.code==='PHOTO_ANALYSIS_REQUIRED'&&e.photoCount===1&&e.unknownCount===1);
+  await assert.rejects(()=>prepareSmartstoreAuto(product,folder,{trustFolder:false,dataRoot,photoRoots:[photos],apiKey:''}),e=>e.code==='PHOTO_ANALYSIS_REQUIRED'&&e.photoCount===1&&e.unknownCount===1);
  }finally{await rm(root,{recursive:true,force:true});}
 });
