@@ -36,7 +36,8 @@ test('재진입 검증은 이미지 순서·영상·옆트임을 모두 대조�
  try{
  let videoId='SE-98bb2cab-3434-48be-bdaa-84ba88bfe976';
  await page.route('https://sell.smartstore.naver.com/**',r=>r.fulfill({contentType:'text/html',body:'<button data-nclicks-code="descrip.sebtn" onclick="window.open(\'https://example.com/editor\')">편집기</button>'}));
- await page.route('https://example.com/editor',r=>r.fulfill({contentType:'text/html',body:'<div class="se-component se-image"><div class=se-component-content-extend><img width=50 height=50 src="https://phinf.pstatic.net/a.png"></div></div><div class="se-component se-video" id="'+videoId+'"></div><div class="se-component se-image"><div class=se-component-content-extend><img width=50 height=50 src="https://phinf.pstatic.net/b.png"></div></div>'}));
+ await page.context().route('https://phinf.pstatic.net/**',r=>r.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a9xkAAAAASUVORK5CYII=','base64')}));
+ await page.context().route('https://example.com/editor',r=>r.fulfill({contentType:'text/html',body:'<div class="se-component se-image"><div class=se-component-content-extend><img width=50 height=50 src="https://phinf.pstatic.net/a.png"></div></div><div class="se-component se-video" id="'+videoId+'"></div><div class="se-component se-image"><div class=se-component-content-extend><img width=50 height=50 src="https://phinf.pstatic.net/b.png"></div></div>'}));
  await page.goto('https://sell.smartstore.naver.com/#/products/copy/1');
  const parts={files:[path.join(root,'a.png'),path.join(root,'b.png')],includeVideo:true,videoIdentity:{identity:['component:'+videoId]}};
  assert.equal((await verifySmartstoreDetail(page,parts)).detailUploaded,true);
