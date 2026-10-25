@@ -60,12 +60,8 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
    if(prepared.photoCount)break;
   }
  }
- for(const relative of draft?.providedPhotos||[]){
-  if(!draft.trustedFolder||typeof relative!=='string'||path.isAbsolute(relative)||relative.split(/[\\/]/).includes('..'))throw Error('제공한 상품사진 경로를 확인해 주세요.');
-  const canonical=await realpath(path.join(draftRoot,relative)),canonicalRoot=await realpath(draftRoot);if(!inside(canonicalRoot,canonical)||!imageExtension.test(canonical))throw Error('제공한 사진이 현재 품번 자료 폴더 밖에 있습니다.');
-  const bytes=await readFile(canonical),id=createHash('sha256').update(bytes).digest('hex').slice(0,24),name='smartstore-photo-'+id+'.jpg',src='/smartstore-photo/'+id;
-  await writeFile(path.join(folder,name),await readFile(await workingProductPhoto({bytes},product,{dataRoot})));prepared.photoFiles[src]=name;prepared.providedImages.push(src);prepared.photoCount++;
- }
+ // Unmatched photos stay local for matching; never invent another template section.
+ prepared.pendingPhotoCount=(draft?.unmatchedPhotos||draft?.providedPhotos||[]).length;
  // Official fallback photos are separate from seller options and store mannequin claims.
  if(draft?.officialPhotos?.length){
   const detailHash=createHash('sha256').update(await readFile(path.join(folder,'detail.jpg'))).digest('hex');
