@@ -1,0 +1,129 @@
+import {readFile,writeFile,mkdir,rename,access} from 'node:fs/promises';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import sharp from 'sharp';
+import {findPhotos} from './smartstore-photo-files.mjs';
+import {imageDownloadFolder} from './desktop-downloads.mjs';
+import {assertDetailOnlyProduct,readDetailOnlySellerCode,isSmartstoreDetailEditUrl} from './smartstore-detail-only.mjs';
+import {openSmartstoreEditor} from './smartstore-detail-upload.mjs';
+const hash=b=>createHash('sha256').update(b).digest('hex');
+const safeStyle=style=>{if(!/^\d{6}$/.test(style||''))throw Error('사진을 가져올 품번 6자리를 확인해 주세요.');};
+
+// Read only rendered editor components, including image strips. Never inspect app internals.
+export function editorPhotoPositions(colors){
+ const compact=s=>String(s||'').replace(/\s+/g,'');let color='';const out=[];
+ const imgs=[...document.querySelectorAll('.se-component img')];
+ for(const c of document.querySelectorAll('.se-component')){
+  const text=(c.innerText||'').trim();
+  if(/◆\s*상세페이지\s*◆|^PRODUCT DETAIL$|^디테일까지/.test(text))break;
+  if(c.classList.contains('se-text')){
+   const match=colors.find(v=>compact(v)===compact(text));
+   if(match)color=match;else if(/^\d{2}\s*[^\d\n]{1,35}$/.test(text))color='';
+  }
+  if(!color||!c.matches('.se-image,.se-imageStrip'))continue;
+  for(const img of c.querySelectorAll('img'))out.push({index:imgs.indexOf(img),colorHint:color});
+ }
+ return out;
+}
+export function naverPhotoUrl(value){
+ const u=new URL(value);if(u.protocol==='http:')u.protocol='https:';
+ if(u.protocol!=='https:'||u.username||u.password||u.port||!['shop-phinf.pstatic.net','shop1.phinf.naver.net','shop2.phinf.naver.net'].includes(u.hostname))throw Error('네이버 상품사진 원본 주소가 아닙니다.');
+ // Preserve the editor URL: never guess an original or a larger image variant.
+ return u.href;
+}
+export function exactSellerRows(rows,style){
+ safeStyle(style);return rows.filter(r=>{try{assertDetailOnlyProduct(r.code,style);return true;}catch{return false;}});
+}
+export async function findPhotoSourceForm(context,style,{check=()=>{},log=()=>{}}={}){
+ safeStyle(style);check();
+ const lists=context.pages().filter(p=>!p.isClosed()&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/origin-list(?:\?|$)/.test(p.url()));
+ if(lists.length>1)throw Error('상품조회 창이 여러 개입니다. 검색할 상품조회 창 하나만 남겨 주세요.');
+ if(lists.length){
+  const list=lists[0];await list.bringToFront();check();
+  await list.getByRole('button',{name:'초기화',exact:true}).click();check();
+  await list.getByRole('radio',{name:'판매자상품코드',exact:true}).check();
+  await list.getByRole('textbox',{name:'검색어 입력',exact:true}).fill(style);
+  const all=list.getByRole('checkbox',{name:'전체',exact:true}).first();if(await all.isVisible())await all.check();
+  const period=list.getByRole('button',{name:'전체',exact:true});if(await period.count()===1)await period.click();
+  check();await list.getByRole('button',{name:'검색',exact:true}).click();
+  await list.locator('[role="row"][row-id] [col-id="sellerManagementCode"]').filter({hasText:style}).first().waitFor({state:'visible',timeout:20000});check();
+  const rows=exactSellerRows(await list.locator('[role="row"][row-id]').evaluateAll(nodes=>nodes.filter(n=>n.querySelector('[col-id="edit"] button')).map(n=>({id:n.getAttribute('row-id'),code:n.querySelector('[col-id="sellerManagementCode"]')?.textContent||''}))),style);
+  if(!rows.length)throw Error('판매자 상품코드가 일치하는 상품을 찾지 못했습니다.');
+  log('판매자 상품코드 '+style+' 검색 · 일치 '+rows.length+'건 중 첫 상품 한 건만 사진 수집');
+  await list.locator('[role="row"][row-id]').filter({has:list.locator('[col-id="sellerManagementCode"]').filter({hasText:rows[0].code.trim()})}).first().getByRole('button',{name:'수정',exact:true}).click();
+ }
+ // The seller center can reuse its named edit window instead of creating a new popup.
+ const deadline=Date.now()+20000;
+ do{
+  check();for(const page of context.pages().filter(p=>!p.isClosed()&&isSmartstoreDetailEditUrl(p.url()))){
+   try{const code=await readDetailOnlySellerCode(page);assertDetailOnlyProduct(code,style);return {page,sellerCode:code};}catch(error){check();}
+  }
+  if(!lists.length)break;await new Promise(r=>setTimeout(r,250));
+ }while(Date.now()<deadline);
+ throw Error('같은 판매자 상품코드의 조회/수정 화면을 확인하지 못했습니다.');
+}
+export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{}}={}){
+ const {page,sellerCode}=await findPhotoSourceForm(context,product.style,{check,log});check();
+ const formUrl=page.url(),editors=[];
+ for(const p of context.pages())if(!p.isClosed()&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/editor(?:\?|$)/.test(p.url())&&await p.opener()===page)editors.push(p);
+ if(editors.length>1)throw Error('이 상품의 상세 편집기가 여러 개입니다. 사용할 편집기 하나만 남겨 주세요.');
+ const editor=editors[0]||await openSmartstoreEditor(page,{check});
+ await editor.locator('.se-component').first().waitFor({state:'visible',timeout:20000});
+ const positions=await editor.evaluate(editorPhotoPositions,product.colors);
+ if(!positions.length)throw Error('색상별 개별 착용사진을 찾지 못했습니다. 긴 통이미지는 이 채팅에서 확인해 주세요.');
+ if(positions.length>40)throw Error('가져올 사진은 한 상품당 40장 이내로 확인해 주세요.');
+ const candidates=[];
+ for(const pos of positions){
+  check();if(page.url()!==formUrl)throw Error('수집 중 조회/수정 상품이 변경되었습니다.');
+  const img=editor.locator('.se-component img').nth(pos.index);await img.scrollIntoViewIfNeeded();
+  await editor.waitForFunction(i=>{const n=document.querySelectorAll('.se-component img')[i];return n&&/^https?:/.test(n.src)&&n.complete&&n.naturalWidth>0;},pos.index,{timeout:10000});
+  const data=await img.evaluate(n=>({url:n.src,width:n.naturalWidth,height:n.naturalHeight}));
+  if(data.width<300||data.height<300||data.height>data.width*3)continue;
+  candidates.push({...pos,...data,url:naverPhotoUrl(data.url)});
+ }
+ check();assertDetailOnlyProduct(await readDetailOnlySellerCode(page),product.style);
+ return {style:product.style,sourceUrl:product.sourceUrl,formUrl,sellerCode,candidates};
+}
+export async function stageImportedPhotos(source,folder,{fetchImpl=fetch,signal}={}){
+ safeStyle(source.style);assertDetailOnlyProduct(source.sellerCode,source.style);
+ const dir=path.join(folder,'smartstore-photo-import');await mkdir(dir,{recursive:true});const candidates=[],seen=new Set();
+ for(const item of source.candidates){
+  signal?.throwIfAborted();const url=naverPhotoUrl(item.url);
+  const response=await fetchImpl(url,{redirect:'error',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(20000)]):AbortSignal.timeout(20000)});
+  if(!response.ok||!/^image\/(jpeg|png|webp)(?:;|$)/i.test(response.headers.get('content-type')||''))throw Error('기존 상품의 사진 파일을 가져오지 못했습니다.');
+  const chunks=[];let size=0;for await(const chunk of response.body){size+=chunk.length;if(size>19000000)throw Error('가져올 사진이 19MB를 초과합니다.');chunks.push(chunk);}const bytes=Buffer.concat(chunks);
+  const meta=await sharp(bytes,{limitInputPixels:40000000}).metadata();if(!['jpeg','png','webp'].includes(meta.format)||meta.width<300||meta.height<300||meta.height>meta.width*3)continue;
+  const sha256=hash(bytes),id=sha256.slice(0,24);if(seen.has(id))continue;seen.add(id);
+  const file=id+({jpeg:'.jpg',png:'.png',webp:'.webp'})[meta.format];await writeFile(path.join(dir,file),bytes);
+  candidates.push({id,file,sha256,url,colorHint:item.colorHint,width:meta.width,height:meta.height});
+ }
+ if(!candidates.length)throw Error('가져올 수 있는 개별 상품사진이 없습니다.');
+ const result={...source,candidates,createdAt:new Date().toISOString(),status:'review'};await writeFile(path.join(dir,'manifest.json'),JSON.stringify(result,null,2));return result;
+}
+export async function applyImportedPhotos(product,folder,choices,{dataRoot,desktop,signal}={}){
+ const stage=JSON.parse(await readFile(path.join(folder,'smartstore-photo-import/manifest.json'),'utf8'));
+ if(stage.style!==product.style||stage.sourceUrl!==product.sourceUrl)throw Error('사진을 수집한 품번·공식 출처와 현재 상품이 다릅니다.');
+ assertDetailOnlyProduct(stage.sellerCode,product.style);
+ if(!Array.isArray(choices)||!choices.length||choices.length>40||new Set(choices.map(c=>c.id)).size!==choices.length)throw Error('적용할 사진을 한 장 이상 선택해 주세요.');
+ const selected=[];for(const choice of choices){
+  const source=stage.candidates.find(c=>c.id===choice.id);if(!source||!product.colors.includes(choice.color)||!['front','side','back','detail'].includes(choice.role))throw Error('선택한 사진의 색상과 정면·측면·뒷면·디테일을 확인해 주세요.');
+  if(!/^[a-f0-9]{24}\.(jpg|png|webp)$/.test(source.file))throw Error('수집 사진 경로가 올바르지 않습니다.');
+  const bytes=await readFile(path.join(folder,'smartstore-photo-import',source.file));if(hash(bytes)!==source.sha256)throw Error('수집 후 사진 원본이 변경되었습니다.');selected.push({...choice,...source,bytes});
+ }
+ // Validate the entire batch before touching the style folder. Existing photos are never overwritten.
+ desktop||=path.dirname(await imageDownloadFolder());const target=path.join(desktop,'상품등록기사진폴더',product.style);await mkdir(target,{recursive:true});
+ const originals=await findPhotos(product,{desktop});let hasMain=originals.some(p=>/^1(?:번)?\.(jpe?g|png|webp)$/i.test(p.name));
+ if(!hasMain&&!selected.some(p=>p.role==='front'))throw Error('대표사진이 없으므로 정면 사진을 한 장 선택해 주세요.');
+ const root=path.join(dataRoot,'smartstore-details',product.style);await mkdir(root,{recursive:true});let old;
+ try{old=JSON.parse(await readFile(path.join(root,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+ if(old&&(old.style!==product.style||old.sourceUrl!==product.sourceUrl))throw Error('기존 사진 매칭 자료의 품번·출처를 다시 확인해 주세요.');
+ const records=[...(old?.photoMapping?.files||[])];let count=0;
+ for(const p of selected){
+  signal?.throwIfAborted();const known=originals.find(f=>hash(f.bytes)===p.sha256);let name=known?.name;
+  if(!name){name=!hasMain&&p.role==='front'?'1'+path.extname(p.file):'기존상품_'+p.color.slice(0,2)+'_'+p.id+path.extname(p.file);await writeFile(path.join(target,name),p.bytes,{flag:'wx'}).catch(async e=>{if(e.code!=='EEXIST'||hash(await readFile(path.join(target,name)))!==p.sha256)throw e;});if(/^1\./.test(name))hasMain=true;count++;}
+  const record={name,hash:p.sha256,color:p.color,role:p.role,source:'seller-detail',sourceUrl:p.url};const i=records.findIndex(r=>r.hash===p.sha256);if(i>=0)records[i]=record;else records.push(record);
+ }
+ const draft={...old,style:product.style,sourceUrl:product.sourceUrl,photoMapping:{...old?.photoMapping,files:records}};
+ await writeFile(path.join(root,'draft.json.tmp'),JSON.stringify(draft,null,2));await rename(path.join(root,'draft.json.tmp'),path.join(root,'draft.json'));
+ return {count,selectedCount:selected.length,target};
+}
