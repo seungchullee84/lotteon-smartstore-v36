@@ -6,6 +6,7 @@ import {loadTagResearch,matchResearchTags,researchForProduct} from './apparel-ta
 const defaultRoot=path.join(path.dirname(fileURLToPath(import.meta.url)),'data');
 const normalize=s=>String(s||'').normalize('NFKC').replace(/[#\s]/g,'').toLowerCase();
 const file=(root,style)=>{if(!/^\d{6}$/.test(style||''))throw Error('태그 선택 품번을 확인해 주세요.');return path.join(root,'smartstore-tag-selections',style+'.json');};
+const manualTags=index=>new Map((index?.tags||[]).filter(t=>t.decision==='include'&&!t.conflict&&/^\d+$/.test(t.id)).map(t=>[t.id,t.name]));
 export function searchProductTags(product,query,{index=loadTagResearch()}={}){
  const term=normalize(query);if(!term||term.length>40)throw Error('태그 검색어를 1~40자로 입력해 주세요.');
  const related=new Map(matchResearchTags(product,index,{limit:10000}).map(t=>[t.id,t]));
@@ -17,15 +18,15 @@ export function searchProductTags(product,query,{index=loadTagResearch()}={}){
 }
 export async function saveSelectedProductTags(product,tags,{dataRoot=defaultRoot,index=loadTagResearch()}={}){
  if(!Array.isArray(tags)||tags.length>10||new Set(tags.map(t=>t.id)).size!==tags.length)throw Error('태그는 중복 없이 최대 10개 선택해 주세요.');
- const allowed=new Map(matchResearchTags(product,index,{limit:10000}).map(t=>[t.id,t.name]));
- if(tags.some(t=>allowed.get(t.id)!==t.name))throw Error('현재 상품 근거에 맞는 조사 태그의 ID·명칭을 다시 확인해 주세요.');
+ const allowed=manualTags(index);
+ if(tags.some(t=>allowed.get(t.id)!==t.name))throw Error('조사 태그의 원본 ID·명칭을 다시 확인해 주세요.');
  const record={style:product.style,sourceUrl:product.sourceUrl,tags:tags.map(({id,name})=>({id,name})),updatedAt:new Date().toISOString()};
  const target=file(dataRoot,product.style);await mkdir(path.dirname(target),{recursive:true});await writeFile(target+'.tmp',JSON.stringify(record,null,2));await rename(target+'.tmp',target);return record;
 }
 export function selectedProductTagResearch(product,{dataRoot=defaultRoot,index=loadTagResearch()}={}){
  const automatic=index===loadTagResearch()?researchForProduct(product):{configured:!!index,count:index?.tags?.length||0,candidates:matchResearchTags(product,index),titleTerms:[]};let record;try{record=JSON.parse(readFileSync(file(dataRoot,product.style),'utf8'));}catch(error){if(error.code==='ENOENT')return automatic;throw error;}
  if(record.style!==product.style||record.sourceUrl!==product.sourceUrl)return automatic;
- const allowed=new Map(matchResearchTags(product,index,{limit:10000}).map(t=>[t.id,t.name]));
+ const allowed=manualTags(index);
  const candidates=(record.tags||[]).filter(t=>allowed.get(t.id)===t.name);
  return {...automatic,candidates,manual:true,manualTags:record.tags,needsReview:candidates.length!==(record.tags||[]).length,titleTerms:automatic.titleTerms};
 }
