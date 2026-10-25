@@ -475,7 +475,7 @@ function syncListingImages(state){
  const custom=$('smartstoreListingExtras'),original=$('originalExtraPreviews');
  const listing=state.smartstoreListing,smart=document.body.dataset.channel==='smartstore';
  const note=$('mainSourceNote');if(!note.dataset.original)note.dataset.original=note.textContent;
- note.textContent=smart?(listing?'대표사진: '+listing.sourceNames[0]+' · '+listing.mainColor+' · 대표·추가 모두 폴더 원본 그대로 · 색상칩·크기 변환·재압축 없음':'바탕화면 상품등록기사진폴더의 해당 품번 폴더에 1.jpg 또는 1번.jpg를 넣어 주세요.'):note.dataset.original;
+ note.textContent=smart?(listing?'대표사진: '+listing.sourceNames[0]+' · '+listing.mainColor+' · 현재 품번 사진을 1500×750 JPG로 변환 · 비율 유지·흰 여백 · 원본 보관':'바탕화면 상품등록기사진폴더의 해당 품번 폴더에 1.jpg 또는 1번.jpg를 넣어 주세요.'):note.dataset.original;
  $('main').hidden=smart&&!listing;
  $('colorChipStatus').hidden=smart;$('extendBackground').hidden=smart;
  $('downloadMain1500').textContent=smart?'대표이미지 원본 저장':'대표이미지 1500×1500 저장';

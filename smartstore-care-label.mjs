@@ -1,7 +1,7 @@
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import sharp from 'sharp';
+import {cachedPhotoWorkFile} from './smartstore-photo-work.mjs';
 import {findPhotos} from './smartstore-photo-files.mjs';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 export function isCareLabelPhoto(photo,draft){
@@ -10,7 +10,7 @@ export function isCareLabelPhoto(photo,draft){
 export async function saveCareLabelSelection(root,photos){
  if(photos.length>3)throw Error('택/케어라벨 이미지는 최대 3장입니다. 품번 폴더를 정리해 주세요.');
  const labels=[];await mkdir(path.join(root,'care-labels'),{recursive:true});
- for(const photo of photos){const sourceHash=hash(photo.bytes),file='care-labels/'+sourceHash.slice(0,24)+'.jpg';await writeFile(path.join(root,file),await sharp(photo.bytes).rotate().jpeg({quality:98}).toBuffer());labels.push({file,sourceName:photo.name,sourceHash});}
+ for(const photo of photos){const sourceHash=hash(photo.bytes),work=await cachedPhotoWorkFile(photo.bytes,path.join(root,'care-labels')),file=path.relative(root,work).split(path.sep).join('/');labels.push({file,sourceName:photo.name,sourceHash});}
  return labels;
 }
 export async function prepareCareLabelImages(product,folder,{dataRoot,...options}){

@@ -8,6 +8,7 @@ import {imageDownloadFolder} from './desktop-downloads.mjs';
 import {smartstoreDetailDocument,TEMPLATE_ASSET_NAMES,TEMPLATE_ASSET_BASE} from './smartstore-detail.mjs';
 import {exportBrandVideo,requireBrandVideo,productVideoOptions} from './smartstore-brand-video.mjs';
 import {renderCacheKey,restoreRenderedDetail,cacheRenderedDetail} from './smartstore-render-cache.mjs';
+import {workingProductPhoto} from './smartstore-photo-work.mjs';
 const appRoot=path.dirname(fileURLToPath(import.meta.url));
 const assetsRoot=path.join(appRoot,'public/smartstore-template');
 const inside=(root,file)=>file.startsWith(root+path.sep);
@@ -31,7 +32,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
   const bytes=await readFile(canonical);const meta=await sharp(bytes,{limitInputPixels:80000000}).metadata();
   if(!['jpeg','png','webp'].includes(meta.format))throw Error('지원하지 않는 마네킨 이미지 형식');
   const hash=createHash('sha256').update(bytes).digest('hex').slice(0,24);const name='smartstore-photo-'+hash+'.jpg';
-  await writeFile(path.join(folder,name),await sharp(bytes).rotate().jpeg({quality:96}).toBuffer());
+  await writeFile(path.join(folder,name),await readFile(await workingProductPhoto({bytes},product,{dataRoot})));
   const src='/smartstore-photo/'+hash;prepared.photoFiles[src]=name;
   prepared.colorImages[color]||=[];
   if(!prepared.colorImages[color].includes(src)){prepared.colorImages[color].push(src);prepared.photoCount++;}
