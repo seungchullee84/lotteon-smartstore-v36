@@ -4,9 +4,20 @@ export function assertSmartstoreTitleLength(title){
  if(!title.trim()||length<27||length>39)throw Error('스마트스토어 상품명은 품번·공백 포함 27~39자입니다. 현재 '+length+'자입니다. 공식 상품정보에 근거한 특징을 보강해 주세요.');
  return title;
 }
+export function assertSmartstoreInputTitle(title,userEdited=false){
+ if(!userEdited)return assertSmartstoreTitleLength(title);
+ if(typeof title!=='string'||!title.trim())throw Error('스마트스토어 전용 상품명을 입력해 주세요.');
+ if([...title].length>100)throw Error('스마트스토어 상품명은 공백 포함 100자 이내로 입력해 주세요.');
+ return title;
+}
+export function applySelectedSmartstoreTitle(product,selection){
+ if(!selection||selection.style!==product.style)throw Error('전용 상품명의 품번이 현재 상품과 다릅니다.');
+ return {...product,smartstoreName:assertSmartstoreInputTitle(selection.title,true),smartstoreNameUserEdited:true};
+}
 export function smartstoreTitle(product){
   const style=String(product?.style||'').trim();
   if(!/^\d{6}$/.test(style))throw Error('먼저 상품 품번을 확인해 주세요.');
+  if(product.smartstoreNameUserEdited)return assertSmartstoreInputTitle(product.smartstoreName,true);
   const source=String(product.smartstoreName||'').trim()||String(product.name||'').trim();
   if(!source)throw Error('스마트스토어 상품명을 입력해 주세요.');
   const gender=['남성','여성'].includes(product.gender)?product.gender:'';

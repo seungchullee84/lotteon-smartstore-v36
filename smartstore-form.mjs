@@ -1,7 +1,7 @@
 export function isSmartstoreInputUrl(url){return /^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/(?:create(?:[?]|$)|copy\/\d+(?:[?]|$))/.test(url);}
 import {buildSmartstoreDetail} from './smartstore-detail.mjs';
 import {fillAdditionalAttributes} from './smartstore-attributes.mjs';
-import {smartstoreTitle,assertSmartstoreTitleLength} from './smartstore-title.mjs';
+import {smartstoreTitle,assertSmartstoreInputTitle} from './smartstore-title.mjs';
 import {learnedFields,assertLearnedFields,fillLearnedAttributes,sellerProductCode} from './smartstore-learned.mjs';
 import {researchForProduct} from './apparel-tag-research.mjs';
 import {fillResearchTags} from './smartstore-research-tags.mjs';
@@ -14,7 +14,7 @@ export function smartstorePlan(p,salePrice){
   if(!p.colors?.length||!p.sizes?.length)throw Error('색상과 사이즈가 필요합니다.');
   const category=null; // Keep the category selected in the copy form.
   if(!['미얀마','중국','베트남','방글라데시','인도네시아','캄보디아','인도','태국','필리핀','파키스탄','스리랑카','일본','대한민국','한국'].includes(p.country))throw Error('스마트스토어 제조국 선택을 먼저 검증해야 합니다.');
-  return {style:p.style,name:smartstoreTitle(p),salePrice:+salePrice,consumerPrice:+p.consumerPrice,category,colors:[...p.colors],sizes:[...p.sizes],stockPerOption:10,expectedOptions:p.colors.length*p.sizes.length,material:p.material,country:p.country,washing:p.washing,manufactured:p.manufactured,html:buildSmartstoreDetail(p).html,keywords:false,save:false};
+  return {style:p.style,name:smartstoreTitle(p),nameUserEdited:!!p.smartstoreNameUserEdited,salePrice:+salePrice,consumerPrice:+p.consumerPrice,category,colors:[...p.colors],sizes:[...p.sizes],stockPerOption:10,expectedOptions:p.colors.length*p.sizes.length,material:p.material,country:p.country,washing:p.washing,manufactured:p.manufactured,html:buildSmartstoreDetail(p).html,keywords:false,save:false};
 }
 
 export function verifySmartstoreOptions(plan,rows){
@@ -75,7 +75,7 @@ export async function fillSmartstoreOrigin(page,country,check=()=>{}){
  return {type:'수입산',region:'아시아',country,importer:'지오다노'};
 }
 export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
-  assertSmartstoreTitleLength(plan.name);
+  assertSmartstoreInputTitle(plan.name,plan.nameUserEdited);
   const page=tab.playwright;
   if(!isSmartstoreInputUrl(await tab.url()))throw Error('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.');
   if(!/\/products\/copy\/\d+/.test(await tab.url()))throw Error('기본설정을 복사한 복사등록 화면에서 실행해 주세요.');
