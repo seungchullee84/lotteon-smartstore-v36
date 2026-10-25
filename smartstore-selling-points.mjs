@@ -17,11 +17,12 @@ export function officialSellingPoints(description){
   [/(?:가먼트\s*워싱)[^.]*?(?:수축[^.]*?최소)/,'워싱으로, 안정감 있게','가먼트 워싱으로 수축을 최소화.','가공'],
   [/캥거루\s*(?:포켓|주머니)/,'가볍게 챙기는 실용성','편리하게 사용하는 캥거루 포켓.','디테일'],
   [/(?:메리노\s*울)[^.]*?(?:부드러|소프트)/,'부드러운 메리노울','메리노울의 부드러운 촉감.','원단'],
+  [/(?:가벼운|가볍고)[^.]*경량|경량[^.]*가벼/,'가볍게, 부담 없이','가벼운 원단의 경량 디자인.','원단'],
  ]){
   const evidence=sentences.find(s=>pattern.test(s)&&!/(?:아닌|없습니다|없음)/.test(s));if(!evidence)continue;
   const description=/^부드럽고, 따뜻하게$/.test(title)&&/기모/.test(evidence)&&!/브러쉬드|브러시드/.test(evidence)?'기모 가공으로 더한 보온성.':copy;
   points.push({title,description,evidence});labels.set(points.at(-1),label);covered.add(label);
-  if(points.length>=3)return finish();
+  if(points.length>=3&&!sections.length)return finish();
  }
  const fabric=text.match(/\d+g\/(?:㎡|m2)의[^.\n]*?(?:실키한|실키)[^.\n]*(?:특징|제공합니다)/);
  if(fabric&&/저지/.test(fabric[0])&&/부드럽|소프트/.test(fabric[0])){
@@ -39,7 +40,7 @@ export function officialSellingPoints(description){
  if(slim&&/레이어드/.test(slim[0])){points.push({title:'슬림하게, 레이어드',description:'몸에 자연스럽게 밀착되는 슬림 실루엣.',evidence:slim[0]});covered.add('실루엣');covered.add('핏');labels.set(points.at(-1),sections.includes('실루엣')?'실루엣':'핏');}
  const neck=text.match(/적당한 폭의 터틀넥[^.\n]*?(?:착용감[^.\n]*?(?:더했으며|제공)|착용감)/);
  if(neck){points.push({title:'부담 적은 터틀넥',description:'적당한 폭으로 편안한 착용감.',evidence:neck[0]});covered.add('디테일');covered.add('네크라인');labels.set(points.at(-1),sections.includes('디테일')?'디테일':'네크라인');}
- if(points.length>=3)return finish();
+ if(points.length>=3&&!sections.length)return finish();
  // Keep the official POINT headings and wording for other clothing categories.
  const original=String(description||'').replace(/\\n/g,'\n');
  const blocks=[...original.matchAll(/POINT\s*0?[1-9]\s*(?:[（(]([^）)]+)[）)])?\s*([\s\S]*?)(?=POINT\s*0?[1-9]|\n\s*\*|$)/gi)];
@@ -50,7 +51,6 @@ export function officialSellingPoints(description){
   const point={title:first,description:sentence,evidence:block[2].trim()};
   if(!compactSellingPoint(point))continue;points.push(point);
   labels.set(points.at(-1),block[1]?.trim());
-  if(points.length>=3)break;
  }
  if(points.length)return finish();
  // Unknown prose needs source review; never display a copied paragraph as a card.
