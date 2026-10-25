@@ -1,5 +1,5 @@
 {
-  "checked": "2026-10-25",
+  "checked": "2026-10-26",
   "note": "Official homepage MEN/WOMEN model photos; unchanged faces. Campaign photos introduce the store, not the current product.",
   "sources": [
     {
@@ -35,6 +35,98 @@
           "sha256": "5c4447701f6f96dbcab48f6d120c21d675e256aa279bfdec1549780af0e98d18"
         }
       ]
+    }
+  ],
+  "additionalVariants": [
+    {
+      "gender": "men",
+      "variant": 2,
+      "file": "store-discovery-men-2.jpg",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "url": "https://m.giordano.co.kr/_data/banner/97f2d97c6970cfd63291b9b5fdcdbc94.jpg",
+      "sha256": "60f7473e0cf0d4fed8405fffc825c422c905a3067677c92e3c727b9d454f981e",
+      "framing": {
+        "left": 1060,
+        "top": 0,
+        "width": 844,
+        "height": 800
+      },
+      "modelAltered": false
+    },
+    {
+      "gender": "men",
+      "variant": 3,
+      "file": "store-discovery-men-3.jpg",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "url": "https://m.giordano.co.kr/_data/banner/9382a2585d78c9bd765e66c96f6f7eb2.jpg",
+      "sha256": "9416112153ca28df3895a5c90a5772ef832f715f50c858bda49a15500a653943",
+      "framing": {
+        "left": 1060,
+        "top": 0,
+        "width": 844,
+        "height": 800
+      },
+      "modelAltered": false
+    },
+    {
+      "gender": "men",
+      "variant": 4,
+      "file": "store-discovery-men-4.jpg",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "url": "https://m.giordano.co.kr/_data/banner/14361e56276b654d85247d847f6d1c55.jpg",
+      "sha256": "c9d9c1f22d53f55e2be8dc03fecd454f64802ac74ecd44d6cb2eed68320a447c",
+      "framing": {
+        "left": 1060,
+        "top": 0,
+        "width": 844,
+        "height": 800
+      },
+      "modelAltered": false
+    },
+    {
+      "gender": "women",
+      "variant": 2,
+      "file": "store-discovery-women-2.jpg",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "url": "https://m.giordano.co.kr/_data/banner/64e020337fe5a82306c702aa79040a8f.jpg",
+      "sha256": "1aabcfe5bdba4ee79fdad5dd76010185addd0928c1a0630d105c52e8a3f06924",
+      "framing": {
+        "left": 1060,
+        "top": 0,
+        "width": 844,
+        "height": 800
+      },
+      "modelAltered": false
+    },
+    {
+      "gender": "women",
+      "variant": 3,
+      "file": "store-discovery-women-3.jpg",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "url": "https://m.giordano.co.kr/_data/banner/4caaed2d7f4f868adff5397ef15a7449.jpg",
+      "sha256": "cb89461d69fe2dd5c09df3befe006a65cbae5b3219d638ffb7f7b3a5bd3db893",
+      "framing": {
+        "left": 1060,
+        "top": 0,
+        "width": 844,
+        "height": 800
+      },
+      "modelAltered": false
+    },
+    {
+      "gender": "women",
+      "variant": 4,
+      "file": "store-discovery-women-4.jpg",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "url": "https://m.giordano.co.kr/_data/banner/2028b136156e68a9c78359347843de94.jpg",
+      "sha256": "470ec4934f6edde129d217d5660e5643e5ed1868781a4d8ae276f734be77c87c",
+      "framing": {
+        "left": 1060,
+        "top": 0,
+        "width": 844,
+        "height": 800
+      },
+      "modelAltered": false
     }
   ]
 }
