@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {runSmartstoreDetailOnly,bindSmartstoreDetailEdit,isSmartstoreDetailEditUrl,assertDetailOnlyProduct} from '../smartstore-detail-only.mjs';
 import {uploadSmartstoreDetail} from '../smartstore-detail-upload.mjs';
 import {requireChannel} from '../channel-routing.mjs';
-function form(url,sellerCode){return {url:()=>url,isClosed:()=>false,setDefaultTimeout(){},async bringToFront(){},locator(selector){assert.equal(selector,'#seller-code1');return {async count(){return 1;},async waitFor(){},async inputValue(){return sellerCode;}};}};}
+function form(url,sellerCode){return {url:()=>url,isClosed:()=>false,setDefaultTimeout(){},async bringToFront(){},getByRole(){return {filter(){return this;},first(){return this;},async isVisible(){return false;}};},locator(selector){assert.equal(selector,'#seller-code1');return {async count(){return 1;},async waitFor(){},async inputValue(){return sellerCode;}};}};}
 test('상세 전용 연결은 단일 조회/수정 창의 판매자 상품코드 숫자로 대조한다',async()=>{
  const edit=form('https://sell.smartstore.naver.com/#/products/edit/123','026982 후드티');
  const copy=form('https://sell.smartstore.naver.com/#/products/copy/123','다른 상품');

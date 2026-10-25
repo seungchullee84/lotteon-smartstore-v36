@@ -89,8 +89,6 @@ export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{
   // product in a fresh window, preserving that existing editor and its contents.
   fresh=await context.newPage();await fresh.goto(formUrl,{waitUntil:'domcontentloaded'});
   await fresh.locator('input[name="product.name"]').waitFor({state:'attached',timeout:20000});check();
-  const notice=fresh.getByRole('dialog').filter({hasText:'판매상품이'});
-  if(await notice.isVisible())await notice.getByRole('button',{name:'닫기',exact:true}).click();
   assertDetailOnlyProduct(await readDetailOnlySellerCode(fresh),product.style);
   editor=await openSmartstoreEditor(fresh,{check});
   await editor.locator('.se-component.se-image,.se-component.se-imageStrip').first().waitFor({state:'attached',timeout:20000});

@@ -2,7 +2,14 @@ export const isSmartstoreDetailEditUrl=url=>/^https:\/\/sell\.smartstore\.naver\
 export function assertDetailOnlyProduct(sellerCode,style){
  if(!/^\d{6}$/.test(style||'')||!String(sellerCode).includes(style))throw Error('판매자 상품코드에 현재 품번 6자리가 연속으로 포함되어 있지 않습니다.');
 }
+export async function confirmSmartstoreEditNotice(page){
+ const notice=page.getByRole('dialog').filter({hasText:/판매상품이[\s\S]*안전기준\s*준수/}).filter({visible:true}).first();
+ if(!await notice.isVisible())return false;
+ await notice.getByRole('button',{name:'확인',exact:true}).click({timeout:5000});
+ await notice.waitFor({state:'hidden',timeout:5000});return true;
+}
 export async function readDetailOnlySellerCode(page){
+ await confirmSmartstoreEditNotice(page);
  const code=page.locator('#seller-code1');
  if(!await code.count())await page.getByRole('button',{name:/^판매자 코드/}).click();
  await code.waitFor({state:'attached',timeout:10000});return code.inputValue();
