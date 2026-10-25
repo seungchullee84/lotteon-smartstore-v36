@@ -115,9 +115,9 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   assert.equal(optimizeCalls,3,'같은 상품의 채널 왕복은 반복 조회하지 않음');
   currentProduct={...product};revision++;
   await page.waitForFunction(()=>document.getElementById('smartstoreName').value==='지오다노 남자 브이넥 아가일 니트 356956');
-  assert.equal(optimizeCalls,4,'스마트스토어 채널에서 상품 수집 완료 후 자동 조회');
+  assert.equal(optimizeCalls,3,'같은 품번 재수집은 직접 수정한 이름을 유지하고 자동 조회로 덮어쓰지 않음');
   await page.locator('#channelLotte').click();keywordMode='success';
-  currentProduct={...product};revision++;
+  currentProduct={...product,style:'356955',name:'남성 아가일 브이넥 니트 356955'};revision++;
   await page.waitForFunction(()=>document.querySelector('textarea[name="keywords"]').value==='지오다노,'+'가'.repeat(35));
   assert.match(await page.locator('#keywordStatus').innerText(),/쉼표 포함/);
   const keywordField=page.locator('textarea[name="keywords"]');
@@ -126,7 +126,7 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
    await keywordField.fill('지오다노,'+'가'.repeat(length-5));
    assert.equal((await keywordField.inputValue()).length,Math.min(length,40));
   }
-  currentProduct={...product};revision++;
+  currentProduct={...product,style:'356954',name:'남성 아가일 브이넥 니트 356954'};revision++;
   await page.waitForFunction(()=>document.getElementById('keywordStatus').textContent.includes('비교하고 있습니다'));
   await page.locator('textarea[name="keywords"]').fill('지오다노,직접수정');
   await page.waitForFunction(()=>document.getElementById('keywordStatus').textContent.includes('자동 적용하지 않았습니다'));
