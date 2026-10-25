@@ -67,6 +67,27 @@ export function verifySearchTagGroups(tags,groups){
  for(const tag of tags)if(!registered.split('#').map(s=>s.trim()).includes(tag.name))throw Error('검색 적용 검증 실패: '+tag.name+' · 확인 창을 검토해 주세요.');
  return true;
 }
+export async function selectLearnedAttribute(page,row,label,value,check=()=>{}){
+ const input=row.locator('.selectize-input');
+ const selected=async()=>{
+  const items=await input.locator('.item').allTextContents();
+  return (items.length?items.join(' '):await input.innerText()).replace(/\s+/g,' ').trim();
+ };
+ check();await input.waitFor({state:'visible'});
+ if(await selected()===value)return;
+ const escaped=value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+ const local=row.locator('.selectize-dropdown-content [data-selectable]:visible').filter({hasText:new RegExp('^\\s*'+escaped+'\\s*$')});
+ // On a retry the dropdown may already be open; clicking its input again closes it.
+ if(await local.count()!==1){check();await input.click();}
+ const choices=page.locator('.selectize-dropdown-content:visible [data-selectable]').filter({hasText:new RegExp('^\\s*'+escaped+'\\s*$')});
+ try{await choices.waitFor({state:'visible',timeout:3000});}
+ catch{
+  check();const available=await page.locator('.selectize-dropdown-content:visible [data-selectable]').allTextContents();
+  throw Error(label+' 선택 목록에서 '+value+'을 확인하지 못했습니다. 표시 항목: '+available.map(s=>s.trim()).join(', '));
+ }
+ check();await choices.click();
+ if(await selected()!==value)throw Error(label+' 선택 확인 실패');
+}
 export async function fillLearnedAttributes(page,fields,check=()=>{}){
  const table=page.getByRole('table',{name:'상품속성 선택 테이블'});
  const materialRow=table.getByRole('row').filter({hasText:'주요소재'});
@@ -82,9 +103,7 @@ export async function fillLearnedAttributes(page,fields,check=()=>{}){
   const row=table.getByRole('row').filter({hasText:label});
   if(!await row.count())continue; // Outerwear categories omit these selectors.
   if(!value)throw Error(label+'을 상품 사진과 대조해 주세요.');
-  const input=row.locator('.selectize-input');
-  if((await input.innerText()).trim()!==value){await input.click();await row.locator('.selectize-dropdown-content').getByText(value,{exact:true}).click();}
-  if((await input.innerText()).trim()!==value)throw Error(label+' 선택 확인 실패');
+  await selectLearnedAttribute(page,row,label,value,check);
  }
 }
 export async function openTagVerification(page,field){
