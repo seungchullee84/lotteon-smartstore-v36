@@ -40,7 +40,6 @@ export async function findPhotoSourceForm(context,style,{check=()=>{},log=()=>{}
  const lists=context.pages().filter(p=>!p.isClosed()&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/origin-list(?:\?|$)/.test(p.url()));
  if(lists.length>1)throw Error('상품조회 창이 여러 개입니다. 검색할 상품조회 창 하나만 남겨 주세요.');
  if(!lists.length){
-  for(const p of context.pages().filter(p=>!p.isClosed()&&isSmartstoreDetailEditUrl(p.url()))){try{const sellerCode=await readDetailOnlySellerCode(p);assertDetailOnlyProduct(sellerCode,style);return {page:p,sellerCode};}catch{check();}}
   const list=await context.newPage();await list.goto('https://sell.smartstore.naver.com/#/products/origin-list',{waitUntil:'domcontentloaded'});check();lists.push(list);
  }
  if(lists.length){
@@ -60,7 +59,9 @@ export async function findPhotoSourceForm(context,style,{check=()=>{},log=()=>{}
  // The seller center can reuse its named edit window instead of creating a new popup.
  const deadline=Date.now()+20000;
  do{
-  check();for(const page of context.pages().filter(p=>!p.isClosed()&&isSmartstoreDetailEditUrl(p.url()))){
+  const edits=context.pages().filter(p=>!p.isClosed()&&isSmartstoreDetailEditUrl(p.url()));
+  const focused=[];for(const page of edits)if(await page.evaluate(()=>document.hasFocus()).catch(()=>false))focused.push(page);
+  check();for(const page of [...focused,...edits.filter(p=>!focused.includes(p))]){
    try{const code=await readDetailOnlySellerCode(page);assertDetailOnlyProduct(code,style);return {page,sellerCode:code};}catch(error){check();}
   }
   if(!lists.length)break;await new Promise(r=>setTimeout(r,250));
