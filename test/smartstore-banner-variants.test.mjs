@@ -1,3 +1,4 @@
+import {fileURLToPath} from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -10,7 +11,7 @@ test('남녀 각 4종 모두 기존과 동일한 860×420 JPG이며 공통 템�
   assert.equal(STORE_BANNER_ASSETS[gender].length,4);
   assert.equal(new Set(STORE_BANNER_ASSETS[gender]).size,4);
   for(const file of STORE_BANNER_ASSETS[gender]){
-   const meta=await sharp(new URL('../public/smartstore-template/'+file,import.meta.url).pathname.replace(/^\/([A-Z]:)/i,'$1')).metadata();
+   const meta=await sharp(fileURLToPath(new URL('../public/smartstore-template/'+file,import.meta.url))).metadata();
    assert.equal(meta.width,860);assert.equal(meta.height,420);assert.equal(meta.format,'jpeg');
    assert.ok(TEMPLATE_ASSET_NAMES.includes(file));assert.equal(publishable('public/smartstore-template/'+file),true);
   }
