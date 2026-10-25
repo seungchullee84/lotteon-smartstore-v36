@@ -91,14 +91,17 @@ export async function selectLearnedAttribute(page,row,label,value,check=()=>{}){
  check();await choices.click({timeout:1500});
  if(await selected()!==value)throw Error(label+' 선택 확인 실패');
 }
-export async function fillLearnedAttributes(page,fields,check=()=>{},log=()=>{}){
+export async function fillLearnedAttributes(page,fields,check=()=>{},log=()=>{},{skipLabels=new Set()}={}){
  const table=page.getByRole('table',{name:'상품속성 선택 테이블'});
  const materialRow=table.getByRole('row').filter({hasText:'주요소재'});
  const skip=label=>log('상품속성 건너뜀: '+label+' · 최종 직접 확인');
  const attempt=async(label,fn)=>{check();try{return await fn();}catch(error){check();if(error.name==='AbortError')throw error;skip(label);}};
- if(!fields.materials.length)skip('주요소재 / 확인 근거 없음');
- else await attempt('주요소재',()=>setAttributeCheckboxes(materialRow,fields.materials,{label:'소재',check,optionalValues:fields.materialFinishes||[],bestEffort:true,timeout:1200,onSkip:skip}));
+ if(!skipLabels.has('주요소재')){
+  if(!fields.materials.length)skip('주요소재 / 확인 근거 없음');
+  else await attempt('주요소재',()=>setAttributeCheckboxes(materialRow,fields.materials,{label:'소재',check,optionalValues:fields.materialFinishes||[],bestEffort:true,timeout:1200,onSkip:skip}));
+ }
  for(const [label,value] of [['소매기장',fields.sleeve],['네크라인',fields.neckline]]){
+  if(skipLabels.has(label))continue;
   const row=table.getByRole('row').filter({hasText:label});
   if(!await row.count())continue; // Outerwear categories omit these selectors.
   if(!value){skip(label+' / 확인 근거 없음');continue;}

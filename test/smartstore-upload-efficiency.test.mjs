@@ -26,6 +26,11 @@ test('이미 옆트임인 이미지는 다시 선택하거나 편집기 창을 �
  await page.setContent('<div class="se-component se-image"><div class="se-component-content-extend"><img width=50 height=50 onclick="window.wrong=true"></div></div>');
  await applySmartstoreImageLayout(page,page.locator('img'));assert.equal(await page.evaluate(()=>window.wrong),undefined);
 }));
+test('추가 속성창에 없는 기본 항목은 본문에서 입력하고 이미 처리한 소재는 다시 누르지 않는다',()=>browserTest(async page=>{
+ await page.setContent('<table aria-label="상품속성 선택 테이블"><tr><th>주요소재</th><td><input type=checkbox onclick="window.wrong=true"></td></tr><tr><th>네크라인</th><td><div class=selectize-input onclick="this.nextElementSibling.hidden=false"><span class=item>선택</span></div><div class=selectize-dropdown-content hidden><div data-selectable onclick="this.parentElement.previousElementSibling.querySelector(\'.item\').textContent=this.textContent;this.parentElement.hidden=true">라운드넥</div></div></td></tr></table><button onclick="document.querySelector(\'.modal-content\').hidden=false">속성 더 입력하기</button><div class=modal-content hidden><h2>상품속성</h2><table><tr><th>주요소재</th><td><input type=checkbox aria-label="면"></td></tr></table><button onclick="this.parentElement.hidden=true">저장</button></div>');
+ await fillProductAttributes(page,{materials:['면'],neckline:'라운드넥',attributes:{'네크라인':'라운드넥'}});
+ assert.equal(await page.locator('.item').innerText(),'라운드넥');assert.equal(await page.evaluate(()=>window.wrong),undefined);
+}));
 test('ONE의 id 속성도 문서 영상 식별자로 사용해 썸네일 교체 후 같은 영상임을 확인한다',()=>browserTest(async page=>{
  await page.setContent('<div class="se-component se-video" id="SE-98bb2cab-3434-48be-bdaa-84ba88bfe976"><img class=se-video-thumbnail-resource src="data:image/png,temp"></div>');
  const expected=['component:SE-98bb2cab-3434-48be-bdaa-84ba88bfe976'];assert.deepEqual(await nativeVideoIdentity(page.locator('.se-video')),expected);

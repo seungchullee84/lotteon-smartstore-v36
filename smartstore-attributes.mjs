@@ -3,11 +3,15 @@ import {selectLearnedAttribute,fillLearnedAttributes} from './smartstore-learned
 export async function fillProductAttributes(page,fields,log=()=>{},check=()=>{}){
  check();const dialog=page.locator('.modal-content').filter({has:page.getByRole('heading',{name:'상품속성',exact:true})});
  // The expanded dialog includes the basic attributes: do not click them twice.
- if(await dialog.isVisible()||await page.getByRole('button',{name:'속성 더 입력하기',exact:true}).isVisible())return fillAdditionalAttributes(page,fields,log,check);
+ if(await dialog.isVisible()||await page.getByRole('button',{name:'속성 더 입력하기',exact:true}).isVisible()){
+  const attempted=new Set();const result=await fillAdditionalAttributes(page,fields,log,check,{attempted});
+  if(!['주요소재','소매기장','네크라인'].every(label=>attempted.has(label)))await fillLearnedAttributes(page,fields,check,log,{skipLabels:attempted});
+  return result;
+ }
  return fillLearnedAttributes(page,fields,check,log);
 }
 // Apply only product attributes with reviewed evidence, through the seller UI.
-export async function fillAdditionalAttributes(page,fields,log=()=>{},check=()=>{}){
+export async function fillAdditionalAttributes(page,fields,log=()=>{},check=()=>{},{attempted=new Set()}={}){
  const heading=page.getByRole('heading',{name:'상품속성',exact:true});
  const dialog=page.locator('.modal-content').filter({has:heading});
  const completed=[];
@@ -24,6 +28,7 @@ export async function fillAdditionalAttributes(page,fields,log=()=>{},check=()=>
   try{
   const row=dialog.getByRole('row').filter({has:page.locator('th').filter({hasText:new RegExp('^\\s*'+label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*$')})});
   if(!await row.count())continue;
+  attempted.add(label);
   if(Array.isArray(value)){
    const selected=await setAttributeCheckboxes(row,value,{label,check,requireAll:true,optionalValues:label==='주요소재'?fields.materialFinishes||[]:[],bestEffort:true,timeout:1200,onSkip:skip});
    if(selected.length)completed.push({label,value:selected});
