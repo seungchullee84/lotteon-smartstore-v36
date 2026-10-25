@@ -5,10 +5,10 @@ import {findPhotos} from './smartstore-photo-files.mjs';
 import {workingProductPhoto,PHOTO_WORK_VERSION} from './smartstore-photo-work.mjs';
 const hash=b=>createHash('sha256').update(b).digest('hex');
 function withOfficialMain(product,manifest){
- if(!product.images?.main)return manifest;
- const source=new URL(product.images.main);if(source.origin!=='https://www.giordano.co.kr')throw Error('현재 상품의 공식몰 대표사진 주소를 확인해 주세요.');
  if(!Array.isArray(manifest.extras))throw Error('추가이미지 선택 자료를 확인해 주세요.');
- const provided=manifest.extras.filter(p=>p.role!=='official-main');
+ const provided=manifest.extras.filter(p=>product.colors?.includes(p.color)&&(p.role==='side'&&p.color===manifest.main?.color||p.role==='front'&&p.color!==manifest.main?.color)&&(!p.sourceHash||p.sourceHash!==manifest.main?.sourceHash));
+ if(!product.images?.main)return {...manifest,extras:provided.slice(0,9)};
+ const source=new URL(product.images.main);if(source.origin!=='https://www.giordano.co.kr')throw Error('현재 상품의 공식몰 대표사진 주소를 확인해 주세요.');
  return {...manifest,extras:[{role:'official-main',color:'공식몰 대표사진',sourceName:'공식몰 대표사진',sourceUrl:source.href},...provided.slice(0,8)],detailRevision:hash(Buffer.from((manifest.detailRevision||'')+'|official-main-first-v1|'+source.href))};
 }
 export function chooseListingPhotos(photos,product){

@@ -14,7 +14,7 @@ test('새 품번 폴더를 API 없이 신뢰해 추가·상세를 연결하고 �
   for(const [i,name]of ['1.jpg','20261025_001.jpg','20261025_002.jpg'].entries())await writeFile(path.join(pictures,name),bytes[i]);await writeFile(path.join(folder,'detail.jpg'),bytes[0]);
   const digest=b=>createHash('sha256').update(b).digest('hex');let calls=0;const options={dataRoot,photoRoots:[pictures],apiKey:'',fetchImpl:()=>{throw Error('외부 사진분석 호출 금지');},recognizePhoto:async b=>{calls++;return digest(b)===digest(bytes[2])?'제조국 베트남 제조연월 2026.08 혼용률 면 60%':'';}};
   const prepared=await prepareSmartstoreAuto(product,folder,options),files=await prepareListingImages(prepared,folder,options);
-  assert.equal(files.extras.length,1);assert.equal(prepared.smartstoreDetail.photoCount,2);assert.equal(prepared.smartstoreDetail.providedImages.length,2);assert.deepEqual(prepared.smartstoreDetail.colorImages,{});
+  assert.equal(files.extras.length,0,'미확정 각도 사진은 추가에 섞지 않음');assert.equal(prepared.smartstoreDetail.photoCount,2);assert.equal(prepared.smartstoreDetail.providedImages.length,2);assert.deepEqual(prepared.smartstoreDetail.colorImages,{});
   const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'draft.json'),'utf8'));assert.equal(draft.careLabels.length,1);assert.equal(draft.trustedFolder,true);
   const html=buildSmartstoreDetail(prepared).html;for(const src of prepared.smartstoreDetail.providedImages)assert(html.includes(src));assert(html.includes('data-provided-photos'));
   const again=await prepareSmartstoreAuto(product,folder,{...options,recognizePhoto:()=>{throw Error('같은 사진 OCR 재실행 금지');}});assert.equal(again.smartstoreDetail.photoCount,2);assert.equal(calls,3);

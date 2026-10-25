@@ -54,11 +54,11 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
   if(path.isAbsolute(relative)||relative.split(/[\\/]/).includes('..')||!product.colors.includes(group.color))throw Error('기존 사진 매칭 정보를 확인해 주세요.');
   let file;try{file=await realpath(path.join(root,relative));}catch(error){if(error.code==='ENOENT')continue;throw error;}const canonical=await realpath(root);if(!file.startsWith(canonical+path.sep))throw Error('기존 사진 위치가 올바르지 않습니다.');
   const bytes=await readFile(file);const mapping={color:group.color,role:rank===0?'front':rank===1?'detail':'side',file,bytes};known.set(hash(bytes),mapping);
-  for(const record of old.photoMapping?.files||[])if((record.preparedHash===hash(bytes)||record.hash===hash(bytes))&&record.color===group.color&&/^[a-f0-9]{64}$/.test(record.hash)){if(['front','detail','side'].includes(record.role))mapping.role=record.role;known.set(record.hash,mapping);}
+  for(const record of old.photoMapping?.files||[])if((record.preparedHash===hash(bytes)||record.hash===hash(bytes))&&record.color===group.color&&/^[a-f0-9]{64}$/.test(record.hash)){if(['front','detail','side','back'].includes(record.role))mapping.role=record.role;known.set(record.hash,mapping);}
  }
  if(old?.style===product.style&&old.sourceUrl===product.sourceUrl)for(const record of old.careLabels||[])if(/^[a-f0-9]{64}$/.test(record.sourceHash))known.set(record.sourceHash,{role:'care-label',color:''});
  if(old?.style===product.style&&old.sourceUrl===product.sourceUrl)for(const record of old.photoMapping?.files||[]){
-  if(/^[a-f0-9]{64}$/.test(record.hash)&&['front','detail','side','care-label','provided'].includes(record.role)&&(['care-label','provided'].includes(record.role)||product.colors.includes(record.color)))known.set(record.hash,{role:record.role,color:['care-label','provided'].includes(record.role)?'':record.color});
+  if(/^[a-f0-9]{64}$/.test(record.hash)&&['front','detail','side','back','care-label','provided'].includes(record.role)&&(['care-label','provided'].includes(record.role)||product.colors.includes(record.color)))known.set(record.hash,{role:record.role,color:['care-label','provided'].includes(record.role)?'':record.color});
  }
  const ignored=new Set((old?.style===product.style&&old.sourceUrl===product.sourceUrl?old.photoMapping?.ignoredPhotos||[]:[]).filter(p=>/^[a-f0-9]{64}$/.test(p.hash)).map(p=>p.hash));
  const found=(await findPhotos(product,{desktop,photoRoots})).filter(p=>!ignored.has(hash(p.bytes))||known.get(hash(p.bytes))?.role==='care-label');

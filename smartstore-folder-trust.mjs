@@ -45,8 +45,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  if(product.colors.includes(main[0].color)){
   const frontColors=new Set(garments.filter(p=>p.role==='front').map(p=>p.color));frontColors.add(main[0].color);
   extras=chooseListingPhotos(garments.filter(p=>p.role!=='provided'&&frontColors.has(p.color)),product).extras;
-  extras=[...extras,...garments.filter(p=>p.role==='provided'&&p!==main[0])].slice(0,9);
- }else extras=garments.filter(p=>p!==main[0]).slice(0,9);
+ }else extras=[];
  const listingImages={...await saveListingSelection(root,{main:main[0],extras}),trustedFolder:true};
  const groups=[],providedPhotos=[],records=[];
  for(const p of reviewed){
@@ -58,11 +57,11 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
    group.files.push({file:relative,role:p.role,main:p===main[0]});
   }else providedPhotos.push(relative);
  }
- for(const g of groups)g.files=g.files.sort((a,b)=>Number(b.main)-Number(a.main)||['front','side','detail'].indexOf(a.role)-['front','side','detail'].indexOf(b.role)).map(p=>p.file);
+ for(const g of groups){const front=g.files.find(p=>p.main)||g.files.find(p=>p.role==='front');g.files=g.files.sort((a,b)=>Number(b===front)-Number(a===front)||['side','detail','back','front'].indexOf(a.role)-['side','detail','back','front'].indexOf(b.role)).map(p=>p.file);}
  const previous=old?.sourceUrl===product.sourceUrl&&old?.officialDetailHash===detailHash?old:null;
  const points=previous?.sellingPoints?.length?previous.sellingPoints:productSellingPoints(product).filter(p=>!/^SIZE$|COLORS$|^PRODUCT$/.test(p.title)).map(p=>({...p,evidence:description+' / '+product.sourceUrl}));
  const draft={style:product.style,sourceUrl:product.sourceUrl,headline:previous?.headline||product.name,officialDetailHash:detailHash,photos:groups,providedPhotos,listingImages,careLabels:await saveCareLabelSelection(root,reviewed.filter(p=>p.role==='care-label')),sellingPoints:points,officialPhotos:previous?.officialPhotos,trustedFolder:true,photoMapping:{basis:'사용자 지시: 현재 품번 폴더 사진 신뢰 · 미확인 색상·각도는 임의 지정하지 않음',files:records},preparedAt:new Date().toISOString()};
  await writeFile(path.join(root,'draft.json'),JSON.stringify(draft,null,2));
- log('품번 폴더 사진 적용 · 대표 1장 · 추가 '+extras.length+'장 · 상세 '+garments.length+'장 · 케어라벨 '+reviewed.filter(p=>p.role==='care-label').length+'장 · 외부 사진분석 없이 진행');
+ log('품번 폴더 사진 적용 · 대표 1장 · 폴더 추가 '+extras.length+'장 · 상세 '+(groups.reduce((n,g)=>n+Math.min(3,g.files.length),0)+providedPhotos.length)+'장 · 케어라벨 '+reviewed.filter(p=>p.role==='care-label').length+'장 · 외부 사진분석 없이 진행');
  return prepareSmartstoreDetail({...product,officialDescription:description},folder,{dataRoot});
 }
