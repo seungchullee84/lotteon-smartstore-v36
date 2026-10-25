@@ -296,6 +296,7 @@ $('openBackgroundRequest').onclick=async()=>{
 $('smartstoreOpen').onclick=async()=>{try{await post('smartstore-open');announce('로그인 후 원하는 상품의 복사등록 화면을 직접 열고 시작을 눌러 주세요.','success');}catch(e){$('error').textContent=e.message;}};
 async function arrangeSmartstoreTitle(useCurrent=true){
  if(!product)return;
+ if(product.smartstoreNameUserEdited&&useCurrent)return;
  const current=product,field=$('smartstoreName');
  const {smartstoreTitle}=await import('/smartstore-title.mjs');
  if(product!==current)return;
@@ -306,7 +307,7 @@ function smartstoreTitleStatus(title,note){
  const length=[...title].length;
  return length+'자 / 27~39자 · '+(length<27?'보강 필요 · ':length>39?'길이 초과 · ':'')+note;
 }
-$('smartstoreName').oninput=()=>{$('smartstoreNameStatus').textContent=smartstoreTitleStatus($('smartstoreName').value,'수정한 스마트스토어 상품명');};
+$('smartstoreName').oninput=()=>{if(product){product.smartstoreNameUserEdited=true;product.smartstoreName=$('smartstoreName').value;}$('smartstoreNameStatus').textContent=[...$('smartstoreName').value].length+'자 · 수정한 상품명 그대로 사용';};
 async function optimizeSmartstoreTitle(){
  if(requestLock||serverBusy||!product)return;
  const current=product,field=$('smartstoreName');
@@ -330,7 +331,7 @@ $('smartstoreOptimizeTitle').onclick=async()=>{
 };
 const autoNaverProducts=new WeakSet();
 async function autoOptimizeSmartstoreTitle(){
- if(!product||document.body.dataset.channel!=='smartstore'||requestLock||serverBusy||autoNaverProducts.has(product))return;
+ if(!product||product.smartstoreNameUserEdited||document.body.dataset.channel!=='smartstore'||requestLock||serverBusy||autoNaverProducts.has(product))return;
  const current=product;
  autoNaverProducts.add(current);
  try{
@@ -392,7 +393,7 @@ $('smartstoreStart').onclick=async()=>{
  const style=$('style').value.trim()||product?.style;
  if(!style){$('error').textContent='품번 또는 공식몰 상품 URL을 먼저 입력해 주세요.';return;}
  requestLock=true;smartstoreStarting=true;$('error').textContent='';$('smartstoreStart').disabled=true;syncButtons();announce('시작 요청 접수 중 · 복사등록 화면을 확인합니다.');
- try{await post('smartstore-auto',{style});serverBusy=true;serverPhase='smartstore-auto';announce('자동 작업 시작 · 선택한 복사등록 화면에 업로드합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;smartstoreStarting=false;syncButtons();}
+ try{await post('smartstore-auto',{style,selectedTitle:product?{style:product.style,title:$('smartstoreName').value}:undefined});serverBusy=true;serverPhase='smartstore-auto';announce('자동 작업 시작 · 선택한 복사등록 화면에 업로드합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;smartstoreStarting=false;syncButtons();}
 };
 const autoStageLabels={connect:'로그인 확인',collect:'공식몰 수집',prepare:'사진·색상 대조',compose:'사진 합성',detail:'상세페이지 제작',upload:'스마트스토어 업로드',done:'업로드 완료'};
 try{if(sessionStorage.getItem('registrationChannel')==='smartstore')selectRegistrationChannel('smartstore');}catch{}
