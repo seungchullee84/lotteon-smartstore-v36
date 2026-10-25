@@ -47,3 +47,13 @@ test('다른 이미지가 타깃을 완전히 가리면 클릭하지 않는다',
   assert.equal(await page.locator('#other').getAttribute('data-clicked'),null);
  }finally{await browser.close();}
 });
+
+test('선택 표시가 이미지 section 대신 component에 있어도 실제 옆트임 결과로 확인한다',async()=>{
+ const browser=await chromium.launch({headless:true});try{
+  const page=await browser.newPage();
+  await page.setContent(`<style>img{display:block;width:600px;height:400px}.toolbar{position:fixed;top:0}</style><div class="se-component se-image" id=component><div class=se-component-content><div class=se-section-image><img onclick="this.closest('.se-component').classList.add('se-is-selected')"></div></div></div><div class=toolbar><button data-name=content-mode-without-pagefull data-value=extend onclick="document.querySelector('.se-component.se-is-selected .se-component-content').classList.add('se-component-content-extend')">옆트임</button></div>`);
+  await applySmartstoreImageLayout(page,page.locator('img'));
+  assert.equal(await page.locator('.se-section-image.se-is-selected').count(),0);
+  assert.equal(await page.locator('#component .se-component-content-extend').count(),1);
+ }finally{await browser.close();}
+});
