@@ -13,7 +13,7 @@ test('긴 PNG는 고정 툴바 아래에서 실제 이미지를 선택하고 각
 test('작은 배너가 160px 위에 있어도 실제 노출된 이미지를 선택한다',async()=>{
  const browser=await chromium.launch({headless:true});try{
  const page=await browser.newPage({viewport:{width:900,height:500}});
- await page.setContent('<style>body{margin:0}img{display:block;width:500px;height:90px;margin:20px auto}</style><div class="se-component se-image" id=short><div class="se-component-content"><div class=se-section-image><img onclick="this.parentElement.classList.add('se-is-selected')"></div></div></div><button data-name=content-mode-without-pagefull data-value=extend onclick="document.querySelector('.se-component-content').classList.add('se-component-content-extend')">옆트임</button>');
+ await page.setContent(`<style>body{margin:0}img{display:block;width:500px;height:90px;margin:20px auto}</style><div class="se-component se-image" id=short><div class="se-component-content"><div class=se-section-image><img onclick="this.parentElement.classList.add('se-is-selected')"></div></div></div><button data-name=content-mode-without-pagefull data-value=extend onclick="document.querySelector('.se-component-content').classList.add('se-component-content-extend')">옆트임</button>`);
  await applySmartstoreImageLayout(page,page.locator('img'));
  assert.equal(await page.locator('#short .se-component-content-extend').count(),1);
  }finally{await browser.close();}
