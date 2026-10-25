@@ -504,8 +504,10 @@ function renderResearchTags(state){
  $('smartstoreAutoTags').disabled=requestLock||state.busy||!research?.candidates?.length;$('smartstoreValidateTags').disabled=$('smartstoreAutoTags').disabled;
  const report=state.tagResult?.style===state.product?.style?state.tagResult:null;
  const validation=state.tagValidation?.style===state.product?.style?state.tagValidation:null;
- const names=(report?.selectedTags||validation?.selectedTags||research?.candidates||[]).slice(0,10).map(t=>t.name),key=JSON.stringify(names);
- if(container.dataset.names!==key){container.dataset.names=key;container.replaceChildren();for(const name of names){const chip=document.createElement('span');chip.textContent='#'+name;container.append(chip);}}
+ const allowed=new Set((research?.candidates||[]).map(t=>t.id));
+ const verified=(report?.selectedTags||validation?.selectedTags||[]).filter(t=>allowed.has(t.id));
+ const entries=(research?.manual?research.candidates:verified.length?verified:research?.candidates||[]).slice(0,10),names=entries.map(t=>t.name),key=JSON.stringify(entries.map(t=>[t.id,t.name]));
+ if(container.dataset.names!==key){container.dataset.names=key;container.replaceChildren();for(const tag of entries){const chip=document.createElement('span');chip.append(document.createTextNode('#'+tag.name));const remove=document.createElement('button');remove.type='button';remove.textContent='×';remove.className='tag-remove';remove.setAttribute('aria-label',tag.name+' 추천에서 삭제');remove.onclick=()=>removeRecommendedTag(tag,remove);chip.append(remove);container.append(chip);}}
  panel.textContent=state.busy&&state.phase==='smartstore-tags'?'현재 상품의 태그를 입력·확인하고 있습니다…':report?'자동입력 '+report.tagCount+'/10개 · '+(report.tagCount<10?(10-report.tagCount)+'개 보강 필요':report.searchTagsVerified?'검색 적용 확인 완료':'진행 기록 확인'):validation?'검증 '+validation.tagCount+'/10개 · 기존 폼 태그 복원 완료':'조사 자료 '+(research?.count||0).toLocaleString()+'개 · '+(names.length?'상품 연관 후보 '+research.candidates.length+'개 · 상위 '+names.length+'개 표시':'상품 근거에 맞는 후보를 확인해 주세요.');
 }
 $('smartstoreAutoTags').onclick=async()=>{
@@ -579,6 +581,11 @@ const tagPicker=document.createElement('section');tagPicker.id='manualTagPicker'
 function drawManualTagChoices(){
  $('manualTagSelectionStatus').textContent='선택 '+manualTagChoices.size+'/10개'+(manualTagChoices.size<10?' · 10개 선택 시 완료':'' );$('applyManualTags').disabled=!manualTagChoices.size||serverBusy;
  const list=$('manualTagChoices');list.replaceChildren();for(const tag of manualTagChoices.values()){const remove=document.createElement('button');remove.type='button';remove.className='secondary';remove.textContent='#'+tag.name+' ×';remove.setAttribute('aria-label',tag.name+' 선택 취소');remove.onclick=()=>{manualTagChoices.delete(tag.id);manualTagHasSelection=true;drawManualTagChoices();for(const box of $('manualTagResults').querySelectorAll('input[type=checkbox]'))if(box.dataset.id===tag.id)box.checked=false;};list.append(remove);}
+}
+async function removeRecommendedTag(tag,button){
+ if(!product||serverBusy||requestLock)return;button.disabled=true;
+ try{const result=await post('smartstore-tags-remove',{style:product.style,tag:{id:tag.id,name:tag.name}});manualTagStyle=product.style;manualTagHasSelection=true;manualTagChoices=new Map(result.tags.map(t=>[t.id,t]));tagPicker.hidden=false;drawManualTagChoices();$('manualTagMessage').textContent='추천에서 삭제했습니다. 검색해 다른 태그를 선택할 수 있습니다.';}
+ catch(error){$('error').textContent=error.message;}finally{button.disabled=false;}
 }
 function syncEnhancedFeatures(state){
  photoAnalysisConfigured=!!state.backgroundConfigured;const p=state.product;if(!p)return;
