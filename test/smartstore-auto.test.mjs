@@ -55,6 +55,10 @@ test('업로드용 조각은 브랜드 소개·본문을 빠짐없이 보존하�
  assert.equal((await sharp(joinedFooter.files.at(-1)).metadata()).height,8500,'구매 혜택부터 맨 아래까지 8000px을 넘어도 한 장 유지');
  assert.deepEqual(await sharp(joinedFooter.files.at(-1)).raw().toBuffer(),await sharp(png).extract({left:0,top:10000,width:860,height:8500}).raw().toBuffer());
  let joinedHeight=0;for(const file of joinedFooter.files)joinedHeight+=(await sharp(file).metadata()).height;assert.equal(joinedHeight,18500);
+ const bannerFooter=await smartstoreUploadParts(png,root,brand,{includeVideo:false,bannerTop:9400,footerTop:10000});
+ assert.equal((await sharp(bannerFooter.files.at(-2)).metadata()).height,600);
+ assert.equal((await sharp(bannerFooter.files.at(-1)).metadata()).height,8500);
+ assert.deepEqual(await sharp(bannerFooter.files.at(-2)).raw().toBuffer(),await sharp(png).extract({left:0,top:9400,width:860,height:600}).raw().toBuffer());
  await assert.rejects(smartstoreUploadParts(png,root,brand,{includeVideo:false,footerTop:19000}),/구간/);
  }finally{await rm(root,{recursive:true,force:true});}
 });
