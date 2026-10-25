@@ -1,11 +1,11 @@
-import {storeBannerAsset} from './smartstore-store-banner.mjs';
+import {storeBannerAsset,STORE_BANNER_ASSET_NAMES} from './smartstore-store-banner.mjs';
 import {buildDetailContent} from './detail-html.mjs';
 import {sellingPointIcon} from './smartstore-point-icons.mjs';
 import {colorCaption} from './smartstore-color-copy.mjs';
 import {brandVideoHtml,brandVideoHeadingHtml,productVideoUrl} from './smartstore-brand-video.mjs';
 
 export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-approved-20261024';
-export const TEMPLATE_ASSET_NAMES=['brand-intro.jpg','benefits.jpg','shipping.jpg','returns.jpg','store.jpg','store-discovery-men.jpg','store-discovery-women.jpg','store-discovery-unisex.jpg','GowunDodum-Regular.ttf'];
+export const TEMPLATE_ASSET_NAMES=['brand-intro.jpg','benefits.jpg','shipping.jpg','returns.jpg','store.jpg',...STORE_BANNER_ASSET_NAMES,'GowunDodum-Regular.ttf'];
 export const TEMPLATE_ASSET_BASE='https://raw.githubusercontent.com/seungchullee84/lotteon-smartstore-v36/main/public/smartstore-template/';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const style='font-family:GowunDodum,\'Malgun Gothic\',sans-serif;color:#25372e;word-break:keep-all;overflow-wrap:break-word;line-height:2.1;';

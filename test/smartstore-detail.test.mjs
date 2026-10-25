@@ -21,7 +21,7 @@ test('새 공통 MP4는 과거 시즌 제외 상품을 포함해 전체에 적�
  assert.doesNotMatch(buildSmartstoreDetail(p,{includeVideo:false}).html,/<video/);
 });
 test('스마트스토어에만 확정 템플릿·영상·공식 원본·INFORMATION 뒤 혜택 적용',()=>{
- const approved=buildSmartstoreDetail(product).html;assert.ok(approved.indexOf('data-store-banner')<approved.indexOf('data-store-footer'));assert.match(approved,/store-discovery-women.jpg/);assert.equal(approved.includes('href="https://shopping.naver.com'),false);const lotte=buildDetailContent(product.images,product.colors,{},product.originalDetailUrl).html;
+ const approved=buildSmartstoreDetail(product).html;assert.ok(approved.indexOf('data-store-banner')<approved.indexOf('data-store-footer'));assert.match(approved,/store-discovery-women(?:-[2-4])?\.jpg/);assert.equal(approved.includes('href="https://shopping.naver.com'),false);const lotte=buildDetailContent(product.images,product.colors,{},product.originalDetailUrl).html;
  assert.match(smartstorePlan(product,50000).html,/data-smartstore-template=/);
  assert.doesNotMatch(lotte,/smartstore-template|youtube|benefits/);
  assert.ok(approved.indexOf('brand-intro.jpg')<approved.indexOf('<video '));
