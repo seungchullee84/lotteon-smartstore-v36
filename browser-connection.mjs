@@ -28,7 +28,8 @@ export class BrowserAutomation {
         const candidates=[process.env.PROGRAMFILES,process.env['PROGRAMFILES(X86)'],process.env.LOCALAPPDATA].filter(Boolean).map(base=>path.join(base,'Google','Chrome','Application','chrome.exe'));
         let exe=chromium.executablePath();
         for(const file of candidates){try{await access(file);exe=file;break;}catch{}}
-        const child=spawn(exe,['--user-data-dir='+profile,'--remote-debugging-port=0','--remote-debugging-address=127.0.0.1','--no-first-run','--no-default-browser-check',initialURL],{detached:true,stdio:'ignore'});
+        // Restore the dedicated profile's tabs and session cookies after Chrome exits.
+        const child=spawn(exe,['--user-data-dir='+profile,'--restore-last-session','--remote-debugging-port=0','--remote-debugging-address=127.0.0.1','--no-first-run','--no-default-browser-check',initialURL],{detached:true,stdio:'ignore'});
         let launchError;child.on('error',e=>{launchError=e;});child.unref();
         let connected=false;
         for(let n=0;n<30;n++){if(launchError)throw Error('크롬을 실행하지 못했습니다: '+launchError.message);try{await connect();connected=true;break;}catch{await new Promise(r=>setTimeout(r,400));}}
