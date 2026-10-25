@@ -77,7 +77,7 @@ test('추가이미지 선택이 같아도 상세 사진 연결 변경은 미리�
 test('공식몰 대표 원본을 추가 첫 번째로 한 번만 넣고 제공 사진 순서·총 9장 제한을 공통 적용한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'official-first-'));try{
   const folder=path.join(root,'collected'),pictures=path.join(root,'photos'),dataRoot=path.join(root,'data');await mkdir(folder);await mkdir(pictures);
-  const product={style:'326931',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=current',images:{main:'https://www.giordano.co.kr/official-main.jpg'},colors:['01블랙']};
+  const product={style:'326931',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=current',images:{main:'https://www.giordano.co.kr/official-main.jpg'},colors:Array.from({length:10},(_,i)=>String(i+1).padStart(2,'0')+'컬러')};
   const official=await sharp({create:{width:81,height:103,channels:3,background:'#fc4'}}).jpeg({quality:77}).toBuffer();await writeFile(path.join(folder,'main.jpg'),official);await writeFile(path.join(folder,'product.json'),JSON.stringify(product));
   const photos=[];for(let i=0;i<10;i++){const bytes=await sharp({create:{width:80,height:100,channels:3,background:{r:i*20,g:50,b:80}}}).jpeg().toBuffer(),name=i===0?'1.jpg':String(i+1)+'.jpg';await writeFile(path.join(pictures,name),bytes);photos.push({name,bytes,color:product.colors[i],role:'front'});}
   const draftRoot=path.join(dataRoot,'smartstore-details',product.style),listingImages={...await saveListingSelection(draftRoot,{main:photos[0],extras:photos.slice(1)}),trustedFolder:true};await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...product,listingImages}));
