@@ -55,14 +55,13 @@ test('마지막 이미지의 옆트임만 빠졌으면 파일을 다시 올리�
  const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-layout-repair-'));
  try{
  let fixed=false,opened=0,applied=0,persist=true;
- page.context().on('page',p=>{p.on('pageerror',e=>console.log('fixture error:',e.message));});
  const id='SE-98bb2cab-3434-48be-bdaa-84ba88bfe976';
- await page.context().route('https://example.com/applied',r=>{applied++;fixed=persist;return r.fulfill({contentType:'text/plain',body:'ok'});});
+ await page.context().route('https://example.com/applied',async r=>{applied++;fixed=persist;await r.fulfill({contentType:'text/html',body:'편집기 적용 완료'});await r.request().frame().page().close();});
  await page.route('https://sell.smartstore.naver.com/**',r=>r.fulfill({contentType:'text/html',body:'<textarea name="editorContent">true</textarea><button data-nclicks-code="descrip.sebtn" onclick="window.open(\'https://example.com/editor\')">편집기</button>'}));
  await page.context().route('https://phinf.pstatic.net/**',r=>r.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a9xkAAAAASUVORK5CYII=','base64')}));
  await page.context().route('https://example.com/editor',r=>{
   opened++;
-  return r.fulfill({contentType:'text/html',body:`<style>body{margin:0}.se-component{margin:200px 0 0}img{width:300px;height:300px}</style><button data-name=content-mode-without-pagefull data-value=extend onclick="document.querySelector('.se-section-image.se-is-selected').parentElement.className='se-component-content-extend'">옆트임</button><div class="se-component se-image" id=first><div class=se-component-content-extend><div class=se-section-image><img src="https://phinf.pstatic.net/a.png"></div></div></div><div class="se-component se-video" id="${id}"></div><div class="se-component se-image" id=last><div class="${fixed?'se-component-content-extend':'se-component-content-fit'}"><div class=se-section-image><img src="https://phinf.pstatic.net/b.png" onclick="this.parentElement.classList.add('se-is-selected')"></div></div></div><button onclick="fetch('/applied').then(()=>window.close())">등록</button>`});
+  return r.fulfill({contentType:'text/html',body:`<style>body{margin:0}.se-component{margin:200px 0 0}img{width:300px;height:300px}</style><button data-name=content-mode-without-pagefull data-value=extend onclick="document.querySelector('.se-section-image.se-is-selected').parentElement.className='se-component-content-extend'">옆트임</button><div class="se-component se-image" id=first><div class=se-component-content-extend><div class=se-section-image><img src="https://phinf.pstatic.net/a.png"></div></div></div><div class="se-component se-video" id="${id}"></div><div class="se-component se-image" id=last><div class="${fixed?'se-component-content-extend':'se-component-content-fit'}"><div class=se-section-image><img src="https://phinf.pstatic.net/b.png" onclick="this.parentElement.classList.add('se-is-selected')"></div></div></div><button onclick="location.href='https://example.com/applied'">등록</button>`});
  });
  await page.goto('https://sell.smartstore.naver.com/#/products/copy/1');
  const parts={files:[path.join(root,'a.png'),path.join(root,'b.png')],includeVideo:true,videoIdentity:{identity:['component:'+id]}},logs=[];
