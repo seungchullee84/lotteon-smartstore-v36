@@ -21,7 +21,7 @@ test('새 사진 경로에서 품번을 정확히 찾고 분석 전에도 1번 �
   const options={desktop:root,dataRoot:path.join(root,'data')};
   const found=await findPhotos(product,options);assert.equal(found.length,2);assert.ok(found.every(p=>p.file.startsWith(chosen+path.sep)));
   const preview=await listingPreview(product,options);assert.equal(preview.main.sourceName,'1.jpg');assert.equal(preview.previewOnly,true);
-  const work=await originalListingMain(product,options);assert.equal((await sharp(work).metadata()).width,1500);assert.equal((await sharp(work).metadata()).height,750);assert.deepEqual(await readFile(path.join(chosen,'1.jpg')),original);
+  const work=await originalListingMain(product,options);assert.equal((await sharp(work).metadata()).width,750);assert.equal((await sharp(work).metadata()).height,1000);assert.deepEqual(await readFile(path.join(chosen,'1.jpg')),original);
   await assert.rejects(prepareListingImages(product,root,options),/선택을 먼저/);
  }finally{await rm(root,{recursive:true,force:true});}
 });
@@ -42,7 +42,7 @@ test('옆면 없이도 다른 색상 정면만 공식 색상 순서로 추가하
  assert.ok(result.extras.every(p=>p.role==='front'&&!p.bytes.equals(result.main.bytes)));
 });
 
-test('대표·추가는 1500×750 JPG 작업본을 사용하고 원본 바이트·EXIF는 보존한다',async()=>{
+test('대표·추가는 750×1000 JPG 작업본을 사용하고 원본 바이트·EXIF는 보존한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-original-'));
  try{
   const photoRoot=path.join(root,'photos'),output=path.join(root,'output'),dataRoot=path.join(root,'data');await mkdir(photoRoot);await mkdir(output);
@@ -55,7 +55,7 @@ test('대표·추가는 1500×750 JPG 작업본을 사용하고 원본 바이트
   assert.deepEqual(await readFile(path.join(draftRoot,listingImages.main.file)),main);assert.deepEqual(await readFile(path.join(draftRoot,listingImages.extras[0].file)),side);
   await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...product,listingImages}));
   const selected=await prepareListingImages(product,output,{dataRoot,photoRoots:[photoRoot]});
-  for(const file of [selected.main,...selected.extras]){const meta=await sharp(file).metadata();assert.equal(meta.width,1500);assert.equal(meta.height,750);assert.equal(meta.format,'jpeg');assert.equal(path.extname(file),'.jpg');}
+  for(const file of [selected.main,...selected.extras]){const meta=await sharp(file).metadata();assert.equal(meta.width,750);assert.equal(meta.height,1000);assert.equal(meta.format,'jpeg');assert.equal(path.extname(file),'.jpg');}
   assert.deepEqual(await readFile(path.join(photoRoot,'1.jpg')),main);assert.deepEqual(await readFile(path.join(photoRoot,'옆면.png')),side);assert.equal((await sharp(path.join(photoRoot,'1.jpg')).metadata()).orientation,6);
   await unlink(path.join(photoRoot,'옆면.png'));await assert.rejects(prepareListingImages(product,output,{dataRoot,photoRoots:[photoRoot]}),/추가사진 원본/);
  }finally{await rm(root,{recursive:true,force:true});}
