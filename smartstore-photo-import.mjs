@@ -165,10 +165,10 @@ export async function applyImportedPhotos(product,folder,choices,{dataRoot,deskt
  return {count,selectedCount:selected.length,target};
 }
 
-export function allImportedPhotoChoices(stage,product,known=[]){
+export function allImportedPhotoChoices(stage,product,known=[],ignored=[]){
  if(stage.style!==product.style||stage.sourceUrl!==product.sourceUrl)throw Error('현재 품번과 사진 출처가 다릅니다.');
  assertDetailOnlyProduct(stage.sellerCode,product.style);const counts=new Map();
- return stage.candidates.map(p=>{
+ return stage.candidates.filter(p=>!ignored.some(record=>record.hash===p.sha256)).map(p=>{
   if(!product.colors.includes(p.colorHint))throw Error('사진 위 색상명이 현재 상품 색상과 다릅니다.');
   counts.set(p.colorHint,(counts.get(p.colorHint)||0)+1);if(counts.get(p.colorHint)>4)throw Error(p.colorHint+' 사진이 4컷을 초과합니다. 색상 구간을 확인해 주세요.');
   const prior=known.find(k=>k.hash===p.sha256&&k.color===p.colorHint&&['front','side','back','detail'].includes(k.role));
@@ -177,8 +177,8 @@ export function allImportedPhotoChoices(stage,product,known=[]){
  });
 }
 
-export function assertImportedPhotoCoverage(stage,prepared){
- const expected=new Map();for(const p of stage.candidates)expected.set(p.colorHint,(expected.get(p.colorHint)||0)+1);
+export function assertImportedPhotoCoverage(stage,prepared,choices){
+ const expected=new Map();for(const p of stage.candidates.filter(p=>!choices||choices.some(c=>c.id===p.id)))expected.set(p.colorHint,(expected.get(p.colorHint)||0)+1);
  for(const [color,count] of expected)if(prepared.smartstoreDetail?.colorImages?.[color]?.length!==count)throw Error(color+' 사진 반영 수가 수집 결과와 다릅니다.');
  if(!prepared.smartstoreDetail?.sellingPoints?.length)throw Error('공식 원문 소구점 확인이 필요합니다. 소구점 없는 상세페이지는 완료 처리하지 않습니다.');
 }

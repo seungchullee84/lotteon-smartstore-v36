@@ -286,12 +286,12 @@ const server=http.createServer(async(req,res)=>{
           const source=await smartBot.importExistingPhotos(product,{signal});signal.throwIfAborted();
           const stage=await stageImportedPhotos(source,folder,{signal});signal.throwIfAborted();
           if(state.product.style!==product.style||state.folder!==folder)throw Error('현재 상품이 변경되어 수집 사진을 적용하지 않았습니다.');
-          let known=[];try{known=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',style,'draft.json'),'utf8')).photoMapping?.files||[];}catch(e){if(e.code!=='ENOENT')throw e;}
-          const choices=allImportedPhotoChoices(stage,product,known);
+          let known=[],ignored=[];try{const mapping=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',style,'draft.json'),'utf8')).photoMapping;known=mapping?.files||[];ignored=mapping?.ignoredPhotos||[];}catch(e){if(e.code!=='ENOENT')throw e;}
+          const choices=allImportedPhotoChoices(stage,product,known,ignored);
           const result=await applyImportedPhotos(product,folder,choices,{dataRoot,signal,automatic:true});signal.throwIfAborted();
           const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,signal,log});signal.throwIfAborted();
           await writeFile(path.join(folder,'product.json'),JSON.stringify(prepared,null,2));await publishPhotoPreview(prepared,folder);
-          assertImportedPhotoCoverage(stage,prepared);
+          assertImportedPhotoCoverage(stage,prepared,choices);
           state.photoImport={...stage,status:'applied',selectedCount:result.selectedCount};
           log('색상별 사진 전체 '+result.selectedCount+'장 자동 반영 완료 · 상세 템플릿 업데이트 · 상품 저장 안 함');
         });return json(res,202,{ok:true});
