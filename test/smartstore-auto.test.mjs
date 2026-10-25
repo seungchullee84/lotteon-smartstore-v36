@@ -14,10 +14,16 @@ const product={style:'375908',name:'여성 경량 패딩 375908',sourceUrl:'http
 const description='가벼운 나일론 원단을 사용한 경량 패딩입니다.';
 test('수집·사진대조·합성·상세생성 성공 후에만 업로드 완료를 알린다',async()=>{
  const order=[];const deps={input:'375908',apiKey:'test',includeMain:true,preflight:async()=>order.push('login'),collect:async()=>{order.push('collect');return {product,folder:'current'};},prepare:async p=>{order.push('prepare');return p;},synthesize:async()=>{order.push('compose');return 'main.jpg';},render:async()=>{order.push('detail');return 'detail.png';},upload:async()=>{order.push('upload');return {detailUploaded:true};}};
- const result=await runSmartstoreAuto(deps);assert.deepEqual(order,['login','collect','prepare','compose','detail','upload']);assert.equal(result.published,false);
+ const result=await runSmartstoreAuto(deps);assert.deepEqual(order,['collect','prepare','login','compose','detail','upload']);assert.equal(result.published,false);
  order.length=0;await assert.rejects(runSmartstoreAuto({...deps,apiKey:''}),/API/);assert.deepEqual(order,[]);
- order.length=0;await assert.rejects(runSmartstoreAuto({...deps,synthesize:async()=>{throw Error('failed');}}),/failed/);assert.deepEqual(order,['login','collect','prepare']);
+ order.length=0;await assert.rejects(runSmartstoreAuto({...deps,synthesize:async()=>{throw Error('failed');}}),/failed/);assert.deepEqual(order,['collect','prepare','login']);
  await assert.rejects(runSmartstoreAuto({...deps,upload:async()=>({detailUploaded:false})}),/업로드 확인/);
+});
+
+test('복사등록 창이 없어도 사진 준비와 미리보기 반영은 먼저 마치며 판매자 업로드는 하지 않는다',async()=>{
+ const order=[];
+ await assert.rejects(runSmartstoreAuto({input:'375908',collect:async()=>{order.push('collect');return {product,folder:'current'};},prepare:async p=>{order.push('prepare');return {...p,smartstoreDetail:{photoCount:3}};},onPrepared:async p=>{assert.equal(p.smartstoreDetail.photoCount,3);order.push('preview');},preflight:async()=>{order.push('login');throw Error('복사등록 창 없음');},render:async()=>assert.fail('렌더링은 로그인 확인 이후'),upload:async()=>assert.fail('업로드 금지')}),/복사등록/);
+ assert.deepEqual(order,['collect','prepare','preview','login']);
 });
 test('중단 이후 다음 단계와 업로드를 실행하지 않는다',async()=>{
  const controller=new AbortController();let uploads=0;

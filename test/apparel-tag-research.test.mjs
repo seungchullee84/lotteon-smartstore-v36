@@ -23,6 +23,13 @@ test('품목·성별·핏·소재를 대조하고 미확인 계절·울·와이�
  assert.equal(matchResearchTags(p,index,{limit:2}).length,2);
 });
 
+test('테리 후드 풀오버는 후드티로 분류하고 실제 니트 후드 풀오버와 구분한다',()=>{
+ const i={tags:['기모후드티','여성후드티','여성티셔츠','여성니트','후드니트','면니트','여성스웨터'].map((name,n)=>tag(name,n+1))};
+ const hoodie={rawName:'NEW 브러시드 테리 후드 풀오버',gender:'여성',officialDescription:'안쪽 기모 처리'};
+ const names=matchResearchTags(hoodie,i).map(t=>t.name);assert(names.includes('여성후드티'));assert(names.includes('기모후드티'));assert(names.includes('여성티셔츠'));assert(!names.some(n=>/니트|스웨터/.test(n)));
+ const knit=matchResearchTags({...hoodie,rawName:'울 니트 후드 풀오버'},i).map(t=>t.name);assert(knit.includes('여성니트'));assert(!knit.includes('여성후드티'));
+});
+
 test('조사자료는 원본 ID·명칭·근거를 검사해 로컬 인덱스로 가져온다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'tag-research-'));
  try{
