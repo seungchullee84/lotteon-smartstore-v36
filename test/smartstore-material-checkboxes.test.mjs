@@ -13,6 +13,6 @@ test('소재 선택은 순서가 바뀌고 클릭 후 늦게 갱신되어도 항
  }finally{await browser.close();}
 });
 test('기모는 공식 원문 근거가 있을 때만 소재 선택 후보에 포함한다',()=>{
- assert(learnedFields({material:'면 60%, 폴리에스터 40%',officialDescription:'안쪽 기모 가공'}).materials.includes('기모'));
- assert(!learnedFields({name:'사용자가 입력한 기모',material:'면 60%, 폴리에스터 40%'}).materials.includes('기모'));
+ assert(learnedFields({material:'면 60%, 폴리에스터 40%',officialDescription:'안쪽 기모 가공'}).materialFinishes.includes('기모'));
+ assert(!learnedFields({name:'사용자가 입력한 기모',material:'면 60%, 폴리에스터 40%'}).materialFinishes.includes('기모'));
 });

@@ -1,9 +1,9 @@
 const normalize=s=>String(s||'').replace(/\s+/g,' ').trim();
-export async function setAttributeCheckboxes(row,values,{label='소재',check=()=>{},requireAll=false,timeout=3000}={}){
+export async function setAttributeCheckboxes(row,values,{label='소재',check=()=>{},requireAll=false,optionalValues=[],timeout=3000}={}){
  const read=()=>row.getByRole('checkbox').evaluateAll(ns=>ns.map(n=>({id:n.id,name:(n.getAttribute('aria-label')||n.labels?.[0]?.textContent||n.parentElement.textContent).replace(/\s+/g,' ').trim(),checked:n.checked})));
  if(!await row.getByRole('checkbox').count()){if(requireAll&&values.length)throw Error(label+' 선택 항목이 없습니다.');return [];}
- const entries=await read(),wanted=new Set(values.map(normalize));
- if(requireAll)for(const value of wanted)if(!entries.some(e=>e.name===value))throw Error('이 카테고리에 해당 속성 값이 없습니다: '+label+' / '+value);
+ const entries=await read(),wanted=new Set([...values,...optionalValues].map(normalize));
+ if(requireAll)for(const value of values.map(normalize))if(!entries.some(e=>e.name===value))throw Error('이 카테고리에 해당 속성 값이 없습니다: '+label+' / '+value);
  const locate=async entry=>{
   const named=row.getByRole('checkbox',{name:entry.name,exact:true});
   if(await named.count()===1)return named;

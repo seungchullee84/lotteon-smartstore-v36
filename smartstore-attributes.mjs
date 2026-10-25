@@ -16,7 +16,7 @@ export async function fillAdditionalAttributes(page,fields,log=()=>{},check=()=>
   const row=dialog.getByRole('row').filter({has:page.locator('th').filter({hasText:new RegExp('^\\s*'+label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*$')})});
   if(!await row.count())continue;
   if(Array.isArray(value)){
-   await setAttributeCheckboxes(row,value,{label,check,requireAll:true});
+   await setAttributeCheckboxes(row,value,{label,check,requireAll:true,optionalValues:label==='주요소재'?fields.materialFinishes||[]:[]});
   }else{
    const input=row.locator('.selectize-input');if(!await input.count())continue;
    if(normalize(await input.innerText())!==value){
