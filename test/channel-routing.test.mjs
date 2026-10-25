@@ -22,7 +22,7 @@ test('스마트스토어만 열 때 롯데ON 탭을 새로 만들지 않는다',
  const pages=[page(lotte)],bot=attach(new SmartstoreAutomation('.',()=>{}),pages);await bot.open();assert.equal(pages.length,2);assert.deepEqual(pages[0].gotos,[]);assert.deepEqual(pages[1].gotos,[SMARTSTORE_HOME]);
 });
 test('이전 화면의 채널 누락은 호환하고 명시한 다른 채널은 차단한다',()=>{
- for(const endpoint of ['open','run','smartstore-open','smartstore-plan','smartstore-test']){
+ for(const endpoint of ['open','run','smartstore-open','smartstore-plan','smartstore-test','smartstore-tags-selection']){
   const expected=endpoint.startsWith('smartstore')?'smartstore':'lotte';assert.equal(requireChannel(endpoint,expected),expected);assert.equal(requireChannel(endpoint),expected);assert.throws(()=>requireChannel(endpoint,expected==='lotte'?'smartstore':'lotte'));
  }
  assert.equal(requireChannel('collect'),undefined);
