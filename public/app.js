@@ -587,7 +587,7 @@ function syncEnhancedFeatures(state){
  const status=state.photoPreparation?.style===p.style?state.photoPreparation:null;
  photoPreparationStatus.textContent=status?.status==='ready'?'사진 연결 확인 · 대표 1장 · 추가 '+status.extraCount+'장 · 상세 착용컷 '+status.detailCount+'장':status?.status==='preparing'?'폴더 사진의 색상·각도 확인 및 미리보기 연결 중…':status?.message||(!state.smartstoreListing?'현재 품번 폴더의 사진을 확인해 주세요.':state.smartstoreListing.previewOnly?'대표사진만 우선 표시 중 · 시작하면 추가·상세사진을 준비합니다.'+' '+(photoAnalysisConfigured?'':'새 사진은 설정 → 사진 자동분석 연결이 필요합니다.'):'확인된 색상별 사진을 추가이미지·상세 미리보기에 연결했습니다.');
  if(manualTagStyle!==p.style){manualTagStyle=p.style;manualTagChoices=new Map((state.tagResearch?.manualTags||[]).map(t=>[t.id,t]));$('manualTagResults').replaceChildren();tagPicker.hidden=!manualTagChoices.size;drawManualTagChoices();}
- if(state.tagResearch?.manual)$('researchTagStatus').textContent='직접 선택한 태그 '+state.tagResearch.candidates.length+'/10개 · '+(state.tagResult?.searchTagsVerified?'현재 폼 검색 적용 확인':'입력 시 네이버 검색 적용 재검증');
+ if(state.tagResearch?.manual){const pairs=tags=>(tags||[]).map(t=>t.id+'\t'+t.name).sort().join('\n');const verified=state.tagResult?.searchTagsVerified&&pairs(state.tagResult.selectedTags)===pairs(state.tagResearch.candidates);$('researchTagStatus').textContent='직접 선택한 태그 '+state.tagResearch.candidates.length+'/10개 · '+(verified?'최근 검색 적용 확인':'입력 시 네이버 검색 적용 재검증');}
  $('manualTagSearch').disabled=!!state.busy;$('applyManualTags').disabled=!!state.busy||!manualTagChoices.size;
 }
 $('manualTagSearch').onclick=async()=>{

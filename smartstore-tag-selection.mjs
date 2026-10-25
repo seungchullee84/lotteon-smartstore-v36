@@ -22,10 +22,10 @@ export async function saveSelectedProductTags(product,tags,{dataRoot=defaultRoot
  const record={style:product.style,sourceUrl:product.sourceUrl,tags:tags.map(({id,name})=>({id,name})),updatedAt:new Date().toISOString()};
  const target=file(dataRoot,product.style);await mkdir(path.dirname(target),{recursive:true});await writeFile(target+'.tmp',JSON.stringify(record,null,2));await rename(target+'.tmp',target);return record;
 }
-export function selectedProductTagResearch(product,{dataRoot=defaultRoot}={}){
+export function selectedProductTagResearch(product,{dataRoot=defaultRoot,index=loadTagResearch()}={}){
  const automatic=researchForProduct(product);let record;try{record=JSON.parse(readFileSync(file(dataRoot,product.style),'utf8'));}catch(error){if(error.code==='ENOENT')return automatic;throw error;}
  if(record.style!==product.style||record.sourceUrl!==product.sourceUrl)return automatic;
- const allowed=new Map(matchResearchTags(product,loadTagResearch(),{limit:10000}).map(t=>[t.id,t.name]));
+ const allowed=new Map(matchResearchTags(product,index,{limit:10000}).map(t=>[t.id,t.name]));
  const candidates=(record.tags||[]).filter(t=>allowed.get(t.id)===t.name);
  return {...automatic,candidates,manual:true,manualTags:record.tags,needsReview:candidates.length!==(record.tags||[]).length,titleTerms:automatic.titleTerms};
 }
