@@ -60,7 +60,7 @@ export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{
  // Wait for a stable, fully hosted image set once, immediately before applying.
  await editor.waitForFunction(count=>{
   const images=[...document.querySelectorAll('.se-component.se-image img')];
-  if(images.length!==count||images.some(n=>!/^https:\/\//.test(n.src)||!n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend')))return false;
+  if(images.length!==count||images.some(n=>!/^https:\/\//.test(n.src)||!n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend'))){delete window.__smartstoreLayoutReady;return false;}
   const signature=images.map(n=>n.closest('.se-component.se-image').id+'|'+n.src).join('\n');
   const before=window.__smartstoreLayoutReady;
   if(!before||before.signature!==signature){window.__smartstoreLayoutReady={signature,since:performance.now()};return false;}
