@@ -5,7 +5,7 @@ test('공식몰 링크·암호화 연결창·태그 검색/삭제/선택과 시�
  const reply=(res,data,status=200)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8'});res.end(JSON.stringify(data));};
  const server=http.createServer(async(req,res)=>{try{
   const url=new URL(req.url,'http://localhost');
-  if(url.pathname==='/api/state')return reply(res,{product,revision:1,busy:false,phase:'done',logs:[],backgroundConfigured:configured,capabilities:{manualTags:true,photoAnalysisSettings:true},tagResearch:{configured:true,count:3,candidates:tags,manual,manualTags:manual?tags:undefined}});
+  if(url.pathname==='/api/state')return reply(res,{product,revision:1,busy:false,phase:'done',logs:[],backgroundConfigured:configured,capabilities:{manualTags:true,photoAnalysisSettings:true},tagValidation:{style:product.style,tagCount:10,selectedTags:[{id:'999',name:'여성니트'}]},tagResearch:{configured:true,count:3,candidates:tags,manual,manualTags:manual?tags:undefined}});
   if(url.pathname==='/api/naver-status')return reply(res,{configured:false});if(url.pathname==='/api/branding')return reply(res,{visible:false});
   if(req.method==='POST'){
    let text='';for await(const chunk of req)text+=chunk;const body=JSON.parse(text);
@@ -27,6 +27,7 @@ test('공식몰 링크·암호화 연결창·태그 검색/삭제/선택과 시�
  try{
   browser=await chromium.launch({headless:true});const page=await browser.newPage();page.setDefaultTimeout(8000);const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:'+server.address().port);await page.locator('#channelSmartstore').click();
   await page.waitForFunction(()=>document.querySelector('#officialProductLink').href.includes('pno=current'));assert.equal(await page.locator('#officialProductLink').getAttribute('target'),'_blank');
+  assert(!(await page.locator('#researchTagStatus').innerText()).includes('검증 10/10'));
   await page.locator('#naverConnectionMenu summary').click();await page.locator('#photoAnalysisSettingsButton').click();assert.equal(await page.locator('#photoAnalysisKey').getAttribute('type'),'password');
   const fakeKey='sk-'+'x'.repeat(24);await page.locator('#photoAnalysisKey').fill(fakeKey);await page.getByRole('button',{name:'암호화 저장',exact:true}).click();await page.waitForFunction(()=>document.querySelector('#photoAnalysisMessage').textContent.includes('저장 완료'));assert.equal(await page.locator('#photoAnalysisKey').inputValue(),'');assert(!await page.locator('body').innerText().then(t=>t.includes(fakeKey)));await page.locator('#closePhotoAnalysis').click();
   await page.getByRole('button',{name:'여성후드티 추천에서 삭제',exact:true}).click();await page.waitForFunction(()=>!document.querySelector('#researchTagCandidates').textContent.includes('여성후드티'));assert.equal(removed.id,'1');

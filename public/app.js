@@ -502,10 +502,10 @@ function renderResearchTags(state){
  const panel=$('researchTagStatus');if(!panel)return;
  const research=state.tagResearch,container=$('researchTagCandidates');tagResearchReady=!!research?.candidates?.length;
  $('smartstoreAutoTags').disabled=requestLock||state.busy||!research?.candidates?.length;$('smartstoreValidateTags').disabled=$('smartstoreAutoTags').disabled;
- const report=state.tagResult?.style===state.product?.style?state.tagResult:null;
- const validation=state.tagValidation?.style===state.product?.style?state.tagValidation:null;
- const allowed=new Set((research?.candidates||[]).map(t=>t.id));
- const verified=(report?.selectedTags||validation?.selectedTags||[]).filter(t=>allowed.has(t.id));
+ const allowed=new Map((research?.candidates||[]).map(t=>[t.id,t.name]));
+ const currentReport=result=>result?.style===state.product?.style&&Array.isArray(result.selectedTags)&&result.selectedTags.every(t=>allowed.get(t.id)===t.name)?result:null;
+ const report=currentReport(state.tagResult),validation=currentReport(state.tagValidation);
+ const verified=report?.selectedTags||validation?.selectedTags||[];
  const entries=(research?.manual?research.candidates:verified.length?verified:research?.candidates||[]).slice(0,10),names=entries.map(t=>t.name),key=JSON.stringify(entries.map(t=>[t.id,t.name]));
  if(container.dataset.names!==key){container.dataset.names=key;container.replaceChildren();for(const tag of entries){const chip=document.createElement('span');chip.append(document.createTextNode('#'+tag.name));const remove=document.createElement('button');remove.type='button';remove.textContent='×';remove.className='tag-remove';remove.setAttribute('aria-label',tag.name+' 추천에서 삭제');remove.onclick=()=>removeRecommendedTag(tag,remove);chip.append(remove);container.append(chip);}}
  for(const button of container.querySelectorAll('.tag-remove'))button.disabled=state.busy||!state.capabilities?.manualTags;
@@ -580,7 +580,7 @@ let photoAnalysisConfigured=false,manualTagStyle='',manualTagChoices=new Map(),m
 const tagTools=document.createElement('div');tagTools.className='manual-tag-tools';tagTools.innerHTML='<label class="sr-only" for="manualTagQuery">연관 태그 검색어</label><input id="manualTagQuery" type="search" maxlength="40" placeholder="예: 후드, 기모, 티셔츠" autocomplete="off"><button id="manualTagSearch" type="button" class="secondary">태그 찾기</button>';$('smartstoreValidateTags').insertAdjacentElement('afterend',tagTools);
 const tagPicker=document.createElement('section');tagPicker.id='manualTagPicker';tagPicker.className='manual-tag-picker';tagPicker.hidden=true;tagPicker.innerHTML='<p id="manualTagMessage" role="status"></p><div id="manualTagResults" class="manual-tag-results"></div><p id="manualTagSelectionStatus"></p><div id="manualTagChoices" class="manual-tag-choices"></div><button id="applyManualTags" type="button">선택 태그 검증·적용</button><small>현재 상품에 근거가 있는 사전 ID·명칭만 선택할 수 있습니다. 적용할 때 네이버 검색 적용 여부를 다시 확인하며 상품은 저장하지 않습니다.</small>';$('researchTagCandidates').parentElement.append(tagPicker);
 function drawManualTagChoices(){
- $('manualTagSelectionStatus').textContent='선택 '+manualTagChoices.size+'/10개'+(manualTagChoices.size<10?' · 10개 선택 시 완료':'' );$('applyManualTags').disabled=!manualTagChoices.size||serverBusy;
+ $('manualTagSelectionStatus').textContent='선택 '+manualTagChoices.size+'/10개 · 적용할 때 검색 등록 여부 확인';$('applyManualTags').disabled=!manualTagChoices.size||serverBusy;
  const list=$('manualTagChoices');list.replaceChildren();for(const tag of manualTagChoices.values()){const remove=document.createElement('button');remove.type='button';remove.className='secondary';remove.textContent='#'+tag.name+' ×';remove.setAttribute('aria-label',tag.name+' 선택 취소');remove.onclick=()=>{manualTagChoices.delete(tag.id);manualTagHasSelection=true;drawManualTagChoices();for(const box of $('manualTagResults').querySelectorAll('input[type=checkbox]'))if(box.dataset.id===tag.id)box.checked=false;};list.append(remove);}
 }
 async function removeRecommendedTag(tag,button){
