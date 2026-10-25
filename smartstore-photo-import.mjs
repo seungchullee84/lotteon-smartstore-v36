@@ -26,6 +26,17 @@ export function editorPhotoPositions(colors){
  }
  return out;
 }
+// ONE restores later color headings and image strips after its first image appears.
+export async function settledEditorPhotoPositions(editor,colors,{check=()=>{},pause=ms=>new Promise(r=>setTimeout(r,ms))}={}){
+ let last='',stable=0;
+ for(let i=0;i<40;i++){
+  check();const snapshot=await editor.evaluate(()=>({signature:[...document.querySelectorAll('.se-component')].map(c=>c.className+'|'+(c.innerText||'')+'|'+c.querySelectorAll('img').length).join('\n')}));
+  if(snapshot.signature===last)stable++;else stable=0;
+  last=snapshot.signature;if(stable>=5)return editor.evaluate(editorPhotoPositions,colors);
+  await pause(400);
+ }
+ throw Error('상세설명 색상 구간을 아직 불러오는 중입니다. 사진 수집을 다시 시도해 주세요.');
+}
 export function naverPhotoUrl(value){
  const u=new URL(value);if(u.protocol==='http:')u.protocol='https:';
  if(u.protocol!=='https:'||u.username||u.password||u.port||!['shop-phinf.pstatic.net','shop1.phinf.naver.net','shop2.phinf.naver.net'].includes(u.hostname))throw Error('네이버 상품사진 원본 주소가 아닙니다.');
@@ -83,7 +94,7 @@ export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{
  // ONE initially exposes an empty text component while restoring the saved document.
  // Wait for the restored image components before looking for their color headings.
  await editor.locator('.se-component.se-image,.se-component.se-imageStrip').first().waitFor({state:'attached',timeout:20000});
- let positions=await editor.evaluate(editorPhotoPositions,product.colors);
+ let positions=await settledEditorPhotoPositions(editor,product.colors,{check});
  if(!positions.length){
   // A named edit window may still hold an unsaved replacement. Read the saved
   // product in a fresh window, preserving that existing editor and its contents.
@@ -92,7 +103,7 @@ export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{
   assertDetailOnlyProduct(await readDetailOnlySellerCode(fresh),product.style);
   editor=await openSmartstoreEditor(fresh,{check});
   await editor.locator('.se-component.se-image,.se-component.se-imageStrip').first().waitFor({state:'attached',timeout:20000});
-  positions=await editor.evaluate(editorPhotoPositions,product.colors);
+  positions=await settledEditorPhotoPositions(editor,product.colors,{check});
  }
  if(!positions.length){if(fresh){await editor.close();await fresh.close();}throw Error('저장된 상세설명에 색상별 개별 사진이 없습니다. 긴 통이미지는 이 채팅에서 확인해 주세요.');}
  if(positions.length>40)throw Error('가져올 사진은 한 상품당 40장 이내로 확인해 주세요.');
