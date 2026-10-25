@@ -1,23 +1,42 @@
-// Short styling impressions from the colour name only; no fabric or performance claims.
-const captions=[
- [/크림|아이보리|오프화이트|에크루|cream|ivory|ecru/i,'부드럽고 화사하게'],
- [/베이지|샌드|오트밀|beige|sand|oatmeal/i,'차분하고 자연스럽게'],
- [/브라운|초코|카멜|모카|brown|choco|camel|mocha/i,'따뜻하고 깊이 있게'],
- [/네이비|남색|navy/i,'단정하고 세련되게'],
- [/블랙|검정|black/i,'깔끔하고 선명하게'],
- [/그레이|회색|차콜|gray|grey|charcoal/i,'차분하게 어우러지는'],
- [/화이트|흰색|white/i,'맑고 깨끗하게'],
- [/버건디|와인|burgundy|wine/i,'깊이 있는 포인트'],
- [/핑크|로즈|pink|rose/i,'은은하고 부드럽게'],
- [/블루|하늘|데님|blue|denim/i,'맑고 산뜻하게'],
- [/그린|카키|올리브|green|khaki|olive/i,'자연스럽고 차분하게'],
- [/레드|빨강|red/i,'선명하게 더하는 포인트'],
- [/옐로|노랑|머스터드|yellow|mustard/i,'밝고 경쾌하게'],
- [/퍼플|보라|라벤더|purple|lavender/i,'은은하게 분위기 있게'],
- [/오렌지|주황|orange/i,'생기 있는 포인트'],
+// Styling impressions only: colour names never establish fabric/performance claims.
+// Stable per product so preview, PNG export and repeat collection keep identical copy.
+export const COLOR_CAPTION_GROUPS=[
+ [/틸|청록|teal|turquoise/i,['푸른빛 감도는 깊은 매력','차분함 속 싱그러운 반전','그린과 블루 사이의 매력']],
+ [/(?:라이트|연|light).*(?:그레이|회색|gray|grey)/i,['가볍게 번지는 은빛 무드','은은하고 맑은 회색빛','담백하게 밝힌 그레이']],
+ [/(?:다크|딥|dark|deep).*(?:그레이|gray|grey)|차콜|charcoal/i,['깊고 차분한 도시 감성','짙은 회색빛의 단정함','무게감 있게 잡아주는 톤']],
+ [/헤더|멜란지|heather|melange/i,['은은하게 스미는 회색빛','단조롭지 않은 톤의 깊이','부드럽게 어우러지는 색감']],
+ [/크림|cream/i,['포근하게 밝히는 크림빛','부드러운 온기를 담은 색','차분한 룩을 밝히는 한 톤']],
+ [/아이보리|오프화이트|에크루|ivory|ecru|off.?white/i,['은은한 여백의 아이보리','부드럽게 빛나는 밝은 톤','깨끗함에 더한 온화함']],
+ [/오트밀|oatmeal/i,['내추럴한 오트밀의 여유','잔잔하게 어우러지는 색감','담백한 일상을 닮은 톤']],
+ [/샌드|sand/i,['모래빛을 닮은 담백함','자연스럽게 스며드는 톤','밝고 차분한 샌드빛']],
+ [/베이지|beige/i,['차분함을 입힌 베이지','자연스럽게 어우러지는 색','편안한 분위기의 뉴트럴']],
+ [/카멜|camel/i,['따뜻하게 깊어지는 카멜','클래식한 카멜의 온도','단정함에 더한 따뜻한 빛']],
+ [/모카|초코|mocha|choco/i,['부드럽게 짙어지는 모카빛','깊은 여운을 남기는 색','차분하게 녹아드는 브라운']],
+ [/브라운|갈색|brown/i,['깊고 따뜻한 브라운 무드','차분한 룩에 더한 깊이','은근하게 살아나는 고급감']],
+ [/네이비|남색|navy/i,['차분함에 더한 세련된 깊이','단정한 룩을 완성하는 톤','짙은 푸른빛의 클래식']],
+ [/인디고|indigo/i,['깊은 푸른빛의 여유','차분하게 짙어지는 블루','캐주얼에 더한 깊은 색감']],
+ [/블랙|검정|black/i,['군더더기 없는 블랙의 힘','선명하게 잡아주는 분위기','어디에나 단정한 존재감']],
+ [/그레이|회색|gray|grey/i,['차분함이 머무는 그레이','담백하게 균형 잡힌 색감','어디에나 자연스러운 한 톤']],
+ [/화이트|흰색|white/i,['맑은 여백을 입은 화이트','깔끔함이 선명해지는 순간','어떤 색과도 맑은 조화']],
+ [/버건디|와인|burgundy|wine/i,['짙은 여운을 남기는 와인빛','차분하게 더하는 붉은 깊이','은근한 존재감의 버건디']],
+ [/더스티.*핑크|로즈|dusty.*pink|rose/i,['한 톤 낮춘 로즈의 여운','차분하게 물드는 장밋빛','은은한 로즈빛의 분위기']],
+ [/핑크|pink/i,['살며시 물드는 핑크빛','부드럽게 더하는 생기','은은하게 밝히는 분위기']],
+ [/스카이|하늘|라이트블루|sky|lightblue/i,['맑게 열린 하늘빛 무드','산뜻하게 번지는 푸른빛','가볍게 밝히는 스카이 톤']],
+ [/블루|데님|파랑|blue|denim/i,['맑고 산뜻한 블루의 리듬','일상에 더하는 푸른 생기','깔끔하게 살아나는 청량감']],
+ [/올리브|카키|olive|khaki/i,['자연을 닮은 차분한 깊이','담백하게 스미는 올리브빛','차분한 룩에 더한 그린 톤']],
+ [/그린|초록|green/i,['싱그러움이 머무는 그린','자연스럽게 살아나는 색감','차분함 속 산뜻한 한 톤']],
+ [/레드|빨강|red/i,['선명한 한 끗의 레드','룩에 생기를 더하는 색','시선을 모으는 붉은 포인트']],
+ [/머스터드|mustard/i,['깊고 따뜻한 머스터드빛','차분한 룩의 노란 포인트','은근하게 더하는 경쾌함']],
+ [/옐로|노랑|yellow/i,['밝은 에너지를 담은 옐로','산뜻하게 물드는 노란빛','일상에 더하는 경쾌한 색']],
+ [/라벤더|lavender/i,['은은하게 스미는 라벤더빛','차분한 보랏빛의 여운','부드러운 분위기의 한 톤']],
+ [/퍼플|보라|purple/i,['은근한 매력의 보랏빛','차분함에 더한 새로운 무드','깊이 있게 물드는 퍼플']],
+ [/오렌지|주황|orange/i,['룩에 생기를 더하는 주황빛','따뜻하고 경쾌한 오렌지','은근하게 시선을 모으는 색']],
 ];
-export function colorCaption(color){
- const name=String(color||'').replace(/^\d+\s*/,'');
- if(!/[\/&+]|배색|혼합|멀티/.test(name))for(const [pattern,caption]of captions)if(pattern.test(name))return caption;
- return '색감으로 더하는 포인트';
+const mixed=['색과 색이 이루는 조화','다채롭게 더하는 포인트','색감으로 완성한 균형'];
+const neutral=['색감으로 더하는 포인트','취향을 담아 고른 색감','오늘의 무드를 더하는 색'];
+function pick(values,key){let n=2166136261;for(const c of key)n=Math.imul(n^c.charCodeAt(0),16777619)>>>0;return values[n%values.length];}
+export function colorCaption(color,{style=''}={}){
+ const name=String(color||'').normalize('NFKC').replace(/^\d+\s*/,'').trim();
+ const values=/[\/&+]|배색|혼합|멀티/.test(name)?mixed:COLOR_CAPTION_GROUPS.find(([pattern])=>pattern.test(name))?.[1]||neutral;
+ return style?pick(values,String(style)+'|'+name):values[0];
 }
