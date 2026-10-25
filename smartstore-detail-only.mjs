@@ -20,7 +20,7 @@ export async function runSmartstoreDetailOnly({product,folder,signal,connect,ren
  log('상세설명만 교체 · 조회/수정 화면 품번 확인');await connect(product);check();
  log('현재 미리보기 구성으로 상세이미지 제작');const detail=await render(product,folder);check();
  const result=await upload(product,folder,detail);check();
- if(result?.detailUploaded!==true)throw Error('상세설명 반영 확인이 끝나지 않았습니다.');
- log('상세설명만 반영 완료 · 상품명·가격·옵션·태그·대표/추가이미지 유지 · 상품 저장 안 함');
+ if(result?.detailUploaded!==true&&!(result?.editorPrepared===true&&result.editorApplied===false))throw Error('상세설명 반영 확인이 끝나지 않았습니다.');
+ log(result.editorPrepared?'상세설명 편집기 준비 완료 · 등록 버튼 전 대기 · 다른 상품정보 유지':'상세설명만 반영 완료 · 상품 저장 안 함');
  return {...result,style:product.style,detailOnly:true,saved:false,published:false};
 }

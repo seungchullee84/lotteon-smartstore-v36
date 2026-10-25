@@ -13,7 +13,7 @@ export async function runSmartstoreAuto({input,apiKey,signal,log=()=>{},step=()=
  const main=includeMain?await stage('compose','4/6 대표사진 배경 합성 · 1500×1500 · 공식 색상칩 적용',()=>synthesize(prepared,folder)):undefined;
  const detail=await stage('detail',`${count-1}/${count} 확정 템플릿 상세페이지 제작·바탕화면 저장`,()=>render(prepared,folder));
  const result=await stage('upload',`${count}/${count} 스마트스토어 상품정보·추가사진·상세페이지 업로드`,()=>upload(prepared,folder,{main,detail}));
- if(result?.detailUploaded!==true)throw Error('상세페이지 업로드 확인이 끝나지 않았습니다. 판매자센터 화면을 확인해 주세요.');
- log('자동 업로드 완료 · 판매자센터에서 최종 내용을 확인한 뒤 등록할 수 있습니다.');
+ if(result?.detailUploaded!==true&&!(result?.editorPrepared===true&&result.editorApplied===false))throw Error('상세페이지 업로드 확인이 끝나지 않았습니다. 판매자센터 화면을 확인해 주세요.');
+ log(result.editorPrepared?'상세설명 편집기 준비 완료 · 등록 버튼을 누르지 않고 대기합니다.':'자동 업로드 완료 · 상품 저장 안 함');
  return {style:product.style,folder,main,detail,...result,published:false,timings};
 }

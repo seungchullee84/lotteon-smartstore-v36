@@ -121,18 +121,19 @@ export async function selectSmartstoreImage(editor,image,{check=()=>{}}={}){
  }
  throw Error('상세이미지 선택 영역 클릭 실패: '+clickIssue.message+' · 편집기 내용은 유지했습니다.');
 }
-export async function applySmartstoreImageLayout(editor,image,{check=()=>{}}={}){
- check();if(await image.evaluate(n=>!!n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend')))return;
+export async function applySmartstoreImageLayout(editor,image,{check=()=>{},layout='extend'}={}){
+ if(!['extend','fit'].includes(layout))throw Error('지원하지 않는 이미지 배치');
+ check();if(await image.evaluate((n,value)=>!!n.closest('.se-component.se-image')?.querySelector('.se-component-content-'+value),layout))return;
  await image.scrollIntoViewIfNeeded();await editor.bringToFront();
  const componentId=await image.evaluate(n=>n.closest('.se-component.se-image').id);
  await selectSmartstoreImage(editor,image,{check});
- const extend=editor.locator('button[data-name="content-mode-without-pagefull"][data-value="extend"]').filter({visible:true}).first();
+ const extend=editor.locator('button[data-name="content-mode-without-pagefull"][data-value="'+layout+'"]').filter({visible:true}).first();
  try{await extend.waitFor({state:'visible',timeout:1500});}catch{check();await selectSmartstoreImage(editor,image,{check});}
  await extend.click();
- await editor.waitForFunction(id=>!!document.getElementById(id)?.querySelector('.se-component-content-extend'),componentId,{timeout:15000});
+ await editor.waitForFunction(({id,layout})=>!!document.getElementById(id)?.querySelector('.se-component-content-'+layout),{id:componentId,layout},{timeout:15000});
  check();
 }
-export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{},log=()=>{}}={}){
+export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{},log=()=>{},bannerIndex,applyEditor=false}={}){
  check();
  // ONE can render the layout before its document model has finished updating.
  // Wait for a stable, fully hosted image set once, immediately before applying.
@@ -148,15 +149,16 @@ export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{
   throw Error('상세이미지 업로드 준비 확인 실패: 예상 '+imageCount+'장 / 현재 '+observed.count+'장 / 업로드 대기 '+(observed.pending.join(',')||'없음')+' · '+error.message);
  }
  const images=editor.locator('.se-component.se-image img');
- const missing=await images.evaluateAll(ns=>ns.flatMap((n,i)=>n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend')?[]:[i]));
+ const missing=await images.evaluateAll((ns,banner)=>ns.flatMap((n,i)=>n.closest('.se-component.se-image')?.querySelector('.se-component-content-'+(i===banner?'fit':'extend'))?[]:[i]),bannerIndex);
  if(missing.length)log('최종 반영 전 옆트임 누락 '+missing.length+'장만 보정 · 파일 재업로드 없음');
- for(const i of missing){check();await applySmartstoreImageLayout(editor,images.nth(i),{check});}
- const ready=await images.evaluateAll(ns=>ns.every(n=>/^https:\/\//.test(n.src)&&n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend')));
+ for(const i of missing){check();await applySmartstoreImageLayout(editor,images.nth(i),{check,layout:i===bannerIndex?'fit':'extend'});}
+ const ready=await images.evaluateAll((ns,banner)=>ns.every((n,i)=>/^https:\/\//.test(n.src)&&n.closest('.se-component.se-image')?.querySelector('.se-component-content-'+(i===banner?'fit':'extend'))),bannerIndex);
  if(await images.count()!==imageCount||!ready)throw Error('최종 반영 전 상세이미지 개수·옆트임을 확인하지 못했습니다. 편집기 내용은 유지했습니다.');
- check();await Promise.all([editor.waitForEvent('close',{timeout:30000}),editor.getByRole('button',{name:'등록',exact:true}).click()]);
+ check();if(!applyEditor){log('상세설명 교체 완료 · 편집기 등록 버튼 누르지 않음 · 현재 창에서 직접 확인해 주세요.');return {editorPrepared:true,editorApplied:false,detailUploaded:false,saved:false,published:false};}
+ await Promise.all([editor.waitForEvent('close',{timeout:30000}),editor.getByRole('button',{name:'등록',exact:true}).click()]);
  if(await page.locator('textarea[name="editorContent"]').inputValue()!=='true')throw Error('판매자센터 상세설명 반영 결과를 확인하지 못했습니다.');
 }
-export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{},mode='copy'}={}){
+export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{},mode='copy',applyEditor=false}={}){
  const allowed=mode==='edit'?isSmartstoreDetailEditUrl(page.url()):mode==='copy'&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+(?:\?|$)/.test(page.url());
  if(!allowed)throw Error(mode==='edit'?'상세설명만 교체는 조회/수정 화면에서 실행해 주세요.':'상세페이지는 스마트스토어 복사등록 화면에서만 교체합니다.');
  check();
@@ -196,7 +198,7 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
   const lastImage=editor.locator('.se-component.se-image img').last();
   await lastImage.scrollIntoViewIfNeeded();
   await editor.waitForFunction(()=>/^https:\/\//.test([...document.querySelectorAll('.se-component.se-image img')].at(-1)?.src||''),null,{timeout:60000});
-  await applySmartstoreImageLayout(editor,lastImage,{check});
+  await applySmartstoreImageLayout(editor,lastImage,{check,layout:parts.bannerLink?.index===index?'fit':'extend'});
  };
  await choose(parts.files[0],0);log('브랜드 소개 이미지 업로드');
  if(parts.includeVideo!==false){await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});parts.videoIdentity=await insertSmartstoreVideo(editor,{check,dataRoot:parts.dataRoot,videoOptions:parts.videoOptions});}
@@ -206,11 +208,12 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  if(order.length!==parts.files.length+Number(includeVideo)||!order[0].includes('se-image')||(includeVideo?!/se-video|se-oembed/.test(order[1])||order.slice(2).some(c=>!c.includes('se-image')):order.some(c=>!c.includes('se-image'))))throw Error('브랜드 소개·상품상세 및 영상 설정에 맞는 순서를 확인해 주세요.');
  await applySmartstoreBannerLink(editor,parts,{check,log});
  log('상세이미지 '+parts.files.length+'장 첨부 완료 · 최종 반영 전 확인');
- await commitSmartstoreEditor(page,editor,parts.files.length,{check,log});
+ const prepared=await commitSmartstoreEditor(page,editor,parts.files.length,{check,log,applyEditor,bannerIndex:parts.bannerLink?.index});
+ if(!applyEditor)return {...prepared,detailParts:parts.files.length,bannerLinkStatus:parts.bannerLinkSubmitted?'submitted-unverified':'unverified',videoUploaded:parts.includeVideo!==false};
  // Reopen the saved ONE document to verify persistence, rather than trust its boolean placeholder.
  return verifySmartstoreDetail(page,parts,{check,log});
 }
-export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{},repairAttempt=0}={}){
+export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{},repairAttempt=0,applyEditor=false}={}){
  check();
  const verified=await openSmartstoreEditor(page,{check});
  await verified.locator('.se-component.se-image img').nth(parts.files.length-1).waitFor({state:'visible',timeout:30000});
@@ -232,15 +235,16 @@ export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  const bannerLinkStatus=!parts.bannerLink?'not-applicable':bannerLinkVerified?'verified':parts.bannerLinkSubmitted?'submitted-unverified':'unverified';
  // User confirmed that ONE applies the link even when its bitmap wrapper has
  // no readable href. This observation is recorded, but does not block layout.
- if(snapshot.length!==expected.length||snapshot.some(n=>!n.extended))mismatch.push('옆트임 배치');
+ if(snapshot.length!==expected.length||snapshot.some((n,i)=>i===parts.bannerLink?.index?n.extended:!n.extended))mismatch.push('옆트임 배치');
  if(includeVideo?!video.length||JSON.stringify(video)!==JSON.stringify(parts.videoIdentity?.identity):videoCount!==0)mismatch.push('MP4 영상 식별자');
  const verification={expected,names,images:snapshot,videoCount,videoIdentity:video,expectedVideoIdentity:parts.videoIdentity?.identity,bannerLinkStatus,bannerLinkVerified,mismatch,repairAttempt};
  await writeFile(path.join(path.dirname(parts.files[0]),'detail-verification.json'),JSON.stringify(verification,null,2));
  if(mismatch.length===1&&mismatch[0]==='옆트임 배치'&&repairAttempt===0){
   log('이미지·영상 일치 · 옆트임 미반영 '+snapshot.filter(n=>!n.extended).length+'장만 재적용 · 파일 재업로드 없음');
-  for(let i=0;i<snapshot.length;i++)if(!snapshot[i].extended){check();await applySmartstoreImageLayout(verified,images.nth(i),{check});}
-  await commitSmartstoreEditor(page,verified,expected.length,{check,log});
-  return verifySmartstoreDetail(page,parts,{check,log,repairAttempt:1});
+  for(let i=0;i<snapshot.length;i++)if(i===parts.bannerLink?.index?snapshot[i].extended:!snapshot[i].extended){check();await applySmartstoreImageLayout(verified,images.nth(i),{check,layout:i===parts.bannerLink?.index?'fit':'extend'});}
+  const prepared=await commitSmartstoreEditor(page,verified,expected.length,{check,log,applyEditor,bannerIndex:parts.bannerLink?.index});
+  if(!applyEditor)return {...prepared,detailParts:parts.files.length};
+  return verifySmartstoreDetail(page,parts,{check,log,repairAttempt:1,applyEditor});
  }
  if(mismatch.length){log('상세 대조 차이: '+mismatch.join(' · '));throw Error('상세페이지 확인 불일치: '+mismatch.join(' · ')+'. 상품은 저장하지 않았습니다.');}
  await verified.close();
