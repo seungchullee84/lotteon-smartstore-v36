@@ -19,7 +19,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  const style=validStyle(product);const draftRoot=path.join(dataRoot,'smartstore-details',style);
  let draft=null;try{draft=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(draft&&(String(draft.style)!==style||draft.sourceUrl!==product.sourceUrl))throw Error('상세페이지 준비 자료의 품번·공식 출처가 현재 상품과 다릅니다.');
- const prepared={style,includeBrandVideo:true,colorImages:{},sellingPoints:[],photoCount:0,photoFiles:{},sourceUrl:product.sourceUrl};
+ const prepared={style,includeBrandVideo:true,colorImages:{},colorSources:{},sellingPoints:[],photoCount:0,photoFiles:{},sourceUrl:product.sourceUrl,displayColors:[...product.colors]};
  if(draft){
   if(draft.headline)prepared.headline=String(draft.headline).slice(0,200);
   if(draft.sellingPoints){if(!Array.isArray(draft.sellingPoints)||draft.sellingPoints.some(p=>!p.title||!p.description||!p.evidence))throw Error('소구점의 공식 확인 근거를 함께 저장해 주세요.');prepared.sellingPoints=draft.sellingPoints.slice(0,3);}
@@ -57,6 +57,25 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
     for(const file of matches.slice(0,3))await attach(color,file,productRoot);
    }
    if(prepared.photoCount)break;
+  }
+ }
+ // Official fallback photos are separate from seller options and store mannequin claims.
+ if(draft?.officialPhotos?.length){
+  const detailHash=createHash('sha256').update(await readFile(path.join(folder,'detail.jpg'))).digest('hex');
+  for(const group of draft.officialPhotos){
+   if(prepared.colorImages[group.color]?.length)continue;
+   if(!/^\d{2}\S+/.test(group.color)||group.sourceUrl!==product.sourceUrl||group.sourceImageUrl!==product.images.detail||group.sourceImageHash!==detailHash)throw Error('공식 보완 사진의 품번·색상·출처를 다시 확인해 주세요.');
+   if(group.files?.length!==2||group.files[0].role!=='front')throw Error('공식 보완 사진은 정면을 첫 번째로 2장 준비해 주세요.');
+   prepared.displayColors.push(group.color);prepared.displayColors=[...new Set(prepared.displayColors)].sort();
+   for(const entry of group.files){
+    if(typeof entry.file!=='string'||path.isAbsolute(entry.file)||entry.file.split(/[\\/]/).includes('..'))throw Error('공식 사진 파일 경로를 확인해 주세요.');
+    const file=await realpath(path.join(draftRoot,entry.file)),canonicalRoot=await realpath(draftRoot);
+    if(!inside(canonicalRoot,file))throw Error('공식 사진이 자료 폴더 밖에 있습니다.');
+    const bytes=await readFile(file),hash=createHash('sha256').update(bytes).digest('hex');if(hash!==entry.sha256)throw Error('확인된 공식 사진 원본과 다릅니다.');
+    const id=hash.slice(0,24),name='smartstore-photo-'+id+'.jpg',src='/smartstore-photo/'+id;
+    await writeFile(path.join(folder,name),bytes);prepared.photoFiles[src]=name;prepared.colorImages[group.color]||=[];prepared.colorImages[group.color].push(src);
+   }
+   prepared.colorSources[group.color]='official';
   }
  }
  const p={...product,smartstoreDetail:prepared};

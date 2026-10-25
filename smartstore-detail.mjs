@@ -44,7 +44,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  const original=buildDetailContent(p.images,p.colors,p.colorImages,p.originalDetailUrl);
  const draft=p.smartstoreDetail;
  if(draft&&String(draft.style)!==String(p.style))throw Error('다른 품번의 상세페이지 자료는 적용하지 않습니다.');
- const groups=(p.colors||[]).map((color,index)=>({color,index,urls:[...new Set(draft?.colorImages?.[color]||p.colorImages?.[color]||[])].slice(0,3)})).filter(g=>g.urls.length);
+ const groups=(draft?.displayColors||p.colors||[]).map((color,index)=>({color,index,urls:[...new Set(draft?.colorImages?.[color]||p.colorImages?.[color]||[])].slice(0,3)})).filter(g=>g.urls.length);
  const points=draft?.sellingPoints?.length?draft.sellingPoints.slice(0,3):productSellingPoints(p);
  const sources=[];
  const photo=(src,alt='',extra='')=>{const url=imageUrl(src);sources.push(src);return `<img src="${safeImage(url)}" alt="${esc(alt)}" style="display:block;width:100%;height:auto;border:0;margin:0;${extra}">`;};
@@ -63,15 +63,17 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  }
  body+=divider+`<section style="padding:88px 6%;">${header('PRODUCT POINT','고를 때 확인할 포인트.')}<div data-product-points style="display:flex;gap:16px;align-items:stretch;">${points.map((point,i)=>`<div style="flex:1;min-width:0;border:1px solid #e0e5dc;border-radius:12px;background:#f7f8f4;padding:28px 24px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">${sellingPointIcon(point)}<span style="font-size:17px;color:#6b785f;">${String(i+1).padStart(2,'0')}</span></div><h3 style="font-size:25px;line-height:1.6;margin:20px 0 18px;">${esc(point.title)}</h3><p style="font-size:22px;line-height:1.9;margin:0;color:#303d35;">${esc(point.description)}</p></div>`).join('')}</div></section>`;
  if(groups.length){
-  if(draft?.photoCount>0){
+  if(draft?.photoCount>0&&!Object.values(draft.colorSources||{}).includes('official')){
    const wearing=mannequinWearingNote(p);
    body+=divider+'<section data-mannequin-intro style="padding:56px 6% 24px;text-align:center;"><p style="font-size:26px;font-weight:600;letter-spacing:.2px;line-height:1.7;margin:0;">매장 마네킹 실제 착용사진</p>'+(wearing?'<p data-mannequin-size style="font-size:22px;margin:10px 0 0;color:#465149;">'+esc(wearing)+'</p>':'')+'</section>';
   }
   for(const group of groups){
+   const mixed=Object.values(draft?.colorSources||{}).includes('official'),official=draft?.colorSources?.[group.color]==='official';
+   const sourceLabel=official?'<p style="text-align:center;font-size:26px;margin:0 0 28px;">지오다노 공식 상품 사진</p>':mixed?'<p style="text-align:center;font-size:26px;margin:0 0 12px;">매장 마네킹 실제 착용사진</p><p style="text-align:center;font-size:22px;margin:0 0 28px;">'+esc(mannequinWearingNote(p))+'</p>':'';
    const photos=group.urls.length===3
     ? '<div data-photo-layout="three"><div>'+photo(group.urls[0],group.color+' 착용 모습','border-radius:14px;')+'</div><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px;align-items:start;">'+group.urls.slice(1).map(url=>'<div>'+photo(url,group.color+' 디테일','border-radius:14px;')+'</div>').join('')+'</div></div>'
     : `<div style="display:flex;gap:8px;align-items:start;"><div style="flex:1.15;min-width:0;">${photo(group.urls[0],group.color+' 착용 모습','border-radius:14px;')}</div>${group.urls.length>1?`<div style="flex:1;min-width:0;">${group.urls.slice(1).map(url=>photo(url,group.color+' 디테일','margin-bottom:8px;border-radius:14px;')).join('')}<p style="font-size:19px;margin:16px 0 0;">DETAIL<br>제공된 상품사진과 디테일을 함께 확인해 주세요.</p></div>`:''}</div>`;
-   body+=`<section id="smartstore-color-${group.index}" style="padding:64px 4%;background:${group.index%2?'#f6f3ef':'#fff'};">${header('COLOR '+String(group.index+1).padStart(2,'0'),esc(group.color))}${photos}</section>`;
+   body+=`<section id="smartstore-color-${group.index}" style="padding:64px 4%;background:${group.index%2?'#f6f3ef':'#fff'};">${header('COLOR '+String(group.index+1).padStart(2,'0'),esc(group.color))}${sourceLabel}${photos}</section>`;
   }
  }
  body+=divider+`<section style="padding:88px 6% 96px;background:#f6f3ef;">${header('MATERIAL & SIZE','상품 정보를 확인해 주세요.')}<p style="font-size:23px;margin:0;">${esc(p.material||'소재는 아래 공식 상품고시를 확인해 주세요.')}</p><p style="font-size:21px;margin:24px 0 0;">사이즈 ${esc((p.sizes||[]).join(' · '))}</p></section>`;
