@@ -73,3 +73,17 @@ test('Windows API 연결은 평문 대신 현재 사용자 암호화로 저장�
  try{const key='sk-'+'a'.repeat(24);await saveSmartstoreAIKey(root,key);assert.equal(await loadSmartstoreAIKey(root),key);const file=await readFile(path.join(root,'smartstore-ai-settings.json'),'utf8');assert.ok(!file.includes(key));assert.ok(JSON.parse(file).encryptedKey.length>40);}
  finally{if(prior!==undefined)process.env.OPENAI_API_KEY=prior;await rm(root,{recursive:true,force:true});}
 });
+test('채팅에서 원본 바이트로 확인한 사진은 변환 해시 없이도 옆면 역할을 유지하고 API 없이 재사용한다',async()=>{
+ const {createHash}=await import('node:crypto');const digest=b=>createHash('sha256').update(b).digest('hex');const root=await mkdtemp(path.join(os.tmpdir(),'human-photo-'));
+ try{
+ const folder=path.join(root,'collected'),photos=path.join(root,'originals'),dataRoot=path.join(root,'data'),draftRoot=path.join(dataRoot,'smartstore-details',product.style);
+ for(const dir of [folder,photos,draftRoot])await mkdir(dir,{recursive:true});
+ const front=await sharp({create:{width:180,height:240,channels:3,background:'#123'}}).jpeg().toBuffer(),side=await sharp({create:{width:180,height:240,channels:3,background:'#456'}}).jpeg().toBuffer();
+ await writeFile(path.join(folder,'detail.jpg'),front);await writeFile(path.join(folder,'smartstore-official.html'),'<body>STYLE. 05375908<div class="prd_detail_content_gio">'+description+'</div></body>');
+ for(const [name,bytes]of [['1.jpg',front],['side.jpg',side]]){await writeFile(path.join(photos,name),bytes);await writeFile(path.join(draftRoot,name),bytes);}
+ const draft={style:product.style,sourceUrl:product.sourceUrl,officialDetailHash:digest(front),photos:[{color:'05블랙',files:['1.jpg','side.jpg']}],sellingPoints:[{title:'경량',description:'가벼운 원단',evidence:description}],photoMapping:{files:[{hash:digest(front),color:'05블랙',role:'front'},{hash:digest(side),color:'05블랙',role:'side'}]}};
+ await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft));
+ const p=await prepareSmartstoreAuto(product,folder,{dataRoot,photoRoots:[photos],fetchImpl:()=>{throw Error('API를 호출하면 안 됨');}});
+ const saved=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));assert.equal(saved.listingImages.extras.length,1);assert.equal(saved.listingImages.extras[0].role,'side');assert.equal(p.smartstoreDetail.photoCount,2);assert.deepEqual(saved.sellingPoints,draft.sellingPoints);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
