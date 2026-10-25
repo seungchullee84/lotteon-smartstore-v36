@@ -1,5 +1,11 @@
 import {setAttributeCheckboxes} from './smartstore-attribute-checkboxes.mjs';
-import {selectLearnedAttribute} from './smartstore-learned.mjs';
+import {selectLearnedAttribute,fillLearnedAttributes} from './smartstore-learned.mjs';
+export async function fillProductAttributes(page,fields,log=()=>{},check=()=>{}){
+ check();const dialog=page.locator('.modal-content').filter({has:page.getByRole('heading',{name:'상품속성',exact:true})});
+ // The expanded dialog includes the basic attributes: do not click them twice.
+ if(await dialog.isVisible()||await page.getByRole('button',{name:'속성 더 입력하기',exact:true}).isVisible())return fillAdditionalAttributes(page,fields,log,check);
+ return fillLearnedAttributes(page,fields,check,log);
+}
 // Apply only product attributes with reviewed evidence, through the seller UI.
 export async function fillAdditionalAttributes(page,fields,log=()=>{},check=()=>{}){
  const heading=page.getByRole('heading',{name:'상품속성',exact:true});

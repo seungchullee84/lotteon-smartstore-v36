@@ -1,8 +1,8 @@
 export function isSmartstoreInputUrl(url){return /^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/(?:create(?:[?]|$)|copy\/\d+(?:[?]|$))/.test(url);}
 import {buildSmartstoreDetail} from './smartstore-detail.mjs';
-import {fillAdditionalAttributes} from './smartstore-attributes.mjs';
+import {fillProductAttributes} from './smartstore-attributes.mjs';
 import {smartstoreTitle,assertSmartstoreInputTitle} from './smartstore-title.mjs';
-import {learnedFields,fillLearnedAttributes,sellerProductCode} from './smartstore-learned.mjs';
+import {learnedFields,sellerProductCode} from './smartstore-learned.mjs';
 import {researchForProduct} from './apparel-tag-research.mjs';
 import {fillResearchTags} from './smartstore-research-tags.mjs';
 
@@ -74,13 +74,21 @@ export async function fillSmartstoreOrigin(page,country,check=()=>{}){
  await page.waitForFunction(()=>{const input=document.querySelector('input[ng-model="vm.viewData.originAreaInfo.importer"]');return input?.value==='지오다노'&&!input.classList.contains('ng-invalid');},null,{timeout:8000});
  return {type:'수입산',region:'아시아',country,importer:'지오다노'};
 }
+export async function fillSmartstoreValue(loc,value,check=()=>{}){
+ check();const expected=String(value),current=await loc.evaluate(e=>e.value);
+ if(current===expected||current!=='<redacted>'&&String(current).replaceAll(',','')===expected.replaceAll(',','')&&/^\d[\d,]*$/.test(expected))return false;
+ await loc.fill(expected);await loc.press('Tab');check();
+ const actual=await loc.evaluate(e=>e.value);
+ if(actual!=='<redacted>'&&String(actual).replaceAll(',','')!==expected.replaceAll(',',''))throw Error('입력값 확인 실패: '+expected.slice(0,50));
+ return true;
+}
 export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   assertSmartstoreInputTitle(plan.name,plan.nameUserEdited);
   const page=tab.playwright;
   if(!isSmartstoreInputUrl(await tab.url()))throw Error('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.');
   if(!/\/products\/copy\/\d+/.test(await tab.url()))throw Error('기본설정을 복사한 복사등록 화면에서 실행해 주세요.');
   const learned=learnedFields(plan);
-  const fill=async(loc,value)=>{check();await loc.fill(String(value));await loc.press('Tab');const actual=await loc.evaluate(e=>e.value);if(actual!=='<redacted>'&&String(actual).replaceAll(',','')!==String(value).replaceAll(',',''))throw Error('입력값 확인 실패: '+String(value).slice(0,50));};
+  const fill=(loc,value)=>fillSmartstoreValue(loc,value,check);
   const open=async(name,field)=>{if(!await field.isVisible())await page.getByRole('button',{name}).click();};
   log('스마트스토어 복사등록 입력 · 조사 자료 태그 자동입력 · 상품 저장/등록 안 함');
   log('카테고리 자동선택 중지 · 현재 선택된 분류 유지');
@@ -110,8 +118,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   if(assets&&(assets.main||Array.isArray(assets.extras))){await uploadSmartstoreImages(page,assets,check);log(assets.main?'대표·추가 이미지 업로드 완료':'추가이미지 정리 완료 · 대표이미지 교체 제외');}
   if(!assets?.detail)log('복사된 상세설명 유지 · 별도로 지시한 이미지 입력만 수행');
   await open(/^상품 주요정보/,page.getByRole('textbox',{name:'품번',exact:true}));
-  await fillLearnedAttributes(page,learned,check,log);
-  await fillAdditionalAttributes(page,learned,log,check);
+  await fillProductAttributes(page,learned,log,check);
   const origin=await fillSmartstoreOrigin(page,plan.country,check);
   log('원산지 확인: '+origin.type+' · '+origin.country+(origin.importer?' · 수입사 '+origin.importer:''));
   const manufactureDate=learned.manufactureDate;

@@ -35,7 +35,8 @@ export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=t
 }
 export const insertSmartstoreVideo=insertNativeBrandVideo;
 export async function applySmartstoreImageLayout(editor,image,{check=()=>{}}={}){
- check();await image.scrollIntoViewIfNeeded();await editor.bringToFront();
+ check();if(await image.evaluate(n=>!!n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend')))return;
+ await image.scrollIntoViewIfNeeded();await editor.bringToFront();
  const componentId=await image.evaluate(n=>n.closest('.se-component.se-image').id);
  const select=async()=>{
   const box=await image.boundingBox(),viewportHeight=await editor.evaluate(()=>innerHeight);
