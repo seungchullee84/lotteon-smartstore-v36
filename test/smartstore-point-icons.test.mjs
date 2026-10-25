@@ -17,3 +17,17 @@ test('실제 상세 문서에서 최신 소구점별 아이콘과 문구를 함�
  p.smartstoreDetail.sellingPoints=[{title:'자수 디테일',description:'입체적인 패치',evidence:'공식 확인'}];
  const html=buildSmartstoreDetail(p).html;assert.match(html,/data-point-icon="embroidery"/);assert.doesNotMatch(html,/data-point-icon="warmth"/);
 });
+
+test('히든밴딩은 허리 안쪽 밴드로, 테이퍼드·하의 핏은 바지로 표현하며 상의와 구분한다',()=>{
+ const pants={rawName:'테이퍼드 히든밴딩 기모 슬랙스',sourceCategory:['MEN','PANTS']};
+ assert.equal(sellingPointIconKind({title:'편안한 히든밴딩'},pants),'hidden-banding');
+ assert.equal(sellingPointIconKind({title:'편안한 허리',description:'허리 안쪽의 히든 밴딩'},pants),'hidden-banding');
+ assert.match(sellingPointIcon({title:'히든밴딩'},pants),/data-band-position="inside"/);
+ assert.equal(sellingPointIconKind({title:'깔끔한 테이퍼드핏'},pants),'tapered-pants');
+ assert.equal(sellingPointIconKind({title:'편안한 실루엣'},pants),'pants-fit');
+ assert.equal(sellingPointIconKind({title:'편안한 실루엣'},{rawName:'여성 스커트'}),'skirt-fit');
+ assert.equal(sellingPointIconKind({title:'편안한 실루엣'},{rawName:'여성 니트'}),'fit');
+ assert.equal(sellingPointIconKind({title:'허리 밴딩'},pants),'banding');
+ const p={style:'115915',...pants,images:{detail:'https://example.com/detail.jpg'},colors:[],smartstoreDetail:{style:'115915',sellingPoints:[{title:'히든밴딩',description:'안쪽 밴드'},{title:'테이퍼드핏',description:'밑단으로 좁아지는 핏'}]}};
+ const html=buildSmartstoreDetail(p).html;assert.match(html,/data-point-icon="hidden-banding"/);assert.match(html,/data-point-icon="tapered-pants"/);assert.doesNotMatch(html,/data-point-icon="fit"/);
+});
