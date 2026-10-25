@@ -162,7 +162,7 @@ function renderDetailPreview(p){
  detailPreviewResizeObserver?.disconnect();
  const box=$('detailPreview');box.replaceChildren();box.scrollTop=0;
  if(document.body.dataset.channel==='smartstore'){
-  $('detailPreviewStatus').textContent='업로드용 860px 구성 그대로 축소 표시 · MP4 무음 자동재생·반복 · 판매페이지 자동재생 미검증';
+  $('detailPreviewStatus').textContent='';
   const frame=document.createElement('iframe');frame.className='smartstore-template-preview';frame.title='스마트스토어 확정 템플릿 상세페이지';frame.allow='autoplay; fullscreen; picture-in-picture';
   frame.src='/smartstore-detail-preview.html?style='+encodeURIComponent(p.style)+'&fields='+encodeURIComponent(JSON.stringify(smartstoreDetailFields()));box.append(frame);
   const fit=()=>{
@@ -501,7 +501,7 @@ function syncListingImages(state){
 function renderResearchTags(state){
  const panel=$('researchTagStatus');if(!panel)return;
  const research=effectiveTagResearch(state),container=$('researchTagCandidates');tagResearchReady=!!research?.candidates?.length||!!research?.manual;
- $('smartstoreAutoTags').disabled=requestLock||state.busy||!tagResearchReady;$('smartstoreValidateTags').disabled=$('smartstoreAutoTags').disabled;
+ $('smartstoreAutoTags').disabled=requestLock||state.busy||!tagResearchReady;
  const allowed=new Map((research?.candidates||[]).map(t=>[t.id,t.name]));
  const currentReport=result=>result?.style===state.product?.style&&Array.isArray(result.selectedTags)&&result.selectedTags.every(t=>allowed.get(t.id)===t.name)?result:null;
  const report=currentReport(state.tagResult),validation=currentReport(state.tagValidation);
@@ -519,7 +519,6 @@ $('smartstoreAutoTags').onclick=async()=>{
  finally{requestLock=false;syncButtons();}
 };
 
-$('smartstoreValidateTags').onclick=async()=>{if(requestLock||serverBusy||!product||document.body.dataset.channel!=='smartstore')return;requestLock=true;syncButtons();try{await flushManualTagSelection();await post('smartstore-tags-validate',{style:product.style,selectedTags:currentManualTags()});serverBusy=true;serverPhase='smartstore-tags';$('error').textContent='';announce('태그 검증 시작 · 검증 뒤 기존 폼 태그를 복원합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;syncButtons();}};
 
 // Preserve deliberate edits per style; newly collected source images stay server-owned.
 const manualProductFields=new Set(['name','gender','consumerPrice','colors','sizes','material','country','manufactured','washing','keywords','commonMiddle','commonSmall','channelMiddle','channelSmall','smartstoreName']);
@@ -577,7 +576,7 @@ $('closePhotoAnalysis').onclick=()=>photoDialog.close();photoDialog.addEventList
 $('photoAnalysisForm').onsubmit=async event=>{event.preventDefault();const button=event.submitter;button.disabled=true;try{await post('smartstore-ai-settings',{apiKey:$('photoAnalysisKey').value});photoAnalysisConfigured=true;$('photoAnalysisForm').reset();$('photoAnalysisMessage').textContent='암호화 저장 완료. 시작을 누르면 사진과 미리보기를 자동 준비합니다.';}catch(error){$('photoAnalysisMessage').textContent=error.message;}finally{button.disabled=false;}};
 const photoPreparationStatus=document.createElement('p');photoPreparationStatus.id='photoPreparationStatus';photoPreparationStatus.className='note';photoPreparationStatus.setAttribute('role','status');$('mainSourceNote').insertAdjacentElement('afterend',photoPreparationStatus);
 let photoAnalysisConfigured=false,manualTagStyle='',manualTagChoices=new Map(),manualTagHasSelection=false,tagSearchSequence=0,manualTagSaveQueue=Promise.resolve(),manualTagSaveVersion=0;
-const tagTools=document.createElement('div');tagTools.className='manual-tag-tools';tagTools.innerHTML='<label class="sr-only" for="manualTagQuery">연관 태그 검색어</label><input id="manualTagQuery" type="search" maxlength="40" placeholder="예: 후드, 기모, 티셔츠" autocomplete="off"><button id="manualTagSearch" type="button" class="secondary">태그 찾기</button>';$('smartstoreValidateTags').insertAdjacentElement('afterend',tagTools);
+const tagTools=document.createElement('div');tagTools.className='manual-tag-tools';tagTools.innerHTML='<label class="sr-only" for="manualTagQuery">연관 태그 검색어</label><input id="manualTagQuery" type="search" maxlength="40" placeholder="예: 후드, 기모, 티셔츠" autocomplete="off"><button id="manualTagSearch" type="button" class="secondary">태그 찾기</button>';$('smartstoreAutoTags').insertAdjacentElement('afterend',tagTools);
 const tagPicker=document.createElement('section');tagPicker.id='manualTagPicker';tagPicker.className='manual-tag-picker';tagPicker.hidden=true;tagPicker.innerHTML='<p id="manualTagSaveStatus" role="status"></p><p id="manualTagMessage" role="status"></p><div id="manualTagResults" class="manual-tag-results"></div><p id="manualTagSelectionStatus"></p><div id="manualTagChoices" class="manual-tag-choices"></div><button id="applyManualTags" type="button">선택 태그 검증·적용</button><small>체크·해제하면 등록기의 적용 태그에 바로 저장됩니다. 근거 없음 태그도 직접 선택할 수 있으며, 네이버 입력 시 검색 등록 여부를 확인합니다. 상품 저장은 하지 않습니다.</small>';$('researchTagCandidates').parentElement.append(tagPicker);
 function drawManualTagChoices(){
  $('manualTagSelectionStatus').textContent='선택 '+manualTagChoices.size+'/10개 · 적용할 때 검색 등록 여부 확인';$('applyManualTags').disabled=!manualTagHasSelection||serverBusy;
