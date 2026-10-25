@@ -8,6 +8,7 @@ export function chooseListingPhotos(photos,product){
  const main=photos.filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name||''));
  if(main.length!==1)throw Error('품번 폴더에서 대표로 사용할 사진 한 장의 파일명을 1.jpg 또는 1번.jpg로 지정해 주세요.');
  const selected=main[0],same=p=>hash(p.bytes)===hash(selected.bytes);
+ if(selected.role==='care-label'||!product.colors.includes(selected.color))throw Error('1번 대표사진의 상품·색상을 확인해 주세요. 케어라벨은 대표로 사용하지 않습니다.');
  const side=photos.find(p=>p.color===selected.color&&p.role==='side'&&!same(p));
  const extras=side?[side]:[];
  for(const color of product.colors.filter(color=>color!==selected.color&&photos.some(p=>p.color===color))){const front=photos.find(p=>p.color===color&&p.role==='front'&&!same(p));if(!front)throw Error(color+' 정면 사진이 필요합니다.');extras.push(front);}
