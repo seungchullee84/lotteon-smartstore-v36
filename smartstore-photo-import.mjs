@@ -73,7 +73,9 @@ export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{
  for(const p of context.pages())if(!p.isClosed()&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/editor(?:\?|$)/.test(p.url())&&await p.opener()===page)editors.push(p);
  if(editors.length>1)throw Error('이 상품의 상세 편집기가 여러 개입니다. 사용할 편집기 하나만 남겨 주세요.');
  const editor=editors[0]||await openSmartstoreEditor(page,{check});
- await editor.locator('.se-component').first().waitFor({state:'visible',timeout:20000});
+ // ONE initially exposes an empty text component while restoring the saved document.
+ // Wait for the restored image components before looking for their color headings.
+ await editor.locator('.se-component.se-image,.se-component.se-imageStrip').first().waitFor({state:'attached',timeout:20000});
  const positions=await editor.evaluate(editorPhotoPositions,product.colors);
  if(!positions.length)throw Error('색상별 개별 착용사진을 찾지 못했습니다. 긴 통이미지는 이 채팅에서 확인해 주세요.');
  if(positions.length>40)throw Error('가져올 사진은 한 상품당 40장 이내로 확인해 주세요.');
