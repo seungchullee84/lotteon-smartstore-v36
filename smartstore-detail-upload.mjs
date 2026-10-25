@@ -26,10 +26,10 @@ export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=t
  if(footerTop!==undefined&&(!Number.isInteger(footerTop)||footerTop<firstHeight||footerTop>=meta.height))throw Error('구매 혜택부터 하단까지의 이미지 구간을 확인해 주세요.');
  if(bannerTop!==undefined&&(!Number.isInteger(bannerTop)||footerTop===undefined||bannerTop<firstHeight||bannerTop>=footerTop))throw Error('하단 안내 위 배너 이미지 구간을 확인해 주세요.');
  const dest=path.join(folder,'smartstore-upload');await mkdir(dest,{recursive:true});
- const digest=createHash('sha256').update(await readFile(png)).digest('hex').slice(0,16);
+ const digest=createHash('sha256').update(await readFile(png)).update(JSON.stringify({rule:'semantic-sections-1',firstHeight,bannerTop,footerTop})).digest('hex').slice(0,16);
  const parts=[];let bannerLink=null;
  for(let top=0,index=0;top<meta.height;index++){
-  let height=index===0?firstHeight:Math.min(8000,meta.height-top);
+  let height=index===0?firstHeight:meta.height-top;
   const footer=top===footerTop;
   const banner=top===bannerTop;
   if(footer)height=meta.height-top;
@@ -37,8 +37,8 @@ export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=t
   else if(footerTop!==undefined&&top<footerTop)height=Math.min(height,footerTop-top);
   if(bannerTop!==undefined&&top<bannerTop)height=Math.min(height,bannerTop-top);
   const file=path.join(dest,digest+'-'+String(index).padStart(2,'0')+'.png');
-  let bytes;do{bytes=await sharp(png,{limitInputPixels:false}).extract({left:0,top,width:860,height}).png({compressionLevel:9}).toBuffer();if(bytes.length<=19000000||footer||banner)break;height=Math.floor(height*.7);}while(height>100);
-  if(bytes.length>19000000)throw Error('상세이미지 조각 용량을 확인해 주세요.');
+  const bytes=await sharp(png,{limitInputPixels:false}).extract({left:0,top,width:860,height}).png({compressionLevel:9}).toBuffer();
+  if(bytes.length>19000000)throw Error('상세 구간 한 장의 업로드 용량을 초과했습니다. 원본과 표를 유지하기 위해 중간 분할하지 않았습니다.');
   await writeFile(file,bytes);parts.push(file);top+=height;
   if(banner)bannerLink={index,file,url:STORE_BANNER_URL};
  }
@@ -178,10 +178,14 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  await editor.waitForFunction(()=>document.querySelectorAll('.se-component').length<=1);
  const existing=await editor.locator('.se-component.se-image,.se-component.se-video,.se-component.se-oembed').count();
  if(existing)throw Error('기존 상세설명이 남아 있어 새 이미지를 올리지 않았습니다.');
- const choose=async(file)=>{
+ const choose=async(file,index)=>{
   check();const before=await editor.locator('.se-component.se-image').count();
   const empty=editor.locator('.se-component.se-text .se-text-paragraph').last();
   if(await empty.count())await empty.click({force:true});
+  if(parts.bannerLink?.index===index&&index>0&&await empty.count()){
+   check();await editor.keyboard.press('End');await editor.keyboard.press('Enter');
+   await editor.evaluate(()=>new Promise(requestAnimationFrame));log('배너 앞 빈 줄 한 칸 분리');
+  }
   await editor.locator('button[data-group="documentToolbar"][data-name="image"]').click();
   const input=editor.locator('input[type="file"]');
   await input.waitFor({state:'attached',timeout:15000});await input.setInputFiles(file);
@@ -191,9 +195,9 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
   await editor.waitForFunction(()=>/^https:\/\//.test([...document.querySelectorAll('.se-component.se-image img')].at(-1)?.src||''),null,{timeout:60000});
   await applySmartstoreImageLayout(editor,lastImage,{check});
  };
- await choose(parts.files[0]);log('브랜드 소개 이미지 업로드');
+ await choose(parts.files[0],0);log('브랜드 소개 이미지 업로드');
  if(parts.includeVideo!==false){await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});parts.videoIdentity=await insertSmartstoreVideo(editor,{check,dataRoot:parts.dataRoot,videoOptions:parts.videoOptions});}
- for(const file of parts.files.slice(1))await choose(file);
+ for(let index=1;index<parts.files.length;index++)await choose(parts.files[index],index);
  const order=await editor.locator('.se-component').evaluateAll(ns=>ns.filter(n=>/se-image|se-video|se-oembed/.test(n.className)).map(n=>n.className));
  const includeVideo=parts.includeVideo!==false;
  if(order.length!==parts.files.length+Number(includeVideo)||!order[0].includes('se-image')||(includeVideo?!/se-video|se-oembed/.test(order[1])||order.slice(2).some(c=>!c.includes('se-image')):order.some(c=>!c.includes('se-image'))))throw Error('브랜드 소개·상품상세 및 영상 설정에 맞는 순서를 확인해 주세요.');

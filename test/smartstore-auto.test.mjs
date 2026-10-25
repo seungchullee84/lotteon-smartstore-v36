@@ -46,7 +46,8 @@ test('업로드용 조각은 브랜드 소개·본문을 빠짐없이 보존하�
  await sharp({create:{width:860,height:1173,channels:3,background:'#ddd'}}).jpeg().toFile(brand);
  const {files}=await smartstoreUploadParts(png,root,brand,await prepareVideo(root));let height=0;
  for(const file of files){const m=await sharp(file).metadata();assert.equal(m.width,860);height+=m.height;assert.ok((await readFile(file)).length<20000000);}
- assert.equal(files.length,4);assert.equal(height,18500);assert.equal((await sharp(png).metadata()).height,18500);
+ assert.equal(files.length,2);assert.equal(height,18500);assert.equal((await sharp(png).metadata()).height,18500);
+ assert.ok((await sharp(files[1]).metadata()).height>8000,'상품 본문은 8000px을 넘어도 한 장 유지');
  const noVideo=await smartstoreUploadParts(png,root,brand,{includeVideo:false});
  assert.equal(noVideo.includeVideo,false);assert.equal(noVideo.video,null);assert.deepEqual(noVideo.files,files);
  const expanded=await smartstoreUploadParts(png,root,brand,{...await prepareVideo(root),brandIntroHeight:1800});
@@ -56,6 +57,7 @@ test('업로드용 조각은 브랜드 소개·본문을 빠짐없이 보존하�
  assert.deepEqual(await sharp(joinedFooter.files.at(-1)).raw().toBuffer(),await sharp(png).extract({left:0,top:10000,width:860,height:8500}).raw().toBuffer());
  let joinedHeight=0;for(const file of joinedFooter.files)joinedHeight+=(await sharp(file).metadata()).height;assert.equal(joinedHeight,18500);
  const bannerFooter=await smartstoreUploadParts(png,root,brand,{includeVideo:false,bannerTop:9400,footerTop:10000});
+ assert.equal(bannerFooter.files.length,4);assert.equal(bannerFooter.bannerLink.index,2);
  assert.equal((await sharp(bannerFooter.files.at(-2)).metadata()).height,600);
  assert.equal((await sharp(bannerFooter.files.at(-1)).metadata()).height,8500);
  assert.deepEqual(await sharp(bannerFooter.files.at(-2)).raw().toBuffer(),await sharp(png).extract({left:0,top:9400,width:860,height:600}).raw().toBuffer());
