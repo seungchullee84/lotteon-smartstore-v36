@@ -54,6 +54,21 @@ export async function applySmartstoreImageLayout(editor,image,{check=()=>{}}={})
  await editor.waitForFunction(id=>!!document.getElementById(id)?.querySelector('.se-component-content-extend'),componentId,{timeout:15000});
  check();
 }
+export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{}}={}){
+ check();
+ // ONE can render the layout before its document model has finished updating.
+ // Wait for a stable, fully hosted image set once, immediately before applying.
+ await editor.waitForFunction(count=>{
+  const images=[...document.querySelectorAll('.se-component.se-image img')];
+  if(images.length!==count||images.some(n=>!/^https:\/\//.test(n.src)||!n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend')))return false;
+  const signature=images.map(n=>n.closest('.se-component.se-image').id+'|'+n.src).join('\n');
+  const before=window.__smartstoreLayoutReady;
+  if(!before||before.signature!==signature){window.__smartstoreLayoutReady={signature,since:performance.now()};return false;}
+  return performance.now()-before.since>=200;
+ },imageCount,{timeout:5000});
+ check();await Promise.all([editor.waitForEvent('close',{timeout:30000}),editor.getByRole('button',{name:'등록',exact:true}).click()]);
+ if(await page.locator('textarea[name="editorContent"]').inputValue()!=='true')throw Error('판매자센터 상세설명 반영 결과를 확인하지 못했습니다.');
+}
 export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}}={}){
  if(!/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+/.test(page.url()))throw Error('상세페이지는 스마트스토어 복사등록 화면에서만 교체합니다.');
  check();
@@ -97,13 +112,11 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  const order=await editor.locator('.se-component').evaluateAll(ns=>ns.filter(n=>/se-image|se-video|se-oembed/.test(n.className)).map(n=>n.className));
  const includeVideo=parts.includeVideo!==false;
  if(order.length!==parts.files.length+Number(includeVideo)||!order[0].includes('se-image')||(includeVideo?!/se-video|se-oembed/.test(order[1])||order.slice(2).some(c=>!c.includes('se-image')):order.some(c=>!c.includes('se-image'))))throw Error('브랜드 소개·상품상세 및 영상 설정에 맞는 순서를 확인해 주세요.');
- check();await Promise.all([editor.waitForEvent('close',{timeout:30000}),editor.getByRole('button',{name:'등록',exact:true}).click()]);
- const content=await page.locator('textarea[name="editorContent"]').inputValue();
- if(content!=='true')throw Error('판매자센터 상세설명 반영 결과를 확인하지 못했습니다.');
+ await commitSmartstoreEditor(page,editor,parts.files.length,{check});
  // Reopen the saved ONE document to verify persistence, rather than trust its boolean placeholder.
  return verifySmartstoreDetail(page,parts,{check,log});
 }
-export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}}={}){
+export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{},repairAttempt=0}={}){
  check();
  const verified=await openSmartstoreEditor(page,{check});
  await verified.locator('.se-component.se-image img').nth(parts.files.length-1).waitFor({state:'visible',timeout:30000});
@@ -123,8 +136,14 @@ export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  if(JSON.stringify(names)!==JSON.stringify(expected))mismatch.push('이미지 파일명·순서');
  if(snapshot.length!==expected.length||snapshot.some(n=>!n.extended))mismatch.push('옆트임 배치');
  if(includeVideo?!video.length||JSON.stringify(video)!==JSON.stringify(parts.videoIdentity?.identity):videoCount!==0)mismatch.push('MP4 영상 식별자');
- const verification={expected,names,images:snapshot,videoCount,videoIdentity:video,expectedVideoIdentity:parts.videoIdentity?.identity,mismatch};
+ const verification={expected,names,images:snapshot,videoCount,videoIdentity:video,expectedVideoIdentity:parts.videoIdentity?.identity,mismatch,repairAttempt};
  await writeFile(path.join(path.dirname(parts.files[0]),'detail-verification.json'),JSON.stringify(verification,null,2));
+ if(mismatch.length===1&&mismatch[0]==='옆트임 배치'&&repairAttempt===0){
+  log('이미지·영상 일치 · 옆트임 미반영 '+snapshot.filter(n=>!n.extended).length+'장만 재적용 · 파일 재업로드 없음');
+  for(let i=0;i<snapshot.length;i++)if(!snapshot[i].extended){check();await applySmartstoreImageLayout(verified,images.nth(i),{check});}
+  await commitSmartstoreEditor(page,verified,expected.length,{check});
+  return verifySmartstoreDetail(page,parts,{check,log,repairAttempt:1});
+ }
  if(mismatch.length){log('상세 대조 차이: '+mismatch.join(' · '));throw Error('상세페이지 확인 불일치: '+mismatch.join(' · ')+'. 상품은 저장하지 않았습니다.');}
  await verified.close();
  log('상세페이지 이미지 '+parts.files.length+'장 반영 확인 · '+(includeVideo?'공통 MP4 포함 · 판매페이지 자동재생 미검증':'영상 제외'));
