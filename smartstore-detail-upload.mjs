@@ -16,10 +16,10 @@ export async function openSmartstoreEditor(page,{check=()=>{}}={}){
  const [editor]=await Promise.all([page.waitForEvent('popup',{timeout:45000}),input.click({timeout:30000})]);
  await editor.bringToFront();return editor;
 }
-export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,videoOptions}={}){
+export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,videoOptions,brandIntroHeight}={}){
  const video=includeVideo?await requireBrandVideo(dataRoot,videoOptions):null;
  const meta=await sharp(png,{limitInputPixels:false}).metadata();
- const brand=await sharp(brandFile).metadata();const firstHeight=Math.round(meta.width*brand.height/brand.width)+BRAND_VIDEO_HEADING_HEIGHT;
+ const brand=await sharp(brandFile).metadata();const firstHeight=(brandIntroHeight??Math.round(meta.width*brand.height/brand.width))+BRAND_VIDEO_HEADING_HEIGHT;
  if(meta.width!==860||meta.height<=firstHeight)throw Error('상세페이지 이미지 크기를 확인해 주세요.');
  const dest=path.join(folder,'smartstore-upload');await mkdir(dest,{recursive:true});
  const digest=createHash('sha256').update(await readFile(png)).digest('hex').slice(0,16);

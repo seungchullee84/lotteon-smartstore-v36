@@ -9,10 +9,10 @@ export async function restoreRenderedDetail(root,style,key,output){
   await writeFile(output+'.partial',bytes);await rename(output+'.partial',output);return record;
  }catch{return null;}
 }
-export async function cacheRenderedDetail(root,style,key,output,height){
+export async function cacheRenderedDetail(root,style,key,output,height,metadata={}){
  try{
   await mkdir(root,{recursive:true});const bytes=await readFile(output),id=randomUUID(),png=path.join(root,style+'.png'),manifest=path.join(root,style+'.json');
   await writeFile(png+'.'+id+'.tmp',bytes);await rename(png+'.'+id+'.tmp',png);
-  await writeFile(manifest+'.'+id+'.tmp',JSON.stringify({key,width:860,height,digest:digest(bytes)}));await rename(manifest+'.'+id+'.tmp',manifest);
+  await writeFile(manifest+'.'+id+'.tmp',JSON.stringify({...metadata,key,width:860,height,digest:digest(bytes)}));await rename(manifest+'.'+id+'.tmp',manifest);
  }catch{} // The requested output remains usable even if cache storage fails.
 }
