@@ -89,7 +89,13 @@ export async function selectSmartstoreImage(editor,image,{check=()=>{}}={}){
  const component=image.locator('xpath=ancestor::*[contains(concat(" ",normalize-space(@class)," ")," se-component ")][1]');
  const target=await section.count()?section:await component.count()?component:image;
  let clickIssue;
- try{await target.click({timeout:3000});check();return;}catch(error){check();clickIssue=error;}
+ try{
+  await image.scrollIntoViewIfNeeded();
+  const bitmap=await image.boundingBox(),container=await target.boundingBox();
+  if(!bitmap||!container)throw Error('이미지 위치가 아직 표시되지 않았습니다.');
+  await target.click({position:{x:bitmap.x-container.x+bitmap.width/2,y:bitmap.y-container.y+bitmap.height/2},timeout:3000});
+  check();return;
+ }catch(error){check();clickIssue=error;}
  for(const alignment of [null,'center','start']){
   check();await image.scrollIntoViewIfNeeded();
   if(alignment)await image.evaluate((n,block)=>n.scrollIntoView({block,inline:'nearest',behavior:'instant'}),alignment);
