@@ -1,8 +1,8 @@
-const normalize=s=>String(s||'').replace(/\s+/g,' ').trim();
+const normalize=s=>String(s||'').replace(/추천/g,'').replace(/\s+/g,' ').trim();
 export async function setAttributeCheckboxes(row,values,{label='소재',check=()=>{},requireAll=false,optionalValues=[],timeout=3000,bestEffort=false,onSkip=()=>{}}={}){
  const skipped=new Set();
  const skip=name=>{if(!skipped.has(name)){skipped.add(name);onSkip(label+' / '+name);}};
- const read=()=>row.getByRole('checkbox').evaluateAll(ns=>ns.map(n=>({id:n.id,name:(n.getAttribute('aria-label')||n.labels?.[0]?.textContent||n.parentElement.textContent).replace(/\s+/g,' ').trim(),checked:n.checked})));
+ const read=()=>row.getByRole('checkbox').evaluateAll(ns=>ns.map(n=>({id:n.id,name:(n.getAttribute('aria-label')||n.labels?.[0]?.textContent||n.parentElement.textContent).replace(/추천/g,'').replace(/\s+/g,' ').trim(),checked:n.checked})));
  if(!await row.getByRole('checkbox').count()){if(bestEffort){for(const value of values)skip(value);return [];}if(requireAll&&values.length)throw Error(label+' 선택 항목이 없습니다.');return [];}
  const entries=await read(),wanted=new Set([...values,...optionalValues].map(normalize));
  if(requireAll||bestEffort)for(const value of values.map(normalize))if(!entries.some(e=>e.name===value)){if(bestEffort)skip(value);else throw Error('이 카테고리에 해당 속성 값이 없습니다: '+label+' / '+value);}

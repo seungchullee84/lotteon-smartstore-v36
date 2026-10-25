@@ -45,6 +45,14 @@ test('선택 실패를 건너뛰는 중에도 사용자 중단을 즉시 전파�
  assert.equal(await page.locator('#cotton').isChecked(),false);
 }));
 
+test('추천 표시가 붙은 소재도 같은 값으로 인식해 체크를 유지한다',()=>fixture(async page=>{
+ await page.setContent('<table><tr><td><input type="checkbox" id="cotton" checked><label for="cotton">면 <span>추천</span></label><input type="checkbox" id="poly"><label for="poly">폴리에스테르 추천</label></td></tr></table>');
+ const skipped=[];
+ const selected=await setAttributeCheckboxes(page.getByRole('row'),['면','폴리에스테르'],{bestEffort:true,timeout:120,onSkip:x=>skipped.push(x)});
+ assert.deepEqual(selected,['면','폴리에스테르']);assert.deepEqual(skipped,[]);
+ assert.equal(await page.locator('#cotton').isChecked(),true);
+}));
+
 test('추가 속성 적용 실패는 입력창을 닫고 최종 확인 기록으로 남긴다',()=>fixture(async page=>{
  await page.setContent('<div class="modal-content"><h2>상품속성</h2><table><tr><th>주요소재</th><td><input type="checkbox" aria-label="면"></td></tr></table><button>저장</button><button onclick="this.parentElement.hidden=true">닫기</button></div>');
  const logs=[];
