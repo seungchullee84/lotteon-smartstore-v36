@@ -43,6 +43,8 @@ test('업로드용 조각은 브랜드 소개·본문을 빠짐없이 보존하�
  assert.equal(files.length,4);assert.equal(height,18500);assert.equal((await sharp(png).metadata()).height,18500);
  const noVideo=await smartstoreUploadParts(png,root,brand,{includeVideo:false});
  assert.equal(noVideo.includeVideo,false);assert.equal(noVideo.video,null);assert.deepEqual(noVideo.files,files);
+ const expanded=await smartstoreUploadParts(png,root,brand,{...await prepareVideo(root),brandIntroHeight:1800});
+ assert.equal((await sharp(expanded.files[0]).metadata()).height,1888,'확장된 브랜드 소개와 영상 제목 뒤에서 분할');
  }finally{await rm(root,{recursive:true,force:true});}
 });
 test('사진 내용이 같으면 재실행 시 확인된 색상을 유지하고 공식 품번은 다시 검증한다',async()=>{
