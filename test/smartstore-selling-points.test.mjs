@@ -22,3 +22,8 @@ test('모든 의류의 표시 문구는 짧게 요약하고 긴 원문과 문단
  const points=officialSellingPoints(text);assert.equal(points.length,3);assert(points.every(p=>p.title.length<=18&&p.description.length<=42&&p.title!==p.description));assert(usableSellingPoints(points,text));assert.deepEqual(points.map(p=>p.title),['히든밴딩, 편안하게','사방으로, 유연하게','부드럽고, 따뜻하게']);
  assert.equal(officialSellingPoints('아주 긴 소개문을 그대로 상품 제목과 설명에 반복하는 방식은 사용하지 않으며 검토가 필요한 새로운 상품입니다.').length,0);assert.equal(usableSellingPoints([{title:'짧은 제목',description:text,evidence:text}],text),false);
 });
+
+test('공식 퀼팅 패딩 원문도 짧은 세 소구점으로 표현한다',()=>{
+ const text='어니언 퀼팅의 크루넥 경량 자켓입니다. PTT 소재로 제작되어 보온성이 우수하고 복원력이 뛰어난 것이 특징입니다. 겉감은 20D 고밀도 나일론 원단으로 제작되었습니다.';
+ const points=officialSellingPoints(text);assert.equal(points.length,3);for(const p of points){assert(p.title.length<=18);assert(p.description.length<=42);assert(text.includes(p.evidence));}
+});
