@@ -1,3 +1,4 @@
+import {setAttributeCheckboxes} from './smartstore-attribute-checkboxes.mjs';
 // Apply only product attributes with reviewed evidence, through the seller UI.
 export async function fillAdditionalAttributes(page,fields,log=()=>{},check=()=>{}){
  const heading=page.getByRole('heading',{name:'상품속성',exact:true});
@@ -15,14 +16,7 @@ export async function fillAdditionalAttributes(page,fields,log=()=>{},check=()=>
   const row=dialog.getByRole('row').filter({has:page.locator('th').filter({hasText:new RegExp('^\\s*'+label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*$')})});
   if(!await row.count())continue;
   if(Array.isArray(value)){
-   const boxes=row.getByRole('checkbox'),known=[];
-   for(let i=0;i<await boxes.count();i++){
-    const box=boxes.nth(i),name=normalize(await box.evaluate(e=>e.labels?.[0]?.textContent||e.parentElement.textContent));
-    known.push(name);const wanted=value.includes(name);
-    if(await box.isChecked()!==wanted){check();await box.locator('..').click();}
-    if(await box.isChecked()!==wanted)throw Error('추가속성 확인 실패: '+label+' / '+name);
-   }
-   for(const name of value)if(!known.includes(name))throw Error('이 카테고리에 해당 속성 값이 없습니다: '+label+' / '+name);
+   await setAttributeCheckboxes(row,value,{label,check,requireAll:true});
   }else{
    const input=row.locator('.selectize-input');if(!await input.count())continue;
    if(normalize(await input.innerText())!==value){
