@@ -33,7 +33,7 @@ export function brandVideoHeadingHtml(){
  return `<section data-brand-video-heading style="height:${BRAND_VIDEO_HEADING_HEIGHT}px;display:flex;align-items:center;justify-content:center;background:#f4f3ec;text-align:center;"><h2 style="font-size:30px;line-height:1.5;font-weight:700;margin:0;">${BRAND_VIDEO_TITLE}</h2></section>`;
 }
 export function brandVideoHtml(src=BRAND_VIDEO_URL){
- return brandVideoHeadingHtml()+`<section data-brand-video="mp4" style="padding:0 28px 28px;background:#f4f3ec;"><video src="${escape(src)}" title="지오다노 공통 브랜드 영상" controls autoplay muted loop playsinline preload="metadata" width="720" height="1280" style="display:block;width:100%;max-width:540px;height:auto;aspect-ratio:9/16;margin:0 auto;background:#000;"></video></section>`;
+ return brandVideoHeadingHtml()+`<section data-brand-video="mp4" style="padding:0 28px 28px;background:#f4f3ec;"><video src="${escape(src)}" title="지오다노 공통 브랜드 영상" controls autoplay muted loop playsinline preload="metadata" width="720" height="1280" style="display:block;width:100%;max-width:540px;height:auto;aspect-ratio:9/14;object-fit:contain;margin:0 auto;background:#f4f3ec;"></video></section>`;
 }
 export async function exportBrandVideo(stem,dataRoot,videoOptions){
  const {file,sha256}=await requireBrandVideo(dataRoot,videoOptions);const output=stem+'_브랜드영상.mp4';
