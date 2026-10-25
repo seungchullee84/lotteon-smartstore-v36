@@ -33,7 +33,8 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  let sourceText=product.officialDetailText||product.officialDescription||'';
  try{const html=await readFile(path.join(folder,'smartstore-official.html'),'utf8');if(styleFromDetail(html)!==style)throw Error('소구점 원문의 공식 품번이 다릅니다.');sourceText=cheerio.load(html)('.prd_detail_content_gio').first().text().trim()||sourceText;}catch(error){if(error.code!=='ENOENT')throw error;}
  if(sourceText){
-  if(!usableSellingPoints(prepared.sellingPoints,sourceText))prepared.sellingPoints=officialSellingPoints(sourceText);
+  const currentPoints=officialSellingPoints(sourceText);
+  if(!usableSellingPoints(prepared.sellingPoints,sourceText)||prepared.sellingPoints.length<currentPoints.length)prepared.sellingPoints=currentPoints;
   prepared.sellingPointSource={style,sourceUrl:product.sourceUrl,textHash:createHash('sha256').update(sourceText).digest('hex')};
  }
  const attach=async(color,file,allowedRoot)=>{
