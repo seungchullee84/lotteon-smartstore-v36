@@ -1,4 +1,4 @@
-import {readFile,writeFile,mkdir,rename,access} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,rename} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
