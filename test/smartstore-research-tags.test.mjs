@@ -26,6 +26,18 @@ async function fixture(page,{candidates,existing=[],invalid=[],wrongId=false}){
  },{candidates,existing,invalid,wrongId});
 }
 
+test('모든 추천을 삭제한 수동 선택은 자동 보충 없이 기존 태그를 비운다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const page=await browser.newPage();
+  await fixture(page,{candidates:[],existing:[{name:'기존태그',id:'1'}]});
+  const result=await fillResearchTags(page,{configured:true,manual:true,candidates:[]});
+  assert.equal(result.tagCount,0);assert.equal(result.tagStatus,'needs-review');
+  assert.equal(await page.locator('span.choice-label').count(),0);
+  assert.equal(await page.evaluate(()=>window.searches),0);assert.equal(await page.evaluate(()=>window.saves),0);
+ }finally{await browser.close();}
+});
+
 test('관련 사전 ID만 입력하고 기존 태그를 재사용하며 10개 미만도 진행한다',async()=>{
  const browser=await chromium.launch({headless:true});
  try{
