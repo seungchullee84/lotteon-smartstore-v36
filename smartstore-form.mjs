@@ -76,7 +76,7 @@ export async function fillSmartstoreOrigin(page,country,check=()=>{}){
 }
 export async function fillSmartstoreValue(loc,value,check=()=>{}){
  check();const expected=String(value),current=await loc.evaluate(e=>e.value);
- if(current===expected||current!=='<redacted>'&&String(current).replaceAll(',','')===expected.replaceAll(',','')&&/^\d[\d,]*$/.test(expected))return false;
+ if(current===expected)return false;
  await loc.fill(expected);await loc.press('Tab');check();
  const actual=await loc.evaluate(e=>e.value);
  if(actual!=='<redacted>'&&String(actual).replaceAll(',','')!==expected.replaceAll(',',''))throw Error('입력값 확인 실패: '+expected.slice(0,50));
