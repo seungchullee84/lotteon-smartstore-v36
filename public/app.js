@@ -157,12 +157,20 @@ $('shutdownApp').onclick=async()=>{
 function smartstoreDetailFields(){
  const f=$('form').elements;return {style:product.style,name:f.name.value,gender:f.gender.value,material:f.material.value,colors:f.colors.value.split(',').map(v=>v.trim()).filter(Boolean),sizes:f.sizes.value.split(',').map(v=>v.trim()).filter(Boolean)};
 }
+let detailPreviewResizeObserver;
 function renderDetailPreview(p){
+ detailPreviewResizeObserver?.disconnect();
  const box=$('detailPreview');box.replaceChildren();box.scrollTop=0;
  if(document.body.dataset.channel==='smartstore'){
-  $('detailPreviewStatus').textContent='공통 MP4 적용 · 미리보기 무음 자동재생·반복 · 판매페이지 자동재생 미검증';
+  $('detailPreviewStatus').textContent='업로드용 860px 구성 그대로 축소 표시 · MP4 무음 자동재생·반복 · 판매페이지 자동재생 미검증';
   const frame=document.createElement('iframe');frame.className='smartstore-template-preview';frame.title='스마트스토어 확정 템플릿 상세페이지';frame.allow='autoplay; fullscreen; picture-in-picture';
-  frame.src='/smartstore-detail-preview.html?style='+encodeURIComponent(p.style)+'&fields='+encodeURIComponent(JSON.stringify(smartstoreDetailFields()));box.append(frame);return;
+  frame.src='/smartstore-detail-preview.html?style='+encodeURIComponent(p.style)+'&fields='+encodeURIComponent(JSON.stringify(smartstoreDetailFields()));box.append(frame);
+  const fit=()=>{
+   const scale=Math.min(1,box.clientWidth/860);if(!scale)return;
+   frame.style.width='860px';frame.style.height=Math.ceil(box.clientHeight/scale)+'px';
+   frame.style.transform='scale('+scale+')';
+  };
+  detailPreviewResizeObserver=new ResizeObserver(fit);detailPreviewResizeObserver.observe(box);fit();return;
  }
  const add=(key)=>{const image=document.createElement('img');image.src='/image/'+key+'?t='+Date.now();image.alt='상세 이미지 '+key;image.loading='lazy';image.onerror=()=>{image.remove();$('detailPreviewStatus').textContent='상세 원본 이미지를 불러오지 못했습니다. 원본 상태를 확인해 주세요.';};box.append(image);};
  if(p.originalDetailUrl&&!p.images.detail){$('detailPreviewStatus').textContent='기존 상세 원본을 불러오지 못했습니다. 대체 이미지를 만들지 않습니다.';return;}
