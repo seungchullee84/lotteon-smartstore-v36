@@ -254,7 +254,7 @@ const server=http.createServer(async(req,res)=>{
             },
             upload:async(p,folder,{main,detail})=>{
               const selected=await prepareListingImages(p,folder,{dataRoot});
-              const detailParts=await smartstoreUploadParts(detail.path,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{includeVideo:detail.includeVideo,dataRoot,videoOptions:detail.videoOptions,brandIntroHeight:detail.brandIntroHeight,footerTop:detail.footerTop});
+              const detailParts=await smartstoreUploadParts(detail.path,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{includeVideo:detail.includeVideo,dataRoot,videoOptions:detail.videoOptions,brandIntroHeight:detail.brandIntroHeight,footerTop:detail.footerTop,bannerTop:detail.bannerTop});
               const careLabels=await prepareCareLabelImages(p,folder,{dataRoot});
               return smartBot.uploadPrepared(p,folder,{main:selected.main,extras:selected.extras,detailParts,careLabels});
             }

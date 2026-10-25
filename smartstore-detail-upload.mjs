@@ -16,22 +16,26 @@ export async function openSmartstoreEditor(page,{check=()=>{}}={}){
  const [editor]=await Promise.all([page.waitForEvent('popup',{timeout:45000}),input.click({timeout:30000})]);
  await editor.bringToFront();return editor;
 }
-export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,videoOptions,brandIntroHeight,footerTop}={}){
+export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,videoOptions,brandIntroHeight,footerTop,bannerTop}={}){
  const video=includeVideo?await requireBrandVideo(dataRoot,videoOptions):null;
  const meta=await sharp(png,{limitInputPixels:false}).metadata();
  const brand=await sharp(brandFile).metadata();const firstHeight=(brandIntroHeight??Math.round(meta.width*brand.height/brand.width))+BRAND_VIDEO_HEADING_HEIGHT;
  if(meta.width!==860||meta.height<=firstHeight)throw Error('상세페이지 이미지 크기를 확인해 주세요.');
  if(footerTop!==undefined&&(!Number.isInteger(footerTop)||footerTop<firstHeight||footerTop>=meta.height))throw Error('구매 혜택부터 하단까지의 이미지 구간을 확인해 주세요.');
+ if(bannerTop!==undefined&&(!Number.isInteger(bannerTop)||footerTop===undefined||bannerTop<firstHeight||bannerTop>=footerTop))throw Error('하단 안내 위 배너 이미지 구간을 확인해 주세요.');
  const dest=path.join(folder,'smartstore-upload');await mkdir(dest,{recursive:true});
  const digest=createHash('sha256').update(await readFile(png)).digest('hex').slice(0,16);
  const parts=[];
  for(let top=0,index=0;top<meta.height;index++){
   let height=index===0?firstHeight:Math.min(8000,meta.height-top);
   const footer=top===footerTop;
+  const banner=top===bannerTop;
   if(footer)height=meta.height-top;
+  else if(banner)height=footerTop-bannerTop;
   else if(footerTop!==undefined&&top<footerTop)height=Math.min(height,footerTop-top);
+  if(bannerTop!==undefined&&top<bannerTop)height=Math.min(height,bannerTop-top);
   const file=path.join(dest,digest+'-'+String(index).padStart(2,'0')+'.png');
-  let bytes;do{bytes=await sharp(png,{limitInputPixels:false}).extract({left:0,top,width:860,height}).png({compressionLevel:9}).toBuffer();if(bytes.length<=19000000||footer)break;height=Math.floor(height*.7);}while(height>100);
+  let bytes;do{bytes=await sharp(png,{limitInputPixels:false}).extract({left:0,top,width:860,height}).png({compressionLevel:9}).toBuffer();if(bytes.length<=19000000||footer||banner)break;height=Math.floor(height*.7);}while(height>100);
   if(bytes.length>19000000)throw Error('상세이미지 조각 용량을 확인해 주세요.');
   await writeFile(file,bytes);parts.push(file);top+=height;
  }
