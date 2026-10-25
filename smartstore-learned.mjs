@@ -78,7 +78,7 @@ export async function selectLearnedAttribute(page,row,label,value,check=()=>{}){
  const escaped=value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
  const local=row.locator('.selectize-dropdown-content [data-selectable]:visible').filter({hasText:new RegExp('^\\s*'+escaped+'\\s*$')});
  // On a retry the dropdown may already be open; clicking its input again closes it.
- if(await local.count()!==1){check();await input.click();}
+ if(await local.count()!==1&&!/\bdropdown-active\b/.test(await input.getAttribute('class')||'')){check();await input.click();}
  const choices=page.locator('.selectize-dropdown-content:visible [data-selectable]').filter({hasText:new RegExp('^\\s*'+escaped+'\\s*$')});
  try{await choices.waitFor({state:'visible',timeout:3000});}
  catch{
