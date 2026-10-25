@@ -478,8 +478,8 @@ function syncListingImages(state){
  note.textContent=smart?(listing?'대표사진: '+listing.sourceNames[0]+' · '+listing.mainColor+' · 현재 품번 사진을 1500×750 JPG로 변환 · 비율 유지·흰 여백 · 원본 보관':'바탕화면 상품등록기사진폴더의 해당 품번 폴더에 1.jpg 또는 1번.jpg를 넣어 주세요.'):note.dataset.original;
  $('main').hidden=smart&&!listing;
  $('colorChipStatus').hidden=smart;$('extendBackground').hidden=smart;
- $('downloadMain1500').textContent=smart?'대표이미지 원본 저장':'대표이미지 1500×1500 저장';
- $('main').alt=smart?'품번 폴더 1번 원본 대표이미지':'1500×1500 대표이미지';
+ $('downloadMain1500').textContent=smart?'대표이미지 1500×750 JPG 저장':'대표이미지 1500×1500 저장';
+ $('main').alt=smart?'품번 폴더 1번 사진 · 1500×750 JPG 작업본':'1500×1500 대표이미지';
  document.querySelector('.main-image-heading h3').textContent=smart?'대표이미지 · 폴더 1번':'대표이미지';
 
  custom.hidden=!smart||!listing;original.hidden=smart&&!!listing;$('extraImages').querySelector('h3').textContent=smart?'추가이미지':'추가이미지 (최대 2장)';
@@ -492,9 +492,9 @@ function syncListingImages(state){
  }
  if(custom.dataset.stamp!==stamp){
   custom.dataset.stamp=stamp;custom.replaceChildren();
-  listing.extraColors.forEach((color,i)=>{const card=document.createElement('div');card.className='extra-image-card';const img=document.createElement('img');img.src=base+'extra-'+i+query;const angle=color===listing.mainColor?'옆면':'정면';img.alt=color+' '+angle;const name=document.createElement('p');name.textContent=color+' · '+angle;const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='원본 이미지 저장';button.onclick=()=>saveSelectedImage('extra-'+i,button);card.append(img,name,button);custom.append(card);});
+  listing.extraColors.forEach((color,i)=>{const card=document.createElement('div');card.className='extra-image-card';const img=document.createElement('img');img.src=base+'extra-'+i+query;const angle=color===listing.mainColor?'옆면':'정면';img.alt=color+' '+angle;const name=document.createElement('p');name.textContent=color+' · '+angle;const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='1500×750 JPG 저장';button.onclick=()=>saveSelectedImage('extra-'+i,button);card.append(img,name,button);custom.append(card);});
  }
- $('extraImageStatus').textContent=listing.previewOnly?'폴더 1번 원본을 표시 중입니다. 추가·상세 사진은 색상 대조 후 반영됩니다.':'대표: '+listing.mainColor+' (1번 사진) · 추가 '+listing.extraColors.length+'장 · 확인된 옆면(있는 경우) + 다른 색상 정면';
+ $('extraImageStatus').textContent=listing.previewOnly?'폴더 1번 사진의 1500×750 JPG 작업본을 표시 중입니다. 추가·상세 사진은 색상 대조 후 반영됩니다.':'대표: '+listing.mainColor+' (1번 사진) · 추가 '+listing.extraColors.length+'장 · 확인된 옆면(있는 경우) + 다른 색상 정면';
  $('extraImages').hidden=false;
 }
 
