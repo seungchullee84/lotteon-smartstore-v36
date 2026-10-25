@@ -6,6 +6,21 @@ export const TEMPLATE_ASSET_NAMES=['brand-intro.jpg','benefits.jpg','shipping.jp
 export const TEMPLATE_ASSET_BASE='https://raw.githubusercontent.com/seungchullee84/lotteon-smartstore-v36/main/public/smartstore-template/';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const style='font-family:GowunDodum,\'Malgun Gothic\',sans-serif;color:#25372e;word-break:keep-all;overflow-wrap:break-word;line-height:1.9;';
+export function mannequinWearingNote(p){
+ const gender=String(p.gender||'').trim();
+ const male=/^(남성|남자|MEN|MALE)$/i.test(gender),female=/^(여성|여자|WOMEN|FEMALE)$/i.test(gender);
+ if(!male&&!female)return '';
+ const category=Object.values(p.category||{}).filter(v=>typeof v==='string').join(' ')+' '+(p.sourceCategory||[]).join(' ');
+ const name=String(p.rawName||p.name||'');
+ let bottom=/의류하의|PANTS|바지|팬츠|스커트/i.test(category);
+ const top=/의류상의|의류아우터|\bTOP\b|\bOUTER\b/i.test(category);
+ if(!bottom&&!top){
+  if(/원피스|벨트|가방|양말|모자/.test(name))return '';
+  bottom=/바지|팬츠|슬랙스|청바지|반바지|스커트/.test(name);
+  if(!bottom&&!/티셔츠|후드|맨투맨|셔츠|니트|스웨터|스웻|스웨트|가디건|자켓|재킷|점퍼|패딩|코트|베스트|조끼|블라우스/.test(name))return '';
+ }
+ return `${male?'남성':'여성'} ${bottom?'하의':'상의'} · ${bottom?(male?'32':'26'):(male?'L':'S')} 사이즈 착용`;
+}
 function safeImage(src){
  if(typeof src!=='string'||!(/^(https?:\/\/|\/image\/|\/smartstore-photo\/|\/smartstore-template\/|data:image\/(png|jpeg|webp);base64,|file:\/\/)/.test(src)))throw Error('상세페이지 이미지 주소를 확인해 주세요.');
  return esc(src);
@@ -44,7 +59,10 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  if(groups.length){
   body+=divider;
   body+=`<section style="padding:28px 6% 44px;">${header('COLOR PALETTE','취향에 맞춰, '+esc(groups.length)+'가지.')}${includeNavigation?'<p style="padding:12px 16px;background:#fff1e7;color:#a43c23;border-left:3px solid #c35b36;font-size:19px;font-weight:700;">색상 사진을 클릭하면 해당 색상으로 이동합니다.</p>':''}<div style="display:flex;gap:12px;align-items:start;">${groups.map(g=>`<${includeNavigation?'a href="#smartstore-color-'+g.index+'"':'div'} style="flex:1;min-width:0;text-decoration:none;color:inherit;">${photo(g.urls[0],g.color,'aspect-ratio:3/4;object-fit:cover;border-radius:10px;')}<b style="display:block;font-size:22px;line-height:1.65;margin-top:14px;">${esc(g.color)}</b></${includeNavigation?'a':'div'}>`).join('')}</div><p style="font-size:20px;line-height:1.9;margin:24px 0 0;color:#465149;">촬영 조명과 화면 설정에 따라 실제 색상과 차이가 있을 수 있습니다. 공식 상품 이미지도 함께 확인해 주세요.</p></section>`;
-  if(draft?.photoCount>0)body+=divider+'<section data-mannequin-intro style="padding:34px 6% 4px;text-align:center;"><p style="font-size:26px;font-weight:600;letter-spacing:.2px;line-height:1.7;margin:0;">매장 마네킹 실제 착용사진</p></section>';
+  if(draft?.photoCount>0){
+   const wearing=mannequinWearingNote(p);
+   body+=divider+'<section data-mannequin-intro style="padding:34px 6% 4px;text-align:center;"><p style="font-size:26px;font-weight:600;letter-spacing:.2px;line-height:1.7;margin:0;">매장 마네킹 실제 착용사진</p>'+(wearing?'<p data-mannequin-size style="font-size:22px;margin:10px 0 0;color:#465149;">'+esc(wearing)+'</p>':'')+'</section>';
+  }
   for(const group of groups){
    const photos=group.urls.length===3
     ? '<div data-photo-layout="three"><div>'+photo(group.urls[0],group.color+' 착용 모습','border-radius:14px;')+'</div><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px;align-items:start;">'+group.urls.slice(1).map(url=>'<div>'+photo(url,group.color+' 디테일','border-radius:14px;')+'</div>').join('')+'</div></div>'
