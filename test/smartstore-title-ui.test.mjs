@@ -50,6 +50,15 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   await page.waitForFunction(()=>document.getElementById('smartstoreName').value.includes('356956'));
   await page.waitForFunction(()=>document.getElementById('naverTitleResult').textContent.includes('처음 한 번'));
   assert.equal(optimizeCalls,0,'키가 없으면 자동 API 요청을 보내지 않음');
+  const originalViewport=page.viewportSize();
+  for(const width of [1200,760]){
+   await page.setViewportSize({width,height:900});
+   await page.waitForFunction(()=>{const box=document.querySelector('#detailPreview'),frame=box.querySelector('iframe');return frame?.clientWidth===860&&Math.abs(frame.getBoundingClientRect().width-Math.min(860,box.clientWidth))<1;});
+   const preview=await page.locator('#detailPreview iframe').evaluate(n=>({width:n.clientWidth,scale:n.style.transform}));
+   assert.equal(preview.width,860,'좁은 창에서도 업로드와 같은 내부 폭 유지');assert.match(preview.scale,/scale\(/);
+  }
+  await page.setViewportSize(originalViewport);
+
   const lotte=await page.locator('input[name="name"]').inputValue();
   await page.locator('#smartstoreOptimizeTitle').click();
   await page.waitForFunction(()=>document.getElementById('smartstoreName').value==='지오다노 남자 브이넥 아가일 니트 356956');
