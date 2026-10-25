@@ -27,7 +27,7 @@ test('스마트스토어에만 확정 템플릿·영상·공식 원본·INFORMAT
  assert.ok(approved.indexOf('brand-intro.jpg')<approved.indexOf('<video '));
  assert.ok(approved.indexOf('/info.jpg')<approved.indexOf('benefits.jpg'));
  assert.match(approved,/controls autoplay muted loop playsinline/);assert.doesNotMatch(approved,/youtube|클릭하면 해당 색상|href="#smartstore-color-/);assert.doesNotMatch(approved,/26920|모달|기모|CARE GUIDE/);
- assert.deepEqual(productSellingPoints(product).map(p=>p.title),['경량','2 COLORS','SIZE']);
+ assert.deepEqual(productSellingPoints(product),[]);assert.equal(productSellingPoints({...product,officialDescription:'가벼운 원단을 사용한 경량 패딩 상품입니다.'})[0].evidence,'가벼운 원단을 사용한 경량 패딩 상품입니다.');
  assert.equal((approved.match(/\/detail.jpg/g)||[]).length,1);
  assert.throws(()=>buildSmartstoreDetail({...product,images:{main:'https://www.giordano.co.kr/main.jpg'}}),/중단/);
 });

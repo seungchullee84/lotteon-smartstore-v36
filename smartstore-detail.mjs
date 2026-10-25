@@ -3,6 +3,7 @@ import {buildDetailContent} from './detail-html.mjs';
 import {sellingPointIcon} from './smartstore-point-icons.mjs';
 import {colorCaption} from './smartstore-color-copy.mjs';
 import {brandVideoHtml,brandVideoHeadingHtml,productVideoUrl} from './smartstore-brand-video.mjs';
+import {officialSellingPoints} from './smartstore-selling-points.mjs';
 
 export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-approved-20261024';
 export const TEMPLATE_ASSET_NAMES=['brand-intro.jpg','lotte-department-official.png','benefits.jpg','shipping.jpg','returns.jpg','store.jpg',...STORE_BANNER_ASSET_NAMES,'GowunDodum-Regular.ttf'];
@@ -29,16 +30,7 @@ function safeImage(src){
  return esc(src);
 }
 export function productSellingPoints(p){
- const name=String(p.rawName||p.name||'');const material=String(p.material||'');const points=[];
- for(const [test,title,description] of [
-  [/기모/,'기모','기모 소재로 준비한 상품'],[/모달/,'모달','상품명에서 확인한 모달 소재'],[/와이드/,'와이드핏','여유로운 와이드 실루엣'],[/슬림핏/,'슬림핏','슬림한 실루엣'],[/레귤러핏/,'레귤러핏','기본이 되는 레귤러 실루엣'],[/라운드넥/,'라운드넥','단정한 라운드 네크라인'],[/긴팔/,'긴팔','긴소매로 완성한 기본 아이템'],[/경량/,'경량','가벼운 착용을 위한 경량 상품']
- ])if(test.test(name))points.push({title,description});
- if(points.length<3&&/(?:면|코튼)\s*\d|\d\s*%?\s*(?:면|코튼)/.test(material))points.push({title:'코튼 혼용',description:material});
- if(points.length<3&&/폴리우레탄|스판덱스/.test(material))points.push({title:'혼용 소재',description:'폴리우레탄·스판덱스 혼용 여부는 아래 소재 정보를 확인해 주세요.'});
- if(points.length<3&&p.colors?.length)points.push({title:p.colors.length+' COLORS',description:p.colors.join(' · ')});
- if(points.length<3&&p.sizes?.length)points.push({title:'SIZE',description:p.sizes.join(' · ')});
- if(!points.length)points.push({title:'PRODUCT',description:'공식 상품 상세정보를 확인해 주세요.'});
- return points.slice(0,3);
+ return officialSellingPoints(p.officialDetailText||p.officialDescription||'');
 }
 
 export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=src=>src,includeVideo=true,videoUrl,includeNavigation=false}={}){
