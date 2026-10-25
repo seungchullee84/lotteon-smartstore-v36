@@ -12,7 +12,7 @@ export function sellerProductCode(p){
 }
 const verified={
  // 026982: reviewed official 01026982 detail and current folder front/side photos show wrist-length ribbed sleeves and a hood.
- '026982':{sleeve:'긴팔',neckline:'후드넥'},
+
  // 376921: official 05376921.jpg and Desktop/상품등록기사진폴더/376921 photos confirm full-length sleeves and a stand collar.
  '376921':{sleeve:'긴팔',neckline:'스텐드/차이나칼라'},
  // 076931: official 01076931.jpg confirms stand neck, long sleeves, faux suede and micro-ball padding.
@@ -40,7 +40,9 @@ export function planTagChanges(existing,candidates){
  return existing.map(t=>{const keep=wanted.has(t.name)&&/^\d+$/.test(t.id||'')&&!seen.has(t.name)&&!ids.has(t.id);if(keep){seen.add(t.name);ids.add(t.id);}return {...t,keep};});
 }
 export function learnedFields(p){
- const known=verified[p.style]||{},title=p.name||'';
+ const reviewed=p.reviewedGarmentAttributes;
+ const checked=reviewed?.style===p.style&&reviewed.sourceUrl===p.sourceUrl?reviewed:{};
+ const known={...(verified[p.style]||{}),...(checked.sleeve?{sleeve:checked.sleeve}:{}),...(checked.neckline?{neckline:checked.neckline}:{})},title=p.name||'';
  const material=p.material||known.material||'';
  const materials=[['인조가죽(합성피혁)',/인조가죽|합성피혁|합성가죽/],['아크릴',/아크릴/],['폴리에스테르',/폴리에[스]?터|폴리에스테르|플리에스터/],['나일론',/나일론/],['폴리우레탄',/폴리우레탄/],['면',/면\s*\d/],['울/모',/(?:울|모)\s*\d/],['레이온/인견',/레이온|인견/],['캐시미어',/캐시미어/]].filter(([,re])=>re.test(material)).map(([name])=>name);
  const sleeve=known.sleeve||(/긴팔/.test(title)?'긴팔':/반팔/.test(title)?'반팔':null);
