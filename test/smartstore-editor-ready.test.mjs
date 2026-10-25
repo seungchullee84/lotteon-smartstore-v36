@@ -25,3 +25,15 @@ for(const confirm of ['적용','<svg width=16 height=16><path d="M2,8L6,12L14,2"
   await assert.rejects(applySmartstoreBannerLink(page,{...parts,bannerLink:{...parts.bannerLink,file:'wrong.png'}}),/확인/);
  }finally{await browser.close();}
 });
+
+test('오른쪽 체크로 링크를 적용했지만 href가 노출되지 않아도 검증 대기 오류 없이 진행한다',async()=>{
+ const browser=await chromium.launch({headless:true});try{
+  const page=await browser.newPage();
+  await page.setContent(`<style>img{display:block;width:300px;height:100px}</style><div class="se-component se-image"><img src="https://example.com/banner.png"></div><button data-name=image-link onclick="document.querySelector('#popup').hidden=false">링크</button><div id=popup hidden><input type=url placeholder=URL><button onclick="document.querySelector('img').dataset.appliedLink=document.querySelector('input').value;document.querySelector('#popup').hidden=true"><svg width=16 height=16></svg></button></div>`);
+  const parts={files:['banner.png'],bannerLink:{index:0,file:'banner.png',url:STORE_BANNER_URL}};
+  await applySmartstoreBannerLink(page,parts);
+  assert.equal(await page.locator('img').getAttribute('data-applied-link'),STORE_BANNER_URL);
+  assert.equal(parts.bannerLinkSubmitted,true);
+  assert.equal(await page.locator('a').count(),0);
+ }finally{await browser.close();}
+});
