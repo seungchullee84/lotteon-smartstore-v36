@@ -58,3 +58,16 @@ test('smartstore main and extras preserve exact original bytes, format, dimensio
   await unlink(path.join(photoRoot,'옆면.png'));await assert.rejects(prepareListingImages(product,output,{dataRoot,photoRoots:[photoRoot]}),/추가사진 원본/);
  }finally{await rm(root,{recursive:true,force:true});}
 });
+test('추가이미지 선택이 같아도 상세 사진 연결 변경은 미리보기 갱신 버전을 바꾼다',async()=>{
+ const dataRoot=await mkdtemp(path.join(os.tmpdir(),'detail-revision-'));
+ try{
+  const product={style:'026982',sourceUrl:'https://www.giordano.co.kr/test'};
+  const root=path.join(dataRoot,'smartstore-details',product.style);await mkdir(root,{recursive:true});
+  const draft={style:product.style,sourceUrl:product.sourceUrl,listingImages:{main:{sourceName:'1.jpg'},extras:[]},photos:[]};
+  const file=path.join(root,'draft.json');await writeFile(file,JSON.stringify(draft));
+  const before=await listingPreview(product,{dataRoot});
+  assert.equal((await listingPreview(product,{dataRoot})).detailRevision,before.detailRevision);
+  draft.photos=[{color:'01네이비',files:['photos/side.jpg']}];await writeFile(file,JSON.stringify(draft));
+  const after=await listingPreview(product,{dataRoot});assert.notEqual(after.detailRevision,before.detailRevision);assert.deepEqual(after.main,before.main);
+ }finally{await rm(dataRoot,{recursive:true,force:true});}
+});
