@@ -63,7 +63,8 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
   const parent=norm(path.basename(path.dirname(file.file)));const exact=product.colors.find(color=>[norm(color),norm(color).replace(/^\d+/, '')].includes(parent));
   if(exact)mapped.push({...file,color:exact,role:'front'});else unknown.push(file);
  }
- if(!unknown.length&&old?.sourceUrl===product.sourceUrl&&old?.officialDetailHash===detailHash&&old?.sellingPoints?.length&&old.sellingPoints.every(p=>p.title&&p.description&&p.evidence)){
+ const currentReview=await applyGarmentReview(product,folder,{dataRoot,photoRoots,desktop});
+ if((currentReview.reviewedGarmentAttributes||!apiKey)&&!unknown.length&&old?.sourceUrl===product.sourceUrl&&old?.officialDetailHash===detailHash&&old?.sellingPoints?.length&&old.sellingPoints.every(p=>p.title&&p.description&&p.evidence)){
   const listingImages=await saveListingSelection(root,chooseListingPhotos(mapped,product));
   const updated={...old,sourceUrl:product.sourceUrl,listingImages,careLabels:await saveCareLabelSelection(root,mapped.filter(p=>p.role==='care-label'))};
   await writeFile(path.join(root,'draft.json.tmp'),JSON.stringify(updated,null,2));await rename(path.join(root,'draft.json.tmp'),path.join(root,'draft.json'));
@@ -73,7 +74,7 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
  if(!apiKey)throw Error('사진의 색상·소구점 확인이 필요합니다. 이 채팅에서 현재 품번 사진 확인을 요청해 주세요.');
  const content=[{type:'input_text',text:JSON.stringify({style:product.style,name:product.rawName,colors:product.colors,material:product.material,officialDescription:description,photoIds:unknown.map(f=>f.id)})}];
  const addImage=async(bytes,label,max=1000)=>{content.push({type:'input_text',text:label},{type:'input_image',image_url:'data:image/jpeg;base64,'+(await sharp(bytes).rotate().resize({width:max,height:1800,fit:'inside',withoutEnlargement:true}).jpeg({quality:85}).toBuffer()).toString('base64'),detail:'high'});};
- if(unknown.length||!product.reviewedGarmentAttributes){
+ if(unknown.length||!currentReview.reviewedGarmentAttributes){
   let chips=[];try{chips=JSON.parse(await readFile(path.join(folder,'color-chips.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
   for(const chip of chips){if(!/^colorchip-\d+\.jpg$/.test(chip.file))throw Error('공식 색상칩 위치 오류');await addImage(await readFile(path.join(folder,chip.file)),'OFFICIAL COLOR '+chip.name,200);}
   const detail=await readFile(path.join(folder,'detail.jpg'));const meta=await sharp(detail).metadata();

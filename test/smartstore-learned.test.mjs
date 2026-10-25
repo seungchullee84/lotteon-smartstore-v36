@@ -86,7 +86,7 @@ test('additional attributes follow the verified style and never carry heavy-down
  const other=learnedFields({style:'123456',name:'남성 패딩',material:'폴리에스터 100%'});assert.equal(other.attributes['핏'],undefined);assert.equal(other.attributes['특징'],undefined);assert.equal(other.attributes['사용대상'],'남성용');
 });
 test('026982 실사 정면·옆면 대조 결과는 상품명에 긴팔이 없어도 유지한다',()=>{
- const fields=learnedFields({style:'026982',name:'남성 기모 테리 패치 후드티 026982',gender:'남성',material:'면 60%, 폴리에스터 40%',manufactured:'2026-08'});
+ const fields=learnedFields({style:'026982',sourceUrl:'https://www.giordano.co.kr/test',reviewedGarmentAttributes:{style:'026982',sourceUrl:'https://www.giordano.co.kr/test',sleeve:'긴팔',neckline:'후드넥'},name:'남성 기모 테리 패치 후드티 026982',gender:'남성',material:'면 60%, 폴리에스터 40%',manufactured:'2026-08'});
  assert.equal(fields.sleeve,'긴팔');assert.equal(fields.neckline,'후드넥');assert.doesNotThrow(()=>assertLearnedFields(fields,['소매기장','네크라인']));
  const other=learnedFields({style:'999999',name:'기본 상품',material:'면100%'});assert.equal(other.sleeve,null);
 });
