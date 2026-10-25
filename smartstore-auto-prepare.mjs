@@ -1,5 +1,6 @@
 import {applyGarmentReview,saveGarmentReview,validateGarmentReview} from './smartstore-garment-review.mjs';
 import {findPhotos} from './smartstore-photo-files.mjs';
+import {workingProductPhoto} from './smartstore-photo-work.mjs';
 import {saveCareLabelSelection,isCareLabelPhoto} from './smartstore-care-label.mjs';
 import {readFile,writeFile,readdir,realpath,mkdir,rename} from 'node:fs/promises';
 import path from 'node:path';
@@ -57,6 +58,8 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
  for(const record of old?.careLabels||[])if(/^[a-f0-9]{64}$/.test(record.sourceHash))known.set(record.sourceHash,{role:'care-label',color:''});
  const ignored=new Set((old?.photoMapping?.ignoredPhotos||[]).filter(p=>/^[a-f0-9]{64}$/.test(p.hash)).map(p=>p.hash));
  const found=(await findPhotos(product,{desktop,photoRoots})).filter(p=>!ignored.has(hash(p.bytes))||known.get(hash(p.bytes))?.role==='care-label');
+ // Only this style's folder is read; keep original bytes for visual-review hashes.
+ for(const photo of found){signal?.throwIfAborted();await workingProductPhoto(photo,product,{dataRoot});}
  const photos=found.length?found:[...known.values()].filter(p=>p.bytes&&p.role!=='care-label').map(p=>({...p,id:hash(p.bytes).slice(0,20),name:path.basename(p.file)}));
  const unknown=[];const mapped=[];
  for(const file of photos){if(isCareLabelPhoto(file,old)){mapped.push({...file,color:'',role:'care-label'});continue;}const previous=known.get(hash(file.bytes));if(previous){mapped.push({...file,color:previous.color,role:previous.role});continue;}
