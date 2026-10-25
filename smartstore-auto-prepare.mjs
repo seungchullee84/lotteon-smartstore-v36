@@ -12,6 +12,7 @@ import {imageDownloadFolder} from './desktop-downloads.mjs';
 import {prepareSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {chooseListingPhotos,saveListingSelection} from './smartstore-listing-images.mjs';
 import {prepareTrustedFolder} from './smartstore-folder-trust.mjs';
+import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const norm=value=>String(value).replace(/\s+/g,'').toLowerCase();
 const image=/\.(jpe?g|png|webp)$/i;
@@ -20,8 +21,7 @@ const string={type:'string'};
 const schema=object({attributes:object({sleeve:{type:'string',enum:['긴팔','반팔','민소매','']},neckline:{type:'string',enum:['후드넥','라운드넥','V넥','칼라넥','터틀넥','스텐드/차이나칼라','']},evidence:string}),points:{type:'array',items:object({title:string,description:string,evidence:string})},photos:{type:'array',items:object({id:string,color:string,confidence:{type:'number'},sameProduct:{type:'boolean'},role:{type:'string',enum:['front','detail','side','care-label']}})}});
 export function officialDescription(html,product){
  const $=cheerio.load(html);if(styleFromDetail(html)!==product.style)throw Error('공식몰 품번이 현재 상품과 다릅니다.');
- const description=$('.prd_detail_content_gio').first().text().trim()||$('meta[name="description"]').attr('content')||[product.rawName,product.material].filter(Boolean).join('. ');
- if(!description)throw Error('공식 상품 소개 문구를 확인하지 못했습니다.');
+ const description=$('.prd_detail_content_gio').first().text().trim();
  return description.replace(/\s+/g,' ').slice(0,12000);
 }
 export async function requestSmartstoreAnalysis({apiKey,content,signal,fetchImpl=fetch}){
@@ -44,7 +44,9 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
  if(!/^\d{6}$/.test(product.style)||new URL(product.sourceUrl).origin!=='https://www.giordano.co.kr')throw Error('공식 상품 출처를 확인해 주세요.');
  let html;try{html=await readFile(path.join(folder,'smartstore-official.html'),'utf8');}catch(e){if(e.code!=='ENOENT')throw e;}
  if(!html){const response=await fetchImpl(product.sourceUrl,{signal,redirect:'error'});if(!response.ok)throw Error('공식 상품 소개를 가져오지 못했습니다.');html=await response.text();}
- const description=officialDescription(html,product);
+ let description=officialDescription(html,product);
+ if(!description){const reviewed=await enrichOfficialProductFacts(product,folder,{dataRoot,signal,log});description=reviewed.researchFacts?.text||'';}
+ if(!description.trim())throw Error('공식 상세 원문을 확인하지 못했습니다. 상세이미지의 소구점을 확인해 주세요.');
  const detailHash=product.images.detail?hash(await readFile(path.join(folder,'detail.jpg'))):null;
  const root=path.join(dataRoot,'smartstore-details',product.style);await mkdir(root,{recursive:true});
  let old;try{old=JSON.parse(await readFile(path.join(root,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}

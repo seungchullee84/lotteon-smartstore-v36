@@ -10,6 +10,9 @@ import {exportBrandVideo,requireBrandVideo,productVideoOptions} from './smartsto
 import {renderCacheKey,restoreRenderedDetail,cacheRenderedDetail} from './smartstore-render-cache.mjs';
 import {workingProductPhoto} from './smartstore-photo-work.mjs';
 import {embeddedOfficialSections} from './smartstore-official-sections.mjs';
+import * as cheerio from 'cheerio';
+import {styleFromDetail} from './product.mjs';
+import {officialSellingPoints,usableSellingPoints} from './smartstore-selling-points.mjs';
 const appRoot=path.dirname(fileURLToPath(import.meta.url));
 const assetsRoot=path.join(appRoot,'public/smartstore-template');
 const inside=(root,file)=>file.startsWith(root+path.sep);
@@ -25,6 +28,13 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  if(draft){
   if(draft.headline)prepared.headline=String(draft.headline).slice(0,200);
   if(draft.sellingPoints){if(!Array.isArray(draft.sellingPoints)||draft.sellingPoints.some(p=>!p.title||!p.description||!p.evidence))throw Error('소구점의 공식 확인 근거를 함께 저장해 주세요.');prepared.sellingPoints=draft.sellingPoints.slice(0,3);}
+ }
+ // Preview, export and upload must re-check the current official wording, too.
+ let sourceText=product.officialDetailText||product.officialDescription||'';
+ try{const html=await readFile(path.join(folder,'smartstore-official.html'),'utf8');if(styleFromDetail(html)!==style)throw Error('소구점 원문의 공식 품번이 다릅니다.');sourceText=cheerio.load(html)('.prd_detail_content_gio').first().text().trim()||sourceText;}catch(error){if(error.code!=='ENOENT')throw error;}
+ if(sourceText){
+  if(!usableSellingPoints(prepared.sellingPoints,sourceText))prepared.sellingPoints=officialSellingPoints(sourceText);
+  prepared.sellingPointSource={style,sourceUrl:product.sourceUrl,textHash:createHash('sha256').update(sourceText).digest('hex')};
  }
  const attach=async(color,file,allowedRoot)=>{
   if(!product.colors.includes(color))throw Error('현재 상품에 없는 색상의 마네킨 컷입니다: '+color);
@@ -96,6 +106,7 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
  const videoOptions={...productVideoOptions(product),...options.videoOptions};
  await requireBrandVideo(options.dataRoot,videoOptions);
  const p=await prepareSmartstoreDetail(product,folder,options);const data=new Map();
+ if(!p.smartstoreDetail.sellingPoints.length)throw Error('공식 상세 원문에 근거한 소구점 확인이 필요합니다. 임의 문구로 상세이미지를 제작하지 않았습니다.');
  const check=()=>{if(signal?.aborted)throw Error('상세페이지 만들기를 중단했습니다.');};check();
  for(const name of TEMPLATE_ASSET_NAMES.filter(n=>!n.endsWith('.ttf')))data.set(TEMPLATE_ASSET_BASE+name,'data:image/'+(name.endsWith('.png')?'png':'jpeg')+';base64,'+(await readFile(path.join(assetsRoot,name))).toString('base64'));
  for(const [key,src] of Object.entries(p.images)){
