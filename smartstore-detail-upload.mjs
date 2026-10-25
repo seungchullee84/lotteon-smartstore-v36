@@ -69,11 +69,13 @@ export async function selectSmartstoreImage(editor,image,{check=()=>{}}={}){
     // Never click a neighbouring image, floating toolbar or control instead.
     const sameImage=component&&hit?.closest('.se-component.se-image')===component;
     const control=hit?.closest('button,input,textarea,select,[role="button"],[role="toolbar"],.se-toolbar');
-    if(hit===n||n.contains(hit)||sameImage&&!control)return {x:x-r.left,y:y-r.top,overlay:hit!==n&&!n.contains(hit)};
+    if(hit===n||n.contains(hit)||sameImage&&!control)return {x,y};
    }
    return null;
   });
-  if(point){const {overlay,...position}=point;await image.click({position,force:overlay});return;}
+  // Locator.click may scroll a tall image a second time and invalidate the
+  // measured offset. Click the hit-tested viewport point without another scroll.
+  if(point){await editor.mouse.click(point.x,point.y);return;}
  }
  throw Error('상세이미지가 편집기 도구에 가려져 선택하지 못했습니다. 편집기 창을 넓힌 뒤 다시 시작해 주세요.');
 }
@@ -81,17 +83,21 @@ export async function applySmartstoreImageLayout(editor,image,{check=()=>{}}={})
  check();if(await image.evaluate(n=>!!n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend')))return;
  await image.scrollIntoViewIfNeeded();await editor.bringToFront();
  const componentId=await image.evaluate(n=>n.closest('.se-component.se-image').id);
- const select=async()=>{
-  // Locator-relative input keeps the selected image correct for tall PNGs and
-  // browser zoom, instead of clicking near the fixed toolbar with page coordinates.
-  await selectSmartstoreImage(editor,image,{check});
-  await editor.waitForFunction(id=>!!document.getElementById(id)?.querySelector('.se-section-image.se-is-selected'),componentId,{timeout:15000});
- };
- await select();
  const extend=editor.locator('button[data-name="content-mode-without-pagefull"][data-value="extend"]').filter({visible:true}).first();
- try{await extend.waitFor({state:'visible',timeout:1500});}catch{check();await select();}
- await extend.click();
- await editor.waitForFunction(id=>!!document.getElementById(id)?.querySelector('.se-component-content-extend'),componentId,{timeout:15000});
+ for(let attempt=0;attempt<2;attempt++){
+  check();await selectSmartstoreImage(editor,image,{check});
+  try{
+   // ONE versions put the selection class on different nodes. The resulting
+   // layout on this exact component is authoritative, not that transient class.
+   await extend.waitFor({state:'visible',timeout:5000});await extend.click();
+   await editor.waitForFunction(id=>!!document.getElementById(id)?.querySelector('.se-component-content-extend'),componentId,{timeout:5000});
+   check();return;
+  }catch(error){
+   if(attempt===0)continue;
+   const observed=await image.evaluate(n=>{const c=n.closest('.se-component.se-image');return {component:c?.className,section:c?.querySelector('.se-section-image')?.className,layout:c?.querySelector('.se-component-content')?.className};}).catch(()=>null);
+   throw Error('상세이미지 옆트임 적용 확인 실패: '+JSON.stringify(observed)+' · '+error.message);
+  }
+ }
  check();
 }
 export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{}}={}){
@@ -134,6 +140,7 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  const existing=await editor.locator('.se-component.se-image,.se-component.se-video,.se-component.se-oembed').count();
  if(existing)throw Error('기존 상세설명이 남아 있어 새 이미지를 올리지 않았습니다.');
  const choose=async(file,index)=>{
+  log('상세이미지 '+(index+1)+'/'+parts.files.length+' 첨부 시작');
   check();const before=await editor.locator('.se-component.se-image').count();
   const empty=editor.locator('.se-component.se-text .se-text-paragraph').last();
   if(await empty.count())await empty.click({force:true});
@@ -145,6 +152,7 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
   await lastImage.scrollIntoViewIfNeeded();
   await editor.waitForFunction(()=>/^https:\/\//.test([...document.querySelectorAll('.se-component.se-image img')].at(-1)?.src||''),null,{timeout:60000});
   await applySmartstoreImageLayout(editor,lastImage,{check});
+  log('상세이미지 '+(index+1)+'/'+parts.files.length+' 옆트임 확인');
   if(parts.links?.[index])await applyStoreBannerLink(editor,lastImage,parts.links[index],{check});
  };
  await choose(parts.files[0],0);log('브랜드 소개 이미지 업로드');
