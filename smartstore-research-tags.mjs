@@ -2,6 +2,11 @@ import {openTagVerification} from './smartstore-learned.mjs';
 
 const escape=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 export async function fillResearchTags(page,research,log=()=>{},check=()=>{},{verifySearch=true}={}){
+ if(research.manual&&research.configured&&!research.candidates.length){
+  check();const field=page.getByRole('textbox',{name:'태그를 입력해주세요.',exact:true});if(!await field.isVisible())await page.getByRole('button',{name:/^검색설정 도움말/}).click();
+  const selected=page.locator('span.choice-label').filter({has:page.locator('strong')});while(await selected.count()){check();await selected.last().getByRole('button').click();}
+  log('직접 선택한 태그 없음 · 기존 태그 삭제 · 0/10개 보강 필요 · 상품 저장 안 함');return {tagsTouched:true,tagMode:'manual',tagCount:0,tagTarget:10,tagMissing:10,selectedTags:[],searchTagsVerified:false,tagStatus:'needs-review'};
+ }
  if(!research.configured||!research.candidates.length){log(research.configured?'상품 근거에 맞는 조사 태그 없음 · 기존 태그 유지':'태그 조사 자료 연결 필요 · 기존 태그 유지');return {tagsTouched:false,tagMode:'research',tagCount:0,searchTagsVerified:false,tagStatus:'no-candidates'};}
  const started=Date.now(),pool=research.candidates.slice(0,60),wanted=new Map(pool.map(t=>[t.id,t.name]));
  if(pool.some(t=>!/^\d+$/.test(t.id)||!t.name)||wanted.size!==pool.length)throw Error('조사 태그 ID·명칭을 확인해 주세요.');

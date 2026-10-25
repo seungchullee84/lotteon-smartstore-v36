@@ -29,7 +29,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
 import {createProductEditStore} from './product-edits.mjs';
-import {searchProductTags,saveSelectedProductTags,selectedProductTagResearch} from './smartstore-tag-selection.mjs';
+import {searchProductTags,saveSelectedProductTags,selectedProductTagResearch,removeProductTag} from './smartstore-tag-selection.mjs';
 import {collect,parseProductInput,buildKeywords,repairCategoryFields} from './product.mjs';
 import {LotteAutomation} from './automation.mjs';
 import {prepareMainImage,backgroundImageStatus,backgroundSelection,applyExtraExclusions,excludeExtraImage} from './main-image.mjs';
@@ -87,7 +87,7 @@ const server=http.createServer(async(req,res)=>{
       if(colorChipStatus)versions.main=(versions.main||'original')+':'+colorChipStatus.hash;
       const selected=state.folder?await backgroundSelection(state.folder):'main';
       const listing=state.product?await listingPreview(state.product,{dataRoot}):null;
-      return json(res,200,{...state,folder:undefined,tagResearch:state.product?selectedProductTagResearch(state.product,{dataRoot}):null,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,detailRevision:listing.detailRevision,mainColor:listing.main.color,extraColors:listing.extras.map(p=>p.color),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
+      return json(res,200,{...state,folder:undefined,capabilities:{manualTags:true,photoAnalysisSettings:true},tagResearch:state.product?selectedProductTagResearch(state.product,{dataRoot}):null,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,detailRevision:listing.detailRevision,mainColor:listing.main.color,extraColors:listing.extras.map(p=>p.color),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
     }
     if(req.method==='GET'&&/^\/smartstore-listing\/(?:main|extra-\d+)$/.test(url.pathname)){
       if(!state.product||url.searchParams.get('style')!==state.product.style)throw Error('현재 품번을 확인해 주세요.');
@@ -200,6 +200,11 @@ const server=http.createServer(async(req,res)=>{
       if(url.pathname==='/api/smartstore-tags-search'){
         if(state.busy||!state.product||b.style!==state.product.style)throw Error('수집 완료 후 현재 품번으로 태그를 찾아 주세요.');
         return json(res,200,searchProductTags(state.product,b.query));
+      }
+      if(url.pathname==='/api/smartstore-tags-remove'){
+        if(state.busy||!state.product||b.style!==state.product.style)throw Error('현재 품번을 확인하고 작업 종료 후 태그를 삭제해 주세요.');
+        const record=await removeProductTag(state.product,b.tag,{dataRoot});state.tagResult=null;state.tagValidation=null;
+        return json(res,200,{ok:true,tags:record.tags});
       }
       if(url.pathname==='/api/smartstore-tags-selected'){
         if(state.busy||!state.product||b.style!==state.product.style)throw Error('현재 품번의 태그 선택을 확인해 주세요.');
