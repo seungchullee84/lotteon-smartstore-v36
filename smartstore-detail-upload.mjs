@@ -81,6 +81,15 @@ export async function applySmartstoreBannerLink(editor,parts,{check=()=>{},log=(
 }
 export const insertSmartstoreVideo=insertNativeBrandVideo;
 export async function selectSmartstoreImage(editor,image,{check=()=>{}}={}){
+ check();
+ // The editable image section receives ONE's pointer events; its bitmap can
+ // be behind a link/selection layer. Let Playwright scroll and click that
+ // container first, without rejecting it through a separate DOM hit test.
+ const section=image.locator('xpath=ancestor::*[contains(concat(" ",normalize-space(@class)," ")," se-section-image ")][1]');
+ const component=image.locator('xpath=ancestor::*[contains(concat(" ",normalize-space(@class)," ")," se-component ")][1]');
+ const target=await section.count()?section:await component.count()?component:image;
+ let clickIssue;
+ try{await target.click({timeout:3000});check();return;}catch(error){check();clickIssue=error;}
  for(const alignment of [null,'center','start']){
   check();await image.scrollIntoViewIfNeeded();
   if(alignment)await image.evaluate((n,block)=>n.scrollIntoView({block,inline:'nearest',behavior:'instant'}),alignment);
@@ -101,7 +110,7 @@ export async function selectSmartstoreImage(editor,image,{check=()=>{}}={}){
   // input coordinates. Fractions map correctly under zoom and inside frames.
   await editor.mouse.click(box.x+point.x*box.width,box.y+point.y*box.height);return;
  }
- throw Error('상세이미지에서 클릭 가능한 영역을 확인하지 못했습니다. 편집기 내용은 유지했습니다.');
+ throw Error('상세이미지 선택 영역 클릭 실패: '+clickIssue.message+' · 편집기 내용은 유지했습니다.');
 }
 export async function applySmartstoreImageLayout(editor,image,{check=()=>{}}={}){
  check();if(await image.evaluate(n=>!!n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend')))return;
