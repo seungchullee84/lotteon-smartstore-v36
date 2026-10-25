@@ -76,31 +76,33 @@ export async function selectLearnedAttribute(page,row,label,value,check=()=>{}){
   const items=await input.locator('.item').allTextContents();
   return (items.length?items.join(' '):await input.innerText()).replace(/\s+/g,' ').trim();
  };
- check();await input.waitFor({state:'visible'});
+ check();await input.waitFor({state:'visible',timeout:1500});
  if(await selected()===value)return;
  const escaped=value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
  const local=row.locator('.selectize-dropdown-content [data-selectable]:visible').filter({hasText:new RegExp('^\\s*'+escaped+'\\s*$')});
  // On a retry the dropdown may already be open; clicking its input again closes it.
- if(await local.count()!==1&&!/\bdropdown-active\b/.test(await input.getAttribute('class')||'')){check();await input.click();}
+ if(await local.count()!==1&&!/\bdropdown-active\b/.test(await input.getAttribute('class')||'')){check();await input.click({timeout:1500});}
  const choices=page.locator('.selectize-dropdown-content:visible [data-selectable]').filter({hasText:new RegExp('^\\s*'+escaped+'\\s*$')});
  try{await choices.waitFor({state:'visible',timeout:3000});}
  catch{
   check();const available=await page.locator('.selectize-dropdown-content:visible [data-selectable]').allTextContents();
   throw Error(label+' 선택 목록에서 '+value+'을 확인하지 못했습니다. 표시 항목: '+available.map(s=>s.trim()).join(', '));
  }
- check();await choices.click();
+ check();await choices.click({timeout:1500});
  if(await selected()!==value)throw Error(label+' 선택 확인 실패');
 }
-export async function fillLearnedAttributes(page,fields,check=()=>{}){
+export async function fillLearnedAttributes(page,fields,check=()=>{},log=()=>{}){
  const table=page.getByRole('table',{name:'상품속성 선택 테이블'});
  const materialRow=table.getByRole('row').filter({hasText:'주요소재'});
- if(!fields.materials.length)throw Error('상품 소재를 확인해 주세요.');
- await setAttributeCheckboxes(materialRow,fields.materials,{label:'소재',check,optionalValues:fields.materialFinishes||[]});
+ const skip=label=>log('상품속성 건너뜀: '+label+' · 최종 직접 확인');
+ const attempt=async(label,fn)=>{check();try{return await fn();}catch(error){check();if(error.name==='AbortError')throw error;skip(label);}};
+ if(!fields.materials.length)skip('주요소재 / 확인 근거 없음');
+ else await attempt('주요소재',()=>setAttributeCheckboxes(materialRow,fields.materials,{label:'소재',check,optionalValues:fields.materialFinishes||[],bestEffort:true,timeout:1200,onSkip:skip}));
  for(const [label,value] of [['소매기장',fields.sleeve],['네크라인',fields.neckline]]){
   const row=table.getByRole('row').filter({hasText:label});
   if(!await row.count())continue; // Outerwear categories omit these selectors.
-  if(!value)throw Error(label+'을 상품 사진과 대조해 주세요.');
-  await selectLearnedAttribute(page,row,label,value,check);
+  if(!value){skip(label+' / 확인 근거 없음');continue;}
+  await attempt(label+' / '+value,()=>selectLearnedAttribute(page,row,label,value,check));
  }
 }
 export async function openTagVerification(page,field){

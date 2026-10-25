@@ -2,7 +2,7 @@ export function isSmartstoreInputUrl(url){return /^https:\/\/sell\.smartstore\.n
 import {buildSmartstoreDetail} from './smartstore-detail.mjs';
 import {fillAdditionalAttributes} from './smartstore-attributes.mjs';
 import {smartstoreTitle,assertSmartstoreInputTitle} from './smartstore-title.mjs';
-import {learnedFields,assertLearnedFields,fillLearnedAttributes,sellerProductCode} from './smartstore-learned.mjs';
+import {learnedFields,fillLearnedAttributes,sellerProductCode} from './smartstore-learned.mjs';
 import {researchForProduct} from './apparel-tag-research.mjs';
 import {fillResearchTags} from './smartstore-research-tags.mjs';
 
@@ -80,7 +80,6 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   if(!isSmartstoreInputUrl(await tab.url()))throw Error('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.');
   if(!/\/products\/copy\/\d+/.test(await tab.url()))throw Error('기본설정을 복사한 복사등록 화면에서 실행해 주세요.');
   const learned=learnedFields(plan);
-  assertLearnedFields(learned,await page.getByRole('table',{name:'상품속성 선택 테이블'}).getByRole('row').allTextContents());
   const fill=async(loc,value)=>{check();await loc.fill(String(value));await loc.press('Tab');const actual=await loc.evaluate(e=>e.value);if(actual!=='<redacted>'&&String(actual).replaceAll(',','')!==String(value).replaceAll(',',''))throw Error('입력값 확인 실패: '+String(value).slice(0,50));};
   const open=async(name,field)=>{if(!await field.isVisible())await page.getByRole('button',{name}).click();};
   log('스마트스토어 복사등록 입력 · 조사 자료 태그 자동입력 · 상품 저장/등록 안 함');
@@ -111,7 +110,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   if(assets&&(assets.main||Array.isArray(assets.extras))){await uploadSmartstoreImages(page,assets,check);log(assets.main?'대표·추가 이미지 업로드 완료':'추가이미지 정리 완료 · 대표이미지 교체 제외');}
   if(!assets?.detail)log('복사된 상세설명 유지 · 별도로 지시한 이미지 입력만 수행');
   await open(/^상품 주요정보/,page.getByRole('textbox',{name:'품번',exact:true}));
-  await fillLearnedAttributes(page,learned,check);
+  await fillLearnedAttributes(page,learned,check,log);
   await fillAdditionalAttributes(page,learned,log,check);
   const origin=await fillSmartstoreOrigin(page,plan.country,check);
   log('원산지 확인: '+origin.type+' · '+origin.country+(origin.importer?' · 수입사 '+origin.importer:''));
