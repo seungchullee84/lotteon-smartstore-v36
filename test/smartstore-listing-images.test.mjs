@@ -87,3 +87,11 @@ test('공식몰 대표 원본을 추가 첫 번째로 한 번만 넣고 제공 �
   await writeFile(path.join(folder,'product.json'),JSON.stringify({...product,style:'326932'}));await assert.rejects(prepareListingImages(product,folder,options),/공식몰 대표사진을 다시 수집/);
  }finally{await rm(root,{recursive:true,force:true});}
 });
+
+test('기존 초안에 섞인 미분류·케어라벨·뒷면·디테일은 서브에서 제외하고 공식몰·같은 색 옆면·다른 색 정면만 유지한다',async()=>{
+ const dataRoot=await mkdtemp(path.join(os.tmpdir(),'listing-routine-'));try{
+  const product={style:'356954',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=routine',images:{main:'https://www.giordano.co.kr/official.jpg'},colors:['01크림','02베이지']};const root=path.join(dataRoot,'smartstore-details',product.style);await mkdir(root,{recursive:true});
+  const listingImages={main:{color:'02베이지',sourceHash:'main'},extras:[{color:'02베이지',role:'side',sourceHash:'side'},{color:'01크림',role:'front',sourceHash:'cream-front'},...['back','detail','care-label','provided'].map(role=>({color:'02베이지',role,sourceHash:role})),{color:'02베이지',role:'front',sourceHash:'another-front'}]};
+  await writeFile(path.join(root,'draft.json'),JSON.stringify({...product,listingImages}));const preview=await listingPreview(product,{dataRoot});assert.deepEqual(preview.extras.map(p=>p.role),['official-main','side','front']);
+ }finally{await rm(dataRoot,{recursive:true,force:true});}
+});
