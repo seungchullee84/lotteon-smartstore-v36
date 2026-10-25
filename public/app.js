@@ -21,7 +21,7 @@ $('main').onerror=()=>{
 };
 
 async function post(endpoint,data={}){
- const expected=({open:'lotte',run:'lotte','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-auto':'smartstore','smartstore-tags-validate':'smartstore','smartstore-tags':'smartstore','smartstore-tags-remove':'smartstore','smartstore-tags-search':'smartstore','smartstore-tags-selected':'smartstore','smartstore-ai-settings':'smartstore','smartstore-optimize-title':'smartstore'})[endpoint];
+ const expected=({open:'lotte',run:'lotte','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-auto':'smartstore','smartstore-tags-validate':'smartstore','smartstore-tags':'smartstore','smartstore-tags-remove':'smartstore','smartstore-tags-search':'smartstore','smartstore-tags-selection':'smartstore','smartstore-tags-selected':'smartstore','smartstore-ai-settings':'smartstore','smartstore-optimize-title':'smartstore'})[endpoint];
  if(expected&&document.body.dataset.channel!==expected)throw Error('선택한 판매채널과 실행 버튼이 다릅니다. 판매채널을 확인해 주세요.');
  if(expected)data={...data,channel:document.body.dataset.channel};
  try{const r=await fetch('/api/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:AbortSignal.timeout(endpoint==='smartstore-optimize-title'?60000:45000)});const b=await r.json();if(!r.ok)throw Error(b.error);return b;}
@@ -395,7 +395,7 @@ $('smartstoreStart').onclick=async()=>{
  const style=$('style').value.trim()||product?.style;
  if(!style){$('error').textContent='품번 또는 공식몰 상품 URL을 먼저 입력해 주세요.';return;}
  requestLock=true;smartstoreStarting=true;$('error').textContent='';$('smartstoreStart').disabled=true;syncButtons();announce('시작 요청 접수 중 · 복사등록 화면을 확인합니다.');
- try{await post('smartstore-auto',{style,selectedTitle:product?{style:product.style,title:$('smartstoreName').value}:undefined,edits:currentProductEdits(),selectedTags:manualTagStyle===product?.style&&manualTagHasSelection?[...manualTagChoices.values()]:undefined});serverBusy=true;serverPhase='smartstore-auto';announce('자동 작업 시작 · 선택한 복사등록 화면에 업로드합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;smartstoreStarting=false;syncButtons();}
+ try{await flushManualTagSelection();await post('smartstore-auto',{style,selectedTitle:product?{style:product.style,title:$('smartstoreName').value}:undefined,edits:currentProductEdits(),selectedTags:currentManualTags()});serverBusy=true;serverPhase='smartstore-auto';announce('자동 작업 시작 · 선택한 복사등록 화면에 업로드합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;smartstoreStarting=false;syncButtons();}
 };
 const autoStageLabels={connect:'로그인 확인',collect:'공식몰 수집',prepare:'사진·색상 대조',compose:'사진 합성',detail:'상세페이지 제작',upload:'스마트스토어 업로드',done:'업로드 완료'};
 try{if(sessionStorage.getItem('registrationChannel')==='smartstore')selectRegistrationChannel('smartstore');}catch{}
@@ -500,8 +500,8 @@ function syncListingImages(state){
 
 function renderResearchTags(state){
  const panel=$('researchTagStatus');if(!panel)return;
- const research=state.tagResearch,container=$('researchTagCandidates');tagResearchReady=!!research?.candidates?.length;
- $('smartstoreAutoTags').disabled=requestLock||state.busy||!research?.candidates?.length;$('smartstoreValidateTags').disabled=$('smartstoreAutoTags').disabled;
+ const research=effectiveTagResearch(state),container=$('researchTagCandidates');tagResearchReady=!!research?.candidates?.length||!!research?.manual;
+ $('smartstoreAutoTags').disabled=requestLock||state.busy||!tagResearchReady;$('smartstoreValidateTags').disabled=$('smartstoreAutoTags').disabled;
  const allowed=new Map((research?.candidates||[]).map(t=>[t.id,t.name]));
  const currentReport=result=>result?.style===state.product?.style&&Array.isArray(result.selectedTags)&&result.selectedTags.every(t=>allowed.get(t.id)===t.name)?result:null;
  const report=currentReport(state.tagResult),validation=currentReport(state.tagValidation);
@@ -514,12 +514,12 @@ function renderResearchTags(state){
 $('smartstoreAutoTags').onclick=async()=>{
  if(requestLock||serverBusy||!product||document.body.dataset.channel!=='smartstore')return;
  requestLock=true;syncButtons();
- try{await post('smartstore-tags',{style:product.style});serverBusy=true;serverPhase='smartstore-tags';$('error').textContent='';announce('태그 자동입력 시작 · 상품 저장 없이 진행합니다.');}
+ try{await flushManualTagSelection();await post('smartstore-tags',{style:product.style,selectedTags:currentManualTags()});serverBusy=true;serverPhase='smartstore-tags';$('error').textContent='';announce('선택 태그 입력 시작 · 상품 저장 없이 진행합니다.');}
  catch(e){$('error').textContent=e.message;}
  finally{requestLock=false;syncButtons();}
 };
 
-$('smartstoreValidateTags').onclick=async()=>{if(requestLock||serverBusy||!product||document.body.dataset.channel!=='smartstore')return;requestLock=true;syncButtons();try{await post('smartstore-tags-validate',{style:product.style});serverBusy=true;serverPhase='smartstore-tags';$('error').textContent='';announce('태그 검증 시작 · 검증 뒤 기존 폼 태그를 복원합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;syncButtons();}};
+$('smartstoreValidateTags').onclick=async()=>{if(requestLock||serverBusy||!product||document.body.dataset.channel!=='smartstore')return;requestLock=true;syncButtons();try{await flushManualTagSelection();await post('smartstore-tags-validate',{style:product.style,selectedTags:currentManualTags()});serverBusy=true;serverPhase='smartstore-tags';$('error').textContent='';announce('태그 검증 시작 · 검증 뒤 기존 폼 태그를 복원합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;syncButtons();}};
 
 // Preserve deliberate edits per style; newly collected source images stay server-owned.
 const manualProductFields=new Set(['name','gender','consumerPrice','colors','sizes','material','country','manufactured','washing','keywords','commonMiddle','commonSmall','channelMiddle','channelSmall','smartstoreName']);
@@ -576,17 +576,29 @@ photoSettingsButton.onclick=()=>{$('photoAnalysisForm').reset();$('photoAnalysis
 $('closePhotoAnalysis').onclick=()=>photoDialog.close();photoDialog.addEventListener('close',()=>$('photoAnalysisForm').reset());
 $('photoAnalysisForm').onsubmit=async event=>{event.preventDefault();const button=event.submitter;button.disabled=true;try{await post('smartstore-ai-settings',{apiKey:$('photoAnalysisKey').value});photoAnalysisConfigured=true;$('photoAnalysisForm').reset();$('photoAnalysisMessage').textContent='암호화 저장 완료. 시작을 누르면 사진과 미리보기를 자동 준비합니다.';}catch(error){$('photoAnalysisMessage').textContent=error.message;}finally{button.disabled=false;}};
 const photoPreparationStatus=document.createElement('p');photoPreparationStatus.id='photoPreparationStatus';photoPreparationStatus.className='note';photoPreparationStatus.setAttribute('role','status');$('mainSourceNote').insertAdjacentElement('afterend',photoPreparationStatus);
-let photoAnalysisConfigured=false,manualTagStyle='',manualTagChoices=new Map(),manualTagHasSelection=false,tagSearchSequence=0;
+let photoAnalysisConfigured=false,manualTagStyle='',manualTagChoices=new Map(),manualTagHasSelection=false,tagSearchSequence=0,manualTagSaveQueue=Promise.resolve(),manualTagSaveVersion=0;
 const tagTools=document.createElement('div');tagTools.className='manual-tag-tools';tagTools.innerHTML='<label class="sr-only" for="manualTagQuery">연관 태그 검색어</label><input id="manualTagQuery" type="search" maxlength="40" placeholder="예: 후드, 기모, 티셔츠" autocomplete="off"><button id="manualTagSearch" type="button" class="secondary">태그 찾기</button>';$('smartstoreValidateTags').insertAdjacentElement('afterend',tagTools);
-const tagPicker=document.createElement('section');tagPicker.id='manualTagPicker';tagPicker.className='manual-tag-picker';tagPicker.hidden=true;tagPicker.innerHTML='<p id="manualTagMessage" role="status"></p><div id="manualTagResults" class="manual-tag-results"></div><p id="manualTagSelectionStatus"></p><div id="manualTagChoices" class="manual-tag-choices"></div><button id="applyManualTags" type="button">선택 태그 검증·적용</button><small>현재 상품에 근거가 있는 사전 ID·명칭만 선택할 수 있습니다. 적용할 때 네이버 검색 적용 여부를 다시 확인하며 상품은 저장하지 않습니다.</small>';$('researchTagCandidates').parentElement.append(tagPicker);
+const tagPicker=document.createElement('section');tagPicker.id='manualTagPicker';tagPicker.className='manual-tag-picker';tagPicker.hidden=true;tagPicker.innerHTML='<p id="manualTagSaveStatus" role="status"></p><p id="manualTagMessage" role="status"></p><div id="manualTagResults" class="manual-tag-results"></div><p id="manualTagSelectionStatus"></p><div id="manualTagChoices" class="manual-tag-choices"></div><button id="applyManualTags" type="button">선택 태그 검증·적용</button><small>체크·해제하면 등록기의 적용 태그에 바로 저장됩니다. 근거 없음 태그도 직접 선택할 수 있으며, 네이버 입력 시 검색 등록 여부를 확인합니다. 상품 저장은 하지 않습니다.</small>';$('researchTagCandidates').parentElement.append(tagPicker);
 function drawManualTagChoices(){
- $('manualTagSelectionStatus').textContent='선택 '+manualTagChoices.size+'/10개 · 적용할 때 검색 등록 여부 확인';$('applyManualTags').disabled=!manualTagChoices.size||serverBusy;
- const list=$('manualTagChoices');list.replaceChildren();for(const tag of manualTagChoices.values()){const remove=document.createElement('button');remove.type='button';remove.className='secondary';remove.textContent='#'+tag.name+' ×';remove.setAttribute('aria-label',tag.name+' 선택 취소');remove.onclick=()=>{manualTagChoices.delete(tag.id);manualTagHasSelection=true;drawManualTagChoices();for(const box of $('manualTagResults').querySelectorAll('input[type=checkbox]'))if(box.dataset.id===tag.id)box.checked=false;};list.append(remove);}
+ $('manualTagSelectionStatus').textContent='선택 '+manualTagChoices.size+'/10개 · 적용할 때 검색 등록 여부 확인';$('applyManualTags').disabled=!manualTagHasSelection||serverBusy;
+ const list=$('manualTagChoices');list.replaceChildren();for(const tag of manualTagChoices.values()){const remove=document.createElement('button');remove.type='button';remove.className='secondary';remove.textContent='#'+tag.name+' ×';remove.setAttribute('aria-label',tag.name+' 선택 취소');remove.onclick=()=>{manualTagChoices.delete(tag.id);commitManualTagSelection();for(const box of $('manualTagResults').querySelectorAll('input[type=checkbox]'))if(box.dataset.id===tag.id)box.checked=false;};list.append(remove);}
 }
+function currentManualTags(){return manualTagStyle===product?.style&&manualTagHasSelection?[...manualTagChoices.values()]:undefined;}
+function effectiveTagResearch(state){return manualTagStyle===state.product?.style&&manualTagHasSelection?{...state.tagResearch,manual:true,candidates:[...manualTagChoices.values()],manualTags:[...manualTagChoices.values()]}:state.tagResearch;}
+function commitManualTagSelection(){
+ manualTagHasSelection=true;drawManualTagChoices();if(smartstoreListingState)renderResearchTags(smartstoreListingState);
+ const style=manualTagStyle,tags=[...manualTagChoices.values()],version=++manualTagSaveVersion;
+ try{localStorage.setItem('smartstore-tags.v1.'+style,JSON.stringify({sourceUrl:product.sourceUrl,tags}));}catch{}
+ $('manualTagSaveStatus').textContent='선택 태그를 저장 중…';
+ manualTagSaveQueue=manualTagSaveQueue.catch(()=>{}).then(()=>post('smartstore-tags-selection',{style,tags}));
+ manualTagSaveQueue.then(()=>{if(style===manualTagStyle&&version===manualTagSaveVersion)$('manualTagSaveStatus').textContent='선택한 '+tags.length+'개 태그가 등록기 적용 목록에 저장됐습니다. 네이버 입력은 태그 자동입력 또는 시작을 누르세요.';},error=>{if(style===manualTagStyle&&version===manualTagSaveVersion)$('manualTagSaveStatus').textContent='선택 저장 실패: '+error.message;});
+}
+async function flushManualTagSelection(){await manualTagSaveQueue;}
 async function removeRecommendedTag(tag,button){
- if(!product||serverBusy||requestLock)return;button.disabled=true;
- try{const result=await post('smartstore-tags-remove',{style:product.style,tag:{id:tag.id,name:tag.name}});manualTagStyle=product.style;manualTagHasSelection=true;manualTagChoices=new Map(result.tags.map(t=>[t.id,t]));tagPicker.hidden=false;drawManualTagChoices();$('manualTagMessage').textContent='추천에서 삭제했습니다. 검색해 다른 태그를 선택할 수 있습니다.';}
- catch(error){$('error').textContent=error.message;}finally{button.disabled=false;}
+ if(!product||serverBusy||requestLock)return;
+ if(!manualTagHasSelection){const tags=(smartstoreListingState?.tagResearch?.candidates||[]).slice(0,10);manualTagStyle=product.style;manualTagChoices=new Map(tags.map(t=>[t.id,{id:t.id,name:t.name}]));}
+ manualTagChoices.delete(tag.id);tagPicker.hidden=false;commitManualTagSelection();
+ for(const box of $('manualTagResults').querySelectorAll('input[type=checkbox]'))if(box.dataset.id===tag.id)box.checked=false;
 }
 function syncEnhancedFeatures(state){
  photoAnalysisConfigured=!!state.backgroundConfigured;const p=state.product;if(!p)return;
