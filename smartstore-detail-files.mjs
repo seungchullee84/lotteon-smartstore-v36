@@ -130,7 +130,7 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
   await writeFile(stem+'.html',smartstoreDetailDocument(p,{imageUrl,fontUrl,videoUrl:encodeURIComponent(video.filename)}).html);
   const bannerPath=stem+'_스토어배너.png';
   await sharp(output,{limitInputPixels:false}).extract({left:0,top:bannerTop,width:860,height:footerTop-bannerTop}).png({compressionLevel:9}).toFile(bannerPath);
-  await writeFile(stem+'_배너연결주소.txt','https://shopping.naver.com/window/department/store/101731950\nONE 편집기에서 배너 이미지를 선택하고 사진 링크를 직접 입력합니다.\n');
+  await writeFile(stem+'_배너연결주소.txt','https://shopping.naver.com/window/department/store/101731950\n자동 업로드 마지막 단계에서 ONE 편집기의 사진 링크로 연결하고 재진입 검증합니다.\n');
   const footerPath=stem+'_구매혜택부터하단.png';
   await sharp(output,{limitInputPixels:false}).extract({left:0,top:footerTop,width:860,height:height-footerTop}).png({compressionLevel:9}).toFile(footerPath);
   const videoGuidePath=stem+'_영상안내.txt';
