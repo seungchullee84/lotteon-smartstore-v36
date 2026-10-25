@@ -516,3 +516,49 @@ $('smartstoreAutoTags').onclick=async()=>{
 };
 
 $('smartstoreValidateTags').onclick=async()=>{if(requestLock||serverBusy||!product||document.body.dataset.channel!=='smartstore')return;requestLock=true;syncButtons();try{await post('smartstore-tags-validate',{style:product.style});serverBusy=true;serverPhase='smartstore-tags';$('error').textContent='';announce('태그 검증 시작 · 검증 뒤 기존 폼 태그를 복원합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;syncButtons();}};
+
+// Preserve deliberate edits per style; newly collected source images stay server-owned.
+const manualProductFields=new Set(['name','gender','consumerPrice','colors','sizes','material','country','manufactured','washing','keywords','commonMiddle','commonSmall','channelMiddle','channelSmall','smartstoreName']);
+const localProductEdits=new Map();
+function editedValuesFor(p){
+ if(!localProductEdits.has(p.style)){
+  let saved={};try{saved=JSON.parse(localStorage.getItem('product-edits.v1.'+p.style)||'{}');}catch{}
+  const fields={...p.userEditedFields,...saved};
+  if(p.smartstoreNameUserEdited&&!Object.hasOwn(fields,'smartstoreName'))fields.smartstoreName=p.smartstoreName;
+  localProductEdits.set(p.style,Object.fromEntries(Object.entries(fields).filter(([k,v])=>manualProductFields.has(k)&&typeof v==='string'&&v.length<=2000)));
+ }
+ return localProductEdits.get(p.style);
+}
+function rememberProductField(key,value){
+ if(!product||!manualProductFields.has(key))return;
+ const fields=editedValuesFor(product);fields[key]=value;
+ try{localStorage.setItem('product-edits.v1.'+product.style,JSON.stringify(fields));}catch{}
+}
+function currentProductEdits(){
+ if(!product)return undefined;
+ const fields=editedValuesFor(product);return Object.keys(fields).length?{style:product.style,fields:{...fields}}:undefined;
+}
+function rememberProductInput(event){
+ const key=event.target.id==='smartstoreName'?'smartstoreName':event.target.name;
+ if(!manualProductFields.has(key))return;
+ rememberProductField(key,event.target.value);
+ if(key==='gender'&&event.type==='change')for(const dependent of ['name','commonMiddle','commonSmall','channelMiddle','channelSmall'])rememberProductField(dependent,$('form').elements[dependent].value);
+}
+$('form').addEventListener('input',rememberProductInput);$('form').addEventListener('change',rememberProductInput);
+$('smartstoreName').addEventListener('input',rememberProductInput);
+const populateWithManualEdits=populate;
+populate=function(p){
+ const fields=editedValuesFor(p),reviewed={...p,category:{...p.category}};
+ for(const [key,value] of Object.entries(fields)){
+  if(['commonMiddle','commonSmall','channelMiddle','channelSmall'].includes(key))reviewed.category[key]=value;
+  else if(key==='colors'||key==='sizes')reviewed[key]=value.split(',').map(s=>s.replace(/\s+/g,'')).filter(Boolean);
+  else reviewed[key]=key==='consumerPrice'&&value!==''?Number(value):value;
+ }
+ if(Object.hasOwn(fields,'smartstoreName'))reviewed.smartstoreNameUserEdited=true;
+ populateWithManualEdits(reviewed);
+ for(const [key,value] of Object.entries(fields)){
+  const field=key==='smartstoreName'?$('smartstoreName'):$('form').elements[key];if(field)field.value=value;
+ }
+ for(const key of Object.keys(fields))reviewedFields.add(key);
+ highlightReviewFields();syncNoticeCopy();renderDetailPreview(reviewed);
+};
