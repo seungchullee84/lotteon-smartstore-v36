@@ -54,13 +54,13 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
   const relative='trusted/'+digest+path.extname(p.name).toLowerCase();await writeFile(path.join(root,relative),p.bytes);
   if(p.color&&p.role!=='provided'){
    let group=groups.find(g=>g.color===p.color);if(!group){group={color:p.color,files:[]};groups.push(group);}
-   group.files.push({file:relative,role:p.role,main:p===main[0]});
+   group.files.push({file:relative,role:p.role,main:p===main[0],hash:digest});
   }else providedPhotos.push(relative);
  }
- for(const g of groups){const front=g.files.find(p=>p.main)||g.files.find(p=>p.role==='front');g.files=g.files.sort((a,b)=>Number(b===front)-Number(a===front)||['side','detail','back','front'].indexOf(a.role)-['side','detail','back','front'].indexOf(b.role)).map(p=>p.file);}
+ for(const g of groups){const imported=old?.importedColorPhotos?.find(p=>p.color===g.color)?.hashes||[],rank=p=>{const i=imported.indexOf(p.hash);return i<0?100:i;};const front=g.files.find(p=>p.main)||g.files.find(p=>p.role==='front');g.files=g.files.sort((a,b)=>rank(a)-rank(b)||Number(b===front)-Number(a===front)||['side','detail','back','front'].indexOf(a.role)-['side','detail','back','front'].indexOf(b.role)).map(p=>p.file);}
  const previous=old?.sourceUrl===product.sourceUrl&&old?.officialDetailHash===detailHash?old:null;
  const points=previous?.sellingPoints?.length?previous.sellingPoints:productSellingPoints(product).filter(p=>!/^SIZE$|COLORS$|^PRODUCT$/.test(p.title)).map(p=>({...p,evidence:description+' / '+product.sourceUrl}));
- const draft={style:product.style,sourceUrl:product.sourceUrl,headline:previous?.headline||product.name,officialDetailHash:detailHash,photos:groups,unmatchedPhotos:providedPhotos,listingImages,careLabels:await saveCareLabelSelection(root,reviewed.filter(p=>p.role==='care-label')),sellingPoints:points,officialPhotos:previous?.officialPhotos,trustedFolder:true,photoMapping:{basis:'사용자 지시: 현재 품번 폴더 사진 신뢰 · 미확인 색상·각도는 임의 지정하지 않음',files:records,ignoredPhotos:old?.style===product.style&&old?.sourceUrl===product.sourceUrl?old.photoMapping?.ignoredPhotos||[]:[]},preparedAt:new Date().toISOString()};
+ const draft={style:product.style,sourceUrl:product.sourceUrl,headline:previous?.headline||product.name,officialDetailHash:detailHash,photos:groups,importedColorPhotos:old?.importedColorPhotos,unmatchedPhotos:providedPhotos,listingImages,careLabels:await saveCareLabelSelection(root,reviewed.filter(p=>p.role==='care-label')),sellingPoints:points,officialPhotos:previous?.officialPhotos,trustedFolder:true,photoMapping:{basis:'사용자 지시: 현재 품번 폴더 사진 신뢰 · 미확인 색상·각도는 임의 지정하지 않음',files:records,ignoredPhotos:old?.style===product.style&&old?.sourceUrl===product.sourceUrl?old.photoMapping?.ignoredPhotos||[]:[]},preparedAt:new Date().toISOString()};
  await writeFile(path.join(root,'draft.json'),JSON.stringify(draft,null,2));
  log('품번 폴더 사진 적용 · 대표 1장 · 폴더 추가 '+extras.length+'장 · 상세 '+groups.reduce((n,g)=>n+Math.min(3,g.files.length),0)+'장 · 매칭 대기 '+providedPhotos.length+'장 · 케어라벨 '+reviewed.filter(p=>p.role==='care-label').length+'장 · 외부 사진분석 없이 진행');
  return prepareSmartstoreDetail({...product,officialDescription:description},folder,{dataRoot});

@@ -1,5 +1,5 @@
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
-import {stageImportedPhotos,applyImportedPhotos} from './smartstore-photo-import.mjs';
+import {stageImportedPhotos,applyImportedPhotos,allImportedPhotoChoices} from './smartstore-photo-import.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
 import {serveBrandVideo,WOMEN_VIDEO_HASH} from './smartstore-brand-video.mjs';
@@ -271,15 +271,28 @@ const server=http.createServer(async(req,res)=>{
       }
       if(url.pathname==='/api/smartstore-import-photos'){
         if(state.busy)throw Error('현재 작업이 끝난 뒤 사진을 가져와 주세요.');
-        if(!state.product||!state.folder||b.style!==state.product.style)throw Error('가져올 품번의 공식몰 정보를 먼저 수집해 주세요.');
-        if(b.edits)await productEdits.save(b.edits,state.product.style);
-        const product=await productEdits.apply(state.product),folder=state.folder;
+        if(!/^\d{6}$/.test(b.style||''))throw Error('사진을 가져올 품번 6자리를 입력해 주세요.');
+        if(b.edits&&state.product)await productEdits.save(b.edits,state.product.style);
+        const style=b.style;
         job('smartstore-import-photos',async()=>{
           const signal=activeAbort.signal;log('기존 상품 착용사진 수집 · 판매자 상품코드로 조회');
+          let product=state.product,folder=state.folder;
+          if(!product||product.style!==style||!folder){
+            folder=path.join(dataRoot,style+'-photo-import-'+Date.now());
+            product=await collect(style,folder,log,()=>signal.aborted,signal,{saveSmartstoreSource:true,noticeCacheRoot:path.join(dataRoot,'smartstore-notice-cache'),prepareMain:false});signal.throwIfAborted();
+            if(product.style!==style)throw Error('공식몰에서 수집한 품번이 다릅니다.');
+          }
+          product=await productEdits.apply(product);state.product=product;state.folder=folder;state.photoImport=null;state.revision++;
           const source=await smartBot.importExistingPhotos(product,{signal});signal.throwIfAborted();
           const stage=await stageImportedPhotos(source,folder,{signal});signal.throwIfAborted();
           if(state.product.style!==product.style||state.folder!==folder)throw Error('현재 상품이 변경되어 수집 사진을 적용하지 않았습니다.');
-          state.photoImport=stage;log('기존 상품 사진 '+stage.candidates.length+'장 수집 · 등록기에서 착용사진·색상·각도를 확인 후 적용해 주세요. 상품 저장 안 함');
+          let known=[];try{known=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',style,'draft.json'),'utf8')).photoMapping?.files||[];}catch(e){if(e.code!=='ENOENT')throw e;}
+          const choices=allImportedPhotoChoices(stage,product,known);
+          const result=await applyImportedPhotos(product,folder,choices,{dataRoot,signal,automatic:true});signal.throwIfAborted();
+          const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,signal,log});signal.throwIfAborted();
+          await writeFile(path.join(folder,'product.json'),JSON.stringify(prepared,null,2));await publishPhotoPreview(prepared,folder);
+          state.photoImport={...stage,status:'applied',selectedCount:result.selectedCount};
+          log('색상별 사진 전체 '+result.selectedCount+'장 자동 반영 완료 · 상세 템플릿 업데이트 · 상품 저장 안 함');
         });return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/smartstore-import-photos-apply'){

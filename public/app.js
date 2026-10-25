@@ -50,7 +50,7 @@ async function copyProgress(errorOnly=false){
  announce(errorOnly?'오류를 복사했습니다.':'진행 기록과 오류를 복사했습니다.','success');
 }
 $('copyError').onclick=()=>copyProgress(true);
-function syncButtons(){if($('smartstoreStart'))$('smartstoreStart').textContent=smartstoreStarting?'시작 요청 중…':serverBusy&&serverPhase==='smartstore-auto'?'자동 작업 진행 중…':'▶ 시작 · 전체 입력·업로드';for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreOpen','smartstoreOptimizeTitle','naverSettings','smartstoreStart','smartstoreDetailOnly','smartstoreImportPhotos','photoImportApply','smartstoreAutoTags'])if($(id))$(id).disabled=requestLock||serverBusy||['smartstoreAutoTags'].includes(id)&&!tagResearchReady||['smartstoreDetailOnly','smartstoreImportPhotos'].includes(id)&&!product;}
+function syncButtons(){if($('smartstoreStart'))$('smartstoreStart').textContent=smartstoreStarting?'시작 요청 중…':serverBusy&&serverPhase==='smartstore-auto'?'자동 작업 진행 중…':'▶ 시작 · 전체 입력·업로드';for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreOpen','smartstoreOptimizeTitle','naverSettings','smartstoreStart','smartstoreDetailOnly','smartstoreImportPhotos','photoImportApply','smartstoreAutoTags'])if($(id))$(id).disabled=requestLock||serverBusy||['smartstoreAutoTags'].includes(id)&&!tagResearchReady||id==='smartstoreDetailOnly'&&!product;}
 function action(id,fn){$(id).onclick=async()=>{
  const primary=id in buttonLabels;if(primary&&(requestLock||serverBusy))return;
  if(id==='run'&&!$('form').reportValidity())return;
@@ -627,13 +627,14 @@ $('manualTagQuery').addEventListener('keydown',event=>{if(event.key==='Enter'&&!
 $('applyManualTags').onclick=async()=>{if(!product||requestLock||serverBusy||!manualTagHasSelection)return;const button=$('applyManualTags');button.disabled=true;try{await flushManualTagSelection();await post('smartstore-tags-selected',{style:product.style,tags:[...manualTagChoices.values()]});serverBusy=true;serverPhase='smartstore-tags';syncButtons();$('manualTagMessage').textContent='선택한 태그만 네이버에서 검증·적용 중 · 상품 저장 안 함';}catch(error){$('manualTagMessage').textContent=error.message;}finally{button.disabled=serverBusy;}};
 
 $('smartstoreImportPhotos').onclick=async()=>{
- if(requestLock||serverBusy||!product)return;
- requestLock=true;$('error').textContent='';syncButtons();announce('판매자상품코드로 기존 상품 착용사진을 찾습니다.');
- try{await post('smartstore-import-photos',{style:product.style,edits:currentProductEdits()});serverBusy=true;serverPhase='smartstore-import-photos';}catch(e){$('error').textContent=e.message;}finally{requestLock=false;syncButtons();}
+ if(requestLock||serverBusy)return;
+ const style=$('style').value.trim()||product?.style;if(!/^\d{6}$/.test(style||'')){$('error').textContent='사진을 가져올 품번 6자리를 입력해 주세요.';return;}
+ requestLock=true;$('error').textContent='';syncButtons();announce('판매자상품코드로 조회 후 색상별 사진 전체를 상세 템플릿에 자동 반영합니다.');
+ try{await post('smartstore-import-photos',{style,edits:currentProductEdits()});serverBusy=true;serverPhase='smartstore-import-photos';}catch(e){$('error').textContent=e.message;}finally{requestLock=false;syncButtons();}
 };
 function syncPhotoImport(state){
  const stage=state.photoImport,p=state.product,box=$('photoImportReview');
- box.hidden=document.body.dataset.channel!=='smartstore'||!stage||stage.style!==p?.style;
+ box.hidden=document.body.dataset.channel!=='smartstore'||!stage||stage.style!==p?.style||stage.status==='applied';
  if(box.hidden)return;
  $('photoImportMessage').textContent=stage.status==='applied'?'✓ 착용사진 '+stage.selectedCount+'장 · 추가이미지와 상세 템플릿에 반영했습니다.':'사진을 확인한 뒤 적용해 주세요.';
  const grid=$('photoImportCandidates'),stamp=stage.style+stage.createdAt;
