@@ -1,5 +1,10 @@
 // Icons describe only the current point's wording, never add product claims.
 const icons={
+ 'hidden-banding':'<path d="M10 19c8-7 20-7 28 0M10 19l-1 21h12l3-12 3 12h12l-1-21M10 24c9 3 19 3 28 0M24 26v4"/><path data-band-position="inside" d="M14 17q10-5 20 0" stroke="#aa814b" stroke-width="3" stroke-dasharray="2.5 2"/><path d="M10 19c8 5 20 5 28 0"/><path d="m34 9-3 4m3-1-3 1 .3-3" stroke="#aa814b"/><text x="22" y="9" text-anchor="middle" font-family="Arial,Malgun Gothic,sans-serif" font-size="6.5" fill="#8b7047" stroke="none">안쪽</text>',
+ banding:'<path d="M11 10h26v9l2 21H27l-3-12-3 12H9l2-21ZM11 19h26M24 20v8"/><path d="m13 11 2 6 3-6 3 6 3-6 3 6 3-6 3 6 2-6"/>',
+ 'tapered-pants':'<path d="M13 7h22l3 10-6 25h-6l-2-17-2 17h-6l-6-25ZM12 13h24M24 13v12M13 14l4 5m18-5-4 5M17 38h5m4 0h5"/><circle cx="25" cy="10" r=".7"/>',
+ 'pants-fit':'<path d="M12 8h24l2 33H26l-2-16-2 16H10ZM12 14h24M24 14v11M13 15l5 5m17-5-5 5M11 37h11m4 0h11"/>',
+ 'skirt-fit':'<path d="M17 9h14l9 32H8ZM16 15h16M21 16l-5 23m11-23 5 23M10 37h28"/>',
  wool:'<circle cx="23" cy="23" r="15.5"/><path d="M10 15c8 0 19 11 26 19M8 23c7-1 16 3 24 12M13 10c-1 8 6 18 18 26M23 8c-2 9 0 17 7 25M31 10c-5 7-7 17-5 25M11 29c10-8 18-11 26-10M16 35c7-8 15-11 22-10M34 35c9 0 10 7 5 7h-7"/>',
  turtleneck:'<path d="M15 20V9c5-3 13-3 18 0v11l8 7-5 8-5-3v9H17v-9l-5 3-5-8Z"/><path d="M15 20c4 5 14 5 18 0M15 9c5 3 13 3 18 0M19 11v10m5-9v10m5-11v10M17 36h14"/>',
  neckline:'<path d="m16 11-9 7 5 9 5-3v17h14V24l5 3 5-9-9-7M16 11c0 10 16 10 16 0M19 11c0 6 10 6 10 0M17 36h14"/>',
@@ -19,6 +24,11 @@ const icons={
  neutral:'<path d="M24 8v32M8 24h32M13 13l22 22m0-22L13 35"/>',
 };
 const surfaces={
+ 'hidden-banding':'<path d="M10 19c8-7 20-7 28 0v5c-8 3-20 3-28 0Z" fill="#efe0bf"/><path d="M10 24c9 3 19 3 28 0l1 16H27l-3-12-3 12H9Z" fill="#e2e8d8"/>',
+ banding:'<path d="M11 10h26v9l2 21H27l-3-12-3 12H9l2-21Z" fill="#e2e8d8"/><path d="M11 10h26v9H11Z" fill="#efe0bf"/>',
+ 'tapered-pants':'<path d="M13 7h22l3 10-6 25h-6l-2-17-2 17h-6l-6-25Z" fill="#e2e8d8"/>',
+ 'pants-fit':'<path d="M12 8h24l2 33H26l-2-16-2 16H10Z" fill="#e2e8d8"/>',
+ 'skirt-fit':'<path d="M17 9h14l9 32H8Z" fill="#e2e8d8"/>',
  wool:'<circle cx="23" cy="23" r="15.5" fill="#eadab8"/><path d="M11 12c7-4 16-2 20 4-11-5-17 1-22 7-1-4 0-8 2-11" fill="#faf4e7"/>',
  turtleneck:'<path d="m15 20 9 3 9-3 8 7-5 8-5-3v9H17v-9l-5 3-5-8Z" fill="#e2e8d8"/><path d="M15 9c5-3 13-3 18 0v11c-4 5-14 5-18 0Z" fill="#faf8ed"/>',
  neckline:'<path d="m16 11-9 7 5 9 5-3v17h14V24l5 3 5-9-9-7c0 10-16 10-16 0" fill="#e2e8d8"/>',
@@ -50,14 +60,27 @@ const rules=[
  ['material',/소재|코튼|면|울|모달|테리|혼용/],
  ['design',/그래픽|디자인|프린트|포인트/],
 ];
-export function sellingPointIconKind(point){
+function specificKind(text){
+ if(/히든\s*밴딩|히든\s*밴드|(?:허리\s*)?안쪽.{0,12}밴[딩드]|숨겨진.{0,8}밴[딩드]/.test(text))return 'hidden-banding';
+ if(/테이퍼드|tapered/i.test(text))return 'tapered-pants';
+ if(/밴딩|허리\s*밴드|고무\s*밴드/.test(text))return 'banding';
+ return '';
+}
+function fitKind(point,product){
+ const detail=[point?.title,point?.description].join(' '),category=[...(product?.sourceCategory||[]),...Object.values(product?.category||{}).filter(v=>typeof v==='string')].join(' '),name=product?.rawName||product?.name||'';
+ if(/스커트|치마|SKIRT/i.test(detail+' '+category+' '+name))return 'skirt-fit';
+ if(/바지|팬츠|슬랙스|청바지|하의|PANTS|TROUSERS/i.test(detail+' '+category+' '+name))return 'pants-fit';
+ return 'fit';
+}
+export function sellingPointIconKind(point,product={}){
+ for(const text of [point?.title,point?.description]){const specific=specificKind(String(text||''));if(specific)return specific;}
  for(const text of [point?.title,point?.description]){
-  for(const [kind,pattern] of rules)if(pattern.test(String(text||'')))return kind;
+  for(const [kind,pattern] of rules)if(pattern.test(String(text||'')))return kind==='fit'?fitKind(point,product):kind;
  }
  return 'neutral';
 }
-export function sellingPointIcon(point){
- const kind=sellingPointIconKind(point);
+export function sellingPointIcon(point,product={}){
+ const kind=sellingPointIconKind(point,product);
  const warm=['wool','warmth','light','design'].includes(kind),cool=['water','cooling','airflow'].includes(kind);
  const tile=warm?'#f6f0e4':cool?'#edf3f1':'#edf1e7',border=warm?'#e9dfcc':cool?'#dce7e3':'#dfe6d7',ink=warm?'#8b7047':cool?'#557a72':'#536a4d';
  return `<svg data-point-icon="${kind}" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" style="display:block;flex:none;" fill="none"><rect x="1" y="2" width="62" height="60" rx="17" fill="${tile}" stroke="${border}"/><path d="M10 13c3-5 7-7 14-7h25" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".7"/><g transform="translate(8 7)"><ellipse cx="24" cy="41" rx="17" ry="2.5" fill="${ink}" opacity=".08"/>${surfaces[kind]||''}<g stroke="${ink}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons[kind]}</g></g></svg>`;
