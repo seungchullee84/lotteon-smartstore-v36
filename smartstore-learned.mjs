@@ -1,3 +1,4 @@
+import {setAttributeCheckboxes} from './smartstore-attribute-checkboxes.mjs';
 // Verified copy-form workflow. No save, publish, category, delivery or age actions.
 export const copyStartUrl='https://sell.smartstore.naver.com/#/products/copy/13755624427';
 export function sellerProductCode(p){
@@ -45,6 +46,8 @@ export function learnedFields(p){
  const known={...(verified[p.style]||{}),...(checked.sleeve?{sleeve:checked.sleeve}:{}),...(checked.neckline?{neckline:checked.neckline}:{})},title=p.name||'';
  const material=p.material||known.material||'';
  const materials=[['인조가죽(합성피혁)',/인조가죽|합성피혁|합성가죽/],['아크릴',/아크릴/],['폴리에스테르',/폴리에[스]?터|폴리에스테르|플리에스터/],['나일론',/나일론/],['폴리우레탄',/폴리우레탄/],['면',/면\s*\d/],['울/모',/(?:울|모)\s*\d/],['레이온/인견',/레이온|인견/],['캐시미어',/캐시미어/]].filter(([,re])=>re.test(material)).map(([name])=>name);
+ // Major-material selectors can also expose processing choices such as brushed fleece.
+ if(/기모|브러시드|브러쉬드/.test([p.rawName,p.officialDescription,material].filter(Boolean).join(' ')))materials.push('기모');
  const sleeve=known.sleeve||(/긴팔/.test(title)?'긴팔':/반팔/.test(title)?'반팔':null);
  const neckline=known.neckline||(/카라|칼라|폴로넥/.test(title)?'칼라넥':/라운드/.test(title)?'라운드넥':/브이넥|V넥/i.test(title)?'V넥':/터틀넥/.test(title)?'터틀넥':/후드/.test(title)?'후드넥':null);
  // Tag candidates are deliberately excluded: the user handles tags manually.
@@ -92,13 +95,7 @@ export async function fillLearnedAttributes(page,fields,check=()=>{}){
  const table=page.getByRole('table',{name:'상품속성 선택 테이블'});
  const materialRow=table.getByRole('row').filter({hasText:'주요소재'});
  if(!fields.materials.length)throw Error('상품 소재를 확인해 주세요.');
- const boxes=materialRow.getByRole('checkbox');
- for(let i=0;i<await boxes.count();i++){
-  check();const box=boxes.nth(i),name=await box.getAttribute('aria-label')||await box.evaluate(e=>e.labels?.[0]?.textContent?.trim()||e.parentElement.textContent.trim());
-  const selected=await box.isChecked(),wanted=fields.materials.includes(name.trim());
-  if(selected!==wanted){const id=await box.getAttribute('id');if(id)await page.locator('label[for="'+id+'"]').click();else await box.click({force:true});}
-  if(await box.isChecked()!==wanted)throw Error('소재 선택 확인 실패: '+name);
- }
+ await setAttributeCheckboxes(materialRow,fields.materials,{label:'소재',check});
  for(const [label,value] of [['소매기장',fields.sleeve],['네크라인',fields.neckline]]){
   const row=table.getByRole('row').filter({hasText:label});
   if(!await row.count())continue; // Outerwear categories omit these selectors.
