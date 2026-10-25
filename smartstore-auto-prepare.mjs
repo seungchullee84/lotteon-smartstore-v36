@@ -46,11 +46,11 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
  let old;try{old=JSON.parse(await readFile(path.join(root,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  const known=new Map();
  // Human-verified prior mappings are reused by image bytes, never just a date filename.
- if(old?.style===product.style)for(const group of old.photos||[])for(const [rank,relative] of (group.files||[]).entries()){
+ if(old?.style===product.style&&old.sourceUrl===product.sourceUrl)for(const group of old.photos||[])for(const [rank,relative] of (group.files||[]).entries()){
   if(path.isAbsolute(relative)||relative.split(/[\\/]/).includes('..')||!product.colors.includes(group.color))throw Error('기존 사진 매칭 정보를 확인해 주세요.');
   const file=await realpath(path.join(root,relative));const canonical=await realpath(root);if(!file.startsWith(canonical+path.sep))throw Error('기존 사진 위치가 올바르지 않습니다.');
   const bytes=await readFile(file);const mapping={color:group.color,role:rank===0?'front':rank===1?'detail':'side',file,bytes};known.set(hash(bytes),mapping);
-  for(const record of old.photoMapping?.files||[])if(record.preparedHash===hash(bytes)&&record.color===group.color&&/^[a-f0-9]{64}$/.test(record.hash)){if(['front','detail','side'].includes(record.role))mapping.role=record.role;known.set(record.hash,mapping);}
+  for(const record of old.photoMapping?.files||[])if((record.preparedHash===hash(bytes)||record.hash===hash(bytes))&&record.color===group.color&&/^[a-f0-9]{64}$/.test(record.hash)){if(['front','detail','side'].includes(record.role))mapping.role=record.role;known.set(record.hash,mapping);}
  }
  for(const record of old?.careLabels||[])if(/^[a-f0-9]{64}$/.test(record.sourceHash))known.set(record.sourceHash,{role:'care-label',color:''});
  const ignored=new Set((old?.photoMapping?.ignoredPhotos||[]).filter(p=>/^[a-f0-9]{64}$/.test(p.hash)).map(p=>p.hash));
@@ -61,14 +61,14 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
   const parent=norm(path.basename(path.dirname(file.file)));const exact=product.colors.find(color=>[norm(color),norm(color).replace(/^\d+/, '')].includes(parent));
   if(exact)mapped.push({...file,color:exact,role:'front'});else unknown.push(file);
  }
- if(!unknown.length&&old?.officialDetailHash===detailHash&&old?.sellingPoints?.length&&old.sellingPoints.every(p=>p.title&&p.description&&p.evidence)){
+ if(!unknown.length&&old?.sourceUrl===product.sourceUrl&&old?.officialDetailHash===detailHash&&old?.sellingPoints?.length&&old.sellingPoints.every(p=>p.title&&p.description&&p.evidence)){
   const listingImages=await saveListingSelection(root,chooseListingPhotos(mapped,product));
   const updated={...old,sourceUrl:product.sourceUrl,listingImages,careLabels:await saveCareLabelSelection(root,mapped.filter(p=>p.role==='care-label'))};
   await writeFile(path.join(root,'draft.json.tmp'),JSON.stringify(updated,null,2));await rename(path.join(root,'draft.json.tmp'),path.join(root,'draft.json'));
   log('확인된 실사 사진·소구점 재사용 · 본사 원본 변경 없음');
   return prepareSmartstoreDetail(product,folder,{dataRoot});
  }
- if(!apiKey)throw Error('새 사진의 색상·소구점 대조가 필요합니다. 자동 제작 연결 설정에 API 키를 연결하거나 이 채팅에서 사진 확인을 요청해 주세요.');
+ if(!apiKey)throw Error('사진의 색상·소구점 확인이 필요합니다. 이 채팅에서 현재 품번 사진 확인을 요청해 주세요.');
  const content=[{type:'input_text',text:JSON.stringify({style:product.style,name:product.rawName,colors:product.colors,material:product.material,officialDescription:description,photoIds:unknown.map(f=>f.id)})}];
  const addImage=async(bytes,label,max=1000)=>{content.push({type:'input_text',text:label},{type:'input_image',image_url:'data:image/jpeg;base64,'+(await sharp(bytes).rotate().resize({width:max,height:1800,fit:'inside',withoutEnlargement:true}).jpeg({quality:85}).toBuffer()).toString('base64'),detail:'high'});};
  if(unknown.length){
