@@ -18,11 +18,11 @@ export function careLabelText(text){
 export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mapped=[],old,description,detailHash,signal,log=()=>{},recognizePhoto}={}){
  const root=path.join(dataRoot,'smartstore-details',product.style);await mkdir(path.join(root,'trusted'),{recursive:true});
  const known=new Map(mapped.map(p=>[hash(p.bytes),p]));let worker;
- const recognize=recognizePhoto||async bytes=>{
+ const recognize=recognizePhoto||(async bytes=>{
   worker||=await createWorker('kor+eng');signal?.throwIfAborted();
   await worker.setParameters({tessedit_pageseg_mode:'11'});
   return (await worker.recognize(await sharp(bytes).rotate().resize({width:1000,withoutEnlargement:true}).toBuffer())).data.text;
- };
+ });
  const reviewed=[];
  try{
   for(const p of photos){

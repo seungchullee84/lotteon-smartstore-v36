@@ -484,7 +484,7 @@ function syncListingImages(state){
 
  custom.hidden=!smart||!listing;original.hidden=smart&&!!listing;$('extraImages').querySelector('h3').textContent=smart?'추가이미지':'추가이미지 (최대 2장)';
  if(!smart||!listing||!product||product.style!==state.product?.style)return;
- const base='/smartstore-listing/',query='?style='+encodeURIComponent(product.style);
+ const base='/smartstore-listing/',query='?style='+encodeURIComponent(product.style)+'&v='+encodeURIComponent(listing.detailRevision||'');
  const main=base+'main'+query;if($('main').getAttribute('src')!==main)$('main').src=main;
  const stamp=product.style+JSON.stringify(listing);
  if(!state.busy&&$('detailPreview').dataset.photoRevision!==stamp){
@@ -492,7 +492,7 @@ function syncListingImages(state){
  }
  if(custom.dataset.stamp!==stamp){
   custom.dataset.stamp=stamp;custom.replaceChildren();
-  listing.extraColors.forEach((color,i)=>{const card=document.createElement('div');card.className='extra-image-card';const img=document.createElement('img');img.src=base+'extra-'+i+query;const angle=color===listing.mainColor?'옆면':'정면';img.alt=color+' '+angle;const name=document.createElement('p');name.textContent=color+' · '+angle;const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='750×1000 JPG 저장';button.onclick=()=>saveSelectedImage('extra-'+i,button);card.append(img,name,button);custom.append(card);});
+  listing.extraColors.forEach((color,i)=>{const card=document.createElement('div');card.className='extra-image-card';const img=document.createElement('img');img.src=base+'extra-'+i+query;const angle=listing.extraRoles?.[i]==='provided'?'':color===listing.mainColor?'옆면':'정면';img.alt=color+(angle?' '+angle:'');const name=document.createElement('p');name.textContent=color+(angle?' · '+angle:'');const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='750×1000 JPG 저장';button.onclick=()=>saveSelectedImage('extra-'+i,button);card.append(img,name,button);custom.append(card);});
  }
  $('extraImageStatus').textContent=listing.previewOnly?'폴더 1번 사진의 750×1000 JPG 작업본을 표시 중입니다. 추가·상세 사진은 색상 대조 후 반영됩니다.':'대표: '+listing.mainColor+' (1번 사진) · 추가 '+listing.extraColors.length+'장 · 확인된 옆면(있는 경우) + 다른 색상 정면';
  $('extraImages').hidden=false;
