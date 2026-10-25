@@ -7,6 +7,7 @@ import {createNaverTitleOptimizer} from '../naver-title.mjs';
 
 test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저장 정책을 보존',async()=>{
  const product={style:'356956',rawName:'남성 아가일 브이넥 니트',name:'남성 아가일 브이넥 니트 356956',gender:'남성',consumerPrice:59800,colors:['01블랙'],sizes:['M'],material:'면 100%',country:'베트남',washing:'손세탁',manufactured:'2026-08',keywords:'지오다노,남성니트',category:{},images:{detail:'https://www.giordano.co.kr/detail.jpg'},warnings:[]};
+ let autoRequest;
  let fail=false,settings=null,configured=false,optimizeCalls=0,revision=1,currentProduct=product,keywordMode='fail';
  const optimize=createNaverTitleOptimizer({clock:()=>new Date('2026-10-22T16:00:00Z'),fetchImpl:async(_,config)=>{
   const request=JSON.parse(config.body);return Response.json({...request,results:request.keywordGroups.map(g=>({title:g.groupName,keywords:g.keywords,data:[{period:request.endDate,ratio:({남성니트:20,남자니트:80,브이넥니트:100,아가일니트:30})[g.groupName]||10}]}))});
@@ -26,6 +27,7 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
      await new Promise(resolve=>setTimeout(resolve,200));
      return respond(res,{keywords:'지오다노,'+'가'.repeat(35),length:40,source:'테스트 데이터랩',period:{startDate:'2026-09-25',endDate:'2026-10-22'}});
     }
+    if(url.pathname==='/api/smartstore-auto'){autoRequest=body;return respond(res,{ok:true},202);}
     if(url.pathname==='/api/naver-settings'){settings=body;configured=true;return respond(res,{configured:true});}
     if(url.pathname==='/api/smartstore-optimize-title'){
      optimizeCalls++;
@@ -135,6 +137,12 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   await page.waitForFunction(()=>document.getElementById('naverTitleResult').textContent.includes('통합검색어 트렌드 API'));
   assert.equal(await page.locator('input[name="name"]').inputValue(),currentProduct.name);
   assert.equal(await page.locator('#smartstoreName').inputValue(),'지오다노 여성 후드 숏 패딩 자켓 376922');
+  const selectedTitle='사용자  수정 후드티 376922';
+  await page.locator('#smartstoreName').fill(selectedTitle);
+  const beforeAutoCalls=optimizeCalls;
+  await Promise.all([page.waitForResponse(r=>r.url().endsWith('/api/smartstore-auto')),page.locator('#smartstoreStart').click()]);
+  assert.deepEqual(autoRequest.selectedTitle,{style:'376922',title:selectedTitle});assert.equal(optimizeCalls,beforeAutoCalls,'시작에서 상품명 재최적화를 요청하지 않음');
+  assert.equal(await page.locator('#smartstoreName').inputValue(),selectedTitle);
   assert.doesNotMatch(await page.locator('body').innerText(),/fake-secret/);assert.deepEqual(errors,[]);
  }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
 });
