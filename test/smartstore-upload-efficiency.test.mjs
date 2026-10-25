@@ -46,7 +46,7 @@ test('재진입 검증은 이미지 순서·영상·옆트임을 모두 대조�
  await page.goto('https://sell.smartstore.naver.com/#/products/copy/1');
  const parts={files:[path.join(root,'a.png'),path.join(root,'b.png')],includeVideo:true,videoIdentity:{identity:['component:'+videoId]}};
  assert.equal((await verifySmartstoreDetail(page,parts)).detailUploaded,true);
- await assert.rejects(()=>verifySmartstoreDetail(page,{...parts,bannerLink:{index:1,file:parts.files[1],url:'https://shopping.naver.com/window/department/store/101731950'}}),/배너 스토어 링크/);
+ const linked=await verifySmartstoreDetail(page,{...parts,bannerLinkSubmitted:true,bannerLink:{index:1,file:parts.files[1],url:'https://shopping.naver.com/window/department/store/101731950'}});assert.equal(linked.detailUploaded,true);assert.equal(linked.bannerLinkVerified,false);assert.equal(linked.bannerLinkStatus,'submitted-unverified');
  videoId='SE-00000000-3434-48be-bdaa-84ba88bfe976';await assert.rejects(()=>verifySmartstoreDetail(page,parts),/MP4 영상 식별자/);
  const report=JSON.parse(await readFile(path.join(root,'detail-verification.json'),'utf8'));assert.deepEqual(report.mismatch,['MP4 영상 식별자']);assert.deepEqual(report.names,['a.png','b.png']);
  }finally{await rm(root,{recursive:true,force:true});}

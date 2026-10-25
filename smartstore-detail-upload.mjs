@@ -49,7 +49,7 @@ export async function applySmartstoreBannerLink(editor,parts,{check=()=>{},log=(
  check();const image=editor.locator('.se-component.se-image img').nth(link.index);
  const expected=path.basename(link.file),actual=await image.evaluate(n=>decodeURIComponent(new URL(n.src).pathname.split('/').at(-1)));
  if(actual!==expected)throw Error('선택할 배너 이미지의 파일명이 다릅니다. 링크를 입력하지 않았습니다.');
- if(await image.evaluate((n,url)=>n.closest('a')?.href===url,link.url))return;
+ if(await image.evaluate((n,url)=>n.closest('a')?.href===url,link.url)){parts.bannerLinkSubmitted=true;return;}
  try{
   await image.scrollIntoViewIfNeeded();const box=await image.boundingBox();
   await image.click({position:{x:box.width/2,y:box.height/2}});
@@ -75,9 +75,9 @@ export async function applySmartstoreBannerLink(editor,parts,{check=()=>{},log=(
   });
   if(buttonIndex<0)throw Error('링크 주소 오른쪽 체크 버튼을 확인하지 못했습니다.');
   check();await editor.locator('button,[role="button"]').nth(buttonIndex).click();
-  await editor.waitForFunction(({index,url})=>document.querySelectorAll('.se-component.se-image img')[index]?.closest('a')?.href===url,{index:link.index,url:link.url},{timeout:5000});
+  parts.bannerLinkSubmitted=true;
  }catch(error){throw Error('배너 링크 연결 확인 실패: '+error.message);}
- log('배너 이미지에 스토어 링크 연결 확인 · 다른 이미지 링크 변경 없음');
+ check();log('배너 주소 입력·오른쪽 체크 완료 · 링크 검증 대기 없이 하단 옆트임 처리 계속');
 }
 export const insertSmartstoreVideo=insertNativeBrandVideo;
 export async function applySmartstoreImageLayout(editor,image,{check=()=>{}}={}){
@@ -191,10 +191,13 @@ export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  if(leftoverUrl)throw Error('저장된 상세페이지에 영상 주소 문장이 남아 있습니다.');
  const mismatch=[];
  if(JSON.stringify(names)!==JSON.stringify(expected))mismatch.push('이미지 파일명·순서');
- if(parts.bannerLink&&snapshot[parts.bannerLink.index]?.link!==parts.bannerLink.url)mismatch.push('배너 스토어 링크');
+ const bannerLinkVerified=!!parts.bannerLink&&snapshot[parts.bannerLink.index]?.link===parts.bannerLink.url;
+ const bannerLinkStatus=!parts.bannerLink?'not-applicable':bannerLinkVerified?'verified':parts.bannerLinkSubmitted?'submitted-unverified':'unverified';
+ // User confirmed that ONE applies the link even when its bitmap wrapper has
+ // no readable href. This observation is recorded, but does not block layout.
  if(snapshot.length!==expected.length||snapshot.some(n=>!n.extended))mismatch.push('옆트임 배치');
  if(includeVideo?!video.length||JSON.stringify(video)!==JSON.stringify(parts.videoIdentity?.identity):videoCount!==0)mismatch.push('MP4 영상 식별자');
- const verification={expected,names,images:snapshot,videoCount,videoIdentity:video,expectedVideoIdentity:parts.videoIdentity?.identity,mismatch,repairAttempt};
+ const verification={expected,names,images:snapshot,videoCount,videoIdentity:video,expectedVideoIdentity:parts.videoIdentity?.identity,bannerLinkStatus,bannerLinkVerified,mismatch,repairAttempt};
  await writeFile(path.join(path.dirname(parts.files[0]),'detail-verification.json'),JSON.stringify(verification,null,2));
  if(mismatch.length===1&&mismatch[0]==='옆트임 배치'&&repairAttempt===0){
   log('이미지·영상 일치 · 옆트임 미반영 '+snapshot.filter(n=>!n.extended).length+'장만 재적용 · 파일 재업로드 없음');
@@ -205,5 +208,5 @@ export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  if(mismatch.length){log('상세 대조 차이: '+mismatch.join(' · '));throw Error('상세페이지 확인 불일치: '+mismatch.join(' · ')+'. 상품은 저장하지 않았습니다.');}
  await verified.close();
  log('상세페이지 이미지 '+parts.files.length+'장 반영 확인 · '+(includeVideo?'공통 MP4 포함 · 판매페이지 자동재생 미검증':'영상 제외'));
- return {detailUploaded:true,bannerLinkVerified:!!parts.bannerLink,bannerLinkUrl:parts.bannerLink?.url||null,detailParts:parts.files.length,videoUploaded:includeVideo,videoSha256:parts.videoIdentity?.sha256,videoPlayback:includeVideo?'unverified':null,colorNavigation:false,imageLayout:'extend'};
+ return {detailUploaded:true,bannerLinkVerified,bannerLinkStatus,bannerLinkUrl:parts.bannerLink?.url||null,detailParts:parts.files.length,videoUploaded:includeVideo,videoSha256:parts.videoIdentity?.sha256,videoPlayback:includeVideo?'unverified':null,colorNavigation:false,imageLayout:'extend'};
 }
