@@ -57,7 +57,7 @@ test('사진 내용이 같으면 재실행 시 확인된 색상을 유지하고 
    if(url===product.sourceUrl)return new Response('<body>STYLE. 05375908<div class="prd_detail_content_gio">'+description+'</div></body>');
    assert.equal(url,'https://api.openai.com/v1/responses');const body=JSON.parse(request.body);assert.equal(body.store,false);
    const supplied=JSON.parse(body.input[0].content[0].text);photoCounts.push(supplied.photoIds.length);
-   const analysis={points:[{title:'경량',description:'가벼운 나일론 원단.',evidence:'가벼운 나일론 원단'}],photos:supplied.photoIds.map((id,i)=>({id,color:'05블랙',confidence:.99,sameProduct:true,role:i===0?'front':'side'}))};
+   const analysis={attributes:{sleeve:'긴팔',neckline:'스텐드/차이나칼라',evidence:'공식 상세 사진의 소매·칼라 확인'},points:[{title:'경량',description:'가벼운 나일론 원단.',evidence:'가벼운 나일론 원단'}],photos:supplied.photoIds.map((id,i)=>({id,color:'05블랙',confidence:.99,sameProduct:true,role:i===0?'front':'side'}))};
    return Response.json({status:'completed',output:[{content:[{type:'output_text',text:JSON.stringify(analysis)}]}]});
   };
   const draftFile=path.join(dataRoot,'smartstore-details',product.style,'draft.json');
