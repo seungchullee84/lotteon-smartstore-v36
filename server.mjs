@@ -1,4 +1,5 @@
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
+import {stageImportedPhotos,applyImportedPhotos} from './smartstore-photo-import.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
 import {serveBrandVideo,WOMEN_VIDEO_HASH} from './smartstore-brand-video.mjs';
@@ -95,6 +96,11 @@ const server=http.createServer(async(req,res)=>{
       if(!state.product||url.searchParams.get('style')!==state.product.style)throw Error('현재 품번을 확인해 주세요.');
       const key=url.pathname.split('/').at(-1);const file=key==='main'?await originalListingMain(state.product,{dataRoot}):(await prepareListingImages(state.product,state.folder,{dataRoot})).extras[Number(key.slice(6))];
       if(!file)return json(res,404,{});res.writeHead(200,{'Content-Type':({'.png':'image/png','.webp':'image/webp'})[path.extname(file).toLowerCase()]||'image/jpeg','Cache-Control':'no-store'});return res.end(await readFile(file));
+    }
+    if(req.method==='GET'&&/^\/smartstore-import-photo\/[a-f0-9]{24}$/.test(url.pathname)){
+      if(!state.folder||!state.product||state.photoImport?.style!==state.product.style)return json(res,404,{});
+      const item=state.photoImport.candidates.find(c=>c.id===url.pathname.split('/').at(-1));if(!item||!(/^[a-f0-9]{24}\.(jpg|png|webp)$/.test(item.file)))return json(res,404,{});
+      res.writeHead(200,{'Content-Type':({'.png':'image/png','.webp':'image/webp'})[path.extname(item.file)]||'image/jpeg','Cache-Control':'no-store'});return res.end(await readFile(path.join(state.folder,'smartstore-photo-import',item.file)));
     }
     if(req.method==='GET'&&url.pathname.startsWith('/smartstore-template/')){
       const name=url.pathname.slice('/smartstore-template/'.length);

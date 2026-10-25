@@ -8,8 +8,13 @@ import {selectedProductTagResearch} from './smartstore-tag-selection.mjs';
 import {fillResearchTags} from './smartstore-research-tags.mjs';
 export const SMARTSTORE_HOME='https://sell.smartstore.naver.com/';
 import {uploadSmartstoreDetail} from './smartstore-detail-upload.mjs';
+import {readExistingPhotos} from './smartstore-photo-import.mjs';
 import {bindSmartstoreDetailEdit,assertDetailOnlyProduct,readDetailOnlySellerCode,isSmartstoreDetailEditUrl} from './smartstore-detail-only.mjs';
 export class SmartstoreAutomation extends BrowserAutomation{
+  async importExistingPhotos(product,{signal}={}){
+    this.stopped=false;await this.connectChrome(SMARTSTORE_HOME);
+    return readExistingPhotos(this.context,product,{log:this.log,check:()=>{this.check();signal?.throwIfAborted();}});
+  }
   async preflightDetailOnly(product){
     this.stopped=false;await this.connectChrome(SMARTSTORE_HOME);
     this.page=await bindSmartstoreDetailEdit(this.context,product.style);
