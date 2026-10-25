@@ -29,6 +29,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
 import {createProductEditStore} from './product-edits.mjs';
+import {searchProductTags,saveSelectedProductTags,selectedProductTagResearch} from './smartstore-tag-selection.mjs';
 import {collect,parseProductInput,buildKeywords,repairCategoryFields} from './product.mjs';
 import {LotteAutomation} from './automation.mjs';
 import {prepareMainImage,backgroundImageStatus,backgroundSelection,applyExtraExclusions,excludeExtraImage} from './main-image.mjs';
@@ -51,7 +52,7 @@ const desktopSession=process.env.REGISTER_DESKTOP==='1'?JSON.parse(await readFil
 const token=desktopSession?.token||randomBytes(24).toString('hex');
 let backgroundApiKey=await loadSmartstoreAIKey(dataRoot);
 const protectedBranding=brandingLock(dataRoot);
-const state={busy:false,phase:'idle',logs:[],product:null,folder:null,error:null,paused:null,revision:0,collectionInput:null,detailFallbackRequest:null};
+const state={busy:false,phase:'idle',logs:[],product:null,folder:null,error:null,paused:null,revision:0,collectionInput:null,detailFallbackRequest:null,photoPreparation:null};
 if(process.env.REGISTER_RESTORE){const restored=path.resolve(process.env.REGISTER_RESTORE);if(restored.startsWith(dataRoot+path.sep)){state.product=JSON.parse(await readFile(restored,'utf8'));repairCategoryFields(state.product);if(state.product.categoryMatch){state.product.fieldStatus||={};state.product.fieldStatus.category=state.product.categoryMatch.status;}state.product.keywords=buildKeywords(state.product);state.folder=path.dirname(restored);state.phase='done';state.revision=1;}}
 if(state.product){state.product=await productEdits.apply(state.product);await applyExtraExclusions(state.folder,state.product);}
 if(state.product&&state.folder){
@@ -65,7 +66,7 @@ const smartBot=new SmartstoreAutomation(dataRoot,log);
 function json(res,status,data){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));}
 async function body(req){let text='';for await(const chunk of req){text+=chunk;if(text.length>1600000)throw Error('요청이 너무 큽니다.');}return JSON.parse(text||'{}');}
 let activeAbort=null;
-function job(phase,fn){if(state.busy)throw Error('진행 중인 작업이 있습니다.');const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase=phase;state.error=null;Promise.resolve().then(fn).then(()=>{state.phase=controller.signal.aborted?'stopped':'done';}).catch(e=>{state.error=controller.signal.aborted?null:e.message;if(e.code==='DETAIL_SOURCE_MISSING'&&!controller.signal.aborted)state.detailFallbackRequest={input:state.collectionInput};state.phase=controller.signal.aborted?'stopped':'error';log(controller.signal.aborted?'작업을 중단했습니다.':e.message);}).finally(()=>{state.busy=false;state.paused=null;activeAbort=null;});}
+function job(phase,fn){if(state.busy)throw Error('진행 중인 작업이 있습니다.');const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase=phase;state.error=null;Promise.resolve().then(fn).then(()=>{state.phase=controller.signal.aborted?'stopped':'done';}).catch(e=>{state.error=controller.signal.aborted?null:e.message;if(['PHOTO_ANALYSIS_REQUIRED','PHOTO_FOLDER_EMPTY'].includes(e.code)&&!controller.signal.aborted)state.photoPreparation={style:state.product?.style,status:e.code==='PHOTO_ANALYSIS_REQUIRED'?'needs-analysis':'missing',photoCount:e.photoCount||0,unknownCount:e.unknownCount||0,message:e.message};if(e.code==='DETAIL_SOURCE_MISSING'&&!controller.signal.aborted)state.detailFallbackRequest={input:state.collectionInput};state.phase=controller.signal.aborted?'stopped':'error';log(controller.signal.aborted?'작업을 중단했습니다.':e.message);}).finally(()=>{state.busy=false;state.paused=null;activeAbort=null;});}
 const server=http.createServer(async(req,res)=>{
   try{
     const url=new URL(req.url,'http://localhost');
@@ -86,7 +87,7 @@ const server=http.createServer(async(req,res)=>{
       if(colorChipStatus)versions.main=(versions.main||'original')+':'+colorChipStatus.hash;
       const selected=state.folder?await backgroundSelection(state.folder):'main';
       const listing=state.product?await listingPreview(state.product,{dataRoot}):null;
-      return json(res,200,{...state,folder:undefined,tagResearch:state.product?researchForProduct(state.product):null,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,detailRevision:listing.detailRevision,mainColor:listing.main.color,extraColors:listing.extras.map(p=>p.color),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
+      return json(res,200,{...state,folder:undefined,tagResearch:state.product?selectedProductTagResearch(state.product,{dataRoot}):null,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,detailRevision:listing.detailRevision,mainColor:listing.main.color,extraColors:listing.extras.map(p=>p.color),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
     }
     if(req.method==='GET'&&/^\/smartstore-listing\/(?:main|extra-\d+)$/.test(url.pathname)){
       if(!state.product||url.searchParams.get('style')!==state.product.style)throw Error('현재 품번을 확인해 주세요.');
@@ -196,6 +197,17 @@ const server=http.createServer(async(req,res)=>{
         backgroundApiKey=await saveSmartstoreAIKey(dataRoot,b.apiKey);
         return json(res,200,{ok:true,configured:true});
       }
+      if(url.pathname==='/api/smartstore-tags-search'){
+        if(state.busy||!state.product||b.style!==state.product.style)throw Error('수집 완료 후 현재 품번으로 태그를 찾아 주세요.');
+        return json(res,200,searchProductTags(state.product,b.query));
+      }
+      if(url.pathname==='/api/smartstore-tags-selected'){
+        if(state.busy||!state.product||b.style!==state.product.style)throw Error('현재 품번의 태그 선택을 확인해 주세요.');
+        const current=state.product,folder=state.folder;
+        await saveSelectedProductTags(current,b.tags,{dataRoot});
+        job('smartstore-tags',async()=>{const report=await smartBot.runTags(current,{folder,research:selectedProductTagResearch(current,{dataRoot})});state.tagResult=report;await writeFile(path.join(folder,'smartstore-tags-result.json'),JSON.stringify(report,null,2));});
+        return json(res,202,{ok:true});
+      }
       if(url.pathname==='/api/smartstore-auto'){
         if(state.busy)throw Error('진행 중인 작업이 있습니다.');
         parseProductInput(b.style);
@@ -219,7 +231,8 @@ const server=http.createServer(async(req,res)=>{
               smartstorePlan(product,product.consumerPrice);
               return {product,folder};
             },
-            onProduct:async(product,folder)=>{state.product=product;state.folder=folder;state.revision++;},
+            onProduct:async(product,folder)=>{state.product=product;state.folder=folder;state.photoPreparation={style:product.style,status:'preparing'};state.revision++;},
+            onPrepared:async(product,folder)=>{const listing=await prepareListingImages(product,folder,{dataRoot});if(!product.smartstoreDetail?.photoCount)throw Error('상세 착용컷 연결을 확인하지 못했습니다. 업로드하지 않았습니다.');state.product=product;state.folder=folder;state.photoPreparation={style:product.style,status:'ready',mainCount:1,extraCount:listing.extras.length,detailCount:product.smartstoreDetail.photoCount};state.revision++;log('미리보기 반영 완료 · 대표 1장 · 추가 '+listing.extras.length+'장 · 상세 착용컷 '+product.smartstoreDetail.photoCount+'장');},
             prepare:(p,folder)=>prepareSmartstoreAuto(p,folder,{dataRoot,apiKey:key,signal,log}),
             includeMain:false,
             render:async(p,folder)=>{
