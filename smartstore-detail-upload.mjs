@@ -31,7 +31,7 @@ export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=t
   if(bytes.length>19000000)throw Error('상세이미지 조각 용량을 확인해 주세요.');
   await writeFile(file,bytes);parts.push(file);top+=height;
  }
- return {files:parts,video:video?{file:video.file,sha256:video.sha256}:null,includeVideo,hash:digest};
+ return {files:parts,video:video?{file:video.file,sha256:video.sha256}:null,includeVideo,dataRoot,videoOptions,hash:digest};
 }
 export const insertSmartstoreVideo=insertNativeBrandVideo;
 export async function applySmartstoreImageLayout(editor,image,{check=()=>{}}={}){
@@ -60,7 +60,7 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  await editor.bringToFront();
  await editor.locator('iframe[id^="input_buffer"]').waitFor({state:'attached',timeout:30000});
  await editor.locator('.se-text-paragraph').first().waitFor({state:'visible',timeout:30000});check();
- if(parts.includeVideo!==false){await requireBrandVideo();await assertNativeVideoToolbar(editor);}
+ if(parts.includeVideo!==false){await requireBrandVideo(parts.dataRoot,parts.videoOptions);await assertNativeVideoToolbar(editor);}
  // The restored document and ONE's input buffer initialise asynchronously.
  await editor.waitForFunction(()=>{
    const signature=[...document.querySelectorAll('.se-component')].map(n=>n.id).join('|');
@@ -91,7 +91,7 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
   await applySmartstoreImageLayout(editor,lastImage,{check});
  };
  await choose(parts.files[0]);log('브랜드 소개 이미지 업로드');
- if(parts.includeVideo!==false){await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});parts.videoIdentity=await insertSmartstoreVideo(editor,{check});}
+ if(parts.includeVideo!==false){await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});parts.videoIdentity=await insertSmartstoreVideo(editor,{check,dataRoot:parts.dataRoot,videoOptions:parts.videoOptions});}
  for(const file of parts.files.slice(1))await choose(file);
  const order=await editor.locator('.se-component').evaluateAll(ns=>ns.filter(n=>/se-image|se-video|se-oembed/.test(n.className)).map(n=>n.className));
  const includeVideo=parts.includeVideo!==false;

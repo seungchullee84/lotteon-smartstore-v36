@@ -1,7 +1,7 @@
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
-import {serveBrandVideo} from './smartstore-brand-video.mjs';
+import {serveBrandVideo,WOMEN_VIDEO_HASH} from './smartstore-brand-video.mjs';
 import {runSmartstoreAuto} from './smartstore-auto.mjs';
 import {prepareSmartstoreAuto} from './smartstore-auto-prepare.mjs';
 import {loadSmartstoreAIKey,saveSmartstoreAIKey} from './smartstore-ai-settings.mjs';
@@ -73,7 +73,7 @@ const server=http.createServer(async(req,res)=>{
     const cookie=(req.headers.cookie||'').split(';').map(s=>s.trim()).includes('session='+token);
     if(url.pathname==='/'&&url.searchParams.get('key')===token){res.writeHead(302,{'Set-Cookie':`session=${token}; HttpOnly; SameSite=Strict; Path=/`,'Location':'/'});return res.end();}
     if(!cookie)return json(res,403,{error:'시작 화면의 전용 링크로 접속해 주세요.'});
-    if(['GET','HEAD'].includes(req.method)&&url.pathname==='/smartstore-brand-video.mp4')return await serveBrandVideo(req,res,dataRoot);
+    if(['GET','HEAD'].includes(req.method)&&url.pathname==='/smartstore-brand-video.mp4')return await serveBrandVideo(req,res,dataRoot,url.searchParams.get('variant')==='women'?{filename:'women.mp4',expectedHash:WOMEN_VIDEO_HASH}:undefined);
     if(req.method==='GET'&&url.pathname==='/api/branding')return json(res,200,await protectedBranding.get());
     if(req.method==='GET'&&url.pathname==='/api/naver-status')return json(res,200,{configured:!!(naverCredentials.clientId&&naverCredentials.clientSecret),...naverVerification,researchConfigured:state.product?researchForProduct(state.product).configured:false,lastAttempt:naverLastAttempt});
     if(req.method==='GET'&&url.pathname==='/api/state'){
@@ -221,7 +221,7 @@ const server=http.createServer(async(req,res)=>{
             },
             upload:async(p,folder,{main,detail})=>{
               const selected=await prepareListingImages(p,folder,{dataRoot});
-              const detailParts=await smartstoreUploadParts(detail.path,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{includeVideo:detail.includeVideo});
+              const detailParts=await smartstoreUploadParts(detail.path,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{includeVideo:detail.includeVideo,dataRoot,videoOptions:detail.videoOptions});
               const careLabels=await prepareCareLabelImages(p,folder,{dataRoot});
               return smartBot.uploadPrepared(p,folder,{main:selected.main,extras:selected.extras,detailParts,careLabels});
             }

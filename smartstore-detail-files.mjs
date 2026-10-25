@@ -6,7 +6,7 @@ import sharp from 'sharp';
 import {chromium} from 'playwright';
 import {imageDownloadFolder} from './desktop-downloads.mjs';
 import {smartstoreDetailDocument,TEMPLATE_ASSET_NAMES,TEMPLATE_ASSET_BASE} from './smartstore-detail.mjs';
-import {exportBrandVideo,requireBrandVideo} from './smartstore-brand-video.mjs';
+import {exportBrandVideo,requireBrandVideo,productVideoOptions} from './smartstore-brand-video.mjs';
 import {renderCacheKey,restoreRenderedDetail,cacheRenderedDetail} from './smartstore-render-cache.mjs';
 const appRoot=path.dirname(fileURLToPath(import.meta.url));
 const assetsRoot=path.join(appRoot,'public/smartstore-template');
@@ -69,7 +69,8 @@ export function localSmartstorePreview(p){
 }
 
 export async function saveSmartstoreDetail(product,folder,output,{signal,...options}={}){
- await requireBrandVideo(options.dataRoot,options.videoOptions);
+ const videoOptions={...productVideoOptions(product),...options.videoOptions};
+ await requireBrandVideo(options.dataRoot,videoOptions);
  const p=await prepareSmartstoreDetail(product,folder,options);const data=new Map();
  const check=()=>{if(signal?.aborted)throw Error('상세페이지 만들기를 중단했습니다.');};check();
  for(const name of TEMPLATE_ASSET_NAMES.filter(n=>!n.endsWith('.ttf')))data.set(TEMPLATE_ASSET_BASE+name,'data:image/jpeg;base64,'+(await readFile(path.join(assetsRoot,name))).toString('base64'));
@@ -100,11 +101,11 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
   await cacheRenderedDetail(cacheRoot,p.style,cacheKey,output,height);
   }
   const stem=output.replace(/\.[^.]+$/,'');
-  const video=await exportBrandVideo(stem,options.dataRoot,options.videoOptions);check();
+  const video=await exportBrandVideo(stem,options.dataRoot,videoOptions);check();
   await writeFile(stem+'.html',smartstoreDetailDocument(p,{imageUrl,fontUrl,videoUrl:encodeURIComponent(video.filename)}).html);
   const videoGuidePath=stem+'_영상안내.txt';
   await writeFile(videoGuidePath,'공통 MP4: '+video.filename+'\n브랜드 소개 이미지 다음에 SmartEditor ONE 동영상 첨부로 넣습니다.\n긴 PNG에는 동영상이 들어가지 않습니다. HTML은 로컬 미리보기용이며 판매자센터 동영상 업로드를 대신하지 않습니다.\n로컬 미리보기: 무음 자동재생·반복. 네이버 판매페이지 자동재생: 미검증.\n');
-  const result={width:860,height,template:document.template,photoCount:p.smartstoreDetail.photoCount,points:document.points,htmlPath:stem+'.html',includeVideo:true,videoPath:video.path,videoSha256:video.sha256,videoGuidePath,previewVideoPlayback:video.previewPlayback,storeVideoPlayback:video.storePlayback,renderCacheHit};
+  const result={width:860,height,template:document.template,photoCount:p.smartstoreDetail.photoCount,points:document.points,htmlPath:stem+'.html',includeVideo:true,videoOptions,videoPath:video.path,videoSha256:video.sha256,videoGuidePath,previewVideoPlayback:video.previewPlayback,storeVideoPlayback:video.storePlayback,renderCacheHit};
   await writeFile(stem+'_제작정보.json',JSON.stringify({style:p.style,sourceUrl:p.sourceUrl,...result},null,2));return result;
  }finally{signal?.removeEventListener('abort',close);await close();await unlink(partial).catch(e=>{if(e.code!=='ENOENT')throw e;});}
 }
