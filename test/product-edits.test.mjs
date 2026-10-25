@@ -18,8 +18,7 @@ test('품번별 직접 수정값만 저장하고 새 공식 사진·원문과 �
   assert.deepEqual(result.colors,['01틸그린','04블랙']);assert.deepEqual(result.sizes,['L','XL']);assert.equal(result.washing,'손세탁');
   assert.equal(result.manufactured,'2026-10');assert.deepEqual(result.images,fresh.images);assert.equal(result.officialDescription,fresh.officialDescription);assert.equal(fresh.country,'베트남');
   const other={...fresh,style:'026982'};assert.deepEqual(await store.apply(other),other);
-  assert.throws(()=>applyProductEdits(other,awaitRecord()),/품번/);
-  function awaitRecord(){return {style:'026981',fields:{country:'한국'}};}
+  assert.throws(()=>applyProductEdits(other,{style:'026981',fields:{country:'한국'}}),/품번/);
  }finally{await rm(root,{recursive:true,force:true});}
 });
 

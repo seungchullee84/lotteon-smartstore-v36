@@ -432,6 +432,7 @@ $('removeExtra2').onclick=()=>removeExtraImage('extra2');
 let keywordRequest=0;
 async function writePopularKeywords(){
  if(!product||serverBusy)return;
+ if(Object.hasOwn(editedValuesFor(product),'keywords')){$('keywordStatus').textContent='직접 수정한 키워드 유지';return;}
  const current=product,field=$('form').elements.keywords,before=field.value,id=++keywordRequest;
  $('keywordStatus').textContent='네이버에서 상품 관련 키워드의 검색 관심도를 비교하고 있습니다…';
  try{
