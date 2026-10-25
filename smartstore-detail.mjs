@@ -1,5 +1,6 @@
 import {buildDetailContent} from './detail-html.mjs';
 import {sellingPointIcon} from './smartstore-point-icons.mjs';
+import {colorCaption} from './smartstore-color-copy.mjs';
 import {brandVideoHtml,brandVideoHeadingHtml,productVideoUrl} from './smartstore-brand-video.mjs';
 
 export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-approved-20261024';
@@ -77,7 +78,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
    const photos=group.urls.length===3
     ? '<div data-photo-layout="three"><div>'+photo(group.urls[0],group.color+' 착용 모습','border-radius:14px;')+'</div><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px;align-items:start;">'+group.urls.slice(1).map(url=>'<div>'+photo(url,group.color+' 디테일','border-radius:14px;')+'</div>').join('')+'</div></div>'
     : `<div style="display:flex;gap:8px;align-items:start;"><div style="flex:1.15;min-width:0;">${photo(group.urls[0],group.color+' 착용 모습','border-radius:14px;')}</div>${group.urls.length>1?`<div style="flex:1;min-width:0;">${group.urls.slice(1).map(url=>photo(url,group.color+' 디테일','margin-bottom:8px;border-radius:14px;')).join('')}<p style="font-size:19px;margin:16px 0 0;">DETAIL<br>제공된 상품사진과 디테일을 함께 확인해 주세요.</p></div>`:''}</div>`;
-   body+=`<section id="smartstore-color-${group.index}" style="padding:64px 4%;background:${group.index%2?'#f6f3ef':'#fff'};">${header('COLOR '+String(group.index+1).padStart(2,'0'),esc(group.color),{emphasized:true})}${sourceLabel}${photos}</section>`;
+   body+=`<section id="smartstore-color-${group.index}" style="padding:64px 4%;background:${group.index%2?'#f6f3ef':'#fff'};">${header(colorCaption(group.color),esc(group.color),{emphasized:true})}${sourceLabel}${photos}</section>`;
   }
  }
  body+=divider+`<section style="padding:88px 6% 96px;background:#f6f3ef;">${header('MATERIAL & SIZE','상품 정보를 확인해 주세요.')}<p style="font-size:23px;margin:0;">${esc(p.material||'소재는 아래 공식 상품고시를 확인해 주세요.')}</p><p style="font-size:21px;margin:24px 0 0;">사이즈 ${esc((p.sizes||[]).join(' · '))}</p></section>`;
