@@ -163,8 +163,10 @@ const server=http.createServer(async(req,res)=>{
         if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 실행해 주세요.');
         if(!state.product||b.style!==state.product.style)throw Error('현재 상품 품번을 확인해 주세요.');
         const current=state.product,folder=state.folder,validateOnly=url.pathname.endsWith('-validate');
+        if(b.selectedTags!==undefined)await saveSelectedProductTags(current,b.selectedTags,{dataRoot});
+        const research=selectedProductTagResearch(current,{dataRoot});
         job('smartstore-tags',async()=>{
-          const report=await smartBot.runTags(current,{validateOnly,folder});
+          const report=await smartBot.runTags(current,{validateOnly,folder,research});
           if(state.product!==current)throw Error('작업 중 상품이 변경되었습니다.');
           if(validateOnly)state.tagValidation=report;else state.tagResult=report;await writeFile(path.join(folder,'smartstore-tags-result.json'),JSON.stringify(report,null,2));
         });return json(res,202,{ok:true});
@@ -205,6 +207,11 @@ const server=http.createServer(async(req,res)=>{
         if(state.busy||!state.product||b.style!==state.product.style)throw Error('현재 품번을 확인하고 작업 종료 후 태그를 삭제해 주세요.');
         const record=await removeProductTag(state.product,b.tag,{dataRoot});state.tagResult=null;state.tagValidation=null;
         return json(res,200,{ok:true,tags:record.tags});
+      }
+      if(url.pathname==='/api/smartstore-tags-selection'){
+        if(state.busy||!state.product||b.style!==state.product.style)throw Error('현재 품번의 태그 선택을 확인해 주세요.');
+        const record=await saveSelectedProductTags(state.product,b.tags,{dataRoot});state.tagResult=null;state.tagValidation=null;
+        return json(res,200,{ok:true,tags:record.tags,saved:true});
       }
       if(url.pathname==='/api/smartstore-tags-selected'){
         if(state.busy||!state.product||b.style!==state.product.style)throw Error('현재 품번의 태그 선택을 확인해 주세요.');
