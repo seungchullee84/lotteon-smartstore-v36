@@ -21,6 +21,6 @@ test('배너 파일을 대조한 뒤 그 이미지 하나에만 스토어 링크
   await applySmartstoreBannerLink(page,parts);
   assert.equal(await page.locator('#banner').getAttribute('href'),STORE_BANNER_URL);
   assert.equal(await page.locator('a').first().getAttribute('href'),'https://example.com/keep');
-  await assert.rejects(applySmartstoreBannerLink(page,{...parts,bannerLink:{...parts.bannerLink,file:'wrong.png'}}),/確認|확인/);
+  await assert.rejects(applySmartstoreBannerLink(page,{...parts,bannerLink:{...parts.bannerLink,file:'wrong.png'}}),/확인/);
  }finally{await browser.close();}
 });
