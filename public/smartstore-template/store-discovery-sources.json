@@ -1,0 +1,40 @@
+{
+  "checked": "2026-10-25",
+  "note": "Official homepage MEN/WOMEN model photos; unchanged faces. Campaign photos introduce the store, not the current product.",
+  "sources": [
+    {
+      "gender": "men",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "images": [
+        {
+          "url": "https://m.giordano.co.kr/_data/banner/1a4d2fdadead0521ebaf25ea3c5d3e05.jpg",
+          "sha256": "e571add58232b152147c01edb5a13b110210d2280b4c186aa9dea20a6b9b3f67"
+        }
+      ]
+    },
+    {
+      "gender": "women",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "images": [
+        {
+          "url": "https://m.giordano.co.kr/_data/banner/ffd41f814ef3d6341e02be830a0984d9.jpg",
+          "sha256": "5c4447701f6f96dbcab48f6d120c21d675e256aa279bfdec1549780af0e98d18"
+        }
+      ]
+    },
+    {
+      "gender": "unisex",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "images": [
+        {
+          "url": "https://m.giordano.co.kr/_data/banner/1a4d2fdadead0521ebaf25ea3c5d3e05.jpg",
+          "sha256": "e571add58232b152147c01edb5a13b110210d2280b4c186aa9dea20a6b9b3f67"
+        },
+        {
+          "url": "https://m.giordano.co.kr/_data/banner/ffd41f814ef3d6341e02be830a0984d9.jpg",
+          "sha256": "5c4447701f6f96dbcab48f6d120c21d675e256aa279bfdec1549780af0e98d18"
+        }
+      ]
+    }
+  ]
+}
