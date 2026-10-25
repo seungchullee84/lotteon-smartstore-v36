@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {mkdtemp,readFile,mkdir,readdir,writeFile,rm} from 'node:fs/promises';import os from 'node:os';import path from 'node:path';import sharp from 'sharp';import {chromium} from 'playwright';
-import {editorPhotoPositions,naverPhotoUrl,exactSellerRows,stageImportedPhotos,applyImportedPhotos,allImportedPhotoChoices} from '../smartstore-photo-import.mjs';
+import {editorPhotoPositions,naverPhotoUrl,exactSellerRows,stageImportedPhotos,applyImportedPhotos,allImportedPhotoChoices,selectSearchChoice} from '../smartstore-photo-import.mjs';
 import {prepareTrustedFolder} from '../smartstore-folder-trust.mjs';
 import {findPhotos} from '../smartstore-photo-files.mjs';
 test('판매자 코드 숫자를 정확히 대조하고 같은 코드 중 하나만 선택할 수 있다',()=>{
@@ -44,4 +44,8 @@ test('HTML 응답은 거부하고 원본 바이트 중복을 제거하며 선택
  const target=path.join(desktop,'상품등록기사진폴더/326922');assert.deepEqual(await readdir(target),['1.jpg']);assert.deepEqual(await readFile(path.join(target,'1.jpg')),bytes);
  const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details/326922/draft.json'),'utf8'));assert.equal(draft.photoMapping.files.length,1);assert.equal(draft.photoMapping.files[0].role,'front');
  }finally{await rm(dir,{recursive:true,force:true});}
+});
+
+test('검색 라디오·체크박스 위의 표시 라벨을 눌러 네이티브 입력 가림을 피한다',async()=>{
+ const b=await chromium.launch({headless:true});try{const p=await b.newPage();await p.setContent('<label style="display:block;position:relative;width:200px;height:40px"><input aria-label="판매자상품코드" type="radio" name="type"><span style="position:absolute;inset:0;background:#fff">판매자상품코드</span></label><label style="display:block;position:relative;width:200px;height:40px"><input aria-label="전체" type="checkbox"><span style="position:absolute;inset:0;background:#fff">전체</span></label>');for(const role of ['radio','checkbox']){const input=p.getByRole(role);await selectSearchChoice(input);assert(await input.isChecked());await selectSearchChoice(input);assert(await input.isChecked());}}finally{await b.close();}
 });
