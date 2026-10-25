@@ -33,7 +33,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
     const cache=path.join(dataRoot,'smartstore-photo-label-cache',hash(p.bytes)+'.json');let record;
     try{record=JSON.parse(await readFile(cache,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
     if(record?.version===1&&typeof record.label==='boolean')label=record.label;
-    else{label=careLabelText(await recognize(p.bytes));await mkdir(path.dirname(cache),{recursive:true});await writeFile(cache,JSON.stringify({version:1,label}));}
+    else{try{label=careLabelText(await recognize(p.bytes));await mkdir(path.dirname(cache),{recursive:true});await writeFile(cache,JSON.stringify({version:1,label}));}catch(error){signal?.throwIfAborted();log('라벨 문구 인식은 생략하고 제공 사진으로 연결합니다: '+p.name);}}
    }
    reviewed.push({...p,color:'',role:label?'care-label':'provided'});
   }
@@ -43,7 +43,8 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  if(main.length!==1)throw Error('현재 품번 폴더에 대표사진 1.jpg 또는 1번.jpg 한 장을 지정해 주세요.');
  let extras;
  if(product.colors.includes(main[0].color)){
-  extras=chooseListingPhotos(garments.filter(p=>p.role!=='provided'),product).extras;
+  const frontColors=new Set(garments.filter(p=>p.role==='front').map(p=>p.color));frontColors.add(main[0].color);
+  extras=chooseListingPhotos(garments.filter(p=>p.role!=='provided'&&frontColors.has(p.color)),product).extras;
   extras=[...extras,...garments.filter(p=>p.role==='provided'&&p!==main[0])].slice(0,9);
  }else extras=garments.filter(p=>p!==main[0]).slice(0,9);
  const listingImages={...await saveListingSelection(root,{main:main[0],extras}),trustedFolder:true};
