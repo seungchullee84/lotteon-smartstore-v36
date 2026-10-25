@@ -83,8 +83,8 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  // Preserve the complete original, including size/INFORMATION. Never crop or substitute it.
  const officialSources=p.images.detail||!groups.length?original.sources:[...new Set(['size','check','info'].map(key=>p.images[key]).filter(Boolean))];
  for(const src of officialSources)body+=photo(src,'해당 상품의 공식 상세 및 상품정보');
- body+='</section>'+common('benefits.jpg','동탄롯데 지오다노 구매 혜택 · 5만명 이상 스토어 관심등록고객')+common('shipping.jpg','정품 상품 출고 안내')+'<div data-returns-guide style="position:relative;">'+common('returns.jpg','교환 및 반품 안내')+'<svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 1164" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"><path d="M52 350H715 M52 405H162" fill="none" stroke="#294c3b" stroke-width="3" stroke-linecap="round"/></svg></div>';
- body+=`<section style="padding:48px 6%;background:#e7ede4;">${header('GIORDANO · DONGTAN','지오다노<br>롯데백화점 동탄점')}<p style="font-size:24px;margin:0 0 28px;">경기도 화성시 동탄역로 160<br>지하 1층 지오다노</p>${common('store.jpg','매장 안내')}</section>`;
+ body+='</section><div data-store-footer>'+common('benefits.jpg','동탄롯데 지오다노 구매 혜택 · 5만명 이상 스토어 관심등록고객')+common('shipping.jpg','정품 상품 출고 안내')+'<div data-returns-guide style="position:relative;">'+common('returns.jpg','교환 및 반품 안내')+'<svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 1164" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"><path d="M52 350H715 M52 405H162" fill="none" stroke="#294c3b" stroke-width="3" stroke-linecap="round"/></svg></div>';
+ body+=`<section style="padding:48px 6%;background:#e7ede4;">${header('GIORDANO · DONGTAN','지오다노<br>롯데백화점 동탄점')}<p style="font-size:24px;margin:0 0 28px;">경기도 화성시 동탄역로 160<br>지하 1층 지오다노</p>${common('store.jpg','매장 안내')}</section></div>`;
  return {html:`<div data-smartstore-template="${SMARTSTORE_DETAIL_TEMPLATE}" style="${style}max-width:848px;margin:0 auto;background:#fff;text-align:left;">${body}</div>`,sources:[...new Set(sources)],template:SMARTSTORE_DETAIL_TEMPLATE,points};
 }
 
