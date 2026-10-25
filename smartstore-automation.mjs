@@ -8,7 +8,7 @@ import {selectedProductTagResearch} from './smartstore-tag-selection.mjs';
 import {fillResearchTags} from './smartstore-research-tags.mjs';
 export const SMARTSTORE_HOME='https://sell.smartstore.naver.com/';
 import {uploadSmartstoreDetail} from './smartstore-detail-upload.mjs';
-import {bindSmartstoreDetailEdit,assertDetailOnlyProduct,isSmartstoreDetailEditUrl} from './smartstore-detail-only.mjs';
+import {bindSmartstoreDetailEdit,assertDetailOnlyProduct,readDetailOnlySellerCode,isSmartstoreDetailEditUrl} from './smartstore-detail-only.mjs';
 export class SmartstoreAutomation extends BrowserAutomation{
   async preflightDetailOnly(product){
     this.stopped=false;await this.connectChrome(SMARTSTORE_HOME);
@@ -18,7 +18,8 @@ export class SmartstoreAutomation extends BrowserAutomation{
   async updateDetailOnly(product,folder,parts){
     const page=this.page,url=this.detailOnlyFormUrl;
     const check=()=>{this.check();if(!page||page.isClosed()||page.url()!==url||!isSmartstoreDetailEditUrl(url))throw Error('조회/수정 화면이 변경되어 상세 교체를 중단했습니다.');};
-    check();assertDetailOnlyProduct(await page.locator('input[name="product.name"]').inputValue(),product.style);
+    check();assertDetailOnlyProduct(await readDetailOnlySellerCode(page),product.style);
+    this.log('상세 전용 상품 확인 · 판매자 상품코드 품번 '+product.style+' 일치 · 기존 코드 유지');
     const result=await uploadSmartstoreDetail(page,parts,{check,log:this.log,mode:'edit'});
     const {writeFile}=await import('node:fs/promises');
     await writeFile(path.join(folder,'smartstore-detail-only-result.json'),JSON.stringify({...result,style:product.style,detailOnly:true,saved:false,published:false},null,2));return result;

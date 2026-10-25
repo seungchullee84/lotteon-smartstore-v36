@@ -1,11 +1,11 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {runSmartstoreDetailOnly,bindSmartstoreDetailEdit,isSmartstoreDetailEditUrl} from '../smartstore-detail-only.mjs';
+import {runSmartstoreDetailOnly,bindSmartstoreDetailEdit,isSmartstoreDetailEditUrl,assertDetailOnlyProduct} from '../smartstore-detail-only.mjs';
 import {uploadSmartstoreDetail} from '../smartstore-detail-upload.mjs';
 import {requireChannel} from '../channel-routing.mjs';
-function form(url,title){return {url:()=>url,isClosed:()=>false,setDefaultTimeout(){},async bringToFront(){},locator(selector){assert.equal(selector,'input[name="product.name"]');return {async waitFor(){},async inputValue(){return title;}};}};}
-test('상세 전용 연결은 단일 조회/수정 창과 같은 품번만 허용한다',async()=>{
- const edit=form('https://sell.smartstore.naver.com/#/products/edit/123','지오다노 후드티 26982');
+function form(url,sellerCode){return {url:()=>url,isClosed:()=>false,setDefaultTimeout(){},async bringToFront(){},locator(selector){assert.equal(selector,'#seller-code1');return {async count(){return 1;},async waitFor(){},async inputValue(){return sellerCode;}};}};}
+test('상세 전용 연결은 단일 조회/수정 창의 판매자 상품코드 숫자로 대조한다',async()=>{
+ const edit=form('https://sell.smartstore.naver.com/#/products/edit/123','26982 후드티');
  const copy=form('https://sell.smartstore.naver.com/#/products/copy/123','다른 상품');
  assert.equal(await bindSmartstoreDetailEdit({pages:()=>[edit,copy]},'026982'),edit);
  await assert.rejects(bindSmartstoreDetailEdit({pages:()=>[copy]},'026982'),/조회\/수정/);

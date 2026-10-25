@@ -1,14 +1,18 @@
 export const isSmartstoreDetailEditUrl=url=>/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/edit\/\d+(?:\?[^#]*)?$/.test(String(url));
-export function assertDetailOnlyProduct(title,style){
- const found=[...new Set((String(title).match(/(?<!\d)\d{5,6}(?!\d)/g)||[]).map(v=>v.padStart(6,'0')))];
- if(!/^\d{6}$/.test(style||'')||found.length!==1||found[0]!==style)throw Error('조회/수정 화면의 상품명 품번이 현재 상세페이지 품번과 다릅니다. 같은 상품을 열어 주세요.');
+export function assertDetailOnlyProduct(sellerCode,style){
+ const found=[...new Set((String(sellerCode).match(/(?<!\d)\d{5,6}(?!\d)/g)||[]).map(v=>v.padStart(6,'0')))];
+ if(!/^\d{6}$/.test(style||'')||found.length!==1||found[0]!==style)throw Error('조회/수정 화면의 판매자 상품코드 품번이 현재 상세페이지 품번과 다릅니다. 판매자 상품코드의 숫자를 확인해 주세요.');
+}
+export async function readDetailOnlySellerCode(page){
+ const code=page.locator('#seller-code1');
+ if(!await code.count())await page.getByRole('button',{name:/^판매자 코드/}).click();
+ await code.waitFor({state:'attached',timeout:10000});return code.inputValue();
 }
 export async function bindSmartstoreDetailEdit(context,style){
  const pages=context.pages().filter(p=>!p.isClosed()&&isSmartstoreDetailEditUrl(p.url()));
  if(pages.length!==1)throw Error(pages.length?'조회/수정 창이 여러 개입니다. 사용할 창 하나만 남겨 주세요.':'전용 크롬에서 상품조회 → 해당 상품 조회/수정 화면을 직접 열어 주세요.');
  const page=pages[0];page.setDefaultTimeout(8000);await page.bringToFront();
- const name=page.locator('input[name="product.name"]');await name.waitFor({state:'visible',timeout:10000});
- assertDetailOnlyProduct(await name.inputValue(),style);return page;
+ assertDetailOnlyProduct(await readDetailOnlySellerCode(page),style);return page;
 }
 export async function runSmartstoreDetailOnly({product,folder,signal,connect,render,upload,log=()=>{}}){
  const check=()=>signal?.throwIfAborted();check();
