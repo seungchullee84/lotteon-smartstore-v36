@@ -107,25 +107,26 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
  const fontUrl='data:font/ttf;base64,'+(await readFile(path.join(assetsRoot,'GowunDodum-Regular.ttf'))).toString('base64');
  const document=smartstoreDetailDocument(p,{imageUrl,fontUrl,includeVideo:false,includeNavigation:false});
  const cacheRoot=path.join(options.dataRoot||path.join(appRoot,'data'),'smartstore-render-cache');
- const cacheKey=await renderCacheKey(document.html);let height,brandIntroHeight,footerTop,bannerTop,renderCacheHit=false;
+ const cacheKey=await renderCacheKey(document.html);let height,brandIntroHeight,footerTop,bannerTop,officialTop,renderCacheHit=false;
  let browser;const close=()=>browser?.close().catch(()=>{});signal?.addEventListener('abort',close,{once:true});
  const partial=output+'.partial';
  try{
   const cached=await restoreRenderedDetail(cacheRoot,p.style,cacheKey,output);check();
-  if(cached&&Number.isFinite(cached.brandIntroHeight)&&Number.isInteger(cached.footerTop)&&Number.isInteger(cached.bannerTop)){height=cached.height;brandIntroHeight=cached.brandIntroHeight;footerTop=cached.footerTop;bannerTop=cached.bannerTop;renderCacheHit=true;options.log?.('사진·문구·템플릿 일치 · 상세이미지 재사용');}
+  if(cached&&Number.isFinite(cached.brandIntroHeight)&&Number.isInteger(cached.footerTop)&&Number.isInteger(cached.bannerTop)&&Number.isInteger(cached.officialTop)){height=cached.height;brandIntroHeight=cached.brandIntroHeight;footerTop=cached.footerTop;bannerTop=cached.bannerTop;officialTop=cached.officialTop;renderCacheHit=true;options.log?.('사진·문구·템플릿 일치 · 상세이미지 재사용');}
   else{
   browser=await chromium.launch({headless:true});check();
   const page=await browser.newPage({viewport:{width:860,height:1200},deviceScaleFactor:1});
   await page.setContent(document.html);await page.evaluate(()=>Promise.all([document.fonts.ready,...[...document.images].map(i=>i.decode())]));check();
   height=await page.evaluate(()=>document.documentElement.scrollHeight);
   brandIntroHeight=await page.locator('[data-brand-intro]').evaluate(n=>Math.ceil(n.getBoundingClientRect().height));
+  officialTop=await page.locator('[data-official-detail]').evaluate(n=>Math.floor(n.getBoundingClientRect().top+scrollY));
   bannerTop=await page.locator('[data-store-banner]').evaluate(n=>Math.floor(n.getBoundingClientRect().top+scrollY));
   footerTop=await page.locator('[data-store-footer]').evaluate(n=>Math.floor(n.getBoundingClientRect().top+scrollY));
   if(height>150000)throw Error('상세페이지가 너무 깁니다. 사진 개수와 원본 길이를 확인해 주세요.');
   const layers=[];for(let top=0;top<height;top+=4096){check();layers.push({input:await page.screenshot({type:'png',fullPage:true,clip:{x:0,y:top,width:860,height:Math.min(4096,height-top)}}),left:0,top});}
   await sharp({create:{width:860,height,channels:3,background:'#fff'},limitInputPixels:false}).composite(layers).png().toFile(partial);check();
   const {rename}=await import('node:fs/promises');await rename(partial,output);
-  await cacheRenderedDetail(cacheRoot,p.style,cacheKey,output,height,{brandIntroHeight,footerTop,bannerTop});
+  await cacheRenderedDetail(cacheRoot,p.style,cacheKey,output,height,{brandIntroHeight,footerTop,bannerTop,officialTop});
   }
   const stem=output.replace(/\.[^.]+$/,'');
   const video=await exportBrandVideo(stem,options.dataRoot,videoOptions);check();
@@ -137,7 +138,7 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
   await sharp(output,{limitInputPixels:false}).extract({left:0,top:footerTop,width:860,height:height-footerTop}).png({compressionLevel:9}).toFile(footerPath);
   const videoGuidePath=stem+'_영상안내.txt';
   await writeFile(videoGuidePath,'공통 MP4: '+video.filename+'\n브랜드 소개 이미지 다음에 SmartEditor ONE 동영상 첨부로 넣습니다.\n긴 PNG에는 동영상이 들어가지 않습니다. HTML은 로컬 미리보기용이며 판매자센터 동영상 업로드를 대신하지 않습니다.\n로컬 미리보기: 무음 자동재생·반복. 네이버 판매페이지 자동재생: 미검증.\n');
-  const result={width:860,height,brandIntroHeight,footerTop,bannerTop,bannerPath,footerPath,template:document.template,photoCount:p.smartstoreDetail.photoCount,points:document.points,htmlPath:stem+'.html',includeVideo:true,videoOptions,videoPath:video.path,videoSha256:video.sha256,videoGuidePath,previewVideoPlayback:video.previewPlayback,storeVideoPlayback:video.storePlayback,renderCacheHit};
+  const result={width:860,height,brandIntroHeight,footerTop,bannerTop,officialTop,bannerPath,footerPath,template:document.template,photoCount:p.smartstoreDetail.photoCount,points:document.points,htmlPath:stem+'.html',includeVideo:true,videoOptions,videoPath:video.path,videoSha256:video.sha256,videoGuidePath,previewVideoPlayback:video.previewPlayback,storeVideoPlayback:video.storePlayback,renderCacheHit};
   await writeFile(stem+'_제작정보.json',JSON.stringify({style:p.style,sourceUrl:p.sourceUrl,...result},null,2));return result;
  }finally{signal?.removeEventListener('abort',close);await close();await unlink(partial).catch(e=>{if(e.code!=='ENOENT')throw e;});}
 }

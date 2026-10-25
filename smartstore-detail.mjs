@@ -82,7 +82,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
   }
  }
  body+=divider+`<section style="padding:88px 6% 96px;background:#f6f3ef;">${header('MATERIAL & SIZE','상품 정보를 확인해 주세요.')}<p style="font-size:23px;margin:0;">${esc(p.material||'소재는 아래 공식 상품고시를 확인해 주세요.')}</p><p style="font-size:21px;margin:24px 0 0;">사이즈 ${esc((p.sizes||[]).join(' · '))}</p></section>`;
- body+=divider+`<section><div style="padding:96px 6% 72px;">${header('PRODUCT DETAIL','디테일까지,<br>차근차근 살펴보세요.')}<p style="font-size:23px;margin:0;">공식 상품 이미지와 상세 정보를 원본 그대로 안내합니다.</p></div>`;
+ body+=divider+`<section data-official-detail><div style="padding:96px 6% 72px;">${header('PRODUCT DETAIL','디테일까지,<br>차근차근 살펴보세요.')}<p style="font-size:23px;margin:0;">공식 상품 이미지와 상세 정보를 원본 그대로 안내합니다.</p></div>`;
  // Preserve the complete original, including size/INFORMATION. Never crop or substitute it.
  const embedded=new Set(p.images.detail?(draft?.embeddedOfficialSections||[]).map(key=>p.images[key]).filter(Boolean):[]);
  const officialSources=(p.images.detail||!groups.length?original.sources:[...new Set(['size','check','info'].map(key=>p.images[key]).filter(Boolean))]).filter(src=>src===p.images.detail||!embedded.has(src));

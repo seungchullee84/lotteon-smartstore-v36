@@ -18,15 +18,16 @@ export async function openSmartstoreEditor(page,{check=()=>{}}={}){
  const [editor]=await Promise.all([page.waitForEvent('popup',{timeout:45000}),input.click({timeout:30000})]);
  await editor.bringToFront();return editor;
 }
-export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,videoOptions,brandIntroHeight,footerTop,bannerTop}={}){
+export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,videoOptions,brandIntroHeight,footerTop,bannerTop,officialTop}={}){
  const video=includeVideo?await requireBrandVideo(dataRoot,videoOptions):null;
  const meta=await sharp(png,{limitInputPixels:false}).metadata();
  const brand=await sharp(brandFile).metadata();const firstHeight=(brandIntroHeight??Math.round(meta.width*brand.height/brand.width))+BRAND_VIDEO_HEADING_HEIGHT;
  if(meta.width!==860||meta.height<=firstHeight)throw Error('상세페이지 이미지 크기를 확인해 주세요.');
  if(footerTop!==undefined&&(!Number.isInteger(footerTop)||footerTop<firstHeight||footerTop>=meta.height))throw Error('구매 혜택부터 하단까지의 이미지 구간을 확인해 주세요.');
  if(bannerTop!==undefined&&(!Number.isInteger(bannerTop)||footerTop===undefined||bannerTop<firstHeight||bannerTop>=footerTop))throw Error('하단 안내 위 배너 이미지 구간을 확인해 주세요.');
+ if(officialTop!==undefined&&(!Number.isInteger(officialTop)||officialTop<=firstHeight||officialTop>=(bannerTop??footerTop??meta.height)))throw Error('공식 디테일부터 INFORMATION까지의 이미지 구간을 확인해 주세요.');
  const dest=path.join(folder,'smartstore-upload');await mkdir(dest,{recursive:true});
- const digest=createHash('sha256').update(await readFile(png)).update(JSON.stringify({rule:'semantic-sections-1',firstHeight,bannerTop,footerTop})).digest('hex').slice(0,16);
+ const digest=createHash('sha256').update(await readFile(png)).update(JSON.stringify({rule:'semantic-sections-2',firstHeight,bannerTop,footerTop,officialTop})).digest('hex').slice(0,16);
  const parts=[];let bannerLink=null;
  for(let top=0,index=0;top<meta.height;index++){
   let height=index===0?firstHeight:meta.height-top;
@@ -36,6 +37,7 @@ export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=t
   else if(banner)height=footerTop-bannerTop;
   else if(footerTop!==undefined&&top<footerTop)height=Math.min(height,footerTop-top);
   if(bannerTop!==undefined&&top<bannerTop)height=Math.min(height,bannerTop-top);
+  if(officialTop!==undefined&&top<officialTop)height=Math.min(height,officialTop-top);
   const file=path.join(dest,digest+'-'+String(index).padStart(2,'0')+'.png');
   const bytes=await sharp(png,{limitInputPixels:false}).extract({left:0,top,width:860,height}).png({compressionLevel:9}).toBuffer();
   if(bytes.length>19000000)throw Error('상세 구간 한 장의 업로드 용량을 초과했습니다. 원본과 표를 유지하기 위해 중간 분할하지 않았습니다.');
@@ -82,6 +84,7 @@ export async function applySmartstoreBannerLink(editor,parts,{check=()=>{},log=(
 export const insertSmartstoreVideo=insertNativeBrandVideo;
 export async function selectSmartstoreImage(editor,image,{check=()=>{}}={}){
  check();
+ try{await image.click({timeout:3000});check();return;}catch{check();}
  // The editable image section receives ONE's pointer events; its bitmap can
  // be behind a link/selection layer. Let Playwright scroll and click that
  // container first, without rejecting it through a separate DOM hit test.

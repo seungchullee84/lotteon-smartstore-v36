@@ -57,6 +57,7 @@ test('업로드용 조각은 브랜드 소개·본문을 빠짐없이 보존하�
  assert.deepEqual(await sharp(joinedFooter.files.at(-1)).raw().toBuffer(),await sharp(png).extract({left:0,top:10000,width:860,height:8500}).raw().toBuffer());
  let joinedHeight=0;for(const file of joinedFooter.files)joinedHeight+=(await sharp(file).metadata()).height;assert.equal(joinedHeight,18500);
  const bannerFooter=await smartstoreUploadParts(png,root,brand,{includeVideo:false,bannerTop:9400,footerTop:10000});
+ const sectioned=await smartstoreUploadParts(png,root,brand,{includeVideo:false,officialTop:6000,bannerTop:9400,footerTop:10000});assert.equal(sectioned.files.length,5);assert.equal(sectioned.bannerLink.index,3);assert.equal((await sharp(sectioned.files[2]).metadata()).height,3400);assert.deepEqual(await sharp(sectioned.files[2]).raw().toBuffer(),await sharp(png).extract({left:0,top:6000,width:860,height:3400}).raw().toBuffer());
  assert.equal(bannerFooter.files.length,4);assert.equal(bannerFooter.bannerLink.index,2);
  assert.equal((await sharp(bannerFooter.files.at(-2)).metadata()).height,600);
  assert.equal((await sharp(bannerFooter.files.at(-1)).metadata()).height,8500);
