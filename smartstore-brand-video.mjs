@@ -7,7 +7,7 @@ const root=path.dirname(fileURLToPath(import.meta.url));
 export const BRAND_VIDEO_HASH='de5190da3e0320e926d4a5393451210420cf8a032df1a4ea3b3fe59d12c88085';
 export const BRAND_VIDEO_URL='/smartstore-brand-video.mp4?v='+BRAND_VIDEO_HASH.slice(0,16);
 export const BRAND_VIDEO_FILENAME='common.mp4';
-export const BRAND_VIDEO_TITLE='GIORDANO BRAND FILM';
+export const BRAND_VIDEO_TITLE='GIORDANO BRAND 26 F/W FILM';
 export const BRAND_VIDEO_HEADING_HEIGHT=88;
 export const WOMEN_VIDEO_HASH='fe6e9b1ba13962a619459029971c21495b9682fb1b8d5e4feba6475fac7625b9';
 export function productVideoOptions(product){
@@ -30,7 +30,7 @@ export async function requireBrandVideo(dataRoot,{expectedHash=BRAND_VIDEO_HASH,
 }
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function brandVideoHeadingHtml(){
- return `<section data-brand-video-heading style="height:${BRAND_VIDEO_HEADING_HEIGHT}px;display:flex;align-items:center;justify-content:center;background:#f4f3ec;text-align:center;"><h2 style="font-size:22px;line-height:1.5;font-weight:700;margin:0;">${BRAND_VIDEO_TITLE}</h2></section>`;
+ return `<section data-brand-video-heading style="height:${BRAND_VIDEO_HEADING_HEIGHT}px;display:flex;align-items:center;justify-content:center;background:#f4f3ec;text-align:center;"><h2 style="font-size:30px;line-height:1.5;font-weight:700;margin:0;">${BRAND_VIDEO_TITLE}</h2></section>`;
 }
 export function brandVideoHtml(src=BRAND_VIDEO_URL){
  return brandVideoHeadingHtml()+`<section data-brand-video="mp4" style="padding:0 28px 28px;background:#f4f3ec;"><video src="${escape(src)}" title="지오다노 공통 브랜드 영상" controls autoplay muted loop playsinline preload="metadata" width="720" height="1280" style="display:block;width:100%;max-width:720px;height:auto;aspect-ratio:9/16;margin:0 auto;background:#000;"></video></section>`;
