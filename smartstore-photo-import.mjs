@@ -159,7 +159,7 @@ export function allImportedPhotoChoices(stage,product,known=[]){
  assertDetailOnlyProduct(stage.sellerCode,product.style);const counts=new Map();
  return stage.candidates.map(p=>{
   if(!product.colors.includes(p.colorHint))throw Error('사진 위 색상명이 현재 상품 색상과 다릅니다.');
-  counts.set(p.colorHint,(counts.get(p.colorHint)||0)+1);if(counts.get(p.colorHint)>3)throw Error(p.colorHint+' 사진이 3컷을 초과합니다. 색상 구간을 확인해 주세요.');
+  counts.set(p.colorHint,(counts.get(p.colorHint)||0)+1);if(counts.get(p.colorHint)>4)throw Error(p.colorHint+' 사진이 4컷을 초과합니다. 색상 구간을 확인해 주세요.');
   const prior=known.find(k=>k.hash===p.sha256&&k.color===p.colorHint&&['front','side','back','detail'].includes(k.role));
   // Source order is enough for the detail template, but never invent a front/side angle.
   return {id:p.id,color:p.colorHint,role:prior?.role||'detail'};

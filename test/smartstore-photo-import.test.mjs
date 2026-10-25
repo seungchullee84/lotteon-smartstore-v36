@@ -8,22 +8,22 @@ test('판매자 코드 숫자를 정확히 대조하고 같은 코드 중 하나
  for(const u of ['https://evil.test/a.jpg','http://127.0.0.1/a.jpg','https://shop-phinf.pstatic.net@evil.test/a'])assert.throws(()=>naverPhotoUrl(u));
  assert.equal(naverPhotoUrl('http://shop1.phinf.naver.net/a.jpg?type=w860'),'https://shop1.phinf.naver.net/a.jpg?type=w860');
 });
-test('색상 아래 1~3컷은 선택 단계 없이 전부 연결하며 미확인 각도는 정면으로 추정하지 않는다',async()=>{
+test('색상 아래 1~4컷은 선택 단계 없이 전부 연결하며 미확인 각도는 정면으로 추정하지 않는다',async()=>{
  const dir=await mkdtemp(path.join(os.tmpdir(),'import-auto-'));try{
  const folder=path.join(dir,'collected'),dataRoot=path.join(dir,'data'),desktop=path.join(dir,'desktop');await mkdir(folder,{recursive:true});
  const product={style:'326922',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=1',colors:['01화이트','03블랙'],images:{},sizes:['S'],name:'여성 터틀넥 티셔츠 326922',material:'면 60%'};
- const candidates=[];for(const color of product.colors)for(let i=0;i<3;i++)candidates.push({colorHint:color,url:'https://shop-phinf.pstatic.net/'+candidates.length+'.jpg'});
+ const candidates=[];for(const color of product.colors)for(let i=0;i<4;i++)candidates.push({colorHint:color,url:'https://shop-phinf.pstatic.net/'+candidates.length+'.jpg'});
  const buffers=await Promise.all(candidates.map((_,i)=>sharp({create:{width:750,height:1000,channels:3,background:{r:i*30,g:70,b:120}}}).jpeg().toBuffer()));
  const stage=await stageImportedPhotos({...product,sellerCode:'326922',candidates},folder,{fetchImpl:async url=>new Response(buffers[Number(new URL(url).pathname.slice(1,-4))],{headers:{'Content-Type':'image/jpeg'}})});
- const choices=allImportedPhotoChoices(stage,product);assert.equal(choices.length,6);assert(choices.every(p=>p.role==='detail'));
+ const choices=allImportedPhotoChoices(stage,product);assert.equal(choices.length,8);assert(choices.every(p=>p.role==='detail'));
  await applyImportedPhotos(product,folder,choices,{dataRoot,desktop,automatic:true});
  const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details/326922/draft.json'),'utf8'));
  const photos=await findPhotos(product,{desktop});const mapped=photos.map(p=>({...p,...draft.photoMapping.files.find(r=>r.name===p.name)}));
  const prepared=await prepareTrustedFolder(product,folder,{dataRoot,photos,mapped,old:draft,description:'공식 터틀넥 설명',detailHash:null,recognizePhoto:()=>assert.fail('확인된 사진 OCR 불필요')});
- assert.equal(prepared.smartstoreDetail.photoCount,6);const saved=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details/326922/draft.json'),'utf8'));
+ assert.equal(prepared.smartstoreDetail.photoCount,8);const saved=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details/326922/draft.json'),'utf8'));
  for(const group of saved.photos){const expected=draft.importedColorPhotos.find(g=>g.color===group.color).hashes;assert.deepEqual(group.files.map(p=>path.basename(p).slice(0,64)),expected);}
  assert.equal(allImportedPhotoChoices(stage,product,[{hash:stage.candidates[0].sha256,color:'01화이트',role:'front'}])[0].role,'front');
- assert.throws(()=>allImportedPhotoChoices({...stage,candidates:[...stage.candidates,stage.candidates[0]]},product),/3컷/);
+ assert.throws(()=>allImportedPhotoChoices({...stage,candidates:[...stage.candidates,stage.candidates[0]]},product),/4컷/);
  }finally{await rm(dir,{recursive:true,force:true});}
 });
 test('색상 제목 아래 단독·묶음 사진만 읽고 공식 상세 이후와 다른 색상은 제외한다',async()=>{
