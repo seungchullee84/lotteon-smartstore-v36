@@ -492,9 +492,9 @@ function syncListingImages(state){
  }
  if(custom.dataset.stamp!==stamp){
   custom.dataset.stamp=stamp;custom.replaceChildren();
-  listing.extraColors.forEach((color,i)=>{const card=document.createElement('div');card.className='extra-image-card';const img=document.createElement('img');img.src=base+'extra-'+i+query;const angle=listing.extraRoles?.[i]==='provided'?'':color===listing.mainColor?'옆면':'정면';img.alt=color+(angle?' '+angle:'');const name=document.createElement('p');name.textContent=color+(angle?' · '+angle:'');const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='750×1000 JPG 저장';button.onclick=()=>saveSelectedImage('extra-'+i,button);card.append(img,name,button);custom.append(card);});
+  listing.extraColors.forEach((color,i)=>{const card=document.createElement('div');card.className='extra-image-card';const img=document.createElement('img');img.src=base+'extra-'+i+query;const official=listing.extraRoles?.[i]==='official-main',angle=official||listing.extraRoles?.[i]==='provided'?'':color===listing.mainColor?'옆면':'정면';img.alt=color+(angle?' '+angle:'');const name=document.createElement('p');name.textContent=official?'공식몰 대표사진 · 추가 1':color+(angle?' · '+angle:'');const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent=official?'공식몰 원본 저장':'750×1000 JPG 저장';button.onclick=()=>saveSelectedImage('extra-'+i,button);card.append(img,name,button);custom.append(card);});
  }
- $('extraImageStatus').textContent=listing.previewOnly?'폴더 1번 사진을 표시 중입니다. 정보 수집 또는 시작을 누르면 폴더 사진을 추가·상세에 연결합니다.':'대표: '+listing.mainColor+' (1번 사진) · 추가 '+listing.extraColors.length+'장 · '+(listing.extraRoles?.includes('provided')?'품번 폴더의 제공 사진':'확인된 옆면(있는 경우) + 다른 색상 정면');
+ $('extraImageStatus').textContent=listing.previewOnly?'폴더 1번 사진을 표시 중입니다. 정보 수집 또는 시작을 누르면 폴더 사진을 추가·상세에 연결합니다.':'대표: '+listing.mainColor+' (1번 사진) · 추가 '+listing.extraColors.length+'장 · '+(listing.extraRoles?.[0]==='official-main'?'공식몰 대표사진을 첫 번째로 · ':'')+(listing.extraRoles?.includes('provided')?'품번 폴더의 제공 사진':'옆면(있는 경우) + 다른 색상 정면');
  $('extraImages').hidden=false;
 }
 

@@ -4,6 +4,13 @@ import {createHash} from 'node:crypto';
 import {findPhotos} from './smartstore-photo-files.mjs';
 import {workingProductPhoto,PHOTO_WORK_VERSION} from './smartstore-photo-work.mjs';
 const hash=b=>createHash('sha256').update(b).digest('hex');
+function withOfficialMain(product,manifest){
+ if(!product.images?.main)return manifest;
+ const source=new URL(product.images.main);if(source.origin!=='https://www.giordano.co.kr')throw Error('현재 상품의 공식몰 대표사진 주소를 확인해 주세요.');
+ if(!Array.isArray(manifest.extras))throw Error('추가이미지 선택 자료를 확인해 주세요.');
+ const provided=manifest.extras.filter(p=>p.role!=='official-main');
+ return {...manifest,extras:[{role:'official-main',color:'공식몰 대표사진',sourceName:'공식몰 대표사진',sourceUrl:source.href},...provided.slice(0,8)],detailRevision:hash(Buffer.from((manifest.detailRevision||'')+'|official-main-first-v1|'+source.href))};
+}
 export function chooseListingPhotos(photos,product){
  const main=photos.filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name||''));
  if(main.length!==1)throw Error('품번 폴더에서 대표로 사용할 사진 한 장의 파일명을 1.jpg 또는 1번.jpg로 지정해 주세요.');
@@ -23,13 +30,13 @@ export async function saveListingSelection(root,selection){
 export async function listingManifest(product,{dataRoot}){
  let draft;try{draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'draft.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return null;throw e;}
  if(String(draft.style)!==String(product.style)||draft.sourceUrl!==product.sourceUrl)return null;
- return draft.listingImages?{...draft.listingImages,detailRevision:hash(Buffer.from(JSON.stringify(draft)+'|'+PHOTO_WORK_VERSION))}:null;
+ return draft.listingImages?withOfficialMain(product,{...draft.listingImages,detailRevision:hash(Buffer.from(JSON.stringify(draft)+'|'+PHOTO_WORK_VERSION))}):null;
 }
 export async function listingPreview(product,options){
  const manifest=await listingManifest(product,options);if(manifest)return manifest;
  const photos=await findPhotos(product,options),main=photos.filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name));
  if(main.length!==1)return null;
- return {main:{sourceName:main[0].name,color:'색상 대조 전'},extras:[],previewOnly:true};
+ return withOfficialMain(product,{main:{sourceName:main[0].name,color:'색상 대조 전'},extras:[],previewOnly:true});
 }
 export async function originalListingMain(product,options){
  const originals=(await findPhotos(product,options)).filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name));
@@ -44,6 +51,11 @@ export async function prepareListingImages(product,folder,{dataRoot,...photoOpti
  if(originals.length!==1)throw Error('품번 폴더의 원본 1.jpg 또는 1번.jpg 한 장을 확인해 주세요.');
  const main=await workingProductPhoto(originals[0],product,{dataRoot}),extras=[];
  for(const entry of manifest.extras){
+  if(entry.role==='official-main'){
+   const collected=JSON.parse(await readFile(path.join(folder,'product.json'),'utf8'));
+   if(collected.style!==product.style||collected.sourceUrl!==product.sourceUrl||collected.images?.main!==product.images.main||entry.sourceUrl!==product.images.main)throw Error('현재 품번의 공식몰 대표사진을 다시 수집해 주세요.');
+   const official=path.join(folder,'main.jpg');await readFile(official);extras.push(official);continue;
+  }
   if(!product.colors.includes(entry.color)&&!(manifest.trustedFolder&&entry.role==='provided'))throw Error('추가사진의 색상을 확인해 주세요.');
   const matches=photos.filter(p=>entry.sourceHash?hash(p.bytes)===entry.sourceHash:p.name===entry.sourceName);
   if(matches.length!==1)throw Error('품번 폴더에서 추가사진 원본을 확인해 주세요: '+entry.sourceName);
