@@ -1,7 +1,6 @@
 export const isSmartstoreDetailEditUrl=url=>/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/edit\/\d+(?:\?[^#]*)?$/.test(String(url));
 export function assertDetailOnlyProduct(sellerCode,style){
- const found=[...new Set((String(sellerCode).match(/(?<!\d)\d{5,6}(?!\d)/g)||[]).map(v=>v.padStart(6,'0')))];
- if(!/^\d{6}$/.test(style||'')||!found.includes(style))throw Error('조회/수정 화면의 판매자 상품코드 품번이 현재 상세페이지 품번과 다릅니다. 판매자 상품코드에 현재 품번이 포함되어 있는지 확인해 주세요.');
+ if(!/^\d{6}$/.test(style||'')||!String(sellerCode).includes(style))throw Error('판매자 상품코드에 현재 품번 6자리가 연속으로 포함되어 있지 않습니다.');
 }
 export async function readDetailOnlySellerCode(page){
  const code=page.locator('#seller-code1');
