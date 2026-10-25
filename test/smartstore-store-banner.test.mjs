@@ -27,7 +27,8 @@ test('클릭 배너만 정확히 분리하고 전후 모든 픽셀을 보존한�
   await sharp({create:{width:860,height:7000,channels:3,background:'#eee'}}).composite([{input:await sharp({create:{width:860,height:420,channels:3,background:'#24583b'}}).png().toBuffer(),top:4100,left:0}]).png().toFile(png);
   await sharp({create:{width:860,height:600,channels:3,background:'#fff'}}).jpeg().toFile(brand);
   const parts=await smartstoreUploadParts(png,root,brand,{includeVideo:false,storeBanner:{top:4100,height:420,url:STORE_BANNER_URL}});
-  assert.deepEqual(parts.links,{2:STORE_BANNER_URL});
+  assert.deepEqual(parts.links,{});
+  assert.deepEqual(parts.manualLinks,{2:STORE_BANNER_URL});
   assert.equal((await sharp(parts.files[2]).metadata()).height,420);
   let top=0;const layers=[];for(const f of parts.files){layers.push({input:await readFile(f),left:0,top});top+=(await sharp(f).metadata()).height;}
   assert.equal(top,7000);
