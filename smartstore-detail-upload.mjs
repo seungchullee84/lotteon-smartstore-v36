@@ -4,6 +4,7 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 import {createHash} from 'node:crypto';
+import {STORE_BANNER_URL} from './smartstore-store-banner.mjs';
 export async function openSmartstoreEditor(page,{check=()=>{}}={}){
  check();
  const input=page.locator('button[data-nclicks-code="descrip.sebtn"]');
@@ -16,22 +17,40 @@ export async function openSmartstoreEditor(page,{check=()=>{}}={}){
  const [editor]=await Promise.all([page.waitForEvent('popup',{timeout:45000}),input.click({timeout:30000})]);
  await editor.bringToFront();return editor;
 }
-export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,videoOptions,brandIntroHeight}={}){
+export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,videoOptions,brandIntroHeight,storeBanner}={}){
  const video=includeVideo?await requireBrandVideo(dataRoot,videoOptions):null;
  const meta=await sharp(png,{limitInputPixels:false}).metadata();
  const brand=await sharp(brandFile).metadata();const firstHeight=(brandIntroHeight??Math.round(meta.width*brand.height/brand.width))+BRAND_VIDEO_HEADING_HEIGHT;
  if(meta.width!==860||meta.height<=firstHeight)throw Error('상세페이지 이미지 크기를 확인해 주세요.');
  const dest=path.join(folder,'smartstore-upload');await mkdir(dest,{recursive:true});
  const digest=createHash('sha256').update(await readFile(png)).digest('hex').slice(0,16);
- const parts=[];
+ if(storeBanner&&(!Number.isInteger(storeBanner.top)||!Number.isInteger(storeBanner.height)||storeBanner.top<firstHeight||storeBanner.height<=0||storeBanner.top+storeBanner.height>meta.height||storeBanner.url!==STORE_BANNER_URL))throw Error('스토어 배너의 위치와 연결 주소를 확인해 주세요.');
+ const parts=[],links={};
  for(let top=0,index=0;top<meta.height;index++){
   let height=index===0?firstHeight:Math.min(8000,meta.height-top);
+  if(storeBanner){
+   if(top<storeBanner.top)height=Math.min(height,storeBanner.top-top);
+   else if(top===storeBanner.top){height=storeBanner.height;links[index]=storeBanner.url;}
+  }
   const file=path.join(dest,digest+'-'+String(index).padStart(2,'0')+'.png');
   let bytes;do{bytes=await sharp(png,{limitInputPixels:false}).extract({left:0,top,width:860,height}).png({compressionLevel:9}).toBuffer();if(bytes.length<=19000000)break;height=Math.floor(height*.7);}while(height>100);
-  if(bytes.length>19000000)throw Error('상세이미지 조각 용량을 확인해 주세요.');
+  if(bytes.length>19000000||links[index]&&height!==storeBanner.height)throw Error('상세이미지 조각 용량을 확인해 주세요.');
   await writeFile(file,bytes);parts.push(file);top+=height;
  }
- return {files:parts,video:video?{file:video.file,sha256:video.sha256}:null,includeVideo,dataRoot,videoOptions,hash:digest};
+ return {files:parts,links,video:video?{file:video.file,sha256:video.sha256}:null,includeVideo,dataRoot,videoOptions,hash:digest};
+}
+export async function applyStoreBannerLink(editor,image,url,{check=()=>{}}={}){
+ if(url!==STORE_BANNER_URL)throw Error('스토어 배너 연결 주소가 다릅니다.');
+ check();await image.scrollIntoViewIfNeeded();
+ const box=await image.boundingBox();await image.click({position:{x:box.width/2,y:Math.min(box.height/2,100)}});
+ await editor.locator('button[data-name="image-link"]').filter({visible:true}).click();
+ const input=editor.locator('input').filter({visible:true}).filter({hasNot:editor.locator('[type="hidden"]')});
+ const urlInput=editor.locator('input[type="url"],input[placeholder*="URL"],input[placeholder*="주소"],input[placeholder*="http"]').filter({visible:true});
+ await urlInput.waitFor({state:'visible',timeout:5000});
+ if(await urlInput.count()!==1)throw Error('배너 링크 입력란을 확인해 주세요.');
+ await urlInput.fill(url);await editor.getByRole('button',{name:'적용',exact:true}).filter({visible:true}).click();
+ await editor.waitForFunction(({src,url})=>[...document.querySelectorAll('.se-component.se-image img')].some(n=>n.src===src&&n.closest('a')?.href===url),{src:await image.getAttribute('src'),url},{timeout:5000});
+ check();
 }
 export const insertSmartstoreVideo=insertNativeBrandVideo;
 export async function applySmartstoreImageLayout(editor,image,{check=()=>{}}={}){
@@ -93,7 +112,7 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  await editor.waitForFunction(()=>document.querySelectorAll('.se-component').length<=1);
  const existing=await editor.locator('.se-component.se-image,.se-component.se-video,.se-component.se-oembed').count();
  if(existing)throw Error('기존 상세설명이 남아 있어 새 이미지를 올리지 않았습니다.');
- const choose=async(file)=>{
+ const choose=async(file,index)=>{
   check();const before=await editor.locator('.se-component.se-image').count();
   const empty=editor.locator('.se-component.se-text .se-text-paragraph').last();
   if(await empty.count())await empty.click({force:true});
@@ -105,10 +124,11 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
   await lastImage.scrollIntoViewIfNeeded();
   await editor.waitForFunction(()=>/^https:\/\//.test([...document.querySelectorAll('.se-component.se-image img')].at(-1)?.src||''),null,{timeout:60000});
   await applySmartstoreImageLayout(editor,lastImage,{check});
+  if(parts.links?.[index])await applyStoreBannerLink(editor,lastImage,parts.links[index],{check});
  };
- await choose(parts.files[0]);log('브랜드 소개 이미지 업로드');
+ await choose(parts.files[0],0);log('브랜드 소개 이미지 업로드');
  if(parts.includeVideo!==false){await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});parts.videoIdentity=await insertSmartstoreVideo(editor,{check,dataRoot:parts.dataRoot,videoOptions:parts.videoOptions});}
- for(const file of parts.files.slice(1))await choose(file);
+ for(let i=1;i<parts.files.length;i++)await choose(parts.files[i],i);
  const order=await editor.locator('.se-component').evaluateAll(ns=>ns.filter(n=>/se-image|se-video|se-oembed/.test(n.className)).map(n=>n.className));
  const includeVideo=parts.includeVideo!==false;
  if(order.length!==parts.files.length+Number(includeVideo)||!order[0].includes('se-image')||(includeVideo?!/se-video|se-oembed/.test(order[1])||order.slice(2).some(c=>!c.includes('se-image')):order.some(c=>!c.includes('se-image'))))throw Error('브랜드 소개·상품상세 및 영상 설정에 맞는 순서를 확인해 주세요.');
@@ -125,7 +145,7 @@ export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  const pending=await images.evaluateAll(ns=>ns.flatMap((n,i)=>/^https:\/\//.test(n.src)?[]:[i]));
  // Hosted images need no scrolling or repeated per-image browser calls.
  for(const i of pending){check();await images.nth(i).scrollIntoViewIfNeeded();await verified.waitForFunction(i=>/^https:\/\//.test(document.querySelectorAll('.se-component.se-image img')[i]?.src||''),i,{timeout:30000});}
- const snapshot=await images.evaluateAll(ns=>ns.map(n=>({name:decodeURIComponent(new URL(n.src).pathname.split('/').at(-1)),src:n.src,extended:!!n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend')})));
+ const snapshot=await images.evaluateAll(ns=>ns.map(n=>({name:decodeURIComponent(new URL(n.src).pathname.split('/').at(-1)),src:n.src,link:n.closest('a')?.href||null,extended:!!n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend')})));
  const names=snapshot.map(n=>n.name);
  const includeVideo=parts.includeVideo!==false;
  const videoCount=await verified.locator('.se-component.se-oembed,.se-component.se-video').count();
@@ -134,6 +154,7 @@ export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  if(leftoverUrl)throw Error('저장된 상세페이지에 영상 주소 문장이 남아 있습니다.');
  const mismatch=[];
  if(JSON.stringify(names)!==JSON.stringify(expected))mismatch.push('이미지 파일명·순서');
+ if(Object.entries(parts.links||{}).some(([i,url])=>snapshot[Number(i)]?.link!==url))mismatch.push('스토어 배너 링크');
  if(snapshot.length!==expected.length||snapshot.some(n=>!n.extended))mismatch.push('옆트임 배치');
  if(includeVideo?!video.length||JSON.stringify(video)!==JSON.stringify(parts.videoIdentity?.identity):videoCount!==0)mismatch.push('MP4 영상 식별자');
  const verification={expected,names,images:snapshot,videoCount,videoIdentity:video,expectedVideoIdentity:parts.videoIdentity?.identity,mismatch,repairAttempt};
