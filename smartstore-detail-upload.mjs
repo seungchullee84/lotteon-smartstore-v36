@@ -5,6 +5,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 import {createHash} from 'node:crypto';
 import {STORE_BANNER_URL} from './smartstore-store-banner.mjs';
+import {isSmartstoreDetailEditUrl} from './smartstore-detail-only.mjs';
 export async function openSmartstoreEditor(page,{check=()=>{}}={}){
  check();
  const input=page.locator('button[data-nclicks-code="descrip.sebtn"]');
@@ -124,8 +125,9 @@ export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{
  check();await Promise.all([editor.waitForEvent('close',{timeout:30000}),editor.getByRole('button',{name:'등록',exact:true}).click()]);
  if(await page.locator('textarea[name="editorContent"]').inputValue()!=='true')throw Error('판매자센터 상세설명 반영 결과를 확인하지 못했습니다.');
 }
-export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}}={}){
- if(!/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+/.test(page.url()))throw Error('상세페이지는 스마트스토어 복사등록 화면에서만 교체합니다.');
+export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{},mode='copy'}={}){
+ const allowed=mode==='edit'?isSmartstoreDetailEditUrl(page.url()):mode==='copy'&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+(?:\?|$)/.test(page.url());
+ if(!allowed)throw Error(mode==='edit'?'상세설명만 교체는 조회/수정 화면에서 실행해 주세요.':'상세페이지는 스마트스토어 복사등록 화면에서만 교체합니다.');
  check();
  const editor=await openSmartstoreEditor(page,{check});
  await editor.bringToFront();
