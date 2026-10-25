@@ -140,7 +140,6 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
   await editor.waitForFunction(()=>/^https:\/\//.test([...document.querySelectorAll('.se-component.se-image img')].at(-1)?.src||''),null,{timeout:60000});
   await applySmartstoreImageLayout(editor,lastImage,{check});
   log('상세이미지 '+(index+1)+'/'+parts.files.length+' 옆트임 확인');
-  if(parts.links?.[index])await applyStoreBannerLink(editor,lastImage,parts.links[index],{check});
  };
  await choose(parts.files[0],0);log('브랜드 소개 이미지 업로드');
  if(parts.includeVideo!==false){await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});parts.videoIdentity=await insertSmartstoreVideo(editor,{check,dataRoot:parts.dataRoot,videoOptions:parts.videoOptions});}
