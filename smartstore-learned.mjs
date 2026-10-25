@@ -42,7 +42,7 @@ export function planTagChanges(existing,candidates){
 }
 export function learnedFields(p){
  const reviewed=p.reviewedGarmentAttributes;
- const checked=reviewed?.style===p.style&&reviewed.sourceUrl===p.sourceUrl?reviewed:{};
+ const checked=reviewed&&reviewed.style===p.style&&reviewed.sourceUrl===p.sourceUrl?reviewed:{};
  const known={...(verified[p.style]||{}),...(checked.sleeve?{sleeve:checked.sleeve}:{}),...(checked.neckline?{neckline:checked.neckline}:{})},title=p.name||'';
  const material=p.material||known.material||'';
  const materials=[['인조가죽(합성피혁)',/인조가죽|합성피혁|합성가죽/],['아크릴',/아크릴/],['폴리에스테르',/폴리에[스]?터|폴리에스테르|플리에스터/],['나일론',/나일론/],['폴리우레탄',/폴리우레탄/],['면',/면\s*\d/],['울/모',/(?:울|모)\s*\d/],['레이온/인견',/레이온|인견/],['캐시미어',/캐시미어/]].filter(([,re])=>re.test(material)).map(([name])=>name);

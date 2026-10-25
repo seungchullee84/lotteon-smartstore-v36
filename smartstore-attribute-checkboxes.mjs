@@ -1,6 +1,7 @@
 const normalize=s=>String(s||'').replace(/\s+/g,' ').trim();
 export async function setAttributeCheckboxes(row,values,{label='소재',check=()=>{},requireAll=false,timeout=3000}={}){
  const read=()=>row.getByRole('checkbox').evaluateAll(ns=>ns.map(n=>({id:n.id,name:(n.getAttribute('aria-label')||n.labels?.[0]?.textContent||n.parentElement.textContent).replace(/\s+/g,' ').trim(),checked:n.checked})));
+ if(!await row.getByRole('checkbox').count()){if(requireAll&&values.length)throw Error(label+' 선택 항목이 없습니다.');return [];}
  const entries=await read(),wanted=new Set(values.map(normalize));
  if(requireAll)for(const value of wanted)if(!entries.some(e=>e.name===value))throw Error('이 카테고리에 해당 속성 값이 없습니다: '+label+' / '+value);
  const locate=async entry=>{
@@ -15,7 +16,9 @@ export async function setAttributeCheckboxes(row,values,{label='소재',check=()
   check();const desired=wanted.has(entry.name),box=await locate(entry);
   if(await box.isChecked()===desired)continue;
   const id=await box.getAttribute('id'),target=id?row.locator('label[for='+JSON.stringify(id)+']'):null;
-  if(target&&await target.count()===1)await target.click();else await box.setChecked(desired,{force:true});
+  if(await box.isVisible())await box.click({force:true});
+  else if(target&&await target.count()===1)await target.click();
+  else throw Error(label+' 선택 입력을 확인하지 못했습니다: '+entry.name);
   const deadline=Date.now()+timeout;let matched=false;
   while(Date.now()<deadline){
    check();const current=(await read()).find(e=>e.name===entry.name);
