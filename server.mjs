@@ -3,6 +3,7 @@ import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail} fro
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
 import {serveBrandVideo,WOMEN_VIDEO_HASH} from './smartstore-brand-video.mjs';
 import {runSmartstoreAuto} from './smartstore-auto.mjs';
+import {runSmartstoreDetailOnly} from './smartstore-detail-only.mjs';
 import {prepareSmartstoreAuto} from './smartstore-auto-prepare.mjs';
 import {loadSmartstoreAIKey,saveSmartstoreAIKey} from './smartstore-ai-settings.mjs';
 import {smartstoreUploadParts} from './smartstore-detail-upload.mjs';
@@ -260,6 +261,26 @@ const server=http.createServer(async(req,res)=>{
             }
           });
           state.autoStep='done';await writeFile(path.join(result.folder,'smartstore-auto-completed.json'),JSON.stringify(result,null,2));
+        });return json(res,202,{ok:true});
+      }
+      if(url.pathname==='/api/smartstore-detail-only'){
+        if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 상세설명만 교체해 주세요.');
+        if(!state.product||!state.folder)throw Error('먼저 현재 상품 정보와 상세 미리보기를 준비해 주세요.');
+        if(b.product?.style!==state.product.style)throw Error('현재 상품의 품번을 다시 확인해 주세요.');
+        const edits={};for(const key of ['name','gender','material'])if(typeof b.product[key]==='string')edits[key]=b.product[key].slice(0,500);
+        for(const key of ['colors','sizes'])if(Array.isArray(b.product[key])&&b.product[key].length<=100&&b.product[key].every(v=>typeof v==='string'&&v.length<100))edits[key]=b.product[key];
+        const product={...state.product,...edits},folder=state.folder;smartBot.stopped=false;
+        job('smartstore-detail-only',async()=>{
+          const signal=activeAbort.signal;
+          await runSmartstoreDetailOnly({product,folder,signal,log,
+            connect:p=>smartBot.preflightDetailOnly(p),
+            render:async(p,folder)=>{
+              const output=path.join(await imageDownloadFolder(),p.style+'_상세설명만수정_'+Date.now()+'.png');
+              const detail=await saveSmartstoreDetail(p,folder,output,{signal,log,dataRoot});
+              return smartstoreUploadParts(output,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{includeVideo:detail.includeVideo,dataRoot,videoOptions:detail.videoOptions,brandIntroHeight:detail.brandIntroHeight,footerTop:detail.footerTop,bannerTop:detail.bannerTop});
+            },
+            upload:(p,folder,parts)=>smartBot.updateDetailOnly(p,folder,parts)
+          });
         });return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/background-request'){
