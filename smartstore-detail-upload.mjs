@@ -52,8 +52,7 @@ export async function applySmartstoreBannerLink(editor,parts,{check=()=>{},log=(
  if(actual!==expected)throw Error('선택할 배너 이미지의 파일명이 다릅니다. 링크를 입력하지 않았습니다.');
  if(await image.evaluate((n,url)=>n.closest('a')?.href===url,link.url)){parts.bannerLinkSubmitted=true;return;}
  try{
-  await image.scrollIntoViewIfNeeded();const box=await image.boundingBox();
-  await image.click({position:{x:box.width/2,y:box.height/2}});
+  await selectSmartstoreImage(editor,image,{check});
   await editor.locator('button[data-name="image-link"]').filter({visible:true}).click();
   const input=editor.locator('input[type="url"],input[placeholder*="URL"],input[placeholder*="주소"],input[placeholder*="http"]').filter({visible:true});
   await input.waitFor({state:'visible',timeout:5000});
@@ -81,22 +80,36 @@ export async function applySmartstoreBannerLink(editor,parts,{check=()=>{},log=(
  check();log('배너 주소 입력·오른쪽 체크 완료 · 링크 검증 대기 없이 하단 옆트임 처리 계속');
 }
 export const insertSmartstoreVideo=insertNativeBrandVideo;
+export async function selectSmartstoreImage(editor,image,{check=()=>{}}={}){
+ for(const alignment of [null,'center','start']){
+  check();await image.scrollIntoViewIfNeeded();
+  if(alignment)await image.evaluate((n,block)=>n.scrollIntoView({block,inline:'nearest',behavior:'instant'}),alignment);
+  const point=await image.evaluate(n=>{
+   const r=n.getBoundingClientRect(),component=n.closest('.se-component.se-image');
+   const l=Math.max(0,r.left),t=Math.max(0,r.top),right=Math.min(innerWidth,r.right),bottom=Math.min(innerHeight,r.bottom);
+   if(right-l<2||bottom-t<2)return null;
+   for(const yf of [.5,.75,.9,.25,.1])for(const xf of [.5,.25,.75]){
+    const x=l+(right-l)*xf,y=t+(bottom-t)*yf,hit=document.elementFromPoint(x,y);
+    const same=component&&hit?.closest('.se-component.se-image')===component;
+    if((hit===n||same)&&!hit?.closest('button,input,select,textarea,[role="button"],[role="toolbar"]'))return {x:(x-r.left)/r.width,y:(y-r.top)/r.height};
+   }
+   return null;
+  });
+  if(!point)continue;
+  const box=await image.boundingBox();if(!box?.width||!box?.height)continue;
+  // DOM hit testing uses local CSS coordinates; boundingBox uses the page's
+  // input coordinates. Fractions map correctly under zoom and inside frames.
+  await editor.mouse.click(box.x+point.x*box.width,box.y+point.y*box.height);return;
+ }
+ throw Error('상세이미지에서 클릭 가능한 영역을 확인하지 못했습니다. 편집기 내용은 유지했습니다.');
+}
 export async function applySmartstoreImageLayout(editor,image,{check=()=>{}}={}){
  check();if(await image.evaluate(n=>!!n.closest('.se-component.se-image')?.querySelector('.se-component-content-extend')))return;
  await image.scrollIntoViewIfNeeded();await editor.bringToFront();
  const componentId=await image.evaluate(n=>n.closest('.se-component.se-image').id);
- const select=async()=>{
-  const box=await image.boundingBox(),viewportHeight=await editor.evaluate(()=>innerHeight);
-  const top=Math.max(box.y,160),bottom=Math.min(box.y+box.height,viewportHeight-40);
-  if(bottom<=top)throw Error('상세이미지 선택 위치를 확인하지 못했습니다.');
-  // Locator-relative input keeps the selected image correct for tall PNGs and
-  // browser zoom, instead of clicking near the fixed toolbar with page coordinates.
-  await image.click({position:{x:box.width/2,y:(top+bottom)/2-box.y}});
-  await editor.waitForFunction(id=>!!document.getElementById(id)?.querySelector('.se-section-image.se-is-selected'),componentId,{timeout:15000});
- };
- await select();
+ await selectSmartstoreImage(editor,image,{check});
  const extend=editor.locator('button[data-name="content-mode-without-pagefull"][data-value="extend"]').filter({visible:true}).first();
- try{await extend.waitFor({state:'visible',timeout:1500});}catch{check();await select();}
+ try{await extend.waitFor({state:'visible',timeout:1500});}catch{check();await selectSmartstoreImage(editor,image,{check});}
  await extend.click();
  await editor.waitForFunction(id=>!!document.getElementById(id)?.querySelector('.se-component-content-extend'),componentId,{timeout:15000});
  check();
