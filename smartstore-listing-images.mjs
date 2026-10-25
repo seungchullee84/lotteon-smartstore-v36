@@ -44,7 +44,7 @@ export async function prepareListingImages(product,folder,{dataRoot,...photoOpti
  if(originals.length!==1)throw Error('품번 폴더의 원본 1.jpg 또는 1번.jpg 한 장을 확인해 주세요.');
  const main=await workingProductPhoto(originals[0],product,{dataRoot}),extras=[];
  for(const entry of manifest.extras){
-  if(!product.colors.includes(entry.color))throw Error('추가사진의 색상을 확인해 주세요.');
+  if(!product.colors.includes(entry.color)&&!(manifest.trustedFolder&&entry.role==='provided'))throw Error('추가사진의 색상을 확인해 주세요.');
   const matches=photos.filter(p=>entry.sourceHash?hash(p.bytes)===entry.sourceHash:p.name===entry.sourceName);
   if(matches.length!==1)throw Error('품번 폴더에서 추가사진 원본을 확인해 주세요: '+entry.sourceName);
   extras.push(await workingProductPhoto(matches[0],product,{dataRoot}));

@@ -20,7 +20,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  const style=validStyle(product);const draftRoot=path.join(dataRoot,'smartstore-details',style);
  let draft=null;try{draft=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(draft&&(String(draft.style)!==style||draft.sourceUrl!==product.sourceUrl))throw Error('상세페이지 준비 자료의 품번·공식 출처가 현재 상품과 다릅니다.');
- const prepared={style,includeBrandVideo:true,colorImages:{},colorSources:{},sellingPoints:[],photoCount:0,photoFiles:{},sourceUrl:product.sourceUrl,displayColors:[...product.colors]};
+ const prepared={style,includeBrandVideo:true,colorImages:{},colorSources:{},sellingPoints:[],photoCount:0,photoFiles:{},providedImages:[],sourceUrl:product.sourceUrl,displayColors:[...product.colors]};
  if(draft){
   if(draft.headline)prepared.headline=String(draft.headline).slice(0,200);
   if(draft.sellingPoints){if(!Array.isArray(draft.sellingPoints)||draft.sellingPoints.some(p=>!p.title||!p.description||!p.evidence))throw Error('소구점의 공식 확인 근거를 함께 저장해 주세요.');prepared.sellingPoints=draft.sellingPoints.slice(0,3);}
@@ -59,6 +59,12 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
    }
    if(prepared.photoCount)break;
   }
+ }
+ for(const relative of draft?.providedPhotos||[]){
+  if(!draft.trustedFolder||typeof relative!=='string'||path.isAbsolute(relative)||relative.split(/[\\/]/).includes('..'))throw Error('제공한 상품사진 경로를 확인해 주세요.');
+  const canonical=await realpath(path.join(draftRoot,relative)),canonicalRoot=await realpath(draftRoot);if(!inside(canonicalRoot,canonical)||!imageExtension.test(canonical))throw Error('제공한 사진이 현재 품번 자료 폴더 밖에 있습니다.');
+  const bytes=await readFile(canonical),id=createHash('sha256').update(bytes).digest('hex').slice(0,24),name='smartstore-photo-'+id+'.jpg',src='/smartstore-photo/'+id;
+  await writeFile(path.join(folder,name),await readFile(await workingProductPhoto({bytes},product,{dataRoot})));prepared.photoFiles[src]=name;prepared.providedImages.push(src);prepared.photoCount++;
  }
  // Official fallback photos are separate from seller options and store mannequin claims.
  if(draft?.officialPhotos?.length){
