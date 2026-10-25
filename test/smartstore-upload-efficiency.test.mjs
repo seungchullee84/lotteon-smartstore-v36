@@ -55,6 +55,7 @@ test('마지막 이미지의 옆트임만 빠졌으면 파일을 다시 올리�
  const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-layout-repair-'));
  try{
  let fixed=false,opened=0,applied=0,persist=true;
+ page.context().on('page',p=>{p.on('pageerror',e=>console.log('fixture error:',e.message));});
  const id='SE-98bb2cab-3434-48be-bdaa-84ba88bfe976';
  await page.context().route('https://example.com/applied',r=>{applied++;fixed=persist;return r.fulfill({contentType:'text/plain',body:'ok'});});
  await page.route('https://sell.smartstore.naver.com/**',r=>r.fulfill({contentType:'text/html',body:'<textarea name="editorContent">true</textarea><button data-nclicks-code="descrip.sebtn" onclick="window.open(\'https://example.com/editor\')">편집기</button>'}));
