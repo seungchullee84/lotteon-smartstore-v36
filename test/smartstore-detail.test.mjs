@@ -57,12 +57,14 @@ test('다른 품번·색상·외부 경로는 차단하고 사진 매핑과 상�
   assert.match(localSmartstorePreview(p).html,/smartstore-photo\/[a-f0-9]{24}/);assert.doesNotMatch(localSmartstorePreview(p).html,/기모/);
   const out=path.join(root,'detail.png');const result=await saveSmartstoreDetail(product,folder,out,{dataRoot,videoOptions});
   const meta=await sharp(out,{limitInputPixels:false}).metadata();assert.equal(meta.width,860);assert.ok(meta.height>4000);assert.equal(result.photoCount,1);
+  assert.ok(Number.isInteger(result.footerTop));assert.equal((await sharp(result.footerPath).metadata()).height,result.height-result.footerTop);
+  assert.deepEqual(await sharp(result.footerPath).raw().toBuffer(),await sharp(out,{limitInputPixels:false}).extract({left:0,top:result.footerTop,width:860,height:result.height-result.footerTop}).raw().toBuffer());
   assert.match(await readFile(result.htmlPath,'utf8'),/data:image\/jpeg;base64,/);assert.deepEqual(await readFile(result.videoPath),fixtureVideo);
   assert.match(await readFile(result.htmlPath,'utf8'),/detail_%EB%B8%8C%EB%9E%9C%EB%93%9C%EC%98%81%EC%83%81\.mp4/);
   assert.equal(result.storeVideoPlayback,'unverified');
   assert.ok(result.points.every(p=>!/모달|기모/.test(p.title+p.description)));
   const repeated=await saveSmartstoreDetail(product,folder,path.join(root,'repeated.png'),{dataRoot,videoOptions});
-  assert.equal(result.renderCacheHit,false);assert.equal(repeated.renderCacheHit,true);
+  assert.equal(result.renderCacheHit,false);assert.equal(repeated.renderCacheHit,true);assert.equal(repeated.footerTop,result.footerTop);
   assert.deepEqual(await readFile(out),await readFile(path.join(root,'repeated.png')));
   await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...draft,headline:'변경한 상품 소개'}));
   const changed=await saveSmartstoreDetail(product,folder,path.join(root,'changed.png'),{dataRoot,videoOptions});assert.equal(changed.renderCacheHit,false);
