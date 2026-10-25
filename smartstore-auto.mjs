@@ -9,7 +9,7 @@ export async function runSmartstoreAuto({input,apiKey,signal,log=()=>{},step=()=
  await onProduct(product,folder);check();
  const prepared=await stage('prepare',`2/${count} 폴더 사진·공식 색상 대조 및 상품 소구점 준비`,()=>prepare(product,folder));
  check();await onPrepared(prepared,folder);check();
- await stage('connect',`3/${count} 스마트스토어 로그인·복사등록 화면 확인`,preflight);
+ await stage('connect',`3/${count} 스마트스토어 로그인·복사등록 또는 조회/수정 화면 확인`,preflight);
  const main=includeMain?await stage('compose','4/6 대표사진 배경 합성 · 1500×1500 · 공식 색상칩 적용',()=>synthesize(prepared,folder)):undefined;
  const detail=await stage('detail',`${count-1}/${count} 확정 템플릿 상세페이지 제작·바탕화면 저장`,()=>render(prepared,folder));
  const result=await stage('upload',`${count}/${count} 스마트스토어 상품정보·추가사진·상세페이지 업로드`,()=>upload(prepared,folder,{main,detail}));

@@ -293,7 +293,7 @@ $('openBackgroundRequest').onclick=async()=>{
 };
 
 // SmartStore is a separate no-save path; Lotte controls retain their behavior.
-$('smartstoreOpen').onclick=async()=>{try{await post('smartstore-open');announce('로그인 후 원하는 상품의 복사등록 화면을 직접 열고 시작을 눌러 주세요.','success');}catch(e){$('error').textContent=e.message;}};
+$('smartstoreOpen').onclick=async()=>{try{await post('smartstore-open');announce('로그인 후 원하는 상품의 복사등록 또는 조회/수정 화면을 직접 열고 시작을 눌러 주세요.','success');}catch(e){$('error').textContent=e.message;}};
 async function arrangeSmartstoreTitle(useCurrent=true){
  if(!product)return;
  if(product.smartstoreNameUserEdited&&useCurrent)return;
@@ -394,8 +394,8 @@ $('smartstoreStart').onclick=async()=>{
  if(requestLock||serverBusy)return;
  const style=$('style').value.trim()||product?.style;
  if(!style){$('error').textContent='품번 또는 공식몰 상품 URL을 먼저 입력해 주세요.';return;}
- requestLock=true;smartstoreStarting=true;$('error').textContent='';$('smartstoreStart').disabled=true;syncButtons();announce('시작 요청 접수 중 · 복사등록 화면을 확인합니다.');
- try{await flushManualTagSelection();await post('smartstore-auto',{style,selectedTitle:product?{style:product.style,title:$('smartstoreName').value}:undefined,edits:currentProductEdits(),selectedTags:currentManualTags()});serverBusy=true;serverPhase='smartstore-auto';announce('자동 작업 시작 · 선택한 복사등록 화면에 업로드합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;smartstoreStarting=false;syncButtons();}
+ requestLock=true;smartstoreStarting=true;$('error').textContent='';$('smartstoreStart').disabled=true;syncButtons();announce('시작 요청 접수 중 · 복사등록 또는 조회/수정 화면을 확인합니다.');
+ try{await flushManualTagSelection();await post('smartstore-auto',{style,selectedTitle:product?{style:product.style,title:$('smartstoreName').value}:undefined,edits:currentProductEdits(),selectedTags:currentManualTags()});serverBusy=true;serverPhase='smartstore-auto';announce('자동 작업 시작 · 선택한 복사등록 또는 조회/수정 화면에 업로드합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;smartstoreStarting=false;syncButtons();}
 };
 const autoStageLabels={connect:'로그인 확인',collect:'공식몰 수집',prepare:'사진·색상 대조',compose:'사진 합성',detail:'상세페이지 제작',upload:'스마트스토어 업로드',done:'업로드 완료'};
 try{if(sessionStorage.getItem('registrationChannel')==='smartstore')selectRegistrationChannel('smartstore');}catch{}

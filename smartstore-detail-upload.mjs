@@ -1,3 +1,4 @@
+import {isSmartstoreInputUrl} from './smartstore-work-target.mjs';
 import {requireBrandVideo,BRAND_VIDEO_HEADING_HEIGHT} from './smartstore-brand-video.mjs';
 import {insertNativeBrandVideo,assertNativeVideoToolbar,nativeVideoIdentity} from './smartstore-native-video.mjs';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
@@ -103,7 +104,7 @@ export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{
  if(await page.locator('textarea[name="editorContent"]').inputValue()!=='true')throw Error('판매자센터 상세설명 반영 결과를 확인하지 못했습니다.');
 }
 export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}}={}){
- if(!/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+/.test(page.url()))throw Error('상세페이지는 스마트스토어 복사등록 화면에서만 교체합니다.');
+ if(!isSmartstoreInputUrl(page.url()))throw Error('상세페이지는 스마트스토어 복사등록 또는 조회/수정 화면에서만 교체합니다.');
  check();
  const editor=await openSmartstoreEditor(page,{check});
  await editor.bringToFront();
