@@ -1,0 +1,389 @@
+{
+  "version": 1,
+  "checked": "2026-10-26",
+  "sourceCount": 20,
+  "photos": [
+    {
+      "id": "men-01",
+      "gender": "men",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "sourceUrl": "https://m.giordano.co.kr/_data/banner/97f2d97c6970cfd63291b9b5fdcdbc94.jpg",
+      "sourceSha256": "60f7473e0cf0d4fed8405fffc825c422c905a3067677c92e3c727b9d454f981e",
+      "framing": {
+        "left": 1060,
+        "top": 0,
+        "width": 844,
+        "height": 800
+      },
+      "tags": [
+        "니트",
+        "스웨터",
+        "데님"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "men-02",
+      "gender": "men",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "sourceUrl": "https://m.giordano.co.kr/_data/banner/9382a2585d78c9bd765e66c96f6f7eb2.jpg",
+      "sourceSha256": "9416112153ca28df3895a5c90a5772ef832f715f50c858bda49a15500a653943",
+      "framing": {
+        "left": 1060,
+        "top": 0,
+        "width": 844,
+        "height": 800
+      },
+      "tags": [
+        "맨투맨",
+        "스웨트",
+        "데님"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "men-03",
+      "gender": "men",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "sourceUrl": "https://m.giordano.co.kr/_data/banner/14361e56276b654d85247d847f6d1c55.jpg",
+      "sourceSha256": "c9d9c1f22d53f55e2be8dc03fecd454f64802ac74ecd44d6cb2eed68320a447c",
+      "framing": {
+        "left": 1060,
+        "top": 0,
+        "width": 844,
+        "height": 800
+      },
+      "tags": [
+        "코트",
+        "자켓",
+        "아우터"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "men-04",
+      "gender": "men",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "sourceUrl": "https://m.giordano.co.kr/_data/banner/dc291265cd56d94f6558118dd8395e50.jpg",
+      "sourceSha256": "9b4611b3777c628b8ca47754e9d20791201772eaf8568dda363cd9490dc6c6ad",
+      "framing": {
+        "left": 1060,
+        "top": 0,
+        "width": 844,
+        "height": 800
+      },
+      "tags": [
+        "코트",
+        "팬츠",
+        "바지"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "men-05",
+      "gender": "men",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "sourceUrl": "https://m.giordano.co.kr/_data/banner/1a4d2fdadead0521ebaf25ea3c5d3e05.jpg",
+      "sourceSha256": "e571add58232b152147c01edb5a13b110210d2280b4c186aa9dea20a6b9b3f67",
+      "framing": null,
+      "tags": [
+        "후드",
+        "맨투맨",
+        "티셔츠"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "men-06",
+      "gender": "men",
+      "sourcePage": "https://www.giordano.co.kr/shop/detail.php?pno=9326058BEF4734C6E641D52B28F57F1F&ctype=1&ctype=2512",
+      "sourceUrl": "https://www.giordano.co.kr/_data/attach/202509/19/17edf62b4cbe254313b202c3470f673f.jpg",
+      "sourceSha256": "5e453d2bb1381cffb801c585cf0acfa83910bebd49af287b4ee4bf9eb335322e",
+      "framing": null,
+      "tags": [
+        "베스트",
+        "조끼",
+        "패딩"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "men-07",
+      "gender": "men",
+      "sourcePage": "https://www.giordano.co.kr/shop/detail.php?pno=F5AEF3C1E5B65D8338ABC7BD7914BA28&ctype=1&ctype=2512",
+      "sourceUrl": "https://www.giordano.co.kr/_data/attach/202609/15/7d33b050d34a72fbe636a52a98b6acaa.jpg",
+      "sourceSha256": "ef5c453fa6f5c99f564fa698a4d096f24cc044d608763c2f7e5613bdeb1177a0",
+      "framing": null,
+      "tags": [
+        "패딩",
+        "자켓",
+        "아우터"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "men-08",
+      "gender": "men",
+      "sourcePage": "https://www.giordano.co.kr/shop/detail.php?pno=C1DE1DACF092B39E2EA916A0443A5660&ctype=1&ctype=2512",
+      "sourceUrl": "https://www.giordano.co.kr/_data/attach/202610/08/2ff323bb613402899e3d6ad28ea87f71.jpg",
+      "sourceSha256": "2127cf6187d8b12b4e32803b80be51e753c70f12b097abc0ab5917654c6310ee",
+      "framing": null,
+      "tags": [
+        "후드",
+        "집업",
+        "플리스"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "men-09",
+      "gender": "men",
+      "sourcePage": "https://www.giordano.co.kr/shop/detail.php?pno=FB06C31DB313998F70AAF5634E3B8898&ctype=1&ctype=2512",
+      "sourceUrl": "https://www.giordano.co.kr/_data/attach/202610/21/ab077490ac2c0edb3d5e10fcb6cd3911.jpg",
+      "sourceSha256": "9626bde220f3ed7451a3e8ec95e3da544af849224dcfe2854073b8e76da6d7df",
+      "framing": null,
+      "tags": [
+        "치노",
+        "팬츠",
+        "바지",
+        "기모"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "men-10",
+      "gender": "men",
+      "sourcePage": "https://www.giordano.co.kr/shop/detail.php?pno=0780938661DCB3A7B6DF40B5028DDD30&ctype=1&ctype=2512",
+      "sourceUrl": "https://www.giordano.co.kr/_data/attach/202609/01/d0d58773f9c3c973be1f93f2dcf80486.jpg",
+      "sourceSha256": "51cf1389e7e451a36962a76e927cfed8d89b6e9d9c80112782f155bf04a3f1f1",
+      "framing": null,
+      "tags": [
+        "셔츠",
+        "체크",
+        "상의"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "women-01",
+      "gender": "women",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "sourceUrl": "https://m.giordano.co.kr/_data/banner/2028b136156e68a9c78359347843de94.jpg",
+      "sourceSha256": "470ec4934f6edde129d217d5660e5643e5ed1868781a4d8ae276f734be77c87c",
+      "framing": {
+        "left": 1060,
+        "top": 0,
+        "width": 844,
+        "height": 800
+      },
+      "tags": [
+        "터틀넥",
+        "티셔츠",
+        "상의"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "women-02",
+      "gender": "women",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "sourceUrl": "https://m.giordano.co.kr/_data/banner/ffd41f814ef3d6341e02be830a0984d9.jpg",
+      "sourceSha256": "5c4447701f6f96dbcab48f6d120c21d675e256aa279bfdec1549780af0e98d18",
+      "framing": null,
+      "tags": [
+        "래글런",
+        "티셔츠",
+        "데님"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "women-03",
+      "gender": "women",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "sourceUrl": "https://m.giordano.co.kr/_data/banner/4caaed2d7f4f868adff5397ef15a7449.jpg",
+      "sourceSha256": "cb89461d69fe2dd5c09df3befe006a65cbae5b3219d638ffb7f7b3a5bd3db893",
+      "framing": {
+        "left": 1060,
+        "top": 0,
+        "width": 844,
+        "height": 800
+      },
+      "tags": [
+        "니트",
+        "스웨터"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "women-04",
+      "gender": "women",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "sourceUrl": "https://m.giordano.co.kr/_data/banner/64cb506bc1c2cb7ebe6e018136e79ef0.jpg",
+      "sourceSha256": "daf766305e497b8155e4451238097bceb46ae87884c3787813e6fe00d7ad0580",
+      "framing": {
+        "left": 1060,
+        "top": 0,
+        "width": 844,
+        "height": 800
+      },
+      "tags": [
+        "코듀로이",
+        "팬츠",
+        "바지"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "women-05",
+      "gender": "women",
+      "sourcePage": "https://www.giordano.co.kr/",
+      "sourceUrl": "https://m.giordano.co.kr/_data/banner/64e020337fe5a82306c702aa79040a8f.jpg",
+      "sourceSha256": "1aabcfe5bdba4ee79fdad5dd76010185addd0928c1a0630d105c52e8a3f06924",
+      "framing": {
+        "left": 1060,
+        "top": 0,
+        "width": 844,
+        "height": 800
+      },
+      "tags": [
+        "패딩",
+        "자켓",
+        "아우터"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "women-06",
+      "gender": "women",
+      "sourcePage": "https://www.giordano.co.kr/shop/detail.php?pno=E2AE1DAFDBDA4C5C362BDA2FE90B477F&ctype=1&ctype=2513",
+      "sourceUrl": "https://www.giordano.co.kr/_data/attach/202610/22/4a8534909043d48af110f8c7490ca696.jpg",
+      "sourceSha256": "2937abe1d2ea2b4b04533a94a8e053d7f20068425fa4d43f89fce06211f3ffdf",
+      "framing": null,
+      "tags": [
+        "패딩",
+        "덕다운",
+        "푸퍼"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "women-07",
+      "gender": "women",
+      "sourcePage": "https://www.giordano.co.kr/shop/detail.php?pno=579996FE3B9825568E212D9393D5D9A2&ctype=1&ctype=2513",
+      "sourceUrl": "https://www.giordano.co.kr/_data/attach/202610/20/11a15db65772fb9b5e3dd6a8f46bb879.jpg",
+      "sourceSha256": "a14409ec38f43e92f98e7217830a78042e587f2bb7fbd8b4939eebb17ef06077",
+      "framing": null,
+      "tags": [
+        "패딩",
+        "숏패딩",
+        "아우터"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "women-08",
+      "gender": "women",
+      "sourcePage": "https://www.giordano.co.kr/shop/detail.php?pno=EA512FEDB2019071FDFCD955B343AD52&ctype=1&ctype=2513",
+      "sourceUrl": "https://www.giordano.co.kr/_data/attach/202610/01/0d3ac066a7565c8495bf86dea749e072.jpg",
+      "sourceSha256": "6ce9d252966be863bf153729c025232621b6aa4d7ca772d36e32a74a9b16f7d9",
+      "framing": null,
+      "tags": [
+        "티셔츠",
+        "긴팔",
+        "상의"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "women-09",
+      "gender": "women",
+      "sourcePage": "https://www.giordano.co.kr/shop/detail.php?pno=E742DA62B248CA5966AFBA6F4186B2C7&ctype=1&ctype=2513",
+      "sourceUrl": "https://www.giordano.co.kr/_data/attach/202610/22/3619fe7a22dda7d54fe9270daeda5c95.png",
+      "sourceSha256": "9a1124b6792051c1ab1cf4f7f96df47ea7a52cca46cf3b261eae1b45342473a2",
+      "framing": null,
+      "tags": [
+        "니트",
+        "스웨터",
+        "케이블"
+      ],
+      "faceOrClothesAltered": false
+    },
+    {
+      "id": "women-10",
+      "gender": "women",
+      "sourcePage": "https://www.giordano.co.kr/shop/detail.php?pno=E93DAB86A8848C52E0F59C723AAEE85E&ctype=1&ctype=2513",
+      "sourceUrl": "https://www.giordano.co.kr/_data/attach/202609/04/06d5d8c4c85210f9f1931f26dc7b1813.jpg",
+      "sourceSha256": "1088f7c35d03db62c755c2adeb09344feb7f2f1ea9c22af5e7afaa92fa6333a7",
+      "framing": null,
+      "tags": [
+        "가디건",
+        "니트",
+        "집업"
+      ],
+      "faceOrClothesAltered": false
+    }
+  ],
+  "variants": [
+    {
+      "id": 1,
+      "file": "brand-intro-pair-01.jpg",
+      "men": "men-01",
+      "women": "women-10"
+    },
+    {
+      "id": 2,
+      "file": "brand-intro-pair-02.jpg",
+      "men": "men-02",
+      "women": "women-02"
+    },
+    {
+      "id": 3,
+      "file": "brand-intro-pair-03.jpg",
+      "men": "men-03",
+      "women": "women-03"
+    },
+    {
+      "id": 4,
+      "file": "brand-intro-pair-04.jpg",
+      "men": "men-04",
+      "women": "women-06"
+    },
+    {
+      "id": 5,
+      "file": "brand-intro-pair-05.jpg",
+      "men": "men-05",
+      "women": "women-01"
+    },
+    {
+      "id": 6,
+      "file": "brand-intro-pair-06.jpg",
+      "men": "men-06",
+      "women": "women-07"
+    },
+    {
+      "id": 7,
+      "file": "brand-intro-pair-07.jpg",
+      "men": "men-07",
+      "women": "women-05"
+    },
+    {
+      "id": 8,
+      "file": "brand-intro-pair-08.jpg",
+      "men": "men-08",
+      "women": "women-09"
+    },
+    {
+      "id": 9,
+      "file": "brand-intro-pair-09.jpg",
+      "men": "men-09",
+      "women": "women-04"
+    },
+    {
+      "id": 10,
+      "file": "brand-intro-pair-10.jpg",
+      "men": "men-10",
+      "women": "women-08"
+    }
+  ]
+}
