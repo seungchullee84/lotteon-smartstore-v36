@@ -106,7 +106,6 @@ export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{
   positions=await settledEditorPhotoPositions(editor,product.colors,{check});
  }
  if(!positions.length){if(fresh){await editor.close();await fresh.close();}throw Error('저장된 상세설명에 색상별 개별 사진이 없습니다. 긴 통이미지는 이 채팅에서 확인해 주세요.');}
- if(positions.length>40)throw Error('가져올 사진은 한 상품당 40장 이내로 확인해 주세요.');
  const candidates=[];
  for(const pos of positions){
   check();if(page.url()!==formUrl)throw Error('수집 중 조회/수정 상품이 변경되었습니다.');
@@ -140,7 +139,7 @@ export async function applyImportedPhotos(product,folder,choices,{dataRoot,deskt
  const stage=JSON.parse(await readFile(path.join(folder,'smartstore-photo-import/manifest.json'),'utf8'));
  if(stage.style!==product.style||stage.sourceUrl!==product.sourceUrl)throw Error('사진을 수집한 품번·공식 출처와 현재 상품이 다릅니다.');
  assertDetailOnlyProduct(stage.sellerCode,product.style);
- if(!Array.isArray(choices)||!choices.length||choices.length>40||new Set(choices.map(c=>c.id)).size!==choices.length)throw Error('적용할 사진을 한 장 이상 선택해 주세요.');
+ if(!Array.isArray(choices)||!choices.length||new Set(choices.map(c=>c.id)).size!==choices.length)throw Error('적용할 사진을 한 장 이상 선택해 주세요.');
  const selected=[];for(const choice of choices){
   const source=stage.candidates.find(c=>c.id===choice.id);if(!source||!product.colors.includes(choice.color)||!['front','side','back','detail'].includes(choice.role))throw Error('선택한 사진의 색상과 정면·측면·뒷면·디테일을 확인해 주세요.');
   if(!/^[a-f0-9]{24}\.(jpg|png|webp)$/.test(source.file))throw Error('수집 사진 경로가 올바르지 않습니다.');

@@ -26,6 +26,24 @@ test('색상 아래 1~4컷은 선택 단계 없이 전부 연결하며 미확인
  assert.throws(()=>allImportedPhotoChoices({...stage,candidates:[...stage.candidates,stage.candidates[0]]},product),/4컷/);
  }finally{await rm(dir,{recursive:true,force:true});}
 });
+test('12색 48장은 적용·폴더 재조회·상세 연결에서 총 40장 제한 없이 유지한다',async()=>{
+ const dir=await mkdtemp(path.join(os.tmpdir(),'import-auto-'));try{
+ const folder=path.join(dir,'collected'),dataRoot=path.join(dir,'data'),desktop=path.join(dir,'desktop');await mkdir(folder,{recursive:true});
+ const product={style:'326922',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=1',colors:Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0')+'색상'),images:{},sizes:['S'],name:'여성 터틀넥 티셔츠 326922',material:'면 60%'};
+ const candidates=[];for(const color of product.colors)for(let i=0;i<4;i++)candidates.push({colorHint:color,url:'https://shop-phinf.pstatic.net/'+candidates.length+'.jpg'});
+ const buffers=await Promise.all(candidates.map((_,i)=>sharp({create:{width:750,height:1000,channels:3,background:{r:i*5,g:70,b:120}}}).jpeg().toBuffer()));
+ const stage=await stageImportedPhotos({...product,sellerCode:'326922',candidates},folder,{fetchImpl:async url=>new Response(buffers[Number(new URL(url).pathname.slice(1,-4))],{headers:{'Content-Type':'image/jpeg'}})});
+ const choices=allImportedPhotoChoices(stage,product);assert.equal(choices.length,48);assert(choices.every(p=>p.role==='detail'));
+ await applyImportedPhotos(product,folder,choices,{dataRoot,desktop,automatic:true});
+ const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details/326922/draft.json'),'utf8'));
+ const photos=await findPhotos(product,{desktop});const mapped=photos.map(p=>({...p,...draft.photoMapping.files.find(r=>r.name===p.name)}));
+ const prepared=await prepareTrustedFolder(product,folder,{dataRoot,photos,mapped,old:draft,description:'공식 터틀넥 설명',detailHash:null,recognizePhoto:()=>assert.fail('확인된 사진 OCR 불필요')});
+ assert.equal(prepared.smartstoreDetail.photoCount,48);const saved=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details/326922/draft.json'),'utf8'));
+ for(const group of saved.photos){const expected=draft.importedColorPhotos.find(g=>g.color===group.color).hashes;assert.deepEqual(group.files.map(p=>path.basename(p).slice(0,64)),expected);}
+ assert.equal(allImportedPhotoChoices(stage,product,[{hash:stage.candidates[0].sha256,color:product.colors[0],role:'front'}])[0].role,'front');assert.equal(allImportedPhotoChoices(stage,product,[],[{hash:stage.candidates[0].sha256}]).length,47);
+ assert.throws(()=>allImportedPhotoChoices({...stage,candidates:[...stage.candidates,stage.candidates[0]]},product),/4컷/);
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
 test('색상 제목 아래 단독·묶음 사진만 읽고 공식 상세 이후와 다른 색상은 제외한다',async()=>{
  const browser=await chromium.launch({headless:true});try{const p=await browser.newPage();await p.setContent('<div class="se-component se-text">01화이트</div><div class="se-component se-image"><img></div><div class="se-component se-imageStrip"><img><img></div><div class="se-component se-text">99다른색</div><div class="se-component se-image"><img></div><div class="se-component se-text">03블랙</div><div class="se-component se-image"><img></div><div class="se-component se-text">◆상세페이지◆</div><div class="se-component se-image"><img></div>');assert.deepEqual(await p.evaluate(editorPhotoPositions,['01화이트','03블랙']),[{index:0,colorHint:'01화이트'},{index:1,colorHint:'01화이트'},{index:2,colorHint:'01화이트'},{index:4,colorHint:'03블랙'}]);}finally{await browser.close();}
 });
