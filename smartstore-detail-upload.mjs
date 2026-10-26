@@ -125,15 +125,21 @@ export async function selectSmartstoreImage(editor,image,{check=()=>{}}={}){
 }
 export async function applySmartstoreImageLayout(editor,image,{check=()=>{},layout='extend'}={}){
  if(!['extend','fit'].includes(layout))throw Error('지원하지 않는 이미지 배치');
- check();if(await image.evaluate((n,value)=>!!n.closest('.se-component.se-image')?.querySelector('.se-component-content-'+value),layout))return;
- await image.scrollIntoViewIfNeeded();await editor.bringToFront();
- const componentId=await image.evaluate(n=>n.closest('.se-component.se-image').id);
- await selectSmartstoreImage(editor,image,{check});
- const extend=editor.locator('button[data-name="content-mode-without-pagefull"][data-value="'+layout+'"]').filter({visible:true}).first();
- try{await extend.waitFor({state:'visible',timeout:1500});}catch{check();await selectSmartstoreImage(editor,image,{check});}
- await extend.click();
- await editor.waitForFunction(({id,layout})=>!!document.getElementById(id)?.querySelector('.se-component-content-'+layout),{id:componentId,layout},{timeout:15000});
- check();
+ const component=image.locator('xpath=ancestor::*[contains(concat(" ",normalize-space(@class)," ")," se-component ")][1]');
+ for(let attempt=0;attempt<2;attempt++){
+  check();if(await image.evaluate((n,value)=>!!n.closest('.se-component.se-image')?.querySelector('.se-component-content-'+value),layout))return;
+  await image.scrollIntoViewIfNeeded();await editor.bringToFront();await selectSmartstoreImage(editor,image,{check});
+  const button=editor.locator('button[data-name="content-mode-without-pagefull"][data-value="'+layout+'"]').filter({visible:true}).first();
+  try{await button.waitFor({state:'visible',timeout:1500});}catch{check();await selectSmartstoreImage(editor,image,{check});}
+  await button.click();
+  // ONE may replace the image component and its id when switching layout.
+  // Re-resolve the image's current ancestor instead of waiting on an old id.
+  try{await component.locator('.se-component-content-'+layout).waitFor({state:'attached',timeout:attempt?10000:5000});check();return;}
+  catch(error){check();if(attempt===0)continue;
+   const observed=await image.evaluate(n=>({component:!!n.closest('.se-component.se-image'),classes:n.closest('.se-component.se-image')?.querySelector('.se-component-content')?.className||''})).catch(()=>({component:false,classes:''}));
+   throw Error((layout==='fit'?'문서 너비':'옆트임')+' 배치 확인 실패 · 현재 이미지에 배치만 두 번 적용했습니다. 파일 재업로드·편집기 등록은 하지 않았습니다. · '+observed.classes);
+  }
+ }
 }
 export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{},log=()=>{},bannerIndex,footerIndex,applyEditor=false}={}){
  check();

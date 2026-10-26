@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {commitSmartstoreEditor,applySmartstoreBannerLink} from '../smartstore-detail-upload.mjs';
+import {applySmartstoreImageLayout,commitSmartstoreEditor,applySmartstoreBannerLink} from '../smartstore-detail-upload.mjs';
 import {STORE_BANNER_URL} from '../smartstore-store-banner.mjs';
 test('최종 반영 전에 업로드 완료와 옆트임 누락 보정을 나누고 해당 이미지 배치만 고친다',async()=>{
  const browser=await chromium.launch({headless:true});try{
@@ -40,4 +40,11 @@ test('오른쪽 체크로 링크를 적용했지만 href가 노출되지 않아�
 
 test('링크 배너와 하단 안내만 문서 너비로 두고 상품 상세는 옆트임을 유지한다',async()=>{
  const b=await chromium.launch({headless:true});try{const page=await b.newPage();await page.setContent(`<style>img{display:block;width:200px;height:100px}.se-component{margin-top:30px}</style><button data-name="content-mode-without-pagefull" data-value="fit" onclick="document.querySelector('.selected').className='se-component-content-fit'">문서 너비</button><div class="se-component se-image" id="top"><div class="se-component-content-extend"><img src="https://example.com/a.png"></div></div><div class="se-component se-image" id="banner"><div class="se-component-content-extend"><img src="https://example.com/b.png" onclick="this.parentElement.classList.add('selected')"></div></div><div class="se-component se-image" id="footer"><div class="se-component-content-extend"><img src="https://example.com/c.png" onclick="document.querySelectorAll('.selected').forEach(n=>n.classList.remove('selected'));this.parentElement.classList.add('selected')"></div></div><button onclick="window.registered=true">등록</button>`);const result=await commitSmartstoreEditor(page,page,3,{bannerIndex:1,footerIndex:2});assert.equal(result.editorPrepared,true);assert.equal(result.editorApplied,false);assert.equal(result.detailUploaded,false);assert.equal(await page.evaluate(()=>window.registered),undefined);assert.equal(await page.locator('#banner .se-component-content-fit').count(),1);assert.equal(await page.locator('#footer .se-component-content-fit').count(),1);assert.equal(await page.locator('#top .se-component-content-extend').count(),1);}finally{await b.close();}
+});
+
+test('배치 전환으로 이미지 컴포넌트 ID가 바뀌어도 현재 이미지의 문서 너비를 확인한다',async()=>{
+ const browser=await chromium.launch({headless:true});try{const page=await browser.newPage();await page.setContent('<style>img{width:200px;height:150px;display:block}</style><button data-name="content-mode-without-pagefull" data-value="fit">문서 너비</button><div class="se-component se-image" id="before"><div class="se-component-content"><img src="https://example.com/photo.png"></div></div>');
+ await page.locator('button').evaluate(n=>n.onclick=()=>{document.querySelector('.se-component').id='after';document.querySelector('.se-component-content').classList.add('se-component-content-fit');});
+ await applySmartstoreImageLayout(page,page.locator('img'),{layout:'fit'});assert.equal(await page.locator('#after .se-component-content-fit').count(),1);assert.equal(await page.locator('#before').count(),0);
+ }finally{await browser.close();}
 });
