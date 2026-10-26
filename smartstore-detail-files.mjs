@@ -1,3 +1,4 @@
+import {mannequinPhotoRegions,registerLongPhotoLayout} from './smartstore-long-photo-import.mjs';
 import {collectCaptionTones} from './smartstore-caption-tone.mjs';
 import {reviewSellingPoints} from './smartstore-selling-point-review.mjs';
 import {readFile,writeFile,mkdir,readdir,realpath,access,unlink} from 'node:fs/promises';
@@ -125,17 +126,17 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
  const fontUrl='data:font/ttf;base64,'+(await readFile(path.join(assetsRoot,'GowunDodum-Regular.ttf'))).toString('base64');
  const document=smartstoreDetailDocument(p,{imageUrl,fontUrl,includeVideo:false,includeNavigation:false});
  const cacheRoot=path.join(options.dataRoot||path.join(appRoot,'data'),'smartstore-render-cache');
- const cacheKey=await renderCacheKey(document.html);let height,brandIntroHeight,footerTop,bannerTop,officialTop,renderCacheHit=false;
+ const cacheKey=await renderCacheKey(document.html);let height,brandIntroHeight,footerTop,bannerTop,officialTop,photoRegions,renderCacheHit=false;
  let browser;const close=()=>browser?.close().catch(()=>{});signal?.addEventListener('abort',close,{once:true});
  const partial=output+'.partial';
  try{
   const cached=await restoreRenderedDetail(cacheRoot,p.style,cacheKey,output);check();
-  if(cached&&Number.isFinite(cached.brandIntroHeight)&&Number.isInteger(cached.footerTop)&&Number.isInteger(cached.bannerTop)&&Number.isInteger(cached.officialTop)){height=cached.height;brandIntroHeight=cached.brandIntroHeight;footerTop=cached.footerTop;bannerTop=cached.bannerTop;officialTop=cached.officialTop;renderCacheHit=true;options.log?.('사진·문구·템플릿 일치 · 상세이미지 재사용');}
+  if(cached&&Array.isArray(cached.photoRegions)&&Number.isFinite(cached.brandIntroHeight)&&Number.isInteger(cached.footerTop)&&Number.isInteger(cached.bannerTop)&&Number.isInteger(cached.officialTop)){height=cached.height;photoRegions=cached.photoRegions;brandIntroHeight=cached.brandIntroHeight;footerTop=cached.footerTop;bannerTop=cached.bannerTop;officialTop=cached.officialTop;renderCacheHit=true;options.log?.('사진·문구·템플릿 일치 · 상세이미지 재사용');}
   else{
   browser=await chromium.launch({headless:true});check();
   const page=await browser.newPage({viewport:{width:860,height:1200},deviceScaleFactor:1});
   await page.setContent(document.html);await page.evaluate(()=>Promise.all([document.fonts.ready,...[...document.images].map(i=>i.decode())]));check();
-  height=await page.evaluate(()=>document.documentElement.scrollHeight);
+  height=await page.evaluate(()=>document.documentElement.scrollHeight);photoRegions=await page.evaluate(mannequinPhotoRegions);
   brandIntroHeight=await page.locator('[data-brand-intro]').evaluate(n=>Math.ceil(n.getBoundingClientRect().height));
   officialTop=await page.locator('[data-official-detail]').evaluate(n=>Math.floor(n.getBoundingClientRect().top+scrollY));
   bannerTop=await page.locator('[data-store-banner]').evaluate(n=>Math.floor(n.getBoundingClientRect().top+scrollY));
@@ -144,8 +145,9 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
   const layers=[];for(let top=0;top<height;top+=4096){check();layers.push({input:await page.screenshot({type:'png',fullPage:true,clip:{x:0,y:top,width:860,height:Math.min(4096,height-top)}}),left:0,top});}
   await sharp({create:{width:860,height,channels:3,background:'#fff'},limitInputPixels:false}).composite(layers).png().toFile(partial);check();
   const {rename}=await import('node:fs/promises');await rename(partial,output);
-  await cacheRenderedDetail(cacheRoot,p.style,cacheKey,output,height,{brandIntroHeight,footerTop,bannerTop,officialTop});
+  await cacheRenderedDetail(cacheRoot,p.style,cacheKey,output,height,{brandIntroHeight,footerTop,bannerTop,officialTop,photoRegions});
   }
+  await registerLongPhotoLayout(await readFile(output),{style:p.style,regions:photoRegions,brandIntroHeight,officialTop,dataRoot:options.dataRoot||path.join(appRoot,'data')});
   const stem=output.replace(/\.[^.]+$/,'');
   const video=await exportBrandVideo(stem,options.dataRoot,videoOptions);check();
   await writeFile(stem+'.html',smartstoreDetailDocument(p,{imageUrl,fontUrl,videoUrl:encodeURIComponent(video.filename)}).html);
