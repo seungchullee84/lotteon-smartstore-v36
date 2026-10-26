@@ -1,6 +1,7 @@
 import {mannequinPhotoRegions,registerLongPhotoLayout} from './smartstore-long-photo-import.mjs';
 import {collectCaptionTones} from './smartstore-caption-tone.mjs';
 import {reviewSellingPoints,officialPointSource} from './smartstore-selling-point-review.mjs';
+import {importedPhotoSelection} from './smartstore-imported-selection.mjs';
 import {readFile,writeFile,mkdir,readdir,realpath,access,unlink} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -26,7 +27,8 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  const style=validStyle(product);const draftRoot=path.join(dataRoot,'smartstore-details',style);
  let draft=null;try{draft=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(draft&&(String(draft.style)!==style||draft.sourceUrl!==product.sourceUrl))throw Error('상세페이지 준비 자료의 품번·공식 출처가 현재 상품과 다릅니다.');
- const prepared={style,includeBrandVideo:true,colorImages:{},colorSources:{},sellingPoints:[],photoCount:0,photoFiles:{},providedImages:[],sourceUrl:product.sourceUrl,displayColors:[...product.colors]};
+ const imported=importedPhotoSelection(product,draft);
+ const prepared={style,includeBrandVideo:true,colorImages:{},colorSources:{},storeColorPhotoHashes:{},sellingPoints:[],photoCount:0,photoFiles:{},providedImages:[],sourceUrl:product.sourceUrl,displayColors:[...product.colors]};
  if(draft){
   if(draft.headline)prepared.headline=String(draft.headline).slice(0,200);
   if(draft.sellingPoints){if(!Array.isArray(draft.sellingPoints)||draft.sellingPoints.some(p=>!p.title||!p.description||!p.evidence))throw Error('소구점의 공식 확인 근거를 함께 저장해 주세요.');prepared.sellingPoints=draft.sellingPoints.slice(0,4);}
@@ -47,20 +49,28 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
   if(!product.colors.includes(color))throw Error('현재 상품에 없는 색상의 마네킨 컷입니다: '+color);
   const canonicalRoot=await realpath(allowedRoot),canonical=await realpath(file);
   if(!inside(canonicalRoot,canonical)||!imageExtension.test(canonical))throw Error('마네킨 컷 파일 위치를 확인해 주세요.');
-  const bytes=await readFile(canonical);const meta=await sharp(bytes,{limitInputPixels:80000000}).metadata();
+  const bytes=await readFile(canonical),sourceDigest=createHash('sha256').update(bytes).digest('hex');
+  const sourceHash=draft?.photoMapping?.files?.find(r=>r.color===color&&(r.hash===sourceDigest||r.preparedHash===sourceDigest))?.hash||sourceDigest;
+  if(imported&&!imported.get(color)?.includes(sourceHash))return;
+  const meta=await sharp(bytes,{limitInputPixels:80000000}).metadata();
   if(!['jpeg','png','webp'].includes(meta.format))throw Error('지원하지 않는 마네킨 이미지 형식');
   const hash=createHash('sha256').update(bytes).digest('hex').slice(0,24);const name='smartstore-photo-'+hash+'.jpg';
   await writeFile(path.join(folder,name),await readFile(await workingProductPhoto({bytes},product,{dataRoot})));
   const src='/smartstore-photo/'+hash;prepared.photoFiles[src]=name;
   prepared.colorImages[color]||=[];
-  if(!prepared.colorImages[color].includes(src)){prepared.colorImages[color].push(src);prepared.photoCount++;}
+  if(!prepared.colorImages[color].includes(src)){prepared.colorImages[color].push(src);(prepared.storeColorPhotoHashes[color]||=[]).push(sourceHash);prepared.photoCount++;}
  };
  if(draft?.photos){
   if(!Array.isArray(draft.photos))throw Error('마네킨 컷 연결 자료를 확인해 주세요.');
-  for(const group of draft.photos){if(!Array.isArray(group.files))throw Error('색상별 사진 목록이 필요합니다.');for(const relative of group.files.slice(0,4)){
+  for(const group of draft.photos){if(!Array.isArray(group.files))throw Error('색상별 사진 목록이 필요합니다.');for(const relative of imported?group.files:group.files.slice(0,4)){
    if(typeof relative!=='string'||path.isAbsolute(relative)||relative.split(/[\\/]/).includes('..'))throw Error('마네킨 컷은 준비 자료 폴더 안의 파일만 연결합니다.');
    await attach(group.color,path.resolve(draftRoot,relative),draftRoot);
   }}
+  if(imported)for(const [color,hashes] of imported){
+   const actual=prepared.storeColorPhotoHashes[color]||[],urls=prepared.colorImages[color]||[];
+   const order=hashes.map(hash=>actual.indexOf(hash)).filter(i=>i>=0);
+   prepared.colorImages[color]=order.map(i=>urls[i]);prepared.storeColorPhotoHashes[color]=order.map(i=>actual[i]);
+  }
  }else{
   if(!mannequinRoots){const desktop=path.dirname(await imageDownloadFolder());mannequinRoots=[path.join(desktop,'상품등록기사진폴더')];}
   for(const root of mannequinRoots){
@@ -80,6 +90,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  }
  // Unmatched photos stay local for matching; never invent another template section.
  prepared.pendingPhotoCount=(draft?.unmatchedPhotos||draft?.providedPhotos||[]).length;
+ prepared.storeColorPhotoCounts=Object.fromEntries(Object.entries(prepared.colorImages).map(([color,urls])=>[color,urls.length]));
  // Official fallback photos are separate from seller options and store mannequin claims.
  if(draft?.officialPhotos?.length){
   const detailHash=createHash('sha256').update(await readFile(path.join(folder,'detail.jpg'))).digest('hex');
@@ -99,7 +110,6 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
    prepared.colorSources[group.color]='official';
   }
  }
- prepared.storeColorPhotoCounts=Object.fromEntries(Object.entries(prepared.colorImages).map(([color,urls])=>[color,urls.length]));
  prepared.captionTones=await collectCaptionTones(product,folder);
  prepared.embeddedOfficialSections=await embeddedOfficialSections(product,folder);
  const p={...product,smartstoreDetail:prepared};

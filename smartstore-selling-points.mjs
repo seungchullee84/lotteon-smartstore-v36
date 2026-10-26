@@ -4,10 +4,10 @@ const genericTitle=/^(?:원단|소재|핏과 실루엣|여밈 디테일|디자�
 function cleanSource(text){
  const value=String(text||'');
  const fits=value.match(/(?:슬림|레귤러|레글러|루즈|와이드|오버)\s*핏/g)||[];
- const unknownAcronym=(value.match(/\b[A-Z]{2,5}\b/g)||[]).some(word=>!['PTT','YKK','HEAT','COOL','WARM','DRY','WOOL','MODAL','NYLON','RAYON','DENIM','LINEN','SILK','LYCRA','NYC','UPF','SPF','UV'].includes(word));
+ const unknownAcronym=(value.match(/\b[A-Z]{2,5}\b/g)||[]).some(word=>!['PTT','YKK','CVC','HEAT','COOL','WARM','DRY','WOOL','MODAL','NYLON','RAYON','DENIM','LINEN','SILK','LYCRA','NYC','UPF','SPF','UV'].includes(word));
  return !unknownAcronym&&!/[\uFFFD\[\]{}=|\\]/.test(value)&&!/[A-Za-z][A-Za-z0-9]*\]/.test(value)&&new Set(fits.map(s=>s.replace(/\s/g,''))).size<2;
 }
-function completeCopy(text){return !/(?:부터|으로|위한|통해|이며|으며|하고|하지만|더해진|경량)$/.test(String(text).replace(/[.!?]+$/,'').trim());}
+function completeCopy(text){const value=String(text).replace(/[.!?]+$/,'').trim();return !/[,，;:]$/.test(value)&&!/(?:부터|으로|위한|통해|이며|으며|하며|하고|하지만|더해진|경량)$/.test(value);}
 export function officialBenefitSentences(source){
  const sections=String(source||'').replace(/\\n/g,'\n').split(/\s*[•●]\s*/).map(section=>section.split(/(?:^|\n)\s*(?:DETAIL\s*SIZE|CHECK\s*UP|INFORMATION|착용\s*시기|두께\s*감|상의\s*핏|하의\s*핏|제품\s*소재|품질\s*보증)(?=\s|$|[:：])/i)[0]);
  const paragraphs=sections.flatMap(section=>section.split(/\n\s*\n/));

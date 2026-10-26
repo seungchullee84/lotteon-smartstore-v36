@@ -6,7 +6,7 @@ test('구매 장점 기준 이전의 준비 완료 캐시도 모든 품번에서
  for(const style of ['123456','654321','456789']){
   const p={...product,style},dir=path.join(root,'smartstore-details',style);await mkdir(dir,{recursive:true});
   await writeFile(path.join(dir,'selling-point-review.json'),JSON.stringify({version:5,method:'local-official-text',style,sourceUrl:p.sourceUrl,textHash:createHash('sha256').update(source).digest('hex'),detailHash:null,status:'ready',points:[{title:'핏과 실루엣',description:'슬림핏 레글러핏 루즈핏.',evidence:'슬림핏 레글러핏 루즈핏.'}]}));
-  const result=await reviewSellingPoints(p,source,{dataRoot:root});assert.equal(result.version,6);assert.equal(result.points.length,1);assert.equal(result.points[0].title,'부드러운 착용감');
+  const result=await reviewSellingPoints(p,source,{dataRoot:root});assert.equal(result.version,7);assert.equal(result.points.length,1);assert.equal(result.points[0].title,'부드러운 착용감');
  }
  }finally{await rm(root,{recursive:true,force:true});}
 });

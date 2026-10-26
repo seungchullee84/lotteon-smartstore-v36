@@ -298,8 +298,8 @@ const server=http.createServer(async(req,res)=>{
           const choices=allImportedPhotoChoices(stage,product,known,ignored);
           const result=await applyImportedPhotos(product,folder,choices,{dataRoot,signal,automatic:true});signal.throwIfAborted();
           const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,signal,log});signal.throwIfAborted();
-          await writeFile(path.join(folder,'product.json'),JSON.stringify(prepared,null,2));await publishPhotoPreview(prepared,folder);
           assertImportedPhotoCoverage(stage,prepared,choices,{requireSellingPoints:false});
+          await writeFile(path.join(folder,'product.json'),JSON.stringify(prepared,null,2));await publishPhotoPreview(prepared,folder);
           state.photoImport={...stage,status:'applied',selectedCount:result.selectedCount,detailReady:!!prepared.smartstoreDetail?.sellingPoints?.length};
           if(!state.photoImport.detailReady)log('사진 수집·연결 완료 · 소구점은 공식 원문 확인 필요 · 상세 제작·업로드는 확인 전 진행하지 않습니다.');
           log('색상별 사진 전체 '+result.selectedCount+'장 자동 반영 완료 · 상세 템플릿 업데이트 · 상품 저장 안 함');
@@ -313,6 +313,7 @@ const server=http.createServer(async(req,res)=>{
           const signal=activeAbort.signal;
           const result=await applyImportedPhotos(product,folder,b.photos,{dataRoot,signal});signal.throwIfAborted();
           const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,signal,log});signal.throwIfAborted();
+          assertImportedPhotoCoverage(state.photoImport,prepared,b.photos,{requireSellingPoints:false});
           await writeFile(path.join(folder,'product.json'),JSON.stringify(prepared,null,2));await publishPhotoPreview(prepared,folder);
           state.photoImport={...state.photoImport,status:'applied',selectedCount:result.selectedCount};
           log('착용사진 '+result.selectedCount+'장 적용 · 품번 폴더 보관 · 추가이미지와 색상별 상세 템플릿 반영 · 판매자센터 저장 안 함');

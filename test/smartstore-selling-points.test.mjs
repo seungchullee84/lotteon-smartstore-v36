@@ -5,6 +5,7 @@ test('모든 상품에서 체크표 선택지·깨진 OCR·미완성 문장은 �
  const noise='클래식한 일자 Elo] 더해진 베이직한 실루옛의 크루넥 경량\n슬랙스, 스커트 등 다양한 아이템과 믹스 매치가 가능해 데일리 룩부터\nCHECK UP\n상의 핏\n슬림핏         레글러핏         루즈핏';
  assert.deepEqual(officialSellingPoints(noise),[]);
  for(const description of ['슬림핏 레글러핏 루즈핏.','클래식한 일자 Elo] 더해진 크루넥 경량.','다양한 아이템과 믹스 매치가 가능해 데일리 룩부터.'])assert.equal(usableSellingPoints([{title:'핏과 실루엣',description,evidence:description}],description),false);
+ const broken='적당한 여유의 AlolTl 안정적인 기장감으로 편안한 착용김을 제공하며,';assert.equal(usableSellingPoints([{title:'편안한 착용감',description:broken+'.',evidence:broken}],broken),false);assert.deepEqual(officialSellingPoints(broken),[]);
  const benefit='입체적인 패턴 설계로 제작되어 세련된 핏을 완성했으며,\n편안한 활동성을 제공합니다.';
  const source=noise+'\n•\n'+benefit;
  const points=officialSellingPoints(source);assert.equal(points.length,1);assert.equal(points[0].title,'움직임은 편안하게');assert.match(points[0].evidence,/편안한 활동성/);assert(usableSellingPoints(points,source));

@@ -7,6 +7,7 @@ import {isCareLabelPhoto,saveCareLabelSelection} from './smartstore-care-label.m
 import {chooseListingPhotos,saveListingSelection} from './smartstore-listing-images.mjs';
 import {prepareSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {officialSellingPoints,usableSellingPoints} from './smartstore-selling-points.mjs';
+import {importedPhotoSelection} from './smartstore-imported-selection.mjs';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 export function careLabelText(text){
  const words=['제조국','제조연월','혼용률','취급주의','관리번호','LOT','MADE IN','폴리에스터','소비자상담'];
@@ -39,18 +40,21 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
   }
  }finally{await worker?.terminate();}
  signal?.throwIfAborted();
+ const imported=importedPhotoSelection(product,old);
+ const active=p=>!imported||imported.get(p.color)?.includes(hash(p.bytes));
  const garments=reviewed.filter(p=>p.role!=='care-label'),main=garments.filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name));
  if(main.length!==1)throw Error('현재 품번 폴더에 대표사진 1.jpg 또는 1번.jpg 한 장을 지정해 주세요.');
  let extras;
  if(product.colors.includes(main[0].color)){
   const frontColors=new Set(garments.filter(p=>p.role==='front').map(p=>p.color));frontColors.add(main[0].color);
-  extras=chooseListingPhotos(garments.filter(p=>p.role!=='provided'&&frontColors.has(p.color)),product).extras;
+  extras=chooseListingPhotos(garments.filter(p=>(p===main[0]||active(p))&&p.role!=='provided'&&frontColors.has(p.color)),product).extras;
  }else extras=[];
  const listingImages={...await saveListingSelection(root,{main:main[0],extras}),trustedFolder:true};
  const groups=[],providedPhotos=[],records=[];
  for(const p of reviewed){
-  const digest=hash(p.bytes);records.push({name:p.name,hash:digest,color:p.color,role:p.role});
+  const digest=hash(p.bytes),prior=old?.photoMapping?.files?.find(r=>r.hash===digest);records.push({...prior,name:p.name,hash:digest,color:p.color,role:p.role});
   if(p.role==='care-label')continue;
+  if(!active(p))continue;
   const relative='trusted/'+digest+path.extname(p.name).toLowerCase();await writeFile(path.join(root,relative),p.bytes);
   if(p.color&&p.role!=='provided'){
    let group=groups.find(g=>g.color===p.color);if(!group){group={color:p.color,files:[]};groups.push(group);}

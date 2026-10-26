@@ -2,7 +2,35 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {mkdtemp,readFile,mkdir,readdir,writeFile,rm} from 'node:fs/promises';import os from 'node:os';import path from 'node:path';import sharp from 'sharp';import {chromium} from 'playwright';
 import {preparePhotoSourceList,editorPhotoPositions,naverPhotoUrl,exactSellerRows,stageImportedPhotos,applyImportedPhotos,allImportedPhotoChoices,assertImportedPhotoCoverage,settledEditorPhotoPositions,selectSearchChoice} from '../smartstore-photo-import.mjs';
 import {prepareTrustedFolder} from '../smartstore-folder-trust.mjs';
+import {prepareSmartstoreDetail} from '../smartstore-detail-files.mjs';
 import {findPhotos} from '../smartstore-photo-files.mjs';
+
+test('재수집은 최신 사진 원본·순서로 교체하고 이전 사진과 빠진 색상을 상세에 되살리지 않는다',async()=>{
+ const dir=await mkdtemp(path.join(os.tmpdir(),'import-replace-'));try{
+ const folder=path.join(dir,'collected'),dataRoot=path.join(dir,'data'),desktop=path.join(dir,'desktop');await mkdir(folder,{recursive:true});
+ const product={style:'326922',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=1',colors:['01블랙','02화이트'],images:{},sizes:['S'],name:'상의'};
+ const candidates=Array.from({length:8},(_,i)=>({colorHint:product.colors[Math.floor(i/4)],url:'https://shop-phinf.pstatic.net/'+i+'.jpg'}));
+ const buffers=await Promise.all(candidates.map((_,i)=>sharp({create:{width:750,height:1000,channels:3,background:{r:i*30,g:70,b:120}}}).jpeg().toBuffer()));
+ const options={recognizePhoto:async()=>'',fetchImpl:async url=>new Response(buffers[Number(new URL(url).pathname.slice(1,-4))],{headers:{'Content-Type':'image/jpeg'}})};
+ const readDraft=async()=>JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'draft.json'),'utf8'));
+ const prepare=async()=>{const old=await readDraft(),photos=await findPhotos(product,{desktop});return prepareTrustedFolder(product,folder,{dataRoot,photos,mapped:photos.map(p=>({...p,...old.photoMapping.files.find(r=>r.name===p.name)})),old,description:'',detailHash:null,recognizePhoto:()=>assert.fail('사진 해시 확인 결과를 재사용해야 합니다.')});};
+ const first=await stageImportedPhotos({...product,sellerCode:product.style,candidates},folder,options);await applyImportedPhotos(product,folder,allImportedPhotoChoices(first,product),{dataRoot,desktop,automatic:true});assert.equal((await prepare()).smartstoreDetail.photoCount,8);
+ const mainPath=path.join(desktop,'상품등록기사진폴더',product.style,'1.jpg'),main=await readFile(mainPath);
+ const latest=await stageImportedPhotos({...product,sellerCode:product.style,candidates:[candidates[2],candidates[1]]},folder,options),choices=allImportedPhotoChoices(latest,product);
+ await applyImportedPhotos(product,folder,choices,{dataRoot,desktop,automatic:true});
+ // Preview/export can be opened before another automatic preparation.
+ const preview=await prepareSmartstoreDetail(product,folder,{dataRoot});assert.equal(preview.smartstoreDetail.photoCount,2);assert.deepEqual(preview.smartstoreDetail.storeColorPhotoHashes['01블랙'],latest.candidates.map(p=>p.sha256));assert(!preview.smartstoreDetail.colorImages['02화이트']);
+ for(let i=0;i<2;i++){const prepared=await prepare();assert.equal(prepared.smartstoreDetail.photoCount,2);assert.deepEqual(prepared.smartstoreDetail.storeColorPhotoHashes['01블랙'],latest.candidates.map(p=>p.sha256));assertImportedPhotoCoverage(latest,prepared,choices,{requireSellingPoints:false});}
+ assert.deepEqual(await readFile(mainPath),main);assert.equal((await findPhotos(product,{desktop})).length,8,'이전 원본은 보존하지만 상세에 섞지 않는다');
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
+
+test('반영 개수가 같아도 사진 원본이나 순서가 다르거나 이전 색상이 남으면 차단한다',()=>{
+ const stage={candidates:[{id:'a',colorHint:'01블랙',sha256:'hash-a'},{id:'b',colorHint:'01블랙',sha256:'hash-b'}]},prepared={smartstoreDetail:{storeColorPhotoCounts:{'01블랙':2},storeColorPhotoHashes:{'01블랙':['hash-a','hash-b']}}};
+ assert.doesNotThrow(()=>assertImportedPhotoCoverage(stage,prepared,undefined,{requireSellingPoints:false}));
+ for(const hashes of [['old-a','old-b'],['hash-b','hash-a']])assert.throws(()=>assertImportedPhotoCoverage(stage,{smartstoreDetail:{...prepared.smartstoreDetail,storeColorPhotoHashes:{'01블랙':hashes}}},undefined,{requireSellingPoints:false}),/원본·순서/);
+ assert.throws(()=>assertImportedPhotoCoverage(stage,{smartstoreDetail:{...prepared.smartstoreDetail,storeColorPhotoCounts:{'01블랙':2,'02화이트':1}}},undefined,{requireSellingPoints:false}),/이전 사진/);
+});
 test('판매자 코드 숫자를 정확히 대조하고 같은 코드 중 하나만 선택할 수 있다',()=>{
  const rows=[{code:'326922 설명A'},{code:'326922 설명B'},{code:'1326922'},{code:'326923'},{code:'326922 356954'}];assert.deepEqual(exactSellerRows(rows,'326922'),[rows[0],rows[1],rows[2],rows[4]]);
  for(const u of ['https://evil.test/a.jpg','http://127.0.0.1/a.jpg','https://shop-phinf.pstatic.net@evil.test/a'])assert.throws(()=>naverPhotoUrl(u));
