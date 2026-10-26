@@ -18,7 +18,7 @@ test('긴 상세와 업로드용 분할 이미지에서 확인된 색상별 사�
  assert.equal((await extractLongMannequinPhotos(bytes,{...options,style:'326925'})).length,0);assert.equal((await extractLongMannequinPhotos(bytes,{...options,colors:['99레드']})).length,0);
  const changed=await sharp(bytes).composite([{input:await sharp({create:{width:428,height:500,channels:3,background:'#e00000'}}).png().toBuffer(),left:0,top:1100}]).png().toBuffer();assert.equal((await extractLongMannequinPhotos(changed,options)).length,0);
  const source={style,colors,sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=1',sellerCode:style,candidates:[{url:'https://shop-phinf.pstatic.net/long.png'}]};
- const stage=await stageImportedPhotos(source,path.join(dataRoot,'collected'),{dataRoot,recognizePhoto:async()=>'',fetchImpl:async()=>new Response(bytes,{headers:{'Content-Type':'image/png'}})});assert.equal(stage.candidates.length,4);assert(stage.candidates.every(c=>c.extractedFromLong));assert.equal(allImportedPhotoChoices(stage,{style,colors}).length,4);
+ const stage=await stageImportedPhotos(source,path.join(dataRoot,'collected'),{dataRoot,recognizePhoto:async()=>'',fetchImpl:async()=>new Response(bytes,{headers:{'Content-Type':'image/png'}})});assert.equal(stage.candidates.length,4);assert(stage.candidates.every(c=>c.extractedFromLong));assert.equal(allImportedPhotoChoices(stage,{style,colors,sourceUrl:source.sourceUrl}).length,4);
  const photo=stage.candidates[0];const m=await sharp(await readFile(path.join(dataRoot,'collected/smartstore-photo-import',photo.file))).metadata();assert.equal(m.width,428);assert.equal(m.height,500);
  }finally{await rm(dataRoot,{recursive:true,force:true});}
 });
