@@ -468,5 +468,5 @@ const server=http.createServer(async(req,res)=>{
 server.listen(desktopSession?.port||0,'127.0.0.1',()=>{
   const url=`http://127.0.0.1:${server.address().port}/?key=${token}`;
   console.log('\n지오다노 등록 도우미: '+url+'\n이 창을 닫으면 프로그램이 종료됩니다.');
-  if(!process.env.NO_AUTO_OPEN){const child=spawn('cmd.exe',['/c','start','',url],{windowsHide:true,stdio:'ignore'});child.on('error',()=>{});}
+  if(!desktopSession&&!process.env.NO_AUTO_OPEN){const child=spawn('cmd.exe',['/c','start','',url],{windowsHide:true,stdio:'ignore'});child.on('error',()=>{});}
 });
