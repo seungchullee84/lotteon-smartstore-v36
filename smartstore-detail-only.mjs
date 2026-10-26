@@ -20,6 +20,18 @@ export async function bindSmartstoreDetailEdit(context,style){
  const page=pages[0];page.setDefaultTimeout(8000);await page.bringToFront();
  assertDetailOnlyProduct(await readDetailOnlySellerCode(page),style);return page;
 }
+export function twoChoiceSellerStyle(code,products){
+ if(!Array.isArray(products)||products.length!==2||products.some(p=>!/^\d{6}$/.test(p.style||'')))throw Error('저장한 두 상품 품번을 확인해 주세요.');
+ const style=products.find(p=>String(code).includes(p.style))?.style;
+ if(!style)throw Error('조회/수정 화면의 판매자 상품코드가 저장한 두 상품의 품번과 일치하지 않습니다.');
+ return style;
+}
+export async function bindSmartstoreTwoChoiceEdit(context,products){
+ const pages=context.pages().filter(p=>!p.isClosed()&&isSmartstoreDetailEditUrl(p.url()));
+ if(pages.length!==1)throw Error(pages.length?'조회/수정 창이 여러 개입니다. 사용할 창 하나만 남겨 주세요.':'전용 크롬에서 두 상품이 함께 구성된 기존 상품의 조회/수정 화면을 직접 열어 주세요.');
+ const page=pages[0];page.setDefaultTimeout(8000);await page.bringToFront();
+ const style=twoChoiceSellerStyle(await readDetailOnlySellerCode(page),products);return {page,style};
+}
 export async function runSmartstoreDetailOnly({product,folder,signal,connect,render,upload,log=()=>{}}){
  const check=()=>signal?.throwIfAborted();check();
  if(!product||!folder||!/^\d{6}$/.test(product.style||''))throw Error('먼저 현재 상품 정보를 수집하고 상세 미리보기를 확인해 주세요.');

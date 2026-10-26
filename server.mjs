@@ -1,3 +1,4 @@
+import {listTwoChoicePackages,readTwoChoicePackage,saveTwoChoicePackage,twoChoiceUploadParts} from './smartstore-two-choice-store.mjs';
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {stageImportedPhotos,applyImportedPhotos,allImportedPhotoChoices,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail} from './smartstore-detail-files.mjs';
@@ -112,6 +113,13 @@ const server=http.createServer(async(req,res)=>{
       if(!state.folder)return json(res,404,{});
       res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'no-store'});
       return res.end(await readFile(path.join(state.folder,'smartstore-photo-'+url.pathname.split('/').at(-1)+'.jpg')));
+    }
+    if(req.method==='GET'&&url.pathname==='/api/smartstore-two-choice')return json(res,200,{packages:await listTwoChoicePackages(dataRoot)});
+    const twoChoiceFile=url.pathname.match(/^\/smartstore-two-choice\/([a-z0-9-]+)\/(preview\.html|overview\.png|brand\.mp4)$/);
+    if(req.method==='GET'&&twoChoiceFile){
+      const [,id,name]=twoChoiceFile,bundle=await readTwoChoicePackage(dataRoot,id);
+      if(name==='brand.mp4')return await serveBrandVideo(req,res,dataRoot);
+      const bytes=await readFile(bundle.files[name]);res.writeHead(200,{'Content-Type':name.endsWith('.html')?'text/html; charset=utf-8':'image/png','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; img-src data:; media-src 'self'; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; frame-ancestors 'self'; base-uri 'none'"});return res.end(bytes);
     }
     if(req.method==='GET'&&url.pathname==='/smartstore-detail-preview.html'){
       const current=state.product;if(!current||!state.folder)return json(res,400,{error:'먼저 상품을 수집해 주세요.'});
@@ -309,6 +317,14 @@ const server=http.createServer(async(req,res)=>{
           state.photoImport={...state.photoImport,status:'applied',selectedCount:result.selectedCount};
           log('착용사진 '+result.selectedCount+'장 적용 · 품번 폴더 보관 · 추가이미지와 색상별 상세 템플릿 반영 · 판매자센터 저장 안 함');
         });return json(res,202,{ok:true});
+      }
+      if(url.pathname==='/api/smartstore-two-choice-save'){
+        if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 저장해 주세요.');return json(res,200,await saveTwoChoicePackage(dataRoot,b.id,b.revision,b.kind));
+      }
+      if(url.pathname==='/api/smartstore-two-choice-upload'){
+        if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 상세를 준비해 주세요.');
+        const bundle=await twoChoiceUploadParts(dataRoot,b.id,b.revision);
+        job('smartstore-detail-only',async()=>{const signal=activeAbort.signal;log('두 상품 선택형 상세 준비 · '+bundle.manifest.label);const result=await smartBot.uploadTwoChoiceDetail(bundle,{signal});if(!result.editorPrepared)throw Error('두 상품 상세 편집기 준비 확인이 끝나지 않았습니다.');log('두 상품 상세 첨부 준비 완료 · 편집기 등록·상품 저장 안 함');});return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/smartstore-detail-only'){
         if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 상세설명만 교체해 주세요.');

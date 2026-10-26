@@ -9,8 +9,17 @@ import {fillResearchTags} from './smartstore-research-tags.mjs';
 export const SMARTSTORE_HOME='https://sell.smartstore.naver.com/';
 import {uploadSmartstoreDetail} from './smartstore-detail-upload.mjs';
 import {readExistingPhotos} from './smartstore-photo-import.mjs';
-import {bindSmartstoreDetailEdit,assertDetailOnlyProduct,readDetailOnlySellerCode,isSmartstoreDetailEditUrl} from './smartstore-detail-only.mjs';
+import {bindSmartstoreDetailEdit,bindSmartstoreTwoChoiceEdit,twoChoiceSellerStyle,assertDetailOnlyProduct,readDetailOnlySellerCode,isSmartstoreDetailEditUrl} from './smartstore-detail-only.mjs';
 export class SmartstoreAutomation extends BrowserAutomation{
+  async uploadTwoChoiceDetail(bundle,{signal}={}){
+    this.stopped=false;await this.connectChrome(SMARTSTORE_HOME);
+    const {page,style}=await bindSmartstoreTwoChoiceEdit(this.context,bundle.manifest.products);this.page=page;const url=page.url();
+    const check=()=>{this.check();signal?.throwIfAborted();if(page.isClosed()||page.url()!==url||!isSmartstoreDetailEditUrl(url))throw Error('조회/수정 화면이 변경되어 두 상품 상세 교체를 중단했습니다.');};
+    check();if(twoChoiceSellerStyle(await readDetailOnlySellerCode(page),bundle.manifest.products)!==style)throw Error('판매자 상품코드가 변경되었습니다.');
+    this.log('저장된 두 상품 상세 · 판매자 상품코드 '+style+' 일치 · 기존 구매옵션 유지');
+    const result=await uploadSmartstoreDetail(page,bundle.parts,{check,log:this.log,mode:'edit',applyEditor:false});
+    const {writeFile}=await import('node:fs/promises');await writeFile(path.join(bundle.folder,'last-upload-result.json'),JSON.stringify({...result,id:bundle.manifest.id,revision:bundle.manifest.revision,style,saved:false,published:false},null,2));return result;
+  }
   async importExistingPhotos(product,{signal}={}){
     this.stopped=false;await this.connectChrome(SMARTSTORE_HOME);
     return readExistingPhotos(this.context,product,{log:this.log,check:()=>{this.check();signal?.throwIfAborted();}});
