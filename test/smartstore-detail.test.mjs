@@ -43,19 +43,20 @@ test('공통 템플릿 파일만 동기화하고 마네킨 컷과 상품 초안�
  for(const file of ['public/smartstore-template/product.jpg','data/smartstore-details/375908/draft.json','data/375908/smartstore-photo-test.jpg'])assert.equal(publishable(file),false,file);
 });
 test('다른 품번·색상·외부 경로는 차단하고 사진 매핑과 상품별 소구점으로 저장',async()=>{
+ const reviewedProduct={...product,officialDescription:'가벼운 원단의 경량 패딩입니다.'};
  const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-template-'));const folder=path.join(root,'product'),dataRoot=path.join(root,'data'),draftRoot=path.join(dataRoot,'smartstore-details',product.style);
  try{
   await mkdir(folder,{recursive:true});await mkdir(draftRoot,{recursive:true});await prepareVideo(dataRoot);
   for(const key of ['detail','size','info'])await sharp({create:{width:120,height:key==='detail'?300:100,channels:3,background:key==='detail'?'#ac3c56':'white'}}).jpeg().toFile(path.join(folder,key+'.jpg'));
   await sharp({create:{width:300,height:400,channels:3,background:'pink'}}).jpeg().toFile(path.join(draftRoot,'front.jpg'));
-  const draft={style:product.style,sourceUrl:product.sourceUrl,photos:[{color:'01핑크',files:['front.jpg']}],sellingPoints:[{title:'경량 패딩',description:'공식 상품명에 확인된 경량 패딩',evidence:'공식 상품명'}]};
-  await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...draft,style:'000000'}));await assert.rejects(prepareSmartstoreDetail(product,folder,{dataRoot}),/품번/);
-  await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...draft,photos:[{color:'다른색상',files:['front.jpg']}]}));await assert.rejects(prepareSmartstoreDetail(product,folder,{dataRoot}),/없는 색상/);
-  await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...draft,photos:[{color:'01핑크',files:['../outside.jpg']}]}));await assert.rejects(prepareSmartstoreDetail(product,folder,{dataRoot}),/폴더 안/);
+  const draft={style:product.style,sourceUrl:product.sourceUrl,photos:[{color:'01핑크',files:['front.jpg']}],sellingPoints:[{title:'경량 패딩',description:'가벼운 원단으로 만든 경량 패딩.',evidence:'가벼운 원단의 경량 패딩입니다.'}]};
+  await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...draft,style:'000000'}));await assert.rejects(prepareSmartstoreDetail(reviewedProduct,folder,{dataRoot}),/품번/);
+  await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...draft,photos:[{color:'다른색상',files:['front.jpg']}]}));await assert.rejects(prepareSmartstoreDetail(reviewedProduct,folder,{dataRoot}),/없는 색상/);
+  await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...draft,photos:[{color:'01핑크',files:['../outside.jpg']}]}));await assert.rejects(prepareSmartstoreDetail(reviewedProduct,folder,{dataRoot}),/폴더 안/);
   await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft));
-  const p=await prepareSmartstoreDetail(product,folder,{dataRoot});assert.equal(p.smartstoreDetail.photoCount,1);assert.equal(p.smartstoreDetail.sellingPoints[0].title,'경량 패딩');
+  const p=await prepareSmartstoreDetail(reviewedProduct,folder,{dataRoot});assert.equal(p.smartstoreDetail.photoCount,1);assert.equal(p.smartstoreDetail.sellingPoints[0].title,'경량 패딩');
   assert.match(localSmartstorePreview(p).html,/smartstore-photo\/[a-f0-9]{24}/);assert.doesNotMatch(localSmartstorePreview(p).html,/기모/);
-  const out=path.join(root,'detail.png');const result=await saveSmartstoreDetail(product,folder,out,{dataRoot,videoOptions});
+  const out=path.join(root,'detail.png');const result=await saveSmartstoreDetail(reviewedProduct,folder,out,{dataRoot,videoOptions});
   const meta=await sharp(out,{limitInputPixels:false}).metadata();assert.equal(meta.width,860);assert.ok(meta.height>4000);assert.equal(result.photoCount,1);
   assert.ok(Number.isInteger(result.bannerTop));assert.ok(result.bannerTop<result.footerTop);assert.equal((await sharp(result.bannerPath).metadata()).height,result.footerTop-result.bannerTop);assert.ok(Number.isInteger(result.footerTop));assert.equal((await sharp(result.footerPath).metadata()).height,result.height-result.footerTop);
   assert.deepEqual(await sharp(result.footerPath).raw().toBuffer(),await sharp(out,{limitInputPixels:false}).extract({left:0,top:result.footerTop,width:860,height:result.height-result.footerTop}).raw().toBuffer());
@@ -63,17 +64,17 @@ test('다른 품번·색상·외부 경로는 차단하고 사진 매핑과 상�
   assert.match(await readFile(result.htmlPath,'utf8'),/detail_%EB%B8%8C%EB%9E%9C%EB%93%9C%EC%98%81%EC%83%81\.mp4/);
   assert.equal(result.storeVideoPlayback,'unverified');
   assert.ok(result.points.every(p=>!/모달|기모/.test(p.title+p.description)));
-  const repeated=await saveSmartstoreDetail(product,folder,path.join(root,'repeated.png'),{dataRoot,videoOptions});
+  const repeated=await saveSmartstoreDetail(reviewedProduct,folder,path.join(root,'repeated.png'),{dataRoot,videoOptions});
   assert.equal(result.renderCacheHit,false);assert.equal(repeated.renderCacheHit,true);assert.equal(repeated.footerTop,result.footerTop);
   assert.deepEqual(await readFile(out),await readFile(path.join(root,'repeated.png')));
   await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...draft,headline:'변경한 상품 소개'}));
-  const changed=await saveSmartstoreDetail(product,folder,path.join(root,'changed.png'),{dataRoot,videoOptions});assert.equal(changed.renderCacheHit,false);
+  const changed=await saveSmartstoreDetail(reviewedProduct,folder,path.join(root,'changed.png'),{dataRoot,videoOptions});assert.equal(changed.renderCacheHit,false);
   assert.notDeepEqual(await readFile(out),await readFile(path.join(root,'changed.png')));
   await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...draft,includeBrandVideo:false}));
-  const withoutVideo=await prepareSmartstoreDetail(product,folder,{dataRoot});
+  const withoutVideo=await prepareSmartstoreDetail(reviewedProduct,folder,{dataRoot});
   assert.equal(withoutVideo.smartstoreDetail.includeBrandVideo,true);
   assert.doesNotMatch(localSmartstorePreview(withoutVideo).html,/youtube|<iframe|2026 F\/W FILM/);
-  const noVideoResult=await saveSmartstoreDetail(product,folder,path.join(root,'no-season-video.png'),{dataRoot,videoOptions});
+  const noVideoResult=await saveSmartstoreDetail(reviewedProduct,folder,path.join(root,'no-season-video.png'),{dataRoot,videoOptions});
   assert.equal(noVideoResult.includeVideo,true);assert.deepEqual(await readFile(noVideoResult.videoPath),fixtureVideo);
   assert.doesNotMatch(await readFile(noVideoResult.htmlPath,'utf8'),/youtube|<iframe|2026 F\/W FILM/);
  }finally{await rm(root,{recursive:true,force:true});}
