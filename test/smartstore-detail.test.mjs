@@ -24,7 +24,7 @@ test('스마트스토어에만 확정 템플릿·영상·공식 원본·INFORMAT
  const approved=buildSmartstoreDetail(product).html;assert.ok(approved.indexOf('data-store-banner')<approved.indexOf('data-store-footer'));assert.match(approved,/store-discovery-women(?:-[2-4])?\.jpg/);assert.equal(approved.includes('href="https://shopping.naver.com'),false);const lotte=buildDetailContent(product.images,product.colors,{},product.originalDetailUrl).html;
  assert.match(smartstorePlan(product,50000).html,/data-smartstore-template=/);
  assert.doesNotMatch(lotte,/smartstore-template|youtube|benefits/);
- assert.ok(approved.indexOf('brand-intro.jpg')<approved.indexOf('<video '));
+ assert.ok(approved.indexOf('brand-intro-pair-')<approved.indexOf('<video '));
  assert.ok(approved.indexOf('/info.jpg')<approved.indexOf('benefits.jpg'));
  assert.match(approved,/controls autoplay muted loop playsinline/);assert.doesNotMatch(approved,/youtube|클릭하면 해당 색상|href="#smartstore-color-/);assert.doesNotMatch(approved,/26920|모달|기모|CARE GUIDE/);
  assert.deepEqual(productSellingPoints(product),[]);assert.equal(productSellingPoints({...product,officialDescription:'가벼운 원단을 사용한 경량 패딩 상품입니다.'})[0].evidence,'가벼운 원단을 사용한 경량 패딩 상품입니다.');
