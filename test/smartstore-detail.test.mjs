@@ -80,8 +80,8 @@ test('다른 품번·색상·외부 경로는 차단하고 사진 매핑과 상�
  }finally{await rm(root,{recursive:true,force:true});}
 });
 
-test('색상 팔레트는 한 줄 최대 4개이며 상세 사진 네 번째도 빠뜨리지 않는다',()=>{
+test('색상 팔레트는 한 줄 최대 2개로 크게 표시하며 상세 사진 네 번째도 빠뜨리지 않는다',()=>{
  const colors=['01화이트','02블랙','03베이지','04그린','12브라운'];const colorImages=Object.fromEntries(colors.map(c=>[c,Array.from({length:4},(_,i)=>'https://example.com/'+c.slice(0,2)+'-'+i+'.jpg')]));
  const html=buildSmartstoreDetail({...product,colors,colorImages}).html;
- assert.match(html,/data-color-palette[^>]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);assert.match(html,/12-3.jpg/);assert.equal((html.match(/data-photo-layout="four"/g)||[]).length,5);
+ assert.match(html,/data-color-palette[^>]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);assert.match(html,/12-3.jpg/);assert.equal((html.match(/data-photo-layout="four"/g)||[]).length,5);
 });

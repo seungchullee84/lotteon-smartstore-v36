@@ -164,7 +164,7 @@ function renderDetailPreview(p){
  if(document.body.dataset.channel==='smartstore'){
   $('detailPreviewStatus').textContent='';
   const frame=document.createElement('iframe');frame.className='smartstore-template-preview';frame.title='스마트스토어 확정 템플릿 상세페이지';frame.allow='autoplay; fullscreen; picture-in-picture';
-  frame.src='/smartstore-detail-preview.html?style='+encodeURIComponent(p.style)+'&fields='+encodeURIComponent(JSON.stringify(smartstoreDetailFields()));box.append(frame);
+  frame.src='/smartstore-detail-preview.html?style='+encodeURIComponent(p.style)+'&v='+encodeURIComponent(smartstoreListingState?.release?.version||Date.now())+'&fields='+encodeURIComponent(JSON.stringify(smartstoreDetailFields()));box.append(frame);
   const fit=()=>{
    const scale=Math.min(1,box.clientWidth/860);if(!scale)return;
    frame.style.width='860px';frame.style.height=Math.ceil(box.clientHeight/scale)+'px';
@@ -492,7 +492,7 @@ function syncListingImages(state){
  if(!smart||!listing||!product||product.style!==state.product?.style)return;
  const base='/smartstore-listing/',query='?style='+encodeURIComponent(product.style)+'&v='+encodeURIComponent(listing.detailRevision||'');
  const main=base+'main'+query;if($('main').getAttribute('src')!==main)$('main').src=main;
- const stamp=product.style+JSON.stringify(listing);
+ const stamp=product.style+JSON.stringify(listing)+'@'+String(state.release?.version||'');
  if(!state.busy&&$('detailPreview').dataset.photoRevision!==stamp){
   renderDetailPreview(product);$('detailPreview').dataset.photoRevision=stamp;
  }
