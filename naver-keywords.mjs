@@ -1,8 +1,9 @@
 import {auditItemscoutKeywords,eligibleItemscoutKeywords} from './itemscout-categories.mjs';
 import {buildKeywords,SEARCH_KEYWORDS_MAX_LENGTH} from './product.mjs';
 import {NAVER_TREND_URL,trendPeriod,interpretTrend} from './naver-title.mjs';
+import {loadTagResearch,matchResearchTags} from './apparel-tag-research.mjs';
 
-export function keywordCandidates(product){
+export function keywordCandidates(product,{researchIndex=loadTagResearch()}={}){
  const base=buildKeywords(product,Infinity).split(',').filter(k=>k&&k!=='지오다노');
  const kind=base[0]?.replace(/^(남성|여성)/,'');
  const alias=({남성:'남자',여성:'여자'})[product.gender];
@@ -15,12 +16,33 @@ export function keywordCandidates(product){
  }
  if(/패딩|코트|자켓|점퍼|바람막이/.test(kind||''))base.push('아우터');
  if(/겨울|동절기/.test(name)&&/패딩|점퍼|자켓|코트/.test(kind||''))base.push('겨울점퍼','겨울아우터');
- return [...new Set(base)].slice(0,16);
+ // Dictionary observations expand relevance candidates, never popularity scores.
+ const tags=matchResearchTags(product,researchIndex,{limit:Infinity});
+ return [...new Set([...base,...tags.map(tag=>tag.name)])];
 }
 export function packKeywords(ranked,max=SEARCH_KEYWORDS_MAX_LENGTH){
- const words=['지오다노'];
- for(const keyword of ranked){if(keyword&&!words.includes(keyword)&&[...words,keyword].join(',').length<=max)words.push(keyword);}
- return words.join(',');
+ const brand='지오다노';
+ const candidates=[...new Set(ranked)].filter(k=>k&&k!==brand&&brand.length+1+k.length<=max);
+ if(!candidates.length)return brand;
+ // Keep the highest-ranked term. Find a whole-word combination near the limit,
+ // preferring earlier (higher-interest) candidates among combinations in range.
+ const first=[0],initial=brand.length+1+candidates[0].length;
+ const states=new Map([[initial,first]]);
+ const earlier=(a,b)=>{for(let i=0;i<Math.min(a.length,b.length);i++){if(a[i]!==b[i])return a[i]<b[i];}return a.length>b.length;};
+ for(let i=1;i<candidates.length;i++){
+  for(const [length,indices] of [...states]){
+   const next=length+1+candidates[i].length;if(next>max)continue;
+   const choice=[...indices,i],previous=states.get(next);
+   if(!previous||earlier(choice,previous))states.set(next,choice);
+  }
+ }
+ const target=Math.max(brand.length,max-3);
+ let chosen=null,bestLength=0;
+ for(const [length,indices] of states){
+  if(length>=target){if(bestLength<target||earlier(indices,chosen)){chosen=indices;bestLength=length;}}
+  else if(bestLength<target&&length>bestLength){chosen=indices;bestLength=length;}
+ }
+ return [brand,...chosen.map(i=>candidates[i])].join(',');
 }
 export async function queryNaver(credentials,request,fetchImpl=fetch){
  if(!credentials?.clientId||!credentials?.clientSecret)throw Error('NAVER API HUB의 Client ID와 Client Secret을 설정해 주세요.');
@@ -73,6 +95,8 @@ export function createKeywordOptimizer({fetchImpl=fetch,clock=()=>new Date(),can
   const ranked=[...scores].filter(([,score])=>score>0).sort((a,b)=>b[1]-a[1]);
   const result={keywords:packKeywords(ranked.map(([k])=>k)),length:0,period,source:'네이버 데이터랩 검색 상대지수',ranking:ranked.map(([keyword,score])=>({keyword,score})),categoryAudit,fromCache:false};
   result.length=result.keywords.length;
+  result.targetLength={min:37,max:SEARCH_KEYWORDS_MAX_LENGTH};
+  result.needsMoreKeywords=result.length<37;
   if(cache.size>=100)cache.delete(cache.keys().next().value);
   cache.set(cacheKey,{time:clock().getTime(),result});return result;
   })();
