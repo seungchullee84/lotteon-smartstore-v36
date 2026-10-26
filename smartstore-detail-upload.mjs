@@ -1,4 +1,10 @@
 export function smartstorePartLayout(parts,index){return index===parts.bannerLink?.index||index===parts.footerIndex?'fit':'extend';}
+export function smartstoreMediaOrder(parts){
+ if(!Array.isArray(parts.files)||!parts.files.length)throw Error('첨부할 상세이미지가 없습니다.');
+ const include=parts.includeVideo!==false,index=parts.videoAfterIndex??0;
+ if(include&&(!Number.isInteger(index)||index<0||index>=parts.files.length))throw Error('브랜드 영상 삽입 위치를 확인해 주세요.');
+ return parts.files.flatMap((_,i)=>include&&i===index?['image','video']:['image']);
+}
 import {requireBrandVideo,BRAND_VIDEO_HEADING_HEIGHT} from './smartstore-brand-video.mjs';
 import {insertNativeBrandVideo,assertNativeVideoToolbar,nativeVideoIdentity} from './smartstore-native-video.mjs';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
@@ -170,6 +176,7 @@ export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{
 export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{},mode='copy',applyEditor=false}={}){
  const allowed=mode==='edit'?isSmartstoreDetailEditUrl(page.url()):mode==='copy'&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+(?:\?|$)/.test(page.url());
  if(!allowed)throw Error(mode==='edit'?'상세설명만 교체는 조회/수정 화면에서 실행해 주세요.':'상세페이지는 스마트스토어 복사등록 화면에서만 교체합니다.');
+ const expectedOrder=smartstoreMediaOrder(parts);
  check();
  const editor=await openSmartstoreEditor(page,{check});
  await editor.bringToFront();
@@ -209,12 +216,13 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
   await editor.waitForFunction(()=>/^https:\/\//.test([...document.querySelectorAll('.se-component.se-image img')].at(-1)?.src||''),null,{timeout:60000});
   await applySmartstoreImageLayout(editor,lastImage,{check,layout:smartstorePartLayout(parts,index)});
  };
- await choose(parts.files[0],0);log('브랜드 소개 이미지 업로드');
- if(parts.includeVideo!==false){await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});parts.videoIdentity=await insertSmartstoreVideo(editor,{check,dataRoot:parts.dataRoot,videoOptions:parts.videoOptions});}
- for(let index=1;index<parts.files.length;index++)await choose(parts.files[index],index);
+ for(let index=0;index<parts.files.length;index++){
+  await choose(parts.files[index],index);
+  if(parts.includeVideo!==false&&index===(parts.videoAfterIndex??0)){await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});parts.videoIdentity=await insertSmartstoreVideo(editor,{check,dataRoot:parts.dataRoot,videoOptions:parts.videoOptions});}
+ }
  const order=await editor.locator('.se-component').evaluateAll(ns=>ns.filter(n=>/se-image|se-video|se-oembed/.test(n.className)).map(n=>n.className));
  const includeVideo=parts.includeVideo!==false;
- if(order.length!==parts.files.length+Number(includeVideo)||!order[0].includes('se-image')||(includeVideo?!/se-video|se-oembed/.test(order[1])||order.slice(2).some(c=>!c.includes('se-image')):order.some(c=>!c.includes('se-image'))))throw Error('브랜드 소개·상품상세 및 영상 설정에 맞는 순서를 확인해 주세요.');
+ if(order.length!==expectedOrder.length||order.some((c,i)=>expectedOrder[i]==='video'?!/se-video|se-oembed/.test(c):!c.includes('se-image')))throw Error('브랜드 소개·상품상세 및 영상 설정에 맞는 순서를 확인해 주세요.');
  await applySmartstoreBannerLink(editor,parts,{check,log});
  log('상세이미지 '+parts.files.length+'장 첨부 완료 · 최종 반영 전 확인');
  const prepared=await commitSmartstoreEditor(page,editor,parts.files.length,{check,log,applyEditor,bannerIndex:parts.bannerLink?.index,footerIndex:parts.footerIndex});
