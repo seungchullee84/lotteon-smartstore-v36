@@ -13,7 +13,6 @@ import {workingProductPhoto} from './smartstore-photo-work.mjs';
 import {embeddedOfficialSections} from './smartstore-official-sections.mjs';
 import * as cheerio from 'cheerio';
 import {styleFromDetail} from './product.mjs';
-import {officialSellingPoints,usableSellingPoints} from './smartstore-selling-points.mjs';
 const appRoot=path.dirname(fileURLToPath(import.meta.url));
 const assetsRoot=path.join(appRoot,'public/smartstore-template');
 const inside=(root,file)=>file.startsWith(root+path.sep);
@@ -40,6 +39,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
   if(draft&&review.points.length){draft.sellingPoints=review.points;await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft,null,2));}
   prepared.sellingPointSource={style,sourceUrl:product.sourceUrl,textHash:createHash('sha256').update(sourceText).digest('hex')};
  }
+ if(!sourceText.trim()){prepared.sellingPoints=[];prepared.sellingPointReview={status:'needs-review',message:'현재 공식 상세 원문을 확인해야 합니다.'};}
  const attach=async(color,file,allowedRoot)=>{
   if(!product.colors.includes(color))throw Error('현재 상품에 없는 색상의 마네킨 컷입니다: '+color);
   const canonicalRoot=await realpath(allowedRoot),canonical=await realpath(file);
