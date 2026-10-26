@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {mkdtemp,readFile,mkdir,readdir,writeFile,rm} from 'node:fs/promises';import os from 'node:os';import path from 'node:path';import sharp from 'sharp';import {chromium} from 'playwright';
-import {editorPhotoPositions,naverPhotoUrl,exactSellerRows,stageImportedPhotos,applyImportedPhotos,allImportedPhotoChoices,assertImportedPhotoCoverage,settledEditorPhotoPositions,selectSearchChoice} from '../smartstore-photo-import.mjs';
+import {preparePhotoSourceList,editorPhotoPositions,naverPhotoUrl,exactSellerRows,stageImportedPhotos,applyImportedPhotos,allImportedPhotoChoices,assertImportedPhotoCoverage,settledEditorPhotoPositions,selectSearchChoice} from '../smartstore-photo-import.mjs';
 import {prepareTrustedFolder} from '../smartstore-folder-trust.mjs';
 import {findPhotos} from '../smartstore-photo-files.mjs';
 test('판매자 코드 숫자를 정확히 대조하고 같은 코드 중 하나만 선택할 수 있다',()=>{
@@ -80,4 +80,12 @@ test('색상 사진이나 소구점이 누락되면 완료 처리하지 않는�
  assert.throws(()=>assertImportedPhotoCoverage(stage,{smartstoreDetail:{colorImages:{'12브라운':['a']},sellingPoints:[{}]}}),/사진 반영 수/);
  assert.throws(()=>assertImportedPhotoCoverage(stage,{smartstoreDetail:{colorImages:{'12브라운':['a','b']},sellingPoints:[]}}),/소구점/);
  assert.doesNotThrow(()=>assertImportedPhotoCoverage(stage,{smartstoreDetail:{colorImages:{'12브라운':['a','b']},sellingPoints:[{}]}}));
+});
+
+test('사진 가져오기 시작은 판매중을 먼저 누르고 500개, 없으면 300개를 선택한다',async()=>{
+ const browser=await chromium.launch({headless:true});try{for(const count of [500,300]){
+ const page=await browser.newPage();await page.setContent('<button id="reset">초기화</button><a href="#" id="sale">판매중 206건</a><button>검색</button><div class="selectize-input"><div class="item">상품등록일순</div></div><div class="selectize-input" id="size"><div class="item">100개씩</div></div><div class="selectize-dropdown" style="display:none"><div class="option">300개씩</div>'+(count===500?'<div class="option">500개씩</div>':'')+'</div>');
+ await page.evaluate(()=>{window.steps=[];document.querySelector('#reset').onclick=()=>steps.push('reset');document.querySelector('#sale').onclick=()=>steps.push('sale');document.querySelector('#size').onclick=()=>{steps.push('size');document.querySelector('.selectize-dropdown').style.display='block';};for(const option of document.querySelectorAll('.option'))option.onclick=()=>{steps.push(option.textContent);document.querySelector('#size .item').textContent=option.textContent;document.querySelector('.selectize-dropdown').style.display='none';};});
+ await preparePhotoSourceList(page);assert.deepEqual(await page.evaluate(()=>steps),['reset','sale','size',count+'개씩']);await page.close();
+ }}finally{await browser.close();}
 });
