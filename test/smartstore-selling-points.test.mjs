@@ -27,3 +27,8 @@ test('공식 퀼팅 패딩 원문도 짧은 세 소구점으로 표현한다',()
  const text='어니언 퀼팅의 크루넥 경량 자켓입니다. PTT 소재로 제작되어 보온성이 우수하고 복원력이 뛰어난 것이 특징입니다. 겉감은 20D 고밀도 나일론 원단으로 제작되었습니다.';
  const points=officialSellingPoints(text);assert.equal(points.length,3);for(const p of points){assert(p.title.length<=18);assert(p.description.length<=42);assert(text.includes(p.evidence));}
 });
+
+test('공식 레귤러핏·컴팩트 코튼·가먼트 워시 문장을 짧은 소구점으로 정리한다',()=>{
+ const text='베이직한 라운드넥 디자인과 자연스럽게 떨어지는 어깨선의 레귤러 핏으로, 체형에 구애받지 않고 편안하게 착용할 수 있는 긴팔 티셔츠입니다. 100% 20수 컴팩트 코튼(205gsm) 싱글 저지 원단을 사용해 부드러우면서도 탄탄한 착용감을 제공하며, 가먼트 워시 가공을 적용해 세탁 후 수축을 최소화했습니다.';
+ const points=officialSellingPoints(text);assert.equal(points.length,3);assert(usableSellingPoints(points,text));assert.deepEqual(points.map(p=>p.title),['자연스러운 레귤러핏','부드럽고, 탄탄하게','워싱으로, 안정감 있게']);
+});
