@@ -1,4 +1,5 @@
 import {excludedPhotoReason} from './smartstore-photo-exclusions.mjs';
+import {extractLongMannequinPhotos} from './smartstore-long-photo-import.mjs';
 import {createWorker} from 'tesseract.js';
 import {readFile,writeFile,mkdir,rename} from 'node:fs/promises';
 import path from 'node:path';
@@ -108,7 +109,8 @@ export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{
  // ONE initially exposes an empty text component while restoring the saved document.
  // Wait for the restored image components before looking for their color headings.
  await editor.locator('.se-component.se-image,.se-component.se-imageStrip').first().waitFor({state:'attached',timeout:20000});
- let positions=await settledEditorPhotoPositions(editor,product.colors,{check});
+ const readPositions=async()=>{const positions=await settledEditorPhotoPositions(editor,product.colors,{check});const long=await editor.locator('.se-component img').evaluateAll(nodes=>nodes.map((n,index)=>({index,width:n.naturalWidth,height:n.naturalHeight})).filter(n=>n.width>=300&&n.height>n.width*3));for(const p of long)if(!positions.some(v=>v.index===p.index))positions.push({index:p.index,longImage:true});return positions;};
+ let positions=await readPositions();
  if(!positions.length){
   // A named edit window may still hold an unsaved replacement. Read the saved
   // product in a fresh window, preserving that existing editor and its contents.
@@ -117,21 +119,21 @@ export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{
   assertDetailOnlyProduct(await readDetailOnlySellerCode(fresh),product.style);
   editor=await openSmartstoreEditor(fresh,{check});
   await editor.locator('.se-component.se-image,.se-component.se-imageStrip').first().waitFor({state:'attached',timeout:20000});
-  positions=await settledEditorPhotoPositions(editor,product.colors,{check});
+  positions=await readPositions();
  }
- if(!positions.length){if(fresh){await editor.close();await fresh.close();}throw Error('저장된 상세설명에 색상별 개별 사진이 없습니다. 긴 통이미지는 이 채팅에서 확인해 주세요.');}
+ if(!positions.length){if(fresh){await editor.close();await fresh.close();}throw Error('저장된 상세설명에서 색상별 사진이나 긴 상세이미지를 확인하지 못했습니다.');}
  const candidates=[];
  for(const pos of positions){
   check();if(page.url()!==formUrl)throw Error('수집 중 조회/수정 상품이 변경되었습니다.');
   const img=editor.locator('.se-component img').nth(pos.index);await img.scrollIntoViewIfNeeded();
   await editor.waitForFunction(i=>{const n=document.querySelectorAll('.se-component img')[i];return n&&/^https?:/.test(n.src)&&n.complete&&n.naturalWidth>0;},pos.index,{timeout:10000});
   const data=await img.evaluate(n=>({url:n.src,width:n.naturalWidth,height:n.naturalHeight}));
-  if(data.width<300||data.height<300||data.height>data.width*3)continue;
+  if(data.width<300||data.height<300||data.height>150000)continue;
   candidates.push({...pos,...data,url:naverPhotoUrl(data.url)});
  }
  check();assertDetailOnlyProduct(await readDetailOnlySellerCode(page),product.style);
  if(fresh){await editor.close();await fresh.close();}
- return {style:product.style,sourceUrl:product.sourceUrl,formUrl,sellerCode,candidates};
+ return {style:product.style,colors:product.colors,sourceUrl:product.sourceUrl,formUrl,sellerCode,candidates};
 }
 export async function stageImportedPhotos(source,folder,{fetchImpl=fetch,signal,dataRoot=path.resolve(folder,'..'),recognizePhoto}={}){
  safeStyle(source.style);assertDetailOnlyProduct(source.sellerCode,source.style);
@@ -141,15 +143,19 @@ export async function stageImportedPhotos(source,folder,{fetchImpl=fetch,signal,
   const response=await fetchImpl(url,{redirect:'error',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(20000)]):AbortSignal.timeout(20000)});
   if(!response.ok||!/^image\/(jpeg|png|webp)(?:;|$)/i.test(response.headers.get('content-type')||''))throw Error('기존 상품의 사진 파일을 가져오지 못했습니다.');
   const chunks=[];let size=0;for await(const chunk of response.body){size+=chunk.length;if(size>19000000)throw Error('가져올 사진이 19MB를 초과합니다.');chunks.push(chunk);}const bytes=Buffer.concat(chunks);
-  const meta=await sharp(bytes,{limitInputPixels:40000000}).metadata();if(!['jpeg','png','webp'].includes(meta.format)||meta.width<300||meta.height<300||meta.height>meta.width*3)continue;
+  const meta=await sharp(bytes,{limitInputPixels:150000000}).metadata();if(!['jpeg','png','webp'].includes(meta.format)||meta.width<300||meta.height<300)continue;
+  const pieces=meta.height>meta.width*3?await extractLongMannequinPhotos(bytes,{style:source.style,colors:source.colors||[],dataRoot,check:()=>signal?.throwIfAborted()}):[{bytes,colorHint:item.colorHint}];
+  for(const piece of pieces){
+  const photo=piece.bytes,photoMeta=await sharp(photo).metadata();
   let recognize=recognizePhoto;
-  if(!recognize&&source.candidates.slice(-4).includes(item))recognize=async b=>{const worker=await createWorker('kor+eng');try{return (await worker.recognize(await sharp(b).resize({width:1000,withoutEnlargement:true}).toBuffer())).data.text;}finally{await worker.terminate();}};
-  const excluded=await excludedPhotoReason(bytes,{dataRoot,recognize});if(excluded)continue;
-  const sha256=hash(bytes),id=sha256.slice(0,24);if(seen.has(id))continue;seen.add(id);
-  const file=id+({jpeg:'.jpg',png:'.png',webp:'.webp'})[meta.format];await writeFile(path.join(dir,file),bytes);
-  candidates.push({id,file,sha256,url,colorHint:item.colorHint,width:meta.width,height:meta.height});
+  if(!recognize&&!piece.extractedFromLong&&source.candidates.slice(-4).includes(item))recognize=async b=>{const worker=await createWorker('kor+eng');try{return (await worker.recognize(await sharp(b).resize({width:1000,withoutEnlargement:true}).toBuffer())).data.text;}finally{await worker.terminate();}};
+  const excluded=await excludedPhotoReason(photo,{dataRoot,recognize});if(excluded)continue;
+  const sha256=hash(photo),id=sha256.slice(0,24);if(seen.has(id))continue;seen.add(id);
+  const file=id+({jpeg:'.jpg',png:'.png',webp:'.webp'})[photoMeta.format];await writeFile(path.join(dir,file),photo);
+  candidates.push({id,file,sha256,url,colorHint:piece.colorHint,width:photoMeta.width,height:photoMeta.height,...(piece.extractedFromLong?{extractedFromLong:true,sourceRectangle:piece.sourceRectangle,layoutHash:piece.layoutHash}:{})});
+  }
  }
- if(!candidates.length)throw Error('가져올 수 있는 개별 상품사진이 없습니다.');
+ if(!candidates.length)throw Error('수집할 마네킹 사진을 확인하지 못했습니다. 긴 상세의 제작 자료와 사진 위치가 일치하는지 확인해 주세요.');
  const result={...source,candidates,createdAt:new Date().toISOString(),status:'review'};await writeFile(path.join(dir,'manifest.json'),JSON.stringify(result,null,2));return result;
 }
 export async function applyImportedPhotos(product,folder,choices,{dataRoot,desktop,signal,automatic=false}={}){
