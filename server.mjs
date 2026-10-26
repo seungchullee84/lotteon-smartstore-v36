@@ -463,7 +463,7 @@ const server=http.createServer(async(req,res)=>{
         state.product=p;job('register',()=>bot.run(p,state.folder,b.finalize===true));return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/continue'){state.paused=null;bot.resume();return json(res,200,{ok:true});}
-      if(url.pathname==='/api/stop'){if(state.busy){const phase=state.phase;state.phase='stopping';state.paused=null;activeAbort?.abort();if(phase==='register')await bot.stop();if(phase==='smartstore'||phase==='smartstore-auto')await smartBot.stop();}return json(res,200,{ok:true});}
+      if(url.pathname==='/api/stop'){if(state.busy){const phase=state.phase;state.phase='stopping';state.paused=null;activeAbort?.abort();if(phase==='register')await bot.stop();if(phase==='smartstore'||phase==='smartstore-auto'||phase==='smartstore-detail-only')await smartBot.stop();}return json(res,200,{ok:true});}
     }
     if(req.method==='GET'&&url.pathname==='/detail-preview.html'){
       res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; img-src https://www.giordano.co.kr; style-src 'unsafe-inline'; frame-ancestors 'none'"});
@@ -474,9 +474,9 @@ const server=http.createServer(async(req,res)=>{
       res.writeHead(200,{'Content-Type':'text/javascript; charset=utf-8','Cache-Control':'no-store'});
       return res.end(await readFile(path.join(root,'smartstore-title.mjs')));
     }
-    if(req.method==='GET'&&['/','/app.js','/style.css'].includes(url.pathname)){
+    if(req.method==='GET'&&['/','/app.js','/two-choice.js','/style.css'].includes(url.pathname)){
       const name=url.pathname==='/'?'index.html':url.pathname.slice(1);
-      const types={'index.html':'text/html','app.js':'text/javascript','style.css':'text/css'};
+      const types={'index.html':'text/html','app.js':'text/javascript','two-choice.js':'text/javascript','style.css':'text/css'};
       res.writeHead(200,{'Content-Type':types[name]+'; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'none'"});return res.end(await readFile(path.join(root,'public',name)));
     }
     json(res,404,{error:'없는 경로'});
