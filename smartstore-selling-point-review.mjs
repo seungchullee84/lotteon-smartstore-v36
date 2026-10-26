@@ -10,13 +10,13 @@ export async function officialPointSource(product,folder,pageText,{dataRoot=path
  let bytes;try{bytes=await readFile(path.join(folder,'detail.jpg'));}catch(e){if(e.code==='ENOENT')return {text:pageText,imageChecked:false,detailHash:null};throw e;}
  const detailHash=digest(bytes);
  // A visual review already checked this exact official image, including its captions.
- try{const manual=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'selling-point-image-review.json'),'utf8'));if(manual.version===1&&manual.style===product.style&&manual.sourceUrl===product.sourceUrl&&manual.detailHash===detailHash&&usableSellingPoints(manual.points,manual.text))return {text:manual.text+'\n'+pageText,imageChecked:true,detailHash,method:'visual-official-detail'};}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
+ try{const manual=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'selling-point-image-review.json'),'utf8'));if(manual.version===1&&manual.style===product.style&&manual.sourceUrl===product.sourceUrl&&manual.detailHash===detailHash&&usableSellingPoints(manual.points,manual.text))return {text:manual.text+'\n•\n'+pageText,imageChecked:true,detailHash,method:'visual-official-detail'};}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
  const key=JSON.stringify([dataRoot,product.style,product.sourceUrl,detailHash]);
  let job=sourceJobs.get(key);if(!job){job=enrichOfficialProductFacts(product,folder,{dataRoot,signal,log,recognize}).then(p=>p.researchFacts);sourceJobs.set(key,job);job.finally(()=>{if(sourceJobs.get(key)===job)sourceJobs.delete(key);}).catch(()=>{});}
  const facts=await job;signal?.throwIfAborted();
  if(!facts?.imageScanComplete||facts.style!==product.style||facts.sourceUrl!==product.sourceUrl||facts.detailHash!==detailHash)throw Error('현재 공식 상세이미지 전체 확인이 끝나지 않았습니다.');
  const imageText=String(facts.text||'').split(/(?:^|\n)\s*(?:DETAIL\s*SIZE|CHECK\s*UP|INFORMATION)\b/i)[0];
- return {text:[imageText,pageText].filter(Boolean).join('\n'),imageChecked:true,detailHash,method:'local-official-image-and-page'};
+ return {text:[imageText,pageText].filter(Boolean).join('\n•\n'),imageChecked:true,detailHash,method:'local-official-image-and-page'};
 }
 export async function saveOfficialImagePointReview(product,folder,{text,points,dataRoot=path.resolve('data')}={}){
  if(!/^\d{6}$/.test(product.style)||new URL(product.sourceUrl).origin!=='https://www.giordano.co.kr'||!text?.trim()||!Array.isArray(points)||points.length>4||!usableSellingPoints(points,text))throw Error('공식 상세 이미지의 원문과 소구점 근거를 확인해 주세요.');
