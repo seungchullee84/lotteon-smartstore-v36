@@ -9,7 +9,7 @@ export function officialSellingPoints(description){
  // Shared apparel features: use only an affirmative, explicit source sentence.
  const sentences=text.replace(/\\n/g,' ').split(/(?<=[.!?])\s+/);
  for(const [pattern,title,copy,label] of [
-  [/레귤러\s*핏[^.]*편안하게\s*착용/,'자연스러운 레귤러핏','자연스러운 어깨선과 편안한 착용감.','핏'],
+  [/자연스럽게[^.]*어깨선[^.]*레귤러\s*핏[^.]*편안하게\s*착용/,'자연스러운 레귤러핏','자연스러운 어깨선과 편안한 착용감.','핏'],
   [/컴팩트\s*(?:코튼|면)[^.]*싱글\s*저지[^.]*부드러[^.]*탄탄/,'부드럽고, 탄탄하게','컴팩트 코튼 싱글 저지의 탄탄한 착용감.','원단'],
   [/어니언[^.]*퀼팅|퀼팅[^.]*어니언/,'입체적인 어니언 퀼팅','어니언 패턴으로 살린 입체감.','퀼팅'],
   [/PTT[^.]*보온성[^.]*복원력/,'따뜻하고, 탄탄하게','보온성과 복원력이 뛰어난 PTT 충전재.','충전재'],

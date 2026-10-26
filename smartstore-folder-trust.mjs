@@ -26,7 +26,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  const reviewed=[];
  try{
   for(const p of photos){
-   signal?.throwIfAborted();if(old?.style===product.style&&old.sourceUrl===product.sourceUrl&&old.photoMapping?.ignoredPhotos?.some(record=>record.hash===hash(p.bytes)))continue;const prior=known.get(hash(p.bytes));
+   signal?.throwIfAborted();const prior=known.get(hash(p.bytes));
    if(prior){reviewed.push({...p,color:prior.color,role:prior.role});continue;}
    let label=isCareLabelPhoto(p,old);
    if(!label){
