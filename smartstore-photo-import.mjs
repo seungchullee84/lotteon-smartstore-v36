@@ -52,6 +52,147 @@ export async function selectSearchChoice(control){
  if(await label.count())await label.click({timeout:5000});else await control.check({timeout:5000});
  if(!await control.isChecked())throw Error('상품조회 검색 조건 선택을 확인하지 못했습니다.');
 }
+export async function preparePhotoSourceList(list,{check=()=>{},log=()=>{}}={}){
+ await list.getByRole('button',{name:'초기화',exact:true}).click({timeout:15000});check();
+ await list.getByRole('link',{name:/^판매중\s*\d+건$/}).click();
+ await list.getByRole('button',{name:'검색',exact:true}).waitFor({state:'visible'});
+ const size=list.locator('.selectize-input').filter({hasText:/개씩/});
+ await size.click();check();
+ const options=list.locator('.selectize-dropdown .option:visible');
+ const fiveHundred=options.getByText('500개씩',{exact:true}),threeHundred=options.getByText('300개씩',{exact:true});
+ const count=await fiveHundred.count()?500:300;
+ if(count===500)await fiveHundred.click();else await threeHundred.click();
+ await list.locator('.selectize-input .item').filter({hasText:new RegExp('^'+count+'개씩(context,style,{check=()=>{},log=()=>{}}={}){
+ safeStyle(style);check();
+ const lists=context.pages().filter(p=>!p.isClosed()&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/origin-list(?:\?|$)/.test(p.url()));
+ if(lists.length>1)throw Error('상품조회 창이 여러 개입니다. 검색할 상품조회 창 하나만 남겨 주세요.');
+ if(!lists.length){
+  const list=await context.newPage();await list.goto('https://sell.smartstore.naver.com/#/products/origin-list',{waitUntil:'domcontentloaded'});check();lists.push(list);
+ }
+ if(lists.length){
+  const list=lists[0];await list.bringToFront();check();
+  try{await preparePhotoSourceList(list,{check,log});}catch{check();throw Error('등록기 전용 크롬에서 스마트스토어 로그인을 완료해 주세요. 현재 로그인 세션을 재사용하며 상품 저장은 하지 않습니다.');}check();
+  await selectSearchChoice(list.getByRole('radio',{name:'판매자상품코드',exact:true}));
+  await list.getByRole('textbox',{name:'검색어 입력',exact:true}).fill(style);
+  const period=list.getByRole('button',{name:'전체',exact:true});if(await period.count()===1)await period.click();
+  check();await list.getByRole('button',{name:'검색',exact:true}).click();
+  await list.locator('[role="row"][row-id] [col-id="sellerManagementCode"]').filter({hasText:style}).first().waitFor({state:'visible',timeout:20000});check();
+  const rows=exactSellerRows(await list.locator('[role="row"][row-id]').evaluateAll(nodes=>nodes.filter(n=>n.querySelector('[col-id="edit"] button')).map(n=>({id:n.getAttribute('row-id'),code:n.querySelector('[col-id="sellerManagementCode"]')?.textContent||''}))),style);
+  if(!rows.length)throw Error('판매자 상품코드가 일치하는 상품을 찾지 못했습니다.');
+  log('판매자 상품코드 '+style+' 검색 · 일치 '+rows.length+'건 중 첫 상품 한 건만 사진 수집');
+  await list.locator('[role="row"][row-id]').filter({has:list.locator('[col-id="sellerManagementCode"]').filter({hasText:rows[0].code.trim()})}).first().getByRole('button',{name:'수정',exact:true}).click();
+ }
+ // The seller center can reuse its named edit window instead of creating a new popup.
+ const deadline=Date.now()+20000;
+ do{
+  const edits=context.pages().filter(p=>!p.isClosed()&&isSmartstoreDetailEditUrl(p.url()));
+  const focused=[];for(const page of edits)if(await page.evaluate(()=>document.hasFocus()).catch(()=>false))focused.push(page);
+  check();for(const page of [...focused,...edits.filter(p=>!focused.includes(p))]){
+   try{const code=await readDetailOnlySellerCode(page);assertDetailOnlyProduct(code,style);return {page,sellerCode:code};}catch(error){check();}
+  }
+  if(!lists.length)break;await new Promise(r=>setTimeout(r,250));
+ }while(Date.now()<deadline);
+ throw Error('같은 판매자 상품코드의 조회/수정 화면을 확인하지 못했습니다.');
+}
+export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{}}={}){
+ const {page,sellerCode}=await findPhotoSourceForm(context,product.style,{check,log});check();
+ const formUrl=page.url(),editors=[];
+ for(const p of context.pages())if(!p.isClosed()&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/editor(?:\?|$)/.test(p.url())&&await p.opener()===page)editors.push(p);
+ if(editors.length>1)throw Error('이 상품의 상세 편집기가 여러 개입니다. 사용할 편집기 하나만 남겨 주세요.');
+ let editor=editors[0]||await openSmartstoreEditor(page,{check}),fresh=null;
+ // ONE initially exposes an empty text component while restoring the saved document.
+ // Wait for the restored image components before looking for their color headings.
+ await editor.locator('.se-component.se-image,.se-component.se-imageStrip').first().waitFor({state:'attached',timeout:20000});
+ let positions=await settledEditorPhotoPositions(editor,product.colors,{check});
+ if(!positions.length){
+  // A named edit window may still hold an unsaved replacement. Read the saved
+  // product in a fresh window, preserving that existing editor and its contents.
+  fresh=await context.newPage();await fresh.goto(formUrl,{waitUntil:'domcontentloaded'});
+  await fresh.locator('input[name="product.name"]').waitFor({state:'attached',timeout:20000});check();
+  assertDetailOnlyProduct(await readDetailOnlySellerCode(fresh),product.style);
+  editor=await openSmartstoreEditor(fresh,{check});
+  await editor.locator('.se-component.se-image,.se-component.se-imageStrip').first().waitFor({state:'attached',timeout:20000});
+  positions=await settledEditorPhotoPositions(editor,product.colors,{check});
+ }
+ if(!positions.length){if(fresh){await editor.close();await fresh.close();}throw Error('저장된 상세설명에 색상별 개별 사진이 없습니다. 긴 통이미지는 이 채팅에서 확인해 주세요.');}
+ const candidates=[];
+ for(const pos of positions){
+  check();if(page.url()!==formUrl)throw Error('수집 중 조회/수정 상품이 변경되었습니다.');
+  const img=editor.locator('.se-component img').nth(pos.index);await img.scrollIntoViewIfNeeded();
+  await editor.waitForFunction(i=>{const n=document.querySelectorAll('.se-component img')[i];return n&&/^https?:/.test(n.src)&&n.complete&&n.naturalWidth>0;},pos.index,{timeout:10000});
+  const data=await img.evaluate(n=>({url:n.src,width:n.naturalWidth,height:n.naturalHeight}));
+  if(data.width<300||data.height<300||data.height>data.width*3)continue;
+  candidates.push({...pos,...data,url:naverPhotoUrl(data.url)});
+ }
+ check();assertDetailOnlyProduct(await readDetailOnlySellerCode(page),product.style);
+ if(fresh){await editor.close();await fresh.close();}
+ return {style:product.style,sourceUrl:product.sourceUrl,formUrl,sellerCode,candidates};
+}
+export async function stageImportedPhotos(source,folder,{fetchImpl=fetch,signal}={}){
+ safeStyle(source.style);assertDetailOnlyProduct(source.sellerCode,source.style);
+ const dir=path.join(folder,'smartstore-photo-import');await mkdir(dir,{recursive:true});const candidates=[],seen=new Set();
+ for(const item of source.candidates){
+  signal?.throwIfAborted();const url=naverPhotoUrl(item.url);
+  const response=await fetchImpl(url,{redirect:'error',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(20000)]):AbortSignal.timeout(20000)});
+  if(!response.ok||!/^image\/(jpeg|png|webp)(?:;|$)/i.test(response.headers.get('content-type')||''))throw Error('기존 상품의 사진 파일을 가져오지 못했습니다.');
+  const chunks=[];let size=0;for await(const chunk of response.body){size+=chunk.length;if(size>19000000)throw Error('가져올 사진이 19MB를 초과합니다.');chunks.push(chunk);}const bytes=Buffer.concat(chunks);
+  const meta=await sharp(bytes,{limitInputPixels:40000000}).metadata();if(!['jpeg','png','webp'].includes(meta.format)||meta.width<300||meta.height<300||meta.height>meta.width*3)continue;
+  const sha256=hash(bytes),id=sha256.slice(0,24);if(seen.has(id))continue;seen.add(id);
+  const file=id+({jpeg:'.jpg',png:'.png',webp:'.webp'})[meta.format];await writeFile(path.join(dir,file),bytes);
+  candidates.push({id,file,sha256,url,colorHint:item.colorHint,width:meta.width,height:meta.height});
+ }
+ if(!candidates.length)throw Error('가져올 수 있는 개별 상품사진이 없습니다.');
+ const result={...source,candidates,createdAt:new Date().toISOString(),status:'review'};await writeFile(path.join(dir,'manifest.json'),JSON.stringify(result,null,2));return result;
+}
+export async function applyImportedPhotos(product,folder,choices,{dataRoot,desktop,signal,automatic=false}={}){
+ const stage=JSON.parse(await readFile(path.join(folder,'smartstore-photo-import/manifest.json'),'utf8'));
+ if(stage.style!==product.style||stage.sourceUrl!==product.sourceUrl)throw Error('사진을 수집한 품번·공식 출처와 현재 상품이 다릅니다.');
+ assertDetailOnlyProduct(stage.sellerCode,product.style);
+ if(!Array.isArray(choices)||!choices.length||new Set(choices.map(c=>c.id)).size!==choices.length)throw Error('적용할 사진을 한 장 이상 선택해 주세요.');
+ const selected=[];for(const choice of choices){
+  const source=stage.candidates.find(c=>c.id===choice.id);if(!source||!product.colors.includes(choice.color)||!['front','side','back','detail'].includes(choice.role))throw Error('선택한 사진의 색상과 정면·측면·뒷면·디테일을 확인해 주세요.');
+  if(!/^[a-f0-9]{24}\.(jpg|png|webp)$/.test(source.file))throw Error('수집 사진 경로가 올바르지 않습니다.');
+  const bytes=await readFile(path.join(folder,'smartstore-photo-import',source.file));if(hash(bytes)!==source.sha256)throw Error('수집 후 사진 원본이 변경되었습니다.');selected.push({...choice,...source,bytes});
+ }
+ // Validate the entire batch before touching the style folder. Existing photos are never overwritten.
+ desktop||=path.dirname(await imageDownloadFolder());const target=path.join(desktop,'상품등록기사진폴더',product.style);await mkdir(target,{recursive:true});
+ const originals=await findPhotos(product,{desktop});let hasMain=originals.some(p=>/^1(?:번)?\.(jpe?g|png|webp)$/i.test(p.name));
+ if(!automatic&&!hasMain&&!selected.some(p=>p.role==='front'))throw Error('대표사진이 없으므로 정면 사진을 한 장 선택해 주세요.');
+ const root=path.join(dataRoot,'smartstore-details',product.style);await mkdir(root,{recursive:true});let old;
+ try{old=JSON.parse(await readFile(path.join(root,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+ if(old&&(old.style!==product.style||old.sourceUrl!==product.sourceUrl))throw Error('기존 사진 매칭 자료의 품번·출처를 다시 확인해 주세요.');
+ const records=[...(old?.photoMapping?.files||[])];let count=0;
+ for(const p of selected){
+  signal?.throwIfAborted();const known=originals.find(f=>hash(f.bytes)===p.sha256);let name=known?.name;
+  if(!name){name=!hasMain&&(automatic||p.role==='front')?'1'+path.extname(p.file):'기존상품_'+p.color.slice(0,2)+'_'+p.id+path.extname(p.file);await writeFile(path.join(target,name),p.bytes,{flag:'wx'}).catch(async e=>{if(e.code!=='EEXIST'||hash(await readFile(path.join(target,name)))!==p.sha256)throw e;});if(/^1\./.test(name))hasMain=true;count++;}
+  const record={name,hash:p.sha256,color:p.color,role:p.role,source:'seller-detail',sourceUrl:p.url};const i=records.findIndex(r=>r.hash===p.sha256);if(i>=0)records[i]=record;else records.push(record);
+ }
+ const importedColorPhotos=[];for(const p of selected){let group=importedColorPhotos.find(g=>g.color===p.color);if(!group){group={color:p.color,hashes:[]};importedColorPhotos.push(group);}group.hashes.push(p.sha256);}
+ const draft={...old,style:product.style,sourceUrl:product.sourceUrl,importedColorPhotos,photoMapping:{...old?.photoMapping,files:records}};
+ await writeFile(path.join(root,'draft.json.tmp'),JSON.stringify(draft,null,2));await rename(path.join(root,'draft.json.tmp'),path.join(root,'draft.json'));
+ return {count,selectedCount:selected.length,target};
+}
+
+export function allImportedPhotoChoices(stage,product,known=[],ignored=[]){
+ if(stage.style!==product.style||stage.sourceUrl!==product.sourceUrl)throw Error('현재 품번과 사진 출처가 다릅니다.');
+ assertDetailOnlyProduct(stage.sellerCode,product.style);const counts=new Map();
+ return stage.candidates.filter(p=>!ignored.some(record=>record.hash===p.sha256)).map(p=>{
+  if(!product.colors.includes(p.colorHint))throw Error('사진 위 색상명이 현재 상품 색상과 다릅니다.');
+  counts.set(p.colorHint,(counts.get(p.colorHint)||0)+1);if(counts.get(p.colorHint)>4)throw Error(p.colorHint+' 사진이 4컷을 초과합니다. 색상 구간을 확인해 주세요.');
+  const prior=known.find(k=>k.hash===p.sha256&&k.color===p.colorHint&&['front','side','back','detail'].includes(k.role));
+  // Source order is enough for the detail template, but never invent a front/side angle.
+  return {id:p.id,color:p.colorHint,role:prior?.role||'detail'};
+ });
+}
+
+export function assertImportedPhotoCoverage(stage,prepared,choices){
+ const expected=new Map();for(const p of stage.candidates.filter(p=>!choices||choices.some(c=>c.id===p.id)))expected.set(p.colorHint,(expected.get(p.colorHint)||0)+1);
+ for(const [color,count] of expected)if(prepared.smartstoreDetail?.colorImages?.[color]?.length!==count)throw Error(color+' 사진 반영 수가 수집 결과와 다릅니다.');
+ if(!prepared.smartstoreDetail?.sellingPoints?.length)throw Error('공식 원문 소구점 확인이 필요합니다. 소구점 없는 상세페이지는 완료 처리하지 않습니다.');
+}
+)}).waitFor({state:'visible'});check();
+ log('착용사진 가져오기 시작 · 판매중 상품 · '+count+'개씩 표시');
+}
 export async function findPhotoSourceForm(context,style,{check=()=>{},log=()=>{}}={}){
  safeStyle(style);check();
  const lists=context.pages().filter(p=>!p.isClosed()&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/origin-list(?:\?|$)/.test(p.url()));
