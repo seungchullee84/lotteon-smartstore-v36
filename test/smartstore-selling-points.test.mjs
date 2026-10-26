@@ -32,3 +32,9 @@ test('공식 레귤러핏·컴팩트 코튼·가먼트 워시 문장을 짧은 �
  const text='베이직한 라운드넥 디자인과 자연스럽게 떨어지는 어깨선의 레귤러 핏으로, 체형에 구애받지 않고 편안하게 착용할 수 있는 긴팔 티셔츠입니다. 100% 20수 컴팩트 코튼(205gsm) 싱글 저지 원단을 사용해 부드러우면서도 탄탄한 착용감을 제공하며, 가먼트 워시 가공을 적용해 세탁 후 수축을 최소화했습니다.';
  const points=officialSellingPoints(text);assert.equal(points.length,3);assert(usableSellingPoints(points,text));assert.deepEqual(points.map(p=>p.title),['자연스러운 레귤러핏','부드럽고, 탄탄하게','워싱으로, 안정감 있게']);
 });
+
+test('마침표 없는 공식 불릿 설명도 원단·핏·디테일 세 특징을 각각 근거로 정리한다',()=>{
+ const source='다양한 이너와 함께 클래식하게 활용하기 좋은 발마칸 코트 • 울 50%와 캐시미어 5% 혼방 소재로 부드러운 촉감과 우수한 보온성 • 밑단으로 갈수록 자연스럽게 넓어지는 A라인 실루엣과 무릎 기장으로 여유로운 핏 • 히든 버튼 여밈과 탈부착 가능한 카라 비조를 적용해 깔끔하고 실용적인 디자인 • 래글런 슬리브와 소매 벨트 디테일, 웰트 포켓 및 뒷면 슬릿으로 활동성과 완성도를 높인 아이템';
+ const points=officialSellingPoints(source);assert.equal(points.length,3);assert(usableSellingPoints(points,source));assert.deepEqual(points.map(p=>p.title),['부드럽고, 따뜻하게','여유롭게 흐르는 A라인','깔끔하고, 실용적으로']);assert(points.every(p=>!p.evidence.includes('•')));
+ assert.equal(officialSellingPoints('울 50%와 캐시미어 5% 혼방 소재 • 부드러운 촉감과 우수한 보온성').length,0);
+});
