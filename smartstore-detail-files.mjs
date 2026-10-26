@@ -90,8 +90,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  }
  // Unmatched photos stay local for matching; never invent another template section.
  prepared.pendingPhotoCount=(draft?.unmatchedPhotos||draft?.providedPhotos||[]).length;
- const heroHash=draft?.listingImages?.main?.sourceHash;
- for(const [color,hashes] of Object.entries(prepared.storeColorPhotoHashes)){const index=hashes.indexOf(heroHash);if(index>=0)prepared.heroImage=prepared.colorImages[color][index];}
+ prepared.heroImage=product.images.main;
  prepared.storeColorPhotoCounts=Object.fromEntries(Object.entries(prepared.colorImages).map(([color,urls])=>[color,urls.length]));
  // Official fallback photos are separate from seller options and store mannequin claims.
  if(draft?.officialPhotos?.length){
@@ -120,6 +119,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
 
 export function localSmartstorePreview(p){
  const map=new Map(Object.entries(p.images).map(([key,src])=>[src,'/image/'+key]));
+ if(p.images.main)map.set(p.images.main,'/image/main-original');
  return smartstoreDetailDocument(p,{assetBase:'/smartstore-template/',fontUrl:'/smartstore-template/GowunDodum-Regular.ttf',imageUrl:src=>map.get(src)||src});
 }
 
