@@ -40,7 +40,10 @@ export function officialSellingPoints(description){
  const sections=[...String(description||'').matchAll(/POINT\s*0?[1-9]\s*[（(]([^）)]+)[）)]/gi)].map(m=>m[1].trim());
  const finish=()=>[...points,...officialProsePoints(description,points)].filter(compactSellingPoint).sort((a,b)=>{const rank=p=>{const i=sections.indexOf(labels.get(p));return i<0?99:i;};return rank(a)-rank(b);}).slice(0,4);
  // Shared apparel features: use only an affirmative, explicit source sentence.
- const sentences=text.replace(/\\n/g,' ').split(/\s*[•●]\s*|(?<=[.!?])\s+/).map(s=>s.trim()).filter(Boolean);
+ const paragraphs=String(description||'').replace(/\\n/g,'\n').split(/\s*[•●]\s*|\n\s*\n|(?<=[.!?])\s+/).map(s=>s.trim()).filter(Boolean);
+ // Prefer one complete image-caption line as evidence. Keep wrapped paragraphs
+ // as a fallback, without merging separate bullets or the page with the image.
+ const sentences=[...paragraphs.flatMap(p=>p.split(/\n+/)),...paragraphs].map(s=>s.replace(/\s+/g,' ').trim()).filter(Boolean);
  for(const [pattern,title,copy,label] of [
   [/(?:부드러[^.]*페이크\s*스웨이드|페이크\s*스웨이드[^.]*부드러)/,'부드러운 스웨이드 결감','부드러운 결감의 페이크 스웨이드 외피.','원단'],
   [/마이크로\s*볼\s*타입[^.]*(?:충전재|패딩)[^.]*(?:보온|포근)/,'보온성을 담은 충전재','마이크로 볼타입 패딩 충전재의 보온성.','충전재'],
