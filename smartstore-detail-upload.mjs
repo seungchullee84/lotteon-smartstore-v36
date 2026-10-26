@@ -151,6 +151,7 @@ export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{
   throw Error('상세이미지 업로드 준비 확인 실패: 예상 '+imageCount+'장 / 현재 '+observed.count+'장 / 업로드 대기 '+(observed.pending.join(',')||'없음')+' · '+error.message);
  }
  const images=editor.locator('.se-component.se-image img');
+ const fitIndexes=[bannerIndex,footerIndex].filter(Number.isInteger);
  const missing=await images.evaluateAll((ns,fitIndexes)=>ns.flatMap((n,i)=>n.closest('.se-component.se-image')?.querySelector('.se-component-content-'+(fitIndexes.includes(i)?'fit':'extend'))?[]:[i]),fitIndexes);
  if(missing.length)log('최종 반영 전 옆트임 누락 '+missing.length+'장만 보정 · 파일 재업로드 없음');
  for(const i of missing){check();await applySmartstoreImageLayout(editor,images.nth(i),{check,layout:fitIndexes.includes(i)?'fit':'extend'});}
