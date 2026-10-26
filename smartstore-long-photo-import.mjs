@@ -6,6 +6,7 @@ import {chromium} from 'playwright';
 import {load} from 'cheerio';
 import {imageDownloadFolder} from './desktop-downloads.mjs';
 import {BRAND_VIDEO_HEADING_HEIGHT} from './smartstore-brand-video.mjs';
+import {detectLongPhotoRegions} from './smartstore-long-photo-detect.mjs';
 const digest=b=>createHash('sha256').update(b).digest('hex');
 const root=dataRoot=>path.join(dataRoot,'smartstore-long-photo-layouts');
 const thumbnail=bytes=>sharp(bytes,{limitInputPixels:false}).flatten({background:'#fff'}).resize(48,128,{fit:'fill'}).removeAlpha().raw().toBuffer();
@@ -49,7 +50,7 @@ export async function backfillLongPhotoLayouts(style,{dataRoot=path.resolve('dat
   }
  }finally{await browser.close();}return count;
 }
-export async function extractLongMannequinPhotos(bytes,{style,colors,dataRoot=path.resolve('data'),backfill=true,check=()=>{}}){
+export async function extractLongMannequinPhotos(bytes,{style,colors,dataRoot=path.resolve('data'),backfill=true,detect=true,recognize,check=()=>{}}){
  const meta=await sharp(bytes,{limitInputPixels:false}).metadata();if(meta.width<300||meta.height>150000||meta.width*meta.height>150000000)return [];
  const find=async()=>{
   let files;try{files=(await readdir(root(dataRoot))).filter(f=>f.startsWith(style+'-')&&f.endsWith('.json'));}catch(e){if(e.code==='ENOENT')return [];throw e;}
@@ -68,5 +69,11 @@ export async function extractLongMannequinPhotos(bytes,{style,colors,dataRoot=pa
    if(valid)return crops;
   }return [];
  };
- let result=await find();if(!result.length&&backfill){await backfillLongPhotoLayouts(style,{dataRoot,check});result=await find();}return result;
+ let result=await find();if(!result.length&&backfill){await backfillLongPhotoLayouts(style,{dataRoot,check});result=await find();}
+ if(!result.length&&detect){
+  const normalized=meta.width===860?bytes:await sharp(bytes,{limitInputPixels:false}).resize({width:860}).png().toBuffer();
+  const regions=await detectLongPhotoRegions(normalized,{style,colors,recognize,check});
+  if(regions.length){await registerLongPhotoLayout(normalized,{style,regions,dataRoot});result=await find();}
+ }
+ return result;
 }

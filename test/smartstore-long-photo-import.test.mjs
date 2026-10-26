@@ -10,7 +10,7 @@ test('긴 상세와 업로드용 분할 이미지에서 확인된 색상별 사�
  const bytes=await sharp({create:{width:860,height:3600,channels:3,background:'#fff'}}).composite(layers).png().toBuffer();
  const brandIntroHeight=700,officialTop=2800,style='326924',colors=['01화이트','02블랙'];
  await registerLongPhotoLayout(bytes,{style,regions,brandIntroHeight,officialTop,dataRoot});
- const options={style,colors,dataRoot,backfill:false};const crops=await extractLongMannequinPhotos(bytes,options);assert.equal(crops.length,4);assert.deepEqual(crops.map(c=>c.colorHint),['01화이트','01화이트','02블랙','02블랙']);
+ const options={style,colors,dataRoot,backfill:false,detect:false};const crops=await extractLongMannequinPhotos(bytes,options);assert.equal(crops.length,4);assert.deepEqual(crops.map(c=>c.colorHint),['01화이트','01화이트','02블랙','02블랙']);
  for(let i=0;i<4;i++){const {left,top,width,height}=regions[i];const expected=await sharp(bytes).extract({left,top,width,height}).png().toBuffer();assert.deepEqual(crops[i].bytes,expected);}
  const first=brandIntroHeight+BRAND_VIDEO_HEADING_HEIGHT;
  const part=await sharp(bytes).extract({left:0,top:first,width:860,height:officialTop-first}).png().toBuffer();assert.equal((await extractLongMannequinPhotos(part,options)).length,4);
