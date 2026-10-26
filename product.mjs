@@ -65,6 +65,9 @@ export function productClassification(html) {
     else if(/셔츠|남방/.test(title))upper('셔츠','셔츠/남방','셔츠');
     else if(/팬츠|바지|슬랙스|데님/.test(title))Object.assign(category,{commonMiddle:gender+'의류하의',commonSmall:gender+'바지',channelMiddle:/데님|청바지/.test(title)?'청바지':/트레이닝|스웨트|스웻/.test(title)?'트레이닝복':'바지',channelSmall:/데님|청바지/.test(title)?'청바지':/슬랙스/.test(title)?'슬랙스':/트레이닝|스웨트|스웻/.test(title)?'트레이닝바지':'면바지'});
   }
+  // 2026-10-26 partner portal popup: filtered lookup returns 2076 머플러 / N.
+  // This is the common classification, not the separate LotteON display tree.
+  if(/머플러|\bMUFFLER\b/i.test(itemTitle))Object.assign(category,{commonMajor:'L0001 : 패션/장신',commonMiddle:'M0357 : 패션액세서리',commonSmall:'01068 : 머플러'});
   return {gender,sourceCategory,category};
 }
 export function validateStyle(value) {
@@ -86,6 +89,9 @@ export function repairCategoryFields(product){
   if(/트리코트/.test(product.rawName||product.name)&&/^(남성|여성)코트$/.test(product.category.commonSmall)&&suggested.commonSmall)product.category.commonSmall=suggested.commonSmall;
   const matched=resolveCatalogCategory(product);
   if(matched.path){product.category=matched.category;product.categoryMatch={status:matched.status,path:matched.path};}
+  if(suggested.commonSmall==='01068 : 머플러'){
+    for(const field of ['commonMajor','commonMiddle','commonSmall'])product.category[field]=suggested[field];
+  }
 }
 export function koreanTitle(raw, gender, style) {
   const sex=String(gender||'').trim(),code=String(style||'').trim();
