@@ -442,7 +442,7 @@ const server=http.createServer(async(req,res)=>{
         if(state.busy)return json(res,409,{error:'진행 중인 작업이 있습니다.'});
         if(!state.product||b.product?.style!==state.product.style)throw Error('먼저 해당 품번 정보를 수집해 주세요.');
         // Source images are server-owned: edited client data cannot redirect uploads or HTML.
-        const p={...b.product,images:state.product.images,colorImages:state.product.colorImages,originalDetailUrl:state.product.originalDetailUrl,sourceCategory:state.product.sourceCategory,sourceUrl:state.product.sourceUrl,missingOriginalDetailUrl:state.product.missingOriginalDetailUrl,detailFallbackApproved:state.product.detailFallbackApproved};validateProduct(p);
+        const p={...b.product,images:state.product.images,colorImages:state.product.colorImages,originalDetailUrl:state.product.originalDetailUrl,sourceCategory:state.product.sourceCategory,sourceUrl:state.product.sourceUrl,missingOriginalDetailUrl:state.product.missingOriginalDetailUrl,detailFallbackApproved:state.product.detailFallbackApproved};p.category={...state.product.category,...p.category};validateProduct(p);
         await writeFile(path.join(state.folder,'reviewed.json'),JSON.stringify(p,null,2));
         state.product=p;job('register',()=>bot.run(p,state.folder,b.finalize===true));return json(res,202,{ok:true});
       }
