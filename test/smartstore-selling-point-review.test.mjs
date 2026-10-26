@@ -1,5 +1,21 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,writeFile} from 'node:fs/promises';import path from 'node:path';import os from 'node:os';import {reviewSellingPoints,saveOfficialImagePointReview} from '../smartstore-selling-point-review.mjs';
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,writeFile} from 'node:fs/promises';import path from 'node:path';import os from 'node:os';import {reviewSellingPoints,saveOfficialImagePointReview,officialPointSource} from '../smartstore-selling-point-review.mjs';
 const product={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=test',name:'공식 의류'};
+test('본문에 특징이 있어도 모든 품번의 공식 이미지 문장을 먼저 확인하고 네 특징을 보존한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'all-image-points-'));try{
+ await writeFile(path.join(root,'detail.jpg'),'official-image-first');
+ const imageText='특유의 부드러운 결감이 느껴지는 페이크 스웨이드 외피 원단 사용\n마이크로 볼타입 패딩 충전재를 풍성하게 채워 넣어 포근한 보온성 구현\n여유 있게 떨어지는 릴렉스 핏으로 감각적인 실루엣 완성\n소매 이밴드와 밑단 스트링 디테일로 자유로운 핏 조절 가능';
+ let calls=0;const recognize=async()=>{calls++;return imageText;};
+ for(const style of ['123456','654321','456789']){
+  const p={...product,style,images:{detail:'https://www.giordano.co.kr/official.jpg'}};
+  const options={dataRoot:root,recognize};const pageText='가벼운 원단의 경량 디자인으로 쾌적하게 착용합니다.';
+  const [a,b]=await Promise.all([officialPointSource(p,root,pageText,options),officialPointSource(p,root,pageText,options)]);assert(a.imageChecked);assert.equal(a.text,b.text);assert(a.text.startsWith(imageText));
+  const review=await reviewSellingPoints(p,a.text,{dataRoot:root,detailHash:a.detailHash});assert.equal(review.status,'ready');assert.equal(review.points.length,4);assert(review.points.every(point=>imageText.replace(/\s/g,'').includes(point.evidence.replace(/\s/g,''))));
+  await officialPointSource(p,root,pageText,options);
+ }
+ assert.equal(calls,3,'동시 미리보기와 재확인은 같은 이미지의 OCR을 재사용');
+ await writeFile(path.join(root,'detail.jpg'),'official-image-updated');await officialPointSource({...product,images:{detail:'official'}},root,'본문',{dataRoot:root,recognize});assert.equal(calls,4);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
 test('공식 이미지 시각 확인은 품번·공식 주소·이미지 해시가 일치할 때만 짧은 본문보다 우선한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'image-points-'));try{
  await writeFile(path.join(root,'detail.jpg'),'official-image-v1');
