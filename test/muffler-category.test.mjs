@@ -19,3 +19,11 @@ test('기존 머플러 자료도 공통분류 복구하며 별도 채널 분류�
  assert.equal(p.category.commonMajor,'L0001 : 패션/장신');
  assert.equal(p.category.channelSmall,'직접선택');
 });
+
+test('입력칸에 밀려 저장된 대중소 분류도 공식 머플러 자료에서 복구',()=>{
+ const p={rawName:'캐시터치 머플러',gender:'여성',sourceCategory:['WOMEN','ACC'],category:{commonMiddle:'패션/장신',commonSmall:'패션액세서리',channelMiddle:'머플러',channelSmall:'머플러'}};
+ repairCategoryFields(p);
+ assert.equal(p.category.commonMajor,'L0001 : 패션/장신');
+ assert.equal(p.category.commonMiddle,'M0357 : 패션액세서리');
+ assert.equal(p.category.commonSmall,'01068 : 머플러');
+});
