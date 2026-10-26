@@ -9,7 +9,7 @@ import {BRAND_VIDEO_HEADING_HEIGHT} from './smartstore-brand-video.mjs';
 const digest=b=>createHash('sha256').update(b).digest('hex');
 const root=dataRoot=>path.join(dataRoot,'smartstore-long-photo-layouts');
 const thumbnail=bytes=>sharp(bytes,{limitInputPixels:false}).flatten({background:'#fff'}).resize(48,128,{fit:'fill'}).removeAlpha().raw().toBuffer();
-const closePixels=(a,b)=>{if(a.length!==b.length)return false;let sum=0,bad=0;for(let i=0;i<a.length;i++){const d=Math.abs(a[i]-b[i]);sum+=d;if(d>12)bad++;}return sum/a.length<1.8&&bad/a.length<.015;};
+const closePixels=(a,b,coarse=false)=>{if(a.length!==b.length)return false;let sum=0,bad=0;for(let i=0;i<a.length;i++){const d=Math.abs(a[i]-b[i]);sum+=d;if(d>12)bad++;}return sum/a.length<(coarse?4:3)&&bad/a.length<(coarse?.06:.025);};
 export function mannequinPhotoRegions(){
  return [...document.querySelectorAll('section[id^="smartstore-color-"]')].flatMap(section=>{
   if(section.dataset.colorSource==='official'||[...section.querySelectorAll('p')].some(p=>p.textContent.trim()==='지오다노 공식 상품 사진'))return [];
@@ -56,7 +56,7 @@ export async function extractLongMannequinPhotos(bytes,{style,colors,dataRoot=pa
   const sha=digest(bytes);let thumb;
   for(const file of files){check();const record=JSON.parse(await readFile(path.join(root(dataRoot),file),'utf8'));if(record.style!==style||!record.regions?.length)continue;
    const scale=meta.width/record.width;if(Math.abs(meta.height-record.height*scale)>2)continue;
-   if(record.sha256!==sha){thumb||=await thumbnail(bytes);if(!closePixels(thumb,Buffer.from(record.thumbnail,'base64')))continue;}
+   if(record.sha256!==sha){thumb||=await thumbnail(bytes);if(!closePixels(thumb,Buffer.from(record.thumbnail,'base64'),true))continue;}
    const crops=[];let valid=true;
    for(const r of record.regions){if(!colors.includes(r.color)){valid=false;break;}
     const rect={left:Math.round(r.left*scale),top:Math.round(r.top*scale),width:Math.round(r.width*scale),height:Math.round(r.height*scale)};

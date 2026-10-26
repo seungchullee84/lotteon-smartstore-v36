@@ -15,6 +15,7 @@ test('긴 상세와 업로드용 분할 이미지에서 확인된 색상별 사�
  const first=brandIntroHeight+BRAND_VIDEO_HEADING_HEIGHT;
  const part=await sharp(bytes).extract({left:0,top:first,width:860,height:officialTop-first}).png().toBuffer();assert.equal((await extractLongMannequinPhotos(part,options)).length,4);
  const jpg=await sharp(bytes).jpeg({quality:94}).toBuffer();assert.equal((await extractLongMannequinPhotos(jpg,options)).length,4);
+ const resized=await sharp(bytes).resize({width:750}).jpeg({quality:92}).toBuffer();assert.equal((await extractLongMannequinPhotos(resized,options)).length,4);
  assert.equal((await extractLongMannequinPhotos(bytes,{...options,style:'326925'})).length,0);assert.equal((await extractLongMannequinPhotos(bytes,{...options,colors:['99레드']})).length,0);
  const changed=await sharp(bytes).composite([{input:await sharp({create:{width:428,height:500,channels:3,background:'#e00000'}}).png().toBuffer(),left:0,top:1100}]).png().toBuffer();assert.equal((await extractLongMannequinPhotos(changed,options)).length,0);
  const source={style,colors,sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=1',sellerCode:style,candidates:[{url:'https://shop-phinf.pstatic.net/long.png'}]};

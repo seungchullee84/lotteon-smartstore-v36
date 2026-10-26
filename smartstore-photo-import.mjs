@@ -109,7 +109,7 @@ export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{
  // ONE initially exposes an empty text component while restoring the saved document.
  // Wait for the restored image components before looking for their color headings.
  await editor.locator('.se-component.se-image,.se-component.se-imageStrip').first().waitFor({state:'attached',timeout:20000});
- const readPositions=async()=>{const positions=await settledEditorPhotoPositions(editor,product.colors,{check});const long=await editor.locator('.se-component img').evaluateAll(nodes=>nodes.map((n,index)=>({index,width:n.naturalWidth,height:n.naturalHeight})).filter(n=>n.width>=300&&n.height>n.width*3));for(const p of long)if(!positions.some(v=>v.index===p.index))positions.push({index:p.index,longImage:true});return positions;};
+ const readPositions=async()=>{const positions=await settledEditorPhotoPositions(editor,product.colors,{check});const long=await editor.locator('.se-component img').evaluateAll(nodes=>nodes.map((n,index)=>({index,width:n.naturalWidth,height:n.naturalHeight})).filter(n=>!n.width||n.width>=300&&n.height>n.width*3));for(const p of long)if(!positions.some(v=>v.index===p.index))positions.push({index:p.index,longImage:true});return positions;};
  let positions=await readPositions();
  if(!positions.length){
   // A named edit window may still hold an unsaved replacement. Read the saved
@@ -128,7 +128,7 @@ export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{
   const img=editor.locator('.se-component img').nth(pos.index);await img.scrollIntoViewIfNeeded();
   await editor.waitForFunction(i=>{const n=document.querySelectorAll('.se-component img')[i];return n&&/^https?:/.test(n.src)&&n.complete&&n.naturalWidth>0;},pos.index,{timeout:10000});
   const data=await img.evaluate(n=>({url:n.src,width:n.naturalWidth,height:n.naturalHeight}));
-  if(data.width<300||data.height<300||data.height>150000)continue;
+  if(data.width<300||data.height<300||data.height>150000||pos.longImage&&data.height<=data.width*3)continue;
   candidates.push({...pos,...data,url:naverPhotoUrl(data.url)});
  }
  check();assertDetailOnlyProduct(await readDetailOnlySellerCode(page),product.style);
