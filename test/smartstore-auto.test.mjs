@@ -22,7 +22,7 @@ test('수집·사진대조·합성·상세생성 성공 후에만 업로드 완�
 
 test('복사등록 창이 없어도 사진 준비와 미리보기 반영은 먼저 마치며 판매자 업로드는 하지 않는다',async()=>{
  const order=[];
- await assert.rejects(runSmartstoreAuto({input:'375908',collect:async()=>{order.push('collect');return {product,folder:'current'};},prepare:async p=>{order.push('prepare');return {...p,smartstoreDetail:{photoCount:3}};},onPrepared:async p=>{assert.equal(p.smartstoreDetail.photoCount,3);order.push('preview');},preflight:async()=>{order.push('login');throw Error('복사등록 창 없음');},render:async()=>assert.fail('렌더링은 로그인 확인 이후'),upload:async()=>assert.fail('업로드 금지')}),/복사등록/);
+ await assert.rejects(runSmartstoreAuto({input:'375908',collect:async()=>{order.push('collect');return {product,folder:'current'};},prepare:async p=>{order.push('prepare');return {...p,smartstoreDetail:{photoCount:3}};},onPrepared:async p=>{assert.equal(p.smartstoreDetail.photoCount,4);order.push('preview');},preflight:async()=>{order.push('login');throw Error('복사등록 창 없음');},render:async()=>assert.fail('렌더링은 로그인 확인 이후'),upload:async()=>assert.fail('업로드 금지')}),/복사등록/);
  assert.deepEqual(order,['collect','prepare','preview','login']);
 });
 test('중단 이후 다음 단계와 업로드를 실행하지 않는다',async()=>{
@@ -57,7 +57,7 @@ test('업로드용 조각은 브랜드 소개·본문을 빠짐없이 보존하�
  assert.deepEqual(await sharp(joinedFooter.files.at(-1)).raw().toBuffer(),await sharp(png).extract({left:0,top:10000,width:860,height:8500}).raw().toBuffer());
  let joinedHeight=0;for(const file of joinedFooter.files)joinedHeight+=(await sharp(file).metadata()).height;assert.equal(joinedHeight,18500);
  const bannerFooter=await smartstoreUploadParts(png,root,brand,{includeVideo:false,bannerTop:9400,footerTop:10000});
- const sectioned=await smartstoreUploadParts(png,root,brand,{includeVideo:false,officialTop:6000,bannerTop:9400,footerTop:10000});assert.equal(sectioned.files.length,5);assert.equal(sectioned.bannerLink.index,3);assert.equal((await sharp(sectioned.files[2]).metadata()).height,3400);assert.deepEqual(await sharp(sectioned.files[2]).raw().toBuffer(),await sharp(png).extract({left:0,top:6000,width:860,height:3400}).raw().toBuffer());
+ const sectioned=await smartstoreUploadParts(png,root,brand,{includeVideo:false,officialTop:6000,bannerTop:9400,footerTop:10000});assert.equal(sectioned.files.length,5);assert.equal(sectioned.footerIndex,4);assert.equal(sectioned.bannerLink.index,3);assert.equal((await sharp(sectioned.files[2]).metadata()).height,3400);assert.deepEqual(await sharp(sectioned.files[2]).raw().toBuffer(),await sharp(png).extract({left:0,top:6000,width:860,height:3400}).raw().toBuffer());
  assert.equal(bannerFooter.files.length,4);assert.equal(bannerFooter.bannerLink.index,2);
  assert.equal((await sharp(bannerFooter.files.at(-2)).metadata()).height,600);
  assert.equal((await sharp(bannerFooter.files.at(-1)).metadata()).height,8500);
@@ -102,7 +102,7 @@ test('채팅에서 원본 바이트로 확인한 사진은 변환 해시 없이�
  const draft={style:product.style,sourceUrl:product.sourceUrl,officialDetailHash:digest(front),photos:[{color:'05블랙',files:['1.jpg','side.jpg']}],sellingPoints:[{title:'경량',description:'가벼운 원단',evidence:description}],photoMapping:{files:[{hash:digest(front),color:'05블랙',role:'front'},{hash:digest(side),color:'05블랙',role:'side'}]}};
  await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft));
  const p=await prepareSmartstoreAuto(product,folder,{trustFolder:false,dataRoot,photoRoots:[photos],fetchImpl:()=>{throw Error('API를 호출하면 안 됨');}});
- const saved=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));assert.equal(saved.listingImages.extras.length,1);assert.equal(saved.listingImages.extras[0].role,'side');assert.equal(p.smartstoreDetail.photoCount,2);assert.deepEqual(saved.sellingPoints,draft.sellingPoints);
+ const saved=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));assert.equal(saved.listingImages.extras.length,1);assert.equal(saved.listingImages.extras[0].role,'side');assert.equal(p.smartstoreDetail.photoCount,2);assert.equal(saved.sellingPoints[0].evidence,description);assert.equal(saved.sellingPoints[0].title,'가볍게, 부담 없이');
  }finally{await rm(root,{recursive:true,force:true});}
 });
 
@@ -114,9 +114,9 @@ test('첫 품번도 사진을 자동 분석해 저장하고 상세 최대 컷을
   for(let i=0;i<4;i++)await writeFile(path.join(photos,i===0?'1.jpg':'date-'+i+'.jpg'),await sharp({create:{width:80,height:100,channels:3,background:['#123','#234','#345','#456'][i]}}).jpeg().toBuffer());
   let calls=0;const fetchImpl=async(_,request)=>{calls++;const body=JSON.parse(request.body),input=JSON.parse(body.input[0].content[0].text);return Response.json({status:'completed',output:[{content:[{type:'output_text',text:JSON.stringify({attributes:{sleeve:'긴팔',neckline:'스텐드/차이나칼라',evidence:'공식·실사 사진 대조'},points:[{title:'경량',description:'가벼운 나일론 원단.',evidence:'가벼운 나일론 원단'}],photos:input.photoIds.map((id,i)=>({id,color:'05블랙',role:i===0?'front':'detail',sameProduct:true,confidence:1}))})}]}]});};
   const options={trustFolder:false,dataRoot,photoRoots:[photos],apiKey:'test',fetchImpl};
-  const first=await prepareSmartstoreAuto(product,folder,options);assert.equal(first.smartstoreDetail.photoCount,3);
+  const first=await prepareSmartstoreAuto(product,folder,options);assert.equal(first.smartstoreDetail.photoCount,4);
   const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'draft.json'),'utf8'));assert.equal(draft.photoMapping.files.length,4,'화면에 선택되지 않은 확인 사진도 해시별로 저장');
-  const second=await prepareSmartstoreAuto(product,folder,options);assert.equal(second.smartstoreDetail.photoCount,3);assert.equal(calls,1,'같은 사진은 매번 다시 외부 분석하지 않음');
+  const second=await prepareSmartstoreAuto(product,folder,options);assert.equal(second.smartstoreDetail.photoCount,4);assert.equal(calls,1,'같은 사진은 매번 다시 외부 분석하지 않음');
  }finally{await rm(root,{recursive:true,force:true});}
 });
 
