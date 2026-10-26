@@ -34,14 +34,14 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  // Preview, export and upload must re-check the current official wording, too.
  let sourceText=product.officialDetailText||product.officialDescription||'';
  try{const html=await readFile(path.join(folder,'smartstore-official.html'),'utf8');if(styleFromDetail(html)!==style)throw Error('소구점 원문의 공식 품번이 다릅니다.');sourceText=cheerio.load(html)('.prd_detail_content_gio').first().text().trim()||sourceText;}catch(error){if(error.code!=='ENOENT')throw error;}
- if(sourceText){
+ {
   let detailHash=null;try{detailHash=createHash('sha256').update(await readFile(path.join(folder,'detail.jpg'))).digest('hex');}catch(e){if(e.code!=='ENOENT')throw e;}
   const review=await reviewSellingPoints(product,sourceText,{dataRoot,detailHash,existing:prepared.sellingPoints});
   prepared.sellingPoints=review.points;prepared.sellingPointReview={status:review.status,message:review.message||''};
   if(draft&&review.points.length){draft.sellingPoints=review.points;await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft,null,2));}
   prepared.sellingPointSource={style,sourceUrl:product.sourceUrl,textHash:createHash('sha256').update(sourceText).digest('hex')};
  }
- if(!sourceText.trim()){prepared.sellingPoints=[];prepared.sellingPointReview={status:'needs-review',message:'현재 공식 상세 원문을 확인해야 합니다.'};}
+ if(!sourceText.trim()&&!prepared.sellingPoints.length){prepared.sellingPoints=[];prepared.sellingPointReview={status:'needs-review',message:'현재 공식 상세 원문을 확인해야 합니다.'};}
  const attach=async(color,file,allowedRoot)=>{
   if(!product.colors.includes(color))throw Error('현재 상품에 없는 색상의 마네킨 컷입니다: '+color);
   const canonicalRoot=await realpath(allowedRoot),canonical=await realpath(file);
