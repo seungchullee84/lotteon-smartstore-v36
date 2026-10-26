@@ -1,3 +1,4 @@
+import {BRAND_INTRO_ASSET_NAMES,brandIntroSelection} from './smartstore-brand-intro.mjs';
 import {storeBannerAsset,STORE_BANNER_ASSET_NAMES} from './smartstore-store-banner.mjs';
 import {buildDetailContent} from './detail-html.mjs';
 import {sellingPointIcon} from './smartstore-point-icons.mjs';
@@ -6,7 +7,7 @@ import {brandVideoHtml,brandVideoHeadingHtml,productVideoUrl} from './smartstore
 import {officialSellingPoints} from './smartstore-selling-points.mjs';
 
 export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-approved-20261024';
-export const TEMPLATE_ASSET_NAMES=['brand-intro.jpg','lotte-department-official.png','benefits.jpg','shipping.jpg','returns.jpg','store.jpg',...STORE_BANNER_ASSET_NAMES,'GowunDodum-Regular.ttf'];
+export const TEMPLATE_ASSET_NAMES=['brand-intro.jpg',...BRAND_INTRO_ASSET_NAMES,'lotte-department-official.png','benefits.jpg','shipping.jpg','returns.jpg','store.jpg',...STORE_BANNER_ASSET_NAMES,'GowunDodum-Regular.ttf'];
 export const TEMPLATE_ASSET_BASE='https://raw.githubusercontent.com/seungchullee84/lotteon-smartstore-v36/main/public/smartstore-template/';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const style='font-family:GowunDodum,\'Malgun Gothic\',sans-serif;color:#25372e;word-break:keep-all;overflow-wrap:break-word;line-height:2.1;';
@@ -49,7 +50,8 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  const name=p.name||p.rawName||'지오다노';
  const headlineBody=String(draft?.headline||name).trim().replace(/^(?:(?:지오다노|GIORDANO)\s*)+/i,'');
  const headline='지오다노'+(headlineBody?' '+headlineBody:'');
- let body='<section data-brand-intro style="background:#f4f3ec;"><div style="aspect-ratio:860/601;overflow:hidden;">'+common('brand-intro.jpg','지오다노 공식 로고와 남녀 모델 브랜드 소개')+'</div><div style="padding:76px 40px 72px;"><p style="font-size:18px;letter-spacing:1.8px;margin:0 0 36px;color:#53694d;">KOREA · SINCE 1994</p><h2 style="font-size:44px;line-height:1.5;margin:0 0 48px;">일상의 기본을, 나답게.</h2><div style="font-size:26px;line-height:2.2;"><p style="margin:0 0 28px;">1994년 국내에 첫선을 보인 지오다노.</p><p style="margin:0 0 28px;">좋은 품질과 합리적인 가치를 바탕으로</p><p style="margin:0;">매일의 옷차림에 자연스러운 감각을 더합니다.</p></div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;margin-top:64px;">'+[['좋은 품질','기본을 생각하는 옷'],['합리적인 가치','매일 함께하는 선택'],['간결한 스타일','나답게 입는 캐주얼']].map(([title,text])=>'<div style="border-top:1px solid #d3d7cc;padding-top:28px;"><h3 style="font-size:25px;margin:0 0 22px;">'+title+'</h3><p style="font-size:20px;margin:0;">'+text+'</p></div>').join('')+'</div><p style="border-top:1px solid #d3d7cc;padding-top:36px;margin:64px 0 0;font-size:18px;">지오다노 공식 홈페이지 브랜드 화보 · 소개용 이미지로, 아래 판매 상품과 착장이 다를 수 있습니다.</p></div></section>';
+ const intro=brandIntroSelection(p);
+ let body='<section data-brand-intro style="background:#f4f3ec;"><div style="aspect-ratio:860/601;overflow:hidden;">'+common(intro.file,'지오다노 공식 로고와 남녀 모델 브랜드 소개')+'</div><div style="padding:76px 40px 72px;"><p style="font-size:18px;letter-spacing:1.8px;margin:0 0 36px;color:#53694d;">KOREA · SINCE 1994</p><h2 style="font-size:44px;line-height:1.5;margin:0 0 48px;">일상의 기본을, 나답게.</h2><div style="font-size:26px;line-height:2.2;"><p style="margin:0 0 28px;">1994년 국내에 첫선을 보인 지오다노.</p><p style="margin:0 0 28px;">좋은 품질과 합리적인 가치를 바탕으로</p><p style="margin:0;">매일의 옷차림에 자연스러운 감각을 더합니다.</p></div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;margin-top:64px;">'+[['좋은 품질','기본을 생각하는 옷'],['합리적인 가치','매일 함께하는 선택'],['간결한 스타일','나답게 입는 캐주얼']].map(([title,text])=>'<div style="border-top:1px solid #d3d7cc;padding-top:28px;"><h3 style="font-size:25px;margin:0 0 22px;">'+title+'</h3><p style="font-size:20px;margin:0;">'+text+'</p></div>').join('')+'</div><p style="border-top:1px solid #d3d7cc;padding-top:36px;margin:64px 0 0;font-size:18px;">지오다노 공식 홈페이지 브랜드 화보 · 소개용 이미지로, 아래 판매 상품과 착장이 다를 수 있습니다.</p></div></section>';
 
  // 2026-10-25: the new common MP4 applies to every product, including old season-video exclusions.
  body+=includeVideo?brandVideoHtml(videoUrl||productVideoUrl(p)):brandVideoHeadingHtml();
@@ -83,7 +85,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  for(const src of officialSources)body+=photo(src,'해당 상품의 공식 상세 및 상품정보');
  body+='</section><div data-store-banner style="padding:48px 0;">'+common(storeBannerAsset(p),'여길 누르면 지오다노 다른 상품을 구경할 수 있어요')+'</div><div data-store-footer>'+common('benefits.jpg','동탄롯데 지오다노 구매 혜택 · 5만명 이상 스토어 관심등록고객')+common('shipping.jpg','정품 상품 출고 안내')+'<div data-returns-guide style="position:relative;">'+common('returns.jpg','교환 및 반품 안내')+'<svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 1164" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:multiply;"><g data-return-highlight fill="#ffe14f" fill-opacity=".5"><rect x="44" y="243" width="290" height="36" rx="4"/><rect x="44" y="313" width="684" height="36" rx="4"/><rect x="44" y="370" width="132" height="36" rx="4"/><rect x="44" y="432" width="689" height="35" rx="4"/></g></svg></div>';
  body+=`<section style="padding:48px 6%;background:#e7ede4;">${header('GIORDANO · DONGTAN','지오다노<br>롯데백화점 동탄점')}<p style="font-size:24px;margin:0 0 28px;">경기도 화성시 동탄역로 160<br>지하 1층 지오다노</p>${common('store.jpg','매장 안내')}</section></div>`;
- return {html:`<div data-smartstore-template="${SMARTSTORE_DETAIL_TEMPLATE}" style="${style}max-width:848px;margin:0 auto;background:#fff;text-align:left;">${body}</div>`,sources:[...new Set(sources)],template:SMARTSTORE_DETAIL_TEMPLATE,points};
+ return {html:`<div data-smartstore-template="${SMARTSTORE_DETAIL_TEMPLATE}" style="${style}max-width:848px;margin:0 auto;background:#fff;text-align:left;">${body}</div>`,sources:[...new Set(sources)],template:SMARTSTORE_DETAIL_TEMPLATE,points,brandIntro:intro};
 }
 
 export function smartstoreDetailDocument(p,options={}){
