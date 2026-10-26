@@ -1,6 +1,6 @@
 import {mannequinPhotoRegions,registerLongPhotoLayout} from './smartstore-long-photo-import.mjs';
 import {collectCaptionTones} from './smartstore-caption-tone.mjs';
-import {reviewSellingPoints} from './smartstore-selling-point-review.mjs';
+import {reviewSellingPoints,officialPointSource} from './smartstore-selling-point-review.mjs';
 import {readFile,writeFile,mkdir,readdir,realpath,access,unlink} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -36,10 +36,11 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  try{const html=await readFile(path.join(folder,'smartstore-official.html'),'utf8');if(styleFromDetail(html)!==style)throw Error('소구점 원문의 공식 품번이 다릅니다.');sourceText=cheerio.load(html)('.prd_detail_content_gio').first().text().trim()||sourceText;}catch(error){if(error.code!=='ENOENT')throw error;}
  {
   let detailHash=null;try{detailHash=createHash('sha256').update(await readFile(path.join(folder,'detail.jpg'))).digest('hex');}catch(e){if(e.code!=='ENOENT')throw e;}
+  const checkedSource=await officialPointSource(product,folder,sourceText,{dataRoot});sourceText=checkedSource.text;
   const review=await reviewSellingPoints(product,sourceText,{dataRoot,detailHash,existing:prepared.sellingPoints});
   prepared.sellingPoints=review.points;prepared.sellingPointReview={status:review.status,message:review.message||''};
   if(draft&&review.points.length){draft.sellingPoints=review.points;await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft,null,2));}
-  prepared.sellingPointSource={style,sourceUrl:product.sourceUrl,textHash:createHash('sha256').update(sourceText).digest('hex')};
+  prepared.sellingPointSource={style,sourceUrl:product.sourceUrl,textHash:createHash('sha256').update(sourceText).digest('hex'),detailHash,imageChecked:checkedSource.imageChecked};
  }
  if(!sourceText.trim()&&!prepared.sellingPoints.length){prepared.sellingPoints=[];prepared.sellingPointReview={status:'needs-review',message:'현재 공식 상세 원문을 확인해야 합니다.'};}
  const attach=async(color,file,allowedRoot)=>{

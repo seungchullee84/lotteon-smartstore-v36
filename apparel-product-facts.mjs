@@ -4,7 +4,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 import {createWorker} from 'tesseract.js';
 
-const VERSION='official-detail-facts-4';
+const VERSION='official-detail-facts-5';
 export function explicitDetailFacts(text){
  const clean=String(text||'').normalize('NFKC');const found=[];
  const add=(feature,pattern,negative)=>{if(pattern.test(clean)&&!negative?.test(clean))found.push(feature);};
@@ -70,14 +70,15 @@ export async function enrichOfficialProductFacts(product,folder,{dataRoot=path.j
     const parsed=String(result.data.tsv||'').split('\n').slice(1).map(line=>line.split('\t')).filter(cols=>Number(cols[10])>=75&&cols[11]?.trim());
     const scale=meta.width/Math.min(meta.width,1100);
     words.push(...parsed.map(c=>({text:c.slice(11).join('\t').trim(),left:Number(c[6])*scale,top:top+Number(c[7])*scale,width:Number(c[8])*scale,height:Number(c[9])*scale})));
-    const confident=parsed.map(cols=>cols.slice(11).join('\t')).join(' ');
-    lines.push(confident);
+    // Preserve complete sentences and line breaks for selling-point evidence.
+    // Dropping individual low-confidence words corrupts Korean phrases.
+    lines.push(result.data.text||'');
    }
    text=lines.join('\n');
   }
   signal?.throwIfAborted();
   const tableSeasons=words.length?await selectedSeasonsFromTable(bytes,words):[];
-  facts={version:VERSION,style:product.style,sourceUrl:product.sourceUrl,detailHash,text,features:[...new Set([...explicitDetailFacts(text),...tableSeasons])],seasonTableSelection:tableSeasons,visualFeatures:[],observedAt:new Date().toISOString()};
+  facts={version:VERSION,style:product.style,sourceUrl:product.sourceUrl,detailHash,text,imageScanComplete:true,features:[...new Set([...explicitDetailFacts(text),...tableSeasons])],seasonTableSelection:tableSeasons,visualFeatures:[],observedAt:new Date().toISOString()};
   await mkdir(cacheRoot,{recursive:true});await writeFile(file,JSON.stringify(facts,null,2));
   return {...product,researchFacts:facts};
  }finally{signal?.removeEventListener('abort',abort);await worker?.terminate().catch(()=>{});}
