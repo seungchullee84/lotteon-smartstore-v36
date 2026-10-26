@@ -143,7 +143,7 @@ export async function stageImportedPhotos(source,folder,{fetchImpl=fetch,signal,
   const chunks=[];let size=0;for await(const chunk of response.body){size+=chunk.length;if(size>19000000)throw Error('가져올 사진이 19MB를 초과합니다.');chunks.push(chunk);}const bytes=Buffer.concat(chunks);
   const meta=await sharp(bytes,{limitInputPixels:40000000}).metadata();if(!['jpeg','png','webp'].includes(meta.format)||meta.width<300||meta.height<300||meta.height>meta.width*3)continue;
   let recognize=recognizePhoto;
-  if(!recognize&&item===source.candidates.at(-1))recognize=async b=>{const worker=await createWorker('kor+eng');try{return (await worker.recognize(await sharp(b).resize({width:1000,withoutEnlargement:true}).toBuffer())).data.text;}finally{await worker.terminate();}};
+  if(!recognize&&source.candidates.slice(-4).includes(item))recognize=async b=>{const worker=await createWorker('kor+eng');try{return (await worker.recognize(await sharp(b).resize({width:1000,withoutEnlargement:true}).toBuffer())).data.text;}finally{await worker.terminate();}};
   const excluded=await excludedPhotoReason(bytes,{dataRoot,recognize});if(excluded)continue;
   const sha256=hash(bytes),id=sha256.slice(0,24);if(seen.has(id))continue;seen.add(id);
   const file=id+({jpeg:'.jpg',png:'.png',webp:'.webp'})[meta.format];await writeFile(path.join(dir,file),bytes);
