@@ -16,7 +16,7 @@ export function officialProsePoints(source,existing=[]){
   // A long sentence may contain multiple independent clauses, but never cut at a character limit.
   const clauses=sentence.split(/[,，]|(?:으며|으며서|으며도|으며,|하고|하며|되며|이며|으로서)\s+/).map(c=>c.trim()).filter(Boolean);
   for(const rule of rules){
-   if(used.has(rule.kind)||!rule.feature.test(sentence)||!rule.claim.test(sentence))continue;
+   if(used.has(rule.kind)||existing.some(p=>rule.feature.test(p.title+' '+p.description))||!rule.feature.test(sentence)||!rule.claim.test(sentence))continue;
    const candidates=[sentence,...clauses];
    const clause=candidates.find(c=>c.length>=8&&c.length<=40&&rule.feature.test(c)&&rule.claim.test(c)&&!/(?:및|와|과|으로|하고|하며|위한|통해|보다|또는|또한|\d)$/.test(c));
    if(!clause)continue;
