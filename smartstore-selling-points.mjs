@@ -42,6 +42,12 @@ export function officialSellingPoints(description){
  // Shared apparel features: use only an affirmative, explicit source sentence.
  const sentences=text.replace(/\\n/g,' ').split(/\s*[•●]\s*|(?<=[.!?])\s+/).map(s=>s.trim()).filter(Boolean);
  for(const [pattern,title,copy,label] of [
+  [/(?:부드러[^.]*페이크\s*스웨이드|페이크\s*스웨이드[^.]*부드러)/,'부드러운 스웨이드 결감','부드러운 결감의 페이크 스웨이드 외피.','원단'],
+  [/마이크로\s*볼\s*타입[^.]*(?:충전재|패딩)[^.]*(?:보온|포근)/,'보온성을 담은 충전재','마이크로 볼타입 패딩 충전재의 보온성.','충전재'],
+  [/(?:여유[^.]*릴렉스\s*핏|릴렉스\s*핏[^.]*여유)/,'여유로운 릴렉스핏','여유 있게 떨어지는 릴렉스 실루엣.','핏'],
+  [/(?:목을?[^.]*감싸[^.]*스탠드\s*넥|스탠드\s*넥[^.]*목을?[^.]*감싸)/,'목을 감싸는 스탠드넥','목을 감싸주는 스탠드 넥 디자인.','네크라인'],
+  [/YKK[^.]*지퍼/i,'YKK 지퍼 디테일','YKK 지퍼로 완성한 여밈 디테일.','여밈'],
+  [/밑단[^.]*스트링[^.]*핏\s*조절/,'조절 가능한 밑단','밑단 스트링으로 핏 조절.','핏 조절'],
   [/울\s*\d+(?:\.\d+)?%[^.]*캐시미어\s*\d+(?:\.\d+)?%[^.]*혼방[^.]*부드러운\s*촉감[^.]*보온/,'부드럽고, 따뜻하게','울·캐시미어 혼방의 부드러운 촉감과 보온성.','원단'],
   [/밑단으로[^.]*넓어지는\s*A라인[^.]*여유로운\s*핏/,'여유롭게 흐르는 A라인','밑단으로 자연스럽게 넓어지는 실루엣.','핏'],
   [/히든\s*버튼\s*여밈[^.]*탈부착\s*가능한\s*(?:카라|칼라)\s*비조/,'깔끔하고, 실용적으로','히든 버튼과 탈부착 가능한 카라 비조.','디테일'],
@@ -60,6 +66,7 @@ export function officialSellingPoints(description){
   [/(?:메리노\s*울)[^.]*?(?:부드러|소프트)/,'부드러운 메리노울','메리노울의 부드러운 촉감.','원단'],
   [/(?:가벼운|가볍고)[^.]*경량|경량[^.]*가벼/,'가볍게, 부담 없이','가벼운 원단의 경량 디자인.','원단'],
  ]){
+  if(covered.has(label))continue;
   const evidence=sentences.find(s=>pattern.test(s)&&!/(?:아닌|없습니다|없음)/.test(s));if(!evidence)continue;
   const description=/^부드럽고, 따뜻하게$/.test(title)&&/기모/.test(evidence)&&!/브러쉬드|브러시드/.test(evidence)?'기모 가공으로 더한 보온성.':copy;
   points.push({title,description,evidence});labels.set(points.at(-1),label);covered.add(label);
