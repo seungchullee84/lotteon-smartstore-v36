@@ -66,7 +66,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
   }
   for(const group of groups){
    const mixed=Object.values(draft?.colorSources||{}).some(source=>source==='official'||source==='mixed'),official=draft?.colorSources?.[group.color]==='official';
-   const sourceLabel=draft?.colorSources?.[group.color]==='mixed'?'<p style="text-align:center;font-size:24px;margin:0 0 24px;">매장 마네킹 사진 · 공식 모델컷 함께 구성</p>'+(mannequinWearingNote(p)?'<p style="text-align:center;font-size:22px;margin:0 0 24px;">매장 마네킹 사진 기준 · '+esc(mannequinWearingNote(p))+'</p>':''):official?'<p style="text-align:center;font-size:26px;margin:0 0 28px;">지오다노 공식 상품 사진</p>':mixed?'<p style="text-align:center;font-size:26px;margin:0 0 12px;">매장 마네킹 실제 착용사진</p><p style="text-align:center;font-size:22px;margin:0 0 28px;">'+esc(mannequinWearingNote(p))+'</p>':'';
+   const sourceLabel=draft?.colorSources?.[group.color]==='mixed'?' ':official?'<p style="text-align:center;font-size:26px;margin:0 0 28px;">지오다노 공식 상품 사진</p>':mixed?'<p style="text-align:center;font-size:26px;margin:0 0 12px;">매장 마네킹 실제 착용사진</p><p style="text-align:center;font-size:22px;margin:0 0 28px;">'+esc(mannequinWearingNote(p))+'</p>':'';
    const photos=group.urls.length===4
     ? '<div data-photo-layout="four" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start;">'+group.urls.map((url,i)=>'<div>'+photo(url,group.color+(i===0?' 착용 모습':' 디테일'),'border-radius:14px;')+'</div>').join('')+'</div>'
     : group.urls.length===3
