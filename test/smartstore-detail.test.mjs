@@ -12,6 +12,15 @@ import {publishable} from '../github-sync.mjs';
 import {prepareVideo,videoOptions,fixtureVideo} from './helpers/brand-video.mjs';
 const product={style:'375908',name:'여성 경량 패딩 자켓 375908',rawName:'여성 경량 패딩 자켓',gender:'여성',colors:['01핑크','02화이트'],sizes:['S','M'],material:'나일론100%',country:'미얀마',washing:'손세탁',manufactured:'2025-08',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=sample',originalDetailUrl:'https://www.giordano.co.kr/detail.jpg',images:{detail:'https://www.giordano.co.kr/detail.jpg',size:'https://www.giordano.co.kr/size.jpg',info:'https://www.giordano.co.kr/info.jpg'}};
 
+test('모든 의류의 AIDA 순서는 실제 상품·구매 장점부터 시작하고 브랜드 영상 뒤에 선택 안내를 둔다',()=>{
+ const point={title:'편안한 움직임',description:'여유로운 품으로 편안하게 입어요.',evidence:'여유로운 품으로 편안한 착용감을 제공합니다.'};
+ for(const name of ['남성 맨투맨','여성 스커트','공용 경량 자켓']){
+  const p={...product,name,colorImages:{'01핑크':['https://example.com/current.jpg']},smartstoreDetail:{style:product.style,sellingPoints:[point],colorImages:{'01핑크':['https://example.com/current.jpg']}}},html=buildSmartstoreDetail(p).html;
+  const order=['data-product-intro','data-aida="interest"','data-color-palette','id="smartstore-color-0"','data-official-detail','data-brand-intro','data-brand-video-heading','<video ','data-aida-action','data-store-banner','data-store-footer'].map(marker=>html.indexOf(marker));
+  assert(order.every((index,i)=>index>=0&&(!i||index>order[i-1])));assert.match(html,/data-product-hero/);assert.match(html,/data-attention-benefit[^>]*>편안한 움직임/);assert.match(html,/마음에 드는 색상과/);assert.equal((html.match(/<video /g)||[]).length,1);assert(!html.includes('<button'));
+ }
+});
+
 test('새 공통 MP4는 과거 시즌 제외 상품을 포함해 전체에 적용한다',()=>{
  const p={...product,smartstoreDetail:{style:product.style,includeBrandVideo:false}};
  assert.doesNotMatch(buildSmartstoreDetail(p).html,/youtube|<iframe|2026 F\/W FILM/);
@@ -58,6 +67,7 @@ test('다른 품번·색상·외부 경로는 차단하고 사진 매핑과 상�
   assert.match(localSmartstorePreview(p).html,/smartstore-photo\/[a-f0-9]{24}/);assert.doesNotMatch(localSmartstorePreview(p).html,/기모/);
   const out=path.join(root,'detail.png');const result=await saveSmartstoreDetail(reviewedProduct,folder,out,{dataRoot,videoOptions});
   const meta=await sharp(out,{limitInputPixels:false}).metadata();assert.equal(meta.width,860);assert.ok(meta.height>4000);assert.equal(result.photoCount,1);
+  assert(result.officialTop<result.videoAfterTop&&result.videoAfterTop<result.bannerTop,'PNG와 ONE의 MP4 위치는 AIDA 브랜드 소개 뒤');
   assert.ok(Number.isInteger(result.bannerTop));assert.ok(result.bannerTop<result.footerTop);assert.equal((await sharp(result.bannerPath).metadata()).height,result.footerTop-result.bannerTop);assert.ok(Number.isInteger(result.footerTop));assert.equal((await sharp(result.footerPath).metadata()).height,result.height-result.footerTop);
   assert.deepEqual(await sharp(result.footerPath).raw().toBuffer(),await sharp(out,{limitInputPixels:false}).extract({left:0,top:result.footerTop,width:860,height:result.height-result.footerTop}).raw().toBuffer());
   assert.match(await readFile(result.htmlPath,'utf8'),/data:image\/jpeg;base64,/);assert.deepEqual(await readFile(result.videoPath),fixtureVideo);

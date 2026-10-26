@@ -18,13 +18,13 @@ export function mannequinPhotoRegions(){
   return [...section.querySelectorAll('img')].map(img=>{const r=img.getBoundingClientRect();return {color,left:Math.ceil(r.left),top:Math.ceil(r.top+scrollY),width:Math.floor(r.width),height:Math.floor(r.height)};});
  });
 }
-export async function registerLongPhotoLayout(bytes,{style,regions,brandIntroHeight,officialTop,dataRoot=path.resolve('data')}){
+export async function registerLongPhotoLayout(bytes,{style,regions,brandIntroHeight,videoAfterTop,officialTop,dataRoot=path.resolve('data')}){
  if(!/^\d{6}$/.test(style)||!regions?.length)return;
  const meta=await sharp(bytes,{limitInputPixels:false}).metadata();
  if(meta.width!==860||meta.height>150000)throw Error('긴 상세 사진 위치의 이미지 크기가 다릅니다.');
  for(const r of regions)if(!r.color||![r.left,r.top,r.width,r.height].every(Number.isInteger)||r.left<0||r.top<0||r.width<150||r.height<150||r.left+r.width>meta.width||r.top+r.height>meta.height)throw Error('마네킹 사진 위치를 확인해 주세요.');
  const records=[{bytes,offset:0,height:meta.height}];
- const first=brandIntroHeight+BRAND_VIDEO_HEADING_HEIGHT;
+ const first=Number.isInteger(videoAfterTop)?(officialTop<videoAfterTop?0:videoAfterTop):brandIntroHeight+BRAND_VIDEO_HEADING_HEIGHT;
  if(Number.isInteger(first)&&Number.isInteger(officialTop)&&officialTop>first&&officialTop<meta.height)records.push({bytes:await sharp(bytes,{limitInputPixels:false}).extract({left:0,top:first,width:860,height:officialTop-first}).png().toBuffer(),offset:first,height:officialTop-first});
  await mkdir(root(dataRoot),{recursive:true});
  for(const record of records){
@@ -46,7 +46,7 @@ export async function backfillLongPhotoLayouts(style,{dataRoot=path.resolve('dat
    await page.setContent($.html());await page.evaluate(()=>Promise.all([document.fonts.ready,...[...document.images].map(i=>i.decode())]));check();
    const height=await page.evaluate(()=>document.documentElement.scrollHeight),image=await sharp(bytes,{limitInputPixels:false}).metadata();
    if(height!==image.height||image.width!==860)continue;
-   const regions=await page.evaluate(mannequinPhotoRegions);await registerLongPhotoLayout(bytes,{style,regions,brandIntroHeight:meta.brandIntroHeight,officialTop:meta.officialTop,dataRoot});count++;
+   const regions=await page.evaluate(mannequinPhotoRegions);await registerLongPhotoLayout(bytes,{style,regions,brandIntroHeight:meta.brandIntroHeight,videoAfterTop:meta.videoAfterTop,officialTop:meta.officialTop,dataRoot});count++;
   }
  }finally{await browser.close();}return count;
 }

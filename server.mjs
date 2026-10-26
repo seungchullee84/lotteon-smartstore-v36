@@ -269,7 +269,7 @@ const server=http.createServer(async(req,res)=>{
             },
             upload:async(p,folder,{main,detail})=>{
               const selected=await prepareListingImages(p,folder,{dataRoot});
-              const detailParts=await smartstoreUploadParts(detail.path,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{includeVideo:detail.includeVideo,dataRoot,videoOptions:detail.videoOptions,brandIntroHeight:detail.brandIntroHeight,footerTop:detail.footerTop,bannerTop:detail.bannerTop,officialTop:detail.officialTop});
+              const detailParts=await smartstoreUploadParts(detail.path,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{includeVideo:detail.includeVideo,dataRoot,videoOptions:detail.videoOptions,brandIntroHeight:detail.brandIntroHeight,videoAfterTop:detail.videoAfterTop,footerTop:detail.footerTop,bannerTop:detail.bannerTop,officialTop:detail.officialTop});
               const careLabels=await prepareCareLabelImages(p,folder,{dataRoot});
               return smartBot.uploadPrepared(p,folder,{main:selected.main,extras:selected.extras,detailParts,careLabels});
             }
@@ -341,7 +341,7 @@ const server=http.createServer(async(req,res)=>{
             render:async(p,folder)=>{
               const output=path.join(await imageDownloadFolder(),p.style+'_상세설명만수정_'+Date.now()+'.png');
               const detail=await saveSmartstoreDetail(p,folder,output,{signal,log,dataRoot});
-              return smartstoreUploadParts(output,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{includeVideo:detail.includeVideo,dataRoot,videoOptions:detail.videoOptions,brandIntroHeight:detail.brandIntroHeight,footerTop:detail.footerTop,bannerTop:detail.bannerTop,officialTop:detail.officialTop});
+              return smartstoreUploadParts(output,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{includeVideo:detail.includeVideo,dataRoot,videoOptions:detail.videoOptions,brandIntroHeight:detail.brandIntroHeight,videoAfterTop:detail.videoAfterTop,footerTop:detail.footerTop,bannerTop:detail.bannerTop,officialTop:detail.officialTop});
             },
             upload:(p,folder,parts)=>smartBot.updateDetailOnly(p,folder,parts)
           });

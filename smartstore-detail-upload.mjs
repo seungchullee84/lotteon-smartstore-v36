@@ -25,34 +25,31 @@ export async function openSmartstoreEditor(page,{check=()=>{}}={}){
  const [editor]=await Promise.all([page.waitForEvent('popup',{timeout:45000}),input.click({timeout:30000})]);
  await editor.bringToFront();return editor;
 }
-export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,videoOptions,brandIntroHeight,footerTop,bannerTop,officialTop}={}){
+export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,videoOptions,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop}={}){
  const video=includeVideo?await requireBrandVideo(dataRoot,videoOptions):null;
  const meta=await sharp(png,{limitInputPixels:false}).metadata();
- const brand=await sharp(brandFile).metadata();const firstHeight=(brandIntroHeight??Math.round(meta.width*brand.height/brand.width))+BRAND_VIDEO_HEADING_HEIGHT;
+ const brand=await sharp(brandFile).metadata();const firstHeight=videoAfterTop??(brandIntroHeight??Math.round(meta.width*brand.height/brand.width))+BRAND_VIDEO_HEADING_HEIGHT;
  if(meta.width!==860||meta.height<=firstHeight)throw Error('상세페이지 이미지 크기를 확인해 주세요.');
  if(footerTop!==undefined&&(!Number.isInteger(footerTop)||footerTop<firstHeight||footerTop>=meta.height))throw Error('구매 혜택부터 하단까지의 이미지 구간을 확인해 주세요.');
  if(bannerTop!==undefined&&(!Number.isInteger(bannerTop)||footerTop===undefined||bannerTop<firstHeight||bannerTop>=footerTop))throw Error('하단 안내 위 배너 이미지 구간을 확인해 주세요.');
- if(officialTop!==undefined&&(!Number.isInteger(officialTop)||officialTop<=firstHeight||officialTop>=(bannerTop??footerTop??meta.height)))throw Error('공식 디테일부터 INFORMATION까지의 이미지 구간을 확인해 주세요.');
+ if(!Number.isInteger(firstHeight)||firstHeight<=0)throw Error('브랜드 영상 삽입 위치를 확인해 주세요.');
+ if(officialTop!==undefined&&(!Number.isInteger(officialTop)||officialTop<=0||(videoAfterTop===undefined&&officialTop<=firstHeight)||officialTop>=(bannerTop??footerTop??meta.height)))throw Error('공식 디테일부터 INFORMATION까지의 이미지 구간을 확인해 주세요.');
  const dest=path.join(folder,'smartstore-upload');await mkdir(dest,{recursive:true});
- const digest=createHash('sha256').update(await readFile(png)).update(JSON.stringify({rule:'semantic-sections-2',firstHeight,bannerTop,footerTop,officialTop})).digest('hex').slice(0,16);
+ const boundaries=[...new Set([0,firstHeight,officialTop,bannerTop,footerTop,meta.height].filter(Number.isInteger))].sort((a,b)=>a-b);
+ const digest=createHash('sha256').update(await readFile(png)).update(JSON.stringify({rule:'semantic-sections-aida-3',boundaries})).digest('hex').slice(0,16);
  const parts=[];let bannerLink=null,footerIndex;
- for(let top=0,index=0;top<meta.height;index++){
-  let height=index===0?firstHeight:meta.height-top;
+ for(let index=0;index<boundaries.length-1;index++){
+  const top=boundaries[index],height=boundaries[index+1]-top;
   const footer=top===footerTop;
   const banner=top===bannerTop;
-  if(footer)height=meta.height-top;
-  else if(banner)height=footerTop-bannerTop;
-  else if(footerTop!==undefined&&top<footerTop)height=Math.min(height,footerTop-top);
-  if(bannerTop!==undefined&&top<bannerTop)height=Math.min(height,bannerTop-top);
-  if(officialTop!==undefined&&top<officialTop)height=Math.min(height,officialTop-top);
   const file=path.join(dest,digest+'-'+String(index).padStart(2,'0')+'.png');
   const bytes=await sharp(png,{limitInputPixels:false}).extract({left:0,top,width:860,height}).png({compressionLevel:9}).toBuffer();
   if(bytes.length>19000000)throw Error('상세 구간 한 장의 업로드 용량을 초과했습니다. 원본과 표를 유지하기 위해 중간 분할하지 않았습니다.');
-  await writeFile(file,bytes);parts.push(file);top+=height;
+  await writeFile(file,bytes);parts.push(file);
   if(footer)footerIndex=index;
   if(banner)bannerLink={index,file,url:STORE_BANNER_URL};
  }
- return {files:parts,bannerLink,footerIndex,video:video?{file:video.file,sha256:video.sha256}:null,includeVideo,dataRoot,videoOptions,hash:digest};
+ return {files:parts,bannerLink,footerIndex,videoAfterIndex:boundaries.indexOf(firstHeight)-1,video:video?{file:video.file,sha256:video.sha256}:null,includeVideo,dataRoot,videoOptions,hash:digest};
 }
 export async function applySmartstoreBannerLink(editor,parts,{check=()=>{},log=()=>{}}={}){
  const link=parts.bannerLink;if(!link)return;
