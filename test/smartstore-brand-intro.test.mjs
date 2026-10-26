@@ -3,7 +3,7 @@ const manifest=JSON.parse(await readFile(new URL('../public/smartstore-template/
 test('남녀 각각 10개의 서로 다른 공식 원본으로 10개 남녀 조합을 만든다',async()=>{
  assert.equal(manifest.photos.filter(p=>p.gender==='men').length,10);assert.equal(manifest.photos.filter(p=>p.gender==='women').length,10);assert.equal(new Set(manifest.photos.map(p=>p.sourceSha256)).size,20);assert.equal(manifest.variants.length,10);
  for(const photo of manifest.photos){assert.equal(photo.faceOrClothesAltered,false);assert.match(new URL(photo.sourceUrl).hostname,/(^|\.)giordano\.co\.kr$/);}
- for(const file of BRAND_INTRO_ASSET_NAMES){assert(publishable('public/smartstore-template/'+file));const meta=await sharp(new URL('../public/smartstore-template/'+file,import.meta.url)).metadata();assert.equal(meta.width,860);assert.equal(meta.height,601);}
+ for(const file of BRAND_INTRO_ASSET_NAMES){assert(publishable('public/smartstore-template/'+file));const meta=await sharp(await readFile(new URL('../public/smartstore-template/'+file,import.meta.url))).metadata();assert.equal(meta.width,860);assert.equal(meta.height,601);}
  assert(publishable('public/smartstore-template/brand-intro-variants.json'));assert(!publishable('data/brand-intro-variants/men-01-original.jpg'));assert(!publishable('public/smartstore-template/arbitrary.jpg'));
 });
 test('공식 상품 성별·품목을 실제 착장 태그와 비교하고 같은 품번은 항상 같은 조합을 선택한다',()=>{
