@@ -1,3 +1,5 @@
+import {excludedPhotoReason} from './smartstore-photo-exclusions.mjs';
+import {createWorker} from 'tesseract.js';
 import {readFile,writeFile,mkdir,rename} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
@@ -15,7 +17,7 @@ export function editorPhotoPositions(colors){
  const imgs=[...document.querySelectorAll('.se-component img')];
  for(const c of document.querySelectorAll('.se-component')){
   const text=(c.innerText||'').trim();
-  if(/◆\s*상세페이지\s*◆|^PRODUCT DETAIL$|^디테일까지/.test(text))break;
+  if(/◆\s*상세페이지\s*◆|^PRODUCT DETAIL$|^디테일까지|정품.*출고.*안내|교환.*반품.*안내|^매장\s*안내|^SHOP INFORMATION/i.test(text))break;
   if(c.classList.contains('se-text')){
    const matches=colors.filter(v=>compact(v)===compact(text)||/^\d{2}[^\d]/.test(compact(text))&&v.slice(0,2)===compact(text).slice(0,2));
    const match=matches.length===1?matches[0]:null;
@@ -131,7 +133,7 @@ export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{
  if(fresh){await editor.close();await fresh.close();}
  return {style:product.style,sourceUrl:product.sourceUrl,formUrl,sellerCode,candidates};
 }
-export async function stageImportedPhotos(source,folder,{fetchImpl=fetch,signal}={}){
+export async function stageImportedPhotos(source,folder,{fetchImpl=fetch,signal,dataRoot=path.resolve(folder,'..'),recognizePhoto}={}){
  safeStyle(source.style);assertDetailOnlyProduct(source.sellerCode,source.style);
  const dir=path.join(folder,'smartstore-photo-import');await mkdir(dir,{recursive:true});const candidates=[],seen=new Set();
  for(const item of source.candidates){
@@ -140,6 +142,9 @@ export async function stageImportedPhotos(source,folder,{fetchImpl=fetch,signal}
   if(!response.ok||!/^image\/(jpeg|png|webp)(?:;|$)/i.test(response.headers.get('content-type')||''))throw Error('기존 상품의 사진 파일을 가져오지 못했습니다.');
   const chunks=[];let size=0;for await(const chunk of response.body){size+=chunk.length;if(size>19000000)throw Error('가져올 사진이 19MB를 초과합니다.');chunks.push(chunk);}const bytes=Buffer.concat(chunks);
   const meta=await sharp(bytes,{limitInputPixels:40000000}).metadata();if(!['jpeg','png','webp'].includes(meta.format)||meta.width<300||meta.height<300||meta.height>meta.width*3)continue;
+  let recognize=recognizePhoto;
+  if(!recognize&&item===source.candidates.at(-1))recognize=async b=>{const worker=await createWorker('kor+eng');try{return (await worker.recognize(await sharp(b).resize({width:1000,withoutEnlargement:true}).toBuffer())).data.text;}finally{await worker.terminate();}};
+  const excluded=await excludedPhotoReason(bytes,{dataRoot,recognize});if(excluded)continue;
   const sha256=hash(bytes),id=sha256.slice(0,24);if(seen.has(id))continue;seen.add(id);
   const file=id+({jpeg:'.jpg',png:'.png',webp:'.webp'})[meta.format];await writeFile(path.join(dir,file),bytes);
   candidates.push({id,file,sha256,url,colorHint:item.colorHint,width:meta.width,height:meta.height});

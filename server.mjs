@@ -284,7 +284,7 @@ const server=http.createServer(async(req,res)=>{
           }
           product=await productEdits.apply(product);state.product=product;state.folder=folder;state.photoImport=null;state.revision++;
           const source=await smartBot.importExistingPhotos(product,{signal});signal.throwIfAborted();
-          const stage=await stageImportedPhotos(source,folder,{signal});signal.throwIfAborted();
+          const stage=await stageImportedPhotos(source,folder,{signal,dataRoot});signal.throwIfAborted();
           if(state.product.style!==product.style||state.folder!==folder)throw Error('현재 상품이 변경되어 수집 사진을 적용하지 않았습니다.');
           let known=[],ignored=[];try{const mapping=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',style,'draft.json'),'utf8')).photoMapping;known=mapping?.files||[];ignored=mapping?.ignoredPhotos||[];}catch(e){if(e.code!=='ENOENT')throw e;}
           const choices=allImportedPhotoChoices(stage,product,known,ignored);

@@ -1,3 +1,4 @@
+import {excludedPhotoReason} from './smartstore-photo-exclusions.mjs';
 import {applyGarmentReview,saveGarmentReview,validateGarmentReview} from './smartstore-garment-review.mjs';
 import {findPhotos} from './smartstore-photo-files.mjs';
 import {workingProductPhoto} from './smartstore-photo-work.mjs';
@@ -63,7 +64,10 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
   if(/^[a-f0-9]{64}$/.test(record.hash)&&['front','detail','side','back','care-label','provided'].includes(record.role)&&(['care-label','provided'].includes(record.role)||product.colors.includes(record.color)))known.set(record.hash,{role:record.role,color:['care-label','provided'].includes(record.role)?'':record.color});
  }
  const ignored=new Set((old?.style===product.style&&old.sourceUrl===product.sourceUrl?old.photoMapping?.ignoredPhotos||[]:[]).filter(p=>/^[a-f0-9]{64}$/.test(p.hash)).map(p=>p.hash));
- const found=(await findPhotos(product,{desktop,photoRoots})).filter(p=>!ignored.has(hash(p.bytes))||known.get(hash(p.bytes))?.role==='care-label');
+ const found=[];for(const photo of await findPhotos(product,{desktop,photoRoots})){
+  if(ignored.has(hash(photo.bytes))&&known.get(hash(photo.bytes))?.role!=='care-label')continue;
+  const reason=await excludedPhotoReason(photo.bytes,{dataRoot});if(reason){log('착용사진 제외 · '+photo.name+' · '+reason);continue;}found.push(photo);
+ }
  // Only this style's folder is read; keep original bytes for visual-review hashes.
  for(const photo of found){signal?.throwIfAborted();await workingProductPhoto(photo,product,{dataRoot});}
  const photos=found;
