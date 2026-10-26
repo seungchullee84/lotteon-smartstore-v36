@@ -674,7 +674,6 @@ export class LotteAutomation extends BrowserAutomation {
   async channel(p,folder){
     // Suffix names for channel controls vary between portal versions. Collect the actual list.
     await this.applyChannelPreset();
-    const major=p.category.channelMajor||(p.gender==='여성'?'브랜드여성의류':'브랜드남성의류');
     if(/패딩|푸퍼|다운/.test(p.name+' '+(p.sourceCategory||[]).join(' '))&&!/코트/.test(p.name)){
       p.category.channelMiddle='점퍼/패딩/야상';p.category.channelSmall='패딩/다운점퍼';
     }
@@ -682,6 +681,7 @@ export class LotteAutomation extends BrowserAutomation {
     if(correctedPath.channelMiddle!==p.category.channelMiddle)this.log('하위 분류에 맞춰 상위 분류 보정: '+p.category.channelMiddle+' → '+correctedPath.channelMiddle);
     p.category=correctedPath;
     const verifiedPath=resolveCatalogCategory(p);if(verifiedPath.path)p.category=verifiedPath.category;
+    const major=p.category.channelMajor||(p.gender==='여성'?'브랜드여성의류':'브랜드남성의류');
     const matchKey=categoryKey(p);
     const known=(await loadCategoryCache(this.root)).matches.find(m=>m.key===matchKey&&m.actual.major===major);
     if(known){p.category.channelMiddle=known.actual.middle;p.category.channelSmall=known.actual.small;this.log('검증된 분류 매칭표 사용: '+major+' > '+known.actual.middle+' > '+known.actual.small);}

@@ -19,6 +19,8 @@ export function similarCategory(value,labels){
 // Keep the parent and leaf together; aliases alone cannot repair the wrong branch.
 export function channelCategoryPath(category){
  const leaf=String(category.channelSmall||'').replace(/^[^:：]*[:：]\s*/,'').replace(/^(남성|여성)/,'').trim();
+ // User-confirmed standard category screenshot, 2026-10-26. No detail level.
+ if(leaf==='니트머플러')return {...category,channelMajor:'잡화',channelMiddle:'워머/머플러',channelSmall:'니트머플러',channelDetail:''};
  const paths=[
   {leaves:['청바지','데님','데님팬츠','부츠컷/와이드핏','스키니/슬림핏','스트레이트핏'],middle:'청바지'},
   {leaves:['바람막이','바람막이점퍼','윈드브레이커','패딩','패딩/다운','패딩점퍼','다운점퍼','패딩/다운점퍼'],middle:'점퍼/패딩/야상'},

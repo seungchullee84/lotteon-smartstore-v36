@@ -1,5 +1,6 @@
 import {readFile,writeFile,mkdir,rename} from 'node:fs/promises';
 import path from 'node:path';
+import {channelCategoryPath} from './category.mjs';
 
 const strings=['name','gender','material','country','washing','manufactured','keywords','smartstoreName'];
 const categories=['commonMiddle','commonSmall','channelMiddle','channelSmall'];
@@ -26,6 +27,7 @@ export function applyProductEdits(product,record){
   else result[key]=value;
  }
  if(Object.hasOwn(fields,'smartstoreName'))result.smartstoreNameUserEdited=true;
+ result.category=channelCategoryPath(result.category);
  return result;
 }
 export function createProductEditStore(dataRoot){

@@ -42,6 +42,7 @@ export function commonFor(path,gender,common){
  return null;
 }
 export function resolveCatalogCategory(p,catalog=loadCatalog(),common=null){
+ if(p.category?.channelMajor==='잡화')return {category:{...p.category},status:'사용자 확인 잡화 경로 · 의류 목록 대조 제외'};
  if(!catalog)return {category:{...p.category},status:'목록 미수집'};
  if(!common)try{common=JSON.parse(readFileSync(new URL('./data/category-catalog-common.json',import.meta.url),'utf8'));}catch{}
  const text=[p.rawName,p.name,...(p.sourceCategory||[])].join(' ');
