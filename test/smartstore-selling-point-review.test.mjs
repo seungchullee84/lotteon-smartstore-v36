@@ -1,5 +1,16 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm} from 'node:fs/promises';import path from 'node:path';import os from 'node:os';import {reviewSellingPoints} from '../smartstore-selling-point-review.mjs';
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,writeFile} from 'node:fs/promises';import path from 'node:path';import os from 'node:os';import {reviewSellingPoints,saveOfficialImagePointReview} from '../smartstore-selling-point-review.mjs';
 const product={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=test',name:'공식 의류'};
+test('공식 이미지 시각 확인은 품번·공식 주소·이미지 해시가 일치할 때만 짧은 본문보다 우선한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'image-points-'));try{
+ await writeFile(path.join(root,'detail.jpg'),'official-image-v1');
+ const text='특유의 부드러운 결감이 느껴지는 페이크 스웨이드 외피 원단 사용';
+ const points=[{title:'부드러운 스웨이드 결감',description:'부드러운 결감의 페이크 스웨이드 외피.',evidence:text}];
+ const record=await saveOfficialImagePointReview(product,root,{text,points,dataRoot:root});
+ for(const source of ['','공식 상품명과 소재만 있는 짧은 설명']){const reviewed=await reviewSellingPoints(product,source,{dataRoot:root,detailHash:record.detailHash});assert.equal(reviewed.status,'ready');assert.equal(reviewed.method,'visual-official-detail');assert.deepEqual(reviewed.points,points);}
+ for(const [p,detailHash] of [[product,'changed-image'],[{...product,sourceUrl:product.sourceUrl+'-changed'},record.detailHash],[{...product,style:'654321'},record.detailHash]]){const reviewed=await reviewSellingPoints(p,'상품명만 확인됨',{dataRoot:root,detailHash});assert.equal(reviewed.status,'needs-review');assert.equal(reviewed.points.length,0);}
+ await assert.rejects(saveOfficialImagePointReview(product,root,{text:'면 100%',points,dataRoot:root}),/원문/);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
 test('별도 API 없이 상의·하의·아우터·원피스·스커트 원문을 공통 처리하고 네트워크를 호출하지 않는다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'local-points-'));try{for(const source of [
  '부드러운 원단으로 편안한 착용감을 제공합니다. 여유로운 핏으로 자연스럽게 떨어집니다. 소매 자수 디테일을 더했습니다.',
