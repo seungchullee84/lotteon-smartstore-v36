@@ -27,7 +27,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  const prepared={style,includeBrandVideo:true,colorImages:{},colorSources:{},sellingPoints:[],photoCount:0,photoFiles:{},providedImages:[],sourceUrl:product.sourceUrl,displayColors:[...product.colors]};
  if(draft){
   if(draft.headline)prepared.headline=String(draft.headline).slice(0,200);
-  if(draft.sellingPoints){if(!Array.isArray(draft.sellingPoints)||draft.sellingPoints.some(p=>!p.title||!p.description||!p.evidence))throw Error('소구점의 공식 확인 근거를 함께 저장해 주세요.');prepared.sellingPoints=draft.sellingPoints.slice(0,3);}
+  if(draft.sellingPoints){if(!Array.isArray(draft.sellingPoints)||draft.sellingPoints.some(p=>!p.title||!p.description||!p.evidence))throw Error('소구점의 공식 확인 근거를 함께 저장해 주세요.');prepared.sellingPoints=draft.sellingPoints.slice(0,4);}
  }
  // Preview, export and upload must re-check the current official wording, too.
  let sourceText=product.officialDetailText||product.officialDescription||'';

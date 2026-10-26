@@ -5,7 +5,7 @@ import {officialSellingPoints,usableSellingPoints} from './smartstore-selling-po
 const digest=text=>createHash('sha256').update(text).digest('hex');
 export async function reviewSellingPoints(product,source,{dataRoot,detailHash=null,signal}={}){
  signal?.throwIfAborted();
- const identity={version:2,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
+ const identity={version:3,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
  if(!source.trim())return {...identity,points:[],status:'needs-review',message:'공식 상세 원문을 확인해야 합니다.'};
  const root=path.join(dataRoot,'smartstore-details',product.style),file=path.join(root,'selling-point-review.json');
  let cached;try{cached=JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}

@@ -20,13 +20,13 @@ export function officialProsePoints(source,existing=[]){
    const candidates=[sentence,...clauses];
    const clause=candidates.find(c=>c.length>=8&&c.length<=40&&rule.feature.test(c)&&rule.claim.test(c)&&!/(?:및|와|과|으로|하고|하며|위한|통해|보다|또는|또한|\d)$/.test(c));
    if(!clause)continue;
-   let description=clause.replace(/[.!?]+$/,'').replace(/(?:입니다|습니다)$/,'');
+   let description=clause.replace(/[.!?]+$/,'');
    // Keep the source phrase intact rather than appending an inferred performance claim.
    description=description.replace(/(?:했으며|하였으며|하며|이며|으로)$/,'').trim()+'.';
    if(existing.some(p=>norm(p.evidence).includes(norm(clause))||norm(p.description)===norm(description))||points.some(p=>norm(p.description)===norm(description)))continue;
    const point={title:rule.kind,description,evidence:sentence};
    if(compactSellingPoint(point)){points.push(point);used.add(rule.kind);}
-   if(points.length+existing.length>=3)return points;
+   if(points.length+existing.length>=4)return points;
   }
  }
  return points;
@@ -38,7 +38,7 @@ export function compactSellingPoint(point){
 export function officialSellingPoints(description){
  const text=String(description||'').replace(/\s+/g,' ');const points=[],covered=new Set(),labels=new Map();
  const sections=[...String(description||'').matchAll(/POINT\s*0?[1-9]\s*[（(]([^）)]+)[）)]/gi)].map(m=>m[1].trim());
- const finish=()=>[...points,...officialProsePoints(description,points)].filter(compactSellingPoint).sort((a,b)=>{const rank=p=>{const i=sections.indexOf(labels.get(p));return i<0?99:i;};return rank(a)-rank(b);}).slice(0,3);
+ const finish=()=>[...points,...officialProsePoints(description,points)].filter(compactSellingPoint).sort((a,b)=>{const rank=p=>{const i=sections.indexOf(labels.get(p));return i<0?99:i;};return rank(a)-rank(b);}).slice(0,4);
  // Shared apparel features: use only an affirmative, explicit source sentence.
  const sentences=text.replace(/\\n/g,' ').split(/\s*[•●]\s*|(?<=[.!?])\s+/).map(s=>s.trim()).filter(Boolean);
  for(const [pattern,title,copy,label] of [
@@ -63,7 +63,7 @@ export function officialSellingPoints(description){
   const evidence=sentences.find(s=>pattern.test(s)&&!/(?:아닌|없습니다|없음)/.test(s));if(!evidence)continue;
   const description=/^부드럽고, 따뜻하게$/.test(title)&&/기모/.test(evidence)&&!/브러쉬드|브러시드/.test(evidence)?'기모 가공으로 더한 보온성.':copy;
   points.push({title,description,evidence});labels.set(points.at(-1),label);covered.add(label);
-  if(points.length>=3&&!sections.length)return finish();
+  if(points.length>=4&&!sections.length)return finish();
  }
  const fabric=text.match(/\d+g\/(?:㎡|m2)의[^.\n]*?(?:실키한|실키)[^.\n]*(?:특징|제공합니다)/);
  if(fabric&&/저지/.test(fabric[0])&&/부드럽|소프트/.test(fabric[0])){
@@ -81,7 +81,7 @@ export function officialSellingPoints(description){
  if(slim&&/레이어드/.test(slim[0])){points.push({title:'슬림하게, 레이어드',description:'몸에 자연스럽게 밀착되는 슬림 실루엣.',evidence:slim[0]});covered.add('실루엣');covered.add('핏');labels.set(points.at(-1),sections.includes('실루엣')?'실루엣':'핏');}
  const neck=text.match(/적당한 폭의 터틀넥[^.\n]*?(?:착용감[^.\n]*?(?:더했으며|제공)|착용감)/);
  if(neck){points.push({title:'부담 적은 터틀넥',description:'적당한 폭으로 편안한 착용감.',evidence:neck[0]});covered.add('디테일');covered.add('네크라인');labels.set(points.at(-1),sections.includes('디테일')?'디테일':'네크라인');}
- if(points.length>=3&&!sections.length)return finish();
+ if(points.length>=4&&!sections.length)return finish();
  // Keep the official POINT headings and wording for other clothing categories.
  const original=String(description||'').replace(/\\n/g,'\n');
  const blocks=[...original.matchAll(/POINT\s*0?[1-9]\s*(?:[（(]([^）)]+)[）)])?\s*([\s\S]*?)(?=POINT\s*0?[1-9]|\n\s*\*|$)/gi)];
