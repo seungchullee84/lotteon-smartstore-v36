@@ -7,8 +7,11 @@ export function officialSellingPoints(description){
  const sections=[...String(description||'').matchAll(/POINT\s*0?[1-9]\s*[（(]([^）)]+)[）)]/gi)].map(m=>m[1].trim());
  const finish=()=>points.filter(compactSellingPoint).sort((a,b)=>{const rank=p=>{const i=sections.indexOf(labels.get(p));return i<0?99:i;};return rank(a)-rank(b);}).slice(0,3);
  // Shared apparel features: use only an affirmative, explicit source sentence.
- const sentences=text.replace(/\\n/g,' ').split(/(?<=[.!?])\s+/);
+ const sentences=text.replace(/\\n/g,' ').split(/\s*[•●·]\s*|(?<=[.!?])\s+/).map(s=>s.trim()).filter(Boolean);
  for(const [pattern,title,copy,label] of [
+  [/울\s*\d+(?:\.\d+)?%[^.]*캐시미어\s*\d+(?:\.\d+)?%[^.]*혼방[^.]*부드러운\s*촉감[^.]*보온/,'부드럽고, 따뜻하게','울·캐시미어 혼방의 부드러운 촉감과 보온성.','원단'],
+  [/밑단으로[^.]*넓어지는\s*A라인[^.]*여유로운\s*핏/,'여유롭게 흐르는 A라인','밑단으로 자연스럽게 넓어지는 실루엣.','핏'],
+  [/히든\s*버튼\s*여밈[^.]*탈부착\s*가능한\s*(?:카라|칼라)\s*비조/,'깔끔하고, 실용적으로','히든 버튼과 탈부착 가능한 카라 비조.','디테일'],
   [/자연스럽게[^.]*어깨선[^.]*레귤러\s*핏[^.]*편안하게\s*착용/,'자연스러운 레귤러핏','자연스러운 어깨선과 편안한 착용감.','핏'],
   [/컴팩트\s*(?:코튼|면)[^.]*싱글\s*저지[^.]*부드러[^.]*탄탄/,'부드럽고, 탄탄하게','컴팩트 코튼 싱글 저지의 탄탄한 착용감.','원단'],
   [/어니언[^.]*퀼팅|퀼팅[^.]*어니언/,'입체적인 어니언 퀼팅','어니언 패턴으로 살린 입체감.','퀼팅'],
