@@ -195,6 +195,6 @@ export function allImportedPhotoChoices(stage,product,known=[],ignored=[]){
 
 export function assertImportedPhotoCoverage(stage,prepared,choices){
  const expected=new Map();for(const p of stage.candidates.filter(p=>!choices||choices.some(c=>c.id===p.id)))expected.set(p.colorHint,(expected.get(p.colorHint)||0)+1);
- for(const [color,count] of expected)if(prepared.smartstoreDetail?.colorImages?.[color]?.length!==count)throw Error(color+' 사진 반영 수가 수집 결과와 다릅니다.');
+ for(const [color,count] of expected)if((prepared.smartstoreDetail?.storeColorPhotoCounts?.[color]??prepared.smartstoreDetail?.colorImages?.[color]?.length)!==count)throw Error(color+' 사진 반영 수가 수집 결과와 다릅니다.');
  if(!prepared.smartstoreDetail?.sellingPoints?.length)throw Error(prepared.smartstoreDetail?.sellingPointReview?.message||'공식 원문 소구점 확인이 필요합니다. 소구점 없는 상세페이지는 완료 처리하지 않습니다.');
 }

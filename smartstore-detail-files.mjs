@@ -1,3 +1,4 @@
+import {supplementOfficialModels} from './smartstore-official-model.mjs';
 import {reviewSellingPoints} from './smartstore-selling-point-review.mjs';
 import {readFile,writeFile,mkdir,readdir,realpath,access,unlink} from 'node:fs/promises';
 import path from 'node:path';
@@ -96,6 +97,8 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
    prepared.colorSources[group.color]='official';
   }
  }
+ prepared.storeColorPhotoCounts=Object.fromEntries(Object.entries(prepared.colorImages).map(([color,urls])=>[color,urls.length]));
+ await supplementOfficialModels(product,prepared,folder,{dataRoot});
  prepared.embeddedOfficialSections=await embeddedOfficialSections(product,folder);
  const p={...product,smartstoreDetail:prepared};
  return p;
