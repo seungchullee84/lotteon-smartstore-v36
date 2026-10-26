@@ -1,4 +1,12 @@
 import test from 'node:test';import assert from 'node:assert/strict';import * as cheerio from 'cheerio';import {buildTwoChoiceDetail} from '../smartstore-two-choice.mjs';
+test('확인된 기모·두께 비교를 사진 위와 비교표 첫 두 행에 표시하고 미확인 상품에는 추정하지 않음',()=>{
+ const products=choices.map((c,i)=>({...c,brushing:i?'기모 가공':'기모 없음',thickness:i?'도톰한 두께':'중간 두께'}));
+ const $=cheerio.load(buildTwoChoiceDetail(products).html);
+ assert.equal($('[data-primary-difference]').length,2);
+ assert.match($('[data-primary-difference]').first().text(),/기모 없음.*중간 두께/);
+ assert.deepEqual($('tbody tr th').map((_,e)=>$(e).text()).get().slice(0,2),['기모','두께감']);
+ assert.equal(cheerio.load(buildTwoChoiceDetail(choices).html)('[data-primary-difference]').length,0);
+});
 const choices=[{name:'가을 면바지',style:'16522',photo:'https://example.com/1.jpg',bodyHtml:'<p data-autumn>가을 원문</p>',material:'면 100%',fabric:'20수 코튼 트윌',colorCount:5,wearingSize:'32',shortFeature:'20수 코튼 트윌'},{name:'겨울 기모 면바지',style:'16926',photo:'https://example.com/2.jpg',bodyHtml:'<p data-winter>겨울 원문</p>',material:'면 97% · 폴리우레탄 3%',fabric:'기모 가공',colorCount:4,wearingSize:'32',shortFeature:'겨울 기모'}];
 test('두 상품 원문과 소재를 독립 유지하고 공통 소개는 뒤에서 한 번만 표시',()=>{const before=structuredClone(choices);const {html}=buildTwoChoiceDetail(choices,{brandHtml:'<p data-brand>브랜드</p>'});const $=cheerio.load(html);assert.equal($('[data-autumn]').length,1);assert.equal($('[data-winter]').length,1);assert.equal($('[data-brand]').length,1);assert.match($('[data-choice="1"]').text(),/가을 원문/);assert.doesNotMatch($('[data-choice="1"]').text(),/겨울 원문/);assert(html.indexOf('data-two-choice-common')>html.indexOf('data-winter'));assert.equal($('a,form,input,select').length,0);assert.deepEqual(choices,before);});
 test('다른 상품으로 재사용하며 두 상품 이외 입력과 위험한 사진 주소 차단',()=>{assert.throws(()=>buildTwoChoiceDetail(choices.slice(0,1)),/정확히 두/);assert.throws(()=>buildTwoChoiceDetail([...choices,choices[0]]),/정확히 두/);assert.throws(()=>buildTwoChoiceDetail([{...choices[0],photo:'javascript:alert(1)'},choices[1]]),/사진 주소/);assert.match(buildTwoChoiceDetail([{...choices[0],name:'셔츠 <A>',style:'111111'},choices[1]],{variant:'cards'}).html,/셔츠 &lt;A&gt;/);});
