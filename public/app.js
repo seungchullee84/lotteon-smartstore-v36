@@ -21,7 +21,7 @@ $('main').onerror=()=>{
 };
 
 async function post(endpoint,data={}){
- const expected=({open:'lotte',run:'lotte','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-auto':'smartstore','smartstore-detail-only':'smartstore','smartstore-tags-validate':'smartstore','smartstore-tags':'smartstore','smartstore-tags-remove':'smartstore','smartstore-tags-search':'smartstore','smartstore-tags-selection':'smartstore','smartstore-tags-selected':'smartstore','smartstore-ai-settings':'smartstore','smartstore-optimize-title':'smartstore'})[endpoint];
+ const expected=({open:'lotte',run:'lotte','smartstore-template':'smartstore','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-auto':'smartstore','smartstore-detail-only':'smartstore','smartstore-tags-validate':'smartstore','smartstore-tags':'smartstore','smartstore-tags-remove':'smartstore','smartstore-tags-search':'smartstore','smartstore-tags-selection':'smartstore','smartstore-tags-selected':'smartstore','smartstore-ai-settings':'smartstore','smartstore-optimize-title':'smartstore'})[endpoint];
  if(expected&&document.body.dataset.channel!==expected)throw Error('선택한 판매채널과 실행 버튼이 다릅니다. 판매채널을 확인해 주세요.');
  if(expected)data={...data,channel:document.body.dataset.channel};
  try{const r=await fetch('/api/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:AbortSignal.timeout(endpoint==='smartstore-optimize-title'?60000:45000)});const b=await r.json();if(!r.ok)throw Error(b.error);return b;}
@@ -50,7 +50,7 @@ async function copyProgress(errorOnly=false){
  announce(errorOnly?'오류를 복사했습니다.':'진행 기록과 오류를 복사했습니다.','success');
 }
 $('copyError').onclick=()=>copyProgress(true);
-function syncButtons(){if($('smartstoreStart'))$('smartstoreStart').textContent=smartstoreStarting?'시작 요청 중…':serverBusy&&serverPhase==='smartstore-auto'?'자동 작업 진행 중…':'▶ 시작 · 전체 입력·업로드';for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreOpen','smartstoreOptimizeTitle','naverSettings','smartstoreStart','smartstoreDetailOnly','smartstoreImportPhotos','photoImportApply','smartstoreAutoTags'])if($(id))$(id).disabled=requestLock||serverBusy||['smartstoreAutoTags'].includes(id)&&!tagResearchReady||id==='smartstoreDetailOnly'&&!product;}
+function syncButtons(){if($('smartstoreStart'))$('smartstoreStart').textContent=smartstoreStarting?'시작 요청 중…':serverBusy&&serverPhase==='smartstore-auto'?'자동 작업 진행 중…':'▶ 시작 · 전체 입력·업로드';for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreTemplate1','smartstoreTemplate2','smartstoreOpen','smartstoreOptimizeTitle','naverSettings','smartstoreStart','smartstoreDetailOnly','smartstoreImportPhotos','photoImportApply','smartstoreAutoTags'])if($(id))$(id).disabled=requestLock||serverBusy||['smartstoreAutoTags'].includes(id)&&!tagResearchReady||['smartstoreDetailOnly','smartstoreTemplate1','smartstoreTemplate2'].includes(id)&&!product;}
 function action(id,fn){$(id).onclick=async()=>{
  const primary=id in buttonLabels;if(primary&&(requestLock||serverBusy))return;
  if(id==='run'&&!$('form').reportValidity())return;
@@ -155,10 +155,11 @@ $('shutdownApp').onclick=async()=>{
 };
 
 function smartstoreDetailFields(){
- const f=$('form').elements;return {style:product.style,name:f.name.value,gender:f.gender.value,material:f.material.value,colors:f.colors.value.split(',').map(v=>v.trim()).filter(Boolean),sizes:f.sizes.value.split(',').map(v=>v.trim()).filter(Boolean)};
+ const f=$('form').elements;return {style:product.style,detailTemplate:product.detailTemplate===2?2:1,name:f.name.value,gender:f.gender.value,material:f.material.value,colors:f.colors.value.split(',').map(v=>v.trim()).filter(Boolean),sizes:f.sizes.value.split(',').map(v=>v.trim()).filter(Boolean)};
 }
 let detailPreviewResizeObserver;
 function renderDetailPreview(p){
+ for(const n of [1,2]){const button=$('smartstoreTemplate'+n);if(button)button.setAttribute('aria-pressed',String((p.detailTemplate===2?2:1)===n));}
  detailPreviewResizeObserver?.disconnect();
  const box=$('detailPreview');box.replaceChildren();box.scrollTop=0;
  if(document.body.dataset.channel==='smartstore'){
@@ -395,7 +396,7 @@ $('smartstoreStart').onclick=async()=>{
  const style=$('style').value.trim()||product?.style;
  if(!style){$('error').textContent='품번 또는 공식몰 상품 URL을 먼저 입력해 주세요.';return;}
  requestLock=true;smartstoreStarting=true;$('error').textContent='';$('smartstoreStart').disabled=true;syncButtons();announce('시작 요청 접수 중 · 복사등록 화면을 확인합니다.');
- try{await flushManualTagSelection();await post('smartstore-auto',{style,selectedTitle:product?{style:product.style,title:$('smartstoreName').value}:undefined,edits:currentProductEdits(),selectedTags:currentManualTags()});serverBusy=true;serverPhase='smartstore-auto';announce('자동 작업 시작 · 선택한 복사등록 화면에 업로드합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;smartstoreStarting=false;syncButtons();}
+ try{await flushManualTagSelection();await post('smartstore-auto',{style,detailTemplate:product?.detailTemplate===2?2:1,selectedTitle:product?{style:product.style,title:$('smartstoreName').value}:undefined,edits:currentProductEdits(),selectedTags:currentManualTags()});serverBusy=true;serverPhase='smartstore-auto';announce('자동 작업 시작 · 선택한 복사등록 화면에 업로드합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;smartstoreStarting=false;syncButtons();}
 };
 $('smartstoreDetailOnly').onclick=async()=>{
  if(requestLock||serverBusy)return;
@@ -494,7 +495,7 @@ function syncListingImages(state){
  if(!smart||!listing||!product||product.style!==state.product?.style)return;
  const base='/smartstore-listing/',query='?style='+encodeURIComponent(product.style)+'&v='+encodeURIComponent(listing.detailRevision||'');
  const main=base+'main'+query;if($('main').getAttribute('src')!==main)$('main').src=main;
- const stamp=product.style+JSON.stringify(listing)+'@'+String(state.release?.version||'');
+ const stamp=product.style+'#template'+(product.detailTemplate===2?2:1)+JSON.stringify(listing)+'@'+String(state.release?.version||'');
  if(!state.busy&&$('detailPreview').dataset.photoRevision!==stamp){
   renderDetailPreview(product);$('detailPreview').dataset.photoRevision=stamp;
  }
@@ -658,4 +659,13 @@ $('photoImportApply').onclick=async()=>{
  if(!photos.length||photos.some(p=>!p.color||!p.role)){$('photoImportMessage').textContent='사용할 착용사진을 선택하고 색상과 각도를 확인해 주세요.';return;}
  requestLock=true;syncButtons();$('error').textContent='';
  try{await post('smartstore-import-photos-apply',{style:product.style,photos});serverBusy=true;serverPhase='smartstore-import-photos';announce('선택한 착용사진을 등록기·상세 템플릿에 연결합니다.');}catch(e){$('error').textContent=e.message;}finally{requestLock=false;syncButtons();}
+};
+
+// Template choice updates the preview and the same selection is sent to every execution path.
+for(const detailTemplate of [1,2])if($('smartstoreTemplate'+detailTemplate))$('smartstoreTemplate'+detailTemplate).onclick=async()=>{
+ if(requestLock||serverBusy||!product||document.body.dataset.channel!=='smartstore')return;
+ const style=product.style;requestLock=true;syncButtons();
+ try{await post('smartstore-template',{style,detailTemplate,edits:currentProductEdits()});if(product?.style!==style)return;product.detailTemplate=detailTemplate;renderDetailPreview(product);announce('템플릿 '+detailTemplate+' 선택됨','success');}
+ catch(error){$('error').textContent=error.message;}
+ finally{requestLock=false;syncButtons();}
 };

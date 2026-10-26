@@ -10,7 +10,14 @@ import {buildDetailContent} from '../detail-html.mjs';
 import {smartstorePlan} from '../smartstore-form.mjs';
 import {publishable} from '../github-sync.mjs';
 import {prepareVideo,videoOptions,fixtureVideo} from './helpers/brand-video.mjs';
-const product={style:'375908',name:'여성 경량 패딩 자켓 375908',rawName:'여성 경량 패딩 자켓',gender:'여성',colors:['01핑크','02화이트'],sizes:['S','M'],material:'나일론100%',country:'미얀마',washing:'손세탁',manufactured:'2025-08',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=sample',originalDetailUrl:'https://www.giordano.co.kr/detail.jpg',images:{detail:'https://www.giordano.co.kr/detail.jpg',size:'https://www.giordano.co.kr/size.jpg',info:'https://www.giordano.co.kr/info.jpg'}};
+const product={detailTemplate:2,style:'375908',name:'여성 경량 패딩 자켓 375908',rawName:'여성 경량 패딩 자켓',gender:'여성',colors:['01핑크','02화이트'],sizes:['S','M'],material:'나일론100%',country:'미얀마',washing:'손세탁',manufactured:'2025-08',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=sample',originalDetailUrl:'https://www.giordano.co.kr/detail.jpg',images:{detail:'https://www.giordano.co.kr/detail.jpg',size:'https://www.giordano.co.kr/size.jpg',info:'https://www.giordano.co.kr/info.jpg'}};
+
+test('기본 템플릿1과 명시적으로 선택한 템플릿2는 독립적으로 보존한다',()=>{
+ const base={...product,detailTemplate:undefined},one=buildSmartstoreDetail(base),two=buildSmartstoreDetail({...base,detailTemplate:2});
+ assert.equal(one.templateVariant,1);assert.equal(one.templateLabel,'템플릿 1');assert(one.html.indexOf('data-brand-intro')<one.html.indexOf('data-product-intro'));assert(!one.html.includes('data-aida-action'));
+ assert.equal(two.templateVariant,2);assert.equal(two.templateLabel,'템플릿 2');assert(two.html.indexOf('data-product-intro')<two.html.indexOf('data-brand-intro'));assert(two.html.includes('data-aida-action'));
+ assert.throws(()=>buildSmartstoreDetail({...base,detailTemplate:3}),/템플릿 1 또는 2/);
+});
 
 test('모든 의류의 AIDA 순서는 실제 상품·구매 장점부터 시작하고 브랜드 영상 뒤에 선택 안내를 둔다',()=>{
  const point={title:'편안한 움직임',description:'여유로운 품으로 편안하게 입어요.',evidence:'여유로운 품으로 편안한 착용감을 제공합니다.'};
@@ -74,6 +81,7 @@ test('다른 품번·색상·외부 경로는 차단하고 사진 매핑과 상�
   assert.match(await readFile(result.htmlPath,'utf8'),/detail_%EB%B8%8C%EB%9E%9C%EB%93%9C%EC%98%81%EC%83%81\.mp4/);
   assert.equal(result.storeVideoPlayback,'unverified');
   assert.ok(result.points.every(p=>!/모달|기모/.test(p.title+p.description)));
+  const templateOne=await saveSmartstoreDetail({...reviewedProduct,detailTemplate:1},folder,path.join(root,'template-one.png'),{dataRoot,videoOptions});assert.equal(templateOne.templateVariant,1);assert(templateOne.videoAfterTop<templateOne.officialTop);assert.equal(templateOne.renderCacheHit,false);
   const repeated=await saveSmartstoreDetail(reviewedProduct,folder,path.join(root,'repeated.png'),{dataRoot,videoOptions});
   assert.equal(result.renderCacheHit,false);assert.equal(repeated.renderCacheHit,true);assert.equal(repeated.footerTop,result.footerTop);
   assert.deepEqual(await readFile(out),await readFile(path.join(root,'repeated.png')));

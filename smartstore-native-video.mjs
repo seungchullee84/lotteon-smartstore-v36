@@ -34,10 +34,17 @@ export async function insertNativeBrandVideo(editor,{check=()=>{},dataRoot,video
  check();const {file,sha256}=await requireBrandVideo(dataRoot,videoOptions);
  const before=await editor.locator('.se-component.se-video').count();
  const originalPages=new Set(editor.context().pages());
- const button=await assertNativeVideoToolbar(editor);await button.click();
+ const button=await assertNativeVideoToolbar(editor);
+ let toolbarChooser=null;const captureChooser=chooser=>{toolbarChooser=chooser;};
+ // Some ONE versions open the native file chooser directly from the toolbar.
+ // Register before clicking so this event cannot be missed while polling dialogs.
+ editor.on('filechooser',captureChooser);
+ try{
+ await button.click();
  const deadline=Date.now()+timeout;let attached=false,completed=false;
  while(Date.now()<deadline){
   check();
+  if(!attached&&toolbarChooser){await toolbarChooser.setFiles(file);attached=true;}
   const videos=editor.locator('.se-component.se-video');
   if(attached&&await videos.count()===before+1){
    await videos.last().scrollIntoViewIfNeeded();
@@ -75,4 +82,5 @@ export async function insertNativeBrandVideo(editor,{check=()=>{},dataRoot,video
   await new Promise(resolve=>setTimeout(resolve,300));
  }
  throw Error(attached?'MP4 첨부 후 네이버 동영상 식별자를 확인하지 못했습니다. 상품은 저장하지 않았습니다.':'MP4 첨부 창을 확인하지 못했습니다. 편집기에서 동영상 첨부를 확인해 주세요. 상품은 저장하지 않았습니다.');
+ }finally{editor.off('filechooser',captureChooser);}
 }

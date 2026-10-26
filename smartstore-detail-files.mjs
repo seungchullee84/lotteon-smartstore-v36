@@ -138,7 +138,7 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
  const imageUrl=src=>{if(!data.has(src))throw Error('현재 상품에 연결되지 않은 상세 이미지: '+src);return data.get(src);};
  const fontUrl='data:font/ttf;base64,'+(await readFile(path.join(assetsRoot,'GowunDodum-Regular.ttf'))).toString('base64');
  const document=smartstoreDetailDocument(p,{imageUrl,fontUrl,includeVideo:false,includeNavigation:false});
- const cacheRoot=path.join(options.dataRoot||path.join(appRoot,'data'),'smartstore-render-cache');
+ const cacheRoot=path.join(options.dataRoot||path.join(appRoot,'data'),'smartstore-render-cache','template-'+document.templateVariant);
  const cacheKey=await renderCacheKey(document.html);let height,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,photoRegions,renderCacheHit=false;
  let browser;const close=()=>browser?.close().catch(()=>{});signal?.addEventListener('abort',close,{once:true});
  const partial=output+'.partial';
@@ -171,8 +171,8 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
   const footerPath=stem+'_구매혜택부터하단.png';
   await sharp(output,{limitInputPixels:false}).extract({left:0,top:footerTop,width:860,height:height-footerTop}).png({compressionLevel:9}).toFile(footerPath);
   const videoGuidePath=stem+'_영상안내.txt';
-  await writeFile(videoGuidePath,'공통 MP4: '+video.filename+'\n상품 사진·구매 장점·공식 상세 다음의 브랜드 소개와 영상 제목 뒤에 SmartEditor ONE 동영상 첨부로 넣습니다.\n긴 PNG에는 동영상이 들어가지 않습니다. HTML은 로컬 미리보기용이며 판매자센터 동영상 업로드를 대신하지 않습니다.\n로컬 미리보기: 무음 자동재생·반복. 네이버 판매페이지 자동재생: 미검증.\n');
-  const result={width:860,height,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,bannerPath,footerPath,template:document.template,photoCount:p.smartstoreDetail.photoCount,points:document.points,htmlPath:stem+'.html',includeVideo:true,videoOptions,videoPath:video.path,videoSha256:video.sha256,videoGuidePath,previewVideoPlayback:video.previewPlayback,storeVideoPlayback:video.storePlayback,renderCacheHit};
+  await writeFile(videoGuidePath,'공통 MP4: '+video.filename+'\n선택한 템플릿의 브랜드 소개와 영상 제목 뒤에 SmartEditor ONE 동영상 첨부로 넣습니다.\n긴 PNG에는 동영상이 들어가지 않습니다. HTML은 로컬 미리보기용이며 판매자센터 동영상 업로드를 대신하지 않습니다.\n로컬 미리보기: 무음 자동재생·반복. 네이버 판매페이지 자동재생: 미검증.\n');
+  const result={width:860,height,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,bannerPath,footerPath,template:document.template,templateVariant:document.templateVariant,templateLabel:document.templateLabel,photoCount:p.smartstoreDetail.photoCount,points:document.points,htmlPath:stem+'.html',includeVideo:true,videoOptions,videoPath:video.path,videoSha256:video.sha256,videoGuidePath,previewVideoPlayback:video.previewPlayback,storeVideoPlayback:video.storePlayback,renderCacheHit};
   await writeFile(stem+'_제작정보.json',JSON.stringify({style:p.style,sourceUrl:p.sourceUrl,...result},null,2));return result;
  }finally{signal?.removeEventListener('abort',close);await close();await unlink(partial).catch(e=>{if(e.code!=='ENOENT')throw e;});}
 }

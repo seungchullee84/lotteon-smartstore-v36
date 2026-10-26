@@ -3,6 +3,7 @@ import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {stageImportedPhotos,applyImportedPhotos,allImportedPhotoChoices,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
+import {resolveDetailTemplate} from './smartstore-template-choice.mjs';
 import {serveBrandVideo,WOMEN_VIDEO_HASH} from './smartstore-brand-video.mjs';
 import {runSmartstoreAuto} from './smartstore-auto.mjs';
 import {runSmartstoreDetailOnly} from './smartstore-detail-only.mjs';
@@ -125,9 +126,10 @@ const server=http.createServer(async(req,res)=>{
       const current=state.product;if(!current||!state.folder)return json(res,400,{error:'먼저 상품을 수집해 주세요.'});
       if(url.searchParams.get('style')!==current.style)return json(res,409,{error:'상품이 변경되었습니다. 상세 미리보기를 다시 열어 주세요.'});
       const fields=JSON.parse(url.searchParams.get('fields')||'{}');
+      fields.detailTemplate=resolveDetailTemplate(fields.detailTemplate??current.detailTemplate);
       const edits={};for(const key of ['name','gender','material'])if(typeof fields[key]==='string'&&fields[key].length<500)edits[key]=fields[key];
       for(const key of ['colors','sizes'])if(Array.isArray(fields[key])&&fields[key].length<=100&&fields[key].every(v=>typeof v==='string'&&v.length<100))edits[key]=fields[key];
-      const p=await prepareSmartstoreDetail({...current,...edits},state.folder);
+      const p=await prepareSmartstoreDetail({...current,...edits,detailTemplate:fields.detailTemplate},state.folder);
       if(state.product!==current)return json(res,409,{error:'상품이 변경되었습니다.'});
       res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; img-src 'self'; media-src 'self'; font-src 'self'; style-src 'unsafe-inline'; frame-ancestors 'self'; base-uri 'none'"});
       return res.end(localSmartstorePreview(p).html);
@@ -148,6 +150,14 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='POST'){
       const b=await body(req);
       requireChannel(url.pathname.slice(5),b.channel);
+      if(url.pathname==='/api/smartstore-template'){
+        if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 템플릿을 선택해 주세요.');
+        if(!state.product||b.style!==state.product.style)throw Error('현재 상품의 품번을 확인해 주세요.');
+        const detailTemplate=resolveDetailTemplate(b.detailTemplate);
+        if(b.edits)await productEdits.save(b.edits,state.product.style);
+        state.product=await productEdits.apply({...state.product,detailTemplate});state.revision++;
+        return json(res,200,{ok:true,detailTemplate});
+      }
       if(url.pathname==='/api/naver-verify'){
         naverVerification=await verifyNaver(naverCredentials);return json(res,200,naverVerification);
       }
@@ -239,6 +249,7 @@ const server=http.createServer(async(req,res)=>{
       if(url.pathname==='/api/smartstore-auto'){
         if(state.busy)throw Error('진행 중인 작업이 있습니다.');
         parseProductInput(b.style);
+        const detailTemplate=resolveDetailTemplate(b.detailTemplate??state.product?.detailTemplate);
         if(b.edits)await productEdits.save(b.edits,state.product?.style);
         const selectedTitle=b.selectedTitle;const input=b.style,key=backgroundApiKey;const previous=state.product;const parsedInput=parseProductInput(input);const sourceUrlHint=previous&&(parsedInput.style===previous.style||parsedInput.url===previous.sourceUrl)?previous.sourceUrl:null;smartBot.stopped=false;bot.stopped=false;
         job('smartstore-auto',async()=>{
@@ -249,7 +260,7 @@ const server=http.createServer(async(req,res)=>{
               const folder=path.join(dataRoot,'smartstore-auto-'+Date.now());
               let product=await collect(value,folder,log,()=>signal.aborted,signal,{saveSmartstoreSource:true,sourceUrlHint,noticeCacheRoot:path.join(dataRoot,'smartstore-notice-cache'),prepareMain:false});
               product.keywords=buildKeywords(product);
-              product=await productEdits.apply(product);
+              product=await productEdits.apply(product);product.detailTemplate=detailTemplate;
               if(selectedTitle){Object.assign(product,applySelectedSmartstoreTitle(product,selectedTitle));log('현재 전용 상품명 그대로 사용 · 자동 재작성 없음');}
               else{product.smartstoreName=smartstoreTitle(product);
               const optimized=await optimizeNaverTitle(product,naverCredentials);
@@ -333,7 +344,7 @@ const server=http.createServer(async(req,res)=>{
         if(b.product?.style!==state.product.style)throw Error('현재 상품의 품번을 다시 확인해 주세요.');
         const edits={};for(const key of ['name','gender','material'])if(typeof b.product[key]==='string')edits[key]=b.product[key].slice(0,500);
         for(const key of ['colors','sizes'])if(Array.isArray(b.product[key])&&b.product[key].length<=100&&b.product[key].every(v=>typeof v==='string'&&v.length<100))edits[key]=b.product[key];
-        const product={...state.product,...edits},folder=state.folder;smartBot.stopped=false;
+        const product={...state.product,...edits,detailTemplate:resolveDetailTemplate(b.product.detailTemplate??state.product.detailTemplate)},folder=state.folder;smartBot.stopped=false;
         job('smartstore-detail-only',async()=>{
           const signal=activeAbort.signal;
           await runSmartstoreDetailOnly({product,folder,signal,log,
@@ -402,8 +413,8 @@ const server=http.createServer(async(req,res)=>{
           if(b.product?.style!==current.style)throw Error('현재 상품을 다시 확인해 주세요.');
           const edits={};for(const key of ['name','gender','material'])if(typeof b.product[key]==='string')edits[key]=b.product[key].slice(0,500);
           for(const key of ['colors','sizes'])if(Array.isArray(b.product[key])&&b.product[key].length<=100&&b.product[key].every(v=>typeof v==='string'&&v.length<100))edits[key]=b.product[key];
-          const p={...current,...edits};const saveFolder=await imageDownloadFolder();
-          const savedPath=path.join(saveFolder,p.style+'_스마트스토어상세_'+Date.now()+'.png');
+          const p={...current,...edits,detailTemplate:resolveDetailTemplate(b.product.detailTemplate??current.detailTemplate)};const saveFolder=await imageDownloadFolder();
+          const savedPath=path.join(saveFolder,p.style+'_템플릿'+p.detailTemplate+'_스마트스토어상세_'+Date.now()+'.png');
           const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase='smartstore-detail';state.error=null;
           try{
             const dimensions=await saveSmartstoreDetail(p,state.folder,savedPath,{signal:controller.signal});

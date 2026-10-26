@@ -2,6 +2,16 @@ import test from 'node:test';import assert from 'node:assert/strict';import {chr
 import {mkdtemp,rm} from 'node:fs/promises';import os from 'node:os';import path from 'node:path';
 import {prepareVideo,fixtureVideo} from './helpers/brand-video.mjs';
 import {nativeVideoIdentity} from '../smartstore-native-video.mjs';
+
+test('동영상 툴바가 첨부창 없이 파일 선택기를 직접 열어도 MP4를 영상 입력에만 첨부한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'direct-native-video-')),browser=await chromium.launch({headless:true});try{
+ const options=await prepareVideo(root),page=await browser.newPage();
+ await page.setContent(`<button data-name=video data-group=documentToolbar onclick="document.querySelector('#video').click()">동영상</button><input id=photo type=file hidden><input id=video type=file hidden onchange="const n=document.createElement('div');n.className='se-component se-video';n.dataset.videoId='direct-picker-video';document.body.append(n)"><button onclick="window.saved=true">등록</button>`);
+ const result=await insertSmartstoreVideo(page,{...options,timeout:3000});assert.deepEqual(result.identity,['direct-picker-video']);
+ assert.equal(await page.locator('#photo').evaluate(n=>n.files.length),0);assert.equal(await page.locator('#video').evaluate(n=>n.files.length),1);assert.equal(await page.evaluate(()=>window.saved),undefined);
+ assert.equal(page.listenerCount('filechooser'),0,'첨부 후 수집기를 해제한다');
+ }finally{await browser.close();await rm(root,{recursive:true,force:true});}
+});
 test('네이버 변환 대기 섬네일이 바뀌어도 같은 문서 영상 요소를 재확인한다',async()=>{
  const browser=await chromium.launch({headless:true});try{
   const page=await browser.newPage();await page.route('https://phinf.pstatic.net/**',r=>r.abort());
