@@ -4,6 +4,22 @@ import assert from 'node:assert/strict';
 import {keywordCandidates,packKeywords,createKeywordOptimizer,verifyNaver} from '../naver-keywords.mjs';
 const product={name:'여성 겨울 후드 숏 패딩',gender:'여성'};
 const credentials={clientId:'dummy',clientSecret:'dummy'};
+
+test('상위 검색어와 지오다노 첫 순서를 유지하며 단순 순차 조립의 빈칸을 줄인다',()=>{
+ const ranked=['가'.repeat(9),'나'.repeat(14),'다'.repeat(11),'라'.repeat(11)];
+ const result=packKeywords(ranked);
+ assert.equal(result,'지오다노,'+ranked[0]+','+ranked[2]+','+ranked[3]);
+ assert.equal(result.length,38);
+ assert.equal(packKeywords(['니트']),'지오다노,니트');
+});
+
+test('태그사전은 상품 근거가 있는 원본 명칭만 후보로 추가한다',()=>{
+ const researchIndex={tags:['남성슬랙스','기모슬랙스','와이드슬랙스','여성슬랙스','겨울슬랙스','기모슬랙스코디'].map((name,i)=>({id:String(i+1),name,decision:'include',kind:'garment'}))};
+ const candidates=keywordCandidates({name:'남성 기모 슬랙스',gender:'남성'},{researchIndex});
+ assert(candidates.includes('기모슬랙스'));assert(candidates.includes('남성슬랙스'));
+ for(const name of ['와이드슬랙스','여성슬랙스','겨울슬랙스','기모슬랙스코디'])assert(!candidates.includes(name));
+ assert(!candidates.includes('지오다노'));
+});
 test('관련 후보만 만들고 쉼표 포함 40자를 넘기거나 단어를 자르지 않는다',()=>{
  const candidates=keywordCandidates(product);
  assert(candidates.includes('후드패딩'));assert(candidates.includes('숏패딩'));assert(!candidates.includes('롱패딩'));
