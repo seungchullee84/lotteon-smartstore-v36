@@ -1,3 +1,41 @@
+// Only purchase benefits belong on these cards. Tables and feature names are not benefits.
+const benefitPattern=/(?:부드|소프트|탄탄|보온|따뜻|포근|가벼|가볍|경량|쾌적|유연|신축|사방\s*스판|가로\s*\/\s*세로\s*양방향|통기|흡습|속건|시원|편안|편하|여유|넉넉|부담.{0,8}(?:적|덜|줄|않)|활동성|움직임|조절|수납|실용|활용|매치|코디|레이어드|연출|어우러|어울|포인트|감각적|세련|입체감|수축.{0,12}최소|환경.{0,15}줄)/;
+const genericTitle=/^(?:원단|소재|핏과 실루엣|여밈 디테일|디자인 포인트|가공 포인트|스타일링|상품정보|제품정보)$/;
+function cleanSource(text){
+ const value=String(text||'');
+ const fits=value.match(/(?:슬림|레귤러|레글러|루즈|와이드|오버)\s*핏/g)||[];
+ const unknownAcronym=(value.match(/\b[A-Z]{2,5}\b/g)||[]).some(word=>!['PTT','YKK','HEAT','COOL','WARM','DRY','WOOL','MODAL','NYLON','RAYON','DENIM','LINEN','SILK','LYCRA','NYC','UPF','SPF','UV'].includes(word));
+ return !unknownAcronym&&!/[\uFFFD\[\]{}=|\\]/.test(value)&&!/[A-Za-z][A-Za-z0-9]*\]/.test(value)&&new Set(fits.map(s=>s.replace(/\s/g,''))).size<2;
+}
+function completeCopy(text){return !/(?:부터|으로|위한|통해|이며|으며|하고|하지만|더해진|경량)$/.test(String(text).replace(/[.!?]+$/,'').trim());}
+export function officialBenefitSentences(source){
+ const sections=String(source||'').replace(/\\n/g,'\n').split(/\s*[•●]\s*/).map(section=>section.split(/(?:^|\n)\s*(?:DETAIL\s*SIZE|CHECK\s*UP|INFORMATION|착용\s*시기|두께\s*감|상의\s*핏|하의\s*핏|제품\s*소재|품질\s*보증)(?=\s|$|[:：])/i)[0]);
+ const paragraphs=sections.flatMap(section=>section.split(/\n\s*\n/));
+ // Join wrapped image prose before splitting sentences. Individual caption lines
+ // are a fallback, and still have to state a complete, legible benefit.
+ return [...paragraphs.flatMap(p=>p.replace(/\n+/g,' ').split(/(?<=[.!?])\s+/)),...paragraphs.flatMap(p=>p.split(/\n+/))]
+  .map(s=>s.replace(/\s+/g,' ').trim()).filter(s=>s&&cleanSource(s)&&completeCopy(s));
+}
+function benefitTitle(text){
+ if(/조절/.test(text))return /핏|둘레|허리|스트링|밑단/.test(text)?'원하는 핏으로 조절':'여밈을 편하게 조절';
+ for(const [pattern,title] of [
+  [/환경.{0,30}(?:부담|줄)/,'환경 부담을 줄인 선택'],
+  [/(?:활동성|움직임)/,'움직임은 편안하게'],
+  [/(?:수축[^.]*최소)/,'세탁 후에도 안정적으로'],
+  [/(?:조절)/,'원하는 핏으로 조절'],
+  [/(?:수납)/,'소지품을 간편하게'],
+  [/(?:매치|코디|활용|어울|어우러)/,'다양한 코디에 활용'],
+  [/(?:보온|따뜻|포근)/,'쌀쌀할 때도 따뜻하게'],
+  [/(?:부드|소프트)/,'부드러운 착용감'],
+  [/(?:탄탄)/,'탄탄한 착용감'],
+  [/(?:통기|쾌적|흡습|속건|시원)/,'쾌적하게 입기 좋게'],
+  [/(?:유연|신축)/,'움직임에 맞춰 유연하게'],
+  [/(?:가벼|가볍|경량)/,'가볍게 입기 좋게'],
+  [/(?:편안|편하|여유|넉넉)/,'편안한 착용감'],
+  [/(?:포인트|감각적|세련|입체감)/,'포인트 있게 연출'],
+ ])if(pattern.test(text))return title;
+ return null;
+}
 // Extract short, complete source clauses locally; never invent a benefit from a noun.
 export function officialProsePoints(source,existing=[]){
  const rules=[
@@ -10,7 +48,7 @@ export function officialProsePoints(source,existing=[]){
  ];
  const norm=x=>String(x).replace(/[\s.!?]+/g,'');
  const used=new Set(),points=[];
- const sentences=String(source||'').replace(/\\n/g,'\n').split(/(?:[•●]|\n+|(?<=[.!?])\s+)/).map(s=>s.trim()).filter(Boolean);
+ const sentences=officialBenefitSentences(source);
  for(const sentence of sentences){
   if(/(?:없(?:는|습니다|음)|아닌|아닙니다|미확인|확인\s*필요|추정|검토가?\s*필요)/.test(sentence)||/^POINT\s*\d|^STYLE[.:]|^SIZE|^COLOR|^소재[ :]|^혼용률[ :]/i.test(sentence))continue;
   // A long sentence may contain multiple independent clauses, but never cut at a character limit.
@@ -18,13 +56,14 @@ export function officialProsePoints(source,existing=[]){
   for(const rule of rules){
    if(used.has(rule.kind)||(rule.kind==='핏과 실루엣'&&existing.some(p=>rule.feature.test(p.title+' '+p.description)))||!rule.feature.test(sentence)||!rule.claim.test(sentence))continue;
    const candidates=[sentence,...clauses];
-   const clause=candidates.find(c=>c.length>=8&&c.length<=40&&rule.feature.test(c)&&rule.claim.test(c)&&!/(?:및|와|과|으로|하고|하며|위한|통해|보다|또는|또한|\d)$/.test(c));
+   const clause=candidates.find(c=>c.length>=8&&c.length<=40&&rule.feature.test(c)&&rule.claim.test(c)&&benefitPattern.test(c)&&completeCopy(c)&&!/(?:및|와|과|으로|하고|하며|위한|통해|보다|또는|또한|\d)$/.test(c));
    if(!clause)continue;
    let description=clause.replace(/[.!?]+$/,'');
    // Keep the source phrase intact rather than appending an inferred performance claim.
    description=description.trim()+'.';
    if(existing.some(p=>(norm(p.evidence).includes(norm(clause))||norm(clause).includes(norm(p.evidence)))||norm(p.description)===norm(description))||points.some(p=>norm(p.description)===norm(description)))continue;
-   const point={title:rule.kind,description,evidence:sentence};
+   const point={title:benefitTitle(clause),description,evidence:sentence};
+   if(existing.some(p=>p.title===point.title)||points.some(p=>p.title===point.title))continue;
    if(compactSellingPoint(point)){points.push(point);used.add(rule.kind);}
    if(points.length+existing.length>=4)return points;
   }
@@ -33,18 +72,19 @@ export function officialProsePoints(source,existing=[]){
 }
 // Display copy is brief; full official sentences remain in evidence only.
 export function compactSellingPoint(point){
- return !!point?.title&&!!point?.description&&point.title.length<=18&&point.description.length<=42&&point.title!==point.description&&!/[.…]$/.test(point.title)&&!/[.…]$/.test(point.description.replace(/\.$/,''));
+ return !!point?.title&&!!point?.description&&point.title.length<=18&&point.description.length<=42&&point.title!==point.description&&!genericTitle.test(point.title)&&cleanSource(point.title+' '+point.description)&&completeCopy(point.description)&&benefitPattern.test(point.title+' '+point.description)&&(!point.evidence||(cleanSource(point.evidence)&&benefitPattern.test(point.evidence)))&&!/[.…]$/.test(point.title)&&!/[.…]$/.test(point.description.replace(/\.$/,''));
 }
 export function officialSellingPoints(description){
  const text=String(description||'').replace(/\s+/g,' ');const points=[],covered=new Set(),labels=new Map();
  const sections=[...String(description||'').matchAll(/POINT\s*0?[1-9]\s*[（(]([^）)]+)[）)]/gi)].map(m=>m[1].trim());
  const finish=()=>[...points,...officialProsePoints(description,points)].filter(compactSellingPoint).sort((a,b)=>{const rank=p=>{const i=sections.indexOf(labels.get(p));return i<0?99:i;};return rank(a)-rank(b);}).slice(0,4);
  // Shared apparel features: use only an affirmative, explicit source sentence.
- const paragraphs=String(description||'').replace(/\\n/g,'\n').split(/\s*[•●]\s*|\n\s*\n|(?<=[.!?])\s+/).map(s=>s.trim()).filter(Boolean);
- // Prefer one complete image-caption line as evidence. Keep wrapped paragraphs
- // as a fallback, without merging separate bullets or the page with the image.
- const sentences=[...paragraphs.flatMap(p=>p.split(/\n+/)),...paragraphs].map(s=>s.replace(/\s+/g,' ').trim()).filter(Boolean);
+ const sentences=officialBenefitSentences(description);
  for(const [pattern,title,copy,label] of [
+  [/(?:ECOLOFT|에코로프(?:트)?)[^.]*충전재[^.]*(?:보온|따뜻)|따뜻[^.]*에코로프(?:트)?[^.]*충전재/,'쌀쌀할 때도 따뜻하게','에코로프트 충전재로 따뜻하게 입어요.','충전재'],
+  [/입체적인\s*패턴[^.]*(?:편안한\s*활동성)/,'움직임은 편안하게','입체 패턴 설계로 편안한 활동성을 더했어요.','활동성'],
+  [/다양한\s*아이템[^.]*믹스\s*매치[^.]*세미\s*포멀/,'다양한 코디에 두루','데일리부터 세미 포멀까지 폭넓게 코디해요.','스타일링'],
+  [/(?:폐원단|재활용)[^.]*충전재[^.]*환경[^.]*부담[^.]*줄/,'환경 부담을 줄인 선택','재활용 원료를 활용해 환경 부담을 줄였어요.','환경'],
   [/(?:부드러[^.]*페이크\s*스웨이드|페이크\s*스웨이드[^.]*부드러)/,'부드러운 스웨이드 결감','부드러운 결감의 페이크 스웨이드 외피.','원단'],
   [/마이크로\s*볼\s*타입[^.]*(?:충전재|패딩)[^.]*(?:보온|포근)/,'보온성을 담은 충전재','마이크로 볼타입 패딩 충전재의 보온성.','충전재'],
   [/(?:여유[^.]*릴렉스\s*핏|릴렉스\s*핏[^.]*여유)/,'여유로운 릴렉스핏','여유 있게 떨어지는 릴렉스 실루엣.','핏'],
@@ -72,7 +112,8 @@ export function officialSellingPoints(description){
   if(covered.has(label))continue;
   const evidence=sentences.find(s=>pattern.test(s)&&!/(?:아닌|없습니다|없음)/.test(s));if(!evidence)continue;
   const description=/^부드럽고, 따뜻하게$/.test(title)&&/기모/.test(evidence)&&!/브러쉬드|브러시드/.test(evidence)?'기모 가공으로 더한 보온성.':copy;
-  points.push({title,description,evidence});labels.set(points.at(-1),label);covered.add(label);
+  const point={title,description,evidence};if(!compactSellingPoint(point))continue;
+  points.push(point);labels.set(points.at(-1),label);covered.add(label);
   if(points.length>=4&&!sections.length)return finish();
  }
  const fabric=text.match(/\d+g\/(?:㎡|m2)의[^.\n]*?(?:실키한|실키)[^.\n]*(?:특징|제공합니다)/);
@@ -99,7 +140,7 @@ export function officialSellingPoints(description){
   if(covered.has(block[1]?.trim()))continue;
   const lines=block[2].split(/\n+/).map(s=>s.trim()).filter(Boolean);if(!lines.length)continue;
   const first=lines[0],sentence=(lines.slice(1).join(' ')||first).split(/(?<=[.!?])\s+/)[0];
-  const point={title:first,description:sentence,evidence:block[2].trim()};
+  const point={title:benefitPattern.test(first)?first:benefitTitle(sentence),description:sentence,evidence:block[2].trim()};
   if(!compactSellingPoint(point))continue;points.push(point);
   labels.set(points.at(-1),block[1]?.trim());
  }

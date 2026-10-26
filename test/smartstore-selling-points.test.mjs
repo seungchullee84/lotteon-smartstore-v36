@@ -1,5 +1,21 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {officialSellingPoints,usableSellingPoints} from '../smartstore-selling-points.mjs';
+
+test('모든 상품에서 체크표 선택지·깨진 OCR·미완성 문장은 구매 장점이 아니다',()=>{
+ const noise='클래식한 일자 Elo] 더해진 베이직한 실루옛의 크루넥 경량\n슬랙스, 스커트 등 다양한 아이템과 믹스 매치가 가능해 데일리 룩부터\nCHECK UP\n상의 핏\n슬림핏         레글러핏         루즈핏';
+ assert.deepEqual(officialSellingPoints(noise),[]);
+ for(const description of ['슬림핏 레글러핏 루즈핏.','클래식한 일자 Elo] 더해진 크루넥 경량.','다양한 아이템과 믹스 매치가 가능해 데일리 룩부터.'])assert.equal(usableSellingPoints([{title:'핏과 실루엣',description,evidence:description}],description),false);
+ const benefit='입체적인 패턴 설계로 제작되어 세련된 핏을 완성했으며,\n편안한 활동성을 제공합니다.';
+ const source=noise+'\n•\n'+benefit;
+ const points=officialSellingPoints(source);assert.equal(points.length,1);assert.equal(points[0].title,'움직임은 편안하게');assert.match(points[0].evidence,/편안한 활동성/);assert(usableSellingPoints(points,source));
+});
+
+test('보온·활동·코디·환경의 구매 장점을 근거와 함께 정리하며 품번별 예외를 쓰지 않는다',()=>{
+ const source='클래식한 일자 퀼팅이 더해진 크루넥 경량 자켓입니다. 입체적인 패턴 설계로 제작되어 세련된 핏을 완성했으며, 편안한 활동성을 제공합니다. 따뜻하면서 형태감이 유지되는 에코로프트 충전재를 사용하였습니다. 폐원단과 재활용 플라스틱, 천연 섬유를 활용한 지속 가능한 충전재로 제작되어 환경에 대한 부담을 줄이면서도 충분한 보온 성능을 구현했습니다. 데님, 슬랙스, 스커트 등 다양한 아이템과 믹스 매치가 가능해 데일리 룩부터 세미 포멀 룩까지 폭넓게 연출할 수 있는 실용적인 아이템입니다.';
+ const points=officialSellingPoints(source);assert.deepEqual(points.map(p=>p.title),['쌀쌀할 때도 따뜻하게','움직임은 편안하게','다양한 코디에 두루','환경 부담을 줄인 선택']);assert(usableSellingPoints(points,source));
+ assert.deepEqual(officialSellingPoints('YKK 지퍼를 사용했습니다. 20D 고밀도 나일론 원단입니다. 면 100%. 3 COLORS. 와이드 핏.'),[]);
+ const unrelated=officialSellingPoints('가벼우면서도 우수한 보온성을 제공하는 충전재입니다.');assert(unrelated.every(p=>!p.description.includes('에코로프트')),'일반 보온 문장에 특정 충전재 이름을 추정하지 않는다');
+});
 test('공식 설명의 실루엣·터틀넥·원단 세 근거로 간결한 소구점을 만든다',()=>{
  const description='몸에 자연스럽게 밀착되는 슬림한 실루엣으로 단독 착용은 물론 레이어드 스타일링에도 활용하기 좋습니다. 적당한 폭의 터틀넥을 적용해 부담스럽지 않은 착용감을 더했으며, 코어 컬러입니다. 130g/㎡의 폴리 레이온 스판 저지 원단을 사용해 부드럽고 실키한 텍스처와 가볍고 편안한 착용감을 제공합니다.';
  const points=officialSellingPoints(description);assert.equal(points.length,3);assert(usableSellingPoints(points));assert(points.every(p=>description.includes(p.evidence)));
@@ -8,12 +24,13 @@ test('공식 설명의 실루엣·터틀넥·원단 세 근거로 간결한 소�
  assert.equal(usableSellingPoints([{title:'혼용 소재',description:'혼용 여부는 아래 소재 정보를 확인해 주세요.',evidence:description}]),false);
 });
 
-test('다른 의류도 공식 POINT 원문을 사용하고 일반 색상·사이즈 문구로 채우지 않는다',()=>{
- const text='POINT 01 (핏)\n테이퍼드 실루엣\n밑단으로 갈수록 좁아지는 라인.\nPOINT 02 (디테일)\n히든 밴딩\n허리 안쪽에 밴딩을 적용했습니다.';const points=officialSellingPoints(text);assert.equal(points.length,2);assert.match(points[0].title,/테이퍼드/);assert.equal(points[1].title,'히든 밴딩');assert(usableSellingPoints(points,text));
+test('공식 POINT도 정보 이름만 나열하지 않고 실제 구매 이점이 있을 때만 사용한다',()=>{
+ const text='POINT 01 (핏)\n테이퍼드 실루엣\n밑단으로 갈수록 좁아지는 라인.\nPOINT 02 (디테일)\n히든 밴딩\n허리 안쪽에 밴딩을 적용했습니다.';assert.deepEqual(officialSellingPoints(text),[]);
+ const benefits=text.replace('허리 안쪽에 밴딩을 적용했습니다.','허리 안쪽 히든 밴딩으로 편안한 착용감을 제공합니다.');const points=officialSellingPoints(benefits);assert.equal(points.length,1);assert.equal(points[0].title,'히든밴딩, 편안하게');assert(usableSellingPoints(points,benefits));
 });
 
 test('두 특징을 먼저 찾아도 공식 POINT 03을 빠뜨리지 않고 원문 순서를 유지한다',()=>{
- const text='몸에 자연스럽게 밀착되는 슬림한 실루엣으로 레이어드에도 활용하기 좋습니다. 적당한 폭의 터틀넥으로 부담스럽지 않은 착용감을 더했으며.\nPOINT 01 (실루엣)\n슬림 실루엣\n몸에 자연스럽게 밀착되는 슬림한 실루엣.\nPOINT 02 (디테일)\n적당한 폭의 터틀넥\n부담스럽지 않은 착용감.\nPOINT 03 (원단)\n면 모달 원단\n부드러운 촉감의 원단을 사용했습니다.';const points=officialSellingPoints(text);assert.equal(points.length,3);assert.equal(points[2].title,'면 모달 원단');assert(usableSellingPoints(points,text));
+ const text='몸에 자연스럽게 밀착되는 슬림한 실루엣으로 레이어드에도 활용하기 좋습니다. 적당한 폭의 터틀넥으로 부담스럽지 않은 착용감을 더했으며.\nPOINT 01 (실루엣)\n슬림 실루엣\n몸에 자연스럽게 밀착되는 슬림한 실루엣.\nPOINT 02 (디테일)\n적당한 폭의 터틀넥\n부담스럽지 않은 착용감.\nPOINT 03 (원단)\n면 모달 원단\n부드러운 촉감의 원단을 사용했습니다.';const points=officialSellingPoints(text);assert.equal(points.length,3);assert.equal(points[2].title,'부드러운 착용감');assert(usableSellingPoints(points,text));
  const rib=text.replace('면 모달 원단\n부드러운 촉감의 원단을 사용했습니다.','280g/㎡의 레이온 스판 립 원단을 사용해 소프트한 텍스처와 톡톡한 두께감이 특징입니다.');const result=officialSellingPoints(rib);assert.equal(result.length,3);assert.equal(result[2].title,'톡톡하고, 부드럽게');
 });
 
@@ -23,9 +40,9 @@ test('모든 의류의 표시 문구는 짧게 요약하고 긴 원문과 문단
  assert.equal(officialSellingPoints('아주 긴 소개문을 그대로 상품 제목과 설명에 반복하는 방식은 사용하지 않으며 검토가 필요한 새로운 상품입니다.').length,0);assert.equal(usableSellingPoints([{title:'짧은 제목',description:text,evidence:text}],text),false);
 });
 
-test('공식 퀼팅 패딩 원문도 짧은 세 소구점으로 표현한다',()=>{
+test('공식 퀼팅 패딩에서도 고밀도·소재명 정보로 소구점 수를 채우지 않는다',()=>{
  const text='어니언 퀼팅의 크루넥 경량 자켓입니다. PTT 소재로 제작되어 보온성이 우수하고 복원력이 뛰어난 것이 특징입니다. 겉감은 20D 고밀도 나일론 원단으로 제작되었습니다.';
- const points=officialSellingPoints(text);assert.equal(points.length,3);for(const p of points){assert(p.title.length<=18);assert(p.description.length<=42);assert(text.includes(p.evidence));}
+ const points=officialSellingPoints(text);assert.equal(points.length,2);for(const p of points){assert(p.title.length<=18);assert(p.description.length<=42);assert(text.includes(p.evidence));}assert(points.every(p=>!p.title.includes('고밀도')));
 });
 
 test('공식 레귤러핏·컴팩트 코튼·가먼트 워시 문장을 짧은 소구점으로 정리한다',()=>{

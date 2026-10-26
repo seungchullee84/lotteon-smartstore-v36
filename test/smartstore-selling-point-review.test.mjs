@@ -1,5 +1,15 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,writeFile} from 'node:fs/promises';import path from 'node:path';import os from 'node:os';import {reviewSellingPoints,saveOfficialImagePointReview,officialPointSource} from '../smartstore-selling-point-review.mjs';
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,writeFile,mkdir} from 'node:fs/promises';import {createHash} from 'node:crypto';import path from 'node:path';import os from 'node:os';import {reviewSellingPoints,saveOfficialImagePointReview,officialPointSource} from '../smartstore-selling-point-review.mjs';
 const product={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=test',name:'공식 의류'};
+test('구매 장점 기준 이전의 준비 완료 캐시도 모든 품번에서 다시 검증한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'benefit-cache-'));try{
+ const source='슬림핏 레글러핏 루즈핏. 부드러운 원단으로 편안한 착용감을 제공합니다.';
+ for(const style of ['123456','654321','456789']){
+  const p={...product,style},dir=path.join(root,'smartstore-details',style);await mkdir(dir,{recursive:true});
+  await writeFile(path.join(dir,'selling-point-review.json'),JSON.stringify({version:5,method:'local-official-text',style,sourceUrl:p.sourceUrl,textHash:createHash('sha256').update(source).digest('hex'),detailHash:null,status:'ready',points:[{title:'핏과 실루엣',description:'슬림핏 레글러핏 루즈핏.',evidence:'슬림핏 레글러핏 루즈핏.'}]}));
+  const result=await reviewSellingPoints(p,source,{dataRoot:root});assert.equal(result.version,6);assert.equal(result.points.length,1);assert.equal(result.points[0].title,'부드러운 착용감');
+ }
+ }finally{await rm(root,{recursive:true,force:true});}
+});
 test('본문에 특징이 있어도 모든 품번의 공식 이미지 문장을 먼저 확인하고 네 특징을 보존한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'all-image-points-'));try{
  await writeFile(path.join(root,'detail.jpg'),'official-image-first');
@@ -34,7 +44,7 @@ test('별도 API 없이 상의·하의·아우터·원피스·스커트 원문�
  '가벼운 소재로 쾌적하게 착용합니다. 넉넉한 실루엣으로 편안하게 착용합니다. 뒷면 단추로 여밈을 조절할 수 있습니다.',
  '부드러운 원단을 사용했습니다. 여유로운 A라인 실루엣으로 연출합니다. 소매 셔링 디테일을 더했습니다.',
  '탄탄한 소재를 사용했습니다. 자연스럽게 넓어지는 플레어 실루엣입니다. 옆면 지퍼로 여밈을 조절합니다.'
- ]){const result=await reviewSellingPoints(product,source,{dataRoot:root,fetchImpl:()=>assert.fail('소구점에 API 호출 금지')});assert.equal(result.status,'ready');assert.equal(result.points.length,3);assert.equal(result.method,'local-official-text');assert(result.points.every(p=>source.includes(p.evidence)&&p.title.length<=18&&p.description.length<=42));
+ ]){const result=await reviewSellingPoints(product,source,{dataRoot:root,fetchImpl:()=>assert.fail('소구점에 API 호출 금지')});assert.equal(result.status,'ready');assert(result.points.length>=2&&result.points.length<=3);assert.equal(result.method,'local-official-text');assert(result.points.every(p=>source.includes(p.evidence)&&p.title.length<=18&&p.description.length<=42));assert(result.points.every(p=>!/^(원단|핏과 실루엣|디자인 포인트|스타일링)$/.test(p.title)));
  const cached=await reviewSellingPoints(product,source,{dataRoot:root});assert.deepEqual(cached.points,result.points);}
  }finally{await rm(root,{recursive:true,force:true});}});
 test('근거 없는 품목·혼용률·색상수나 빈 원문에는 장점을 추정하지 않고 과거 결과도 넘기지 않는다',async()=>{const root=await mkdtemp(path.join(os.tmpdir(),'local-invalid-'));try{
