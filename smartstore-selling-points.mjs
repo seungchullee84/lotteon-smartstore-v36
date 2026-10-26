@@ -1,3 +1,36 @@
+// Extract short, complete source clauses locally; never invent a benefit from a noun.
+export function officialProsePoints(source,existing=[]){
+ const rules=[
+  {kind:'원단',feature:/(?:원단|소재|조직|짜임|니트|저지|코튼|면|울|캐시미어|린넨|리넨|모달|레이온|나일론|폴리에스터|충전재)/,claim:/(?:부드|탄탄|촉감|보온|신축|통기|흡습|흡한|속건|가벼|경량|쾌적|유연|소프트|시원|따뜻|포근|입체|텍스처)/},
+  {kind:'핏과 실루엣',feature:/(?:핏|실루엣|라인|기장|길이|어깨선|품|허리선)/,claim:/(?:여유|슬림|와이드|레귤러|오버|넉넉|좁아|넓어|떨어|덮|밀착|편안|조절|크롭|롱|숏|스트레이트|테이퍼드|플레어|A라인)/},
+  {kind:'여밈 디테일',feature:/(?:단추|버튼|여밈|지퍼|스트링|비조|벨트|밴딩|밴드)/,claim:/(?:조절|탈부착|분리|오픈|투웨이|양방향|숨|히든|편안|적용|더했|더해|갖추|구성|디테일)/},
+  {kind:'디자인 포인트',feature:/(?:포켓|주머니|슬릿|트임|턱|플리츠|셔링|자수|프린트|패턴|스티치|절개|배색|카라|칼라|넥|후드|소매|커프스|케이블|립)/,claim:/(?:디자인|디테일|적용|더했|더해|갖추|구성|연출|조절|활동|수납|포인트|짜임|탈부착|분리)/},
+  {kind:'가공 포인트',feature:/(?:가공|워싱|워시|브러시|브러쉬|기모|코팅)/,claim:/(?:수축|최소|방지|촉감|부드|보온|따뜻|입체|자연|적용)/},
+  {kind:'스타일링',feature:/(?:레이어드|스타일링|매치|코디)/,claim:/(?:활용|연출|어울|좋|편안|가능|쉽|자연)/},
+ ];
+ const norm=x=>String(x).replace(/\s+/g,'');
+ const used=new Set(),points=[];
+ const sentences=String(source||'').replace(/\\n/g,'\n').split(/(?:[•●]|\n+|(?<=[.!?])\s+)/).map(s=>s.trim()).filter(Boolean);
+ for(const sentence of sentences){
+  if(/(?:없(?:는|습니다|음)|아닌|아닙니다|미확인|확인\s*필요|추정|검토가?\s*필요)/.test(sentence)||/^POINT\s*\d|^STYLE[.:]|^SIZE|^COLOR|^소재[ :]|^혼용률[ :]/i.test(sentence))continue;
+  // A long sentence may contain multiple independent clauses, but never cut at a character limit.
+  const clauses=sentence.split(/[,，]|(?:으며|으며서|으며도|으며,|하고|하며|되며|이며|으로서)\s+/).map(c=>c.trim()).filter(Boolean);
+  for(const rule of rules){
+   if(used.has(rule.kind)||!rule.feature.test(sentence)||!rule.claim.test(sentence))continue;
+   const candidates=[sentence,...clauses];
+   const clause=candidates.find(c=>c.length>=8&&c.length<=40&&rule.feature.test(c)&&rule.claim.test(c)&&!/(?:및|와|과|으로|하고|하며|위한|통해|보다|또는|또한|\d)$/.test(c));
+   if(!clause)continue;
+   let description=clause.replace(/[.!?]+$/,'').replace(/(?:입니다|습니다)$/,'');
+   // Keep the source phrase intact rather than appending an inferred performance claim.
+   description=description.replace(/(?:했으며|하였으며|하며|이며|으로)$/,'').trim()+'.';
+   if(existing.some(p=>norm(p.evidence).includes(norm(clause))||norm(p.description)===norm(description))||points.some(p=>norm(p.description)===norm(description)))continue;
+   const point={title:rule.kind,description,evidence:sentence};
+   if(compactSellingPoint(point)){points.push(point);used.add(rule.kind);}
+   if(points.length+existing.length>=3)return points;
+  }
+ }
+ return points;
+}
 // Display copy is brief; full official sentences remain in evidence only.
 export function compactSellingPoint(point){
  return !!point?.title&&!!point?.description&&point.title.length<=18&&point.description.length<=42&&point.title!==point.description&&!/[.…]$/.test(point.title)&&!/[.…]$/.test(point.description.replace(/\.$/,''));
@@ -5,7 +38,7 @@ export function compactSellingPoint(point){
 export function officialSellingPoints(description){
  const text=String(description||'').replace(/\s+/g,' ');const points=[],covered=new Set(),labels=new Map();
  const sections=[...String(description||'').matchAll(/POINT\s*0?[1-9]\s*[（(]([^）)]+)[）)]/gi)].map(m=>m[1].trim());
- const finish=()=>points.filter(compactSellingPoint).sort((a,b)=>{const rank=p=>{const i=sections.indexOf(labels.get(p));return i<0?99:i;};return rank(a)-rank(b);}).slice(0,3);
+ const finish=()=>[...points,...officialProsePoints(description,points)].filter(compactSellingPoint).sort((a,b)=>{const rank=p=>{const i=sections.indexOf(labels.get(p));return i<0?99:i;};return rank(a)-rank(b);}).slice(0,3);
  // Shared apparel features: use only an affirmative, explicit source sentence.
  const sentences=text.replace(/\\n/g,' ').split(/\s*[•●]\s*|(?<=[.!?])\s+/).map(s=>s.trim()).filter(Boolean);
  for(const [pattern,title,copy,label] of [
@@ -61,8 +94,7 @@ export function officialSellingPoints(description){
   labels.set(points.at(-1),block[1]?.trim());
  }
  if(points.length)return finish();
- // Unknown prose needs source review; never display a copied paragraph as a card.
- return [];
+ return officialProsePoints(description);
 }
 export function usableSellingPoints(points,source){
  const compact=s=>String(s).replace(/\s+/g,'');
