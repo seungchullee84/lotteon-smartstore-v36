@@ -74,10 +74,9 @@ export async function findPhotoSourceForm(context,style,{check=()=>{},log=()=>{}
  }
  if(lists.length){
   const list=lists[0];await list.bringToFront();check();
-  try{await list.getByRole('button',{name:'초기화',exact:true}).click({timeout:15000});}catch{check();throw Error('등록기 전용 크롬에서 스마트스토어 로그인을 완료해 주세요. 현재 로그인 세션을 재사용하며 상품 저장은 하지 않습니다.');}check();
+  try{await preparePhotoSourceList(list,{check,log});}catch{check();throw Error('등록기 전용 크롬에서 스마트스토어 로그인을 완료해 주세요. 현재 로그인 세션을 재사용하며 상품 저장은 하지 않습니다.');}check();
   await selectSearchChoice(list.getByRole('radio',{name:'판매자상품코드',exact:true}));
   await list.getByRole('textbox',{name:'검색어 입력',exact:true}).fill(style);
-  const all=list.getByRole('checkbox',{name:'전체',exact:true}).first();if(await all.isVisible())await selectSearchChoice(all);
   const period=list.getByRole('button',{name:'전체',exact:true});if(await period.count()===1)await period.click();
   check();await list.getByRole('button',{name:'검색',exact:true}).click();
   await list.locator('[role="row"][row-id] [col-id="sellerManagementCode"]').filter({hasText:style}).first().waitFor({state:'visible',timeout:20000});check();
