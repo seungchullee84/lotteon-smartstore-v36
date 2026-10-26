@@ -151,7 +151,7 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
   await page.setContent(document.html);await page.evaluate(()=>Promise.all([document.fonts.ready,...[...document.images].map(i=>i.decode())]));check();
   height=await page.evaluate(()=>document.documentElement.scrollHeight);photoRegions=await page.evaluate(mannequinPhotoRegions);
   brandIntroHeight=await page.locator('[data-brand-intro]').evaluate(n=>Math.ceil(n.getBoundingClientRect().height));
-  videoAfterTop=await page.locator('[data-brand-video-heading]').evaluate(n=>Math.ceil(n.getBoundingClientRect().bottom+scrollY));
+  videoAfterTop=await page.locator('[data-brand-video-heading]').evaluate(n=>Math.floor(n.getBoundingClientRect().bottom+scrollY));
   officialTop=await page.locator('[data-official-detail]').evaluate(n=>Math.floor(n.getBoundingClientRect().top+scrollY));
   bannerTop=await page.locator('[data-store-banner]').evaluate(n=>Math.floor(n.getBoundingClientRect().top+scrollY));
   footerTop=await page.locator('[data-store-footer]').evaluate(n=>Math.floor(n.getBoundingClientRect().top+scrollY));
