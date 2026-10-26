@@ -4,6 +4,7 @@ import {preparePhotoSourceList,editorPhotoPositions,naverPhotoUrl,exactSellerRow
 import {prepareTrustedFolder} from '../smartstore-folder-trust.mjs';
 import {prepareSmartstoreDetail} from '../smartstore-detail-files.mjs';
 import {findPhotos} from '../smartstore-photo-files.mjs';
+import {createHash} from 'node:crypto';
 
 test('재수집은 최신 사진 원본·순서로 교체하고 이전 사진과 빠진 색상을 상세에 되살리지 않는다',async()=>{
  const dir=await mkdtemp(path.join(os.tmpdir(),'import-replace-'));try{
@@ -13,7 +14,7 @@ test('재수집은 최신 사진 원본·순서로 교체하고 이전 사진과
  const buffers=await Promise.all(candidates.map((_,i)=>sharp({create:{width:750,height:1000,channels:3,background:{r:i*30,g:70,b:120}}}).jpeg().toBuffer()));
  const options={recognizePhoto:async()=>'',fetchImpl:async url=>new Response(buffers[Number(new URL(url).pathname.slice(1,-4))],{headers:{'Content-Type':'image/jpeg'}})};
  const readDraft=async()=>JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'draft.json'),'utf8'));
- const prepare=async()=>{const old=await readDraft(),photos=await findPhotos(product,{desktop});return prepareTrustedFolder(product,folder,{dataRoot,photos,mapped:photos.map(p=>({...p,...old.photoMapping.files.find(r=>r.name===p.name)})),old,description:'',detailHash:null,recognizePhoto:()=>assert.fail('사진 해시 확인 결과를 재사용해야 합니다.')});};
+ const prepare=async()=>{const old=await readDraft(),photos=await findPhotos(product,{desktop});return prepareTrustedFolder(product,folder,{dataRoot,photos,mapped:photos.map(p=>({...p,...old.photoMapping.files.find(r=>r.hash===createHash('sha256').update(p.bytes).digest('hex'))})),old,description:'',detailHash:null,recognizePhoto:()=>assert.fail('사진 해시 확인 결과를 재사용해야 합니다.')});};
  const first=await stageImportedPhotos({...product,sellerCode:product.style,candidates},folder,options);await applyImportedPhotos(product,folder,allImportedPhotoChoices(first,product),{dataRoot,desktop,automatic:true});assert.equal((await prepare()).smartstoreDetail.photoCount,8);
  const mainPath=path.join(desktop,'상품등록기사진폴더',product.style,'1.jpg'),main=await readFile(mainPath);
  const latest=await stageImportedPhotos({...product,sellerCode:product.style,candidates:[candidates[2],candidates[1]]},folder,options),choices=allImportedPhotoChoices(latest,product);
@@ -21,7 +22,17 @@ test('재수집은 최신 사진 원본·순서로 교체하고 이전 사진과
  // Preview/export can be opened before another automatic preparation.
  const preview=await prepareSmartstoreDetail(product,folder,{dataRoot});assert.equal(preview.smartstoreDetail.photoCount,2);assert.deepEqual(preview.smartstoreDetail.storeColorPhotoHashes['01블랙'],latest.candidates.map(p=>p.sha256));assert(!preview.smartstoreDetail.colorImages['02화이트']);
  for(let i=0;i<2;i++){const prepared=await prepare();assert.equal(prepared.smartstoreDetail.photoCount,2);assert.deepEqual(prepared.smartstoreDetail.storeColorPhotoHashes['01블랙'],latest.candidates.map(p=>p.sha256));assertImportedPhotoCoverage(latest,prepared,choices,{requireSellingPoints:false});}
- assert.deepEqual(await readFile(mainPath),main);assert.equal((await findPhotos(product,{desktop})).length,8,'이전 원본은 보존하지만 상세에 섞지 않는다');
+ assert.deepEqual(await readFile(mainPath),buffers[2]);assert.deepEqual(await readFile(path.join(dataRoot,'smartstore-details',product.style,'imported-originals',createHash('sha256').update(main).digest('hex')+'.jpg')),main);assert.equal((await readdir(path.dirname(mainPath))).length,8,'이전 대표 원본은 백업하고 최신 대표만 갱신한다');
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
+
+test('사용자가 직접 넣거나 수정한 대표 1번은 재수집해도 덮어쓰지 않는다',async()=>{
+ const dir=await mkdtemp(path.join(os.tmpdir(),'import-user-main-'));try{
+ const product={style:'326922',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=1',colors:['01블랙']},folder=path.join(dir,'collected'),dataRoot=path.join(dir,'data'),desktop=path.join(dir,'desktop'),target=path.join(desktop,'상품등록기사진폴더',product.style);await mkdir(folder,{recursive:true});await mkdir(target,{recursive:true});
+ const bytes=await sharp({create:{width:750,height:1000,channels:3,background:'#333'}}).jpeg().toBuffer(),custom=await sharp({create:{width:750,height:1000,channels:3,background:'#777'}}).jpeg().toBuffer();
+ const source={...product,sellerCode:product.style,candidates:[{colorHint:'01블랙',url:'https://shop-phinf.pstatic.net/test.jpg'}]},options={recognizePhoto:async()=>'',fetchImpl:async()=>new Response(bytes,{headers:{'Content-Type':'image/jpeg'}})};
+ const stage=await stageImportedPhotos(source,folder,options);await applyImportedPhotos(product,folder,allImportedPhotoChoices(stage,product),{dataRoot,desktop,automatic:true});
+ await writeFile(path.join(target,'1.jpg'),custom);await applyImportedPhotos(product,folder,allImportedPhotoChoices(stage,product),{dataRoot,desktop,automatic:true});assert.deepEqual(await readFile(path.join(target,'1.jpg')),custom);
  }finally{await rm(dir,{recursive:true,force:true});}
 });
 
@@ -74,6 +85,10 @@ test('12색 48장은 적용·폴더 재조회·상세 연결에서 총 40장 제
 });
 test('색상 제목 아래 단독·묶음 사진만 읽고 공식 상세 이후와 다른 색상은 제외한다',async()=>{
  const browser=await chromium.launch({headless:true});try{const p=await browser.newPage();await p.setContent('<div class="se-component se-text">01화이트</div><div class="se-component se-image"><img></div><div class="se-component se-imageStrip"><img><img></div><div class="se-component se-text">99다른색</div><div class="se-component se-image"><img></div><div class="se-component se-text">03블랙</div><div class="se-component se-image"><img></div><div class="se-component se-text">◆상세페이지◆</div><div class="se-component se-image"><img></div>');assert.deepEqual(await p.evaluate(editorPhotoPositions,['01화이트','03블랙']),[{index:0,colorHint:'01화이트'},{index:1,colorHint:'01화이트'},{index:2,colorHint:'01화이트'},{index:4,colorHint:'03블랙'}]);}finally{await browser.close();}
+});
+
+test('이전 상품의 색상 번호만 같다는 이유로 다른 색상 사진을 연결하지 않는다',async()=>{
+ const browser=await chromium.launch({headless:true});try{const page=await browser.newPage();await page.setContent('<div class="se-component se-text">01오프화이트</div><div class="se-component se-image"><img></div><div class="se-component se-text">03블랙</div><div class="se-component se-image"><img></div>');assert.deepEqual(await page.evaluate(editorPhotoPositions,['01블랙','03라이트헤더그레이']),[]);}finally{await browser.close();}
 });
 test('HTML 응답은 거부하고 원본 바이트 중복을 제거하며 선택 사진만 품번 폴더와 매칭 자료에 반영한다',async()=>{
  const dir=await mkdtemp(path.join(os.tmpdir(),'import-photos-'));try{
