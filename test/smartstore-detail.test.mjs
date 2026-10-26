@@ -54,7 +54,7 @@ test('다른 품번·색상·외부 경로는 차단하고 사진 매핑과 상�
   await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...draft,photos:[{color:'다른색상',files:['front.jpg']}]}));await assert.rejects(prepareSmartstoreDetail(reviewedProduct,folder,{dataRoot}),/없는 색상/);
   await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...draft,photos:[{color:'01핑크',files:['../outside.jpg']}]}));await assert.rejects(prepareSmartstoreDetail(reviewedProduct,folder,{dataRoot}),/폴더 안/);
   await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft));
-  const p=await prepareSmartstoreDetail(reviewedProduct,folder,{dataRoot});assert.equal(p.smartstoreDetail.photoCount,1);assert.equal(p.smartstoreDetail.sellingPoints[0].title,'경량 패딩');
+  const p=await prepareSmartstoreDetail(reviewedProduct,folder,{dataRoot});assert.equal(p.smartstoreDetail.photoCount,1);assert.equal(p.smartstoreDetail.sellingPoints[0].title,'가볍게, 부담 없이');
   assert.match(localSmartstorePreview(p).html,/smartstore-photo\/[a-f0-9]{24}/);assert.doesNotMatch(localSmartstorePreview(p).html,/기모/);
   const out=path.join(root,'detail.png');const result=await saveSmartstoreDetail(reviewedProduct,folder,out,{dataRoot,videoOptions});
   const meta=await sharp(out,{limitInputPixels:false}).metadata();assert.equal(meta.width,860);assert.ok(meta.height>4000);assert.equal(result.photoCount,1);

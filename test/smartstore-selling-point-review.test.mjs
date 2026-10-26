@@ -1,13 +1,16 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm} from 'node:fs/promises';import path from 'node:path';import os from 'node:os';import {reviewSellingPoints} from '../smartstore-selling-point-review.mjs';
 const product={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=test',name:'공식 의류'};
-const points=[{title:'단정한 디테일',description:'뒷면 단추로 여밈을 조절할 수 있습니다.',evidence:'뒷면 단추로 여밈을 조절할 수 있습니다.'}];
-test('기존 규칙에 없는 의류도 공식 원문을 공통 요약하고 동일 출처·해시에서 재사용한다',async()=>{const root=await mkdtemp(path.join(os.tmpdir(),'point-review-'));try{let calls=0;const fetchImpl=async()=>{calls++;return new Response(JSON.stringify({output:[{content:[{type:'output_text',text:JSON.stringify({points})}]}]}));};
- const source='뒷면 단추로 여밈을 조절할 수 있습니다.';const options={dataRoot:root,apiKey:'test-only',fetchImpl,detailHash:'one'};
- const first=await reviewSellingPoints(product,source,options);assert.equal(first.status,'ready');assert.deepEqual(first.points,points);await reviewSellingPoints(product,source,options);assert.equal(calls,1);
- await reviewSellingPoints(product,source,{...options,detailHash:'two'});assert.equal(calls,2);
- const stale=await reviewSellingPoints(product,'현재 상품에는 단추 여밈이 없습니다.',{...options,apiKey:'',existing:points});assert.equal(stale.points.length,0);assert.equal(stale.status,'needs-review');
+test('별도 API 없이 상의·하의·아우터·원피스·스커트 원문을 공통 처리하고 네트워크를 호출하지 않는다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'local-points-'));try{for(const source of [
+ '부드러운 원단으로 편안한 착용감을 제공합니다. 여유로운 핏으로 자연스럽게 떨어집니다. 소매 자수 디테일을 더했습니다.',
+ '허리 스트링으로 둘레를 조절할 수 있습니다. 넉넉한 핏으로 편안하게 착용합니다. 옆면 포켓으로 수납성을 높였습니다.',
+ '가벼운 소재로 쾌적하게 착용합니다. 넉넉한 실루엣으로 편안하게 착용합니다. 뒷면 단추로 여밈을 조절할 수 있습니다.',
+ '부드러운 원단을 사용했습니다. 여유로운 A라인 실루엣으로 연출합니다. 소매 셔링 디테일을 더했습니다.',
+ '탄탄한 소재를 사용했습니다. 자연스럽게 넓어지는 플레어 실루엣입니다. 옆면 지퍼로 여밈을 조절합니다.'
+ ]){const result=await reviewSellingPoints(product,source,{dataRoot:root,fetchImpl:()=>assert.fail('소구점에 API 호출 금지')});assert.equal(result.status,'ready');assert.equal(result.points.length,3);assert.equal(result.method,'local-official-text');assert(result.points.every(p=>source.includes(p.evidence)&&p.title.length<=18&&p.description.length<=42));
+ const cached=await reviewSellingPoints(product,source,{dataRoot:root});assert.deepEqual(cached.points,result.points);}
  }finally{await rm(root,{recursive:true,force:true});}});
-test('근거 없는 응답·통신 오류·미연결은 완료로 표시하지 않는다',async()=>{const root=await mkdtemp(path.join(os.tmpdir(),'point-invalid-'));try{
- for(const fetchImpl of [async()=>new Response(JSON.stringify({output_text:JSON.stringify({points})})),async()=>new Response('{}',{status:503})]){const result=await reviewSellingPoints(product,'다른 상품의 공식 설명입니다.',{dataRoot:root,apiKey:'test-only',fetchImpl});assert.equal(result.status,'needs-review');assert.equal(result.points.length,0);}
- const offline=await reviewSellingPoints(product,'다른 상품의 공식 설명입니다.',{dataRoot:root,apiKey:''});assert.equal(offline.status,'needs-review');
+test('근거 없는 품목·혼용률·색상수나 빈 원문에는 장점을 추정하지 않고 과거 결과도 넘기지 않는다',async()=>{const root=await mkdtemp(path.join(os.tmpdir(),'local-invalid-'));try{
+ await reviewSellingPoints(product,'뒷면 단추로 여밈을 조절할 수 있습니다.',{dataRoot:root});
+ for(const source of ['', '원피스. 면 100%. 4 COLORS. SIZE S M L.', '현재 상품에는 단추 여밈이 없습니다.']){const result=await reviewSellingPoints(product,source,{dataRoot:root});assert.equal(result.status,'needs-review');assert.equal(result.points.length,0);assert(!/연결|API/.test(result.message));}
  }finally{await rm(root,{recursive:true,force:true});}});
