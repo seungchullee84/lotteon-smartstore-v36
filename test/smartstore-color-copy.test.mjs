@@ -12,3 +12,9 @@ test('색상별 착용사진 제목에 COLOR 순번 대신 색상별 문구를 �
  const p={style:'356954',images:{detail:'https://example.com/detail.jpg'},colors:['01크림','02베이지'],colorImages:{'01크림':['https://example.com/cream.jpg'],'02베이지':['https://example.com/beige.jpg']}};
  const html=buildSmartstoreDetail(p).html;assert(!html.includes('>COLOR 01<'));assert(!html.includes('>COLOR 02<'));assert(html.includes(colorCaption('01크림',{style:p.style})));assert(html.includes(colorCaption('02베이지',{style:p.style})));assert(html.includes('01크림'));assert(html.includes('02베이지'));
 });
+
+test('카키를 올리브·그린으로 부르지 않고 토프·다크네이비·밝기별 표현을 구분한다',()=>{
+ for(const style of ['116926','076915','026952'])assert.doesNotMatch(colorCaption('02브리티쉬카키',{style}),/올리브|그린/);
+ assert.match(colorCaption('01워시드올리브'),/차분|올리브|그린/);assert.notEqual(colorCaption('토프'),colorCaption('알 수 없음'));assert.notEqual(colorCaption('다크네이비'),colorCaption('네이비'));assert.notEqual(colorCaption('라이트베이지'),colorCaption('다크베이지'));assert.notEqual(colorCaption('더스티블루'),colorCaption('블루'));
+ for(const [,values]of COLOR_CAPTION_GROUPS)for(const text of values){assert(text.length<=14,text);assert.doesNotMatch(text,/보온|기모|신축|방수|면100|울100/);}
+});
