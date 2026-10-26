@@ -2,13 +2,13 @@
 export function officialProsePoints(source,existing=[]){
  const rules=[
   {kind:'원단',feature:/(?:원단|소재|조직|짜임|니트|저지|코튼|면|울|캐시미어|린넨|리넨|모달|레이온|나일론|폴리에스터|충전재)/,claim:/(?:부드|탄탄|촉감|보온|신축|통기|흡습|흡한|속건|가벼|경량|쾌적|유연|소프트|시원|따뜻|포근|입체|텍스처)/},
-  {kind:'핏과 실루엣',feature:/(?:핏|실루엣|라인|기장|길이|어깨선|품|허리선)/,claim:/(?:여유|슬림|와이드|레귤러|오버|넉넉|좁아|넓어|떨어|덮|밀착|편안|조절|크롭|롱|숏|스트레이트|테이퍼드|플레어|A라인)/},
-  {kind:'여밈 디테일',feature:/(?:단추|버튼|여밈|지퍼|스트링|비조|벨트|밴딩|밴드)/,claim:/(?:조절|탈부착|분리|오픈|투웨이|양방향|숨|히든|편안|적용|더했|더해|갖추|구성|디테일)/},
+  {kind:'핏과 실루엣',feature:/(?:핏|실루엣|라인|기장|길이|어깨선|허리선)/,claim:/(?:여유|슬림|와이드|레귤러|오버|넉넉|좁아|넓어|떨어|덮|밀착|편안|조절|크롭|롱|숏|스트레이트|테이퍼드|플레어|A라인)/},
+  {kind:'여밈 디테일',feature:/(?:단추|버튼|여밈|지퍼|스트링|비조|벨트|밴딩|밴드)/,claim:/(?:조절|탈부착|분리|오픈|투웨이|양방향|편안|적용|더했|더해|갖추|구성|디테일)/},
   {kind:'디자인 포인트',feature:/(?:포켓|주머니|슬릿|트임|턱|플리츠|셔링|자수|프린트|패턴|스티치|절개|배색|카라|칼라|넥|후드|소매|커프스|케이블|립)/,claim:/(?:디자인|디테일|적용|더했|더해|갖추|구성|연출|조절|활동|수납|포인트|짜임|탈부착|분리)/},
   {kind:'가공 포인트',feature:/(?:가공|워싱|워시|브러시|브러쉬|기모|코팅)/,claim:/(?:수축|최소|방지|촉감|부드|보온|따뜻|입체|자연|적용)/},
   {kind:'스타일링',feature:/(?:레이어드|스타일링|매치|코디)/,claim:/(?:활용|연출|어울|좋|편안|가능|쉽|자연)/},
  ];
- const norm=x=>String(x).replace(/\s+/g,'');
+ const norm=x=>String(x).replace(/[\s.!?]+/g,'');
  const used=new Set(),points=[];
  const sentences=String(source||'').replace(/\\n/g,'\n').split(/(?:[•●]|\n+|(?<=[.!?])\s+)/).map(s=>s.trim()).filter(Boolean);
  for(const sentence of sentences){
@@ -22,8 +22,8 @@ export function officialProsePoints(source,existing=[]){
    if(!clause)continue;
    let description=clause.replace(/[.!?]+$/,'');
    // Keep the source phrase intact rather than appending an inferred performance claim.
-   description=description.replace(/(?:했으며|하였으며|하며|이며|으로)$/,'').trim()+'.';
-   if(existing.some(p=>norm(p.evidence).includes(norm(clause))||norm(p.description)===norm(description))||points.some(p=>norm(p.description)===norm(description)))continue;
+   description=description.trim()+'.';
+   if(existing.some(p=>(norm(p.evidence).includes(norm(clause))||norm(clause).includes(norm(p.evidence)))||norm(p.description)===norm(description))||points.some(p=>norm(p.description)===norm(description)))continue;
    const point={title:rule.kind,description,evidence:sentence};
    if(compactSellingPoint(point)){points.push(point);used.add(rule.kind);}
    if(points.length+existing.length>=4)return points;
