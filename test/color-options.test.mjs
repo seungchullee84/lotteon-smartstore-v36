@@ -102,3 +102,10 @@ test('번호가 붙은 다크인디고는 통합색상 인디고블루를 우선
   assert.equal(matchColor('02다크인디고',['블루','네이비']),'네이비');
   assert.equal(matchColor('02다크인디고',['베이지','블랙']),null);
 });
+
+test('사용자 확정 라즈베리는 자주 대신 루비로 매칭',()=>{
+  const labels=['레드','와인','자주','핑크','루비'];
+  assert.equal(matchColor('02라즈베리',labels),'루비');
+  assert.equal(matchColor('02 RASPBERRY',labels),'루비');
+  assert.equal(matchColor('02라즈베리',['자주','핑크','레드']),null);
+});

@@ -176,6 +176,8 @@ export function matchColor(raw, choices) {
   ];
   const norm=s=>baseColor(s).toUpperCase().replace(/[()（）_-]/g,'');
   const base=norm(raw);
+  // User-confirmed LotteON integrated color; do not substitute purple/pink.
+  if(/^(라즈베리|RASPBERRY)$/.test(base))return choices.find(c=>norm(c)==='루비')||null;
   if(/^(린스|RINSE)$/.test(base))return choices.find(c=>norm(c)==='블루')||null;
   const exact=choices.find(c=>norm(c)===base);if(exact)return exact;
   if(/인디고|INDIGO/.test(base)){
