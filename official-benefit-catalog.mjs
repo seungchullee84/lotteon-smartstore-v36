@@ -1,5 +1,5 @@
 import {readFile,writeFile,mkdir,readdir,rename} from 'node:fs/promises';
-import path from 'node:path';import {fileURLToPath} from 'node:url';import {createHash} from 'node:crypto';import {load} from 'cheerio';
+import path from 'node:path';import {fileURLToPath} from 'node:url';import {createHash} from 'node:crypto';import {load} from 'cheerio';import {chromium} from 'playwright';
 import {parseProduct,styleFromDetail} from './product.mjs';import {officialSellingPoints} from './smartstore-selling-points.mjs';import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url)),sha=b=>createHash('sha256').update(b).digest('hex');
 export const CATALOG_RULE='adult-official-benefits-1';
@@ -12,8 +12,10 @@ export async function catalogImageSource(product,detailHash,{dataRoot=path.join(
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function atomic(file,value){await mkdir(path.dirname(file),{recursive:true});await writeFile(file+'.tmp',JSON.stringify(value,null,2));await rename(file+'.tmp',file);}
 async function pool(items,count,fn){let cursor=0;await Promise.all(Array.from({length:count},async()=>{while(cursor<items.length){const i=cursor++;await fn(items[i],i);}}));}
-async function get(url){const response=await fetch(url,{signal:AbortSignal.timeout(25000)});if(!response.ok)throw Error('공식몰 응답 '+response.status);const bytes=Buffer.from(await response.arrayBuffer());if(bytes.length>24000000)throw Error('원본 용량 초과');return bytes;}
+let browserContext;
+async function get(url){if(browserContext){if(new URL(url).pathname.endsWith('.php')){const page=await browserContext.newPage();try{const r=await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});if(!r?.ok())throw Error('공식몰 응답 '+r?.status());return Buffer.from(await page.content());}finally{await page.close();}}const r=await browserContext.request.get(url,{timeout:25000});if(!r.ok())throw Error('공식 이미지 응답 '+r.status());const b=await r.body();if(b.length>24000000)throw Error('원본 용량 초과');return b;}const response=await fetch(url,{signal:AbortSignal.timeout(25000)});if(!response.ok)throw Error('공식몰 응답 '+response.status);const bytes=Buffer.from(await response.arrayBuffer());if(bytes.length>24000000)throw Error('원본 용량 초과');return bytes;}
 export async function runCatalog({dataRoot=path.join(root,'data'),imageWorkers=2}={}){
+ const browser=await chromium.launch({headless:true});browserContext=await browser.newContext();
  const dir=path.join(dataRoot,'official-benefit-catalog'),productsDir=path.join(dir,'products'),sources=path.join(dir,'sources');await mkdir(productsDir,{recursive:true});await mkdir(sources,{recursive:true});
  const status={rule:CATALOG_RULE,startedAt:new Date().toISOString(),phase:'discover',scope:'성인 남성·여성·G-MOTION, 주니어 제외',categories:[],discovered:0,sourceComplete:0,imageComplete:0,withThreeOrFour:0,needsReview:0,excludedJunior:0,errors:[]};
  const checkpoint=()=>atomic(path.join(dir,'progress.json'),{...status,updatedAt:new Date().toISOString()});await checkpoint();
@@ -31,7 +33,7 @@ export async function runCatalog({dataRoot=path.join(root,'data'),imageWorkers=2
   const unchanged=previous?.rule===CATALOG_RULE&&previous?.detailHash===detailHash&&sameOfficialProduct(previous.sourceUrl,item.sourceUrl);
   const record={rule:CATALOG_RULE,style,rawName:product.rawName,gender:product.gender,sourceCategory:product.sourceCategory,sourceUrl:item.sourceUrl,detailUrl:product.images.detail||null,detailHash,pageText,imageText:unchanged?previous.imageText||'':'',imageScanComplete:unchanged&&previous.imageScanComplete===true,observedAt:new Date().toISOString(),points:officialSellingPoints([unchanged?previous.imageText:'',pageText].filter(Boolean).join('\n•\n')),folder};record.status=record.points.length>=3?'official-text-ready':'needs-review';records.set(style,record);await atomic(path.join(productsDir,style+'.json'),record);status.sourceComplete++;if(status.sourceComplete%25===0){console.log(JSON.stringify({phase:'sources',done:status.sourceComplete,total:queue.size}));await checkpoint();}
  }catch(e){status.errors.push({stage:'product',url:item.sourceUrl,error:e.message});}});
- status.phase='images';await checkpoint();console.log(JSON.stringify({phase:'images',products:records.size}));
+ await browser.close();browserContext=null;status.phase='images';await checkpoint();console.log(JSON.stringify({phase:'images',products:records.size}));
  await pool([...records.values()],imageWorkers,async record=>{try{
   if(record.detailHash&&!record.imageScanComplete){const product=JSON.parse(await readFile(path.join(record.folder,'product.json'),'utf8'));const enriched=await enrichOfficialProductFacts(product,record.folder,{dataRoot});record.imageText=enriched.researchFacts.text;record.imageScanComplete=enriched.researchFacts.imageScanComplete===true;}
   const source=[record.imageText,record.pageText].filter(Boolean).join('\n•\n');record.points=officialSellingPoints(source);record.status=record.points.length>=3?'automatic-source-reviewed':'needs-review';record.visualReview=false;record.analyzedAt=new Date().toISOString();await atomic(path.join(productsDir,record.style+'.json'),record);if(record.imageScanComplete)status.imageComplete++;if(record.points.length>=3)status.withThreeOrFour++;else status.needsReview++;
