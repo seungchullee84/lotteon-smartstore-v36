@@ -18,12 +18,13 @@ export function editorPhotoPositions(colors){
  const imgs=[...document.querySelectorAll('.se-component img')];
  for(const c of document.querySelectorAll('.se-component')){
   const text=(c.innerText||'').trim();
-  if((out.length>0&&/^상품\s*디테일/.test(text))||/^[◆★☆\s]*상세페이지[◆★☆\s]*$|^PRODUCT DETAIL$|^디테일까지|정품.*출고.*안내|교환.*반품.*안내|^매장\s*안내|^SHOP INFORMATION/i.test(text))break;
+  if((out.length>0&&/^상품\s*디테일/.test(text))||/^[◆★☆\s]*상세페이지[◆★☆\s]*$|^PRODUCT DETAIL$|^디테일까지|정품.*출고.*안내|교환.*반품.*안내|교환.*추천방법|교환.*추천\s*방법|매장\s*위치|^상담\s*안내|^배송\s*안내|^매장\s*안내|^SHOP INFORMATION/i.test(text))break;
   if(c.classList.contains('se-text')){
    const matches=colors.filter(v=>compact(v)===compact(text));
    const match=matches.length===1?matches[0]:null;
    if(match)color=match;else if(/^\d{2}\s*[^\d\n]{1,35}$/.test(text))color='';
   }
+  if(c.matches('.se-image,.se-imageStrip')&&[...c.querySelectorAll('img')].some(n=>n.naturalWidth>0&&n.naturalHeight>n.naturalWidth*3))break;
   if(!color||!c.matches('.se-image,.se-imageStrip'))continue;
   for(const img of c.querySelectorAll('img'))out.push({index:imgs.indexOf(img),colorHint:color});
  }

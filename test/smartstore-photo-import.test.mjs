@@ -142,3 +142,7 @@ test('ST·STR과 슬래시·더하기 표기 차이로 줄무늬 색상을 누�
 test('색상 사진 앞의 상품 디테일 제목에서는 멈추지 않고 별표 상세페이지에서 끝낸다',async()=>{
  const browser=await chromium.launch({headless:true});try{const p=await browser.newPage();await p.setContent('<div class="se-component se-text">상품 디테일</div><div class="se-component se-text">01크림</div><div class="se-component se-image"><img><img><img></div><div class="se-component se-text">02네이비</div><div class="se-component se-image"><img><img></div><div class="se-component se-text">★상세페이지★</div><div class="se-component se-image"><img></div>');assert.deepEqual((await p.evaluate(editorPhotoPositions,['01크림','02네이비'])).map(p=>p.colorHint),['01크림','01크림','01크림','02네이비','02네이비']);}finally{await browser.close();}
 });
+
+test('마지막 색상 이후 교환 추천방법·매장위치에 있는 매장 전경은 색상 사진이 아니다',async()=>{
+ const browser=await chromium.launch({headless:true});try{const p=await browser.newPage();for(const heading of ['롯데 백화점 동탄점 지오다노에서 알려드리는 교환 추천방법 !◆','◆ 매장위치','상담안내','배송안내']){await p.setContent('<div class="se-component se-text">03크림+블랙</div><div class="se-component se-image"><img><img></div><div class="se-component se-text">'+heading+'</div><div class="se-component se-image"><img></div>');assert.equal((await p.evaluate(editorPhotoPositions,['03크림+블랙'])).length,2);}}finally{await browser.close();}
+});
