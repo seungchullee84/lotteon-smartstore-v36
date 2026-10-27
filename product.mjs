@@ -14,6 +14,36 @@ import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 import {readSourceImage,inspectDetailSource} from './source-image.mjs';
 
 export const OFFICIAL = 'https://www.giordano.co.kr';
+const juniorPattern=/주니어|쥬니어|키즈|아동|어린이|유아|(?:^|[^a-z])(?:junior|juniors|kids|kid|children|boys|girls)(?:$|[^a-z])/i;
+export function assertAdultProduct(product){
+  const evidence=[product.rawName,product.name,...(product.sourceCategory||[])];
+  if(product.sourceUrl){try{const brand=new URL(product.sourceUrl).searchParams.get('brand');if(brand)evidence.push(brand.replaceAll('_',' '));}catch{}}
+  if(evidence.some(value=>juniorPattern.test(String(value||'')))){
+    const error=Error('주니어 상품으로 확인되어 적용하지 않았습니다. 성인 상품의 품번 또는 공식몰 상품 URL을 확인해 주세요.');
+    error.code='JUNIOR_PRODUCT';throw error;
+  }
+}
+export function assertAdultProductPage(html,sourceUrl){
+  const $=cheerio.load(html);
+  // Read this product's title and breadcrumb, never the shared site menu.
+  const nav=$('.navi').filter((_,el)=>$(el).find('a.prdpath1').length>0).first();
+  const rawName=$('title').text().split(' - ')[0].trim();
+  assertAdultProduct({sourceUrl,rawName,name:rawName?'':$('h3').first().clone().children('a').remove().end().text(),sourceCategory:nav.find('a').map((_,el)=>$(el).text().trim()).get()});
+}
+export async function findAdultProductUrl(links,style,readCandidate,cancelled=()=>false){
+  let juniorFound=false;
+  for(const candidate of links){
+    if(cancelled())throw Error('사용자가 중단했습니다.');
+    if(new URL(candidate).origin!==OFFICIAL)continue;
+    const html=await readCandidate(candidate);if(!html)continue;
+    let actual;try{actual=styleFromDetail(html);}catch{continue;}
+    if(actual!==style)continue;
+    try{assertAdultProductPage(html,candidate);}catch(error){if(error.code!=='JUNIOR_PRODUCT')throw error;juniorFound=true;continue;}
+    return candidate;
+  }
+  if(juniorFound)assertAdultProduct({sourceCategory:['JUNIOR']});
+  throw Error('검색 결과에서 실제 품번 '+style+' 상품을 찾지 못했습니다. 공식몰 상품 URL을 확인해 주세요.');
+}
 export function productClassification(html) {
   const $=cheerio.load(html);
   // Only the product breadcrumb is authoritative. Global menus contain both sexes.
@@ -226,6 +256,7 @@ export function officialConsumerPrice(html) {
   return unique.length===1?unique[0]:null;
 }
 export function parseProduct(html, detailUrl, style) {
+  assertAdultProductPage(html,detailUrl);
   const $=cheerio.load(html);
   const raw=$('title').text().split(' - ')[0].trim()||$('h3').first().clone().children('a').remove().end().text().trim();
   const text=$('body').text();
@@ -300,14 +331,10 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
   const $=cheerio.load(await page.content());
   const links=[...new Set($('a[href*="detail.php?pno="]').map((_,el)=>new URL($(el).attr('href'),searchUrl).href).get())];
   if(!links.length)throw Error('공식몰에서 해당 품번을 찾지 못했습니다.');
-  for(const candidate of links){
-    if(signal?.aborted||cancelled())throw Error('사용자가 중단했습니다.');
-    if(new URL(candidate).origin!==OFFICIAL)continue;
-    const response=await context.request.get(candidate,{timeout:20000});if(!response.ok())continue;
-    let actual;try{actual=styleFromDetail(await response.text());}catch{continue;}
-    if(actual===style){url=candidate;break;}
-  }
-  if(!url)throw Error('검색 결과에서 실제 품번 '+style+' 상품을 찾지 못했습니다. 공식몰 상품 URL을 확인해 주세요.');
+  url=await findAdultProductUrl(links,style,async candidate=>{
+    const response=await context.request.get(candidate,{timeout:20000});
+    return response.ok()?await response.text():null;
+  },()=>signal?.aborted||cancelled());
   }
   await page.goto(url,{waitUntil:'domcontentloaded'});
   if(new URL(page.url()).origin!==OFFICIAL)throw Error('공식몰 이외 페이지로 이동했습니다.');
@@ -315,6 +342,7 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
   validateStyle(style);
   const actualStyle=styleFromDetail(await page.content());
   if(actualStyle!==style)throw Error('입력 품번 '+style+'와 공식몰 상품 품번 '+actualStyle+'가 다릅니다.');
+  assertAdultProductPage(await page.content(),page.url());
   await page.locator('img[src*="'+style+'info."]').first().waitFor({state:'attached',timeout:20000});
 
   await page.waitForLoadState('load');

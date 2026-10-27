@@ -8,7 +8,7 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 import * as cheerio from 'cheerio';
-import {styleFromDetail} from './product.mjs';
+import {styleFromDetail,assertAdultProduct,assertAdultProductPage} from './product.mjs';
 import {imageDownloadFolder} from './desktop-downloads.mjs';
 import {prepareSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {chooseListingPhotos,saveListingSelection} from './smartstore-listing-images.mjs';
@@ -44,9 +44,11 @@ export function validateAnalysis(result,product,description,unknown){
  return result;
 }
 export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,signal,fetchImpl=fetch,photoRoots,desktop,log=()=>{},trustFolder=true,recognizePhoto}){
+ assertAdultProduct(product);
  if(!/^\d{6}$/.test(product.style)||new URL(product.sourceUrl).origin!=='https://www.giordano.co.kr')throw Error('공식 상품 출처를 확인해 주세요.');
  let html;try{html=await readFile(path.join(folder,'smartstore-official.html'),'utf8');}catch(e){if(e.code!=='ENOENT')throw e;}
  if(!html){const response=await fetchImpl(product.sourceUrl,{signal,redirect:'error'});if(!response.ok)throw Error('공식 상품 소개를 가져오지 못했습니다.');html=await response.text();}
+ assertAdultProductPage(html,product.sourceUrl);
  let description=officialDescription(html,product);
  description=(await officialPointSource(product,folder,description,{dataRoot,signal,log})).text;
  if(!description.trim())throw Error('공식 상세 원문을 확인하지 못했습니다. 상세이미지의 소구점을 확인해 주세요.');

@@ -34,7 +34,7 @@ import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
 import {createProductEditStore} from './product-edits.mjs';
 import {searchProductTags,saveSelectedProductTags,selectedProductTagResearch,removeProductTag} from './smartstore-tag-selection.mjs';
-import {collect,parseProductInput,buildKeywords,repairCategoryFields} from './product.mjs';
+import {assertAdultProduct,collect,parseProductInput,buildKeywords,repairCategoryFields} from './product.mjs';
 import {LotteAutomation} from './automation.mjs';
 import {prepareMainImage,backgroundImageStatus,backgroundSelection,applyExtraExclusions,excludeExtraImage} from './main-image.mjs';
 import sharp from 'sharp';
@@ -58,6 +58,7 @@ let backgroundApiKey=await loadSmartstoreAIKey(dataRoot);
 const protectedBranding=brandingLock(dataRoot);
 const state={busy:false,phase:'idle',logs:[],product:null,folder:null,error:null,paused:null,revision:Date.now(),collectionInput:null,detailFallbackRequest:null,photoPreparation:null};
 if(process.env.REGISTER_RESTORE){const restored=path.resolve(process.env.REGISTER_RESTORE);if(restored.startsWith(dataRoot+path.sep)){state.product=JSON.parse(await readFile(restored,'utf8'));repairCategoryFields(state.product);if(state.product.categoryMatch){state.product.fieldStatus||={};state.product.fieldStatus.category=state.product.categoryMatch.status;}state.product.keywords=buildKeywords(state.product);state.folder=path.dirname(restored);state.phase='done';state.revision++;}}
+if(state.product){try{assertAdultProduct(state.product);}catch(error){if(error.code!=='JUNIOR_PRODUCT')throw error;state.product=null;state.folder=null;state.phase='error';state.error=error.message;state.revision++;}}
 if(state.product){state.product=await productEdits.apply(state.product);await applyExtraExclusions(state.folder,state.product);}
 if(state.product&&state.folder){
   try{const previous=JSON.parse(await readFile(path.join(state.folder,'smartstore-tags-result.json'),'utf8'));if(previous.style===state.product.style){if(previous.validationOnly)state.tagValidation=previous;else state.tagResult=previous;}}

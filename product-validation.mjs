@@ -1,8 +1,8 @@
 // Shared by the server and offline regression tests; no registration side effects.
-import {repairCategoryFields,easyProductName,cleanMarketingText,validateStyle,SEARCH_KEYWORDS_MAX_LENGTH} from './product.mjs';
+import {assertAdultProduct,repairCategoryFields,easyProductName,cleanMarketingText,validateStyle,SEARCH_KEYWORDS_MAX_LENGTH} from './product.mjs';
 
 export function validateProduct(p){
-
+  assertAdultProduct(p);
   repairCategoryFields(p);
   p.country=String(p.country||'').replace(/[^가-힣A-Za-z\s]+/g,'').trim();
   p.name=easyProductName(p.name);
