@@ -17,6 +17,7 @@ import {verifyNaver,createKeywordOptimizer} from './naver-keywords.mjs';
 import {generateBackground} from './background-image.mjs';
 import {createReleaseTracker} from './app-release.mjs';
 import {startGithubSync} from './github-sync.mjs';
+import {startBenefitResearch} from './benefit-research.mjs';
 import {brandingLock} from './branding-lock.mjs';
 import {SmartstoreAutomation} from './smartstore-automation.mjs';
 import {smartstorePlan} from './smartstore-form.mjs';
@@ -43,6 +44,7 @@ const root=path.dirname(fileURLToPath(import.meta.url));
 const releases=createReleaseTracker(root);await releases.get();
 const githubSync=process.env.REGISTER_PORTABLE==='1'?{state:{status:'portable',message:'배포 실행판'},stop(){}}:startGithubSync(root,{beforeSync:()=>releases.get()});
 const dataRoot=path.join(root,'data');await mkdir(dataRoot,{recursive:true});
+const benefitResearch=startBenefitResearch(root);
 const productEdits=createProductEditStore(dataRoot);
 let naverCredentials={clientId:process.env.NAVER_CLIENT_ID?.trim()||'',clientSecret:process.env.NAVER_CLIENT_SECRET?.trim()||''};
 if(!naverCredentials.clientId||!naverCredentials.clientSecret){
@@ -93,7 +95,7 @@ const server=http.createServer(async(req,res)=>{
       if(colorChipStatus)versions.main=(versions.main||'original')+':'+colorChipStatus.hash;
       const selected=state.folder?await backgroundSelection(state.folder):'main';
       const listing=state.product?await listingPreview(state.product,{dataRoot}):null;
-      return json(res,200,{...state,folder:undefined,capabilities:{manualTags:true,photoAnalysisSettings:true},tagResearch:state.product?selectedProductTagResearch(state.product,{dataRoot}):null,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,detailRevision:listing.detailRevision,mainColor:listing.main.color||'품번 폴더 사진',extraColors:listing.extras.map(p=>p.color||'제공한 상품사진'),extraRoles:listing.extras.map(p=>p.role),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state});
+      return json(res,200,{...state,folder:undefined,capabilities:{manualTags:true,photoAnalysisSettings:true},tagResearch:state.product?selectedProductTagResearch(state.product,{dataRoot}):null,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,detailRevision:listing.detailRevision,mainColor:listing.main.color||'품번 폴더 사진',extraColors:listing.extras.map(p=>p.color||'제공한 상품사진'),extraRoles:listing.extras.map(p=>p.role),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state,benefitResearch:benefitResearch.state});
     }
     if(req.method==='GET'&&/^\/smartstore-listing\/(?:main|extra-\d+)$/.test(url.pathname)){
       if(!state.product||url.searchParams.get('style')!==state.product.style)throw Error('현재 품번을 확인해 주세요.');

@@ -1,4 +1,4 @@
-﻿if (Test-Path -LiteralPath 'D:\CodexStorage\Browsers') { $env:PLAYWRIGHT_BROWSERS_PATH = 'D:\CodexStorage\Browsers' }
+if (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'runtime-browsers')) { $env:PLAYWRIGHT_BROWSERS_PATH = Join-Path $PSScriptRoot 'runtime-browsers' } elseif (Test-Path -LiteralPath 'D:\CodexStorage\Browsers') { $env:PLAYWRIGHT_BROWSERS_PATH = 'D:\CodexStorage\Browsers' }
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
 $bundled = Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies'

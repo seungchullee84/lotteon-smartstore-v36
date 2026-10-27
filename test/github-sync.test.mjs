@@ -6,9 +6,11 @@ import path from 'node:path';
 import os from 'node:os';
 import {publishable,syncGithub} from '../github-sync.mjs';
 const git=(cwd,args)=>execFileSync('git',args,{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe'],windowsHide:true});
-test('자동 반영 범위는 소스만 포함하고 개인 데이터와 인증 파일 제외',()=>{
+test('자동 반영 범위는 소스·정제된 공식 조사자료만 포함하고 개인 데이터와 인증 파일 제외',()=>{
  for(const file of ['public/app.js','test/check.test.mjs','server.mjs','.app-release.json','package.json','data/category-matches.json','data/category-itemscout-verified.json','data/washing-icon-library.json'])assert.equal(publishable(file),true,file);
  for(const file of ['data/desktop-session.json','data/product.json','data/naver-api-settings.json','data/category-secrets.json','.env','node_modules/a.js','credentials.mjs','private/password.js','../outside.mjs'])assert.equal(publishable(file),false,file);
+ for(const file of ['research/official-benefits/manifest.json','research/official-benefits/shard-a.json'])assert.equal(publishable(file),true,file);
+ for(const file of ['research/official-benefits/private.json','research/official-benefits/sources/a.jpg','research/official-benefits/shard-a.json/../../secret','research/other/manifest.json'])assert.equal(publishable(file),false,file);
 });
 test('자동 커밋과 push, 인증 문자열 차단, 원격 변경을 덮어쓰지 않음',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'github-sync-'));
@@ -21,8 +23,10 @@ test('자동 커밋과 push, 인증 문자열 차단, 원격 변경을 덮어쓰
   git(local,['add','package.json']);git(local,['commit','-m','initial']);git(local,['push','-u','origin','main']);
   await writeFile(path.join(local,'server.mjs'),'// modified source');
   await mkdir(path.join(local,'data'));await writeFile(path.join(local,'data','desktop-session.json'),'private');
+  await mkdir(path.join(local,'research','official-benefits'),{recursive:true});await writeFile(path.join(local,'research','official-benefits','manifest.json'),JSON.stringify({version:1,queue:[]}));
   const result=await syncGithub(local,{expectedRemote:origin});assert.equal(result.status,'synced');
   assert.equal(git(root,['--git-dir='+origin,'show','main:server.mjs']),'// modified source');
+  assert.equal(JSON.parse(git(root,['--git-dir='+origin,'show','main:research/official-benefits/manifest.json'])).version,1);
   assert.doesNotMatch(git(root,['--git-dir='+origin,'ls-tree','-r','--name-only','main']),/data\//);
   assert.equal((await syncGithub(local,{expectedRemote:origin})).sha,result.sha);
   await writeFile(path.join(local,'sample.mjs'),'const key="sk-'+ 'a'.repeat(40)+'";');

@@ -2,7 +2,7 @@ import {readdir,readFile,writeFile,rename,stat} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
 
-const ignored=new Set(['data','node_modules','.git','.codex']);
+const ignored=new Set(['data','node_modules','.git','.codex','research']);
 export function formatReleaseDate(value){
  const parts=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(value));
  const p=Object.fromEntries(parts.map(v=>[v.type,v.value]));
