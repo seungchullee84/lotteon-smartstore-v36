@@ -2,7 +2,7 @@ import {catalogImageSource} from './official-benefit-catalog.mjs';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {officialSellingPoints,usableSellingPoints} from './smartstore-selling-points.mjs';
+import {officialSellingPoints,usableSellingPoints,officialImageBenefitText} from './smartstore-selling-points.mjs';
 import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 const digest=text=>createHash('sha256').update(text).digest('hex');
 const sourceJobs=new Map();
@@ -13,7 +13,7 @@ export async function officialPointSource(product,folder,pageText,{dataRoot=path
  // A visual review already checked this exact official image, including its captions.
  try{const manual=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'selling-point-image-review.json'),'utf8'));if(manual.version===1&&manual.style===product.style&&manual.sourceUrl===product.sourceUrl&&manual.detailHash===detailHash&&usableSellingPoints(manual.points,manual.text))return {text:manual.text+'\n•\n'+pageText,imageChecked:true,detailHash,method:'visual-official-detail'};}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
  const catalog=await catalogImageSource(product,detailHash,{dataRoot});
- if(catalog)return {text:[catalog.imageText,pageText].filter(Boolean).join('\n•\n'),imageChecked:true,detailHash,method:'official-catalog-image-cache'};
+ if(catalog)return {text:[officialImageBenefitText(catalog.imageText),pageText].filter(Boolean).join('\n•\n'),imageChecked:true,detailHash,method:'official-catalog-image-cache'};
  const key=JSON.stringify([dataRoot,product.style,product.sourceUrl,detailHash]);
  let job=sourceJobs.get(key);if(!job){job=enrichOfficialProductFacts(product,folder,{dataRoot,signal,log,recognize}).then(p=>p.researchFacts);sourceJobs.set(key,job);job.finally(()=>{if(sourceJobs.get(key)===job)sourceJobs.delete(key);}).catch(()=>{});}
  const facts=await job;signal?.throwIfAborted();
