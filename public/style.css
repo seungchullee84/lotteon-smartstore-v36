@@ -286,3 +286,25 @@ body[data-channel="smartstore"] #smartstoreStart{background:#087c42}body[data-ch
 .smartstore-template-picker{display:flex;gap:10px;margin:14px 0}.template-choice{display:flex;flex:1;gap:10px;align-items:center;padding:12px;text-align:left;border:1px solid #cbd8cc;border-radius:12px;background:#fff;color:#506756}.template-choice[aria-pressed="true"]{border:2px solid #087d45;background:#edf7ee;color:#12613c;padding:11px}.template-choice span{display:grid;gap:5px}.template-choice b{font-size:16px}.template-choice small{font-size:12px;line-height:1.5}body:not([data-channel="smartstore"]) .smartstore-template-picker{display:none}
 
 #detailOnlyCompletion:not([hidden]){display:block;background:#c4e8d1;border:2px solid #287b49;color:#123d24;padding:15px 18px;border-radius:10px;font-size:16px;font-weight:800;line-height:1.65;margin:14px 0;}
+
+.detail-motion{display:flex;align-items:center;justify-content:center;gap:15px}
+.detail-motion-scene{position:relative;display:inline-block;flex:none;width:58px;height:48px;overflow:visible}
+.detail-motion-rocket{position:absolute;left:10px;top:6px;font-size:29px;line-height:36px}
+.detail-motion-check{position:absolute;left:13px;top:8px;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#dbf5df;color:#165a32;font:bold 24px Arial;opacity:0}
+.detail-motion-spark{position:absolute;left:27px;top:18px;color:#f5d879;font-size:15px;opacity:0}
+.detail-motion.working .detail-motion-rocket{animation:detailRocketCruise 1.25s ease-in-out infinite}
+.detail-motion.working .detail-motion-scene:before,.detail-motion.working .detail-motion-scene:after{content:'';position:absolute;left:4px;top:34px;width:10px;height:3px;background:#ffb45e;border-radius:4px;transform:rotate(-45deg);animation:detailRocketTrail .65s ease-out infinite}
+.detail-motion.working .detail-motion-scene:after{left:0;top:39px;animation-delay:.3s;width:7px;background:#ffdc91}
+.detail-motion.success .detail-motion-rocket{animation:detailRocketFinish .55s ease-in forwards}
+.detail-motion.success .detail-motion-check{animation:detailCheckFinish .5s cubic-bezier(.2,1.4,.4,1) .4s forwards}
+.detail-motion.success .detail-motion-spark-one{--spark-x:-29px;--spark-y:-24px}
+.detail-motion.success .detail-motion-spark-two{--spark-x:29px;--spark-y:-22px}
+.detail-motion.success .detail-motion-spark-three{--spark-x:25px;--spark-y:22px}
+.detail-motion.success .detail-motion-spark{animation:detailFinishSpark .9s ease-out .5s both}
+#detailOnlyCompletion .detail-motion{justify-content:flex-start}
+@keyframes detailRocketCruise{0%,100%{transform:translate(-2px,2px) rotate(-5deg)}50%{transform:translate(3px,-3px) rotate(3deg)}}
+@keyframes detailRocketTrail{from{opacity:.9;transform:translate(0,0) rotate(-45deg)}to{opacity:0;transform:translate(-9px,9px) rotate(-45deg)}}
+@keyframes detailRocketFinish{0%{transform:translate(0,0);opacity:1}100%{transform:translate(28px,-30px) scale(.55);opacity:0}}
+@keyframes detailCheckFinish{0%{opacity:0;transform:scale(.4)}75%{opacity:1;transform:scale(1.12)}100%{opacity:1;transform:scale(1)}}
+@keyframes detailFinishSpark{0%{opacity:0;transform:translate(0,0) scale(.3)}25%{opacity:1}100%{opacity:0;transform:translate(var(--spark-x),var(--spark-y)) scale(1)}}
+@media(prefers-reduced-motion:reduce){.detail-motion *,.detail-motion-scene:before,.detail-motion-scene:after{animation:none!important}.detail-motion.success .detail-motion-rocket{opacity:0}.detail-motion.success .detail-motion-check{opacity:1}}

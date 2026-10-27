@@ -32,7 +32,23 @@ const buttonLabels={open:'1. 크롬 로그인 창 열기',collect:'2. 공식몰 
 const busyLabels={open:'크롬 연결 중…',collect:'공식몰 정보 수집 중…',run:'상품 입력 시작 중…'};
 const feedback=document.createElement('div');feedback.id='clickFeedback';feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');document.body.append(feedback);
 let feedbackTimer,feedbackJob=null;
-function announce(text,kind='working'){feedbackJob=null;clearTimeout(feedbackTimer);feedback.textContent=text;feedback.className='visible '+kind;if(kind!=='working')feedbackTimer=setTimeout(()=>feedback.className='',4500);}
+function detailMotionContent(text,kind){
+ const row=document.createElement('span');row.className='detail-motion '+kind;
+ const scene=document.createElement('span');scene.className='detail-motion-scene';scene.setAttribute('aria-hidden','true');
+ for(const [name,label] of [['rocket','🚀'],['check','✓'],['spark spark-one','✦'],['spark spark-two','✧'],['spark spark-three','✦']]){
+  const item=document.createElement('span');item.className='detail-motion-'+name;item.textContent=label;scene.append(item);
+ }
+ const message=document.createElement('span');message.className='detail-motion-message';message.textContent=text;
+ row.append(scene,message);return row;
+}
+function announce(text,kind='working'){
+ feedbackJob=null;clearTimeout(feedbackTimer);feedback.replaceChildren();
+ if(/상세설명.*교체/.test(text)&&['working','success'].includes(kind)){
+  feedback.append(detailMotionContent(kind==='working'?'상세설명 교체 중 · 새 옷으로 갈아입는 중이에요…':text,kind));
+ }else feedback.textContent=text;
+ feedback.className='visible '+kind;
+ if(kind!=='working')feedbackTimer=setTimeout(()=>feedback.className='',4500);
+}
 function syncFeedbackWithState(state){
  if(!feedback.classList.contains('working')){feedbackJob=null;return;}
  if(state.busy){feedbackJob=state.phase;return;}
@@ -112,7 +128,10 @@ function updateDetailOnlyCompletion(state){
  if(!banner){banner=document.createElement('p');banner.id='detailOnlyCompletion';banner.setAttribute('role','status');banner.setAttribute('aria-live','polite');$('smartstoreDetailOnly').insertAdjacentElement('afterend',banner);}
  const done=!state.busy&&state.phase==='done'&&state.completedJob==='smartstore-detail-only'&&!state.error;
  banner.hidden=!done;
- banner.textContent=done?'✓ 상세설명 교체 완료 · 편집기에서 확인해 주세요. 상품 저장·등록 전입니다.':'';
+ if(done&&banner.dataset.motionState!=='complete'){
+  banner.replaceChildren(detailMotionContent('상세설명 교체 완료 · 편집기에서 확인해 주세요. 상품 저장·등록 전입니다.','success'));
+  banner.dataset.motionState='complete';
+ }else if(!done){banner.replaceChildren();delete banner.dataset.motionState;}
 }
 async function refresh(){if(appClosed)return;try{const r=await fetch('/api/state',{signal:AbortSignal.timeout(5000)});const s=await r.json();if(!r.ok)throw Error(s.error);document.dispatchEvent(new CustomEvent('register-state',{detail:{busy:s.busy,phase:s.phase,error:s.error}}));if(s.release){applyReleaseColor(s.release.version);$('releaseVersion').textContent='버전 '+s.release.version;$('releaseUpdated').textContent='최종 수정: '+s.release.displayDate;$('releaseUpdated').dateTime=s.release.updatedAt;}if(s.githubSync){$('githubSyncStatus').textContent=s.githubSync.message;$('githubSyncStatus').dataset.status=s.githubSync.status;}syncFeedbackWithState(s);updateCollectionStatus(s);updateDetailOnlyCompletion(s);renderResearchTags(s);syncEnhancedFeatures(s);updateMissingDetailChoice(s);syncBackgroundImage(s);syncExtraImages(s);$('status').textContent=({idle:'대기',collect:'정보 수집 중',register:'등록 중',background:'배경 합성 중',smartstore:'스마트스토어 입력 테스트 중','smartstore-detail-only':'상세설명만 교체 중','smartstore-import-photos':'기존 상품 착용사진 가져오는 중','smartstore-auto':'자동 진행 · '+(autoStageLabels[s.autoStep]||'시작 중'),'smartstore-tags':'태그 자동입력 중','smartstore-detail':'스마트스토어 상세페이지 만드는 중',done:s.completedJob==='smartstore-detail-only'?'✓ 상세설명 교체 완료':'작업 종료',error:'확인 필요',stopping:'중단 중…',stopped:'중단됨'})[s.phase];$('logs').textContent=s.logs.map(x=>x.time+' '+x.message).join('\n');if(s.error)$('error').textContent=s.error;$('pause').hidden=!s.paused;$('pauseMessage').textContent=s.paused||'';serverBusy=s.busy;serverPhase=s.phase;syncButtons();if(s.product&&lastRevision!==s.revision){populate(s.product);lastRevision=s.revision;}smartstoreListingState=s;syncListingImages(s);syncPhotoImport(s);}catch(e){$('error').textContent=e.message;}if(!appClosed)setTimeout(refresh,1200);}refresh();
 

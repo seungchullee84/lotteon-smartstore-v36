@@ -4,7 +4,7 @@ test('상세 교체 성공만 완료 표시하고 대기·실패·다른 작업�
  const browser=await chromium.launch({headless:true});try{
   const page=await browser.newPage();await page.setContent('<button id=smartstoreDetailOnly>상세설명만 교체</button>');
   const source=await readFile(new URL('../public/app.js',import.meta.url),'utf8'),helper=source.slice(source.indexOf('function updateDetailOnlyCompletion('),source.indexOf('async function refresh(){'));
-  await page.addScriptTag({content:"const $=id=>document.getElementById(id);"+helper});
+  const motion=source.slice(source.indexOf("function detailMotionContent("),source.indexOf("function announce("));await page.addScriptTag({content:"const $=id=>document.getElementById(id);"+motion+helper});
   for(const state of [{busy:true,phase:'smartstore-detail-only'},{busy:false,phase:'error',error:'실패',completedJob:'smartstore-detail-only'},{busy:false,phase:'done',completedJob:'collect'}]){
    await page.evaluate(s=>updateDetailOnlyCompletion(s),state);assert.equal(await page.locator('#detailOnlyCompletion').isVisible(),false);
   }
