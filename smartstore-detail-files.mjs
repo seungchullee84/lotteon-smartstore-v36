@@ -94,7 +94,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  // The product folder's selected 1번 mannequin photo is shared by both templates.
  prepared.heroImage=Object.entries(prepared.colorImages).find(([color,urls])=>prepared.colorSources[color]!=='official'&&urls.length)?.[1][0]||null;
  try{
-  const main=await originalListingMain(product,{dataRoot,mannequinRoots});
+  const main=await originalListingMain(product,{dataRoot,photoRoots:mannequinRoots?.map(root=>path.join(root,style))});
   const bytes=await readFile(main),id=createHash('sha256').update(bytes).digest('hex').slice(0,24);
   const name='smartstore-photo-'+id+'.jpg',src='/smartstore-photo/'+id;
   await writeFile(path.join(folder,name),bytes);prepared.photoFiles[src]=name;prepared.heroImage=src;

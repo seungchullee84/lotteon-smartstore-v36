@@ -24,7 +24,7 @@ test('모든 의류의 AIDA 순서는 상품·구매 장점부터 시작하고 �
  for(const name of ['남성 맨투맨','여성 스커트','공용 경량 자켓']){
   const p={...product,name,colorImages:{'01핑크':['https://example.com/current.jpg']},smartstoreDetail:{style:product.style,sellingPoints:[point],colorImages:{'01핑크':['https://example.com/current.jpg']}}},html=buildSmartstoreDetail(p).html;
   const order=['data-product-intro','data-aida="interest"','data-color-palette','id="smartstore-color-0"','data-official-detail','data-brand-intro','data-brand-video-heading','<video ','data-store-banner','data-store-footer'].map(marker=>html.indexOf(marker));
-  assert(order.every((index,i)=>index>=0&&(!i||index>order[i-1])));assert.match(html,/data-product-hero/);assert.match(html,/data-attention-benefit[^>]*>편안한 움직임/);assert.doesNotMatch(html,/나의 한 벌 고르기|마음에 드는 색상과|나에게 맞는 한 벌을 선택/);assert.equal((html.match(/<video /g)||[]).length,1);assert(!html.includes('<button'));
+  assert(order.every((index,i)=>index>=0&&(!i||index>order[i-1])));assert.doesNotMatch(html,/data-product-hero/);assert.match(html,/data-attention-benefit[^>]*>편안한 움직임/);assert.doesNotMatch(html,/나의 한 벌 고르기|마음에 드는 색상과|나에게 맞는 한 벌을 선택/);assert.equal((html.match(/<video /g)||[]).length,1);assert(!html.includes('<button'));
  }
 });
 
@@ -102,4 +102,18 @@ test('색상 팔레트는 한 줄 최대 4개로 표시하며 상세 사진 네 
  const colors=['01화이트','02블랙','03베이지','04그린','12브라운'];const colorImages=Object.fromEntries(colors.map(c=>[c,Array.from({length:4},(_,i)=>'https://example.com/'+c.slice(0,2)+'-'+i+'.jpg')]));
  const html=buildSmartstoreDetail({...product,colors,colorImages}).html;
  assert.match(html,/data-color-palette[^>]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);assert.match(html,/12-3.jpg/);assert.equal((html.match(/data-photo-layout="four"/g)||[]).length,5);
+});
+
+
+test('두 템플릿 상품 소개 메인은 공식 모델 대신 현재 마네킹 1번을 사용한다',()=>{
+ const hero='/smartstore-photo/'+'a'.repeat(24);
+ for(const detailTemplate of [1,2]){
+  const p={...product,detailTemplate,images:{...product.images,main:'https://www.giordano.co.kr/official-main.jpg'},smartstoreDetail:{style:product.style,heroImage:hero,colorImages:{},sellingPoints:[]}};
+  const html=buildSmartstoreDetail(p).html;
+  assert.match(html,/data-product-hero/);
+  assert.match(html,new RegExp('src="'+hero+'"'));
+  assert.doesNotMatch(html,/src="https:\/\/www.giordano.co.kr\/official-main.jpg"/);
+  const changed=buildSmartstoreDetail({...p,smartstoreDetail:{...p.smartstoreDetail,heroImage:hero.replace(/a/g,'b')}}).html;
+  assert.notEqual(html,changed,'대표 마네킹 변경 시 렌더 캐시 입력도 달라진다');
+ }
 });
