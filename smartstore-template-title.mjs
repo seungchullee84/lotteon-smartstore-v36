@@ -16,7 +16,7 @@ export function officialTemplateTitleLayout(product){
  const lead=title.match(/^((?:[A-Z][A-Z0-9&/.-]*\s+)+)(?=[가-힣])/);
  const label=lead?.[1].trim()||'',body=lead?title.slice(lead[0].length):title;
  const words=body.split(' ');let lines=[body];
- if(body.length>14&&words.length>=3){
+ if(body.length>10&&words.length>=3){
   let cut=1,diff=Infinity;
   for(let i=1;i<words.length;i++){
    const delta=Math.abs(words.slice(0,i).join(' ').length-words.slice(i).join(' ').length);
@@ -26,3 +26,4 @@ export function officialTemplateTitleLayout(product){
  }
  return {title,label,lines};
 }
+
