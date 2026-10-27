@@ -8,7 +8,7 @@ export function officialTemplateTitle(product){
  if(/^\d{5,8}$/.test(style)){
   title=title.replace(new RegExp('(?:STYLE\\s*(?:NO\\.?)?\\s*[:.]?\\s*)?(?<!\\d)\\d{0,2}'+style+'(?!\\d)','gi'),'');
  }
- return title.replace(/\s+/g,' ').replace(/^[\s·|,;:—–-]+|[\s·|,;:—–-]+$/g,'').trim();
+ return title.replace(/\bNEW\b/gi,'').replace(/\s+/g,' ').replace(/^[\s·|,;:—–-]+|[\s·|,;:—–-]+$/g,'').trim();
 }
 
 export function officialTemplateTitleLayout(product){
