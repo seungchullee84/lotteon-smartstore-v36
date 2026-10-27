@@ -1,3 +1,4 @@
+import {catalogImageSource} from './official-benefit-catalog.mjs';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
@@ -11,6 +12,8 @@ export async function officialPointSource(product,folder,pageText,{dataRoot=path
  const detailHash=digest(bytes);
  // A visual review already checked this exact official image, including its captions.
  try{const manual=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'selling-point-image-review.json'),'utf8'));if(manual.version===1&&manual.style===product.style&&manual.sourceUrl===product.sourceUrl&&manual.detailHash===detailHash&&usableSellingPoints(manual.points,manual.text))return {text:manual.text+'\n•\n'+pageText,imageChecked:true,detailHash,method:'visual-official-detail'};}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
+ const catalog=await catalogImageSource(product,detailHash,{dataRoot});
+ if(catalog)return {text:[catalog.imageText,pageText].filter(Boolean).join('\n•\n'),imageChecked:true,detailHash,method:'official-catalog-image-cache'};
  const key=JSON.stringify([dataRoot,product.style,product.sourceUrl,detailHash]);
  let job=sourceJobs.get(key);if(!job){job=enrichOfficialProductFacts(product,folder,{dataRoot,signal,log,recognize}).then(p=>p.researchFacts);sourceJobs.set(key,job);job.finally(()=>{if(sourceJobs.get(key)===job)sourceJobs.delete(key);}).catch(()=>{});}
  const facts=await job;signal?.throwIfAborted();
@@ -26,7 +29,7 @@ export async function saveOfficialImagePointReview(product,folder,{text,points,d
 }
 export async function reviewSellingPoints(product,source,{dataRoot,detailHash=null,signal}={}){
  signal?.throwIfAborted();
- const identity={version:7,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
+ const identity={version:8,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
  const root=path.join(dataRoot,'smartstore-details',product.style),file=path.join(root,'selling-point-review.json');
  let imageReview;try{imageReview=JSON.parse(await readFile(path.join(root,'selling-point-image-review.json'),'utf8'));}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
  if(detailHash&&imageReview?.version===1&&imageReview.style===product.style&&imageReview.sourceUrl===product.sourceUrl&&imageReview.detailHash===detailHash&&imageReview.points?.length<=4&&usableSellingPoints(imageReview.points,imageReview.text)){
