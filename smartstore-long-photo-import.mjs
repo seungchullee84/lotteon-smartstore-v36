@@ -6,7 +6,7 @@ import {chromium} from 'playwright';
 import {load} from 'cheerio';
 import {imageDownloadFolder} from './desktop-downloads.mjs';
 import {BRAND_VIDEO_HEADING_HEIGHT} from './smartstore-brand-video.mjs';
-import {detectLongPhotoRegions} from './smartstore-long-photo-detect.mjs';
+import {detectLongPhotoRegions,sectionPhotoRectangles} from './smartstore-long-photo-detect.mjs';
 const digest=b=>createHash('sha256').update(b).digest('hex');
 const root=dataRoot=>path.join(dataRoot,'smartstore-long-photo-layouts');
 const thumbnail=bytes=>sharp(bytes,{limitInputPixels:false}).flatten({background:'#fff'}).resize(48,128,{fit:'fill'}).removeAlpha().raw().toBuffer();
@@ -75,5 +75,12 @@ export async function extractLongMannequinPhotos(bytes,{style,colors,dataRoot=pa
   const regions=await detectLongPhotoRegions(normalized,{style,colors,recognize,check});
   if(regions.length){await registerLongPhotoLayout(normalized,{style,regions,dataRoot});result=await find();}
  }
- return result;
+ const separated=[];
+ for(const piece of result){
+  check();const raw=await sharp(piece.bytes).flatten({background:'#fff'}).removeAlpha().raw().toBuffer({resolveWithObject:true});
+  const panels=sectionPhotoRectangles(raw.data,raw.info,{top:0,bottom:raw.info.height,color:piece.colorHint});
+  if(panels.length<2){separated.push(piece);continue;}
+  for(const {color,...rect} of panels)separated.push({...piece,bytes:await sharp(piece.bytes).extract(rect).png().toBuffer(),sourceRectangle:{...rect,left:piece.sourceRectangle.left+rect.left,top:piece.sourceRectangle.top+rect.top}});
+ }
+ return separated;
 }

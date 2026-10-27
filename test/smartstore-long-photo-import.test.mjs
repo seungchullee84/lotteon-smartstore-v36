@@ -3,7 +3,7 @@ import {mkdtemp,rm,readFile} from 'node:fs/promises';import path from 'node:path
 import {registerLongPhotoLayout,extractLongMannequinPhotos,mannequinPhotoRegions} from '../smartstore-long-photo-import.mjs';
 import {stageImportedPhotos,allImportedPhotoChoices} from '../smartstore-photo-import.mjs';
 import {BRAND_VIDEO_HEADING_HEIGHT} from '../smartstore-brand-video.mjs';
-import {ocrPhotoSections,detectLongPhotoRegions} from '../smartstore-long-photo-detect.mjs';
+import {ocrPhotoSections,detectLongPhotoRegions,sectionPhotoRectangles} from '../smartstore-long-photo-detect.mjs';
 
 test('제작 기록이 없는 구형 긴 상세도 매장 구간·색상명·사진 경계로 분리한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'long-ocr-'));try{
@@ -45,4 +45,14 @@ test('긴 상세와 업로드용 분할 이미지에서 확인된 색상별 사�
 });
 test('위치 기록은 색상 착용사진만 포함하고 팔레트·브랜드·공식 보완사진·안내는 제외한다',async()=>{
  const browser=await chromium.launch({headless:true});try{const page=await browser.newPage({viewport:{width:860,height:1200}});await page.setContent('<img width="860" height="600"><section data-color-palette><img width="100" height="100"></section><section id="smartstore-color-0"><h2>01화이트</h2><img width="400" height="500"><img width="400" height="500"></section><section id="smartstore-color-1"><h2>02블랙</h2><p>지오다노 공식 상품 사진</p><img width="400" height="500"></section><section data-official-detail><img width="860" height="3000"></section>');const regions=await page.evaluate(mannequinPhotoRegions);assert.equal(regions.length,2);assert(regions.every(r=>r.color==='01화이트'&&r.width===400&&r.height===500));}finally{await browser.close();}
+});
+
+test('4px 구분선의 정면·측면·디테일 묶음은 세 컷으로 분리하고 예전 위치 기록도 재검사한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'thin-photo-panels-'));try{
+ const regions=[{left:0,top:0,width:860,height:1147},{left:0,top:1151,width:428,height:570},{left:432,top:1151,width:428,height:570}];
+ const layers=await Promise.all(regions.map(async(r,i)=>({input:await sharp({create:{width:r.width,height:r.height,channels:3,background:['#725948','#414d51','#817a6c'][i]}}).png().toBuffer(),left:r.left,top:r.top})));
+ const collage=await sharp({create:{width:860,height:1721,channels:3,background:'#fff'}}).composite(layers).png().toBuffer(),raw=await sharp(collage).raw().toBuffer({resolveWithObject:true});
+ assert.deepEqual(sectionPhotoRectangles(raw.data,raw.info,{top:0,bottom:1721,color:'01화이트'}).map(({color,...r})=>r),regions);
+ const long=await sharp({create:{width:860,height:3000,channels:3,background:'#fff'}}).composite([{input:collage,left:0,top:500}]).png().toBuffer();await registerLongPhotoLayout(long,{style:'326924',regions:[{color:'01화이트',left:0,top:500,width:860,height:1721}],dataRoot:root});const pieces=await extractLongMannequinPhotos(long,{style:'326924',colors:['01화이트'],dataRoot:root,backfill:false,detect:false});assert.equal(pieces.length,3);assert.deepEqual(pieces[0].sourceRectangle,{left:0,top:500,width:860,height:1147});
+ }finally{await rm(root,{recursive:true,force:true});}
 });
