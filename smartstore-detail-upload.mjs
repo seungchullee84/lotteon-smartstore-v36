@@ -15,6 +15,16 @@ import {STORE_BANNER_URL} from './smartstore-store-banner.mjs';
 import {isSmartstoreDetailEditUrl} from './smartstore-detail-only.mjs';
 export async function openSmartstoreEditor(page,{check=()=>{}}={}){
  check();
+ // Reuse ONE's named window: Chrome does not emit a new popup event for it.
+ const context=page.context?.();
+ if(context){
+  const editors=context.pages().filter(p=>!p.isClosed()&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/editor(?:\?|$)/.test(p.url()));
+  const linked=[];for(const editor of editors)if(await editor.opener()===page)linked.push(editor);
+  const forms=[...new Set(context.pages().filter(p=>!p.isClosed()&&/\/#\/products\/(?:edit|copy)\/\d+/.test(p.url())).map(p=>p.url()))];
+  const existing=linked.length===1?linked[0]:!linked.length&&editors.length===1&&forms.length===1&&forms[0]===page.url()?editors[0]:null;
+  if(existing){check();await existing.bringToFront();return existing;}
+  if(editors.length)throw Error('상세 편집기의 상품 연결이 불명확합니다. 사용할 상품과 편집기 한 개를 남겨 주세요.');
+ }
  const input=page.locator('button[data-nclicks-code="descrip.sebtn"]');
  if(!await input.isVisible()){
   const heading=page.getByRole('button',{name:/^상세설명/});
@@ -37,18 +47,25 @@ export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=t
  const dest=path.join(folder,'smartstore-upload');await mkdir(dest,{recursive:true});
  const boundaries=[...new Set([0,firstHeight,officialTop,bannerTop,footerTop,meta.height].filter(Number.isInteger))].sort((a,b)=>a-b);
  const digest=createHash('sha256').update(await readFile(png)).update(JSON.stringify({rule:'semantic-sections-aida-3',boundaries})).digest('hex').slice(0,16);
- const parts=[];let bannerLink=null,footerIndex;
+ const cacheFile=path.join(dest,digest+'-parts.json');
+ let cached;try{cached=JSON.parse(await readFile(cacheFile,'utf8'));}catch{}
+ const parts=[];let bannerLink=null,footerIndex;const records=[];
  for(let index=0;index<boundaries.length-1;index++){
   const top=boundaries[index],height=boundaries[index+1]-top;
   const footer=top===footerTop;
   const banner=top===bannerTop;
   const file=path.join(dest,digest+'-'+String(index).padStart(2,'0')+'.png');
-  const bytes=await sharp(png,{limitInputPixels:false}).extract({left:0,top,width:860,height}).png({compressionLevel:9}).toBuffer();
+  let bytes,reused=false;
+  const record=cached?.files?.[index];
+  if(record?.name===path.basename(file))try{const stored=await readFile(file);if(createHash('sha256').update(stored).digest('hex')===record.sha256){bytes=stored;reused=true;}}catch{}
+  bytes||=await sharp(png,{limitInputPixels:false}).extract({left:0,top,width:860,height}).png({compressionLevel:6}).toBuffer();
+  records.push({name:path.basename(file),sha256:createHash('sha256').update(bytes).digest('hex')});
   if(bytes.length>19000000)throw Error('상세 구간 한 장의 업로드 용량을 초과했습니다. 원본과 표를 유지하기 위해 중간 분할하지 않았습니다.');
-  await writeFile(file,bytes);parts.push(file);
+  if(!reused)await writeFile(file,bytes);parts.push(file);
   if(footer)footerIndex=index;
   if(banner)bannerLink={index,file,url:STORE_BANNER_URL};
  }
+ await writeFile(cacheFile,JSON.stringify({files:records}));
  return {files:parts,bannerLink,footerIndex,videoAfterIndex:boundaries.indexOf(firstHeight)-1,video:video?{file:video.file,sha256:video.sha256}:null,includeVideo,dataRoot,videoOptions,hash:digest};
 }
 export async function applySmartstoreBannerLink(editor,parts,{check=()=>{},log=()=>{}}={}){
