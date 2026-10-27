@@ -6,8 +6,8 @@ export function ocrPhotoSections(tsv,{style,colors,width,height}){
  for(const line of String(tsv||'').trim().split('\n').slice(1)){const r=line.split('\t');if(r[0]!=='5'||!r[11]?.trim())continue;const key=r.slice(1,5).join('/');const list=grouped.get(key)||[];list.push({text:r.slice(11).join('\t'),left:+r[6],top:+r[7],width:+r[8],height:+r[9]});grouped.set(key,list);}
  const lines=[...grouped.values()].map(a=>({text:compact(a.map(w=>w.text).join('')),left:Math.min(...a.map(w=>w.left)),top:Math.min(...a.map(w=>w.top)),bottom:Math.max(...a.map(w=>w.top+w.height)),height:Math.max(...a.map(w=>w.height))})).sort((a,b)=>a.top-b.top);
  const text=lines.map(l=>l.text).join(' ');const recorded=[...text.matchAll(/style(\d{6})/g)].map(m=>m[1]);if(recorded.some(v=>v!==style))return [];
- const marker=lines.find(l=>/매장.*마네.*착용사진/.test(l.text));if(!marker)return [];
- const end=lines.find(l=>l.top>marker.bottom&&/^(materialsize|productdetail)$/.test(l.text))?.top||height;
+ const marker=lines.find(l=>/매장.*(?:마네.*착용|직접.*촬영)/.test(l.text));if(!marker)return [];
+ const end=lines.find(l=>l.top>marker.bottom&&/^(materialsize|productdetail|fabricfit|fabricandfit)$/.test(l.text))?.top||height;
  const headings=[];
  for(const l of lines){if(l.top<=marker.bottom||l.top>=end||l.left>width*.2||l.height<width*.027)continue;
   const exact=colors.filter(c=>l.text===compact(c)||l.text.endsWith(compact(c.slice(2)))&&l.text.length<=compact(c).length+2);

@@ -103,7 +103,13 @@ export async function findPhotoSourceForm(context,style,{check=()=>{},log=()=>{}
 export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{}}={}){
  const {page,sellerCode}=await findPhotoSourceForm(context,product.style,{check,log});check();
  const formUrl=page.url(),editors=[];
+ const openEditors=context.pages().filter(p=>!p.isClosed()&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/editor(?:\?|$)/.test(p.url()));
  for(const p of context.pages())if(!p.isClosed()&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/editor(?:\?|$)/.test(p.url())&&await p.opener()===page)editors.push(p);
+ if(!editors.length&&openEditors.length){
+  const formUrls=[...new Set(context.pages().filter(p=>!p.isClosed()&&isSmartstoreDetailEditUrl(p.url())).map(p=>p.url()))];
+  if(openEditors.length!==1||formUrls.length!==1||formUrls[0]!==formUrl)throw Error('열린 상세 편집기의 상품 연결이 불명확합니다. 현재 상품의 편집기 한 개를 남겨 주세요.');
+  editors.push(openEditors[0]);log('현재 열린 상세 편집기 사용 · 부모 창 연결 복구');
+ }
  if(editors.length>1)throw Error('이 상품의 상세 편집기가 여러 개입니다. 사용할 편집기 하나만 남겨 주세요.');
  let editor=editors[0]||await openSmartstoreEditor(page,{check}),fresh=null;
  // ONE initially exposes an empty text component while restoring the saved document.
@@ -111,6 +117,7 @@ export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{
  await editor.locator('.se-component.se-image,.se-component.se-imageStrip').first().waitFor({state:'attached',timeout:20000});
  const readPositions=async()=>{const positions=await settledEditorPhotoPositions(editor,product.colors,{check});const long=await editor.locator('.se-component img').evaluateAll(nodes=>nodes.map((n,index)=>({index,width:n.naturalWidth,height:n.naturalHeight})).filter(n=>!n.width||n.width>=300&&n.height>n.width*3));for(const p of long)if(!positions.some(v=>v.index===p.index))positions.push({index:p.index,longImage:true});return positions;};
  let positions=await readPositions();
+ if(!positions.length&&editors.length)throw Error('현재 열린 상세 편집기에서 마네킹 사진을 찾지 못했습니다. 저장된 다른 상세로 대체하지 않았습니다.');
  if(!positions.length){
   // A named edit window may still hold an unsaved replacement. Read the saved
   // product in a fresh window, preserving that existing editor and its contents.
