@@ -61,7 +61,7 @@ test('동영상 버튼 첫 클릭이 반응하지 않으면 다시 누르고 한
  const root=await mkdtemp(path.join(os.tmpdir(),'retry-native-video-')),browser=await chromium.launch({headless:true});
  try{
   const options=await prepareVideo(root),page=await browser.newPage();
-  await page.setContent(`<button data-name=video data-group=documentToolbar onclick="window.clicks=(window.clicks||0)+1;if(window.clicks===2)document.querySelector('[role=dialog]').hidden=false">동영상</button><div role=dialog hidden><input type=file accept="video/mp4" onchange="window.uploads=(window.uploads||0)+1;setTimeout(()=>{const n=document.createElement('div');n.className='se-component se-video';n.dataset.videoId='retried-video';document.body.append(n)},1800)"></div><button onclick="window.saved=true">등록</button>`);
+  await page.setContent(`<button data-name=video data-group=documentToolbar onclick="window.clicks=(window.clicks||0)+1;if(window.clicks===2)document.querySelector('#slot').innerHTML=document.querySelector('template').innerHTML">동영상</button><div id=slot></div><template><div role=dialog><input type=file accept="video/mp4" onchange="window.uploads=(window.uploads||0)+1;setTimeout(()=>{const n=document.createElement('div');n.className='se-component se-video';n.dataset.videoId='retried-video';document.body.append(n)},1800)"></div></template><button onclick="window.saved=true">등록</button>`);
   const result=await insertSmartstoreVideo(page,{...options,timeout:8000});
   assert.deepEqual(result.identity,['retried-video']);
   assert.equal(await page.evaluate(()=>window.clicks),2);
