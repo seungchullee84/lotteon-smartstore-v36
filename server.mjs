@@ -278,7 +278,7 @@ const server=http.createServer(async(req,res)=>{
             prepare:(p,folder)=>prepareSmartstoreAuto(p,folder,{dataRoot,apiKey:key,signal,log}),
             includeMain:false,
             render:async(p,folder)=>{
-              const output=path.join(await imageDownloadFolder(),p.style+'_스마트스토어자동상세_'+Date.now()+'.png');
+              const output=path.join(folder,p.style+'_스마트스토어자동상세_'+Date.now()+'.png');
               const detail=await saveSmartstoreDetail(p,folder,output,{signal,log});return {...detail,path:output};
             },
             upload:async(p,folder,{main,detail})=>{
@@ -353,7 +353,7 @@ const server=http.createServer(async(req,res)=>{
           await runSmartstoreDetailOnly({product,folder,signal,log,
             connect:p=>smartBot.preflightDetailOnly(p),
             render:async(p,folder)=>{
-              const output=path.join(await imageDownloadFolder(),p.style+'_상세설명만수정_'+Date.now()+'.png');
+              const output=path.join(folder,p.style+'_상세설명만수정_'+Date.now()+'.png');
               const detail=await saveSmartstoreDetail(p,folder,output,{signal,log,dataRoot});
               return smartstoreUploadParts(output,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{includeVideo:detail.includeVideo,dataRoot,videoOptions:detail.videoOptions,brandIntroHeight:detail.brandIntroHeight,videoAfterTop:detail.videoAfterTop,footerTop:detail.footerTop,bannerTop:detail.bannerTop,officialTop:detail.officialTop});
             },
