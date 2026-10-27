@@ -9974,7 +9974,7 @@
   "withThreeOrFour": 432,
   "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-27T13:54:56.237Z",
+  "updatedAt": "2026-10-27T13:55:56.891Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-27T13:22:06.679Z",
@@ -17008,7 +17008,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -17032,7 +17032,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -17044,7 +17044,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -17056,7 +17056,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -17152,7 +17152,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -17200,7 +17200,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -17212,7 +17212,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -17224,7 +17224,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -17272,7 +17272,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -17284,7 +17284,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -17308,7 +17308,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -17332,7 +17332,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -17356,7 +17356,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "needs-review"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -17380,7 +17380,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -17404,7 +17404,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -17452,7 +17452,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -17500,7 +17500,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20640,7 +20640,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20652,7 +20652,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20688,7 +20688,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20700,7 +20700,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20712,7 +20712,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20724,7 +20724,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20760,7 +20760,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20772,7 +20772,7 @@
             "changes": [
               "공식 상세이미지 변경"
             ],
-            "status": "analyzing"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20796,7 +20796,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20820,7 +20820,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20844,7 +20844,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20856,7 +20856,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20868,7 +20868,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20892,7 +20892,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "analyzing"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20904,7 +20904,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20952,7 +20952,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20964,7 +20964,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21012,7 +21012,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "needs-review"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21024,7 +21024,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21108,7 +21108,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21132,7 +21132,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21144,7 +21144,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21156,7 +21156,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21168,7 +21168,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21180,7 +21180,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21192,7 +21192,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21204,7 +21204,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21216,7 +21216,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21240,7 +21240,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21252,7 +21252,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21264,7 +21264,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21276,7 +21276,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21288,7 +21288,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21300,7 +21300,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21324,7 +21324,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21336,7 +21336,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -21384,7 +21384,7 @@
             "changes": [
               "상품 원문·정보 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
