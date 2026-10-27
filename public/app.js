@@ -36,7 +36,7 @@ function detailMotionContent(text,kind){
  const row=document.createElement('span');row.className='detail-motion '+kind;
  const scene=document.createElement('span');scene.className='detail-motion-scene';scene.setAttribute('aria-hidden','true');
  for(const [name,label] of [['rocket','🚀'],['check','✓'],['spark spark-one','✦'],['spark spark-two','✧'],['spark spark-three','✦']]){
-  const item=document.createElement('span');item.className='detail-motion-'+name;item.textContent=label;scene.append(item);
+  const item=document.createElement('span');item.className=name.split(' ').map(part=>'detail-motion-'+part).join(' ');item.textContent=label;scene.append(item);
  }
  const message=document.createElement('span');message.className='detail-motion-message';message.textContent=text;
  row.append(scene,message);return row;
