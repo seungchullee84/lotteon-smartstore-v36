@@ -10,12 +10,12 @@ import {buildDetailContent} from '../detail-html.mjs';
 import {smartstorePlan} from '../smartstore-form.mjs';
 import {publishable} from '../github-sync.mjs';
 import {prepareVideo,videoOptions,fixtureVideo} from './helpers/brand-video.mjs';
-const product={detailTemplate:2,style:'375908',name:'여성 경량 패딩 자켓 375908',rawName:'여성 경량 패딩 자켓',gender:'여성',colors:['01핑크','02화이트'],sizes:['S','M'],material:'나일론100%',country:'미얀마',washing:'손세탁',manufactured:'2025-08',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=sample',originalDetailUrl:'https://www.giordano.co.kr/detail.jpg',images:{detail:'https://www.giordano.co.kr/detail.jpg',size:'https://www.giordano.co.kr/size.jpg',info:'https://www.giordano.co.kr/info.jpg'}};
+const product={detailTemplate:1,style:'375908',name:'여성 경량 패딩 자켓 375908',rawName:'여성 경량 패딩 자켓',gender:'여성',colors:['01핑크','02화이트'],sizes:['S','M'],material:'나일론100%',country:'미얀마',washing:'손세탁',manufactured:'2025-08',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=sample',originalDetailUrl:'https://www.giordano.co.kr/detail.jpg',images:{detail:'https://www.giordano.co.kr/detail.jpg',size:'https://www.giordano.co.kr/size.jpg',info:'https://www.giordano.co.kr/info.jpg'}};
 
 test('기본 템플릿1과 명시적으로 선택한 템플릿2는 독립적으로 보존한다',()=>{
  const base={...product,detailTemplate:undefined},one=buildSmartstoreDetail(base),two=buildSmartstoreDetail({...base,detailTemplate:2});
  assert.equal(one.templateVariant,1);assert.equal(one.templateLabel,'템플릿 1');assert(one.html.indexOf('data-product-intro')<one.html.indexOf('data-official-detail'));assert(one.html.indexOf('data-official-detail')<one.html.indexOf('data-brand-intro'));assert(one.html.indexOf('data-brand-intro')<one.html.indexOf('data-brand-video-heading'));assert(one.html.indexOf('data-brand-video-heading')<one.html.indexOf('data-store-banner'));assert(!one.html.includes('data-aida-action'));
- assert.equal(two.templateVariant,2);assert.equal(two.templateLabel,'템플릿 2');assert(two.html.indexOf('data-product-intro')<two.html.indexOf('data-brand-intro'));assert(two.html.includes('data-aida="attention"'));assert(!two.html.includes('data-aida-action'));
+ assert.equal(two.templateVariant,2);assert.equal(two.templateLabel,'템플릿 2');assert(two.html.indexOf('data-product-intro')<two.html.indexOf('data-brand-intro'));assert(one.html.includes('data-aida="attention"'));assert(two.html.includes('data-intro-layout="title-and-benefits"'));assert(!two.html.includes('data-aida-action'));
  assert.throws(()=>buildSmartstoreDetail({...base,detailTemplate:3}),/템플릿 1 또는 2/);
 });
 
@@ -81,7 +81,7 @@ test('다른 품번·색상·외부 경로는 차단하고 사진 매핑과 상�
   assert.match(await readFile(result.htmlPath,'utf8'),/detail_%EB%B8%8C%EB%9E%9C%EB%93%9C%EC%98%81%EC%83%81\.mp4/);
   assert.equal(result.storeVideoPlayback,'unverified');
   assert.ok(result.points.every(p=>!/모달|기모/.test(p.title+p.description)));
-  const templateOne=await saveSmartstoreDetail({...reviewedProduct,detailTemplate:1},folder,path.join(root,'template-one.png'),{dataRoot,videoOptions});assert.equal(templateOne.templateVariant,1);assert(templateOne.officialTop<templateOne.videoAfterTop);assert.equal(templateOne.videoAfterTop,templateOne.bannerTop);assert.equal(templateOne.renderCacheHit,false);
+  const templateOne=await saveSmartstoreDetail({...reviewedProduct,detailTemplate:2},folder,path.join(root,'template-one.png'),{dataRoot,videoOptions});assert.equal(templateOne.templateVariant,2);assert(templateOne.officialTop<templateOne.videoAfterTop);assert.equal(templateOne.videoAfterTop,templateOne.bannerTop);assert.equal(templateOne.renderCacheHit,false);
   const repeated=await saveSmartstoreDetail(reviewedProduct,folder,path.join(root,'repeated.png'),{dataRoot,videoOptions});
   assert.equal(result.renderCacheHit,false);assert.equal(repeated.renderCacheHit,true);assert.equal(repeated.footerTop,result.footerTop);
   assert.deepEqual(await readFile(out),await readFile(path.join(root,'repeated.png')));
@@ -105,15 +105,15 @@ test('색상 팔레트는 한 줄 최대 4개로 표시하며 상세 사진 네 
 });
 
 
-test('템플릿1 상단은 사진 없이 제목 중심, 템플릿2는 현재 마네킹을 사용한다',()=>{
+test('템플릿2 상단은 사진 없이 제목 중심, 템플릿1은 현재 마네킹을 사용한다',()=>{
  const hero='/smartstore-photo/'+'a'.repeat(24);
  for(const detailTemplate of [1,2]){
   const p={...product,detailTemplate,images:{...product.images,main:'https://www.giordano.co.kr/official-main.jpg'},smartstoreDetail:{style:product.style,heroImage:hero,colorImages:{},sellingPoints:[]}};
   const html=buildSmartstoreDetail(p).html;
-  if(detailTemplate===2)assert.match(html,/data-product-hero/);else assert.doesNotMatch(html,/data-product-hero/);
-  if(detailTemplate===2)assert.match(html,new RegExp('src="'+hero+'"'));
+  if(detailTemplate===1)assert.match(html,/data-product-hero/);else assert.doesNotMatch(html,/data-product-hero/);
+  if(detailTemplate===1)assert.match(html,new RegExp('src="'+hero+'"'));
   assert.doesNotMatch(html,/src="https:\/\/www.giordano.co.kr\/official-main.jpg"/);
   const changed=buildSmartstoreDetail({...p,smartstoreDetail:{...p.smartstoreDetail,heroImage:hero.replace(/a/g,'b')}}).html;
-  if(detailTemplate===2)assert.notEqual(html,changed,'대표 마네킹 변경 시 렌더 캐시 입력도 달라진다');else assert.equal(html,changed,'사진 없는 상단은 마네킹 메인 변경에 영향받지 않는다');
+  if(detailTemplate===1)assert.notEqual(html,changed,'대표 마네킹 변경 시 렌더 캐시 입력도 달라진다');else assert.equal(html,changed,'사진 없는 상단은 마네킹 메인 변경에 영향받지 않는다');
  }
 });
