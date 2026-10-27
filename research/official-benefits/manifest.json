@@ -9972,9 +9972,9 @@
   "sourceComplete": 1416,
   "imageComplete": 1278,
   "withThreeOrFour": 432,
-  "phase": "discover",
+  "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-27T12:39:33.781Z",
+  "updatedAt": "2026-10-27T12:40:54.667Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-27T12:09:29.588Z",
