@@ -62,8 +62,14 @@ function announce(text,kind='working'){
  if(kind!=='working')feedbackTimer=setTimeout(()=>feedback.className='',4500);
 }
 function syncFeedbackWithState(state){
+ if(state.busy){
+  if(!feedback.classList.contains('working')||feedbackJob!==state.phase){
+   const label=({collect:'공식몰 정보 수집 중…',register:'롯데ON 상품 입력 진행 중…',background:'배경 합성 중…',smartstore:'스마트스토어 입력 중…','smartstore-auto':'스마트스토어 자동 작업 진행 중…','smartstore-detail-only':'상세설명 교체 중…','smartstore-import-photos':'기존 상품 착용사진 가져오는 중…','smartstore-tags':'태그 자동입력 중…','smartstore-detail':'상세페이지 제작 중…',stopping:'작업 중단 중…'})[state.phase]||'작업 진행 중…';
+   announce(label);
+  }
+  feedbackJob=state.phase;return;
+ }
  if(!feedback.classList.contains('working')){feedbackJob=null;return;}
- if(state.busy){feedbackJob=state.phase;return;}
  if(requestLock)return;
  const job=feedbackJob||(serverBusy?serverPhase:null);
  if(!job)return;
