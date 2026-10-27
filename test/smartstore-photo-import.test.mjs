@@ -134,3 +134,7 @@ test('사진 가져오기 시작은 판매중을 먼저 누르고 500개, 없으
  await preparePhotoSourceList(page);assert.deepEqual(await page.evaluate(()=>steps),['reset','sale','size',count+'개씩']);await page.close();
  }}finally{await browser.close();}
 });
+
+test('ST·STR과 슬래시·더하기 표기 차이로 줄무늬 색상을 누락하지 않고 상품 디테일에서 끝낸다',async()=>{
+ const browser=await chromium.launch({headless:true});try{const p=await browser.newPage();await p.setContent('<div class="se-component se-text">01크림</div><div class="se-component se-image"><img></div><div class="se-component se-text">03그레이/화이트ST</div><div class="se-component se-imageStrip"><img><img></div><div class="se-component se-text">04네이비/화이트ST</div><div class="se-component se-image"><img></div><div class="se-component se-text">05차콜</div><div class="se-component se-image"><img></div><div class="se-component se-text">06블랙</div><div class="se-component se-image"><img></div><div class="se-component se-text">상품 디테일</div><div class="se-component se-image"><img></div>');assert.deepEqual((await p.evaluate(editorPhotoPositions,['01크림','03그레이+화이트STR','04네이비+화이트STR','05차콜','06블랙'])).map(p=>p.colorHint),['01크림','03그레이+화이트STR','03그레이+화이트STR','04네이비+화이트STR','05차콜','06블랙']);}finally{await browser.close();}
+});

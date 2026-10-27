@@ -14,11 +14,11 @@ const safeStyle=style=>{if(!/^\d{6}$/.test(style||''))throw Error('사진을 가
 
 // Read only rendered editor components, including image strips. Never inspect app internals.
 export function editorPhotoPositions(colors){
- const compact=s=>String(s||'').replace(/\s+/g,'');let color='';const out=[];
+ const compact=s=>String(s||'').normalize('NFKC').replace(/\s+/g,'').replace(/[+\/]/g,'+').replace(/(?:STR|ST|스트라이프)$/i,'STR');let color='';const out=[];
  const imgs=[...document.querySelectorAll('.se-component img')];
  for(const c of document.querySelectorAll('.se-component')){
   const text=(c.innerText||'').trim();
-  if(/◆\s*상세페이지\s*◆|^PRODUCT DETAIL$|^디테일까지|정품.*출고.*안내|교환.*반품.*안내|^매장\s*안내|^SHOP INFORMATION/i.test(text))break;
+  if(/◆\s*상세페이지\s*◆|^PRODUCT DETAIL$|^상품\s*디테일|^디테일까지|정품.*출고.*안내|교환.*반품.*안내|^매장\s*안내|^SHOP INFORMATION/i.test(text))break;
   if(c.classList.contains('se-text')){
    const matches=colors.filter(v=>compact(v)===compact(text));
    const match=matches.length===1?matches[0]:null;
