@@ -105,15 +105,15 @@ test('색상 팔레트는 한 줄 최대 4개로 표시하며 상세 사진 네 
 });
 
 
-test('두 템플릿 상품 소개 메인은 공식 모델 대신 현재 마네킹 1번을 사용한다',()=>{
+test('템플릿1 상단은 사진 없이 제목 중심, 템플릿2는 현재 마네킹을 사용한다',()=>{
  const hero='/smartstore-photo/'+'a'.repeat(24);
  for(const detailTemplate of [1,2]){
   const p={...product,detailTemplate,images:{...product.images,main:'https://www.giordano.co.kr/official-main.jpg'},smartstoreDetail:{style:product.style,heroImage:hero,colorImages:{},sellingPoints:[]}};
   const html=buildSmartstoreDetail(p).html;
-  assert.match(html,/data-product-hero/);
-  assert.match(html,new RegExp('src="'+hero+'"'));
+  if(detailTemplate===2)assert.match(html,/data-product-hero/);else assert.doesNotMatch(html,/data-product-hero/);
+  if(detailTemplate===2)assert.match(html,new RegExp('src="'+hero+'"'));
   assert.doesNotMatch(html,/src="https:\/\/www.giordano.co.kr\/official-main.jpg"/);
   const changed=buildSmartstoreDetail({...p,smartstoreDetail:{...p.smartstoreDetail,heroImage:hero.replace(/a/g,'b')}}).html;
-  assert.notEqual(html,changed,'대표 마네킹 변경 시 렌더 캐시 입력도 달라진다');
+  if(detailTemplate===2)assert.notEqual(html,changed,'대표 마네킹 변경 시 렌더 캐시 입력도 달라진다');else assert.equal(html,changed,'사진 없는 상단은 마네킹 메인 변경에 영향받지 않는다');
  }
 });
