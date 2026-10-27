@@ -438,7 +438,6 @@ function selectRegistrationChannel(channel){
  $('channelSmartstore').setAttribute('aria-pressed',String(smart));
  $('activeChannelName').textContent=smart?'스마트스토어':'롯데ON';
  $('activeChannelName').className=smart?'smartstore-brand':'lotteon-brand';
- $('channelSummary').textContent=smart?'현재 작업 채널: 스마트스토어 · 품번으로 사진 합성·상세페이지 제작·업로드':'현재 작업 채널: 롯데ON · 기존 등록 방식';
  document.title=smart?'스마트스토어 상품등록기':'롯데ON 상품등록기';
  try{sessionStorage.setItem('registrationChannel',smart?'smartstore':'lotte');}catch{}
  $('saveDetailImages').textContent=smart?'스마트스토어 상세페이지 만들기·저장':'상세이미지 저장';
