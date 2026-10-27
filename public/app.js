@@ -553,7 +553,7 @@ function renderResearchTags(state){
  const research=effectiveTagResearch(state),container=$('researchTagCandidates');tagResearchReady=!!research?.candidates?.length||!!research?.manual;
  $('smartstoreAutoTags').disabled=requestLock||state.busy||!tagResearchReady;
  const allowed=new Map((research?.candidates||[]).map(t=>[t.id,t.name]));
- const currentReport=result=>result?.style===state.product?.style&&Array.isArray(result.selectedTags)&&result.selectedTags.every(t=>allowed.get(t.id)===t.name)?result:null;
+ const currentReport=result=>result&&result.style===state.product?.style&&Array.isArray(result.selectedTags)&&result.selectedTags.every(t=>allowed.get(t.id)===t.name)?result:null;
  const report=currentReport(state.tagResult),validation=currentReport(state.tagValidation);
  const verified=report?.selectedTags||validation?.selectedTags||[];
  const entries=(research?.manual?research.candidates:verified.length?verified:research?.candidates||[]).slice(0,10),names=entries.map(t=>t.name),key=JSON.stringify(entries.map(t=>[t.id,t.name]));
