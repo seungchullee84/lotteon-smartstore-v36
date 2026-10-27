@@ -1,7 +1,8 @@
 import * as one from './smartstore-template-one.mjs';
 import * as two from './smartstore-template-two.mjs';
 import {resolveDetailTemplate} from './smartstore-template-choice.mjs';
-export {TEMPLATE_ASSET_NAMES,TEMPLATE_ASSET_BASE,mannequinWearingNote,productSellingPoints} from './smartstore-template-two.mjs';
+export {TEMPLATE_ASSET_BASE,mannequinWearingNote,productSellingPoints} from './smartstore-template-one.mjs';
+export const TEMPLATE_ASSET_NAMES=[...new Set([...one.TEMPLATE_ASSET_NAMES,...two.TEMPLATE_ASSET_NAMES])];
 export const SMARTSTORE_DETAIL_TEMPLATE=one.SMARTSTORE_DETAIL_TEMPLATE;
 function selected(product,options){
  const variant=resolveDetailTemplate(options.detailTemplate??product.detailTemplate);
