@@ -51,7 +51,7 @@ test('4px 구분선의 정면·측면·디테일 묶음은 세 컷으로 분리�
  const root=await mkdtemp(path.join(os.tmpdir(),'thin-photo-panels-'));try{
  const regions=[{left:0,top:0,width:860,height:1147},{left:0,top:1151,width:428,height:570},{left:432,top:1151,width:428,height:570}];
  const layers=await Promise.all(regions.map(async(r,i)=>({input:await sharp({create:{width:r.width,height:r.height,channels:3,background:['#725948','#414d51','#817a6c'][i]}}).png().toBuffer(),left:r.left,top:r.top})));
- const collage=await sharp({create:{width:860,height:1721,channels:3,background:'#fff'}}).composite(layers).png().toBuffer(),raw=await sharp(collage).raw().toBuffer({resolveWithObject:true});
+ const collage=await sharp({create:{width:860,height:1721,channels:3,background:'#fff'}}).composite(layers).png().toBuffer(),raw=await sharp(collage).removeAlpha().raw().toBuffer({resolveWithObject:true});
  assert.deepEqual(sectionPhotoRectangles(raw.data,raw.info,{top:0,bottom:1721,color:'01화이트'}).map(({color,...r})=>r),regions);
  const long=await sharp({create:{width:860,height:3000,channels:3,background:'#fff'}}).composite([{input:collage,left:0,top:500}]).png().toBuffer();await registerLongPhotoLayout(long,{style:'326924',regions:[{color:'01화이트',left:0,top:500,width:860,height:1721}],dataRoot:root});const pieces=await extractLongMannequinPhotos(long,{style:'326924',colors:['01화이트'],dataRoot:root,backfill:false,detect:false});assert.equal(pieces.length,3);assert.deepEqual(pieces[0].sourceRectangle,{left:0,top:500,width:860,height:1147});
  }finally{await rm(root,{recursive:true,force:true});}
