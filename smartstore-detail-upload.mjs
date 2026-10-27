@@ -1,4 +1,4 @@
-export function smartstorePartLayout(parts,index){return index===parts.bannerLink?.index||index===parts.footerIndex?'fit':'extend';}
+export function smartstorePartLayout(parts,index){return 'fit';}
 export function smartstoreMediaOrder(parts){
  if(!Array.isArray(parts.files)||!parts.files.length)throw Error('첨부할 상세이미지가 없습니다.');
  const include=parts.includeVideo!==false,index=parts.videoAfterIndex??0;
@@ -84,7 +84,7 @@ export async function applySmartstoreBannerLink(editor,parts,{check=()=>{},log=(
   check();await editor.locator('button,[role="button"]').nth(buttonIndex).click();
   parts.bannerLinkSubmitted=true;
  }catch(error){throw Error('배너 링크 연결 확인 실패: '+error.message);}
- check();log('배너 주소 입력·오른쪽 체크 완료 · 링크 검증 대기 없이 하단 옆트임 처리 계속');
+ check();log('배너 주소 입력·오른쪽 체크 완료 · 링크 검증 대기 없이 문서 너비 배치 처리 계속');
 }
 export const insertSmartstoreVideo=insertNativeBrandVideo;
 export async function selectSmartstoreImage(editor,image,{check=()=>{}}={}){
@@ -126,7 +126,7 @@ export async function selectSmartstoreImage(editor,image,{check=()=>{}}={}){
  }
  throw Error('상세이미지 선택 영역 클릭 실패: '+clickIssue.message+' · 편집기 내용은 유지했습니다.');
 }
-export async function applySmartstoreImageLayout(editor,image,{check=()=>{},layout='extend'}={}){
+export async function applySmartstoreImageLayout(editor,image,{check=()=>{},layout='fit'}={}){
  if(!['extend','fit'].includes(layout))throw Error('지원하지 않는 이미지 배치');
  const component=image.locator('xpath=ancestor::*[contains(concat(" ",normalize-space(@class)," ")," se-component ")][1]');
  for(let attempt=0;attempt<2;attempt++){
@@ -160,12 +160,12 @@ export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{
   throw Error('상세이미지 업로드 준비 확인 실패: 예상 '+imageCount+'장 / 현재 '+observed.count+'장 / 업로드 대기 '+(observed.pending.join(',')||'없음')+' · '+error.message);
  }
  const images=editor.locator('.se-component.se-image img');
- const fitIndexes=[bannerIndex,footerIndex].filter(Number.isInteger);
+ const fitIndexes=Array.from({length:imageCount},(_,i)=>i);
  const missing=await images.evaluateAll((ns,fitIndexes)=>ns.flatMap((n,i)=>n.closest('.se-component.se-image')?.querySelector('.se-component-content-'+(fitIndexes.includes(i)?'fit':'extend'))?[]:[i]),fitIndexes);
- if(missing.length)log('최종 반영 전 옆트임 누락 '+missing.length+'장만 보정 · 파일 재업로드 없음');
+ if(missing.length)log('최종 반영 전 문서 너비 배치 누락 '+missing.length+'장만 보정 · 파일 재업로드 없음');
  for(const i of missing){check();await applySmartstoreImageLayout(editor,images.nth(i),{check,layout:fitIndexes.includes(i)?'fit':'extend'});}
  const ready=await images.evaluateAll((ns,fitIndexes)=>ns.every((n,i)=>/^https:\/\//.test(n.src)&&n.closest('.se-component.se-image')?.querySelector('.se-component-content-'+(fitIndexes.includes(i)?'fit':'extend'))),fitIndexes);
- if(await images.count()!==imageCount||!ready)throw Error('최종 반영 전 상세이미지 개수·옆트임을 확인하지 못했습니다. 편집기 내용은 유지했습니다.');
+ if(await images.count()!==imageCount||!ready)throw Error('최종 반영 전 상세이미지 개수·문서 너비을 확인하지 못했습니다. 편집기 내용은 유지했습니다.');
  check();if(!applyEditor){log('상세설명 교체 완료 · 편집기 등록 버튼 누르지 않음 · 현재 창에서 직접 확인해 주세요.');return {editorPrepared:true,editorApplied:false,detailUploaded:false,saved:false,published:false};}
  await Promise.all([editor.waitForEvent('close',{timeout:30000}),editor.getByRole('button',{name:'등록',exact:true}).click()]);
  if(await page.locator('textarea[name="editorContent"]').inputValue()!=='true')throw Error('판매자센터 상세설명 반영 결과를 확인하지 못했습니다.');
@@ -249,12 +249,12 @@ export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  const bannerLinkStatus=!parts.bannerLink?'not-applicable':bannerLinkVerified?'verified':parts.bannerLinkSubmitted?'submitted-unverified':'unverified';
  // User confirmed that ONE applies the link even when its bitmap wrapper has
  // no readable href. This observation is recorded, but does not block layout.
- if(snapshot.length!==expected.length||snapshot.some((n,i)=>smartstorePartLayout(parts,i)==='fit'?!n.fitted:!n.extended))mismatch.push('옆트임 배치');
+ if(snapshot.length!==expected.length||snapshot.some((n,i)=>smartstorePartLayout(parts,i)==='fit'?!n.fitted:!n.extended))mismatch.push('문서 너비 배치');
  if(includeVideo?!video.length||JSON.stringify(video)!==JSON.stringify(parts.videoIdentity?.identity):videoCount!==0)mismatch.push('MP4 영상 식별자');
  const verification={expected,names,images:snapshot,videoCount,videoIdentity:video,expectedVideoIdentity:parts.videoIdentity?.identity,bannerLinkStatus,bannerLinkVerified,mismatch,repairAttempt};
  await writeFile(path.join(path.dirname(parts.files[0]),'detail-verification.json'),JSON.stringify(verification,null,2));
- if(mismatch.length===1&&mismatch[0]==='옆트임 배치'&&repairAttempt===0){
-  log('이미지·영상 일치 · 옆트임 미반영 '+snapshot.filter(n=>!n.extended).length+'장만 재적용 · 파일 재업로드 없음');
+ if(mismatch.length===1&&mismatch[0]==='문서 너비 배치'&&repairAttempt===0){
+  log('이미지·영상 일치 · 문서 너비 미반영 '+snapshot.filter(n=>!n.extended).length+'장만 재적용 · 파일 재업로드 없음');
   for(let i=0;i<snapshot.length;i++)if(smartstorePartLayout(parts,i)==='fit'?!snapshot[i].fitted:!snapshot[i].extended){check();await applySmartstoreImageLayout(verified,images.nth(i),{check,layout:smartstorePartLayout(parts,i)});}
   const prepared=await commitSmartstoreEditor(page,verified,expected.length,{check,log,applyEditor,bannerIndex:parts.bannerLink?.index,footerIndex:parts.footerIndex});
   if(!applyEditor)return {...prepared,detailParts:parts.files.length};
@@ -263,5 +263,5 @@ export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  if(mismatch.length){log('상세 대조 차이: '+mismatch.join(' · '));throw Error('상세페이지 확인 불일치: '+mismatch.join(' · ')+'. 상품은 저장하지 않았습니다.');}
  await verified.close();
  log('상세페이지 이미지 '+parts.files.length+'장 반영 확인 · '+(includeVideo?'공통 MP4 포함 · 판매페이지 자동재생 미검증':'영상 제외'));
- return {detailUploaded:true,bannerLinkVerified,bannerLinkStatus,bannerLinkUrl:parts.bannerLink?.url||null,detailParts:parts.files.length,videoUploaded:includeVideo,videoSha256:parts.videoIdentity?.sha256,videoPlayback:includeVideo?'unverified':null,colorNavigation:false,imageLayout:'mixed',footerImageLayout:'fit'};
+ return {detailUploaded:true,bannerLinkVerified,bannerLinkStatus,bannerLinkUrl:parts.bannerLink?.url||null,detailParts:parts.files.length,videoUploaded:includeVideo,videoSha256:parts.videoIdentity?.sha256,videoPlayback:includeVideo?'unverified':null,colorNavigation:false,imageLayout:'fit',footerImageLayout:'fit'};
 }

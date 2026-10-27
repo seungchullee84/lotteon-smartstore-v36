@@ -284,3 +284,5 @@ body[data-channel="smartstore"] #smartstoreStart{background:#087c42}body[data-ch
 
 /* Named SmartStore detail templates */
 .smartstore-template-picker{display:flex;gap:10px;margin:14px 0}.template-choice{display:flex;flex:1;gap:10px;align-items:center;padding:12px;text-align:left;border:1px solid #cbd8cc;border-radius:12px;background:#fff;color:#506756}.template-choice[aria-pressed="true"]{border:2px solid #087d45;background:#edf7ee;color:#12613c;padding:11px}.template-choice span{display:grid;gap:5px}.template-choice b{font-size:16px}.template-choice small{font-size:12px;line-height:1.5}body:not([data-channel="smartstore"]) .smartstore-template-picker{display:none}
+
+#detailOnlyCompletion:not([hidden]){display:block;background:#c4e8d1;border:2px solid #287b49;color:#123d24;padding:15px 18px;border-radius:10px;font-size:16px;font-weight:800;line-height:1.65;margin:14px 0;}
