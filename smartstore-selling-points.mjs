@@ -74,7 +74,7 @@ export function officialProsePoints(source,existing=[]){
 export function compactSellingPoint(point){
  return !!point?.title&&!!point?.description&&point.title.length<=18&&point.description.length<=42&&point.title!==point.description&&!genericTitle.test(point.title)&&cleanSource(point.title+' '+point.description)&&completeCopy(point.description)&&benefitPattern.test(point.title+' '+point.description)&&(!point.evidence||(cleanSource(point.evidence)&&benefitPattern.test(point.evidence)))&&!/[.…]$/.test(point.title)&&!/[.…]$/.test(point.description.replace(/\.$/,''));
 }
-export function officialSellingPoints(description){
+function extractOfficialSellingPoints(description){
  const text=String(description||'').replace(/\s+/g,' ');const points=[],covered=new Set(),labels=new Map();
  const sections=[...String(description||'').matchAll(/POINT\s*0?[1-9]\s*[（(]([^）)]+)[）)]/gi)].map(m=>m[1].trim());
  const finish=()=>[...points,...officialProsePoints(description,points)].filter(compactSellingPoint).sort((a,b)=>{const rank=p=>{const i=sections.indexOf(labels.get(p));return i<0?99:i;};return rank(a)-rank(b);}).slice(0,4);
@@ -150,4 +150,13 @@ export function officialSellingPoints(description){
 export function usableSellingPoints(points,source){
  const compact=s=>String(s).replace(/\s+/g,'');
  return Array.isArray(points)&&points.length>0&&points.every(p=>compactSellingPoint(p)&&p.evidence&&!/^혼용 소재$|^\d+ COLORS$|^SIZE$|^PRODUCT$/.test(p.title)&&!/혼용 여부는.*확인해/.test(p.description)&&(source===undefined||compact(source).includes(compact(p.evidence.split(/\s+\/\s+https?:\/\//)[0]))));
+}
+
+// Normalize customer-facing benefit copy only; preserve official evidence verbatim.
+export function displaySellingPoints(points){
+ const copy=value=>String(value||'').replace(/브러쉬드|브러시드|brushed/gi,'기모');
+ return points.map(point=>({...point,title:copy(point.title),description:copy(point.description)}));
+}
+export function officialSellingPoints(description){
+ return displaySellingPoints(extractOfficialSellingPoints(description));
 }

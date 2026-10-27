@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {officialSellingPoints,usableSellingPoints} from '../smartstore-selling-points.mjs';
+import {officialSellingPoints,usableSellingPoints,displaySellingPoints} from '../smartstore-selling-points.mjs';
 
 test('모든 상품에서 체크표 선택지·깨진 OCR·미완성 문장은 구매 장점이 아니다',()=>{
  const noise='클래식한 일자 Elo] 더해진 베이직한 실루옛의 크루넥 경량\n슬랙스, 스커트 등 다양한 아이템과 믹스 매치가 가능해 데일리 룩부터\nCHECK UP\n상의 핏\n슬림핏         레글러핏         루즈핏';
@@ -55,4 +55,14 @@ test('마침표 없는 공식 불릿 설명도 원단·핏·디테일 세 특징
  const source='다양한 이너와 함께 클래식하게 활용하기 좋은 발마칸 코트 • 울 50%와 캐시미어 5% 혼방 소재로 부드러운 촉감과 우수한 보온성 • 밑단으로 갈수록 자연스럽게 넓어지는 A라인 실루엣과 무릎 기장으로 여유로운 핏 • 히든 버튼 여밈과 탈부착 가능한 카라 비조를 적용해 깔끔하고 실용적인 디자인 • 래글런 슬리브와 소매 벨트 디테일, 웰트 포켓 및 뒷면 슬릿으로 활동성과 완성도를 높인 아이템';
  const points=officialSellingPoints(source);assert.equal(points.length,4);assert(usableSellingPoints(points,source));assert.deepEqual(points.slice(0,3).map(p=>p.title),['부드럽고, 따뜻하게','여유롭게 흐르는 A라인','깔끔하고, 실용적으로']);assert(points.every(p=>!p.evidence.includes('•')));
  assert.equal(officialSellingPoints('울 50%와 캐시미어 5% 혼방 소재 • 부드러운 촉감과 우수한 보온성').length,0);
+});
+
+test('모든 상품 소구점의 브러시드 표시는 기모로 통일하고 원문 근거를 보존한다',()=>{
+ for(const word of ['브러쉬드','브러시드','brushed','BRUSHED']){
+  const evidence=word+' 가공으로 보온력이 우수하고 따뜻합니다.';
+  const [point]=displaySellingPoints([{title:word+'의 따뜻함',description:word+' 가공으로 포근하게.',evidence}]);
+  assert.equal(point.title,'기모의 따뜻함');assert.equal(point.description,'기모 가공으로 포근하게.');assert.equal(point.evidence,evidence);
+ }
+ const source='브러쉬드 가공으로 보온력이 우수하고 따뜻합니다.';
+ const points=officialSellingPoints(source);assert(points.length);assert(points.every(p=>!/브러쉬드|브러시드/.test(p.title+p.description)));assert(points.some(p=>p.evidence.includes('브러쉬드')));
 });
