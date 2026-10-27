@@ -40,8 +40,14 @@ export async function insertNativeBrandVideo(editor,{check=()=>{},dataRoot,video
  // Register before clicking so this event cannot be missed while polling dialogs.
  editor.on('filechooser',captureChooser);
  try{
- await button.click();
  const deadline=Date.now()+timeout;let attached=false,completed=false;
+ let toolbarAttempts=0,nextToolbarAttempt=0;
+ const clickToolbar=async()=>{
+  check();toolbarAttempts++;nextToolbarAttempt=Date.now()+1500;
+  try{await button.click({timeout:Math.min(2000,Math.max(1,deadline-Date.now()))});}
+  catch(error){if(error.name!=='TimeoutError')throw error;}
+ };
+ await clickToolbar();
  while(Date.now()<deadline){
   check();
   if(!attached&&toolbarChooser){await toolbarChooser.setFiles(file);attached=true;}
@@ -53,7 +59,10 @@ export async function insertNativeBrandVideo(editor,{check=()=>{},dataRoot,video
   }
   const popupPages=editor.context().pages().filter(p=>!originalPages.has(p)&&!p.isClosed());
   const scopes=[...popupPages.flatMap(p=>p.frames()),...editor.frames()];
+  let uploaderOpen=popupPages.length>0;
   for(const scope of scopes){
+   if(await scope.locator('#video-uploader-wrap').isVisible().catch(()=>false)||
+      await scope.getByRole('dialog').filter({visible:true}).count())uploaderOpen=true;
    if(!attached){
     let inputs=scope.locator('input[type="file"][accept*="video"],input[type="file"][accept*=".mp4"]');
     // Some upload windows expose an untyped single file input. Only use it in a new video popup.
@@ -78,6 +87,12 @@ export async function insertNativeBrandVideo(editor,{check=()=>{},dataRoot,video
      }
     }
    }
+  }
+  // Retry only while the toolbar has produced no chooser, uploader, or video.
+  // Once attachment starts, never click the toolbar again or submit another file.
+  if(!attached&&!toolbarChooser&&!uploaderOpen&&toolbarAttempts<4&&
+     await videos.count()===before&&Date.now()>=nextToolbarAttempt){
+   await clickToolbar();
   }
   await new Promise(resolve=>setTimeout(resolve,300));
  }
