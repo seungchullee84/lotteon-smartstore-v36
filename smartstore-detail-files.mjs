@@ -1,3 +1,4 @@
+import {originalListingMain} from './smartstore-listing-images.mjs';
 import {mannequinPhotoRegions,registerLongPhotoLayout} from './smartstore-long-photo-import.mjs';
 import {collectCaptionTones} from './smartstore-caption-tone.mjs';
 import {reviewSellingPoints,officialPointSource} from './smartstore-selling-point-review.mjs';
@@ -90,7 +91,17 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  }
  // Unmatched photos stay local for matching; never invent another template section.
  prepared.pendingPhotoCount=(draft?.unmatchedPhotos||draft?.providedPhotos||[]).length;
- prepared.heroImage=product.images.main;
+ // The product folder's selected 1번 mannequin photo is shared by both templates.
+ prepared.heroImage=Object.entries(prepared.colorImages).find(([color,urls])=>prepared.colorSources[color]!=='official'&&urls.length)?.[1][0]||null;
+ try{
+  const main=await originalListingMain(product,{dataRoot,mannequinRoots});
+  const bytes=await readFile(main),id=createHash('sha256').update(bytes).digest('hex').slice(0,24);
+  const name='smartstore-photo-'+id+'.jpg',src='/smartstore-photo/'+id;
+  await writeFile(path.join(folder,name),bytes);prepared.photoFiles[src]=name;prepared.heroImage=src;
+ }catch(error){
+  if(!/1.jpg 또는 1번.jpg 한 장/.test(error.message))throw error;
+ }
+ prepared.heroSource='store-mannequin';
  prepared.storeColorPhotoCounts=Object.fromEntries(Object.entries(prepared.colorImages).map(([color,urls])=>[color,urls.length]));
  // Official fallback photos are separate from seller options and store mannequin claims.
  if(draft?.officialPhotos?.length){
