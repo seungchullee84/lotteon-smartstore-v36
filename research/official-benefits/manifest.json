@@ -9972,7 +9972,7 @@
   "sourceComplete": 1414,
   "imageComplete": 489,
   "withThreeOrFour": 212,
-  "phase": "sources",
+  "phase": "ready",
   "startedAt": "2026-10-27T05:53:33.467Z",
   "updatedAt": "2026-10-27T11:29:44.377Z",
   "websiteCheck": null
