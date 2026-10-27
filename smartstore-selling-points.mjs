@@ -9,7 +9,12 @@ function cleanSource(text){
  const unknownAcronym=(value.match(/\b[A-Z]{2,5}\b/g)||[]).some(word=>!['FIT','REGULAR','RELAXED','SLIM','WIDE','OVER','SPAN','POLY','GG','GSM','SQM','YD','RIB','NECK','CREW','FRENCH','TERRY','PTT','YKK','CVC','HEAT','COOL','WARM','DRY','WOOL','MODAL','NYLON','RAYON','DENIM','LINEN','SILK','LYCRA','NYC','UPF','SPF','UV'].includes(word));
  return !unknownAcronym&&!/[\uFFFD\[\]{}=|\\]/.test(value)&&!/[A-Za-z][A-Za-z0-9]*\]/.test(value)&&new Set(fits.map(s=>s.replace(/\s/g,''))).size<2;
 }
-function completeCopy(text){const value=String(text).replace(/[.!?]+$/,'').trim();return !/[,，;:]$/.test(value)&&!/(?:부터|으로|위한|통해|이며|으며|하며|하고|하지만|더해진|경량|로|며|좋)$/.test(value);}
+function completeCopy(text){const value=String(text).replace(/[.!?]+$/,'').trim();return !/[,，;:]$/.test(value)&&!/(?:부터|으로|위한|통해|이며|으며|하며|하고|하지만|더해진|경량|로|며|좋|했|였|렸|췄|줬|뒀|웠|었|았|있|없)$/.test(value);}
+function finishSourceClause(text){
+ // Splitting "강화했으며" leaves "강화했". Finish only the past-tense
+ // ending; the claim and its full original evidence remain unchanged.
+ return /(?:했|였|렸|췄|줬|뒀|웠|었|았)$/.test(text)?text+'습니다':text;
+}
 export function officialBenefitSentences(source){
  const sections=String(source||'').replace(/\\n/g,'\n').split(/\s*[•●]\s*/).map(section=>section.split(/(?:^|\n)\s*(?:DETAIL\s*SIZE|CHECK\s*UP|INFORMATION|착용\s*시기|두께\s*감|상의\s*핏|하의\s*핏|제품\s*소재|품질\s*보증)(?=\s|$|[:：])/i)[0]);
  const paragraphs=sections.flatMap(section=>section.split(/\n\s*\n/));
@@ -57,7 +62,7 @@ export function officialProsePoints(source,existing=[]){
   const clauses=sentence.split(/[,，]|(?:으며|으며서|으며도|으며,|하고|하며|되며|이며|으로서)\s+/).map(c=>c.trim()).filter(Boolean);
   for(const rule of rules){
    if(used.has(rule.kind)||(rule.kind==='핏과 실루엣'&&existing.some(p=>rule.feature.test(p.title+' '+p.description)))||!rule.feature.test(sentence)||!rule.claim.test(sentence))continue;
-   const candidates=[sentence,...clauses];
+   const candidates=[sentence,...clauses].map(finishSourceClause);
    const clause=candidates.find(c=>c.length>=8&&c.length<=40&&rule.feature.test(c)&&rule.claim.test(c)&&benefitPattern.test(c)&&completeCopy(c)&&!/(?:및|와|과|으로|하고|하며|위한|통해|보다|또는|또한|\d)$/.test(c));
    if(!clause)continue;
    let description=clause.replace(/[.!?]+$/,'');

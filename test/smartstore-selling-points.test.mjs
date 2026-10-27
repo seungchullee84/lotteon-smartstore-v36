@@ -1,6 +1,15 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {officialSellingPoints,usableSellingPoints,displaySellingPoints} from '../smartstore-selling-points.mjs';
 
+test('공식 문장의 연결어를 나눠도 강화했 같은 미완성 서술어로 끝내지 않는다',()=>{
+ const source='양쪽의 웰트 포켓과 내부 인포켓은 실용적인 수납공간을 제공하고, 소매 안쪽에는 이밴드를 더해 바람 유입을 차단하여 보온성을 강화했으며, 밑단의 스트링과 스토퍼는 필요에 따라 실루엣을 자유롭게 조절할 수 있습니다.';
+ const points=officialSellingPoints(source);
+ const warm=points.find(p=>/보온/.test(p.description));
+ assert(warm);assert.match(warm.description,/강화했습니다\.$/);assert.equal(warm.evidence,source);
+ assert(usableSellingPoints(points,source));
+ for(const ending of ['강화했','높였','살렸','낮췄','있'])assert.equal(usableSellingPoints([{title:'쌀쌀할 때도 따뜻하게',description:'보온성을 '+ending+'.',evidence:source}],source),false);
+});
+
 test('모든 상품에서 체크표 선택지·깨진 OCR·미완성 문장은 구매 장점이 아니다',()=>{
  const noise='클래식한 일자 Elo] 더해진 베이직한 실루옛의 크루넥 경량\n슬랙스, 스커트 등 다양한 아이템과 믹스 매치가 가능해 데일리 룩부터\nCHECK UP\n상의 핏\n슬림핏         레글러핏         루즈핏';
  assert.deepEqual(officialSellingPoints(noise),[]);
