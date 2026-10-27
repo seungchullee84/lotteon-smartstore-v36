@@ -3,7 +3,7 @@ import path from 'node:path';import {fileURLToPath} from 'node:url';import {crea
 import {parseProduct,styleFromDetail} from './product.mjs';import {officialSellingPoints} from './smartstore-selling-points.mjs';import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url)),sha=b=>createHash('sha256').update(b).digest('hex');
 export const CATALOG_RULE='adult-official-benefits-1';
-export function adultProduct(product){return !/JUNIOR|KIDS|BOYS|GIRLS|주니어|키즈|아동|여아|남아/i.test([...(product.sourceCategory||[]),product.rawName||''].join(' '));}
+export function adultProduct(product){const text=[...(product.sourceCategory||[]),product.gender||'',product.rawName||''].join(' ');return !/JUNIOR|KIDS|BOYS|GIRLS|주니어|키즈|아동|여아|남아/i.test(text)&&/\bMEN\b|\bWOMEN\b|G-MOTION|남성|여성|성인|공용|UNISEX/i.test(text);}
 export function sameOfficialProduct(a,b){try{const x=new URL(a),y=new URL(b);return x.origin==='https://www.giordano.co.kr'&&y.origin===x.origin&&x.pathname==='/shop/detail.php'&&y.pathname===x.pathname&&x.searchParams.get('pno')===y.searchParams.get('pno');}catch{return false;}}
 export async function catalogImageSource(product,detailHash,{dataRoot=path.join(root,'data')}={}){
  if(!adultProduct(product))return null;
