@@ -24,7 +24,7 @@ export function ocrPhotoSections(tsv,{style,colors,width,height}){
 function runs(values,gap,min){const out=[];let first=-1,last=-1;for(let i=0;i<values.length;i++){if(values[i]){if(first<0)first=i;last=i;}else if(first>=0&&i-last>gap){if(last-first+1>=min)out.push([first,last+1]);first=-1;}}if(first>=0&&last-first+1>=min)out.push([first,last+1]);return out;}
 export function sectionPhotoRectangles(data,{width,height},section){
  const top=Math.max(0,Math.ceil(section.top)),bottom=Math.min(height,Math.floor(section.bottom)),minimum=Math.floor(width*.16);
- const active=(x,y)=>{const i=(y*width+x)*3,b=(y*width+Math.min(5,width-1))*3;return Math.max(Math.abs(data[i]-data[b]),Math.abs(data[i+1]-data[b+1]),Math.abs(data[i+2]-data[b+2]))>24;};
+ const active=(x,y)=>{const i=(y*width+x)*3,b=(y*width+Math.min(5,width-1))*3;if(Math.min(data[i],data[i+1],data[i+2])>245)return false;const light=Math.min(data[b],data[b+1],data[b+2])>225;return Math.max(Math.abs(data[i]-(light?data[b]:255)),Math.abs(data[i+1]-(light?data[b+1]:255)),Math.abs(data[i+2]-(light?data[b+2]:255)))>24;};
  const split=(rect,depth=0)=>{
   if(depth>3)return [rect];
   const columns=Array.from({length:rect.width},(_,dx)=>{let n=0;for(let y=rect.top;y<rect.top+rect.height;y++)if(active(rect.left+dx,y))n++;return n/rect.height>.15;});
