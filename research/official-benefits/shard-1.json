@@ -2593,7 +2593,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": null,
+      "pageHash": "a382caaebec111f09eb8ba77f84597d66f7c19699f7c2bb1b0478e35e6460be0",
       "pageText": "볼륨감 있는 와이드핏 핏 치노팬츠입니다.\n\n과하지 않은 여유로운 실루엣이 다리 라인을 따라 밑단까지 자연스럽게 떨어지며, 깔끔하고 안정적인 핏을 완성합니다.\n다양한 스타일에 손쉽게 매치할 수 있어 데일리 아이템으로 활용하기 좋으며, 한층 트렌디한 분위기를 연출할 수 있습니다.\n\n탄탄한 조직감의 코튼 트윌 원단을 사용해 와이드핏 핏의 실루엣을 안정적으로 유지하며, 워싱 가공으로 착용감을 부드럽게 완성했습니다.\n\n클래식한 카키 톤 구성에 모던한 그레이 톤을 더해 균형감 있는 컬러 구성으로 완성했습니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -2606,8 +2606,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-27T05:54:24.982Z",
-      "analyzedAt": "2026-10-27T11:07:01.030Z"
+      "observedAt": "2026-10-27T11:20:16.511Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
