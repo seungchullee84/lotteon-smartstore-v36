@@ -30,7 +30,9 @@ export function shareableBenefit(record){
  if(pageText.length>1000000||imageText.length>1000000)throw Error('공식 조사 원문 크기를 확인해 주세요.');
  const imageScanComplete=record.imageScanComplete===true&&!!detailHash&&!!imageText.trim();
  const points=officialSellingPoints([officialImageBenefitText(imageScanComplete?imageText:''),pageText].filter(Boolean).join('\n•\n'));
- const result={rule,style:record.style,rawName:String(record.rawName||''),gender:['남성','여성'].includes(record.gender)?record.gender:'',sourceCategory:category,sourceUrl:source.url,detailUrl,detailHash,pageText,imageText:imageScanComplete?imageText:'',imageScanComplete,points,status:imageScanComplete?(points.length>=3?'automatic-source-reviewed':'needs-review'):'image-pending',visualReview:false,observedAt:iso(record.observedAt),analyzedAt:iso(record.analyzedAt)};
+ const detailValidators={etag:typeof record.detailValidators?.etag==='string'?record.detailValidators.etag.slice(0,500):null,lastModified:typeof record.detailValidators?.lastModified==='string'?record.detailValidators.lastModified.slice(0,100):null};
+ const pageHash=/^[a-f0-9]{64}$/i.test(record.pageHash||'')?record.pageHash:null;
+ const result={rule,style:record.style,rawName:String(record.rawName||''),gender:['남성','여성'].includes(record.gender)?record.gender:'',sourceCategory:category,sourceUrl:source.url,detailUrl,detailHash,detailValidators,pageHash,pageText,imageText:imageScanComplete?imageText:'',imageScanComplete,points,status:imageScanComplete?(points.length>=3?'automatic-source-reviewed':'needs-review'):'image-pending',visualReview:false,observedAt:iso(record.observedAt),analyzedAt:iso(record.analyzedAt)};
  if(sensitive.test(JSON.stringify(result)))throw Error('공식 조사자료에 비공개 정보로 보이는 내용이 있어 공유를 중단했습니다.');
  return result;
 }
@@ -48,6 +50,13 @@ async function localRecords(catalogDir){
  const records=[];for(const name of names.filter(n=>/^[a-f0-9]{16,64}\.json$/i.test(n))){const raw=await readJson(path.join(catalogDir,'by-source',name));const record=shareableBenefit(raw);if(record)records.push(record);}
  return records;
 }
+export function sharedWebsiteState(state,records=[]){
+ if(state?.version!==1||!iso(state.checkedAt))return null;
+ const hash=v=>/^[a-f0-9]{64}$/i.test(v||'')?v:null;
+ const products=Object.fromEntries(Object.entries(state.products||{}).filter(([id])=>/^[a-f0-9]{16,64}$/i.test(id)).map(([id,r])=>[id,{pageHash:hash(r.pageHash),detailHash:hash(r.detailHash)}]));
+ const batches=(state.batches||[]).slice(-168).filter(b=>/^[a-f0-9]{20}$/i.test(b.id||'')&&iso(b.checkedAt)).map(b=>({id:b.id,checkedAt:iso(b.checkedAt),events:(b.events||[]).flatMap(e=>{const source=identity(e.sourceUrl);if(!source||!['new','changed'].includes(e.type)||!/^\d{6}$/.test(e.style||'')||/주니어|키즈|아동|여아|남아|JUNIOR|KIDS/i.test(e.name||''))return [];const record=records.find(r=>r.style===e.style&&r.sourceUrl===source.url);const status=record?((record.pageHash!==e.pageHash||record.detailHash!==e.detailHash)?'superseded':record.imageScanComplete?(record.points.length?'ready':'needs-review'):'analyzing'):'analyzing';return [{type:e.type,style:e.style,name:String(e.name||''),sourceUrl:source.url,pageHash:hash(e.pageHash),detailHash:hash(e.detailHash),changes:(e.changes||[]).filter(v=>['새로 발견한 성인 상품','상품 원문·정보 변경','공식 상세이미지 변경'].includes(v)),status}];})}));
+ const result={version:1,checkedAt:iso(state.checkedAt),nextCheckAt:iso(state.nextCheckAt),baselineAt:iso(state.baselineAt),baselineReady:true,errors:Number.isInteger(state.errors)?state.errors:0,products,batches};if(sensitive.test(JSON.stringify(result)))throw Error('변경 알림 자료에 비공개 정보로 보이는 내용이 있습니다.');return result;
+}
 export async function exportBenefitSnapshot(catalogDir,sharedDir){
  const records=(await localRecords(catalogDir)).sort((a,b)=>a.sourceUrl.localeCompare(b.sourceUrl));
  const allowed=new Set(records.map(r=>identity(r.sourceUrl).id.toLowerCase()));
@@ -60,6 +69,7 @@ export async function exportBenefitSnapshot(catalogDir,sharedDir){
  let changed=0;for(const name of shards)changed+=Number(await writeChanged(path.join(sharedDir,name),{version:1,records:buckets[name]}));
  const progress=await readJson(path.join(catalogDir,'progress.json'),{});
  const manifest={version:1,rule,scope:'성인 남성·여성·G-MOTION, 주니어 제외',shards,queue:[...queue.values()].sort((a,b)=>a.pno.localeCompare(b.pno)),sourceComplete:records.length,imageComplete:records.filter(r=>r.imageScanComplete).length,withThreeOrFour:records.filter(r=>r.imageScanComplete&&r.points.length>=3).length,phase:progress.phase||'ready',startedAt:iso(progress.startedAt),updatedAt:records.reduce((latest,r)=>[r.analyzedAt,r.observedAt,latest].filter(Boolean).sort().at(-1)||null,null)};
+ manifest.websiteCheck=sharedWebsiteState(await readJson(path.join(catalogDir,'website-check.json')),records);
  changed+=Number(await writeChanged(path.join(sharedDir,'manifest.json'),manifest));
  return {...manifest,changedFiles:changed};
 }
@@ -76,6 +86,7 @@ export async function restoreBenefitSnapshot(sharedDir,catalogDir){
   }
  }
  await writeChanged(path.join(catalogDir,'queue.json'),[...queue.values()]);
+ const website=sharedWebsiteState(manifest.websiteCheck);const localWebsite=await readJson(path.join(catalogDir,'website-check.json'));if(website&&(!localWebsite||website.checkedAt>localWebsite.checkedAt))await writeChanged(path.join(catalogDir,'website-check.json'),website);
  if(!await readJson(path.join(catalogDir,'progress.json')))await writeChanged(path.join(catalogDir,'progress.json'),{rule,phase:'ready',categories:[],startedAt:manifest.startedAt||new Date().toISOString(),discovered:queue.size,sourceComplete:manifest.sourceComplete,imageComplete:complete,restoredFromGithub:true,errors:[]});
  return {available:true,restored,complete,total:queue.size};
 }

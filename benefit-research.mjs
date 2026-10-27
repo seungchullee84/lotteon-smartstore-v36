@@ -43,8 +43,9 @@ export function startBenefitResearch(root,{interval=60000,autoRun=process.env.RE
    const queue=await readJson(path.join(storage.catalogDir,'queue.json'),[]);if(!queue.length){state.status='empty';state.message='공유할 소구점 조사자료 없음';return;}
    const snapshot=await exportBenefitSnapshot(storage.catalogDir,storage.sharedDir);Object.assign(state,{imageComplete:snapshot.imageComplete,total:snapshot.queue.length,withThreeOrFour:snapshot.withThreeOrFour,lastSharedAt:snapshot.updatedAt});
    const progress=await readJson(path.join(storage.catalogDir,'progress.json'),{});const info=await readJson(path.join(storage.runtimeDir,'worker.json'));
-   if(await workerAlive(info)){Object.assign(state,{status:'running',pid:info.pid,message:`성인 소구점 분석 ${state.imageComplete}/${state.total}건 · GitHub 자동 공유`});return;}
-   if(!attempted&&autoRun&&snapshot.imageComplete<snapshot.queue.length){attempted=true;const job=await startBenefitWorker(root,storage);Object.assign(state,{status:'running',pid:job.pid,message:'남은 성인 상품 소구점 분석 재개'});return;}
+   state.website=snapshot.websiteCheck||null;
+   if(await workerAlive(info)){Object.assign(state,{status:'running',pid:info.pid,message:`성인 소구점 분석 ${state.imageComplete}/${state.total}건 · 홈페이지 30분 간격 확인`});return;}
+   if(!attempted&&autoRun){attempted=true;const job=await startBenefitWorker(root,storage);Object.assign(state,{status:'running',pid:job.pid,message:'남은 소구점 분석·홈페이지 30분 간격 확인 시작'});return;}
    state.status=progress.phase==='complete'?'complete':autoRun?'stopped':'paused';state.message=state.status==='complete'?`소구점 분석 종료 ${state.imageComplete}/${state.total}건 · 미확인 자료는 재검토 필요`:autoRun?'소구점 분석 중지 · 다음 실행 시 재개':'소구점 자동 분석 꺼짐';
   }catch(error){state.status='error';state.message=error.message;}finally{busy=false;}
  }
