@@ -28,9 +28,9 @@ export function sectionPhotoRectangles(data,{width,height},section){
  const split=(rect,depth=0)=>{
   if(depth>3)return [rect];
   const columns=Array.from({length:rect.width},(_,dx)=>{let n=0;for(let y=rect.top;y<rect.top+rect.height;y++)if(active(rect.left+dx,y))n++;return n/rect.height>.15;});
-  const xs=runs(columns,1,minimum),out=[];
+  const xs=runs(columns,0,minimum),out=[];
   for(const [a,b] of xs){const left=rect.left+a,right=rect.left+b;const rows=Array.from({length:rect.height},(_,dy)=>{let n=0;for(let x=left;x<right;x++)if(active(x,rect.top+dy))n++;return n/(right-left)>.30;});
-   for(const [c,d] of runs(rows,4,minimum)){const child={left,top:rect.top+c,width:right-left,height:d-c};
+   for(const [c,d] of runs(rows,0,minimum)){const child={left,top:rect.top+c,width:right-left,height:d-c};
     if(depth<3&&(xs.length>1||c>2||d<rect.height-2))out.push(...split(child,depth+1));else out.push(child);
    }
   }return out;
