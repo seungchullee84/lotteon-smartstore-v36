@@ -1,6 +1,6 @@
 import {sourceBenefitRecipes} from './smartstore-benefit-recipes.mjs';
 // Only purchase benefits belong on these cards. Tables and feature names are not benefits.
-const benefitPattern=/(?:부드|소프트|탄탄|보온|따뜻|포근|가벼|가볍|경량|쾌적|유연|신축|사방\s*스판|가로\s*\/\s*세로\s*양방향|통기|흡습|속건|시원|편안|편하|여유|넉넉|부담.{0,8}(?:적|덜|줄|않)|활동성|움직임|조절|수납|실용|활용|매치|코디|레이어드|연출|어우러|어울|포인트|감각적|세련|입체감|수축.{0,12}최소|환경.{0,15}줄)/;
+const benefitPattern=/(?:부드|소프트|탄탄|보온|따뜻|포근|가벼|가볍|경량|쾌적|유연|신축|사방\s*스판|가로\s*\/\s*세로\s*양방향|통기|흡습|속건|시원|편안|편하|여유|넉넉|부담.{0,8}(?:적|덜|줄|않)|활동성|움직임|조절|수납|실용|활용|매치|코디|레이어드|연출|어우러|어울|포인트|감각적|세련|입체감|(?:수축|변형).{0,12}(?:최소|방지|줄)|환경.{0,15}줄)/;
 const genericTitle=/^(?:원단|소재|핏과 실루엣|여밈 디테일|디자인 포인트|가공 포인트|스타일링|상품정보|제품정보)$/;
 function cleanSource(text){
  const value=String(text||'');
