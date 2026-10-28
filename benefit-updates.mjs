@@ -35,6 +35,6 @@ export async function saveWebsiteCheck(catalogDir,records,{now=new Date().toISOS
  if(!previous){let queue=[];try{queue=JSON.parse(await readFile(path.join(catalogDir,'queue.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}for(const item of queue)if(/^[a-f0-9]{16,64}$/i.test(item.pno||''))baseline[item.pno]={pageHash:null,detailHash:null};}
  const products={...baseline};for(const r of records){const id=new URL(r.sourceUrl).searchParams.get('pno'),imageVerified=r.detailImageVerified===true&&verifiedHash(r.detailHash);products[id]={detailPresent:Object.hasOwn(r,'detailUrl')?!!r.detailUrl:baseline[id]?.detailPresent??null,pageHash:verifiedHash(r.pageHash)?r.pageHash:baseline[id]?.pageHash||null,detailHash:imageVerified?r.detailHash:baseline[id]?.detailHash||null,detailImageVerified:imageVerified?true:baseline[id]?.detailImageVerified??false};}
  const batch={id:digest(now).slice(0,20),checkedAt:now,events};
- const state={version:1,checkedAt:now,nextCheckAt:new Date(Date.parse(now)+BENEFIT_CHECK_INTERVAL).toISOString(),baselineAt:previous?.baselineAt||now,baselineReady:true,errors,products,batches:[...(previous?.batches||[]),batch].slice(-168)};
+ const state={version:1,checkedAt:now,nextCheckAt:new Date(Date.parse(now)+BENEFIT_CHECK_INTERVAL).toISOString(),baselineAt:previous?.baselineAt||now,baselineReady:true,errors,products,batches:[...(previous?.batches||[]),batch].slice(-216)};
  await writeFile(file+'.tmp',JSON.stringify(state,null,2));await rename(file+'.tmp',file);return state;
 }

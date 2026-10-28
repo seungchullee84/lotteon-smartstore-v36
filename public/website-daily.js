@@ -20,6 +20,11 @@ globalThis.websiteDailySummary=function(website,now=new Date()){
   }
   return [...found.values()];
  }
- const events=uniqueEvents(batches.filter(batch=>batch.day===day));
- return {day,events,newCount:events.filter(event=>event.type==='new').length,changedCount:events.filter(event=>event.type==='changed').length,hasTodayCheck:batches.some(batch=>batch.day===day),history:uniqueEvents(batches.filter(batch=>batch.day<day)).reverse().slice(0,30)};
+ const midnight=Date.parse(day+'T00:00:00+09:00');
+ const days=['오늘','어제','그제'].map((label,index)=>{
+  const date=dayKey(midnight-index*86400000),events=uniqueEvents(batches.filter(batch=>batch.day===date));
+  return {day:date,label,events,newCount:events.filter(event=>event.type==='new').length,changedCount:events.filter(event=>event.type==='changed').length,hasCheck:batches.some(batch=>batch.day===date)};
+ });
+ const today=days[0];
+ return {day,events:today.events,newCount:today.newCount,changedCount:today.changedCount,hasTodayCheck:today.hasCheck,days,history:days.slice(1).flatMap(record=>record.events.slice().reverse())};
 };

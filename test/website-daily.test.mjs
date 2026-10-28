@@ -32,3 +32,14 @@ test('상세이미지 최초 추가도 오늘 변경 누적에 포함하고 재�
  const result=summary({batches:[batch('2026-10-28T02:20:00Z',[added]),batch('2026-10-28T02:40:00Z',[added]),batch('2026-10-28T03:00:00Z',[])]},'2026-10-28T04:00:00Z');
  assert.equal(result.changedCount,1);assert.deepEqual(result.events[0].changes,['공식 상세이미지 추가']);
 });
+test('오늘·어제·그제만 보여주며 4일 전 기록은 제외하고 같은 품번도 날짜별로 집계한다',()=>{
+ const batches=[24,25,26,27,28].map(date=>batch('2026-10-'+date+'T01:00:00Z',[event('new','216710'),event('changed','026993')]));
+ const result=summary({batches},'2026-10-28T04:00:00Z');
+ assert.deepEqual(result.days.map(day=>day.day),['2026-10-28','2026-10-27','2026-10-26']);assert.deepEqual(result.days.map(day=>day.label),['오늘','어제','그제']);
+ assert(result.days.every(day=>day.newCount===1&&day.changedCount===1));assert.equal(result.history.length,4);assert(!result.history.some(e=>e.day<'2026-10-26'));
+});
+test('이전 날짜 상품도 30건에서 자르지 않아 표시 건수와 전체 목록이 일치한다',()=>{
+ const events=Array.from({length:40},(_,i)=>event('new',String(200000+i)));
+ const result=summary({batches:[batch('2026-10-27T01:00:00Z',events)]},'2026-10-28T04:00:00Z');
+ assert.equal(result.days[1].newCount,40);assert.equal(result.days[1].events.length,40);assert.equal(result.history.length,40);assert.equal(result.days[2].hasCheck,false);
+});

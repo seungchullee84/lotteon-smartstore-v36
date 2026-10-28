@@ -20,17 +20,25 @@ function renderWebsiteUpdates(website){
   const status=document.createElement('div');status.className='website-product-status';status.textContent='확인 '+time(event.firstCheckedAt||checkedAt)+(event.firstCheckedAt&&event.firstCheckedAt!==checkedAt?' · 최근 '+time(checkedAt):'')+' · '+({ready:'소구점 분석 완료',analyzing:'소구점 분석 중','needs-review':'소구점 추가 확인 필요',superseded:'이후 확인 기록 있음'}[event.status]||'소구점 확인 중');
   card.append(label,link,reason,status);parent.append(card);
  }
+ function addDayGroups(parent,dayRecord){
  const groups=document.createElement('div');groups.className='website-current-groups';
  for(const [type,title] of [['new','신상품'],['changed','상세이미지 추가·변경']]){
-  const items=events.filter(event=>event.type===type),section=document.createElement('section'),titleNode=document.createElement('h3');section.className='website-current-group';titleNode.textContent=title+' '+items.length+'건';section.append(titleNode);
+  const items=dayRecord.events.filter(event=>event.type===type),section=document.createElement('section'),titleNode=document.createElement('h3');section.className='website-current-group';titleNode.textContent=title+' '+items.length+'건';section.append(titleNode);
   for(const event of items)addProduct(section,event,event.checkedAt);
-  if(!items.length){const empty=document.createElement('p');empty.className='website-group-empty';empty.textContent=daily.hasTodayCheck?'오늘 확인된 해당 상품이 없습니다.':'오늘 홈페이지 확인 결과를 기다리고 있습니다.';section.append(empty);}
+  if(!items.length){const empty=document.createElement('p');empty.className='website-group-empty';empty.textContent=dayRecord.hasCheck?'이 날짜에 확인된 해당 상품이 없습니다.':dayRecord.label==='오늘'?'오늘 홈페이지 확인 결과를 기다리고 있습니다.':'이 날짜의 저장된 확인 기록이 없습니다.';section.append(empty);}
   groups.append(section);
  }
- list.append(groups);
+ parent.append(groups);
+ }
+ addDayGroups(list,daily.days[0]);
  const next=document.createElement('p');next.className='website-check-note';next.textContent='마지막 확인 '+time(website.checkedAt)+' · 다음 확인 '+time(website.nextCheckAt)+' · 매일 00:00 한국 시간 기준으로 새로 집계'+(website.errors?' · 일부 원본 확인 실패: 다음 주기에 재확인':'');list.append(next);
- const history=daily.history;
- if(history.length){const older=document.createElement('details'),title=document.createElement('summary');older.className='website-older-history';title.textContent='어제 이전 기록 '+history.length+'건 · 오늘 누적에서 제외';older.append(title);for(const event of history)addProduct(older,event,event.checkedAt);list.append(older);}
+ for(const dayRecord of daily.days.slice(1)){
+  const older=document.createElement('details'),title=document.createElement('summary');older.className='website-older-history';older.dataset.day=dayRecord.day;
+  title.append(document.createTextNode(dayRecord.label+' · '+dayRecord.day.replaceAll('-','.')+' · '));
+  if(dayRecord.hasCheck){const added=document.createElement('strong'),changed=document.createElement('strong');added.className=changed.className='website-update-count';added.textContent=dayRecord.newCount+'건';changed.textContent=dayRecord.changedCount+'건';title.append(document.createTextNode('신상품 '),added,document.createTextNode(' · 변경 '),changed);}else title.append(document.createTextNode('확인 기록 없음'));
+  older.append(title);addDayGroups(older,dayRecord);list.append(older);
+ }
+ const historyNote=document.createElement('p');historyNote.className='website-check-note';historyNote.textContent='최근 3일(오늘·어제·그제)까지 조회 · 건수는 날짜별 일일 누적';list.append(historyNote);
 }
 const $=id=>document.getElementById(id);let product=null,lastRevision=-1,appClosed=false,lastImageVersions={},selectedBackgroundImage='main';
 renderWebsiteUpdates(null);

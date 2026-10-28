@@ -56,3 +56,12 @@ test('안내 HTML 이후 실제 이미지가 확인되면 추가 1건이며 같�
   const changed=await saveWebsiteCheck(dir,[item({detailHash:'e'.repeat(64)})],{now:'2026-10-28T02:40:00Z'});assert.deepEqual(changed.batches.at(-1).events[0].changes,['공식 상세이미지 변경']);
  }finally{await rm(dir,{recursive:true,force:true});}
 });
+test('3일의 20분 확인 기록이 공유·다음 체크포인트에서 168개로 잘리지 않는다',async()=>{
+ const dir=await mkdtemp(path.join(os.tmpdir(),'benefit-three-days-'));try{
+  const batches=Array.from({length:200},(_,i)=>({id:i.toString(16).padStart(20,'0'),checkedAt:new Date(Date.parse('2026-10-25T15:00:00Z')+i*1200000).toISOString(),events:[]}));
+  const previous={version:1,checkedAt:batches.at(-1).checkedAt,products:{},batches};
+  assert.equal(sharedWebsiteState(previous).batches.length,200);
+  await writeFile(path.join(dir,'website-check.json'),JSON.stringify(previous));
+  const next=await saveWebsiteCheck(dir,[],{now:'2026-10-28T10:00:00Z'});assert.equal(next.batches.length,201);
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
