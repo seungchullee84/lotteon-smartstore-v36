@@ -23,6 +23,8 @@ export function similarCategory(value,labels){
 
 // Keep the parent and leaf together; aliases alone cannot repair the wrong branch.
 export function channelCategoryPath(category){
+ // Selected in the live Lotte channel tree, 2026-10-28. No material restriction.
+ if(category.channelSmall==='머플러'&&category.channelMiddle==='워머/목도리')return {...category,channelMajor:'브랜드잡화/넥타이',channelDetail:'',channelCodes:{major:'BC35000000',middle:'BC35100000',small:'BC35100100',detail:''}};
  if(category.channelSmall==='남성내의')return {...category,...MENS_UNDERWEAR_CATEGORY,channelCodes:undefined};
  const leaf=String(category.channelSmall||'').replace(/^[^:：]*[:：]\s*/,'').replace(/^(남성|여성)/,'').trim();
  // User-confirmed standard category screenshot, 2026-10-26. No detail level.

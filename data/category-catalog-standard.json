@@ -850,6 +850,37 @@
           "complete": true
         }
       ]
+    },
+    {
+      "code": "BC35000000",
+      "name": "브랜드잡화/넥타이",
+      "partial": true,
+      "middles": [
+        {
+          "code": "BC35100000",
+          "name": "워머/목도리",
+          "partial": false,
+          "smalls": [
+            {
+              "code": "BC35100100",
+              "name": "머플러",
+              "details": []
+            },
+            {
+              "code": "BC35100200",
+              "name": "목도리",
+              "details": []
+            },
+            {
+              "code": "BC35100300",
+              "name": "워머",
+              "details": []
+            }
+          ]
+        }
+      ],
+      "verifiedAt": "2026-10-28T04:01:10.795Z",
+      "verification": "롯데 실제 채널 분류 목록 선택 확인 · 상품 저장/변경 안 함"
     }
   ],
   "completedAt": "2026-10-20T05:07:58.551Z"

@@ -1,4 +1,4 @@
-import {isMensUnderwear,MENS_UNDERWEAR_CATEGORY} from './category.mjs';
+import {isMensUnderwear,MENS_UNDERWEAR_CATEGORY,channelCategoryPath} from './category.mjs';
 import {readFileSync} from 'node:fs';
 const strip=s=>String(s||'').replace(/^[^:：]*[:：]\s*/,'').replace(/\s/g,'');
 export function loadCatalog(){
@@ -43,8 +43,12 @@ export function commonFor(path,gender,common){
  return null;
 }
 export function resolveCatalogCategory(p,catalog=loadCatalog(),common=null){
+ if(/머플러/.test(p.rawName||p.name||'')&&!p.category?.channelSmall?.trim()){
+  const major=catalog?.majors.find(m=>m.code==='BC35000000'),middle=major?.middles.find(m=>m.code==='BC35100000'),small=middle?.smalls.find(s=>s.code==='BC35100100');
+  if(small)return {category:channelCategoryPath({...p.category,commonMajor:'L0001 : 패션/장신',commonMiddle:'M0357 : 패션액세서리',commonSmall:'01068 : 머플러',channelMiddle:middle.name,channelSmall:small.name}),status:'실제 롯데 목록 확인 · 소재 제한 없는 머플러 분류',path:{major:{code:major.code,name:major.name},middle:{code:middle.code,name:middle.name},small:{code:small.code,name:small.name},detail:null}};
+ }
  if(isMensUnderwear(p))return {category:{...p.category,...MENS_UNDERWEAR_CATEGORY,channelCodes:undefined},status:'사용자 확인 공통·채널 분류 · 남성의류 → 남성속옷 → 남성내의'};
- if(p.category?.channelMajor==='잡화')return {category:{...p.category},status:'사용자 확인 잡화 경로 · 의류 목록 대조 제외'};
+ if(['잡화','브랜드잡화/넥타이'].includes(p.category?.channelMajor))return {category:{...p.category},status:'실제 확인 잡화 경로 · 의류 목록 대조 제외'};
  if(!catalog)return {category:{...p.category},status:'목록 미수집'};
  if(!common)try{common=JSON.parse(readFileSync(new URL('./data/category-catalog-common.json',import.meta.url),'utf8'));}catch{}
  const text=[p.rawName,p.name,...(p.sourceCategory||[])].join(' ');

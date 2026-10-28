@@ -4,6 +4,11 @@ import {readFileSync} from 'node:fs';
 import {loadCatalog,standardPaths,resolveCatalogCategory} from '../category-catalog.mjs';
 const catalog=loadCatalog();
 const common=JSON.parse(readFileSync(new URL('../data/category-catalog-common.json',import.meta.url),'utf8'));
+test('나일론 퀼팅 머플러 공란은 실제 확인한 소재 제한 없는 머플러 경로로 채운다',()=>{
+ const {category}=resolveCatalogCategory({gender:'남성',rawName:'나일론 퀼팅 머플러',sourceCategory:['MEN','ACC'],category:{}},catalog,common);
+ assert.equal(category.channelMajor,'브랜드잡화/넥타이');assert.equal(category.channelMiddle,'워머/목도리');assert.equal(category.channelSmall,'머플러');assert.equal(category.channelCodes.small,'BC35100100');
+ assert.equal(category.commonSmall,'01068 : 머플러');
+});
 test('남성 내의는 공통·채널 대분류까지 사용자 확인 경로를 사용하고 의류 목록으로 덮어쓰지 않는다',()=>{
  const p={gender:'남성',rawName:'지워머 크루넥 긴팔티',sourceCategory:['MEN','INNERWEAR'],category:{channelMajor:'브랜드남성의류',channelMiddle:'티셔츠/맨투맨',channelSmall:'라운드넥티셔츠',channelCodes:{major:'old'}}};
  const {category}=resolveCatalogCategory(p,catalog,common);
