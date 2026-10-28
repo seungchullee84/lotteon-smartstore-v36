@@ -365,8 +365,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T03:31:47.536Z",
-      "analyzedAt": "2026-10-28T03:32:02.109Z"
+      "observedAt": "2026-10-28T04:09:13.881Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1740,8 +1740,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T03:31:18.813Z",
-      "analyzedAt": "2026-10-28T03:32:01.775Z"
+      "observedAt": "2026-10-28T04:08:41.513Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2178,8 +2178,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T03:31:20.632Z",
-      "analyzedAt": "2026-10-28T03:32:01.781Z"
+      "observedAt": "2026-10-28T04:08:42.719Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3068,7 +3068,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "12ef5d012cacf79ffed8e8e64fa7e5492a32fdb5f28cf10856edeae450bbc6cc",
+      "pageHash": "c8f0d77fce5d9d3f61915777e63c45f139f1e94be5604661bfe0d5bdf84d6133",
       "pageText": "미니멀하고 세련된 디자인의 푸파 숏 다운 입니다.\n\n다운 전문 기관인 R.D.S의 인증을 받은 프리미엄 다운을 사용하여 우수한 품질을 보증하며, 솜털 80/ 깃털 20의 함유량으로 보다 가볍고 따뜻합니다. \n\n하이넥 형태가 목을 따뜻하게 감싸주고 지퍼 바깥에 덧댄 플라켓이 찬 공기를 막아주어 높은 보온성을 유지합니다. 릴렉스한 실루엣과 자연스럽게 떨어지는 숄더드롭 디테일이 돋보이는 트렌디한 제품으로, 밑단의 내부 스트링으로 밑단 폭 조절이 가능하여 스타일링에 용이합니다.  \n\nFW계절감에 맞는 베이직하고 세련된 컬러로 구성한 겨울 필수 아이템입니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -3081,8 +3081,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T03:31:43.646Z",
-      "analyzedAt": "2026-10-28T03:32:02.053Z"
+      "observedAt": "2026-10-28T04:09:07.645Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
