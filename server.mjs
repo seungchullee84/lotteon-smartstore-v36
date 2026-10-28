@@ -1,6 +1,7 @@
 import {listTwoChoicePackages,readTwoChoicePackage,saveTwoChoicePackage,twoChoiceUploadParts} from './smartstore-two-choice-store.mjs';
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {localPhotoReview,applyLocalPhotoReview} from './smartstore-local-photo-review.mjs';
+import {workingProductPhoto} from './smartstore-photo-work.mjs';
 import {applyImportedPhotos,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
@@ -131,7 +132,8 @@ const server=http.createServer(async(req,res)=>{
       const photos=await localPhotoReview(state.product,{dataRoot});
       if(url.pathname==='/api/local-photo-review')return json(res,200,{style:state.product.style,colors:state.product.colors,photos:photos.map(({id,name,color,role})=>({id,name,color,role}))});
       const photo=photos.find(p=>p.id===url.pathname.split('/').at(-1));if(!photo)return json(res,404,{error:'사진이 변경됐습니다.'});
-      res.writeHead(200,{'Content-Type':({'.png':'image/png','.webp':'image/webp'})[path.extname(photo.name).toLowerCase()]||'image/jpeg','Cache-Control':'no-store'});return res.end(photo.bytes);
+      const preview=await workingProductPhoto(photo,state.product,{dataRoot});
+      res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'no-store'});return res.end(await readFile(preview));
     }
     if(req.method==='GET'&&/^\/smartstore-import-photo\/[a-f0-9]{24}$/.test(url.pathname)){
       if(!state.folder||!state.product||state.photoImport?.style!==state.product.style)return json(res,404,{});
