@@ -43,7 +43,7 @@ export function validateAnalysis(result,product,description,unknown){
  const seen=new Set();for(const p of result.photos){if(seen.has(p.id)||!unknown.some(f=>f.id===p.id))throw Error('사진 대조 대상이 일치하지 않습니다.');seen.add(p.id);if(!(p.role==='care-label'&&(p.color===''||product.colors.includes(p.color))||product.colors.includes(p.color))||p.sameProduct!==true||!Number.isFinite(p.confidence)||p.confidence<.90||p.confidence>1||!['front','detail','side','care-label'].includes(p.role))throw Error('색상·품번 확인이 필요한 사진이 있습니다: '+(unknown.find(f=>f.id===p.id)?.name||p.id)+'. 색상명 폴더에 넣거나 이 채팅에서 확인해 주세요.');}
  return result;
 }
-export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,signal,fetchImpl=fetch,photoRoots,desktop,log=()=>{},trustFolder=true,recognizePhoto}){
+export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,signal,fetchImpl=fetch,photoRoots,desktop,log=()=>{},trustFolder=!apiKey,recognizePhoto}){
  assertAdultProduct(product);
  if(!/^\d{6}$/.test(product.style)||new URL(product.sourceUrl).origin!=='https://www.giordano.co.kr')throw Error('공식 상품 출처를 확인해 주세요.');
  let html;try{html=await readFile(path.join(folder,'smartstore-official.html'),'utf8');}catch(e){if(e.code!=='ENOENT')throw e;}
@@ -77,7 +77,7 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
  const photos=found;
  if(!photos.length){const error=Error('현재 품번 '+product.style+' 폴더에 상품사진을 넣어 주세요. 이전 품번이나 삭제된 사진은 사용하지 않습니다.');error.code='PHOTO_FOLDER_EMPTY';throw error;}
  const unknown=[];const mapped=[];
- for(const file of photos){const previous=known.get(hash(file.bytes));if(previous){mapped.push({...file,color:previous.color,role:previous.role});continue;}
+ for(const file of photos){const previous=known.get(hash(file.bytes));if(previous&&(previous.role!=='provided'||trustFolder)){mapped.push({...file,color:previous.color,role:previous.role});continue;}
   const parent=norm(path.basename(path.dirname(file.file)));const exact=product.colors.find(color=>[norm(color),norm(color).replace(/^\d+/, '')].includes(parent));
   // A color folder can identify its color, but cannot establish front/side/detail.
   unknown.push({...file,...(exact?{colorHint:exact}:{}),...(isCareLabelPhoto(file)?{roleHint:'care-label'}:{})});

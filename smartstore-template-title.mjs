@@ -2,8 +2,8 @@
 export function officialTemplateTitle(product){
  let title=String(product.rawName||product.name||'지오다노').trim();
  // Remove confirmed campaign model names, not product/material annotations.
- title=title.replace(/[\[（(][^\]）)]*(?:변우석|문가영)[^\]）)]*[\]）)]/g,'')
-  .replace(/(?:변우석|문가영)(?:\s*(?:착용|PICK|추천))?/gi,'');
+ title=title.replace(/[\[（(][^\]）)]*(?:변우석|문가영|박현지)[^\]）)]*[\]）)]/g,'')
+  .replace(/(?:변우석|문가영|박현지)(?:\s*(?:착용|PICK|추천))?/gi,'');
  const style=String(product.style||'');
  if(/^\d{5,8}$/.test(style)){
   title=title.replace(new RegExp('(?:STYLE\\s*(?:NO\\.?)?\\s*[:.]?\\s*)?(?<!\\d)\\d{0,2}'+style+'(?!\\d)','gi'),'');

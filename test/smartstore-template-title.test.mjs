@@ -7,6 +7,7 @@ test('공식몰 원본 상품명 우선, 품번 제외, 기능 숫자·원문 �
 });
 
 test('인물 이름만 제외하고 공식 표현을 라벨과 균형 잡힌 줄로 배치한다',()=>{
+ assert.equal(officialTemplateTitle({style:'326933',rawName:'NEW [박현지] 브러시드 테리 후드 집업'}),'브러시드 테리 후드 집업');
  const p={style:'076931',rawName:'NEW [변우석] CLOUD LIGHT 스웨이드 목넥 패딩 푸퍼'};
  const layout=officialTemplateTitleLayout(p);
  assert.equal(layout.label,'CLOUD LIGHT');

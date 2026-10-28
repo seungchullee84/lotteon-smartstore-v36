@@ -1,4 +1,5 @@
 import {originalListingMain} from './smartstore-listing-images.mjs';
+import {findPhotos} from './smartstore-photo-files.mjs';
 import {mannequinPhotoRegions,registerLongPhotoLayout} from './smartstore-long-photo-import.mjs';
 import {collectCaptionTones} from './smartstore-caption-tone.mjs';
 import {reviewSellingPoints,officialPointSource} from './smartstore-selling-point-review.mjs';
@@ -24,7 +25,7 @@ const normalize=s=>String(s).replace(/\s+/g,'').toLowerCase();
 const imageExtension=/\.(jpe?g|png|webp)$/i;
 function validStyle(p){if(!/^\d{5,8}$/.test(p?.style||''))throw Error('현재 상품의 품번을 확인해 주세요.');return String(p.style);}
 
-export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join(appRoot,'data'),mannequinRoots}={}){
+export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join(appRoot,'data'),mannequinRoots,photoRoots}={}){
  const style=validStyle(product);const draftRoot=path.join(dataRoot,'smartstore-details',style);
  let draft=null;try{draft=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(draft&&(String(draft.style)!==style||draft.sourceUrl!==product.sourceUrl))throw Error('상세페이지 준비 자료의 품번·공식 출처가 현재 상품과 다릅니다.');
@@ -89,8 +90,24 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
    if(prepared.photoCount)break;
   }
  }
- // Unmatched photos stay local for matching; never invent another template section.
- prepared.pendingPhotoCount=(draft?.unmatchedPhotos||draft?.providedPhotos||[]).length;
+ // The current style folder is authoritative; unknown colors are shown without color claims.
+ if(draft?.trustedFolder&&draft.sourceUrl===product.sourceUrl){
+  const current=new Set((await findPhotos(product,{photoRoots:photoRoots||mannequinRoots?.map(root=>path.join(root,style))})).map(p=>createHash('sha256').update(p.bytes).digest('hex')));
+  const labels=new Set((draft.careLabels||[]).map(p=>p.sourceHash));
+  const canonicalRoot=await realpath(draftRoot);
+  for(const relative of draft.unmatchedPhotos||draft.providedPhotos||[]){
+   if(typeof relative!=='string'||path.isAbsolute(relative)||relative.split(/[\\/]/).includes('..'))throw Error('마네킨 사진 연결 경로를 확인해 주세요.');
+   const file=await realpath(path.join(draftRoot,relative));if(!inside(canonicalRoot,file))throw Error('마네킨 사진이 자료 폴더 밖에 있습니다.');
+   const bytes=await readFile(file),digest=createHash('sha256').update(bytes).digest('hex');
+   if(!current.has(digest)||labels.has(digest))continue;
+   const id=digest.slice(0,24),src='/smartstore-photo/'+id,name='smartstore-photo-'+id+'.jpg';
+   if(prepared.providedImages.includes(src))continue;
+   await writeFile(path.join(folder,name),await readFile(await workingProductPhoto({bytes},product,{dataRoot})));
+   prepared.photoFiles[src]=name;prepared.providedImages.push(src);prepared.photoCount++;
+  }
+ }
+ prepared.pendingPhotoCount=0;
+ prepared.unclassifiedPhotoCount=prepared.providedImages.length;
  // The product folder's selected 1번 mannequin photo is shared by both templates.
  prepared.heroImage=Object.entries(prepared.colorImages).find(([color,urls])=>prepared.colorSources[color]!=='official'&&urls.length)?.[1][0]||null;
  try{

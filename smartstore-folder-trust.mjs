@@ -70,5 +70,5 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  const draft={style:product.style,sourceUrl:product.sourceUrl,headline:previous?.headline||product.name,officialDetailHash:detailHash,photos:groups,importedMainPhoto:old?.importedMainPhoto,importedColorPhotos:old?.importedColorPhotos,unmatchedPhotos:providedPhotos,listingImages,careLabels:await saveCareLabelSelection(root,reviewed.filter(p=>p.role==='care-label')),sellingPoints:points,officialPhotos:previous?.officialPhotos,trustedFolder:true,photoMapping:{basis:'사용자 지시: 현재 품번 폴더 사진 신뢰 · 미확인 색상·각도는 임의 지정하지 않음',files:records,ignoredPhotos:old?.style===product.style&&old?.sourceUrl===product.sourceUrl?old.photoMapping?.ignoredPhotos||[]:[]},preparedAt:new Date().toISOString()};
  await writeFile(path.join(root,'draft.json'),JSON.stringify(draft,null,2));
  log('품번 폴더 사진 적용 · 대표 1장 · 폴더 추가 '+extras.length+'장 · 상세 '+groups.reduce((n,g)=>n+Math.min(4,g.files.length),0)+'장 · 매칭 대기 '+providedPhotos.length+'장 · 케어라벨 '+reviewed.filter(p=>p.role==='care-label').length+'장 · 외부 사진분석 없이 진행');
- return prepareSmartstoreDetail({...product,officialDescription:description},folder,{dataRoot});
+ return prepareSmartstoreDetail({...product,officialDescription:description},folder,{dataRoot,photoRoots:[...new Set(photos.map(p=>path.dirname(p.file)))]});
 }
