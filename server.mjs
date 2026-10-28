@@ -504,9 +504,9 @@ const server=http.createServer(async(req,res)=>{
       res.writeHead(200,{'Content-Type':'text/javascript; charset=utf-8','Cache-Control':'no-store'});
       return res.end(await readFile(path.join(root,'smartstore-title.mjs')));
     }
-    if(req.method==='GET'&&['/','/app.js','/detail-preview.js','/two-choice.js','/style.css'].includes(url.pathname)){
+    if(req.method==='GET'&&['/','/app.js','/website-daily.js','/detail-preview.js','/two-choice.js','/style.css'].includes(url.pathname)){
       const name=url.pathname==='/'?'index.html':url.pathname.slice(1);
-      const types={'index.html':'text/html','app.js':'text/javascript','detail-preview.js':'text/javascript','two-choice.js':'text/javascript','style.css':'text/css'};
+      const types={'index.html':'text/html','app.js':'text/javascript','website-daily.js':'text/javascript','detail-preview.js':'text/javascript','two-choice.js':'text/javascript','style.css':'text/css'};
       res.writeHead(200,{'Content-Type':types[name]+'; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'none'"});return res.end(await readFile(path.join(root,'public',name)));
     }
     json(res,404,{error:'없는 경로'});

@@ -4,33 +4,33 @@ function renderWebsiteUpdates(website){
  const summary=$('websiteUpdateSummary'),list=$('websiteUpdateList');if(!summary||!list)return;
  const loading=!website?.checkedAt;if(loading)website=lastWebsiteCheck;if(!website?.checkedAt){if(!summary.querySelector('.website-update-count'))summary.textContent='홈페이지 기준선 확인 중 · 20분 간격';return;}
  if(!loading){lastWebsiteCheck={checkedAt:website.checkedAt,nextCheckAt:website.nextCheckAt,errors:website.errors,batches:website.batches||[]};try{localStorage.setItem('registrar-website-check-v1',JSON.stringify(lastWebsiteCheck));}catch{}}
- summary.title=loading?'자료 불러오는 중 · 마지막 확인 건수를 유지합니다.':'마지막 홈페이지 확인 결과';
+ summary.title=loading?'자료 불러오는 중 · 마지막 자료로 오늘 누적 건수를 표시합니다.':'한국 시간 오늘 누적 · 같은 상품은 유형별로 하루 한 번 집계합니다.';
  const time=value=>new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(value));
- const stamp=JSON.stringify(website);if(list.dataset.stamp===stamp)return;list.dataset.stamp=stamp;
- const batches=(website.batches||[]).map(batch=>({...batch,events:(batch.events||[]).map(event=>({...event,changes:(event.changes||[]).filter(change=>['새로 발견한 성인 상품','공식 상세페이지 추가','공식 상세이미지 변경'].includes(change))})).filter(event=>event.type==='new'||event.changes.length)})),latest=batches.at(-1),events=latest?.events||[];
+ const daily=websiteDailySummary(website),events=daily.events;
+ const stamp=daily.day+'|'+JSON.stringify(website);if(list.dataset.stamp===stamp)return;list.dataset.stamp=stamp;
  summary.classList.toggle('has-updates',events.some(event=>event.type==='new'||event.type==='changed'));
- summary.replaceChildren(document.createTextNode('홈페이지 확인 '+time(website.checkedAt)+' · 신상품 '));const newCount=document.createElement('strong'),changedCount=document.createElement('strong');newCount.className=changedCount.className='website-update-count';newCount.textContent=events.filter(e=>e.type==='new').length+'건';changedCount.textContent=events.filter(e=>e.type==='changed').length+'건';summary.append(newCount,document.createTextNode(' · 변경 '),changedCount,document.createTextNode(' · 20분 간격'));
+ summary.replaceChildren(document.createTextNode('홈페이지 오늘 누적 '+daily.day.slice(5).replace('-','.')+' · 신상품 '));const newCount=document.createElement('strong'),changedCount=document.createElement('strong');newCount.className=changedCount.className='website-update-count';newCount.textContent=daily.newCount+'건';changedCount.textContent=daily.changedCount+'건';summary.append(newCount,document.createTextNode(' · 변경 '),changedCount,document.createTextNode(' · 20분 간격'));
  list.replaceChildren();
- const heading=document.createElement('p');heading.className='website-current-heading';heading.textContent='이번 확인 결과 · '+time(latest?.checkedAt||website.checkedAt);list.append(heading);
+ const heading=document.createElement('p');heading.className='website-current-heading';heading.textContent='오늘 누적 · '+daily.day.replaceAll('-','.')+' · 같은 상품 중복 제외';list.append(heading);
  function addProduct(parent,event,checkedAt){
   const card=document.createElement('article');card.className='website-product-card';
   const label=document.createElement('span');label.className='website-product-label';label.textContent=(event.type==='new'?'신상품':'상세 변경')+' · 품번 '+event.style;
   const link=document.createElement('a');link.className='website-product-link';link.textContent=event.name+' ↗';link.href=event.sourceUrl;link.target='_blank';link.rel='noopener noreferrer';link.title='공식 상품페이지 열기';
-  const reason=document.createElement('div');reason.className='website-product-reason';reason.textContent=event.type==='new'?'이번 홈페이지 확인에서 새로 발견한 상품':event.changes.join(' · ');
-  const status=document.createElement('div');status.className='website-product-status';status.textContent='확인 '+time(checkedAt)+' · '+({ready:'소구점 분석 완료',analyzing:'소구점 분석 중','needs-review':'소구점 추가 확인 필요',superseded:'이후 확인 기록 있음'}[event.status]||'소구점 확인 중');
+  const reason=document.createElement('div');reason.className='website-product-reason';reason.textContent=event.type==='new'?(event.day===daily.day?'오늘 홈페이지 확인에서 새로 발견한 상품':'해당 날짜의 홈페이지 확인에서 새로 발견한 상품'):event.changes.join(' · ');
+  const status=document.createElement('div');status.className='website-product-status';status.textContent='확인 '+time(event.firstCheckedAt||checkedAt)+(event.firstCheckedAt&&event.firstCheckedAt!==checkedAt?' · 최근 '+time(checkedAt):'')+' · '+({ready:'소구점 분석 완료',analyzing:'소구점 분석 중','needs-review':'소구점 추가 확인 필요',superseded:'이후 확인 기록 있음'}[event.status]||'소구점 확인 중');
   card.append(label,link,reason,status);parent.append(card);
  }
  const groups=document.createElement('div');groups.className='website-current-groups';
  for(const [type,title] of [['new','신상품'],['changed','상세이미지 추가·변경']]){
   const items=events.filter(event=>event.type===type),section=document.createElement('section'),titleNode=document.createElement('h3');section.className='website-current-group';titleNode.textContent=title+' '+items.length+'건';section.append(titleNode);
-  for(const event of items)addProduct(section,event,latest?.checkedAt||website.checkedAt);
-  if(!items.length){const empty=document.createElement('p');empty.className='website-group-empty';empty.textContent='이번 확인에서 해당 상품이 없습니다.';section.append(empty);}
+  for(const event of items)addProduct(section,event,event.checkedAt);
+  if(!items.length){const empty=document.createElement('p');empty.className='website-group-empty';empty.textContent=daily.hasTodayCheck?'오늘 확인된 해당 상품이 없습니다.':'오늘 홈페이지 확인 결과를 기다리고 있습니다.';section.append(empty);}
   groups.append(section);
  }
  list.append(groups);
- const next=document.createElement('p');next.className='website-check-note';next.textContent='다음 확인 '+time(website.nextCheckAt)+(website.errors?' · 일부 원본 확인 실패: 다음 주기에 재확인':'');list.append(next);
- const history=batches.slice(0,-1).reverse().flatMap(b=>b.events.map(e=>({...e,checkedAt:b.checkedAt}))).slice(0,30);
- if(history.length){const older=document.createElement('details'),title=document.createElement('summary');older.className='website-older-history';title.textContent='이전 확인 기록 '+history.length+'건 · 위 건수에 포함되지 않음';older.append(title);for(const event of history)addProduct(older,event,event.checkedAt);list.append(older);}
+ const next=document.createElement('p');next.className='website-check-note';next.textContent='마지막 확인 '+time(website.checkedAt)+' · 다음 확인 '+time(website.nextCheckAt)+' · 매일 00:00 한국 시간 기준으로 새로 집계'+(website.errors?' · 일부 원본 확인 실패: 다음 주기에 재확인':'');list.append(next);
+ const history=daily.history;
+ if(history.length){const older=document.createElement('details'),title=document.createElement('summary');older.className='website-older-history';title.textContent='어제 이전 기록 '+history.length+'건 · 오늘 누적에서 제외';older.append(title);for(const event of history)addProduct(older,event,event.checkedAt);list.append(older);}
 }
 const $=id=>document.getElementById(id);let product=null,lastRevision=-1,appClosed=false,lastImageVersions={},selectedBackgroundImage='main';
 renderWebsiteUpdates(null);
