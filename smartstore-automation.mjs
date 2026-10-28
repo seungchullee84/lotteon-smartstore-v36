@@ -105,7 +105,7 @@ export class SmartstoreAutomation extends BrowserAutomation{
     let pages=forms();if(!pages.length){await this.open();pages=forms();}
     if(pages.length!==1)throw Error(pages.length?'수정·복사등록 창이 여러 개입니다. 사용할 창 하나만 남긴 뒤 시작을 눌러 주세요.':'스마트스토어에서 원하는 상품의 수정 또는 복사등록 화면을 열고 시작을 눌러 주세요.');
     this.page=pages[0];this.page.setDefaultTimeout(8000);await this.page.bringToFront();await this.ensureLogin();
-    if(!isSmartstoreInputUrl(this.page.url()))throw Error('로그인 후 수정 또는 복사등록 화면을 열고 다시 시작해 주세요.');
+    if(!isSmartstoreInputUrl(this.page.url())||(!isSmartstoreDetailEditUrl(this.page.url())&&!/\/products\/copy\/\d+(?:[?]|$)/.test(this.page.url())))throw Error('로그인 후 수정 또는 복사등록 화면을 열고 다시 시작해 주세요.');
     this.formMode=isSmartstoreDetailEditUrl(this.page.url())?'edit':'copy';
     if(this.formMode==='edit'){
       assertDetailOnlyProduct(await readDetailOnlySellerCode(this.page),product?.style);

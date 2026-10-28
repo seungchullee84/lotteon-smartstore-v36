@@ -148,10 +148,8 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   if(!await directDate.evaluate(e=>e.checked))await directDate.locator('..').click();
   await fill(page.locator('input[ng-model="vm.dateText"]'),plan.manufactured);
   const tagReport=await fillResearchTags(page,plan.tagResearch||researchForProduct(plan),log,check);
-  const sellerCode=sellerProductCode(plan);
   await open(/^판매자 코드/,page.locator('#seller-code1'));
-  if(!editing)await fill(page.locator('#seller-code1'),sellerCode);
-  else log('수정 화면의 기존 판매자 상품코드 유지');
+  const sellerCode=await fillSmartstoreSellerCode(page,plan,{check,log});
   log('판매자 상품코드 확인: '+sellerCode+' · 바코드·내부코드 유지');
   await open(/^노출 채널/,page.locator('#material-detail'));
   await fill(page.locator('#material-detail'),learned.material);
@@ -193,3 +191,13 @@ export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=fal
       if(await result.isVisible()){check();await result.getByRole('button',{name:'닫기',exact:true}).click();await result.waitFor({state:'hidden'});}
     }
   }
+
+export async function fillSmartstoreSellerCode(page,plan,{check=()=>{},log=()=>{}}={}){
+ check();
+ if(isSmartstoreDetailEditUrl(page.url())){
+  const code=await readDetailOnlySellerCode(page);assertDetailOnlyProduct(code,plan.style);
+  log('수정 화면의 기존 판매자 상품코드 유지');return code;
+ }
+ if(!/\/products\/copy\/\d+(?:[?]|$)/.test(page.url())||!isSmartstoreInputUrl(page.url()))throw Error('수정 또는 복사등록 화면에서 실행해 주세요.');
+ const code=sellerProductCode(plan);await fillSmartstoreValue(page.locator('#seller-code1'),code,check);return code;
+}

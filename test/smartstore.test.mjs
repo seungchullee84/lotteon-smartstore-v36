@@ -6,7 +6,7 @@ test('스마트스토어 테스트 판매가는 소비자가와 구분하고 키
 test('잘못된 판매가나 미검증 분류는 입력하지 않음',()=>{for(const price of [0,59801,NaN])assert.throws(()=>smartstorePlan(product,price));assert.equal(smartstorePlan({...product,name:'남성 바지',gender:'남성'},59800).category,null);});
 test('옵션 마지막 조합 누락과 재고 오류를 검출',()=>{const p=smartstorePlan(product,59800);const rows=p.colors.flatMap(color=>p.sizes.map(size=>({color,size,stock:10})));assert.equal(verifySmartstoreOptions(p,rows),8);assert.throws(()=>verifySmartstoreOptions(p,rows.slice(0,-1)));assert.throws(()=>verifySmartstoreOptions(p,[...rows.slice(0,-1),{...rows.at(-1),stock:0}]));assert.throws(()=>verifySmartstoreOptions(p,[...rows,rows[0]]));});
 
-test('복사등록과 신규만 허용하고 수정 화면은 거부',()=>{for(const suffix of ['create','copy/13755624427'])assert.equal(isSmartstoreInputUrl('https://sell.smartstore.naver.com/#/products/'+suffix),true);for(const suffix of ['update/1','edit/1','copy/abc'])assert.equal(isSmartstoreInputUrl('https://sell.smartstore.naver.com/#/products/'+suffix),false);});
+test('복사등록과 수정·신규 주소를 인식하고 잘못된 주소는 거부',()=>{for(const suffix of ['create','copy/13755624427','edit/13755624427'])assert.equal(isSmartstoreInputUrl('https://sell.smartstore.naver.com/#/products/'+suffix),true);for(const suffix of ['update/1','copy/abc','edit/abc'])assert.equal(isSmartstoreInputUrl('https://sell.smartstore.naver.com/#/products/'+suffix),false);});
 
 test('27자 미만 상품명은 판매자 폼을 조작하기 전에 차단한다',async()=>{
  await assert.rejects(fillSmartstore(null,{name:'지오다노 여성 자켓 376501'},{}),/27~39/);
