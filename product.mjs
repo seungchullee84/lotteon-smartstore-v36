@@ -148,7 +148,7 @@ export function cleanMarketingText(value) {
   return String(value).replace(/\[[^\]]*\]/g,'').replace(/변우석|문가영|박현지/g,'').replace(/[\[\]]/g,'').replace(/\s+/g,' ').trim();
 }
 export const SEARCH_KEYWORDS_MAX_LENGTH=40;
-export function buildKeywords(p,maxLength=SEARCH_KEYWORDS_MAX_LENGTH) {
+export function buildKeywords(p,maxLength=37) {
   const name=easyProductName(String(p.name||'').trim()||p.rawName||'');
   const sex=['남성','여성'].includes(p.gender)?p.gender:'';
   const words=['지오다노'];

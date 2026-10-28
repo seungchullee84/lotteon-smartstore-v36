@@ -587,7 +587,7 @@ async function writePopularKeywords(){
   const result=await post('naver-keywords',{style:current.style});
   if(view!==channelViewId||activeChannel()!=='lotte')return;if(id!==keywordRequest||product!==current||field.value!==before){if(id===keywordRequest)$('keywordStatus').textContent='조회 중 상품 또는 입력값이 바뀌어 자동 적용하지 않았습니다.';return;}
   field.value=result.keywords;product.keywords=result.keywords;
-  const keywordLengthNote=result.needsMoreKeywords?' · 관련 검색자료 부족으로 37자 미만 (임의 보강 없음)':' · 지오다노 첫 번째 · 37~40자 목표';
+  const keywordLengthNote=result.needsMoreKeywords?' · 관련 검색자료 부족으로 35자 미만 (임의 보강 없음)':' · 지오다노 첫 번째 · 37자 내외 목표';
   $('keywordStatus').textContent=result.length+'자(쉼표 포함) · '+result.source+' · '+result.period.startDate+' ~ '+result.period.endDate+' · 월간 검색횟수 아님'+(result.categoryAudit?' · 카테고리 일치 '+result.categoryAudit.entries.filter(e=>e.status==='verified').length+'개 / 제외 '+result.categoryAudit.entries.filter(e=>e.status==='excluded'||e.status==='product-review').length+'개 / 미검증 '+result.categoryAudit.entries.filter(e=>e.status==='unverified').length+'개':'');
   $('keywordStatus').textContent+=keywordLengthNote;
  }catch(e){if(id===keywordRequest&&product===current)$('keywordStatus').textContent='기존 키워드 유지 · '+e.message;}

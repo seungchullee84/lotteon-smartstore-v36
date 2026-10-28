@@ -22,7 +22,7 @@ for(const length of [39,40,41]){
   assert.equal(packKeywords([word]),length<=40?keywords:'지오다노');
   // Fallback adds the 9-character brand/category prefix and one comma.
   const baseWord='가'.repeat(length-10);
-  assert.equal(buildKeywords({name:baseWord,gender:'남성'}),length<=40?'지오다노,남성의류,'+baseWord:'지오다노,남성의류');
+  assert.equal(buildKeywords({name:baseWord,gender:'남성'},40),length<=40?'지오다노,남성의류,'+baseWord:'지오다노,남성의류');
   if(length<=40){const p=reviewed(keywords);assert.doesNotThrow(()=>validateProduct(p));assert.equal(p.keywords,keywords);}
   else assert.throws(()=>validateProduct(reviewed(keywords)),/쉼표·공백 포함 40자/);
  });

@@ -36,11 +36,11 @@ export function packKeywords(ranked,max=SEARCH_KEYWORDS_MAX_LENGTH){
    if(!previous||earlier(choice,previous))states.set(next,choice);
   }
  }
- const target=Math.max(brand.length,max-3);
- let chosen=null,bestLength=0;
+ const target=Math.min(37,max);
+ let chosen=null,bestDistance=Infinity;
  for(const [length,indices] of states){
-  if(length>=target){if(bestLength<target||earlier(indices,chosen)){chosen=indices;bestLength=length;}}
-  else if(bestLength<target&&length>bestLength){chosen=indices;bestLength=length;}
+  const distance=Math.abs(length-target);
+  if(distance<bestDistance||(distance===bestDistance&&earlier(indices,chosen))){chosen=indices;bestDistance=distance;}
  }
  return [brand,...chosen.map(i=>candidates[i])].join(',');
 }
@@ -95,8 +95,8 @@ export function createKeywordOptimizer({fetchImpl=fetch,clock=()=>new Date(),can
   const ranked=[...scores].filter(([,score])=>score>0).sort((a,b)=>b[1]-a[1]);
   const result={keywords:packKeywords(ranked.map(([k])=>k)),length:0,period,source:'네이버 데이터랩 검색 상대지수',ranking:ranked.map(([keyword,score])=>({keyword,score})),categoryAudit,fromCache:false};
   result.length=result.keywords.length;
-  result.targetLength={min:37,max:SEARCH_KEYWORDS_MAX_LENGTH};
-  result.needsMoreKeywords=result.length<37;
+  result.targetLength={target:37,min:35,max:39};
+  result.needsMoreKeywords=result.length<35;
   if(cache.size>=100)cache.delete(cache.keys().next().value);
   cache.set(cacheKey,{time:clock().getTime(),result});return result;
   })();
