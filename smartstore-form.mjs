@@ -110,6 +110,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   await fill(page.locator('#choice_option_name1'),'사이즈');await fill(page.locator('#choice_option_value1'),plan.sizes.join(','));
   await page.getByRole('button',{name:'옵션목록으로 적용',exact:true}).click();
   }
+  await waitSmartstoreOptionGrid(page,plan.expectedOptions,check);
   const header=page.getByRole('grid').getByRole('checkbox');
   if(!await header.evaluate(e=>e.checked))await header.press('Space');
   if(!await header.evaluate(e=>e.checked))throw Error('옵션 전체선택 확인 실패');
@@ -202,4 +203,11 @@ export async function fillSmartstoreSellerCode(page,plan,{check=()=>{},log=()=>{
  }
  if(!/\/products\/copy\/\d+(?:[?]|$)/.test(page.url())||!isSmartstoreInputUrl(page.url()))throw Error('수정 또는 복사등록 화면에서 실행해 주세요.');
  const code=sellerProductCode(plan);await fillSmartstoreValue(page.locator('#seller-code1'),code,check);return code;
+}
+
+export async function waitSmartstoreOptionGrid(page,expectedOptions,check=()=>{}){
+ check();
+ await page.waitForFunction(count=>Number(document.querySelector('[role="grid"]')?.getAttribute('aria-rowcount'))===count+2,expectedOptions,{timeout:30000});
+ await page.getByRole('button',{name:'선택목록 일괄수정',exact:true}).waitFor({state:'visible',timeout:30000});
+ check();
 }

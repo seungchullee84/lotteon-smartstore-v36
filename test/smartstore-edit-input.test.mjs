@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {SmartstoreAutomation} from '../smartstore-automation.mjs';
-import {fillSmartstoreSellerCode} from '../smartstore-form.mjs';
+import {fillSmartstoreSellerCode,waitSmartstoreOptionGrid} from '../smartstore-form.mjs';
 
 for(const style of ['115928','056930','134600'])test(style+' 수정·복사등록에서 전체 입력 대상을 선택하고 수정 상품코드는 보존한다',async()=>{
  const browser=await chromium.launch({headless:true});try{
@@ -23,4 +23,8 @@ for(const style of ['115928','056930','134600'])test(style+' 수정·복사등�
    await page.close();
   }
  }finally{await browser.close();}
+});
+
+test('수정 화면의 옵션 목록과 일괄수정 버튼이 늦게 복원되어도 갱신 완료 후 입력한다',async()=>{
+ const browser=await chromium.launch({headless:true});try{const page=await browser.newPage();await page.setContent('<div role="grid" aria-rowcount="37"></div><button hidden>선택목록 일괄수정</button><script>setTimeout(()=>{document.querySelector('[role="grid"]').setAttribute('aria-rowcount','30');document.querySelector('button').hidden=false;},150);</script>');await waitSmartstoreOptionGrid(page,28);assert.equal(await page.getByRole('button').isVisible(),true);assert.equal(await page.getByRole('grid').getAttribute('aria-rowcount'),'30');}finally{await browser.close();}
 });
