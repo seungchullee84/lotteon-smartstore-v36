@@ -90,14 +90,14 @@ test('색상 제목 아래 단독·묶음 사진만 읽고 공식 상세 이후�
 test('이전 상품의 색상 번호만 같다는 이유로 다른 색상 사진을 연결하지 않는다',async()=>{
  const browser=await chromium.launch({headless:true});try{const page=await browser.newPage();await page.setContent('<div class="se-component se-text">01오프화이트</div><div class="se-component se-image"><img></div><div class="se-component se-text">03블랙</div><div class="se-component se-image"><img></div>');assert.deepEqual(await page.evaluate(editorPhotoPositions,['01블랙','03라이트헤더그레이']),[]);}finally{await browser.close();}
 });
-test('HTML 응답은 거부하고 원본 바이트 중복을 제거하며 선택 사진만 품번 폴더와 매칭 자료에 반영한다',async()=>{
+test('HTML 응답은 거부하고 색상이 다른 동일 원본을 보존하며 선택 사진만 반영한다',async()=>{
  const dir=await mkdtemp(path.join(os.tmpdir(),'import-photos-'));try{
  const folder=path.join(dir,'collected'),dataRoot=path.join(dir,'data'),desktop=path.join(dir,'desktop');await mkdir(folder,{recursive:true});
  const product={style:'326922',sourceUrl:'https://www.giordano.co.kr/shop/view.php?index_no=1',colors:['01화이트','03블랙']};
  const bytes=await sharp({create:{width:750,height:1000,channels:3,background:'#eee'}}).jpeg().toBuffer(),url='https://shop-phinf.pstatic.net/a.jpg';
  const source={...product,sellerCode:'326922 시스루 터틀넥',candidates:[{url,colorHint:'01화이트'},{url,colorHint:'03블랙'}]};
  await assert.rejects(stageImportedPhotos(source,folder,{recognizePhoto:async()=>'',fetchImpl:async()=>new Response('<html>',{headers:{'Content-Type':'text/html'}})}),/사진 파일/);
- const stage=await stageImportedPhotos(source,folder,{recognizePhoto:async()=>'',fetchImpl:async()=>new Response(bytes,{headers:{'Content-Type':'image/jpeg'}})});assert.equal(stage.candidates.length,1);
+ const stage=await stageImportedPhotos(source,folder,{recognizePhoto:async()=>'',fetchImpl:async()=>new Response(bytes,{headers:{'Content-Type':'image/jpeg'}})});assert.equal(stage.candidates.length,2);assert.notEqual(stage.candidates[0].id,stage.candidates[1].id);
  const c=stage.candidates[0];assert.deepEqual(await readFile(path.join(folder,'smartstore-photo-import',c.file)),bytes);
  await assert.rejects(applyImportedPhotos({...product,style:'326923'},folder,[{id:c.id,color:'01화이트',role:'front'}],{dataRoot,desktop}),/품번/);
  await assert.rejects(applyImportedPhotos(product,folder,[{id:c.id,color:'01화이트',role:''}],{dataRoot,desktop}),/각도|정면/);
