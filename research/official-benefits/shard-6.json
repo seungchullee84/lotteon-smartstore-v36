@@ -1564,8 +1564,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T10:24:07.557Z",
-      "analyzedAt": "2026-10-28T10:25:25.221Z"
+      "observedAt": "2026-10-28T11:16:45.913Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1713,8 +1713,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T10:24:10.424Z",
-      "analyzedAt": "2026-10-28T10:25:25.272Z"
+      "observedAt": "2026-10-28T11:16:48.721Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2501,7 +2501,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "c97964e8ef7c3dcb36526f44948abd11b57e3f3fc5c6d82be3b6a5c9052bf790",
+      "pageHash": "17611059c9866804f11c31b30a527b0d35651cdb8c0435341894c944c6d70c18",
       "pageText": "전면에 자수가 새겨진 7gg 코튼 케이블 풀오버입니다.\n\n프리미엄 코튼 7gg원사를 사용하여 피부에 닿는 느낌이 부드럽고 까끌거림이 없습니다. \n세탁 후에도 변형을 최소화 하기 위해 소매와 밑단처리도 탄탄하게 되어 있습니다. \n\n가슴 부분에는 크레스트 자수가 새겨져 있어 한층 클래식하고 고급스러운 느낌입니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -2514,8 +2514,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T10:24:37.394Z",
-      "analyzedAt": "2026-10-28T10:25:25.607Z"
+      "observedAt": "2026-10-28T11:17:16.188Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2869,14 +2869,14 @@
         "TOP"
       ],
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=6D832E20D6587DF464957D75E164633F&ctype=1",
-      "detailUrl": null,
-      "detailHash": null,
-      "detailImageVerified": false,
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01096510_.jpg",
+      "detailHash": "44669fca5fbd2a5e7a7000c9669e0aae7bb51f190ff0eea78ccc7cad9578439a",
+      "detailImageVerified": true,
       "detailValidators": {
-        "etag": null,
-        "lastModified": null
+        "etag": "\"f8ad3fd2743eca0c9b35709c46cc7f40\"",
+        "lastModified": "Mon, 23 Mar 2026 01:41:11 GMT"
       },
-      "pageHash": "9e549f481548b9ee7a2b21add60a5ec164387a7dfd765c5515cf2cfa548010f0",
+      "pageHash": "ae5a031c52485fcf5990cdba22285a5689a6d6af8e6589c2455879db812fe3bc",
       "pageText": "저지 프린트 티셔츠\n\n프론트 중앙에 배치된 슬로건 ‘GOOD ENERGY EVERYWHERE’는 \n\n컬러와 구성에 따라 다채롭게 디자인된 그래픽 타입으로, \n티셔츠마다 각각 다른 무드를 연출하는 아이템입니다.\n\n넥 라인은 더블 스티치 처리로 깔끔하게 마감하였고, 착용 시 늘어남을 방지합니다. \n전체 봉제 라인은 내구성 있게 마감되어 실루엣을 안정적으로 유지해 줍니다.\n\n고밀도이면서도 부드러운 촉감을 지닌 20수 컴팩 면사(Single Combed Cotton Yarn)를 사용하여, \n기본에 충실하면서도 한층 더 완성도 높은 표면감과 터치감을 구현했습니다. \nSK 저지(Single Knit Jersey) 조직으로 제작되어 적당한 탄력과 안정적인 구조감을 갖추고 있으며, \n밀도 있는 조직 덕분에 비침이 적고, 형태 유지력이 뛰어나 잦은 착용과 세탁에도 흐트러짐 없이 착용 가능합니다.\n\nGARMENT WASH(가먼트 워시) 가공을 통해 세탁 후 수축을 최소화하였고, \n착용 시에는 자연스럽고 유연한 핏감과 편안한 착용감을 제공합니다. \n\n적절한 중량감(190~205g/m²)은 몸에 달라붙지 않고, 실루엣을 안정감 있게 잡아주며, \n일상 속에서 단독으로도 충분히 활용할 수 있는 이중적인 실용성과 완성도를 갖춘 원단입니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -2894,8 +2894,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T10:23:45.290Z",
-      "analyzedAt": "2026-10-28T10:25:24.932Z"
+      "observedAt": "2026-10-28T11:16:26.646Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
