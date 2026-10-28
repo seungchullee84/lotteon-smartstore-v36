@@ -4,7 +4,8 @@ import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-export const RESEARCH_INDEX=path.join(path.dirname(fileURLToPath(import.meta.url)),'data/apparel-tag-research/index.json');
+export const RESEARCH_INDEX=path.join(path.dirname(fileURLToPath(import.meta.url)),'research/apparel-tags/index.json');
+const legacyResearchIndex=path.join(path.dirname(fileURLToPath(import.meta.url)),'data/apparel-tag-research/index.json');
 const normalize=s=>String(s||'').normalize('NFKC').replace(/\s+/g,'').toLowerCase();
 let cached=null,stamp='';const matches=new Map();
 
@@ -32,7 +33,7 @@ export function loadTagResearch(file=RESEARCH_INDEX){
   const stat=statSync(file),key=file+':'+stat.mtimeMs+':'+stat.size;
   if(key!==stamp){const d=JSON.parse(readFileSync(file,'utf8'));if(d.schema!=='apparel-tag-local-index/1'||!Array.isArray(d.tags))throw Error('태그 자료 형식을 확인해 주세요.');cached=d;stamp=key;matches.clear();}
   return cached;
- }catch(e){if(e.code==='ENOENT')return null;throw e;}
+ }catch(e){if(e.code==='ENOENT')return file===RESEARCH_INDEX?loadTagResearch(legacyResearchIndex):null;throw e;}
 }
 
 // Parse the complete label using supported garment meanings and evidenced
