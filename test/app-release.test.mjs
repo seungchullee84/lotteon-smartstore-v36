@@ -20,6 +20,8 @@ test('소스 변경만 버전 증가, 재실행과 자동 버전 기록은 증�
   assert.equal(JSON.parse(await readFile(path.join(root,'package.json'),'utf8')).version,'0.39.0');
   assert.equal((await tracker.get()).version,39);
   await writeFile(path.join(root,'data','product.json'),'{}');
+  for(const dir of ['runtime-browsers','node_modules-copied-backup','exports']){await mkdir(path.join(root,dir));await writeFile(path.join(root,dir,'generated.json'),'{"changed":true}');}
+  assert.equal((await tracker.get()).version,39,'설치 런타임·의존성 백업·생성물은 코드 버전에서 제외');
   await utimes(source,new Date(),new Date());
   assert.equal((await tracker.get()).version,39);
   await writeFile(source,'second');

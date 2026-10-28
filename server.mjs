@@ -18,6 +18,7 @@ import {generateBackground} from './background-image.mjs';
 import {createReleaseTracker} from './app-release.mjs';
 import {startGithubSync} from './github-sync.mjs';
 import {startBenefitResearch} from './benefit-research.mjs';
+import {benefitResearchView} from './ui-state.mjs';
 import {brandingLock} from './branding-lock.mjs';
 import {SmartstoreAutomation} from './smartstore-automation.mjs';
 import {smartstorePlan} from './smartstore-form.mjs';
@@ -104,8 +105,9 @@ const server=http.createServer(async(req,res)=>{
       if(state.folder)try{colorChipStatus=JSON.parse(await readFile(path.join(state.folder,'colorchip-status.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
       if(colorChipStatus)versions.main=(versions.main||'original')+':'+colorChipStatus.hash;
       const selected=state.folder?await backgroundSelection(state.folder):'main';
-      const listing=state.product?await listingPreview(state.product,{dataRoot}):null;
-      return json(res,200,{...state,folder:undefined,capabilities:{manualTags:true,photoAnalysisSettings:true},tagResearch:state.product?selectedProductTagResearch(state.product,{dataRoot}):null,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,detailRevision:listing.detailRevision,mainColor:listing.main.color||'품번 폴더 사진',extraColors:listing.extras.map(p=>p.color||'제공한 상품사진'),extraRoles:listing.extras.map(p=>p.role),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state,benefitResearch:benefitResearch.state});
+      const includeSmartstore=url.searchParams.get('channel')!=='lotte';
+      const listing=includeSmartstore&&state.product?await listingPreview(state.product,{dataRoot}):null;
+      return json(res,200,{...state,folder:undefined,capabilities:{manualTags:true,photoAnalysisSettings:true},tagResearch:includeSmartstore&&state.product?selectedProductTagResearch(state.product,{dataRoot}):null,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,detailRevision:listing.detailRevision,mainColor:listing.main.color||'품번 폴더 사진',extraColors:listing.extras.map(p=>p.color||'제공한 상품사진'),extraRoles:listing.extras.map(p=>p.role),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state,benefitResearch:benefitResearchView(benefitResearch.state)});
     }
     if(req.method==='GET'&&/^\/smartstore-listing\/(?:main|extra-\d+)$/.test(url.pathname)){
       if(!state.product||url.searchParams.get('style')!==state.product.style)throw Error('현재 품번을 확인해 주세요.');
