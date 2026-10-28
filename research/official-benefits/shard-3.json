@@ -499,8 +499,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T06:49:39.349Z",
-      "analyzedAt": "2026-10-28T06:59:14.990Z"
+      "observedAt": "2026-10-28T07:23:27.229Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -939,8 +939,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T06:49:47.520Z",
-      "analyzedAt": "2026-10-28T06:59:15.077Z"
+      "observedAt": "2026-10-28T07:23:33.914Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1398,7 +1398,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "0148887d62dd4439995a5015111b0317b82af547940bbff295175ed2c3aa1e18",
+      "pageHash": "e14cd4058f535a2c22c9c40bb04e122d144b41847bf9063401672080ec6271f4",
       "pageText": "트렌디한 실루엣의 코튼/폴리 후드 파카입니다.\n\n봄, 가을 시즌 착용하기 좋은 두께감으로 제작되었으며, 내추럴한 터치감과 은은한 컬러감이 세련된 무드를 전해줍니다.\n\n후드를 탈착하여 목넥스타일로 연출 가능하며, 앞 중심에 플라켓이 있어 찬 바람이 들어오는 것을 막아줍니다.\n\n소매에는 턱 디테일 있어 활동성이 뛰어나고, 소매단에 비죠 디테일을 추가해 사이즈 조절이 가능합니다.\n양쪽 포켓에는 플랩을 고정하는 히든 스냅이 있어 소지품 분실 우려가 적습니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -1411,8 +1411,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T06:49:01.379Z",
-      "analyzedAt": "2026-10-28T06:59:14.525Z"
+      "observedAt": "2026-10-28T07:22:57.559Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1933,8 +1933,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T06:48:52.863Z",
-      "analyzedAt": "2026-10-28T06:59:14.419Z"
+      "observedAt": "2026-10-28T07:22:50.095Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2403,8 +2403,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T06:49:12.888Z",
-      "analyzedAt": "2026-10-28T06:59:14.661Z"
+      "observedAt": "2026-10-28T07:23:05.726Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2572,8 +2572,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T06:48:42.857Z",
-      "analyzedAt": "2026-10-28T06:59:14.289Z"
+      "observedAt": "2026-10-28T07:22:42.643Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3223,8 +3223,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T06:49:38.287Z",
-      "analyzedAt": "2026-10-28T06:59:14.986Z"
+      "observedAt": "2026-10-28T07:23:26.500Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
