@@ -18,7 +18,7 @@ for(const style of ['115928','056930','134600'])test(style+' 수정·복사등�
     await assert.rejects(bot.preflight({style:''}),/품번/);
     assert.equal(await page.locator('#seller-code1').inputValue(),before);
     await bot.preflight({style:'999999'});
-    const changed=await fillSmartstoreSellerCode(page,{style:'999999',name:'상품',gender:'남성'});assert.equal(changed,'999999 '+before);assert.equal(await page.locator('#seller-code1').inputValue(),changed);
+    const changed=await fillSmartstoreSellerCode(page,{style:'999999',name:'상품',gender:'남성'});assert.equal(changed,'999999 (구)'+before);assert.equal(await page.locator('#seller-code1').inputValue(),changed);
    }else assert(result.includes(style));
    await page.close();
   }
@@ -30,5 +30,5 @@ test('수정 화면의 옵션 목록과 일괄수정 버튼이 늦게 복원되�
 });
 
 test('기존 판매자코드는 전체 보존하고 현재 품번만 앞에 추가하며 재실행해도 중복하지 않는다',()=>{
- const old='◆◆116523 울트라치노 신규코드';const next=prependSmartstoreSellerStyle('115928',old);assert.equal(next,'115928 '+old);assert.equal(prependSmartstoreSellerStyle('115928',next),next);assert.equal(prependSmartstoreSellerStyle('115928','다른 설명 115928'),'115928 다른 설명 115928');assert.equal(prependSmartstoreSellerStyle('115928',''),'115928');
+ const old='◆◆116523 울트라치노 신규코드';const next=prependSmartstoreSellerStyle('115928',old);assert.equal(next,'115928 (구)'+old);assert.equal(prependSmartstoreSellerStyle('115928',next),next);assert.equal(prependSmartstoreSellerStyle('115928','다른 설명 115928'),'115928 (구)다른 설명 115928');assert.equal(prependSmartstoreSellerStyle('115928',''),'115928');assert.equal(prependSmartstoreSellerStyle('056930',next),'056930 (구)'+next);
 });

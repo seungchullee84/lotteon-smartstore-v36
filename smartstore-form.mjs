@@ -210,7 +210,7 @@ export function prependSmartstoreSellerStyle(style,existing){
  if(!/^\d{6}$/.test(style||''))throw Error('현재 품번 6자리를 확인해 주세요.');
  const code=String(existing??'');
  if(new RegExp('^'+style+'(?:\\D|$)').test(code))return code;
- return code.trim()?style+' '+code:style;
+ return code.trim()?style+' (구)'+code:style;
 }
 
 export async function waitSmartstoreOptionGrid(page,expectedOptions,check=()=>{}){
