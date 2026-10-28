@@ -843,8 +843,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T07:54:13.823Z",
-      "analyzedAt": "2026-10-28T08:09:40.061Z"
+      "observedAt": "2026-10-28T08:30:39.296Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
