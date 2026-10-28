@@ -103,3 +103,5 @@ test('수집 결과의 자동 상품명도 중복 없이 키워드 생성으로 
  assert.equal(p.name,'남성 아가일 브이넥 니트 356956');
  assert.equal(buildKeywords(p),'지오다노,남성니트,브이넥니트,아가일니트');
 });
+
+test('벨트는 페이지에 명시된 _info 원본을 기존 placeholder보다 우선한다',()=>{const p=parseProduct('<title>리버서블 벨트</title><img src="/_data/attach/belt.jpg"><img src="/_gio_on/2021/01134600info.jpg"><img src="/_gio_on/2021/01134600_info.jpg">','https://www.giordano.co.kr/shop/detail.php?pno=example','134600');assert.equal(p.images.info,'https://www.giordano.co.kr/_gio_on/2021/01134600_info.jpg');assert.equal(p.images.detail,undefined);});
