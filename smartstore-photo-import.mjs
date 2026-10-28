@@ -15,7 +15,7 @@ const safeStyle=style=>{if(!/^\d{6}$/.test(style||''))throw Error('사진을 가
 
 // Read only rendered editor components, including image strips. Never inspect app internals.
 export function editorPhotoPositions(colors){
- const compact=s=>String(s||'').normalize('NFKC').replace(/\s+/g,'').replace(/[+\/]/g,'+').replace(/(?:STR|ST|스트라이프)$/i,'STR');let color='';const out=[];
+ const compact=s=>String(s||'').normalize('NFKC').replace(/\s+/g,'').replace(/브리티시/g,'브리티쉬').replace(/[+\/]/g,'+').replace(/(?:STR|ST|스트라이프)$/i,'STR');let color='';const out=[];
  const imgs=[...document.querySelectorAll('.se-component img')];
  for(const c of document.querySelectorAll('.se-component')){
   const text=(c.innerText||'').trim();
@@ -35,7 +35,7 @@ export function editorPhotoPositions(colors){
 export async function settledEditorPhotoPositions(editor,colors,{check=()=>{},pause=ms=>new Promise(r=>setTimeout(r,ms))}={}){
  let last='',stable=0;
  for(let i=0;i<40;i++){
-  check();const snapshot=await editor.evaluate(()=>({signature:[...document.querySelectorAll('.se-component')].map(c=>c.className+'|'+(c.innerText||'')+'|'+c.querySelectorAll('img').length).join('\n')}));
+  check();const snapshot=await editor.evaluate(()=>({signature:[...document.querySelectorAll('.se-component')].map(c=>c.className+'|'+(c.innerText||'')+'|'+[...c.querySelectorAll('img')].map(n=>n.naturalWidth+'x'+n.naturalHeight).join(',')).join('\n')}));
   if(snapshot.signature===last)stable++;else stable=0;
   last=snapshot.signature;if(stable>=5)return editor.evaluate(editorPhotoPositions,colors);
   await pause(400);
