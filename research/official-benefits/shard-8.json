@@ -71,8 +71,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T06:57:06.859Z",
-      "analyzedAt": "2026-10-28T06:59:21.095Z"
+      "observedAt": "2026-10-28T07:31:26.505Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -760,15 +760,15 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "bba84d047a0171a7843da1acfce93b31071e6575ae3115fb31acf3c5c6d82582",
+      "pageHash": "b8baf009ff8933df9de77d8b0253bb7fa4a78a2a716fba5af1dc77ea68b03ece",
       "pageText": "",
       "imageText": "",
       "imageScanComplete": false,
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T06:56:57.931Z",
-      "analyzedAt": "2026-10-28T06:59:20.904Z"
+      "observedAt": "2026-10-28T07:31:17.919Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -806,8 +806,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T06:57:08.512Z",
-      "analyzedAt": "2026-10-28T06:59:21.106Z"
+      "observedAt": "2026-10-28T07:31:28.135Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1614,8 +1614,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T06:57:12.291Z",
-      "analyzedAt": "2026-10-28T06:59:21.168Z"
+      "observedAt": "2026-10-28T07:31:31.878Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1635,7 +1635,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "6b8c7d5cc4907d419fe6d0ee32a81dce39e5a34e50b69d04a5a112a9ffe9c376",
+      "pageHash": "7157b49465a7adddca78c6784895951b4c820fe13d1354a01583ed4c7c52d019",
       "pageText": "군더더기 없이 깔끔한 실루엣의 레귤러 핏 피케 폴로 셔츠입니다.\n\n다양한 체형을 아우를 수 있는 여유로운 핏과 절제된 디테일로, \n누구나 부담 없이 착용할 수 있는 아이템입니다.\n\n심플하면서도 클래식한 디자인이 돋보이며, 단독으로도, \n이너로도 활용도 높아 데일리 룩은 물론, \n격식 있는 스타일에도 자연스럽게 어우러집니다. \n매 시즌 사랑받는 폴로 셔츠의 정석을 찾는 분께 추천드립니다.\n\n고급 20수 면사를 사용한 탄탄한 조직감의 코튼 피케 소재로 제작되었습니다. \n중량감 있는 원단을 사용해, 가볍지만 흐트러짐 없이 안정적인 실루엣을 유지합니다.\n소프티 가공(Softie Finish) 처리로 부드럽고 쾌적한 촉감을 더했습니다.\n계절과 스타일에 구애받지 않고 오래도록 편안하게 착용할 수 있는 \n균형 잡힌 소재입니다.\n\n세탁 후에도 변형 걱정 없이 오래도록 깔끔하게 완성된 제품에 워싱을 더하는 가먼트 워싱 기법을 적용해 세탁 후 수축이나 형태 변형을 최소화했습니다.\n또한, 셔츠 전문 공정에 능한 숙련된 생산 파트너와 협업하여 \n정교하게 마감된 카라 디테일이 착용 시 \n한층 더 스마트하고 세련된 실루엣을 연출합니다.\n\n감각적인 컬러 구성으로 선택의 폭을 넓힌 폴로 피케 티셔츠입니다.\n부드러운 파스텔 톤부터 선명한 비비드 컬러, 차분한 뉴트럴 계열까지 다양한 컬러 옵션을 갖추어 취향에 맞는 스타일링이 가능합니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -1658,8 +1658,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T06:57:16.214Z",
-      "analyzedAt": "2026-10-28T06:59:21.229Z"
+      "observedAt": "2026-10-28T07:31:34.751Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2674,8 +2674,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T06:56:55.001Z",
-      "analyzedAt": "2026-10-28T06:59:20.887Z"
+      "observedAt": "2026-10-28T07:31:15.235Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
