@@ -1,3 +1,4 @@
+import {sellerProductCode} from '../smartstore-learned.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
@@ -19,7 +20,7 @@ for(const style of ['115928','056930','134600'])test(style+' 수정·복사등�
     assert.equal(await page.locator('#seller-code1').inputValue(),before);
     await bot.preflight({style:'999999'});
     const changed=await fillSmartstoreSellerCode(page,{style:'999999',name:'상품',gender:'남성'});assert.equal(changed,'999999 (구)'+before);assert.equal(await page.locator('#seller-code1').inputValue(),changed);
-   }else assert(result.includes(style));
+   }else{assert.equal(result,sellerProductCode({style,name:'상품',gender:'남성'}));assert(!result.includes('(구)'));assert(!result.includes('기존 상품코드'));}
    await page.close();
   }
  }finally{await browser.close();}
