@@ -9998,11 +9998,11 @@
     }
   ],
   "sourceComplete": 1420,
-  "imageComplete": 1284,
+  "imageComplete": 1286,
   "withThreeOrFour": 434,
-  "phase": "sources",
+  "phase": "images",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-28T11:17:49.042Z",
+  "updatedAt": "2026-10-28T11:18:11.617Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-28T11:17:49.276Z",
@@ -18740,7 +18740,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "analyzing"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -18752,7 +18752,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "analyzing"
+            "status": "ready"
           },
           {
             "type": "changed",

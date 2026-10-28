@@ -2472,7 +2472,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-28T11:06:43.929Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-28T11:18:11.596Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2823,7 +2823,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-28T11:06:36.057Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-28T11:18:11.379Z"
     },
     {
       "rule": "adult-official-benefits-1",
