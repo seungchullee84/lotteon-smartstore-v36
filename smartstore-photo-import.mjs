@@ -109,11 +109,18 @@ export async function readIsolatedPhotoSource(context,product,{check=()=>{},log=
  const session=await context.storageState();check();
  const naverHost=host=>host.replace(/^\./,'')==='naver.com'||host.endsWith('.naver.com');
  const storageState={cookies:session.cookies.filter(c=>naverHost(c.domain)),origins:session.origins.filter(o=>naverHost(new URL(o.origin).hostname))};
- const isolated=await context.browser().newContext({storageState});
- try{
-  check();log('자동 색상 대조 · 저장된 동일 품번 상품을 별도 읽기 창에서 확인 · 열린 편집 내용 유지');
-  const source=await readSource(isolated,product,{check,log});check();return source;
- }finally{await isolated.close();}
+ for(let attempt=0;attempt<2;attempt++){
+  check();const isolated=await context.browser().newContext({storageState});
+  try{
+   check();log('자동 색상 대조 · 저장된 동일 품번 상품을 별도 읽기 창에서 확인 · 열린 편집 내용 유지');
+   const source=await readSource(isolated,product,{check,log});check();return source;
+  }catch(error){
+   check();
+   if(!/Target (?:page, context or browser|page|context|browser) has been closed/i.test(error.message))throw error;
+   if(attempt||context.browser().isConnected?.()===false)throw Error('사진 확인용 읽기 창 또는 크롬 연결이 닫혔습니다. 전용 크롬 연결 상태를 확인한 뒤 다시 시도해 주세요.');
+   log('사진 확인용 읽기 창이 닫혀 한 번 다시 엽니다.');
+  }finally{await isolated.close().catch(()=>{});}
+ }
 }
 
 export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{}}={}){
