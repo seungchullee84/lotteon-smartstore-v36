@@ -100,15 +100,15 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "a7a6634c3e8f15902314e9183e87036c5b92d8d2c7dc925f93a57299fb812344",
+      "pageHash": "5f421a6d173fb0dae175981ed540e80ef0b376a6c3cd474c6968579195540e9f",
       "pageText": "일체형 후드 구조로 보온성과 높은 실용성을 갖춘 인슐레이션 경량 자켓입니다. \n고밀도 립스탑 나일론 100% 원단과 ECLoft® Fluff 프리미엄 충전재를 사용하여 \n가볍고 따뜻한 착용감을 제공하며, 세심한 다운백 구조와 샌드 퀼팅 기법으로 \n보온성과 볼륨감을 강화하여 일상부터 액티브 활동까지 다양한 환경에서 착용할 수 있습니다.",
       "imageText": "",
       "imageScanComplete": false,
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:05:11.059Z",
-      "analyzedAt": "2026-10-28T05:28:14.690Z"
+      "observedAt": "2026-10-28T05:38:02.199Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1496,7 +1496,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "3402d0c29433244afc7b159f857c7f1f142561ed4fa79d5445ac70b336c3c0e4",
+      "pageHash": "65d0f142276398eab9a129ebf39ab3fb6fd4dface045723dfafa0617433edba6",
       "pageText": "릴렉스 핏과 스탠드 넥 디자인으로 여유롭고 클래식한 무드의 푸퍼 자켓\n\n은은한 워싱감의 코듀로이 소재와 마이크로 볼타입 패딩을 적용해 깊이 있는 색감과 풍성한 볼륨감 연출\n\nYKK 메탈 지퍼, 소매 이밴드, 밑단 스트링·스토퍼 등 방풍 및 실루엣 조절 디테일",
       "imageText": "",
       "imageScanComplete": false,
@@ -1514,8 +1514,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:05:13.744Z",
-      "analyzedAt": "2026-10-28T05:28:14.751Z"
+      "observedAt": "2026-10-28T05:38:04.803Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3334,8 +3334,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:05:29.966Z",
-      "analyzedAt": "2026-10-28T05:28:14.930Z"
+      "observedAt": "2026-10-28T05:38:22.542Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
