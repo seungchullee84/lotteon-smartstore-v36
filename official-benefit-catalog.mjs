@@ -1,5 +1,6 @@
 import {officialProductFingerprint,fetchOfficialDetailVersion} from './benefit-updates.mjs';
-import {readFile,writeFile,mkdir,readdir,rename} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,readdir} from 'node:fs/promises';
+import {atomicWrite} from './atomic-file.mjs';
 import path from 'node:path';import {fileURLToPath} from 'node:url';import {createHash} from 'node:crypto';import {load} from 'cheerio';import {chromium} from 'playwright';
 import {parseProduct,styleFromDetail} from './product.mjs';import {officialSellingPoints,officialImageBenefitText} from './smartstore-selling-points.mjs';import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url)),sha=b=>createHash('sha256').update(b).digest('hex');
@@ -13,7 +14,7 @@ export async function catalogImageSource(product,detailHash,{dataRoot=path.join(
  for(const file of files)try{const record=JSON.parse(await readFile(file,'utf8'));if(record.rule===CATALOG_RULE&&record.style===product.style&&record.imageScanComplete===true&&record.detailHash===detailHash&&sameOfficialProduct(record.sourceUrl,product.sourceUrl)&&record.imageText?.trim())return record;}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}return null;
 }
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-async function atomic(file,value){await mkdir(path.dirname(file),{recursive:true});await writeFile(file+'.tmp',JSON.stringify(value,null,2));await rename(file+'.tmp',file);}
+async function atomic(file,value){await atomicWrite(file,JSON.stringify(value,null,2));}
 async function pool(items,count,fn){let cursor=0;await Promise.all(Array.from({length:count},async()=>{while(cursor<items.length){const i=cursor++;await fn(items[i],i);}}));}
 let browserContext;
 async function get(url){if(browserContext){if(new URL(url).pathname.endsWith('.php')){const page=await browserContext.newPage();try{const r=await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});if(!r?.ok())throw Error('공식몰 응답 '+r?.status());return Buffer.from(await page.content());}finally{await page.close();}}const r=await browserContext.request.get(url,{timeout:25000});if(!r.ok())throw Error('공식 이미지 응답 '+r.status());const b=await r.body();if(b.length>24000000)throw Error('원본 용량 초과');return b;}const response=await fetch(url,{signal:AbortSignal.timeout(25000)});if(!response.ok)throw Error('공식몰 응답 '+response.status);const bytes=Buffer.from(await response.arrayBuffer());if(bytes.length>24000000)throw Error('원본 용량 초과');return bytes;}

@@ -5,6 +5,13 @@ import {exportBenefitSnapshot,readJson,writeChanged} from './benefit-sharing.mjs
 import {websiteCheckDue,saveWebsiteCheck,BENEFIT_CHECK_INTERVAL} from './benefit-updates.mjs';
 const [catalogDir,runtimeDir,sharedDir]=process.argv.slice(2);
 if(!catalogDir||!runtimeDir||!sharedDir)throw Error('소구점 분석 작업 경로를 확인해 주세요.');
+const progress=await readJson(path.join(catalogDir,'progress.json'));
+const lastCheck=await readJson(path.join(catalogDir,'website-check.json'));
+if(progress?.phase==='images'&&!websiteCheckDue(lastCheck)){
+ try{await runCatalog({catalogDir,dataRoot:runtimeDir,resume:true,imageWorkers:2,imageDeadline:Date.parse(lastCheck.nextCheckAt)});}
+ catch(error){console.error(error.message);}
+ finally{await exportBenefitSnapshot(catalogDir,sharedDir);}
+}
 while(true){
  let state=await readJson(path.join(catalogDir,'website-check.json'));
  if(!websiteCheckDue(state)){await wait(Math.min(60000,Math.max(1000,Date.parse(state.nextCheckAt)-Date.now())));continue;}

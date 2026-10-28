@@ -1,4 +1,5 @@
-import {readFile,writeFile,mkdir,readdir,rename} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,readdir} from 'node:fs/promises';
+import {atomicWrite} from './atomic-file.mjs';
 import path from 'node:path';
 import {assertAdultProduct} from './product.mjs';
 import {officialSellingPoints,officialImageBenefitText} from './smartstore-selling-points.mjs';
@@ -11,7 +12,7 @@ export async function readJson(file,fallback=null){try{return JSON.parse(await r
 export async function writeChanged(file,value){
  const text=JSON.stringify(value,null,2)+'\n';
  try{if(await readFile(file,'utf8')===text)return false;}catch(e){if(e.code!=='ENOENT')throw e;}
- await mkdir(path.dirname(file),{recursive:true});await writeFile(file+'.tmp',text);await rename(file+'.tmp',file);return true;
+ await atomicWrite(file,text);return true;
 }
 function identity(value){
  try{const u=new URL(value);const id=u.searchParams.get('pno');if(u.origin!=='https://www.giordano.co.kr'||u.pathname!=='/shop/detail.php'||u.username||u.password||!/^[a-f0-9]{16,64}$/i.test(id||''))return null;return {id,url:'https://www.giordano.co.kr/shop/detail.php?pno='+id+'&ctype=1'};}catch{return null;}
