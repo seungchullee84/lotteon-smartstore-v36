@@ -1,6 +1,8 @@
 import {resolveCatalogCategory} from './category-catalog.mjs';
 import {categoryKey,loadCategoryCache,saveCategoryMatch} from './category-cache.mjs';
 import {BrowserAutomation} from './browser-connection.mjs';
+import {createBrowserLoginStore} from './browser-login-store.mjs';
+import {tryLotteLogin,selectLottePage} from './browser-login.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {OptionCoverage} from './option-coverage.mjs';
@@ -11,16 +13,19 @@ import {prepareMainImage} from './main-image.mjs';
 
 const PORTAL='https://together.lotteshopping.com/EMDV3/index.html';
 export class LotteAutomation extends BrowserAutomation {
+  async ensureLogin(waitForForm=false){return tryLotteLogin(this.page,{store:createBrowserLoginStore(this.root),log:this.log,check:()=>this.check(),waitForForm});}
   async open(){
+    this.stopped=false;
     await this.connectChrome(PORTAL);
     const pages=this.context.pages().filter(p=>!p.isClosed());
-    this.page=pages.find(p=>p.url().startsWith('https://together.lotteshopping.com/'))||await this.context.newPage();
+    this.page=await selectLottePage(pages,this.page)||await this.context.newPage();
     this.page.setDefaultTimeout(8000);
     if(!this.page.url().startsWith('https://together.lotteshopping.com/'))await this.page.goto(PORTAL,{waitUntil:'domcontentloaded'});
     const cdp=await this.context.newCDPSession(this.page);
     try{const {windowId}=await cdp.send('Browser.getWindowForTarget');await cdp.send('Browser.setWindowBounds',{windowId,bounds:{windowState:'normal'}});await cdp.send('Browser.setWindowBounds',{windowId,bounds:{windowState:'maximized'}});}finally{await cdp.detach();}
     await this.page.bringToFront();
-    this.log('크롬 로그인 창을 열었습니다. 이미 열려 있으면 기존 창에 다시 연결합니다. 로그인 후 상품등록 화면을 열어 주세요.');
+    await this.ensureLogin(true);
+    this.log('전용 크롬에 연결했습니다. 로그인 후 상품등록 화면을 열어 주세요.');
   }
   async wait(message){
     this.log(message); this.onPause?.(message);
@@ -285,9 +290,11 @@ export class LotteAutomation extends BrowserAutomation {
     validateStyle(p.style);this.stopped=false;
     const catalogMatch=resolveCatalogCategory(p);if(catalogMatch.path){p.category=catalogMatch.category;this.log('실제 분류 매칭표 적용: '+p.category.commonSmall+' / '+p.category.channelMiddle+' > '+p.category.channelSmall)}
     if(!this.page||this.page.isClosed()||this.browser&&!this.browser.isConnected())await this.open();
+    else await this.ensureLogin();
     const start=Date.now();
     this.log('자동입력 시작');
     try{
+      if(!await this.page.locator('[id*="TabFrame_form_tab_Menu_OCPIPMPiMPrdcInfoRgstM_"]').count())await this.wait('전용 크롬에서 로그인·추가 인증을 완료하고 온라인 상품등록 화면을 연 뒤 매장 품번 241142를 선택하고 계속을 눌러 주세요.');
       await this.activateRegistration();
       const channelOpen=await this.locator('cbo_preSet_comboedit_input').count()>0;
       if(channelOpen){

@@ -131,7 +131,7 @@ async function copyProgress(errorOnly=false){
  announce(errorOnly?'오류를 복사했습니다.':'진행 기록과 오류를 복사했습니다.','success');
 }
 $('copyError').onclick=()=>copyProgress(true);
-function syncButtons(){if($('smartstoreDetailOnly')){const active=smartstoreDetailStarting||serverBusy&&serverPhase==='smartstore-detail-only';$('smartstoreDetailOnly').textContent=active?'상세설명 교체 진행 중…':'상세설명만 교체 · 조회/수정';$('smartstoreDetailOnly').setAttribute('aria-busy',String(active));}if($('smartstoreStart'))$('smartstoreStart').textContent=smartstoreStarting?'시작 요청 중…':serverBusy&&serverPhase==='smartstore-auto'?'자동 작업 진행 중…':'▶ 시작 · 전체 입력·업로드';for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreTemplate1','smartstoreTemplate2','smartstoreOpen','smartstoreOptimizeTitle','naverSettings','smartstoreStart','smartstoreDetailOnly','smartstoreImportPhotos','photoImportApply','smartstoreAutoTags'])if($(id))$(id).disabled=requestLock||serverBusy||['smartstoreAutoTags'].includes(id)&&!tagResearchReady||['smartstoreDetailOnly','smartstoreTemplate1','smartstoreTemplate2'].includes(id)&&!product;}
+function syncButtons(){if($('smartstoreDetailOnly')){const active=smartstoreDetailStarting||serverBusy&&serverPhase==='smartstore-detail-only';$('smartstoreDetailOnly').textContent=active?'상세설명 교체 진행 중…':'상세설명만 교체 · 조회/수정';$('smartstoreDetailOnly').setAttribute('aria-busy',String(active));}if($('smartstoreStart'))$('smartstoreStart').textContent=smartstoreStarting?'시작 요청 중…':serverBusy&&serverPhase==='smartstore-auto'?'자동 작업 진행 중…':'▶ 시작 · 전체 입력·업로드';for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreTemplate1','smartstoreTemplate2','smartstoreOpen','smartstoreOptimizeTitle','naverSettings','browserLoginSettings','smartstoreStart','smartstoreDetailOnly','smartstoreImportPhotos','photoImportApply','smartstoreAutoTags'])if($(id))$(id).disabled=requestLock||serverBusy||['smartstoreAutoTags'].includes(id)&&!tagResearchReady||['smartstoreDetailOnly','smartstoreTemplate1','smartstoreTemplate2'].includes(id)&&!product;}
 function action(id,fn){$(id).onclick=async()=>{
  const primary=id in buttonLabels;if(primary&&(requestLock||serverBusy))return;
  if(id==='run'&&!$('form').reportValidity())return;
@@ -400,6 +400,29 @@ $('openBackgroundRequest').onclick=async()=>{
 };
 
 // SmartStore is a separate no-save path; Lotte controls retain their behavior.
+let browserLoginStatus=null,browserLoginSaving=false;
+function showBrowserLoginStatus(status){
+ browserLoginStatus=status;
+ $('browserLoginMessage').textContent=!status.supported?'자동 로그인 암호화 저장은 Windows에서 지원합니다.':status.configured?(status.enabled?'자동 로그인 사용 중':'자동 로그인 꺼짐')+' · 저장 계정 '+status.accountHint+' · 변경할 때만 아이디와 비밀번호를 모두 입력하세요.':'처음 한 번 아이디와 비밀번호를 입력해 저장하세요.';
+ $('browserLoginEnabled').checked=status.configured?status.enabled:true;
+ $('deleteBrowserLogin').disabled=!status.configured;
+}
+$('browserLoginSettings').onclick=async()=>{
+ $('browserLoginForm').reset();$('browserLoginMessage').textContent='저장 상태 확인 중…';$('saveBrowserLogin').disabled=true;$('deleteBrowserLogin').disabled=true;$('browserLoginDialog').showModal();
+ try{const r=await fetch('/api/browser-login-status');const status=await r.json();if(!r.ok)throw Error(status.error);showBrowserLoginStatus(status);$('saveBrowserLogin').disabled=!status.supported;}
+ catch(error){$('browserLoginMessage').textContent=error.message;}
+};
+$('closeBrowserLogin').onclick=()=>{if(!browserLoginSaving)$('browserLoginDialog').close();};
+$('browserLoginDialog').addEventListener('cancel',event=>{if(browserLoginSaving)event.preventDefault();});
+$('browserLoginDialog').addEventListener('close',()=>$('browserLoginForm').reset());
+async function saveBrowserLogin(action){
+ browserLoginSaving=true;$('saveBrowserLogin').disabled=true;$('deleteBrowserLogin').disabled=true;$('closeBrowserLogin').disabled=true;
+ try{const status=await post('browser-login-settings',{action,enabled:$('browserLoginEnabled').checked,username:action==='save'?$('browserLoginUsername').value:'',password:action==='save'?$('browserLoginPassword').value:''});$('browserLoginForm').reset();showBrowserLoginStatus(status);$('browserLoginMessage').textContent=action==='delete'?'이 PC에 저장한 자동 로그인 정보를 삭제했습니다.':status.enabled?'이 PC에 암호화 저장했습니다. 크롬 연결·상품 입력 시작 시 로그인이 필요하면 자동으로 시도합니다.':'자동 로그인을 껐습니다. 저장 정보는 이 PC에 유지합니다.';}
+ catch(error){$('browserLoginMessage').textContent=error.message;}
+ finally{browserLoginSaving=false;$('browserLoginPassword').value='';$('saveBrowserLogin').disabled=!browserLoginStatus?.supported;$('deleteBrowserLogin').disabled=!browserLoginStatus?.configured;$('closeBrowserLogin').disabled=false;}
+}
+$('browserLoginForm').onsubmit=event=>{event.preventDefault();void saveBrowserLogin('save');};
+$('deleteBrowserLogin').onclick=()=>void saveBrowserLogin('delete');
 $('smartstoreOpen').onclick=async()=>{try{await post('smartstore-open');announce('로그인 후 원하는 상품의 복사등록 화면을 직접 열고 시작을 눌러 주세요.','success');}catch(e){$('error').textContent=e.message;}};
 async function arrangeSmartstoreTitle(useCurrent=true){
  if(!product||activeChannel()!=='smartstore')return;
