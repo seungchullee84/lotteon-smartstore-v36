@@ -56,3 +56,16 @@ test('공식 로그인 화면에서만 한 번 입력하고 성공·실패·수�
   assert.equal(await selectLottePage([page,delayed,disabled],page),page,'이미 연결한 작업 창을 유지');
  }finally{await browser.close();}
 });
+
+test('롯데·스마트스토어 계정과 로그인 방식을 분리하고 한쪽 삭제가 다른 쪽에 영향을 주지 않는다',{skip:process.platform!=='win32'},async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'registrar-login-channels-')),lotte=createBrowserLoginStore(root),smart=createBrowserLoginStore(root,{channel:'smartstore'});
+ try{
+  await lotte.update({action:'save',enabled:true,username:'fixture-lotte',password:'fixture-lotte-pass'});
+  await smart.update({action:'save',enabled:true,loginType:'seller',username:'fixture-smart',password:'fixture-smart-pass'});
+  assert.equal((await lotte.load()).username,'fixture-lotte');assert.equal((await smart.load()).username,'fixture-smart');assert.equal((await smart.load()).loginType,'seller');
+  assert.equal((await smart.status()).loginType,'seller');assert.equal(publishable('data/smartstore-browser-login-settings.json'),false);
+  await assert.rejects(smart.update({action:'save',enabled:true,loginType:'naver'}),/다시 입력/);
+  await smart.update({action:'delete'});assert.equal((await lotte.load()).username,'fixture-lotte');assert.equal(await smart.load(),null);
+  assert.throws(()=>createBrowserLoginStore(root,{channel:'../other'}),/판매채널/);
+ }finally{await rm(root,{recursive:true,force:true});}
+});

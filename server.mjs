@@ -49,7 +49,8 @@ const githubSync=process.env.REGISTER_PORTABLE==='1'?{state:{status:'portable',m
 const dataRoot=path.join(root,'data');await mkdir(dataRoot,{recursive:true});
 const benefitResearch=startBenefitResearch(root);
 const productEdits=createProductEditStore(dataRoot);
-const browserLogin=createBrowserLoginStore(dataRoot);
+const browserLogins={lotte:createBrowserLoginStore(dataRoot),smartstore:createBrowserLoginStore(dataRoot,{channel:'smartstore'})};
+function browserLoginFor(channel='lotte'){if(!Object.hasOwn(browserLogins,channel))throw Error('자동 로그인 판매채널을 확인해 주세요.');return browserLogins[channel];}
 let naverCredentials={clientId:process.env.NAVER_CLIENT_ID?.trim()||'',clientSecret:process.env.NAVER_CLIENT_SECRET?.trim()||''};
 if(!naverCredentials.clientId||!naverCredentials.clientSecret){
   try{const saved=JSON.parse(await readFile(path.join(dataRoot,'naver-api-settings.json'),'utf8'));naverCredentials={clientId:saved.clientId||'',clientSecret:saved.clientSecret||''};}catch(e){if(e.code!=='ENOENT')throw e;}
@@ -99,7 +100,7 @@ const server=http.createServer(async(req,res)=>{
     if(!cookie)return json(res,403,{error:'시작 화면의 전용 링크로 접속해 주세요.'});
     if(['GET','HEAD'].includes(req.method)&&url.pathname==='/smartstore-brand-video.mp4')return await serveBrandVideo(req,res,dataRoot,url.searchParams.get('variant')==='women'?{filename:'women.mp4',expectedHash:WOMEN_VIDEO_HASH}:undefined);
     if(req.method==='GET'&&url.pathname==='/api/branding')return json(res,200,await protectedBranding.get());
-    if(req.method==='GET'&&url.pathname==='/api/browser-login-status')return json(res,200,await browserLogin.status());
+    if(req.method==='GET'&&url.pathname==='/api/browser-login-status')return json(res,200,await browserLoginFor(url.searchParams.get('channel')||'lotte').status());
     if(req.method==='GET'&&url.pathname==='/api/naver-status')return json(res,200,{configured:!!(naverCredentials.clientId&&naverCredentials.clientSecret),...naverVerification,researchConfigured:state.product?researchForProduct(state.product).configured:false,lastAttempt:naverLastAttempt});
     if(req.method==='GET'&&url.pathname==='/api/state'){
       const versions={};
@@ -199,7 +200,7 @@ const server=http.createServer(async(req,res)=>{
       }
       if(url.pathname==='/api/browser-login-settings'){
         if(state.busy)throw Error('현재 작업이 끝난 뒤 자동 로그인 설정을 변경해 주세요.');
-        return json(res,200,await browserLogin.update(b));
+        return json(res,200,await browserLoginFor(b.channel).update(b));
       }
       if(url.pathname==='/api/smartstore-optimize-title'){
         if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 조회해 주세요.');

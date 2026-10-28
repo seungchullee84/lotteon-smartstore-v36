@@ -20,10 +20,12 @@ export function protectLogin(value,decrypt=false){
  });
 }
 function valid(value){return typeof value?.username==='string'&&value.username.trim().length>0&&value.username.length<=200&&typeof value.password==='string'&&value.password.length>0&&value.password.length<=256;}
-export function createBrowserLoginStore(root){
- const file=path.join(root,'browser-login-settings.json');let pending=Promise.resolve();
+export function createBrowserLoginStore(root,{channel='lotte'}={}){
+ if(!['lotte','smartstore'].includes(channel))throw Error('자동 로그인 판매채널을 확인해 주세요.');
+ const smart=channel==='smartstore';
+ const file=path.join(root,smart?'smartstore-browser-login-settings.json':'browser-login-settings.json');let pending=Promise.resolve();
  async function read(){try{return JSON.parse(await readFile(file,'utf8'));}catch(error){if(error.code==='ENOENT')return {version:1};throw failure();}}
- function summary(saved){return {supported:process.platform==='win32',configured:!!saved.encryptedLogin,enabled:!!saved.encryptedLogin&&saved.enabled===true,accountHint:saved.accountHint||''};}
+ function summary(saved){return {supported:process.platform==='win32',configured:!!saved.encryptedLogin,enabled:!!saved.encryptedLogin&&saved.enabled===true,accountHint:saved.accountHint||'',...(smart?{loginType:saved.loginType||'naver'}:{})};}
  return {
   async status(){return summary(await read());},
   update(input){
@@ -32,10 +34,13 @@ export function createBrowserLoginStore(root){
     if(input.action==='delete')saved={version:1};
     else if(input.action==='save'){
      if(typeof input.enabled!=='boolean')throw Error('자동 로그인 사용 여부를 선택해 주세요.');
+     const loginType=smart?(input.loginType||saved.loginType||'naver'):undefined;
+     if(smart&&!['naver','seller'].includes(loginType))throw Error('네이버 아이디 또는 이메일·판매자 아이디 방식을 선택해 주세요.');
+     if(smart&&saved.encryptedLogin&&loginType!==(saved.loginType||'naver')&&!input.username&&!input.password)throw Error('로그인 방식을 바꿀 때는 아이디와 비밀번호를 모두 다시 입력해 주세요.');
      if(input.username||input.password){
       if(!valid(input))throw Error('아이디와 비밀번호를 모두 입력해 주세요.');
-      const username=input.username.trim(),encryptedLogin=await protectLogin(JSON.stringify({username,password:input.password}));
-      saved={version:1,encryptedLogin,accountHint:username.slice(0,Math.min(2,username.length))+'***',updatedAt:new Date().toISOString()};
+      const username=input.username.trim(),encryptedLogin=await protectLogin(JSON.stringify({username,password:input.password,...(smart?{loginType}:{})}));
+      saved={version:1,encryptedLogin,accountHint:username.slice(0,Math.min(2,username.length))+'***',updatedAt:new Date().toISOString(),...(smart?{loginType}:{})};
      }
      if(!saved.encryptedLogin)throw Error('처음 설정할 때는 아이디와 비밀번호를 모두 입력해 주세요.');
      saved.enabled=input.enabled;
@@ -46,7 +51,7 @@ export function createBrowserLoginStore(root){
   async load(){
    const saved=await read();if(!saved.enabled||!saved.encryptedLogin)return null;
    let value;try{value=JSON.parse(await protectLogin(saved.encryptedLogin,true));}catch{throw failure();}
-   if(!valid(value))throw failure();return {...value,revision:saved.updatedAt};
+   if(!valid(value)||smart&&(!['naver','seller'].includes(value.loginType)||value.loginType!==saved.loginType))throw failure();return {...value,revision:saved.updatedAt};
   }
  };
 }

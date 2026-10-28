@@ -8,12 +8,12 @@ import {chromium} from 'playwright';
 import {createBrowserLoginStore} from '../browser-login-store.mjs';
 
 test('설정 화면에서 암호화 저장·끄기·삭제하고 비밀번호 입력값을 즉시 지운다',{skip:process.platform!=='win32'},async()=>{
- const root=await mkdtemp(path.join(os.tmpdir(),'registrar-login-ui-')),store=createBrowserLoginStore(root),responses=[];
+ const root=await mkdtemp(path.join(os.tmpdir(),'registrar-login-ui-')),store=createBrowserLoginStore(root),smartStore=createBrowserLoginStore(root,{channel:'smartstore'}),responses=[];
  const reply=(res,data)=>{responses.push(JSON.stringify(data));res.setHeader('Content-Type','application/json');res.end(JSON.stringify(data));};
  const server=http.createServer(async(req,res)=>{try{
   const url=new URL(req.url,'http://localhost');
-  if(url.pathname==='/api/browser-login-status')return reply(res,await store.status());
-  if(url.pathname==='/api/browser-login-settings'){let body='';for await(const part of req)body+=part;return reply(res,await store.update(JSON.parse(body)));}
+  if(url.pathname==='/api/browser-login-status')return reply(res,await (url.searchParams.get('channel')==='smartstore'?smartStore:store).status());
+  if(url.pathname==='/api/browser-login-settings'){let body='';for await(const part of req)body+=part;const input=JSON.parse(body);return reply(res,await (input.channel==='smartstore'?smartStore:store).update(input));}
   if(url.pathname==='/api/state')return reply(res,{product:null,revision:1,busy:false,phase:'idle',logs:[]});
   if(url.pathname==='/api/branding')return reply(res,{visible:false});
   if(url.pathname==='/api/naver-status')return reply(res,{configured:false});
@@ -29,9 +29,16 @@ test('설정 화면에서 암호화 저장·끄기·삭제하고 비밀번호 �
   await page.getByText('이 PC에 암호화 저장했습니다. 크롬 연결·상품 입력 시작 시 로그인이 필요하면 자동으로 시도합니다.',{exact:true}).waitFor();
   assert.equal(await page.locator('#browserLoginPassword').inputValue(),'');assert.equal(await page.locator('#browserLoginUsername').inputValue(),'');
   assert.equal((await store.load()).username,'fixture-ui-user');assert.ok(responses.every(text=>!text.includes('fixture-ui-user')&&!text.includes('fixture-ui-pass')));
-  await page.locator('#closeBrowserLogin').click();await page.locator('#browserLoginSettings').click();await page.getByText(/자동 로그인 사용 중 · 저장 계정/).waitFor();
+  await page.locator('#closeBrowserLogin').click();await page.locator('#channelSmartstore').click();await page.locator('#browserLoginSettings').click();
+  await page.getByRole('heading',{name:'스마트스토어 자동 로그인 설정',exact:true}).waitFor();await page.getByText('처음 한 번 아이디와 비밀번호를 입력해 저장하세요.',{exact:true}).waitFor();
+  assert.equal(await page.locator('#browserLoginTypeLabel').isVisible(),true);await page.locator('#browserLoginType').selectOption('seller');
+  await page.locator('#browserLoginUsername').fill('fixture-smart-ui');await page.locator('#browserLoginPassword').fill('fixture-smart-ui-pass');await page.locator('#saveBrowserLogin').click();
+  await page.getByText('이 PC에 암호화 저장했습니다. 크롬 연결·상품 입력 시작 시 로그인이 필요하면 자동으로 시도합니다.',{exact:true}).waitFor();assert.equal((await smartStore.load()).loginType,'seller');assert.equal((await store.load()).username,'fixture-ui-user');
+  assert.ok(responses.every(text=>!text.includes('fixture-smart-ui')&&!text.includes('fixture-smart-ui-pass')));
+  await page.locator('#closeBrowserLogin').click();await page.locator('#browserLoginSettings').click();await page.getByText(/자동 로그인 사용 중 · 저장 계정/).waitFor();assert.equal(await page.locator('#browserLoginType').inputValue(),'seller');
+  await page.locator('#closeBrowserLogin').click();await page.locator('#channelLotte').click();await page.locator('#browserLoginSettings').click();await page.getByText(/자동 로그인 사용 중 · 저장 계정/).waitFor();assert.equal(await page.locator('#browserLoginTypeLabel').isVisible(),false);
   await page.locator('#browserLoginEnabled').uncheck();await page.locator('#saveBrowserLogin').click();await page.getByText('자동 로그인을 껐습니다. 저장 정보는 이 PC에 유지합니다.',{exact:true}).waitFor();assert.equal(await store.load(),null);
-  await page.locator('#deleteBrowserLogin').click();await page.getByText('이 PC에 저장한 자동 로그인 정보를 삭제했습니다.',{exact:true}).waitFor();assert.equal((await store.status()).configured,false);
+  await page.locator('#deleteBrowserLogin').click();await page.getByText('이 PC에 저장한 자동 로그인 정보를 삭제했습니다.',{exact:true}).waitFor();assert.equal((await store.status()).configured,false);assert.equal((await smartStore.status()).enabled,true);
   await page.locator('#browserLoginUsername').fill('unsaved');await page.locator('#browserLoginPassword').fill('unsaved');await page.locator('#closeBrowserLogin').click();
   assert.equal(await page.locator('#browserLoginPassword').inputValue(),'');assert.deepEqual(errors,[]);
  }finally{await browser.close();await new Promise(resolve=>server.close(resolve));await rm(root,{recursive:true,force:true});}

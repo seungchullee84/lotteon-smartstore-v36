@@ -1,5 +1,7 @@
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {BrowserAutomation} from './browser-connection.mjs';
+import {createBrowserLoginStore} from './browser-login-store.mjs';
+import {selectSmartstorePage,trySmartstoreLogin} from './smartstore-login.mjs';
 import {fillSmartstore,smartstorePlan,isSmartstoreInputUrl} from './smartstore-form.mjs';
 import {prepareListingImages} from './smartstore-listing-images.mjs';
 import path from 'node:path';
@@ -11,6 +13,10 @@ import {uploadSmartstoreDetail} from './smartstore-detail-upload.mjs';
 import {readExistingPhotos} from './smartstore-photo-import.mjs';
 import {bindSmartstoreDetailEdit,bindSmartstoreTwoChoiceEdit,twoChoiceSellerStyle,assertDetailOnlyProduct,readDetailOnlySellerCode,isSmartstoreDetailEditUrl} from './smartstore-detail-only.mjs';
 export class SmartstoreAutomation extends BrowserAutomation{
+  async ensureLogin(){
+    const result=await trySmartstoreLogin(this.page,{context:this.context,store:createBrowserLoginStore(this.root,{channel:'smartstore'}),log:this.log,check:()=>this.check()});
+    this.page=result.page;return result;
+  }
   async uploadTwoChoiceDetail(bundle,{signal}={}){
     this.stopped=false;await this.connectChrome(SMARTSTORE_HOME);
     const {page,style}=await bindSmartstoreTwoChoiceEdit(this.context,bundle.manifest.products);this.page=page;const url=page.url();
@@ -26,6 +32,8 @@ export class SmartstoreAutomation extends BrowserAutomation{
   }
   async preflightDetailOnly(product){
     this.stopped=false;await this.connectChrome(SMARTSTORE_HOME);
+    const selected=await selectSmartstorePage(this.context.pages(),this.page);
+    if(selected){this.page=selected;await this.ensureLogin();}
     this.page=await bindSmartstoreDetailEdit(this.context,product.style);
     this.detailOnlyFormUrl=this.page.url();
   }
@@ -55,12 +63,13 @@ export class SmartstoreAutomation extends BrowserAutomation{
     await writeFile(path.join(folder,'smartstore-auto-result.json'),JSON.stringify(result,null,2));return result;
   }
   async open(){
+    this.stopped=false;
     await this.connectChrome(SMARTSTORE_HOME);
     const pages=this.context.pages().filter(p=>!p.isClosed());
-    const previous=this.page&&!this.page.isClosed()&&this.page.url().startsWith(SMARTSTORE_HOME)?this.page:null;
-    this.page=previous||pages.find(p=>p.url().startsWith(SMARTSTORE_HOME))||pages.find(p=>p.url().startsWith('https://accounts.commerce.naver.com/'))||await this.context.newPage();
+    this.page=await selectSmartstorePage(pages,this.page)||await this.context.newPage();
     if(this.page.url()==='about:blank')await this.page.goto(SMARTSTORE_HOME,{waitUntil:'domcontentloaded'});
     this.page.setDefaultTimeout(8000);await this.page.bringToFront();
+    await this.ensureLogin();
     this.log('스마트스토어 연결 · 원하는 상품의 복사등록 화면을 직접 선택한 뒤 등록기에서 시작을 누르세요.');
   }
   async runTags(product,{validateOnly=false,folder,research=selectedProductTagResearch(product,{dataRoot:this.root})}={}){
@@ -91,9 +100,13 @@ export class SmartstoreAutomation extends BrowserAutomation{
   }
   async bindCopyForm(){
     await this.connectChrome(SMARTSTORE_HOME);
-    const copies=this.context.pages().filter(p=>!p.isClosed()&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+(?:[?]|$)/.test(p.url()));
+    const findCopies=()=>this.context.pages().filter(p=>!p.isClosed()&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+(?:[?]|$)/.test(p.url()));
+    let copies=findCopies();
+    if(!copies.length){await this.open();copies=findCopies();}
     if(copies.length!==1)throw Error(copies.length?'복사등록 창이 여러 개입니다. 사용할 창 하나만 남긴 뒤 시작을 눌러 주세요.':'스마트스토어에서 원하는 상품의 복사등록 화면을 직접 열고 시작을 눌러 주세요.');
     this.page=copies[0];this.page.setDefaultTimeout(8000);await this.page.bringToFront();
+    await this.ensureLogin();
+    if(!/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+(?:[?]|$)/.test(this.page.url()))throw Error('로그인 후 원하는 상품의 복사등록 화면을 직접 열고 다시 시작해 주세요.');
     this.copyFormUrl=this.page.url();
   }
   async run(p,folder,salePrice,includeImages=false){

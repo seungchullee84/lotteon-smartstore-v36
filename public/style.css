@@ -338,3 +338,5 @@ body[data-channel="smartstore"] #smartstoreStart{background:#087c42}body[data-ch
 .website-older-history .website-update-count{color:#c62828;font-size:16px;font-weight:800}
 
 #browserLoginDialog{width:min(520px,calc(100vw - 36px));box-sizing:border-box;max-height:88vh;overflow:auto;border:1px solid #b9aa96;border-radius:14px;padding:24px;background:#fffcf6}#browserLoginDialog::backdrop{background:#0006}#browserLoginDialog p{line-height:1.65}#browserLoginDialog label{display:block;margin:12px 0}#browserLoginDialog input:not([type=checkbox]){width:100%;box-sizing:border-box}#browserLoginDialog .bar{flex-wrap:wrap}
+
+#browserLoginTypeLabel[hidden]{display:none}#browserLoginType{display:block;width:100%;box-sizing:border-box;margin-top:6px}

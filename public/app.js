@@ -68,7 +68,7 @@ async function post(endpoint,data={}){
  const expected=({open:'lotte',run:'lotte','smartstore-template':'smartstore','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-auto':'smartstore','smartstore-detail-only':'smartstore','smartstore-tags-validate':'smartstore','smartstore-tags':'smartstore','smartstore-tags-remove':'smartstore','smartstore-tags-search':'smartstore','smartstore-tags-selection':'smartstore','smartstore-tags-selected':'smartstore','smartstore-ai-settings':'smartstore','smartstore-optimize-title':'smartstore'})[endpoint];
  if(expected&&document.body.dataset.channel!==expected)throw Error('선택한 판매채널과 실행 버튼이 다릅니다. 판매채널을 확인해 주세요.');
  if(expected)data={...data,channel:document.body.dataset.channel};
- try{const r=await fetch('/api/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:AbortSignal.timeout(endpoint==='smartstore-optimize-title'?60000:45000)});const b=await r.json();if(!r.ok)throw Error(b.error);return b;}
+ try{const r=await fetch('/api/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:AbortSignal.timeout(['smartstore-optimize-title','smartstore-open','open'].includes(endpoint)?60000:45000)});const b=await r.json();if(!r.ok)throw Error(b.error);return b;}
  catch(e){if(e.name==='TimeoutError')throw Error('서버 응답 시간이 초과됐습니다. 진행 기록에서 작업 상태를 확인해 주세요.');if(e instanceof TypeError)throw Error('등록기 서버와 연결되지 않았습니다. 잠시 후 새로고침해 주세요.');throw e;}
 }
 let requestLock=false,serverBusy=false,serverPhase='idle',smartstoreStarting=false,smartstoreDetailStarting=false;
@@ -400,24 +400,31 @@ $('openBackgroundRequest').onclick=async()=>{
 };
 
 // SmartStore is a separate no-save path; Lotte controls retain their behavior.
-let browserLoginStatus=null,browserLoginSaving=false;
+let browserLoginStatus=null,browserLoginSaving=false,browserLoginChannel='lotte',browserLoginView=0;
 function showBrowserLoginStatus(status){
  browserLoginStatus=status;
  $('browserLoginMessage').textContent=!status.supported?'자동 로그인 암호화 저장은 Windows에서 지원합니다.':status.configured?(status.enabled?'자동 로그인 사용 중':'자동 로그인 꺼짐')+' · 저장 계정 '+status.accountHint+' · 변경할 때만 아이디와 비밀번호를 모두 입력하세요.':'처음 한 번 아이디와 비밀번호를 입력해 저장하세요.';
  $('browserLoginEnabled').checked=status.configured?status.enabled:true;
+ $('browserLoginType').value=status.loginType||'naver';
  $('deleteBrowserLogin').disabled=!status.configured;
 }
 $('browserLoginSettings').onclick=async()=>{
+ const view=++browserLoginView;browserLoginChannel=activeChannel();browserLoginStatus=null;
+ const smart=browserLoginChannel==='smartstore';
+ $('browserLoginHeading').textContent=(smart?'스마트스토어':'롯데')+' 자동 로그인 설정';
+ $('browserLoginIntro').textContent=(smart?'스마트스토어':'롯데')+' 전용 크롬 연결·상품 입력 시작 시, 로그인이 필요한 화면에서 저장한 계정으로 한 번 자동 로그인합니다. 이미 로그인되어 있으면 그대로 사용합니다.';
+ $('browserLoginUsernameLabel').textContent=smart?'스마트스토어 로그인 아이디':'롯데 아이디';$('browserLoginPasswordLabel').textContent=smart?'스마트스토어 로그인 비밀번호':'롯데 비밀번호';
+ $('browserLoginTypeLabel').hidden=!smart;
  $('browserLoginForm').reset();$('browserLoginMessage').textContent='저장 상태 확인 중…';$('saveBrowserLogin').disabled=true;$('deleteBrowserLogin').disabled=true;$('browserLoginDialog').showModal();
- try{const r=await fetch('/api/browser-login-status');const status=await r.json();if(!r.ok)throw Error(status.error);showBrowserLoginStatus(status);$('saveBrowserLogin').disabled=!status.supported;}
- catch(error){$('browserLoginMessage').textContent=error.message;}
+ try{const r=await fetch('/api/browser-login-status?channel='+browserLoginChannel);const status=await r.json();if(view!==browserLoginView)return;if(!r.ok)throw Error(status.error);showBrowserLoginStatus(status);$('saveBrowserLogin').disabled=!status.supported;}
+ catch(error){if(view===browserLoginView)$('browserLoginMessage').textContent=error.message;}
 };
-$('closeBrowserLogin').onclick=()=>{if(!browserLoginSaving)$('browserLoginDialog').close();};
-$('browserLoginDialog').addEventListener('cancel',event=>{if(browserLoginSaving)event.preventDefault();});
-$('browserLoginDialog').addEventListener('close',()=>$('browserLoginForm').reset());
+$('closeBrowserLogin').onclick=()=>{if(!browserLoginSaving){browserLoginView++;$('browserLoginForm').reset();$('browserLoginDialog').close();}};
+$('browserLoginDialog').addEventListener('cancel',event=>{if(browserLoginSaving)event.preventDefault();else{browserLoginView++;$('browserLoginForm').reset();}});
+$('browserLoginDialog').addEventListener('close',()=>{if(!$('browserLoginDialog').open){browserLoginView++;$('browserLoginForm').reset();}});
 async function saveBrowserLogin(action){
  browserLoginSaving=true;$('saveBrowserLogin').disabled=true;$('deleteBrowserLogin').disabled=true;$('closeBrowserLogin').disabled=true;
- try{const status=await post('browser-login-settings',{action,enabled:$('browserLoginEnabled').checked,username:action==='save'?$('browserLoginUsername').value:'',password:action==='save'?$('browserLoginPassword').value:''});$('browserLoginForm').reset();showBrowserLoginStatus(status);$('browserLoginMessage').textContent=action==='delete'?'이 PC에 저장한 자동 로그인 정보를 삭제했습니다.':status.enabled?'이 PC에 암호화 저장했습니다. 크롬 연결·상품 입력 시작 시 로그인이 필요하면 자동으로 시도합니다.':'자동 로그인을 껐습니다. 저장 정보는 이 PC에 유지합니다.';}
+ try{const status=await post('browser-login-settings',{channel:browserLoginChannel,loginType:browserLoginChannel==='smartstore'?$('browserLoginType').value:undefined,action,enabled:$('browserLoginEnabled').checked,username:action==='save'?$('browserLoginUsername').value:'',password:action==='save'?$('browserLoginPassword').value:''});$('browserLoginForm').reset();showBrowserLoginStatus(status);$('browserLoginMessage').textContent=action==='delete'?'이 PC에 저장한 자동 로그인 정보를 삭제했습니다.':status.enabled?'이 PC에 암호화 저장했습니다. 크롬 연결·상품 입력 시작 시 로그인이 필요하면 자동으로 시도합니다.':'자동 로그인을 껐습니다. 저장 정보는 이 PC에 유지합니다.';}
  catch(error){$('browserLoginMessage').textContent=error.message;}
  finally{browserLoginSaving=false;$('browserLoginPassword').value='';$('saveBrowserLogin').disabled=!browserLoginStatus?.supported;$('deleteBrowserLogin').disabled=!browserLoginStatus?.configured;$('closeBrowserLogin').disabled=false;}
 }
