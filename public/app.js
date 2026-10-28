@@ -374,6 +374,7 @@ function syncBackgroundImage(s){
 }
 function backgroundGuide(){return '선택한 사진: '+backgroundLabels[selectedBackgroundImage]+'. 사진을 확인한 뒤 아래 버튼으로 새 합성 채팅을 여세요. 요청 문구를 확인하고 전송하면 합성을 진행합니다.';}
 function showBackgroundChoice(){
+ $('backgroundChatFallback')?.remove();
  $('backgroundOriginal').src='/image/'+selectedBackgroundImage+'-original?t='+Date.now();
  $('backgroundOriginal').alt='합성할 '+backgroundLabels[selectedBackgroundImage]+' 원본';
  $('backgroundStatus').textContent=backgroundGuide();
