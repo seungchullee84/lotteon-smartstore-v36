@@ -1,3 +1,4 @@
+import {buildSmartstoreDetail} from '../smartstore-detail.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,rm,access} from 'node:fs/promises';
@@ -22,7 +23,7 @@ async function fixture(style){
  return {root,folder,product,source,options,bytes,photos};
 }
 
-for(const style of ['326921','376911'])test('첫 수집: 기록 없는 숫자 파일명을 기존 상품 색상 구간으로 연결하고 재수집에 재사용 · '+style,async()=>{
+for(const style of ['326921','376911'])test('첫 수집: 숫자 파일명도 모두 채택하고 판매자 조회 없이 재수집에 재사용 · '+style,async()=>{
  const f=await fixture(style);try{
   await assert.rejects(access(path.join(f.options.dataRoot,'smartstore-details',style,'draft.json')));
   await assert.rejects(access(path.join(f.options.dataRoot,'smartstore-photo-mappings',style+'.json')));
@@ -32,11 +33,11 @@ for(const style of ['326921','376911'])test('첫 수집: 기록 없는 숫자 �
   assert.equal(prepared.smartstoreDetail.pendingPhotoCount,0);
   assert.equal(prepared.smartstoreDetail.photoCount,4);
   const digest=b=>createHash('sha256').update(b).digest('hex');
-  for(const [i,color]of f.product.colors.entries())assert.deepEqual(prepared.smartstoreDetail.storeColorPhotoHashes[color],f.bytes.slice(i*2,i*2+2).map(digest));
+  assert.equal(prepared.smartstoreDetail.providedImages.length,4);assert.equal(prepared.smartstoreDetail.acceptAllFolderPhotos,true);
   assert.deepEqual(await readFile(path.join(f.photos,'1.jpg')),f.bytes[0]);
   const again=await prepareSmartstoreWithColorRecovery(f.product,f.folder,{...options,readSource:()=>assert.fail('연결 완료 품번은 다시 가져오지 않아야 함')});
   assert.deepEqual(again.smartstoreDetail.storeColorPhotoHashes,prepared.smartstoreDetail.storeColorPhotoHashes);
-  assert.deepEqual([reads,recoveries,completed],[1,1,1]);
+  assert.deepEqual([reads,recoveries,completed],[0,0,0]);
  }finally{await rm(f.root,{recursive:true,force:true});}
 });
 
@@ -46,11 +47,11 @@ test('로그인 실패·틀린 품번·틀린 공식 출처·중단을 성공으
    await assert.rejects(importSmartstoreColorPhotos(f.product,f.folder,{...f.options,readSource:async()=>source,fetchImpl:()=>assert.fail('출처가 틀리면 다운로드 전 중단')}));
   }
   let completed=0;
-  const pending=await prepareSmartstoreWithColorRecovery(f.product,f.folder,{...f.options,readSource:async()=>{throw Error('로그인 확인 필요');},onImported:()=>completed++});assert.match(pending.photoRecoveryWarning,/로그인/);assert(pending.smartstoreDetail.pendingPhotoCount>0);
+  const pending=await prepareSmartstoreWithColorRecovery(f.product,f.folder,{...f.options,prepare:async()=>({...f.product,smartstoreDetail:{pendingPhotoCount:4}}),readSource:async()=>{throw Error('로그인 확인 필요');},onImported:()=>completed++});assert.match(pending.photoRecoveryWarning,/로그인/);assert(pending.smartstoreDetail.pendingPhotoCount>0);
   const controller=new AbortController();
-  await assert.rejects(prepareSmartstoreWithColorRecovery(f.product,f.folder,{...f.options,signal:controller.signal,readSource:async()=>{controller.abort();return f.source;},onImported:()=>completed++}),{name:'AbortError'});
+  await assert.rejects(prepareSmartstoreWithColorRecovery(f.product,f.folder,{...f.options,prepare:async()=>({...f.product,smartstoreDetail:{pendingPhotoCount:4}}),signal:controller.signal,readSource:async()=>{controller.abort();return f.source;},onImported:()=>completed++}),{name:'AbortError'});
   assert.equal(completed,0);assert.deepEqual(await readFile(path.join(f.photos,'1.jpg')),f.bytes[0]);
-  const cache=JSON.parse(await readFile(path.join(f.options.dataRoot,'smartstore-photo-mappings',f.product.style+'.json'),'utf8'));
+  const cache=JSON.parse(await readFile(path.join(f.options.dataRoot,'smartstore-photo-mappings',f.product.style+'.json'),'utf8').catch(e=>{if(e.code==='ENOENT')return '{"files":[]}';throw e;}));
   assert.deepEqual(cache.files,[],'실패한 가져오기에서 색상 연결이 만들어지지 않아야 함');
  }finally{await rm(f.root,{recursive:true,force:true});}
 });
@@ -58,7 +59,7 @@ test('로그인 실패·틀린 품번·틀린 공식 출처·중단을 성공으
 test('색상 사진의 원본·순서 검증이 실패하면 완료 콜백을 실행하지 않는다',async()=>{
  const f=await fixture('326923');try{
   let prepares=0,completed=0;
-  const prepare=async(...args)=>{const result=await prepareSmartstoreAuto(...args);if(++prepares===2)result.smartstoreDetail.storeColorPhotoHashes['01크림'].reverse();return result;};
+  const prepare=async(...args)=>{if(++prepares===1)return {...f.product,smartstoreDetail:{pendingPhotoCount:4}};const result=await prepareSmartstoreAuto(...args);if(prepares===2)result.smartstoreDetail.storeColorPhotoHashes['01크림'].reverse();return result;};
   await assert.rejects(prepareSmartstoreWithColorRecovery(f.product,f.folder,{...f.options,prepare,readSource:async()=>f.source,onImported:()=>completed++}),/원본·순서/);
   assert.equal(completed,0);
  }finally{await rm(f.root,{recursive:true,force:true});}
@@ -85,4 +86,17 @@ test('닫힌 읽기 창은 한 번만 재시도하고 사용자 중단·끊긴 �
   else await assert.rejects(readIsolatedPhotoSource(context,{style:'056933'},options),mode==='abort'?{name:'AbortError'}:/크롬 연결이 닫혔습니다/);
   assert.equal(created,mode==='recover'||mode==='closed'?2:1);assert.equal(closed,created);
  }
+});
+
+test('품번 폴더는 동일 원본·과거 제외·미분류 여부와 관계없이 모두 템플릿에 채택한다',async()=>{
+ const f=await fixture('326924');try{
+  await writeFile(path.join(f.photos,'동일원본.jpg'),f.bytes[0]);
+  const hash=createHash('sha256').update(f.bytes[0]).digest('hex');
+  await mkdir(f.options.dataRoot,{recursive:true});await writeFile(path.join(f.options.dataRoot,'smartstore-photo-exclusions.json'),JSON.stringify([{sha256:hash,reason:'과거 다른 작업의 제외 기록'}]));
+  const prepare=()=>prepareSmartstoreWithColorRecovery(f.product,f.folder,{...f.options,readSource:()=>assert.fail('신뢰 폴더의 사진을 다시 찾으러 판매자센터에 접근하면 안 됨')});
+  const p=await prepare();assert.equal(p.smartstoreDetail.photoCount,5);assert.equal(p.smartstoreDetail.pendingPhotoCount,0);assert.equal(p.smartstoreDetail.providedImages.length,5);
+  for(const detailTemplate of [1,2]){const html=buildSmartstoreDetail({...p,detailTemplate}).html;for(const src of p.smartstoreDetail.providedImages)assert(html.includes(src));}
+  const file=path.join(f.options.dataRoot,'smartstore-details',f.product.style,'draft.json'),draft=JSON.parse(await readFile(file,'utf8'));draft.photoMapping.ignoredPhotos=[{hash,reason:'이전 제외'}];await writeFile(file,JSON.stringify(draft));
+  const again=await prepare();assert.equal(again.smartstoreDetail.photoCount,5);assert.deepEqual(await readFile(path.join(f.photos,'1.jpg')),f.bytes[0]);
+ }finally{await rm(f.root,{recursive:true,force:true});}
 });

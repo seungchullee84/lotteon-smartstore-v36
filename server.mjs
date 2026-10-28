@@ -1,7 +1,5 @@
 import {listTwoChoicePackages,readTwoChoicePackage,saveTwoChoicePackage,twoChoiceUploadParts} from './smartstore-two-choice-store.mjs';
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
-import {localPhotoReview,applyLocalPhotoReview} from './smartstore-local-photo-review.mjs';
-import {workingProductPhoto} from './smartstore-photo-work.mjs';
 import {applyImportedPhotos,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';

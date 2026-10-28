@@ -36,7 +36,7 @@ export async function prepareSmartstoreWithColorRecovery(product,folder,options)
  catch(error){
   signal?.throwIfAborted();options.assertCurrent?.(product,folder);
   if(!/로그인|검색 결과|Target .*has been closed|크롬 연결이 닫혔습니다/.test(error.message))throw error;
-  log('폴더 사진 '+pending+'장 유지 · 기존 상품 조회 실패 · 등록기의 폴더 사진 색상·각도 확인에서 연결해 주세요.');
+  log('폴더 사진 '+pending+'장 유지 · 기존 상품 조회 실패 · 폴더 사진 원본과 미리보기를 유지합니다.');
   return {...prepared,photoRecoveryWarning:error.message};
  }
  await onImported(imported);signal?.throwIfAborted();

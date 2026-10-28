@@ -70,7 +70,7 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
   if(/^[a-f0-9]{64}$/.test(record.hash)&&['front','detail','side','back','care-label','provided'].includes(record.role)&&(['care-label','provided'].includes(record.role)||product.colors.includes(record.color)))known.set(record.hash,{role:record.role,color:['care-label','provided'].includes(record.role)?'':record.color});
  }
  for(const record of await readPhotoMappings(dataRoot,product))if(!known.has(record.hash)||known.get(record.hash).role==='provided')known.set(record.hash,record);
- const selected=importedPhotoSelection(product,old);
+ const selected=trustFolder?null:importedPhotoSelection(product,old);
  for(const [color,hashes] of selected||[])for(const digest of hashes){const prior=known.get(digest);known.set(digest,{color,role:prior?.color===color&&['front','side','back','detail'].includes(prior.role)?prior.role:'detail'});}
  const ignored=new Set((old?.style===product.style&&old.sourceUrl===product.sourceUrl?old.photoMapping?.ignoredPhotos||[]:[]).filter(p=>/^[a-f0-9]{64}$/.test(p.hash)).map(p=>p.hash));
  const found=[];for(const photo of await findPhotos(product,{desktop,photoRoots})){

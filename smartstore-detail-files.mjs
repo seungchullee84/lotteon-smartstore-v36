@@ -62,7 +62,18 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
   prepared.colorImages[color]||=[];
   if(!prepared.colorImages[color].includes(src)){prepared.colorImages[color].push(src);(prepared.storeColorPhotoHashes[color]||=[]).push(sourceHash);prepared.photoCount++;}
  };
- if(draft?.photos){
+ if(draft?.acceptAllFolderPhotos){
+  const photos=await findPhotos(product,{photoRoots:photoRoots||mannequinRoots?.map(root=>path.join(root,style))});
+  const rank=photo=>{const digest=createHash('sha256').update(photo.bytes).digest('hex'),record=draft.photoMapping?.files?.find(r=>r.name===photo.name&&r.hash===digest),order=draft.importedColorPhotos?.find(g=>g.color===record?.color)?.hashes||[],index=order.indexOf(digest);return index<0?100:index;};
+  photos.sort((a,b)=>rank(a)-rank(b));
+  for(const photo of photos){
+   const digest=createHash('sha256').update(photo.bytes).digest('hex'),record=draft.photoMapping?.files?.find(r=>r.name===photo.name&&r.hash===digest);
+   if(record?.role==='care-label'||(draft.careLabels||[]).some(r=>r.sourceName===photo.name&&r.sourceHash===digest))continue;
+   if(record?.color&&record.role!=='provided'&&product.colors.includes(record.color)){await attach(record.color,photo.file,path.dirname(photo.file));continue;}
+   const id=createHash('sha256').update(photo.name+'|'+digest).digest('hex').slice(0,24),src='/smartstore-photo/'+id,name='smartstore-photo-'+id+'.jpg';
+   await writeFile(path.join(folder,name),await readFile(await workingProductPhoto(photo,product,{dataRoot})));prepared.photoFiles[src]=name;prepared.providedImages.push(src);prepared.photoCount++;
+  }
+ }else if(draft?.photos){
   if(!Array.isArray(draft.photos))throw Error('마네킨 컷 연결 자료를 확인해 주세요.');
   for(const group of draft.photos){if(!Array.isArray(group.files))throw Error('색상별 사진 목록이 필요합니다.');for(const relative of group.files){
    if(typeof relative!=='string'||path.isAbsolute(relative)||relative.split(/[\\/]/).includes('..'))throw Error('마네킨 컷은 준비 자료 폴더 안의 파일만 연결합니다.');
@@ -91,7 +102,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
   }
  }
  // The current style folder is authoritative; unknown colors are shown without color claims.
- if(draft?.trustedFolder&&draft.sourceUrl===product.sourceUrl){
+ if(draft?.trustedFolder&&!draft.acceptAllFolderPhotos&&draft.sourceUrl===product.sourceUrl){
   const current=new Set((await findPhotos(product,{photoRoots:photoRoots||mannequinRoots?.map(root=>path.join(root,style))})).map(p=>createHash('sha256').update(p.bytes).digest('hex')));
   const labels=new Set((draft.careLabels||[]).map(p=>p.sourceHash));
   const canonicalRoot=await realpath(draftRoot);

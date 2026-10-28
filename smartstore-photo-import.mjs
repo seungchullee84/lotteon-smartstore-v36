@@ -254,10 +254,13 @@ export function assertImportedPhotoCoverage(stage,prepared,choices,{requireSelli
  const expected=new Map(),selected=new Map();for(const p of stage.candidates.filter(p=>!choices||choices.some(c=>c.id===p.id))){const color=choices?.find(c=>c.id===p.id)?.color||p.colorHint;expected.set(color,(expected.get(color)||0)+1);if(p.sha256){if(!selected.has(color))selected.set(color,[]);selected.get(color).push(p.sha256);}}
  for(const [color,count] of expected){
   const actual=prepared.smartstoreDetail?.storeColorPhotoCounts?.[color]??prepared.smartstoreDetail?.colorImages?.[color]?.length??0;
-  if(actual!==count)throw Error(color+' 사진 반영 수가 수집 결과와 다릅니다. (수집 '+count+'장 · 반영 '+actual+'장)');
+  if(prepared.smartstoreDetail?.acceptAllFolderPhotos?actual<count:actual!==count)throw Error(color+' 사진 반영 수가 수집 결과와 다릅니다. (수집 '+count+'장 · 반영 '+actual+'장)');
   const hashes=prepared.smartstoreDetail?.storeColorPhotoHashes?.[color],wanted=selected.get(color);
-  if(hashes&&wanted&&(hashes.length!==wanted.length||hashes.some((hash,i)=>hash!==wanted[i])))throw Error(color+' 사진 원본·순서가 최신 수집 결과와 다릅니다.');
+  if(hashes&&wanted){
+   let index=0;for(const hash of hashes)if(hash===wanted[index])index++;
+   if(prepared.smartstoreDetail?.acceptAllFolderPhotos?index!==wanted.length:hashes.length!==wanted.length||hashes.some((hash,i)=>hash!==wanted[i]))throw Error(color+' 사진 원본·순서가 최신 수집 결과와 다릅니다.');
+  }
  }
- for(const [color,count] of Object.entries(prepared.smartstoreDetail?.storeColorPhotoCounts||{}))if(count&&!expected.has(color))throw Error(color+' 사진이 최신 수집 선택에 없습니다. 이전 사진이 남았는지 확인해 주세요.');
+ if(!prepared.smartstoreDetail?.acceptAllFolderPhotos)for(const [color,count] of Object.entries(prepared.smartstoreDetail?.storeColorPhotoCounts||{}))if(count&&!expected.has(color))throw Error(color+' 사진이 최신 수집 선택에 없습니다. 이전 사진이 남았는지 확인해 주세요.');
  if(requireSellingPoints&&!prepared.smartstoreDetail?.sellingPoints?.length)throw Error(prepared.smartstoreDetail?.sellingPointReview?.message||'공식 원문 소구점 확인이 필요합니다. 소구점 없는 상세페이지는 완료 처리하지 않습니다.');
 }
