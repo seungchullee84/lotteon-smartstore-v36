@@ -877,8 +877,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:13:51.406Z",
-      "analyzedAt": "2026-10-28T05:28:21.772Z"
+      "observedAt": "2026-10-28T05:46:42.882Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1226,8 +1226,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:14:07.276Z",
-      "analyzedAt": "2026-10-28T05:28:21.993Z"
+      "observedAt": "2026-10-28T05:46:58.311Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2106,7 +2106,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "7d81b9343c25b49c8122309a966654560feb4b174fbb075c5f844dd6ece8d1ce",
+      "pageHash": "8c16aa4ebf3a8fe1f217e299669008a425e27d7bb9890bb64526b3bf326dcf02",
       "pageText": "유틸리티 무드의 트렌디한 코튼 카고 팬츠입니다.\n\n힙부터 허벅지까지 여유 있으며, 밑단라인까지 와이드하게 떨어지는 실루엣입니다.\n카고 디테일 포인트로 트렌디하면서도 편안한 착용감을 자랑합니다.\n\n트윌조직의 코튼 소재를 사용하였으며, 전체적으로 가먼트 워싱을 가미하여\n내추럴한 터치감을 느낄 수 있습니다.\n\n봄 시즌 다양한 상의들과 코디하여 캐주얼하게 연출해보세요.",
       "imageText": "",
       "imageScanComplete": false,
@@ -2119,8 +2119,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:14:27.126Z",
-      "analyzedAt": "2026-10-28T05:28:22.330Z"
+      "observedAt": "2026-10-28T05:47:23.485Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
