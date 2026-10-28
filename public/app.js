@@ -372,7 +372,7 @@ function syncBackgroundImage(s){
   if(version){$(key).src='/image/'+key+'?t='+Date.now();$('backgroundStatus').textContent='합성 완료 — '+backgroundLabels[key]+'를 변경했습니다.';announce(backgroundLabels[key]+'를 변경했습니다.','success');}
  }
 }
-function backgroundGuide(){return '선택한 사진: '+backgroundLabels[selectedBackgroundImage]+'. 현재 이 채팅창에 “합성해줘”라고 보내 주세요. 합성 결과는 항상 대표이미지로 적용합니다.';}
+function backgroundGuide(){return '선택한 사진: '+backgroundLabels[selectedBackgroundImage]+'. 사진을 확인한 뒤 아래 버튼으로 새 합성 채팅을 여세요. 요청 문구를 확인하고 전송하면 합성을 진행합니다.';}
 function showBackgroundChoice(){
  $('backgroundOriginal').src='/image/'+selectedBackgroundImage+'-original?t='+Date.now();
  $('backgroundOriginal').alt='합성할 '+backgroundLabels[selectedBackgroundImage]+' 원본';
@@ -395,7 +395,20 @@ $('backgroundImageChoice').onchange=async()=>{
 $('closeBackground').onclick=()=>$('backgroundDialog').close();
 $('openBackgroundRequest').onclick=async()=>{
  const button=$('openBackgroundRequest');button.disabled=true;
- try{await post('background-selection',{style:product.style,key:selectedBackgroundImage});$('backgroundStatus').textContent=backgroundGuide();announce(backgroundLabels[selectedBackgroundImage]+' 선택됨 — 이 채팅창에 “합성해줘”라고 보내 주세요.');}
+ const style=product?.style,key=selectedBackgroundImage;
+ try{
+  await post('background-selection',{style,key});
+  if(product?.style!==style||selectedBackgroundImage!==key)throw Error('상품 또는 선택 사진이 변경됐습니다. 다시 확인해 주세요.');
+  const prompt='품번 '+style+'의 '+backgroundLabels[key]+'('+key+') 원본으로 배경 늘리기·합성을 진행해줘. 프로젝트의 현재 등록기 상태와 해당 상품 폴더 background-selection.json을 먼저 확인하고, 선택한 원본 사진을 직접 확인해줘. 품번 또는 선택이 달라졌거나 진행 중이면 적용하지 말고 중단해줘. 인물·옷·색상·비율과 보이는 전체 영역을 보존하면서 배경을 자연스럽게 늘려 1500×1500 JPEG로 만들어줘. 완성본은 선택한 자리와 관계없이 현재 상품 대표이미지에 적용하고 원본은 보존해줘. 판매처 저장·등록은 누르지 마.';
+  const url='codex://new?originUrl='+encodeURIComponent('https://github.com/seungchullee84/lotteon-smartstore-v36.git')+'&prompt='+encodeURIComponent(prompt);
+  let fallback=$('backgroundChatFallback');
+  if(!fallback){fallback=document.createElement('div');fallback.id='backgroundChatFallback';button.after(fallback);}
+  const link=document.createElement('a');link.href=url;link.textContent='합성 채팅 다시 열기';
+  const text=document.createElement('textarea');text.readOnly=true;text.value=prompt;text.setAttribute('aria-label','채팅에 붙여넣을 합성 요청');
+  fallback.replaceChildren(link,text);
+  $('backgroundStatus').textContent='새 채팅 열기를 요청했습니다. 열리지 않으면 아래 링크를 누르거나 요청 문구를 복사해 채팅에 붙여넣으세요. 사진은 로컬 선택 정보로 연결되며 자동 첨부·전송되지 않습니다.';
+  window.location.href=url;
+ }
  catch(e){$('backgroundStatus').textContent=e.message;}
  finally{button.disabled=false;}
 };
