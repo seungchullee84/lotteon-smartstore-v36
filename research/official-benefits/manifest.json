@@ -3466,6 +3466,13 @@
       ]
     },
     {
+      "pno": "5CD03D4102E68CB4FEDFA50AD0F0FECA",
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=5CD03D4102E68CB4FEDFA50AD0F0FECA&ctype=1",
+      "categories": [
+        "남성 ALL"
+      ]
+    },
+    {
       "pno": "5CE2E317D62FA08E46F719C90169FF60",
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=5CE2E317D62FA08E46F719C90169FF60&ctype=1",
       "categories": [
@@ -3631,6 +3638,13 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=610AADCEA7DB9F5077F31C9368247920&ctype=1",
       "categories": [
         "아울렛"
+      ]
+    },
+    {
+      "pno": "61161D4C95255E948D7C9EF2B2298C67",
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=61161D4C95255E948D7C9EF2B2298C67&ctype=1",
+      "categories": [
+        "남성 ALL"
       ]
     },
     {
@@ -9972,9 +9986,9 @@
   "sourceComplete": 1416,
   "imageComplete": 1279,
   "withThreeOrFour": 432,
-  "phase": "complete",
+  "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-28T01:23:05.856Z",
+  "updatedAt": "2026-10-28T01:43:46.537Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-28T01:22:53.770Z",
@@ -10160,7 +10174,7 @@
       },
       "EEA1C42212EAC4088FA55DDE69265DB9": {
         "pageHash": "3e373a19afff72e49df652ba932ff68aafcb715a7b0650346622f920db202e02",
-        "detailHash": "e5bc51e274bbeacec55c5cbb9ca00ce48d0b681a4403a752d0e717d8a2d94ccc",
+        "detailHash": "c39d2a299268f069b81e1c9d7653a04c7e2bcf60161dc5abfae1c893a912a88d",
         "detailPresent": null
       },
       "B1ADD780AA11AE45ECD515D8AADA4292": {
@@ -11970,7 +11984,7 @@
       },
       "FEE75B05309B665FB5A6EC3B56DDA5E1": {
         "pageHash": "135a82c15b5ef85516fc12eb7f45dece6ef97d0ffd0b93eed7d0d1c3a621a0b0",
-        "detailHash": "d3ed0dbcf1cb2eeecc31d453ff4c3cd937e9551c7b73f645e08a0d169bf69d2f",
+        "detailHash": "55a006b8055f500a40709c824054324441439675ee073fea30da15920f25d528",
         "detailPresent": null
       },
       "49EACBFDD48ABAB09C5DBA8F05FE804B": {
@@ -12200,7 +12214,7 @@
       },
       "128912D8DBDC975FB6BF98F9A594CA4F": {
         "pageHash": "2c04ddbe240e89ea4041301da6f7493646879b8eb36a01eb209d7877e2cff13a",
-        "detailHash": "1397e08afe2ae6084e621741b48ab647097f6ff0c61e7dc385435d17fba796bd",
+        "detailHash": "cefc0c39702a349e4d19c4c32db400d87424342d4f0016c91b02af3c645c200c",
         "detailPresent": null
       },
       "E61465C83D9066A9275F524863C0032D": {
@@ -12275,12 +12289,12 @@
       },
       "0E9EC0B32522AB21038CBB847D19D25C": {
         "pageHash": "6de0de68f94de99918c08be84ddcd6817f3e143622cb659f89e1ece48b34a610",
-        "detailHash": "685da4218add1da8699a3fd61068d53b1a1be1b08ce6ec2438b5a5a299ef8f4a",
+        "detailHash": "cb48bcf4110e3c73aff26e7202a7c0f013b628bef369d3121cf8f7c893ab8ab6",
         "detailPresent": null
       },
       "7C6589B90DEF5A20AD29C76E438461AC": {
         "pageHash": "84af1ecf6b01e1f913fa9ada78e77e65686e479e0f25402fc30c366f9af2fc06",
-        "detailHash": "1f6e4db0d5b36812837679650bb9aaa956a14307293283560bbc6990f6fe8a3b",
+        "detailHash": "93a109124defe3365270fe67258eff591a80d6d836f22cb06572627f07034aa6",
         "detailPresent": null
       },
       "28383C755009C4109567575BCC92FE56": {
@@ -17103,68 +17117,7 @@
       {
         "id": "9a4ff8b9fe8a4c93b944",
         "checkedAt": "2026-10-28T01:22:53.770Z",
-        "events": [
-          {
-            "type": "changed",
-            "style": "026993",
-            "name": "NEW [변우석] 플리스 후드 집업",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=EEA1C42212EAC4088FA55DDE69265DB9&ctype=1",
-            "pageHash": "3e373a19afff72e49df652ba932ff68aafcb715a7b0650346622f920db202e02",
-            "detailHash": "e5bc51e274bbeacec55c5cbb9ca00ce48d0b681a4403a752d0e717d8a2d94ccc",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "analyzing"
-          },
-          {
-            "type": "changed",
-            "style": "356953",
-            "name": "NEW [문가영] 하이넥 풀집 가디건",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=FEE75B05309B665FB5A6EC3B56DDA5E1&ctype=1",
-            "pageHash": "135a82c15b5ef85516fc12eb7f45dece6ef97d0ffd0b93eed7d0d1c3a621a0b0",
-            "detailHash": "d3ed0dbcf1cb2eeecc31d453ff4c3cd937e9551c7b73f645e08a0d169bf69d2f",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "analyzing"
-          },
-          {
-            "type": "changed",
-            "style": "326929",
-            "name": "NEW 플리스 집업",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=128912D8DBDC975FB6BF98F9A594CA4F&ctype=1",
-            "pageHash": "2c04ddbe240e89ea4041301da6f7493646879b8eb36a01eb209d7877e2cff13a",
-            "detailHash": "1397e08afe2ae6084e621741b48ab647097f6ff0c61e7dc385435d17fba796bd",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "analyzing"
-          },
-          {
-            "type": "changed",
-            "style": "416918",
-            "name": "NEW 브러시드 와이드 슬랙스",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=0E9EC0B32522AB21038CBB847D19D25C&ctype=1",
-            "pageHash": "6de0de68f94de99918c08be84ddcd6817f3e143622cb659f89e1ece48b34a610",
-            "detailHash": "685da4218add1da8699a3fd61068d53b1a1be1b08ce6ec2438b5a5a299ef8f4a",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "analyzing"
-          },
-          {
-            "type": "changed",
-            "style": "416917",
-            "name": "NEW 브러시드 스트레이트 슬랙스",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7C6589B90DEF5A20AD29C76E438461AC&ctype=1",
-            "pageHash": "84af1ecf6b01e1f913fa9ada78e77e65686e479e0f25402fc30c366f9af2fc06",
-            "detailHash": "1f6e4db0d5b36812837679650bb9aaa956a14307293283560bbc6990f6fe8a3b",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "analyzing"
-          }
-        ]
+        "events": []
       }
     ]
   }

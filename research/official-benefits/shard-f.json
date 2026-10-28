@@ -2691,8 +2691,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T01:12:05.142Z",
-      "analyzedAt": "2026-10-28T01:22:57.489Z"
+      "observedAt": "2026-10-28T01:43:40.928Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3047,7 +3047,7 @@
       ],
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=FEE75B05309B665FB5A6EC3B56DDA5E1&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05356953.jpg",
-      "detailHash": "d3ed0dbcf1cb2eeecc31d453ff4c3cd937e9551c7b73f645e08a0d169bf69d2f",
+      "detailHash": "55a006b8055f500a40709c824054324441439675ee073fea30da15920f25d528",
       "detailValidators": {
         "etag": null,
         "lastModified": null

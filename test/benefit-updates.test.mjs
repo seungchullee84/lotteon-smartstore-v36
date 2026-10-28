@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,writeFile,readFile} from 'node:fs/promises';import path from 'node:path';import os from 'node:os';
+import sharp from 'sharp';import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,writeFile,readFile} from 'node:fs/promises';import path from 'node:path';import os from 'node:os';
 import {websiteCheckDue,BENEFIT_CHECK_INTERVAL,officialProductFingerprint,fetchOfficialDetailVersion,saveWebsiteCheck,changedOfficialProducts} from '../benefit-updates.mjs';
 import {sharedWebsiteState} from '../benefit-sharing.mjs';
 const id='a'.repeat(32),url='https://www.giordano.co.kr/shop/detail.php?pno='+id+'&ctype=1',hash='b'.repeat(64);
@@ -10,10 +10,13 @@ test('상품정보만 바뀌면 제외하고 확인된 상세 추가만 변경�
 test('20분 경과 시에만 다음 확인이 필요하다',()=>{const at=Date.parse('2026-10-27T11:00:00Z');assert.equal(BENEFIT_CHECK_INTERVAL,1200000);assert(websiteCheckDue(null,at));assert(!websiteCheckDue({checkedAt:new Date(at).toISOString()},at+1199999));assert(websiteCheckDue({checkedAt:new Date(at).toISOString()},at+1200000));});
 test('상품 본문·옵션·상세주소 변화는 감지하고 비상품 필드는 무시한다',()=>{const p={style:'375908',rawName:'여성 패딩',sourceCategory:['WOMEN'],images:{detail:'a'},sizes:['S']};const first=officialProductFingerprint(p,'따뜻합니다');assert.notEqual(first,officialProductFingerprint(p,'가볍습니다'));assert.notEqual(first,officialProductFingerprint({...p,sizes:['S','M']},'따뜻합니다'));assert.equal(first,officialProductFingerprint({...p,folder:'C:/private'},'따뜻합니다'));});
 test('같은 주소의 이미지도 조건부 요청으로 재확인하고 변경된 바이트의 해시를 갱신',async()=>{
- const previous={detailUrl:'https://www.giordano.co.kr/a.jpg',detailHash:hash,imageScanComplete:true,detailValidators:{etag:'"old"',lastModified:'Mon, 26 Oct 2026 00:00:00 GMT'}};let sent;
+ const previous={detailUrl:'https://www.giordano.co.kr/a.jpg',detailHash:hash,imageScanComplete:true,detailImageVerified:true,detailValidators:{etag:'"old"',lastModified:'Mon, 26 Oct 2026 00:00:00 GMT'}};let sent;
  const same=await fetchOfficialDetailVersion(previous.detailUrl,previous,async(u,h)=>{sent=h;return {status:304};});assert.equal(sent['If-None-Match'],'"old"');assert.equal(same.bytes,null);assert.equal(same.detailHash,hash);
- const changed=await fetchOfficialDetailVersion(previous.detailUrl,previous,async()=>({status:200,headers:{etag:'"new"'},bytes:Buffer.from('new-image')}));assert.notEqual(changed.detailHash,hash);assert.equal(changed.detailValidators.etag,'"new"');
- await assert.rejects(fetchOfficialDetailVersion(previous.detailUrl,{...previous,imageScanComplete:false},async()=>({status:304})),/検証|검증/);
+ const changed=await fetchOfficialDetailVersion(previous.detailUrl,previous,async()=>({status:200,headers:{etag:'"new"'},bytes:await sharp({create:{width:4,height:8,channels:3,background:'white'}}).png().toBuffer()}));assert.notEqual(changed.detailHash,hash);assert.equal(changed.detailValidators.etag,'"new"');
+ await assert.rejects(fetchOfficialDetailVersion(previous.detailUrl,{...previous,imageScanComplete:false,detailImageVerified:false},async()=>({status:304})),/検証|검증/);
+});
+test('HTTP 200 안내 HTML과 손상 파일은 상세이미지 변경으로 인정하지 않는다',async()=>{
+ for(const bytes of [Buffer.from('<!DOCTYPE html><html>안내 페이지</html>'),Buffer.from('broken-image')])await assert.rejects(fetchOfficialDetailVersion('https://www.giordano.co.kr/detail.jpg',null,async()=>({status:200,bytes})),/실제 상세이미지가 아닌/);
 });
 test('최초 기준선은 알리지 않고 이후 신상품·본문·이미지 변경만 별도 배치로 기록',async()=>{
  const dir=await mkdtemp(path.join(os.tmpdir(),'benefit-update-'));try{
