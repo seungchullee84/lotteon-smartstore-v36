@@ -375,8 +375,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:17:06.136Z",
-      "analyzedAt": "2026-10-28T05:28:24.007Z"
+      "observedAt": "2026-10-28T05:50:08.920Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1773,7 +1773,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "8d9a76eba2499e5065331fd740d96341dde61a0a2075d2cef220f76eb220468c",
+      "pageHash": "d1d0d008952e8a54b13e4e23428852b2b4abb495c4950421184fa927b6e9c0e6",
       "pageText": "울  혼방 소재의 12GG 크루넥 스웨터 입니다.\n\n울과 폴리혼방 원사를 사용하여 구김이 덜 가고 부드러우며, 매끈한 표면감과 부드러운 터치가 특징 입니다.\n\n여유로운 루즈 핏으로 착용감이 편안하며 봄/가을 간절기 뿐만 아닌 겨울에도 입을 수 있어 활용도가 굉장히 높습니다.\n\n다양한 하의와 매치할 수 있는 이지한 아이템으로, 슬렉스와 매치하여 모던한 비즈니스 룩으로, 데님 또는 치노팬츠와 매치하여 캐주얼한 룩으로 제안 드립니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -1786,8 +1786,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:16:39.484Z",
-      "analyzedAt": "2026-10-28T05:28:23.778Z"
+      "observedAt": "2026-10-28T05:49:43.312Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1868,8 +1868,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:16:33.769Z",
-      "analyzedAt": "2026-10-28T05:28:23.720Z"
+      "observedAt": "2026-10-28T05:49:39.871Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2223,7 +2223,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "e257a9bb7bcfaa7460b76627c48b9a40d94d1c6762ccbd3b77c214a0865e74c4",
+      "pageHash": "8b34e01d6be5a6929b9f93c4bce24c28023589ab8f77d1bf16a4011fc7bffbef",
       "pageText": "진한 블루 톤의 데님 트러커 재킷으로, \n워싱을 통한 자연스러운 텍스처와 클래식 데님 특유의 깊이 있는 워싱감을 선명하게 구현했습니다. \n\n정교한 스티치 라인과 캔톤 디테일을 적용해 구조적 완성도를 높였으며, \n트러커 재킷의 특징을 현대적으로 다듬어 균형감 있는 실루엣을 제공합니다.\n\n뒷판 절개 라인과 허리 조절 디테일이 실루엣을 안정적으로 잡아 줍니다.\n\n코튼100%의 스판이 포함되지 않은 탄탄한 소재감의 12oz 적당히 두께감 있는 원단으로 제작되어, \n한여름을 제외한 사계절 내내 활용하기 좋습니다.\n핸드 브러시 가공을 적용하여 프리미엄 데님 고유의 자연스러운 페이드가 돋보이며 깊이감 있는 워싱 컬러를 보여줍니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -2236,8 +2236,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:16:41.174Z",
-      "analyzedAt": "2026-10-28T05:28:23.786Z"
+      "observedAt": "2026-10-28T05:49:44.763Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2514,8 +2514,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:16:30.545Z",
-      "analyzedAt": "2026-10-28T05:28:23.658Z"
+      "observedAt": "2026-10-28T05:49:34.834Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3163,8 +3163,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:17:01.549Z",
-      "analyzedAt": "2026-10-28T05:28:23.960Z"
+      "observedAt": "2026-10-28T05:50:04.472Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
