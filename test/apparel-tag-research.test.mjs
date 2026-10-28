@@ -58,3 +58,10 @@ test('기모 후드 집업은 후드티·니트·남성·무지·여름 태그�
  assert(!matchResearchTags({...hoodie,rawName:'기모 후드 풀오버'},i).some(t=>t.name==='후드집업'));
  assert(!matchResearchTags({...hoodie,rawName:'니트 집업 가디건'},i).some(t=>t.name==='후드집업'));
 });
+
+test('공식몰 데님·탱크탑·블레이저·카라티 표기를 인식하고 잡화에 의류 태그를 강제하지 않는다',()=>{
+ const i={tags:['청바지','여성청바지','캐미솔','나시티','여성나시티','블레이저','여성블레이저','자켓','티셔츠','폴로티셔츠','브리프'].map((name,n)=>tag(name,n+1))};
+ for(const [rawName,wanted] of [['NEW 브러시드 와이드 데님','청바지'],['부츠컷 데님 (롱버전 +5cm)','청바지'],['헨리넥 탱크탑','나시티'],['울 블레이저','블레이저'],['피케 폴로 반팔 카라티','폴로티셔츠'],['아웃밴드 브리프','브리프']])assert(matchResearchTags({rawName,gender:'여성'},i).some(t=>t.name===wanted),rawName);
+ assert(!matchResearchTags({rawName:'데님 자켓',gender:'여성'},i).some(t=>t.name==='청바지'));
+ assert.equal(matchResearchTags({rawName:'울캐시 머플러',gender:'여성'},i).length,0);
+});

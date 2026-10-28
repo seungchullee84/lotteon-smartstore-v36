@@ -298,7 +298,7 @@ const server=http.createServer(async(req,res)=>{
               return smartBot.uploadPrepared(p,folder,{main:selected.main,extras:selected.extras,detailParts,careLabels});
             }
           });
-          state.autoStep='done';await writeFile(path.join(result.folder,'smartstore-auto-completed.json'),JSON.stringify(result,null,2));
+          if(result.tagStatus)state.tagResult={style:state.product.style,tagStatus:result.tagStatus,tagCount:result.tagCount,tagMissing:result.tagMissing,searchTagsVerified:result.searchTagsVerified,selectedTags:result.selectedTags};state.autoStep='done';await writeFile(path.join(result.folder,'smartstore-auto-completed.json'),JSON.stringify(result,null,2));
         });return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/smartstore-import-photos'){
