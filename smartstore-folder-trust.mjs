@@ -29,7 +29,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  try{
   for(const p of photos){
    signal?.throwIfAborted();const digest=hash(p.bytes),matches=mapped.filter(m=>hash(m.bytes)===digest);const prior=old?.photoMapping?.files?.find(r=>r.name===p.name&&r.hash===digest&&r.role!=='provided')||known.get(p.name+'|'+digest)||(matches.length===1?matches[0]:undefined);
-   if(prior&&prior.role!=='provided'){reviewed.push({...p,color:prior.color,role:prior.role});continue;}
+   if(prior&&prior.role!=='provided'){const code=prior.source==='seller-detail'&&p.name.match(/^기존상품_(\d{2})_/)?.[1];const color=code&&product.colors.find(c=>c.startsWith(code));reviewed.push({...p,color:color||prior.color,role:prior.role});continue;}
    const parent=path.basename(path.dirname(p.file)).replace(/\s+/g,'').toLowerCase();
    const folderColor=product.colors.find(color=>[color.replace(/\s+/g,'').toLowerCase(),color.replace(/^\d+/,'').replace(/\s+/g,'').toLowerCase()].includes(parent));
    let label=isCareLabelPhoto(p,old);
