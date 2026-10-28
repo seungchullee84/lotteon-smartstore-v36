@@ -57,7 +57,8 @@ export async function prepareListingImages(product,folder,{dataRoot,...photoOpti
    const official=path.join(folder,'main.jpg');extras.push(await workingProductPhoto({file:official},product,{dataRoot}));continue;
   }
   if(!product.colors.includes(entry.color)&&!(manifest.trustedFolder&&entry.role==='provided'))throw Error('추가사진의 색상을 확인해 주세요.');
-  const matches=photos.filter(p=>entry.sourceHash?hash(p.bytes)===entry.sourceHash:p.name===entry.sourceName);
+  const exact=photos.filter(p=>p.name===entry.sourceName&&(!entry.sourceHash||hash(p.bytes)===entry.sourceHash));
+  const matches=exact.length?exact:photos.filter(p=>entry.sourceHash?hash(p.bytes)===entry.sourceHash:p.name===entry.sourceName);
   if(matches.length!==1)throw Error('품번 폴더에서 추가사진 원본을 확인해 주세요: '+entry.sourceName);
   extras.push(await workingProductPhoto(matches[0],product,{dataRoot}));
  }
