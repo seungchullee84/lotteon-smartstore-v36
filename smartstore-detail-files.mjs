@@ -64,7 +64,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  };
  if(draft?.photos){
   if(!Array.isArray(draft.photos))throw Error('마네킨 컷 연결 자료를 확인해 주세요.');
-  for(const group of draft.photos){if(!Array.isArray(group.files))throw Error('색상별 사진 목록이 필요합니다.');for(const relative of imported?group.files:group.files.slice(0,4)){
+  for(const group of draft.photos){if(!Array.isArray(group.files))throw Error('색상별 사진 목록이 필요합니다.');for(const relative of group.files){
    if(typeof relative!=='string'||path.isAbsolute(relative)||relative.split(/[\\/]/).includes('..'))throw Error('마네킨 컷은 준비 자료 폴더 안의 파일만 연결합니다.');
    await attach(group.color,path.resolve(draftRoot,relative),draftRoot);
   }}
@@ -85,7 +85,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
      if(e.isDirectory()&&[normalize(color),label].includes(normalize(e.name))){for(const file of (await readdir(path.join(productRoot,e.name))).sort())if(imageExtension.test(file))matches.push(path.join(productRoot,e.name,file));}
      else if(e.isFile()&&imageExtension.test(e.name)&&label&&normalize(e.name).includes(label))matches.push(path.join(productRoot,e.name));
     }
-    for(const file of matches.slice(0,4))await attach(color,file,productRoot);
+    for(const file of matches)await attach(color,file,productRoot);
    }
    if(prepared.photoCount)break;
   }
@@ -101,7 +101,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
    const bytes=await readFile(file),digest=createHash('sha256').update(bytes).digest('hex');
    if(!current.has(digest)||labels.has(digest))continue;
    const id=digest.slice(0,24),src='/smartstore-photo/'+id,name='smartstore-photo-'+id+'.jpg';
-   if(prepared.providedImages.includes(src))continue;
+   if(prepared.photoFiles[src])continue;
    await writeFile(path.join(folder,name),await readFile(await workingProductPhoto({bytes},product,{dataRoot})));
    prepared.photoFiles[src]=name;prepared.providedImages.push(src);prepared.photoCount++;
   }

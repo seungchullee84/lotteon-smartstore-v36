@@ -8,6 +8,7 @@ import {chooseListingPhotos,saveListingSelection} from './smartstore-listing-ima
 import {prepareSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {officialSellingPoints,usableSellingPoints} from './smartstore-selling-points.mjs';
 import {importedPhotoSelection} from './smartstore-imported-selection.mjs';
+import {savePhotoMappings} from './smartstore-photo-mapping-cache.mjs';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 export function careLabelText(text){
  const words=['제조국','제조연월','혼용률','취급주의','관리번호','LOT','MADE IN','폴리에스터','소비자상담'];
@@ -28,7 +29,9 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  try{
   for(const p of photos){
    signal?.throwIfAborted();const prior=known.get(hash(p.bytes));
-   if(prior){reviewed.push({...p,color:prior.color,role:prior.role});continue;}
+   if(prior&&prior.role!=='provided'){reviewed.push({...p,color:prior.color,role:prior.role});continue;}
+   const parent=path.basename(path.dirname(p.file)).replace(/\s+/g,'').toLowerCase();
+   const folderColor=product.colors.find(color=>[color.replace(/\s+/g,'').toLowerCase(),color.replace(/^\d+/,'').replace(/\s+/g,'').toLowerCase()].includes(parent));
    let label=isCareLabelPhoto(p,old);
    if(!label){
     const cache=path.join(dataRoot,'smartstore-photo-label-cache',hash(p.bytes)+'.json');let record;
@@ -36,7 +39,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
     if(record?.version===1&&typeof record.label==='boolean')label=record.label;
     else{try{label=careLabelText(await recognize(p.bytes));await mkdir(path.dirname(cache),{recursive:true});await writeFile(cache,JSON.stringify({version:1,label}));}catch(error){signal?.throwIfAborted();log('라벨 문구 인식은 생략하고 제공 사진으로 연결합니다: '+p.name);}}
    }
-   reviewed.push({...p,color:'',role:label?'care-label':'provided'});
+   reviewed.push({...p,color:label?'':folderColor||'',role:label?'care-label':folderColor?'detail':'provided'});
   }
  }finally{await worker?.terminate();}
  signal?.throwIfAborted();
@@ -69,6 +72,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  const points=usableSellingPoints(previous?.sellingPoints,description)&&previous.sellingPoints.length>=officialPoints.length?previous.sellingPoints:officialPoints;
  const draft={style:product.style,sourceUrl:product.sourceUrl,headline:previous?.headline||product.name,officialDetailHash:detailHash,photos:groups,importedMainPhoto:old?.importedMainPhoto,importedColorPhotos:old?.importedColorPhotos,unmatchedPhotos:providedPhotos,listingImages,careLabels:await saveCareLabelSelection(root,reviewed.filter(p=>p.role==='care-label')),sellingPoints:points,officialPhotos:previous?.officialPhotos,trustedFolder:true,photoMapping:{basis:'사용자 지시: 현재 품번 폴더 사진 신뢰 · 미확인 색상·각도는 임의 지정하지 않음',files:records,ignoredPhotos:old?.style===product.style&&old?.sourceUrl===product.sourceUrl?old.photoMapping?.ignoredPhotos||[]:[]},preparedAt:new Date().toISOString()};
  await writeFile(path.join(root,'draft.json'),JSON.stringify(draft,null,2));
+ await savePhotoMappings(dataRoot,product,records);
  log('품번 폴더 사진 적용 · 대표 1장 · 폴더 추가 '+extras.length+'장 · 상세 '+groups.reduce((n,g)=>n+Math.min(4,g.files.length),0)+'장 · 매칭 대기 '+providedPhotos.length+'장 · 케어라벨 '+reviewed.filter(p=>p.role==='care-label').length+'장 · 외부 사진분석 없이 진행');
  return prepareSmartstoreDetail({...product,officialDescription:description},folder,{dataRoot,photoRoots:[...new Set(photos.map(p=>path.dirname(p.file)))]});
 }

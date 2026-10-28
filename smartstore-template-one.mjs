@@ -1,4 +1,3 @@
-import {unclassifiedMannequinSection} from './smartstore-mannequin-section.mjs';
 import {BRAND_INTRO_ASSET_NAMES,brandIntroSelection} from './smartstore-brand-intro.mjs';
 import {storeBannerAsset,STORE_BANNER_ASSET_NAMES} from './smartstore-store-banner.mjs';
 import {buildDetailContent} from './detail-html.mjs';
@@ -40,7 +39,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  const original=buildDetailContent(p.images,p.colors,p.colorImages,p.originalDetailUrl);
  const draft=p.smartstoreDetail;
  if(draft&&String(draft.style)!==String(p.style))throw Error('다른 품번의 상세페이지 자료는 적용하지 않습니다.');
- const groups=(draft?.displayColors||p.colors||[]).map((color,index)=>({color,index,urls:[...new Set(draft?.colorImages?.[color]||p.colorImages?.[color]||[])].slice(0,4)})).filter(g=>g.urls.length);
+ const groups=(draft?.displayColors||p.colors||[]).map((color,index)=>({color,index,urls:[...new Set(draft?.colorImages?.[color]||p.colorImages?.[color]||[])]})).filter(g=>g.urls.length);
  const points=displaySellingPoints(draft?.sellingPoints?.length?draft.sellingPoints.slice(0,4):productSellingPoints(p));
  const sources=[];
  const photo=(src,alt='',extra='')=>{const url=imageUrl(src);sources.push(src);return `<img src="${safeImage(url)}" alt="${esc(draft?.photoSources?.[src]==='official-model'?alt.replace(/디테일$/,'공식 모델 착용 모습'):alt)}" style="display:block;width:100%;height:auto;border:0;margin:0;${extra}">${draft?.photoSources?.[src]==='official-model'?'<p data-official-model-note style="font-size:19px;line-height:1.7;margin:12px 0 0;text-align:center;">지오다노 공식 모델 착용사진</p>':''}`;};
@@ -72,7 +71,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
   for(const group of groups){
    const mixed=Object.values(draft?.colorSources||{}).some(source=>source==='official'||source==='mixed'),official=draft?.colorSources?.[group.color]==='official';
    const sourceLabel=official?'<p style="text-align:center;font-size:26px;margin:0 0 28px;">지오다노 공식 상품 사진</p>':'';
-   const photos=group.urls.length===4
+   const photos=group.urls.length>=4
     ? '<div data-photo-layout="four" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;align-items:start;">'+group.urls.map((url,i)=>'<div>'+photo(url,group.color+(i===0?' 착용 모습':' 디테일'),'border-radius:14px;')+'</div>').join('')+'</div>'
     : group.urls.length===3
     ? '<div data-photo-layout="three"><div>'+photo(group.urls[0],group.color+' 착용 모습','border-radius:14px;')+'</div><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin-top:4px;align-items:start;">'+group.urls.slice(1).map(url=>'<div>'+photo(url,group.color+' 디테일','border-radius:14px;')+'</div>').join('')+'</div></div>'
@@ -80,7 +79,6 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
    body+=`<section id="smartstore-color-${group.index}" style="padding:52px 0;background:${group.index%2?'#f6f3ef':'#fff'};"><div style="padding:0 4%;">${header(colorCaption(group.color,{style:p.style}),esc(group.color),{emphasized:true,kickerTone:draft?.captionTones?.[group.color]})}${sourceLabel}</div>${photos}${group.urls.length>1?'<p data-photo-note style="font-size:19px;margin:16px 4% 0;line-height:1.9;">DETAIL<br>'+ (group.index===0?'제공된 상품사진과 디테일을 함께 확인해 주세요.':esc([group.color+'의 착용 모습을 사진으로 살펴보세요.',group.color+'의 전체 실루엣을 확인해 주세요.',group.color+'의 착용 모습과 세부 구성을 살펴보세요.',group.color+' 사진을 비교하며 스타일링을 확인해 주세요.'][(group.index-1)%4]))+'</p>':''}</section>`;
   }
  }
- body+=unclassifiedMannequinSection(draft,photo);
  body+=divider+`<section style="padding:88px 6% 96px;background:#f6f3ef;">${header('MATERIAL & SIZE','상품 정보를 확인해 주세요.')}<p style="font-size:23px;margin:0;">${esc(p.material||'소재는 아래 공식 상품고시를 확인해 주세요.')}</p><p style="font-size:21px;margin:24px 0 0;">사이즈 ${esc((p.sizes||[]).join(' · '))}</p></section>`;
  body+=divider+`<section data-official-detail data-aida="desire"><div style="padding:96px 6% 72px;">${header('PRODUCT DETAIL','디테일까지,<br>차근차근 살펴보세요.')}<p style="font-size:23px;margin:0;">공식 상품 이미지와 상세 정보를 원본 그대로 안내합니다.</p></div>`;
  // Preserve the complete original, including size/INFORMATION. Never crop or substitute it.

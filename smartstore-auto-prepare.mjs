@@ -16,6 +16,7 @@ import {prepareTrustedFolder} from './smartstore-folder-trust.mjs';
 import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 import {officialPointSource} from './smartstore-selling-point-review.mjs';
 import {importedPhotoSelection} from './smartstore-imported-selection.mjs';
+import {readPhotoMappings,savePhotoMappings} from './smartstore-photo-mapping-cache.mjs';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const norm=value=>String(value).replace(/\s+/g,'').toLowerCase();
 const image=/\.(jpe?g|png|webp)$/i;
@@ -68,6 +69,9 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
   if(record.role==='provided'&&known.has(record.hash))continue;
   if(/^[a-f0-9]{64}$/.test(record.hash)&&['front','detail','side','back','care-label','provided'].includes(record.role)&&(['care-label','provided'].includes(record.role)||product.colors.includes(record.color)))known.set(record.hash,{role:record.role,color:['care-label','provided'].includes(record.role)?'':record.color});
  }
+ for(const record of await readPhotoMappings(dataRoot,product))if(!known.has(record.hash)||known.get(record.hash).role==='provided')known.set(record.hash,record);
+ const selected=importedPhotoSelection(product,old);
+ for(const [color,hashes] of selected||[])for(const digest of hashes){const prior=known.get(digest);known.set(digest,{color,role:prior?.color===color&&['front','side','back','detail'].includes(prior.role)?prior.role:'detail'});}
  const ignored=new Set((old?.style===product.style&&old.sourceUrl===product.sourceUrl?old.photoMapping?.ignoredPhotos||[]:[]).filter(p=>/^[a-f0-9]{64}$/.test(p.hash)).map(p=>p.hash));
  const found=[];for(const photo of await findPhotos(product,{desktop,photoRoots})){
   if(ignored.has(hash(photo.bytes))&&known.get(hash(photo.bytes))?.role!=='care-label')continue;
@@ -107,9 +111,10 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
  const listingImages=await saveListingSelection(root,chooseListingPhotos(mapped,product));
  const imported=importedPhotoSelection(product,old);
  const groups=[],records=mapped.map(p=>({...old?.photoMapping?.files?.find(r=>r.hash===hash(p.bytes)),name:p.name,color:p.color,role:p.role,hash:hash(p.bytes),confidence:p.confidence??1}));
- for(const color of product.colors){const files=[];const order=imported?.get(color)||[];const selected=mapped.filter(p=>p.color===color&&p.role!=='care-label'&&(!imported||order.includes(hash(p.bytes)))).sort((a,b)=>imported?order.indexOf(hash(a.bytes))-order.indexOf(hash(b.bytes)):Number(/^1(?:번)?\./i.test(b.name))-Number(/^1(?:번)?\./i.test(a.name))||['front','side','detail'].indexOf(a.role)-['front','side','detail'].indexOf(b.role)).slice(0,4);for(const p of selected){const relative='auto/'+hash(p.bytes).slice(0,24)+'.jpg';await mkdir(path.join(root,'auto'),{recursive:true});const bytes=await sharp(p.bytes).rotate().jpeg({quality:97}).toBuffer();await writeFile(path.join(root,relative),bytes);records.find(r=>r.hash===hash(p.bytes)).preparedHash=hash(bytes);files.push(relative);}if(files.length)groups.push({color,files});}
+ for(const color of product.colors){const files=[];const order=imported?.get(color)||[];const selected=mapped.filter(p=>p.color===color&&p.role!=='care-label'&&(!imported||order.includes(hash(p.bytes)))).sort((a,b)=>imported?order.indexOf(hash(a.bytes))-order.indexOf(hash(b.bytes)):Number(/^1(?:번)?\./i.test(b.name))-Number(/^1(?:번)?\./i.test(a.name))||['front','side','detail'].indexOf(a.role)-['front','side','detail'].indexOf(b.role));for(const p of selected){const relative='auto/'+hash(p.bytes).slice(0,24)+'.jpg';await mkdir(path.join(root,'auto'),{recursive:true});const bytes=await sharp(p.bytes).rotate().jpeg({quality:97}).toBuffer();await writeFile(path.join(root,relative),bytes);records.find(r=>r.hash===hash(p.bytes)).preparedHash=hash(bytes);files.push(relative);}if(files.length)groups.push({color,files});}
  const draft={importedMainPhoto:old?.importedMainPhoto,importedColorPhotos:old?.importedColorPhotos,officialPhotos:old?.sourceUrl===product.sourceUrl&&old?.officialDetailHash===detailHash?old.officialPhotos:undefined,includeBrandVideo:old?.sourceUrl===product.sourceUrl?old.includeBrandVideo:undefined,careLabels:await saveCareLabelSelection(root,mapped.filter(p=>p.role==='care-label')),style:product.style,sourceUrl:product.sourceUrl,officialDetailHash:detailHash,listingImages,headline:product.name,sellingPoints:analysis.points.map(p=>({...p,evidence:p.evidence+' / '+product.sourceUrl})),photos:groups,preparedAt:new Date().toISOString(),photoMapping:{basis:'공식 색상칩·상세 대조 / 기존 확인 사진은 내용 해시로 재사용',files:records,ignoredPhotos:old?.photoMapping?.ignoredPhotos||[]}};
  signal?.throwIfAborted();await writeFile(path.join(root,'draft.json.tmp'),JSON.stringify(draft,null,2));await rename(path.join(root,'draft.json.tmp'),path.join(root,'draft.json'));
+ await savePhotoMappings(dataRoot,product,records);
  log('사진 '+mapped.length+'장 · '+groups.length+'개 색상 대조 완료 · 공식 설명 근거 소구점 '+analysis.points.length+'개');
  if(analysis.attributes)await saveGarmentReview(product,folder,analysis.attributes,{dataRoot,photoRoots,desktop});
  const prepared=await applyGarmentReview(await prepareSmartstoreDetail(product,folder,{dataRoot}),folder,{dataRoot,photoRoots,desktop});

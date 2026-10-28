@@ -1,4 +1,5 @@
 import {excludedPhotoReason} from './smartstore-photo-exclusions.mjs';
+import {savePhotoMappings} from './smartstore-photo-mapping-cache.mjs';
 import {extractLongMannequinPhotos} from './smartstore-long-photo-import.mjs';
 import {createWorker} from 'tesseract.js';
 import {readFile,writeFile,mkdir,rename,unlink} from 'node:fs/promises';
@@ -205,6 +206,7 @@ export async function applyImportedPhotos(product,folder,choices,{dataRoot,deskt
  const importedColorPhotos=[];for(const p of selected){let group=importedColorPhotos.find(g=>g.color===p.color);if(!group){group={color:p.color,hashes:[]};importedColorPhotos.push(group);}group.hashes.push(p.sha256);}
  const draft={...old,style:product.style,sourceUrl:product.sourceUrl,importedMainPhoto,importedColorPhotos,photoMapping:{...old?.photoMapping,files:records}};
  await writeFile(path.join(root,'draft.json.tmp'),JSON.stringify(draft,null,2));await rename(path.join(root,'draft.json.tmp'),path.join(root,'draft.json'));
+ await savePhotoMappings(dataRoot,product,records);
  return {count,selectedCount:selected.length,target};
 }
 
