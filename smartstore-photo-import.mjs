@@ -102,6 +102,20 @@ export async function findPhotoSourceForm(context,style,{check=()=>{},log=()=>{}
  }while(Date.now()<deadline);
  throw Error('같은 판매자 상품코드의 조회/수정 화면을 확인하지 못했습니다.');
 }
+// Automatic recovery reads the saved source in its own temporary context. This
+// avoids ONE's named editor reusing another product's unsaved editor window.
+export async function readIsolatedPhotoSource(context,product,{check=()=>{},log=()=>{},readSource=readExistingPhotos}={}){
+ check();
+ const session=await context.storageState();check();
+ const naverHost=host=>host.replace(/^\./,'')==='naver.com'||host.endsWith('.naver.com');
+ const storageState={cookies:session.cookies.filter(c=>naverHost(c.domain)),origins:session.origins.filter(o=>naverHost(new URL(o.origin).hostname))};
+ const isolated=await context.browser().newContext({storageState});
+ try{
+  check();log('자동 색상 대조 · 저장된 동일 품번 상품을 별도 읽기 창에서 확인 · 열린 편집 내용 유지');
+  const source=await readSource(isolated,product,{check,log});check();return source;
+ }finally{await isolated.close();}
+}
+
 export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{}}={}){
  const {page,sellerCode}=await findPhotoSourceForm(context,product.style,{check,log});check();
  const formUrl=page.url(),editors=[];

@@ -7,6 +7,7 @@ import sharp from 'sharp';
 import {createHash} from 'node:crypto';
 import {prepareSmartstoreWithColorRecovery,importSmartstoreColorPhotos} from '../smartstore-color-recovery.mjs';
 import {prepareSmartstoreAuto} from '../smartstore-auto-prepare.mjs';
+import {readIsolatedPhotoSource} from '../smartstore-photo-import.mjs';
 
 async function fixture(style){
  const root=await mkdtemp(path.join(os.tmpdir(),'color-recovery-'));
@@ -26,7 +27,7 @@ for(const style of ['326921','376911'])test('첫 수집: 기록 없는 숫자 �
   await assert.rejects(access(path.join(f.options.dataRoot,'smartstore-details',style,'draft.json')));
   await assert.rejects(access(path.join(f.options.dataRoot,'smartstore-photo-mappings',style+'.json')));
   let reads=0,recoveries=0,completed=0;
-  const options={...f.options,readSource:async()=>{reads++;return f.source;},onRecovery:p=>{recoveries++;assert.equal(p.smartstoreDetail.pendingPhotoCount,4);},onImported:()=>completed++};
+  const options={...f.options,readSource:async(p,sourceOptions)=>{assert.equal(sourceOptions.isolated,true);reads++;return f.source;},onRecovery:p=>{recoveries++;assert.equal(p.smartstoreDetail.pendingPhotoCount,4);},onImported:()=>completed++};
   const prepared=await prepareSmartstoreWithColorRecovery(f.product,f.folder,options);
   assert.equal(prepared.smartstoreDetail.pendingPhotoCount,0);
   assert.equal(prepared.smartstoreDetail.photoCount,4);
@@ -61,4 +62,16 @@ test('색상 사진의 원본·순서 검증이 실패하면 완료 콜백을 �
   await assert.rejects(prepareSmartstoreWithColorRecovery(f.product,f.folder,{...f.options,prepare,readSource:async()=>f.source,onImported:()=>completed++}),/원본·순서/);
   assert.equal(completed,0);
  }finally{await rm(f.root,{recursive:true,force:true});}
+});
+
+test('연속 품번 자동 가져오기는 기존 편집기에 접근하지 않고 별도 읽기 창을 성공·실패·중단 모두 정리한다',async()=>{
+ for(const outcome of ['success','failure','abort']){
+  let closed=0,read=0;const controller=new AbortController();
+  const isolated={close:async()=>closed++};
+  const context={pages:()=>assert.fail('사용자 편집기 탐색 금지'),storageState:async()=>({cookies:[{domain:'.naver.com',name:'session',value:'test-only'},{domain:'other.test',name:'unrelated',value:'excluded'}],origins:[{origin:'https://sell.smartstore.naver.com',localStorage:[]},{origin:'https://other.test',localStorage:[]}]}),browser:()=>({newContext:async({storageState})=>{assert.equal(storageState.cookies.length,1);assert.equal(storageState.origins.length,1);return isolated;}})};
+  const product={style:'376911'},options={check:()=>controller.signal.throwIfAborted(),readSource:async(ctx,p)=>{read++;assert.equal(ctx,isolated);assert.equal(p,product);if(outcome==='failure')throw Error('읽기 실패');if(outcome==='abort')controller.abort();return {style:p.style};}};
+  if(outcome==='success')assert.deepEqual(await readIsolatedPhotoSource(context,product,options),{style:'376911'});
+  else await assert.rejects(readIsolatedPhotoSource(context,product,options),outcome==='failure'?/읽기 실패/:{name:'AbortError'});
+  assert.equal(read,1);assert.equal(closed,1);
+ }
 });

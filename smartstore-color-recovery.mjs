@@ -8,7 +8,7 @@ export async function importSmartstoreColorPhotos(product,folder,options){
  const {dataRoot,signal,readSource,assertCurrent=()=>{},prepare=prepareSmartstoreAuto}=options;
  const check=()=>{signal?.throwIfAborted();assertCurrent(product,folder);};
  check();
- const source=await readSource(product,{signal});check();
+ const source=await readSource(product,{signal,isolated:options.isolatedSource===true});check();
  // Check identity before downloading or modifying a style's local files.
  allImportedPhotoChoices({...source,candidates:[]},product);
  const stage=await stageImportedPhotos(source,folder,options);check();
@@ -31,7 +31,7 @@ export async function prepareSmartstoreWithColorRecovery(product,folder,options)
  if(!pending)return prepared;
  log('사진 '+pending+'장 색상 연결 확인 · 같은 품번의 기존 상품 색상 구간을 자동으로 가져옵니다.');
  await onRecovery(prepared);signal?.throwIfAborted();
- const imported=await importSmartstoreColorPhotos(prepared,folder,options);
+ const imported=await importSmartstoreColorPhotos(prepared,folder,{...options,isolatedSource:true});
  await onImported(imported);signal?.throwIfAborted();
  log('기존 상품 색상 구간 대조 완료 · '+imported.result.selectedCount+'장 연결 · 상품 저장 안 함');
  return imported.product;
