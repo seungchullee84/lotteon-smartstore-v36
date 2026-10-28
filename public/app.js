@@ -550,8 +550,8 @@ $('smartstoreStart').onclick=async()=>{
  if(requestLock||serverBusy)return;
  const style=$('style').value.trim()||product?.style;
  if(!style){$('error').textContent='품번 또는 공식몰 상품 URL을 먼저 입력해 주세요.';return;}
- requestLock=true;smartstoreStarting=true;$('error').textContent='';$('smartstoreStart').disabled=true;syncButtons();announce('시작 요청 접수 중 · 복사등록 화면을 확인합니다.');
- try{await flushManualTagSelection();await post('smartstore-auto',{style,detailTemplate:product?.detailTemplate===2?2:1,selectedTitle:product?{style:product.style,title:$('smartstoreName').value}:undefined,edits:currentProductEdits(),selectedTags:currentManualTags()});serverBusy=true;serverPhase='smartstore-auto';announce('자동 작업 시작 · 선택한 복사등록 화면에 업로드합니다.');}catch(e){$('error').textContent=e.message;announce('처리하지 못했습니다: '+e.message,'failed');}finally{requestLock=false;smartstoreStarting=false;syncButtons();}
+ requestLock=true;smartstoreStarting=true;$('error').textContent='';$('smartstoreStart').disabled=true;syncButtons();announce('시작 요청 접수 중 · 수정/복사등록 화면을 확인합니다.');
+ try{await flushManualTagSelection();await post('smartstore-auto',{style,detailTemplate:product?.detailTemplate===2?2:1,selectedTitle:product?{style:product.style,title:$('smartstoreName').value}:undefined,edits:currentProductEdits(),selectedTags:currentManualTags()});serverBusy=true;serverPhase='smartstore-auto';announce('자동 작업 시작 · 선택한 수정/복사등록 화면에 업로드합니다.');}catch(e){$('error').textContent=e.message;announce('처리하지 못했습니다: '+e.message,'failed');}finally{requestLock=false;smartstoreStarting=false;syncButtons();}
 };
 $('smartstoreDetailOnly').onclick=async()=>{
  if(requestLock||serverBusy)return;
