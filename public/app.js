@@ -1,9 +1,10 @@
 let smartstoreListingState=null,tagResearchReady=false;
 function renderWebsiteUpdates(website){
  const summary=$('websiteUpdateSummary'),list=$('websiteUpdateList');if(!summary||!list)return;
- if(!website?.checkedAt){summary.textContent='홈페이지 기준선 확인 중 · 30분 간격';return;}
+ if(!website?.checkedAt){summary.classList.remove('has-updates');summary.textContent='홈페이지 기준선 확인 중 · 30분 간격';return;}
  const time=value=>new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(value));
  const batches=website.batches||[],latest=batches.at(-1),events=latest?.events||[];
+ summary.classList.toggle('has-updates',events.some(event=>event.type==='new'||event.type==='changed'));
  summary.textContent='홈페이지 확인 '+time(website.checkedAt)+' · 신상품 '+events.filter(e=>e.type==='new').length+'건 · 변경 '+events.filter(e=>e.type==='changed').length+'건 · 30분 간격';
  const stamp=JSON.stringify(website);if(list.dataset.stamp===stamp)return;list.dataset.stamp=stamp;list.replaceChildren();
  const next=document.createElement('p');next.textContent='다음 확인 '+time(website.nextCheckAt)+(website.errors?' · 일부 원본 확인 실패: 다음 주기에 재확인':'');list.append(next);
@@ -62,8 +63,14 @@ function announce(text,kind='working'){
  if(kind!=='working')feedbackTimer=setTimeout(()=>feedback.className='',4500);
 }
 function syncFeedbackWithState(state){
+ if(state.busy){
+  if(!feedback.classList.contains('working')||feedbackJob!==state.phase){
+   const label=({collect:'공식몰 정보 수집 중…',register:'롯데ON 상품 입력 진행 중…',background:'배경 합성 중…',smartstore:'스마트스토어 입력 중…','smartstore-auto':'스마트스토어 자동 작업 진행 중…','smartstore-detail-only':'상세설명 교체 중…','smartstore-import-photos':'기존 상품 착용사진 가져오는 중…','smartstore-tags':'태그 자동입력 중…','smartstore-detail':'상세페이지 제작 중…',stopping:'작업 중단 중…'})[state.phase]||'작업 진행 중…';
+   announce(label);
+  }
+  feedbackJob=state.phase;return;
+ }
  if(!feedback.classList.contains('working')){feedbackJob=null;return;}
- if(state.busy){feedbackJob=state.phase;return;}
  if(requestLock)return;
  const job=feedbackJob||(serverBusy?serverPhase:null);
  if(!job)return;
@@ -432,7 +439,6 @@ function selectRegistrationChannel(channel){
  $('channelSmartstore').setAttribute('aria-pressed',String(smart));
  $('activeChannelName').textContent=smart?'스마트스토어':'롯데ON';
  $('activeChannelName').className=smart?'smartstore-brand':'lotteon-brand';
- $('channelSummary').textContent=smart?'현재 작업 채널: 스마트스토어 · 품번으로 사진 합성·상세페이지 제작·업로드':'현재 작업 채널: 롯데ON · 기존 등록 방식';
  document.title=smart?'스마트스토어 상품등록기':'롯데ON 상품등록기';
  try{sessionStorage.setItem('registrationChannel',smart?'smartstore':'lotte');}catch{}
  $('saveDetailImages').textContent=smart?'스마트스토어 상세페이지 만들기·저장':'상세이미지 저장';
