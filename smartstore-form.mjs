@@ -1,4 +1,4 @@
-import {isSmartstoreDetailEditUrl,readDetailOnlySellerCode,assertDetailOnlyProduct} from './smartstore-detail-only.mjs';
+import {isSmartstoreDetailEditUrl,readDetailOnlySellerCode} from './smartstore-detail-only.mjs';
 export function isSmartstoreInputUrl(url){return /^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/(?:create(?:[?]|$)|(?:copy|edit)\/\d+(?:[?]|$))/.test(url);}
 import {buildSmartstoreDetail} from './smartstore-detail.mjs';
 import {fillProductAttributes} from './smartstore-attributes.mjs';
@@ -89,7 +89,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   if(!isSmartstoreInputUrl(await tab.url()))throw Error('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.');
   const editing=isSmartstoreDetailEditUrl(await tab.url());
   if(!editing&&!/\/products\/copy\/\d+/.test(await tab.url()))throw Error('수정 또는 복사등록 화면에서 실행해 주세요.');
-  if(editing)assertDetailOnlyProduct(await readDetailOnlySellerCode(page),plan.style);
+  if(editing&&!/^\d{6}$/.test(plan.style||''))throw Error('전체 입력할 현재 품번을 확인해 주세요.');
   const learned=learnedFields(plan);
   const fill=(loc,value)=>fillSmartstoreValue(loc,value,check);
   const open=async(name,field)=>{if(!await field.isVisible())await page.getByRole('button',{name}).click();};
@@ -195,8 +195,10 @@ export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=fal
 export async function fillSmartstoreSellerCode(page,plan,{check=()=>{},log=()=>{}}={}){
  check();
  if(isSmartstoreDetailEditUrl(page.url())){
-  const code=await readDetailOnlySellerCode(page);assertDetailOnlyProduct(code,plan.style);
-  log('수정 화면의 기존 판매자 상품코드 유지');return code;
+  const code=await readDetailOnlySellerCode(page);
+  if(!/^\d{6}$/.test(plan.style||''))throw Error('전체 입력할 현재 품번을 확인해 주세요.');
+  if(code.includes(plan.style)){log('같은 품번의 기존 판매자 상품코드 유지');return code;}
+  const next=sellerProductCode(plan);await fillSmartstoreValue(page.locator('#seller-code1'),next,check);log('전체 입력 · 판매자 상품코드를 현재 품번으로 변경');return next;
  }
  if(!/\/products\/copy\/\d+(?:[?]|$)/.test(page.url())||!isSmartstoreInputUrl(page.url()))throw Error('수정 또는 복사등록 화면에서 실행해 주세요.');
  const code=sellerProductCode(plan);await fillSmartstoreValue(page.locator('#seller-code1'),code,check);return code;

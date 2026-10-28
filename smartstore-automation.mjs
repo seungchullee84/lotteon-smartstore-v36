@@ -55,7 +55,7 @@ export class SmartstoreAutomation extends BrowserAutomation{
     if(!isSmartstoreInputUrl(this.page.url()))throw Error('수정 또는 복사등록 화면에서 실행해 주세요.');
   }
   async uploadPrepared(p,folder,{main,extras,detailParts,careLabels=[]}){
-    this.check();const plan={...smartstorePlan(p,p.consumerPrice),tagResearch:selectedProductTagResearch(p,{dataRoot:this.root})};
+    this.check();if(this.boundProductStyle&&this.boundProductStyle!==p.style)throw Error('전체 입력할 품번이 변경되었습니다.');const plan={...smartstorePlan(p,p.consumerPrice),tagResearch:selectedProductTagResearch(p,{dataRoot:this.root})};
     if(!this.page||this.page.isClosed()||this.page.url()!==this.copyFormUrl||!isSmartstoreInputUrl(this.page.url()))throw Error('자동화 중 등록 화면이 변경됐습니다.');
     const check=()=>{this.check();if(this.page.isClosed()||this.page.url()!==this.copyFormUrl)throw Error('등록 화면이 변경되어 업로드를 중단했습니다.');};
     const report=await fillSmartstore({playwright:this.page,url:()=>this.page.url()},plan,{main,extras,careLabels,replaceImages:true,detail:true},this.log,check);
@@ -108,10 +108,11 @@ export class SmartstoreAutomation extends BrowserAutomation{
     if(!isSmartstoreInputUrl(this.page.url())||(!isSmartstoreDetailEditUrl(this.page.url())&&!/\/products\/copy\/\d+(?:[?]|$)/.test(this.page.url())))throw Error('로그인 후 수정 또는 복사등록 화면을 열고 다시 시작해 주세요.');
     this.formMode=isSmartstoreDetailEditUrl(this.page.url())?'edit':'copy';
     if(this.formMode==='edit'){
-      assertDetailOnlyProduct(await readDetailOnlySellerCode(this.page),product?.style);
-      this.log('수정 화면 품번 '+product.style+' 확인 · 전체 입력·업로드 · 상품 저장 안 함');
+      if(!/^\d{6}$/.test(product?.style||''))throw Error('전체 입력할 현재 품번을 확인해 주세요.');
+      this.originalSellerCode=await readDetailOnlySellerCode(this.page);
+      this.log('수정 화면 전체 교체 · 기존 코드 '+this.originalSellerCode+' → 현재 품번 '+product.style+' · 상품 저장 안 함');
     }
-    this.copyFormUrl=this.page.url();
+    this.boundProductStyle=product?.style;this.copyFormUrl=this.page.url();
   }
   async run(p,folder,salePrice,includeImages=false){
     this.stopped=false;const plan={...smartstorePlan(p,salePrice),tagResearch:selectedProductTagResearch(p,{dataRoot:this.root})};

@@ -15,9 +15,10 @@ for(const style of ['115928','056930','134600'])test(style+' 수정·복사등�
    const before=await page.locator('#seller-code1').inputValue();const result=await fillSmartstoreSellerCode(page,{style,name:'상품',gender:'남성'});
    if(mode==='edit'){
     assert.equal(result,before);assert.equal(await page.locator('#seller-code1').inputValue(),before);
-    await assert.rejects(bot.preflight({style:'999999'}),/품번/);
-    await assert.rejects(fillSmartstoreSellerCode(page,{style:'999999'}),/품번/);
+    await assert.rejects(bot.preflight({style:''}),/품번/);
     assert.equal(await page.locator('#seller-code1').inputValue(),before);
+    await bot.preflight({style:'999999'});
+    const changed=await fillSmartstoreSellerCode(page,{style:'999999',name:'상품',gender:'남성'});assert(changed.includes('999999'));assert.equal(await page.locator('#seller-code1').inputValue(),changed);
    }else assert(result.includes(style));
    await page.close();
   }
