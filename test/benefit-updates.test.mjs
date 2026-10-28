@@ -3,6 +3,10 @@ import {websiteCheckDue,BENEFIT_CHECK_INTERVAL,officialProductFingerprint,fetchO
 import {sharedWebsiteState} from '../benefit-sharing.mjs';
 const id='a'.repeat(32),url='https://www.giordano.co.kr/shop/detail.php?pno='+id+'&ctype=1',hash='b'.repeat(64);
 const item=(extra={})=>({style:'375908',rawName:'여성 경량 패딩 자켓',sourceUrl:url,pageHash:'c'.repeat(64),detailHash:hash,...extra});
+test('상품정보만 바뀌면 제외하고 확인된 상세 추가만 변경으로 표시',()=>{
+ assert.deepEqual(changedOfficialProducts({[id]:{pageHash:'c'.repeat(64),detailHash:hash}},[item({pageHash:'d'.repeat(64)})]),[]);
+ assert.deepEqual(changedOfficialProducts({[id]:{pageHash:null,detailHash:null,detailPresent:false}},[item()])[0].changes,['공식 상세페이지 추가']);
+});
 test('20분 경과 시에만 다음 확인이 필요하다',()=>{const at=Date.parse('2026-10-27T11:00:00Z');assert.equal(BENEFIT_CHECK_INTERVAL,1200000);assert(websiteCheckDue(null,at));assert(!websiteCheckDue({checkedAt:new Date(at).toISOString()},at+1199999));assert(websiteCheckDue({checkedAt:new Date(at).toISOString()},at+1200000));});
 test('상품 본문·옵션·상세주소 변화는 감지하고 비상품 필드는 무시한다',()=>{const p={style:'375908',rawName:'여성 패딩',sourceCategory:['WOMEN'],images:{detail:'a'},sizes:['S']};const first=officialProductFingerprint(p,'따뜻합니다');assert.notEqual(first,officialProductFingerprint(p,'가볍습니다'));assert.notEqual(first,officialProductFingerprint({...p,sizes:['S','M']},'따뜻합니다'));assert.equal(first,officialProductFingerprint({...p,folder:'C:/private'},'따뜻합니다'));});
 test('같은 주소의 이미지도 조건부 요청으로 재확인하고 변경된 바이트의 해시를 갱신',async()=>{

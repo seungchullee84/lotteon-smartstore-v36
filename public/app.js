@@ -7,7 +7,7 @@ function renderWebsiteUpdates(website){
  summary.title=loading?'자료 불러오는 중 · 마지막 확인 건수를 유지합니다.':'마지막 홈페이지 확인 결과';
  const time=value=>new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(value));
  const stamp=JSON.stringify(website);if(list.dataset.stamp===stamp)return;list.dataset.stamp=stamp;
- const batches=website.batches||[],latest=batches.at(-1),events=latest?.events||[];
+ const batches=(website.batches||[]).map(batch=>({...batch,events:(batch.events||[]).map(event=>({...event,changes:(event.changes||[]).filter(change=>['새로 발견한 성인 상품','공식 상세페이지 추가','공식 상세이미지 변경'].includes(change))})).filter(event=>event.type==='new'||event.changes.length)})),latest=batches.at(-1),events=latest?.events||[];
  summary.classList.toggle('has-updates',events.some(event=>event.type==='new'||event.type==='changed'));
  summary.replaceChildren(document.createTextNode('홈페이지 확인 '+time(website.checkedAt)+' · 신상품 '));const newCount=document.createElement('strong'),changedCount=document.createElement('strong');newCount.className=changedCount.className='website-update-count';newCount.textContent=events.filter(e=>e.type==='new').length+'건';changedCount.textContent=events.filter(e=>e.type==='changed').length+'건';summary.append(newCount,document.createTextNode(' · 변경 '),changedCount,document.createTextNode(' · 20분 간격'));
  list.replaceChildren();
