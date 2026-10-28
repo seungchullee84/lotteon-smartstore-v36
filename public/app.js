@@ -1,7 +1,10 @@
 let smartstoreListingState=null,tagResearchReady=false;
+let lastWebsiteCheck=null;try{lastWebsiteCheck=JSON.parse(localStorage.getItem('registrar-website-check-v1')||'null');}catch{} 
 function renderWebsiteUpdates(website){
  const summary=$('websiteUpdateSummary'),list=$('websiteUpdateList');if(!summary||!list)return;
- if(!website?.checkedAt){summary.classList.remove('has-updates');summary.textContent='홈페이지 기준선 확인 중 · 20분 간격';return;}
+ const loading=!website?.checkedAt;if(loading)website=lastWebsiteCheck;if(!website?.checkedAt){if(!summary.querySelector('.website-update-count'))summary.textContent='홈페이지 기준선 확인 중 · 20분 간격';return;}
+ if(!loading){lastWebsiteCheck={checkedAt:website.checkedAt,nextCheckAt:website.nextCheckAt,errors:website.errors,batches:website.batches||[]};try{localStorage.setItem('registrar-website-check-v1',JSON.stringify(lastWebsiteCheck));}catch{}}
+ summary.title=loading?'자료 불러오는 중 · 마지막 확인 건수를 유지합니다.':'마지막 홈페이지 확인 결과';
  const time=value=>new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(value));
  const stamp=JSON.stringify(website);if(list.dataset.stamp===stamp)return;list.dataset.stamp=stamp;
  const batches=website.batches||[],latest=batches.at(-1),events=latest?.events||[];
@@ -14,6 +17,7 @@ function renderWebsiteUpdates(website){
  for(const event of history){const row=document.createElement('p'),link=document.createElement('a');link.textContent=event.style+' · '+event.name;link.href=event.sourceUrl;link.target='_blank';link.rel='noopener noreferrer';row.append(link,document.createTextNode(' — '+time(event.checkedAt)+' · '+event.changes.join(', ')+' · '+({ready:'소구점 분석 완료 · 등록기 반영',analyzing:'소구점 재분석 중','needs-review':'추가 확인 필요',superseded:'이후 변경사항 확인'}[event.status]||'확인 중')));list.append(row);}
 }
 const $=id=>document.getElementById(id);let product=null,lastRevision=-1,appClosed=false,lastImageVersions={},selectedBackgroundImage='main';
+renderWebsiteUpdates(null);
 function applyReleaseColor(version){
  const badge=$('releaseVersion'),number=Number(version);
  if(!Number.isSafeInteger(number)||number<0||badge.dataset.version===String(number))return;
