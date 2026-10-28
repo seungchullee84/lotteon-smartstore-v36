@@ -1,4 +1,5 @@
 import {resolveCatalogCategory} from './category-catalog.mjs';
+import {isMensUnderwear,MENS_UNDERWEAR_CATEGORY} from './category.mjs';
 import {officialColorChips,collectColorChips} from './color-chips.mjs';
 import {prepareMainImage} from './main-image.mjs';
 import {normalizeCountry} from './country.mjs';
@@ -84,7 +85,7 @@ export function productClassification(html) {
   // Only mappings verified against the partner portal are prefilled.
   if(gender==='여성'&&sourceCategory.includes('TOP')&&sourceCategory.includes('긴팔티'))Object.assign(category,{commonMiddle:'M0210 : 여성의류상의',commonSmall:'00843 : 여성티셔츠/탑',channelMiddle:'티셔츠/맨투맨',channelSmall:'라운드넥티셔츠'});
   // Fall back to the product name when the official breadcrumb has no mapping.
-  if(gender==='남성'&&sourceCategory.includes('INNERWEAR')&&/지워머|내의|내복|발열|레깅스/.test(itemTitle))Object.assign(category,{commonMajor:'L0014 : 남성의류',commonMiddle:'M0059 : 남성속옷',commonSmall:'00715 : 남성내의'});
+  if(isMensUnderwear({gender,sourceCategory,rawName:itemTitle}))Object.assign(category,MENS_UNDERWEAR_CATEGORY);
   if(gender&&!category.commonMiddle){
     const title=itemTitle;
     const upper=(small,middle,channel)=>Object.assign(category,{commonMiddle:gender+'의류상의',commonSmall:gender+small,channelMiddle:middle,channelSmall:channel});
@@ -124,7 +125,7 @@ export function repairCategoryFields(product){
     for(const field of ['commonMajor','commonMiddle','commonSmall'])product.category[field]=suggested[field];
   }
   if(suggested.commonSmall==='00715 : 남성내의'){
-    for(const field of ['commonMajor','commonMiddle','commonSmall'])product.category[field]=suggested[field];
+    Object.assign(product.category,MENS_UNDERWEAR_CATEGORY);delete product.category.channelCodes;
   }
 }
 export function koreanTitle(raw, gender, style) {

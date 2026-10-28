@@ -11,7 +11,7 @@ test('남성 INNERWEAR 지워머는 레깅스·긴팔티 모두 남성속옷의 
  for(const name of ['지워머 레깅스(에센셜)','지워머 크루넥 긴팔티(에센셜)']){
   const p=productClassification('<div class="navi"><a>Home</a><a class="prdpath1">MEN</a><a>INNERWEAR</a><a>'+name+'</a></div>');
   assert.equal(p.category.commonMajor,'L0014 : 남성의류');assert.equal(p.category.commonMiddle,'M0059 : 남성속옷');assert.equal(p.category.commonSmall,'00715 : 남성내의');
-  assert.equal(p.category.channelSmall,'');
+  assert.equal(p.category.channelMajor,'남성의류');assert.equal(p.category.channelMiddle,'남성속옷');assert.equal(p.category.channelSmall,'남성내의');
  }
 });
 test('경로가 없거나 충돌하면 성별 미확정',()=>{assert.equal(productClassification('<a>WOMEN</a><a>MEN</a>').gender,'');assert.equal(productClassification('<div class="navi"><a class="prdpath1">WOMEN</a><a class="prdpath1">MEN</a></div>').gender,'');});

@@ -27,7 +27,7 @@ export function applyProductEdits(product,record){
   else result[key]=value;
  }
  if(Object.hasOwn(fields,'smartstoreName'))result.smartstoreNameUserEdited=true;
- if(result.category.channelSmall?.trim()==='니트머플러')result.category=channelCategoryPath(result.category);
+ if(['니트머플러','남성내의'].includes(result.category.channelSmall?.trim()))result.category=channelCategoryPath(result.category);
  return result;
 }
 export function createProductEditStore(dataRoot){

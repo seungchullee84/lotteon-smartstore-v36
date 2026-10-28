@@ -1,3 +1,4 @@
+import {isMensUnderwear,MENS_UNDERWEAR_CATEGORY} from './category.mjs';
 import {readFileSync} from 'node:fs';
 const strip=s=>String(s||'').replace(/^[^:：]*[:：]\s*/,'').replace(/\s/g,'');
 export function loadCatalog(){
@@ -42,7 +43,7 @@ export function commonFor(path,gender,common){
  return null;
 }
 export function resolveCatalogCategory(p,catalog=loadCatalog(),common=null){
- if(p.gender==='남성'&&p.sourceCategory?.includes('INNERWEAR')&&/지워머|내의|내복|발열|레깅스/.test(p.rawName||p.name||''))return {category:{...p.category,commonMajor:'L0014 : 남성의류',commonMiddle:'M0059 : 남성속옷',commonSmall:'00715 : 남성내의'},status:'사용자 확인 공통분류 · 남성의류 → 남성속옷 → 남성내의'};
+ if(isMensUnderwear(p))return {category:{...p.category,...MENS_UNDERWEAR_CATEGORY,channelCodes:undefined},status:'사용자 확인 공통·채널 분류 · 남성의류 → 남성속옷 → 남성내의'};
  if(p.category?.channelMajor==='잡화')return {category:{...p.category},status:'사용자 확인 잡화 경로 · 의류 목록 대조 제외'};
  if(!catalog)return {category:{...p.category},status:'목록 미수집'};
  if(!common)try{common=JSON.parse(readFileSync(new URL('./data/category-catalog-common.json',import.meta.url),'utf8'));}catch{}
