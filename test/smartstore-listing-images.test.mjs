@@ -95,3 +95,14 @@ test('기존 초안에 섞인 미분류·케어라벨·뒷면·디테일은 서�
   await writeFile(path.join(root,'draft.json'),JSON.stringify({...product,listingImages}));const preview=await listingPreview(product,{dataRoot});assert.deepEqual(preview.extras.map(p=>p.role),['official-main','side','front']);
  }finally{await rm(dataRoot,{recursive:true,force:true});}
 });
+
+test('같은 원본 바이트의 파일이 여러 개여도 지정한 추가사진 파일명을 우선해 연결한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'listing-same-bytes-'));try{
+  const dataRoot=path.join(root,'data'),desktop=path.join(root,'desktop'),product={style:'115928',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=extras',colors:['01블랙','02미드나잇'],images:{}};
+  const folder=path.join(desktop,'상품등록기사진폴더',product.style),draftRoot=path.join(dataRoot,'smartstore-details',product.style);await mkdir(folder,{recursive:true});
+  const main=await sharp({create:{width:75,height:100,channels:3,background:'#111'}}).jpeg().toBuffer(),extra=await sharp({create:{width:75,height:100,channels:3,background:'#334'}}).jpeg().toBuffer();
+  await writeFile(path.join(folder,'1.jpg'),main);await writeFile(path.join(folder,'front.jpg'),extra);await writeFile(path.join(folder,'same-bytes.jpg'),extra);
+  const listingImages=await saveListingSelection(draftRoot,{main:photo('1.jpg','01블랙','front',main),extras:[photo('front.jpg','02미드나잇','front',extra)]});
+  await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...product,listingImages}));const result=await prepareListingImages(product,root,{dataRoot,desktop});assert.equal(result.extras.length,1);assert.equal(result.manifest.extras[0].sourceName,'front.jpg');assert.deepEqual(await readFile(path.join(folder,'same-bytes.jpg')),extra);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
