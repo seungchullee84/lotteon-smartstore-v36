@@ -53,6 +53,15 @@ if(!naverCredentials.clientId||!naverCredentials.clientSecret){
 let optimizeNaverTitle=createNaverTitleOptimizer();
 let optimizeKeywords=createKeywordOptimizer();
 let naverVerification={verified:false};
+let naverConnectionPending=null;
+function ensureNaverConnection(){
+ if(naverConnectionPending)return naverConnectionPending;
+ if(!naverCredentials.clientId||!naverCredentials.clientSecret)return Promise.resolve({verified:false});
+ naverConnectionPending=verifyNaver(naverCredentials).then(result=>{naverVerification=result;return result;}).catch(error=>{naverVerification={verified:false};throw error;}).finally(()=>{naverConnectionPending=null;});
+ return naverConnectionPending;
+}
+void ensureNaverConnection().catch(()=>{});
+const naverConnectionRetry=setInterval(()=>{if(!naverVerification.verified)void ensureNaverConnection().catch(()=>{});},15000);naverConnectionRetry.unref();
 let naverLastAttempt=null;
 const desktopSession=process.env.REGISTER_DESKTOP==='1'?JSON.parse(await readFile(path.join(dataRoot,'desktop-session.json'),'utf8')):null;
 const token=desktopSession?.token||randomBytes(24).toString('hex');
@@ -162,7 +171,7 @@ const server=http.createServer(async(req,res)=>{
         return json(res,200,{ok:true,detailTemplate});
       }
       if(url.pathname==='/api/naver-verify'){
-        naverVerification=await verifyNaver(naverCredentials);return json(res,200,naverVerification);
+        return json(res,200,await ensureNaverConnection());
       }
       if(url.pathname==='/api/naver-keywords'){
         if(state.busy||!state.product||b.style!==state.product.style)throw Error('수집 완료 후 현재 상품으로 다시 조회해 주세요.');

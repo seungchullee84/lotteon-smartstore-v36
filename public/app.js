@@ -523,8 +523,8 @@ function showNaverConnection(connected,detail=''){
 async function verifyNaverConnection(){
  $('naverVerify').disabled=true;
  $('naverConnectionStatus').textContent='네이버 인증 확인 중…';
- try{await post('naver-verify',{});showNaverConnection(true);}
- catch(e){showNaverConnection(false,e.message);}
+ try{const result=await post('naver-verify',{});showNaverConnection(result.verified===true);return result.verified===true;}
+ catch(e){showNaverConnection(false,e.message);return false;}
  finally{$('naverVerify').disabled=false;}
 }
 $('naverVerify').onclick=async()=>{await verifyNaverConnection();};
@@ -535,8 +535,8 @@ async function loadNaverConnection(){
   const status=await response.json();
   if(!status.configured){$('naverConnectionStatus').textContent='네이버 연결 설정 필요';return;}
   if(status.verified)showNaverConnection(true);
-  else await verifyNaverConnection();
- }catch(e){showNaverConnection(false,e.message);}
+  else if(!await verifyNaverConnection()){ $('naverConnectionDetail').textContent+=' · 15초 후 자동 재연결';setTimeout(loadNaverConnection,15000);}
+ }catch(e){showNaverConnection(false,e.message+' · 15초 후 자동 재연결');setTimeout(loadNaverConnection,15000);}
 };
 void loadNaverConnection();
 if(new URLSearchParams(location.search).get('settings')==='naver')$('naverSettings').click();
