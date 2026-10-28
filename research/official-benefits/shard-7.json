@@ -107,8 +107,8 @@
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:37:54.328Z",
-      "analyzedAt": "2026-10-28T09:50:44.269Z"
+      "observedAt": "2026-10-28T10:11:46.486Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1514,8 +1514,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:37:57.634Z",
-      "analyzedAt": "2026-10-28T09:50:44.327Z"
+      "observedAt": "2026-10-28T10:11:49.911Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3334,8 +3334,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:38:15.693Z",
-      "analyzedAt": "2026-10-28T09:50:44.547Z"
+      "observedAt": "2026-10-28T10:12:16.152Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
