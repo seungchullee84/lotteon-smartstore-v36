@@ -6,7 +6,7 @@ globalThis.websiteDailySummary=function(website,now=new Date()){
   const parts=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date).map(p=>[p.type,p.value]));
   return parts.year+'-'+parts.month+'-'+parts.day;
  };
- const day=dayKey(now),allowed=['공식 상세페이지 추가','공식 상세이미지 변경'];
+ const day=dayKey(now),allowed=['공식 상세페이지 추가','공식 상세이미지 추가','공식 상세이미지 변경'];
  const batches=(website?.batches||[]).filter(batch=>dayKey(batch.checkedAt)).slice().sort((a,b)=>Date.parse(a.checkedAt)-Date.parse(b.checkedAt)).map(batch=>({...batch,day:dayKey(batch.checkedAt),events:(batch.events||[]).flatMap(event=>{
   if(!['new','changed'].includes(event.type))return [];
   const changes=event.type==='new'?['새로 발견한 성인 상품']:(event.changes||[]).filter(change=>allowed.includes(change));

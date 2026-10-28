@@ -2,10 +2,10 @@ import sharp from 'sharp';import test from 'node:test';import assert from 'node:
 import {websiteCheckDue,BENEFIT_CHECK_INTERVAL,officialProductFingerprint,fetchOfficialDetailVersion,saveWebsiteCheck,changedOfficialProducts} from '../benefit-updates.mjs';
 import {sharedWebsiteState} from '../benefit-sharing.mjs';
 const id='a'.repeat(32),url='https://www.giordano.co.kr/shop/detail.php?pno='+id+'&ctype=1',hash='b'.repeat(64);
-const item=(extra={})=>({style:'375908',rawName:'여성 경량 패딩 자켓',sourceUrl:url,pageHash:'c'.repeat(64),detailHash:hash,...extra});
+const item=(extra={})=>({style:'375908',rawName:'여성 경량 패딩 자켓',sourceUrl:url,pageHash:'c'.repeat(64),detailHash:hash,detailImageVerified:true,...extra});
 test('상품정보만 바뀌면 제외하고 확인된 상세 추가만 변경으로 표시',()=>{
  assert.deepEqual(changedOfficialProducts({[id]:{pageHash:'c'.repeat(64),detailHash:hash}},[item({pageHash:'d'.repeat(64)})]),[]);
- assert.deepEqual(changedOfficialProducts({[id]:{pageHash:null,detailHash:null,detailPresent:false}},[item()])[0].changes,['공식 상세페이지 추가']);
+ assert.deepEqual(changedOfficialProducts({[id]:{pageHash:null,detailHash:null,detailPresent:false}},[item()])[0].changes,['공식 상세이미지 추가']);
 });
 test('20분 경과 시에만 다음 확인이 필요하다',()=>{const at=Date.parse('2026-10-27T11:00:00Z');assert.equal(BENEFIT_CHECK_INTERVAL,1200000);assert(websiteCheckDue(null,at));assert(!websiteCheckDue({checkedAt:new Date(at).toISOString()},at+1199999));assert(websiteCheckDue({checkedAt:new Date(at).toISOString()},at+1200000));});
 test('상품 본문·옵션·상세주소 변화는 감지하고 비상품 필드는 무시한다',()=>{const p={style:'375908',rawName:'여성 패딩',sourceCategory:['WOMEN'],images:{detail:'a'},sizes:['S']};const first=officialProductFingerprint(p,'따뜻합니다');assert.notEqual(first,officialProductFingerprint(p,'가볍습니다'));assert.notEqual(first,officialProductFingerprint({...p,sizes:['S','M']},'따뜻합니다'));assert.equal(first,officialProductFingerprint({...p,folder:'C:/private'},'따뜻합니다'));});
@@ -28,15 +28,15 @@ test('최초 기준선은 알리지 않고 이후 신상품·본문·이미지 �
   const publicState=sharedWebsiteState(state,next.map(r=>({...r,imageScanComplete:true,points:[{title:'따뜻함'}]})));assert.equal(publicState.batches.at(-1).events[0].status,'ready');assert.doesNotMatch(JSON.stringify(publicState),/folder|token|password/);
  }finally{await rm(dir,{recursive:true,force:true});}
 });
-test('첫 확인에서 읽지 못한 기존 상품이 나중에 복구돼도 신상품으로 알리지 않는다',()=>{assert.deepEqual(changedOfficialProducts({[id]:{pageHash:null,detailHash:null}},[item()]),[]);});
+test('이전에 읽지 못한 기존 상품의 정상 이미지는 신상품 대신 상세이미지 추가로 알린다',()=>{const events=changedOfficialProducts({[id]:{pageHash:null,detailHash:null}},[item()]);assert.equal(events[0].type,'changed');assert.deepEqual(events[0].changes,['공식 상세이미지 추가']);});
 
 test('소구점 분석·OCR 완료나 분석 결과 변경은 홈페이지 변경이 아니다',()=>{
  const old={[id]:{pageHash:'c'.repeat(64),detailHash:hash}};
  assert.deepEqual(changedOfficialProducts(old,[item({imageScanComplete:true,imageText:'새 OCR 결과',points:[{title:'보온'}],status:'automatic-source-reviewed',analyzedAt:new Date().toISOString()})]),[]);
 });
-test('확인 실패·최초 해시 확보는 실제 변경으로 집계하지 않는다',()=>{
+test('확인 실패는 제외하고 정상 이미지 최초 확보는 추가로 집계한다',()=>{
  assert.deepEqual(changedOfficialProducts({[id]:{pageHash:'c'.repeat(64),detailHash:hash}},[item({pageHash:null,detailHash:null})]),[]);
- assert.deepEqual(changedOfficialProducts({[id]:{pageHash:'c'.repeat(64),detailHash:null}},[item()]),[]);
+ assert.deepEqual(changedOfficialProducts({[id]:{pageHash:'c'.repeat(64),detailHash:null}},[item()])[0].changes,['공식 상세이미지 추가']);
 });
 test('일시적 확인 실패에도 마지막 확인된 원본 해시를 보존한다',async()=>{
  const dir=await mkdtemp(path.join(os.tmpdir(),'benefit-hash-'));try{
@@ -45,5 +45,14 @@ test('일시적 확인 실패에도 마지막 확인된 원본 해시를 보존�
   assert.equal(failed.products[id].detailHash,hash);assert.equal(failed.batches.at(-1).events.length,0);
   const changed=await saveWebsiteCheck(dir,[item({detailHash:'d'.repeat(64)})]);
   assert.deepEqual(changed.batches.at(-1).events[0].changes,['공식 상세이미지 변경']);
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
+test('안내 HTML 이후 실제 이미지가 확인되면 추가 1건이며 같은 이미지 재확인은 0건이다',async()=>{
+ const dir=await mkdtemp(path.join(os.tmpdir(),'benefit-added-'));try{
+  await writeFile(path.join(dir,'website-check.json'),JSON.stringify({version:1,checkedAt:'2026-10-28T01:00:00Z',products:{[id]:{pageHash:'c'.repeat(64),detailHash:'d'.repeat(64),detailImageVerified:false}},batches:[]}));
+  const added=await saveWebsiteCheck(dir,[item()],{now:'2026-10-28T02:00:00Z'});
+  assert.deepEqual(added.batches.at(-1).events[0].changes,['공식 상세이미지 추가']);assert.equal(added.products[id].detailImageVerified,true);
+  const same=await saveWebsiteCheck(dir,[item()],{now:'2026-10-28T02:20:00Z'});assert.equal(same.batches.at(-1).events.length,0);
+  const changed=await saveWebsiteCheck(dir,[item({detailHash:'e'.repeat(64)})],{now:'2026-10-28T02:40:00Z'});assert.deepEqual(changed.batches.at(-1).events[0].changes,['공식 상세이미지 변경']);
  }finally{await rm(dir,{recursive:true,force:true});}
 });

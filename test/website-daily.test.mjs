@@ -27,3 +27,8 @@ test('다시 불러온 저장 기록에도 같은 일일 누적을 표시한다'
  assert.equal(summary(cache,'2026-10-28T03:00:00Z').newCount,1);
  assert.equal(summary(null,'2026-10-28T03:00:00Z').newCount,0);
 });
+test('상세이미지 최초 추가도 오늘 변경 누적에 포함하고 재확인은 중복 집계하지 않는다',()=>{
+ const added=event('changed','026993',{changes:['공식 상세이미지 추가']});
+ const result=summary({batches:[batch('2026-10-28T02:20:00Z',[added]),batch('2026-10-28T02:40:00Z',[added]),batch('2026-10-28T03:00:00Z',[])]},'2026-10-28T04:00:00Z');
+ assert.equal(result.changedCount,1);assert.deepEqual(result.events[0].changes,['공식 상세이미지 추가']);
+});
