@@ -9986,46 +9986,46 @@
   "sourceComplete": 1416,
   "imageComplete": 1279,
   "withThreeOrFour": 432,
-  "phase": "sources",
+  "phase": "complete",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-28T01:43:46.537Z",
+  "updatedAt": "2026-10-28T01:45:14.932Z",
   "websiteCheck": {
     "version": 1,
-    "checkedAt": "2026-10-28T01:22:53.770Z",
-    "nextCheckAt": "2026-10-28T01:42:53.770Z",
+    "checkedAt": "2026-10-28T01:45:10.455Z",
+    "nextCheckAt": "2026-10-28T02:05:10.455Z",
     "baselineAt": "2026-10-28T00:19:36.206Z",
     "baselineReady": true,
-    "errors": 5,
+    "errors": 1417,
     "products": {
       "6D1FCB29E5811EA0E105CFFF4AAFD6DA": {
         "pageHash": "6d50e3f99d9d6158a94da51d79d3760be2a76e438bcfcade201aab36d1c6b9f6",
         "detailHash": "10ef4d649ee86327f7d47e94ec80cbe460c62c7977840d25b609fc74586fbc4e",
-        "detailPresent": null
+        "detailPresent": true
       },
       "938FFFB2AEA67ED1D653A1772C1FEA15": {
         "pageHash": "a23a4ab4711d1e3907c0fa2a5cfb9487f0a91b6e9c92439976059bcd2686cf73",
         "detailHash": "0b53d5e6b0d4cc292a3ce1bc1c259183d99d53cb5312e6bc86ecc0d19a86d072",
-        "detailPresent": null
+        "detailPresent": true
       },
       "C5BB28E75F9E572EA21FD001363F7E48": {
-        "pageHash": "fa7d041e342baccb1fa97f79cbd4c88e93343e8f20d2764c362de8f70ddd0a1a",
+        "pageHash": "08a459cffc256155ed1e9472ceb90fa2e9fce10a286d44a5d456713970b206d1",
         "detailHash": "3df4418578191d594705f94352e270dfa42e265f83ff4fcfa8af49d23ea327dc",
-        "detailPresent": null
+        "detailPresent": true
       },
       "A61ACF4CF39249EF880312EF9FE5E681": {
-        "pageHash": "9413d5d40cf16d0ff85238691a34cff8488a773d7bd87f6203bc3fab6edca670",
+        "pageHash": "67079f1bd4abc518741cd8ec99b374de43692f89c1c8f0a2f6b11f4c146e1358",
         "detailHash": "471231f8ac78571f14f43a21c5357044e0ea734aae2171f5cef8c0873c227427",
-        "detailPresent": null
+        "detailPresent": true
       },
       "FE17F53887EB408F24E042210315F071": {
-        "pageHash": "0fffcfbf757bb38894978ad53b997cfd5458269dc9f7915b5de5f54c2f8b7a23",
+        "pageHash": "4c24026f26cb6035889d8bdbd3b6f205eeeade9ef37d1896664200652db99f2f",
         "detailHash": "2abb4f6b2960836f3af1f71c66a750596afdd96eb76d522cab840547ea43fb91",
-        "detailPresent": null
+        "detailPresent": true
       },
       "DE08656A2CC7193539C979A0A486A9EE": {
         "pageHash": "4bece4402f402120867b5114f2c6c30b39fc0233a77b7d8a77a5307e9f239be9",
         "detailHash": "49602de3d27fccf829c6ee566778b934eff1535c551cc537e82f7c8153990db3",
-        "detailPresent": null
+        "detailPresent": true
       },
       "2D92D9CC61279818C97217607C02F907": {
         "pageHash": "8983bca0675fa5a5af8e9f18bd8d4564eb4afbf0336c54e435e5b275dfd68767",
@@ -17117,6 +17117,11 @@
       {
         "id": "9a4ff8b9fe8a4c93b944",
         "checkedAt": "2026-10-28T01:22:53.770Z",
+        "events": []
+      },
+      {
+        "id": "c94d59bd9dad525fc944",
+        "checkedAt": "2026-10-28T01:45:10.455Z",
         "events": []
       }
     ]
