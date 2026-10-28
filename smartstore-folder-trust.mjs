@@ -19,7 +19,7 @@ export function careLabelText(text){
 // local OCR separates care labels without requiring a remote image-analysis key.
 export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mapped=[],old,description,detailHash,signal,log=()=>{},recognizePhoto}={}){
  const root=path.join(dataRoot,'smartstore-details',product.style);await mkdir(path.join(root,'trusted'),{recursive:true});
- const known=new Map(mapped.map(p=>[hash(p.bytes),p]));let worker;
+ const known=new Map(mapped.map(p=>[p.name+'|'+hash(p.bytes),p]));let worker;
  const recognize=recognizePhoto||(async bytes=>{
   worker||=await createWorker('kor+eng');signal?.throwIfAborted();
   await worker.setParameters({tessedit_pageseg_mode:'11'});
@@ -28,7 +28,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  const reviewed=[];
  try{
   for(const p of photos){
-   signal?.throwIfAborted();const prior=known.get(hash(p.bytes));
+   signal?.throwIfAborted();const prior=known.get(p.name+'|'+hash(p.bytes));
    if(prior&&prior.role!=='provided'){reviewed.push({...p,color:prior.color,role:prior.role});continue;}
    const parent=path.basename(path.dirname(p.file)).replace(/\s+/g,'').toLowerCase();
    const folderColor=product.colors.find(color=>[color.replace(/\s+/g,'').toLowerCase(),color.replace(/^\d+/,'').replace(/\s+/g,'').toLowerCase()].includes(parent));
@@ -57,7 +57,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  const roleOrder=['front','side','detail','back','provided','care-label'];
  const detailPhotos=[...reviewed].sort((a,b)=>Number(/^1(?:번)?\./i.test(b.name))-Number(/^1(?:번)?\./i.test(a.name))||roleOrder.indexOf(a.role)-roleOrder.indexOf(b.role));
  for(const p of detailPhotos){
-  const digest=hash(p.bytes),prior=old?.photoMapping?.files?.find(r=>r.hash===digest);records.push({...prior,name:p.name,hash:digest,color:p.color,role:p.role});
+  const digest=hash(p.bytes),prior=old?.photoMapping?.files?.find(r=>r.name===p.name&&r.hash===digest);records.push({...prior,name:p.name,hash:digest,color:p.color,role:p.role});
   if(p.role==='care-label')continue;
   if(!active(p))continue;
   const relative='trusted/'+digest+path.extname(p.name).toLowerCase();await writeFile(path.join(root,relative),p.bytes);

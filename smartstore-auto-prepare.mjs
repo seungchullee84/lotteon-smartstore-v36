@@ -82,7 +82,7 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
  const photos=found;
  if(!photos.length){const error=Error('현재 품번 '+product.style+' 폴더에 상품사진을 넣어 주세요. 이전 품번이나 삭제된 사진은 사용하지 않습니다.');error.code='PHOTO_FOLDER_EMPTY';throw error;}
  const unknown=[];const mapped=[];
- for(const file of photos){const previous=known.get(hash(file.bytes));if(previous&&(previous.role!=='provided'||trustFolder)){mapped.push({...file,color:previous.color,role:previous.role});continue;}
+ for(const file of photos){const previous=old?.photoMapping?.files?.find(r=>r.name===file.name&&r.hash===hash(file.bytes))||known.get(hash(file.bytes));if(previous&&(previous.role!=='provided'||trustFolder)){mapped.push({...file,color:previous.color,role:previous.role});continue;}
   const parent=norm(path.basename(path.dirname(file.file)));const exact=product.colors.find(color=>[norm(color),norm(color).replace(/^\d+/, '')].includes(parent));
   // A color folder can identify its color, but cannot establish front/side/detail.
   unknown.push({...file,...(exact?{colorHint:exact}:{}),...(isCareLabelPhoto(file)?{roleHint:'care-label'}:{})});

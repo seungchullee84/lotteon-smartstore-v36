@@ -179,7 +179,7 @@ export async function stageImportedPhotos(source,folder,{fetchImpl=fetch,signal,
   let recognize=recognizePhoto;
   if(!recognize&&!piece.extractedFromLong&&source.candidates.slice(-4).includes(item))recognize=async b=>{const worker=await createWorker('kor+eng');try{return (await worker.recognize(await sharp(b).resize({width:1000,withoutEnlargement:true}).toBuffer())).data.text;}finally{await worker.terminate();}};
   const excluded=await excludedPhotoReason(photo,{dataRoot,recognize});if(excluded)continue;
-  const sha256=hash(photo),id=sha256.slice(0,24);if(seen.has(id))continue;seen.add(id);
+  const sha256=hash(photo),id=hash(Buffer.from(sha256+'|'+(piece.colorHint||''))).slice(0,24);if(seen.has(id))continue;seen.add(id);
   const file=id+({jpeg:'.jpg',png:'.png',webp:'.webp'})[photoMeta.format];await writeFile(path.join(dir,file),photo);
   candidates.push({id,file,sha256,url,colorHint:piece.colorHint,width:photoMeta.width,height:photoMeta.height,...(piece.extractedFromLong?{extractedFromLong:true,sourceRectangle:piece.sourceRectangle,layoutHash:piece.layoutHash}:{})});
   }
@@ -219,9 +219,9 @@ export async function applyImportedPhotos(product,folder,choices,{dataRoot,deskt
   importedMainPhoto={version:1,style:product.style,sourceUrl:product.sourceUrl,name,hash:next.sha256};count++;
  }
  for(const p of selected){
-  signal?.throwIfAborted();const known=originals.find(f=>hash(f.bytes)===p.sha256);let name=known?.name;
+  signal?.throwIfAborted();const known=originals.find(f=>hash(f.bytes)===p.sha256&&records.some(r=>r.name===f.name&&r.hash===p.sha256&&r.color===p.color));let name=known?.name;
   if(!name){name=!hasMain&&(automatic||p.role==='front')?'1'+path.extname(p.file):'기존상품_'+p.color.slice(0,2)+'_'+p.id+path.extname(p.file);await writeFile(path.join(target,name),p.bytes,{flag:'wx'}).catch(async e=>{if(e.code!=='EEXIST'||hash(await readFile(path.join(target,name)))!==p.sha256)throw e;});if(/^1\./.test(name)){hasMain=true;importedMainPhoto={version:1,style:product.style,sourceUrl:product.sourceUrl,name,hash:p.sha256};}count++;}
-  const record={name,hash:p.sha256,color:p.color,role:p.role,source:'seller-detail',sourceUrl:p.url};const i=records.findIndex(r=>r.hash===p.sha256);if(i>=0)records[i]=record;else records.push(record);
+  const record={name,hash:p.sha256,color:p.color,role:p.role,source:'seller-detail',sourceUrl:p.url};const i=records.findIndex(r=>r.name===name&&r.hash===p.sha256);if(i>=0)records[i]=record;else records.push(record);
  }
  const importedColorPhotos=[];for(const p of selected){let group=importedColorPhotos.find(g=>g.color===p.color);if(!group){group={color:p.color,hashes:[]};importedColorPhotos.push(group);}group.hashes.push(p.sha256);}
  const draft={...old,style:product.style,sourceUrl:product.sourceUrl,importedMainPhoto,importedColorPhotos,photoMapping:{...old?.photoMapping,files:records}};
