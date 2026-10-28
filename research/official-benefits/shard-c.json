@@ -377,8 +377,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T01:19:57.408Z",
-      "analyzedAt": "2026-10-28T01:23:03.705Z"
+      "observedAt": "2026-10-28T02:16:18.042Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -818,8 +818,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T01:19:23.436Z",
-      "analyzedAt": "2026-10-28T01:23:03.336Z"
+      "observedAt": "2026-10-28T02:15:36.746Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1136,7 +1136,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "02351135ffee9b725349ce994ab266f910af19f93f624fc34ac930de914d58fb",
+      "pageHash": "255a53c40c044ed2e40c332dde927fed1c7976dddf7cd017b31648e925b055ee",
       "pageText": "가볍고 보온성이 뛰어난 라운드넥 초경량 다운 베스트입니다.\n\n나일론 원단을 사용하여 내구성이 좋으며 프리미엄 다운의 솜/깃털 함량 90/10으로 보온성이 높습니다. \n\n어떤 착장과 매치하여도 잘 어울리는 세련된 컬러 구성으로 아우터 안에 레이어링하거나 간절기 시즌 단독으로 착용하기에도 활용도 높은 스타일입니다.\n\n항아리 퀼팅 디테일로 한층 더 세련되고 캐주얼하게 업데이트 되었으며 슬랙스와 매치하여 스마트한 룩부터 데님 팬츠와 매치하여 캐주얼한 룩까지 다양하게 연출할 수 있는 베이직한 아이템입니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -1149,8 +1149,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T01:19:53.983Z",
-      "analyzedAt": "2026-10-28T01:23:03.658Z"
+      "observedAt": "2026-10-28T02:16:13.249Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2913,8 +2913,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T01:19:50.804Z",
-      "analyzedAt": "2026-10-28T01:23:03.621Z"
+      "observedAt": "2026-10-28T02:16:09.869Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
