@@ -5237,6 +5237,13 @@
       ]
     },
     {
+      "pno": "8B32A86E6B2DACFF376C30CF32BE0FC7",
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=8B32A86E6B2DACFF376C30CF32BE0FC7&ctype=1",
+      "categories": [
+        "남성 ALL"
+      ]
+    },
+    {
       "pno": "8B41D4B63A0977B2ECD1BA2CF4D5E259",
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=8B41D4B63A0977B2ECD1BA2CF4D5E259&ctype=1",
       "categories": [
@@ -9986,9 +9993,9 @@
   "sourceComplete": 1418,
   "imageComplete": 1282,
   "withThreeOrFour": 433,
-  "phase": "discover",
+  "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-28T02:56:22.235Z",
+  "updatedAt": "2026-10-28T03:17:35.213Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-28T02:56:09.898Z",
