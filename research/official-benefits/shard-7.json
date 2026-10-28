@@ -104,8 +104,8 @@
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T02:06:03.369Z",
-      "analyzedAt": "2026-10-28T02:20:26.933Z"
+      "observedAt": "2026-10-28T02:41:21.817Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1475,8 +1475,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T02:06:07.119Z",
-      "analyzedAt": "2026-10-28T02:20:26.981Z"
+      "observedAt": "2026-10-28T02:41:26.008Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
