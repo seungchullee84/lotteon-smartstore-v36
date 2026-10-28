@@ -9,7 +9,7 @@ function renderWebsiteUpdates(website){
  const daily=websiteDailySummary(website),events=daily.events;
  const stamp=daily.day+'|'+JSON.stringify(website);if(list.dataset.stamp===stamp)return;list.dataset.stamp=stamp;
  summary.classList.toggle('has-updates',events.some(event=>event.type==='new'||event.type==='changed'));
- summary.replaceChildren(document.createTextNode('홈페이지 오늘 누적 '+daily.day.slice(5).replace('-','.')+' · 신상품 '));const newCount=document.createElement('strong'),changedCount=document.createElement('strong');newCount.className=changedCount.className='website-update-count';newCount.textContent=daily.newCount+'건';changedCount.textContent=daily.changedCount+'건';summary.append(newCount,document.createTextNode(' · 변경 '),changedCount,document.createTextNode(' · 20분 간격'));
+ summary.replaceChildren(document.createTextNode('홈페이지 오늘 누적 '+daily.day.slice(5).replace('-','.')+' · 신상품 '));const newCount=document.createElement('strong'),changedCount=document.createElement('strong');newCount.className=changedCount.className='website-update-count';newCount.textContent=daily.newCount+'건';changedCount.textContent=daily.changedCount+'건';summary.append(newCount,document.createTextNode(' · 변경 '),changedCount,document.createTextNode(' · 마지막 확인 '+time(website.checkedAt)+' (한국 시간) · 20분 간격'));
  list.replaceChildren();
  const heading=document.createElement('p');heading.className='website-current-heading';heading.textContent='오늘 누적 · '+daily.day.replaceAll('-','.')+' · 같은 상품 중복 제외';list.append(heading);
  function addProduct(parent,event,checkedAt){
