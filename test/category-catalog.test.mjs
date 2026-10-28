@@ -4,6 +4,12 @@ import {readFileSync} from 'node:fs';
 import {loadCatalog,standardPaths,resolveCatalogCategory} from '../category-catalog.mjs';
 const catalog=loadCatalog();
 const common=JSON.parse(readFileSync(new URL('../data/category-catalog-common.json',import.meta.url),'utf8'));
+test('남성 내의는 공통·채널 대분류까지 사용자 확인 경로를 사용하고 의류 목록으로 덮어쓰지 않는다',()=>{
+ const p={gender:'남성',rawName:'지워머 크루넥 긴팔티',sourceCategory:['MEN','INNERWEAR'],category:{channelMajor:'브랜드남성의류',channelMiddle:'티셔츠/맨투맨',channelSmall:'라운드넥티셔츠',channelCodes:{major:'old'}}};
+ const {category}=resolveCatalogCategory(p,catalog,common);
+ assert.equal(category.commonMajor,'L0014 : 남성의류');assert.equal(category.commonMiddle,'M0059 : 남성속옷');assert.equal(category.commonSmall,'00715 : 남성내의');
+ assert.equal(category.channelMajor,'남성의류');assert.equal(category.channelMiddle,'남성속옷');assert.equal(category.channelSmall,'남성내의');assert.equal(category.channelCodes,undefined);
+});
 test('남녀 표준분류 전체 경로와 코드를 수집했고 성별이 섞이지 않음',()=>{
  assert.equal(catalog.complete,true);
  const paths=['여성','남성'].flatMap(g=>standardPaths(catalog,g));
