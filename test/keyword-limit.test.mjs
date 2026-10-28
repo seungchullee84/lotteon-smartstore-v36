@@ -6,6 +6,12 @@ import {packKeywords,keywordCandidates,createKeywordOptimizer} from '../naver-ke
 
 // These are synthetic offline fixtures, not observations of search volume.
 const credentials={clientId:'dummy',clientSecret:'dummy'};
+test('37자 조합을 40자 조합보다 우선하고 최상위 검색어를 유지한다',()=>{
+ const first='가'.repeat(10),longer='나'.repeat(24),exact='다'.repeat(21);
+ assert.equal(packKeywords([first,longer,exact]),'지오다노,'+first+','+exact);
+ assert.equal(packKeywords([first,longer,exact]).length,37);
+ assert(buildKeywords({name:'가'.repeat(28),gender:'남성'}).length<=37);
+});
 function reviewed(keywords){
  return {style:'000000',name:'남성 니트 000000',gender:'남성',material:'면 100%',country:'베트남',washing:'손세탁',manufactured:'2026-08',consumerPrice:59800,colors:['01블랙'],sizes:['M'],keywords,category:{commonMiddle:'남성의류상의',commonSmall:'니트',channelMiddle:'남성의류',channelSmall:'니트'}};
 }

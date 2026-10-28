@@ -78,10 +78,10 @@ for(const [name,gender,required] of keywordCases)test('상품 종류별 키워�
 });
 
 test('키워드 예산 초과 시 단어 중간 절단 없이 브랜드·핵심 품목 우선',()=>{
- const result=buildKeywords({name:'남성 브이넥 집업 아가일 스트라이프 니트 베스트',gender:'남성'});
+ const result=buildKeywords({name:'남성 브이넥 집업 아가일 스트라이프 니트 베스트',gender:'남성'},40);
  assert.equal(result,'지오다노,남성니트,브이넥니트,집업니트,니트조끼,아가일니트,스트라이프니트');
  assert.ok(result.length<=40);
- const exact=buildKeywords({name:'가'.repeat(30),gender:'남성'});
+ const exact=buildKeywords({name:'가'.repeat(30),gender:'남성'},40);
  assert.equal(exact.length,40,'쉼표를 포함해 정확히 40자까지 허용');
  assert.equal(buildKeywords({name:'가'.repeat(31),gender:'남성'}),'지오다노,남성의류','초과 단어는 통째로 제외');
 });
