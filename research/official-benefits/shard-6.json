@@ -789,7 +789,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "e9aa5c555458531ad1337bd7f55aee6cd8b5a61809bf4835362621d03eeebaeb",
+      "pageHash": "9189b31d4d76d0aa5ae321e32aaafe6cb4321807737cff873d59a23feb757660",
       "pageText": "여성 미드렝스 다운자켓입니다.\n\n오버핏 형태의 실루엣의 허벅 중간정도 내려오는 기장감이며 허리 스트링으로  다양하게 연출 가능합니다\n후드 스트링을 통해 사이즈 조절이 가능하며 아웃포켓 디자인으로 트렌디한 스타일링이 가능합니다 \n\n밀착력과 보온성이 우수한 프리미엄 다운 80/20 충전재로 안전성 기준  및 동물 학대와 관련된 행위를 하지 않은 RDS인증이 된 다운을 사용 하였습니다\n\n고밀도 다운백을 사용하여, 털 빠짐을 최소화 하였습니다.\n\n스웨터등과 레이어링 할 수 있는 여유 있는 사이즈로 \n다양한 스타일로 스타일리쉬하게 연출하기 좋은 데일리 아이템입니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -802,8 +802,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T03:29:31.291Z",
-      "analyzedAt": "2026-10-28T03:32:00.559Z"
+      "observedAt": "2026-10-28T04:06:41.060Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1524,8 +1524,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T03:30:27.125Z",
-      "analyzedAt": "2026-10-28T03:32:01.244Z"
+      "observedAt": "2026-10-28T04:07:39.683Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2819,8 +2819,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T03:29:58.252Z",
-      "analyzedAt": "2026-10-28T03:32:00.826Z"
+      "observedAt": "2026-10-28T04:07:08.299Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
