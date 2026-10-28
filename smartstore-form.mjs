@@ -110,12 +110,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   await fill(page.locator('#choice_option_name1'),'사이즈');await fill(page.locator('#choice_option_value1'),plan.sizes.join(','));
   await page.getByRole('button',{name:'옵션목록으로 적용',exact:true}).click();
   }
-  await waitSmartstoreOptionGrid(page,plan.expectedOptions,check);
-  const header=page.getByRole('grid').getByRole('checkbox');
-  if(!await header.evaluate(e=>e.checked))await header.press('Space');
-  if(!await header.evaluate(e=>e.checked))throw Error('옵션 전체선택 확인 실패');
-  await fill(page.locator('input[ng-model="vm.bulkStockQuantity"]'),plan.stockPerOption);
-  await page.getByRole('button',{name:'선택목록 일괄수정',exact:true}).click();
+  await applySmartstoreBulkStock(page,plan,check);
   const rows=await readSmartstoreOptionRows(page,plan,check);
   const verifiedOptions=verifySmartstoreOptions(plan,rows);
   log('색상 '+plan.colors.length+' × 사이즈 '+plan.sizes.length+' 옵션 조합 생성');
@@ -217,5 +212,30 @@ export async function waitSmartstoreOptionGrid(page,expectedOptions,check=()=>{}
  check();
  await page.waitForFunction(count=>Number(document.querySelector('[role="grid"]')?.getAttribute('aria-rowcount'))===count+2,expectedOptions,{timeout:30000});
  await page.getByRole('button',{name:'선택목록 일괄수정',exact:true}).waitFor({state:'visible',timeout:30000});
+ check();
+}
+
+export async function applySmartstoreBulkStock(page,plan,check=()=>{}){
+ await waitSmartstoreOptionGrid(page,plan.expectedOptions,check);
+ // The visible checkbox left of option numbers is separate from AG Grid's
+ // hidden built-in checkbox. Re-select after rebuilding the option rows.
+ const header=page.locator('[role="grid"] .ag-header input.ag-selection-checkbox');
+ await header.waitFor({state:'attached',timeout:10000});
+ const label=header.locator('..');
+ if(await header.isChecked()){check();await label.click();}
+ check();await label.click();
+ if(!await header.isChecked())throw Error('옵션 전체선택 확인 실패');
+ await page.waitForFunction(()=>{
+  const rows=[...document.querySelectorAll('[role="grid"] [role="row"][row-index]')];
+  return rows.length>0&&rows.every(row=>row.classList.contains('ag-row-selected')||row.getAttribute('aria-selected')==='true');
+ },null,{timeout:15000});
+ check();const stock=page.locator('input[ng-model="vm.bulkStockQuantity"]');
+ await stock.fill(String(plan.stockPerOption));await stock.press('Tab');
+ if((await stock.inputValue()).replaceAll(',','')!==String(plan.stockPerOption))throw Error('일괄 재고수량 입력 확인 실패');
+ check();await page.getByRole('button',{name:'선택목록 일괄수정',exact:true}).click();
+ await page.waitForFunction(expected=>{
+  const cells=[...document.querySelectorAll('[role="grid"] [role="row"][row-index] [col-id="stockQuantity"]')];
+  return cells.length>0&&cells.every(cell=>Number(cell.textContent.replaceAll(',','').trim())===expected);
+ },plan.stockPerOption,{timeout:15000});
  check();
 }
