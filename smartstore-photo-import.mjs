@@ -84,7 +84,8 @@ export async function findPhotoSourceForm(context,style,{check=()=>{},log=()=>{}
   await list.getByRole('textbox',{name:'검색어 입력',exact:true}).fill(style);
   const period=list.getByRole('button',{name:'전체',exact:true});if(await period.count()===1)await period.click();
   check();await list.getByRole('button',{name:'검색',exact:true}).click();
-  await list.locator('[role="row"][row-id] [col-id="sellerManagementCode"]').filter({hasText:style}).first().waitFor({state:'visible',timeout:20000});check();
+  try{await list.locator('[role="row"][row-id] [col-id="sellerManagementCode"]').filter({hasText:style}).first().waitFor({state:'visible',timeout:20000});}
+  catch(error){check();if(list.isClosed()||/has been closed/i.test(error.message))throw error;throw Error('판매중 상품 목록에서 판매자 상품코드 '+style+'의 검색 결과를 확인하지 못했습니다. 전용 크롬의 검색 결과·판매 상태·판매자 상품코드를 확인해 주세요.');}check();
   const rows=exactSellerRows(await list.locator('[role="row"][row-id]').evaluateAll(nodes=>nodes.filter(n=>n.querySelector('[col-id="edit"] button')).map(n=>({id:n.getAttribute('row-id'),code:n.querySelector('[col-id="sellerManagementCode"]')?.textContent||''}))),style);
   if(!rows.length)throw Error('판매자 상품코드가 일치하는 상품을 찾지 못했습니다.');
   log('판매자 상품코드 '+style+' 검색 · 일치 '+rows.length+'건 중 첫 상품 한 건만 사진 수집');
