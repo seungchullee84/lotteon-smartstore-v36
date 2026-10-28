@@ -1,5 +1,5 @@
 import {resolveCatalogCategory} from './category-catalog.mjs';
-import {isMensUnderwear,MENS_UNDERWEAR_CATEGORY} from './category.mjs';
+import {isMensUnderwear,MENS_UNDERWEAR_CATEGORY,brushedTrainingCategory} from './category.mjs';
 import {officialColorChips,collectColorChips} from './color-chips.mjs';
 import {prepareMainImage} from './main-image.mjs';
 import {normalizeCountry} from './country.mjs';
@@ -100,6 +100,7 @@ export function productClassification(html) {
   // 2026-10-26 partner portal popup: filtered lookup returns 2076 머플러 / N.
   // This is the common classification, not the separate LotteON display tree.
   if(/머플러|\bMUFFLER\b/i.test(itemTitle))Object.assign(category,{commonMajor:'L0001 : 패션/장신',commonMiddle:'M0357 : 패션액세서리',commonSmall:'01068 : 머플러'});
+  const brushed=brushedTrainingCategory({gender,sourceCategory,rawName:itemTitle,category});if(brushed)Object.assign(category,brushed);
   return {gender,sourceCategory,category};
 }
 export function validateStyle(value) {

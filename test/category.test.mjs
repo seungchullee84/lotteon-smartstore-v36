@@ -41,3 +41,10 @@ test('하위 항목에 맞는 상위 경로를 함께 보정',async()=>{
 test('기모 배럴핏 데님은 소재와 핏으로 분류',()=>{const p=productClassification('<div class="navi"><a>Home</a><a class="prdpath1">WOMEN</a><a>PANTS</a><a>데님</a><a>NEW 브러시드 배럴핏 데님</a></div>');assert.equal(p.category.channelMiddle,'청바지');assert.equal(p.category.channelSmall,'부츠컷/와이드핏');});
 
 test('기모보다 트레이닝 상품 종류를 우선',()=>{const p=productClassification('<div class="navi"><a>Home</a><a class="prdpath1">WOMEN</a><a>PANTS</a><a>트레이닝/스웻팬츠</a><a>브러시드 테리 조거 팬츠</a></div>');assert.equal(p.category.channelMiddle,'트레이닝복');assert.equal(p.category.channelSmall,'트레이닝하의');});
+
+test('남성 기모 스웻 팬츠만 바지/기모팬츠로 연결하고 비기모·데님은 강제하지 않는다',async()=>{
+ const {brushedTrainingCategory}=await import('../category.mjs');const p={gender:'남성',rawName:'NEW 브러시드 테리 스트레이트 스웻 팬츠',sourceCategory:['MEN','PANTS','트레이닝/스웻팬츠'],category:{channelMiddle:'트레이닝복',channelSmall:'트레이닝하의'}};
+ assert.equal(brushedTrainingCategory(p).channelMiddle,'바지');assert.equal(brushedTrainingCategory(p).channelSmall,'기모팬츠');
+ for(const rawName of ['테리 스웻 팬츠','기모 없는 트레이닝 바지','무기모 조거 팬츠','브러시드 데님 팬츠'])assert.equal(brushedTrainingCategory({...p,rawName}),null,rawName);
+ const c=productClassification('<div class="navi"><a>Home</a><a class="prdpath1">MEN</a><a>PANTS</a><a>트레이닝/스웻팬츠</a><a>NEW 브러시드 테리 스트레이트 스웻 팬츠</a></div>');assert.equal(c.category.channelMiddle,'바지');assert.equal(c.category.channelSmall,'기모팬츠');
+});

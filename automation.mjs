@@ -4,7 +4,7 @@ import {BrowserAutomation} from './browser-connection.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {OptionCoverage} from './option-coverage.mjs';
-import {categoryAlternatives,similarCategory,channelCategoryPath} from './category.mjs';
+import {categoryAlternatives,similarCategory,channelCategoryPath,brushedTrainingCategory} from './category.mjs';
 import { matchColor, validateStyle } from './product.mjs';
 import {buildDetailContent} from './detail-html.mjs';
 import {prepareMainImage} from './main-image.mjs';
@@ -671,6 +671,28 @@ export class LotteAutomation extends BrowserAutomation {
     }
     throw Error('기존 카테고리가 너무 많아 확인이 필요합니다.');
   }
+  async applyCurrentBrushedCategory(p){
+    const category=brushedTrainingCategory(p);if(!category)throw Error('기모가 확인된 남성 트레이닝 바지만 이 분류를 적용합니다.');
+    this.stopped=false;await this.connectChrome(PORTAL);
+    const pages=[];for(const page of this.context.pages())if(!page.isClosed()&&page.url().startsWith('https://together.lotteshopping.com/')&&await page.locator('[id$="cbo_preSet_comboedit_input"]').filter({visible:true}).count())pages.push(page);
+    if(pages.length!==1)throw Error('현재 채널 입력 화면 하나를 유지해 주세요. 신규 상품은 만들지 않았습니다.');
+    this.page=pages[0];this.page.setDefaultTimeout(8000);
+    const style=await this.page.locator('[id$="edt_style_input"]').filter({visible:true}).last().inputValue();
+    if(style.replace(/\s/g,'')!==p.style+'(DT)')throw Error('열려 있는 채널 창의 품번이 다릅니다. 신규 상품은 만들지 않았습니다.');
+    const grid=this.locator('div_input05_div_body_grd_Dspctgr');
+    const rows=await grid.locator('[id]').evaluateAll(es=>es.filter(e=>/body_gridrow_\d+GridAreaContainerElement_inner$/.test(e.id)).length);
+    if(rows){
+      const text=await grid.innerText();if([category.channelMajor,category.channelMiddle,category.channelSmall].every(label=>text.includes(label)))return {category,alreadyApplied:true};
+      throw Error('기존 표준카테고리가 있어 그대로 유지했습니다. 중복 추가 전 기존 분류를 확인해 주세요.');
+    }
+    await this.similarCategoryClick(category.channelMajor,'L');await this.settle();
+    await this.similarCategoryClick(category.channelMiddle,'M');await this.settle();
+    await this.similarCategoryClick(category.channelSmall,'S');await this.settle();
+    await this.addStandardCategory(category.channelMajor,category.channelMiddle,category.channelSmall);
+    await saveCategoryMatch(this.root,categoryKey({...p,category}),{major:category.channelMajor,middle:category.channelMiddle,small:category.channelSmall},p.style);
+    this.log('같은 품번 채널 분류 적용: '+p.style+' · 바지 > 기모팬츠 · 신규 생성·상품 저장 안 함');
+    return {category,applied:true,saved:false};
+  }
   async channel(p,folder){
     // Suffix names for channel controls vary between portal versions. Collect the actual list.
     await this.applyChannelPreset();
@@ -684,7 +706,7 @@ export class LotteAutomation extends BrowserAutomation {
     const major=p.category.channelMajor||(p.gender==='여성'?'브랜드여성의류':'브랜드남성의류');
     const matchKey=categoryKey(p);
     const known=(await loadCategoryCache(this.root)).matches.find(m=>m.key===matchKey&&m.actual.major===major);
-    if(known){p.category.channelMiddle=known.actual.middle;p.category.channelSmall=known.actual.small;this.log('검증된 분류 매칭표 사용: '+major+' > '+known.actual.middle+' > '+known.actual.small);}
+    if(known&&!brushedTrainingCategory(p)){p.category.channelMiddle=known.actual.middle;p.category.channelSmall=known.actual.small;this.log('검증된 분류 매칭표 사용: '+major+' > '+known.actual.middle+' > '+known.actual.small);}
     await this.similarCategoryClick(major,'L');p.category.channelMiddle=await this.similarCategoryClick(p.category.channelMiddle,'M');await this.settle();p.category.channelSmall=await this.similarCategoryClick(p.category.channelSmall,'S');await this.settle();
     if(p.category.channelDetail)p.category.channelDetail=await this.similarCategoryClick(p.category.channelDetail,'D');
     // Select category's own add button by its visible enclosing block.

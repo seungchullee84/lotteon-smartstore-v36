@@ -1,4 +1,4 @@
-import {isMensUnderwear,MENS_UNDERWEAR_CATEGORY,channelCategoryPath} from './category.mjs';
+import {isMensUnderwear,MENS_UNDERWEAR_CATEGORY,channelCategoryPath,brushedTrainingCategory} from './category.mjs';
 import {readFileSync} from 'node:fs';
 const strip=s=>String(s||'').replace(/^[^:：]*[:：]\s*/,'').replace(/\s/g,'');
 export function loadCatalog(){
@@ -43,6 +43,8 @@ export function commonFor(path,gender,common){
  return null;
 }
 export function resolveCatalogCategory(p,catalog=loadCatalog(),common=null){
+ const brushed=brushedTrainingCategory(p);
+ if(brushed)return {category:brushed,status:'사용자 확인 · 기모 트레이닝 바지 → 바지 / 기모팬츠',path:{major:{code:'BC31000000',name:'브랜드남성의류'},middle:{code:'BC31050000',name:'바지'},small:{code:'BC31050100',name:'기모팬츠'},detail:null}};
  if(/머플러/.test(p.rawName||p.name||'')&&!p.category?.channelSmall?.trim()){
   const major=catalog?.majors.find(m=>m.code==='BC35000000'),middle=major?.middles.find(m=>m.code==='BC35100000'),small=middle?.smalls.find(s=>s.code==='BC35100100');
   if(small)return {category:channelCategoryPath({...p.category,commonMajor:'L0001 : 패션/장신',commonMiddle:'M0357 : 패션액세서리',commonSmall:'01068 : 머플러',channelMiddle:middle.name,channelSmall:small.name}),status:'실제 롯데 목록 확인 · 소재 제한 없는 머플러 분류',path:{major:{code:major.code,name:major.name},middle:{code:middle.code,name:middle.name},small:{code:small.code,name:small.name},detail:null}};

@@ -484,6 +484,12 @@ const server=http.createServer(async(req,res)=>{
         const category={...state.product.category};for(const key of ['commonMiddle','commonSmall','channelMiddle','channelSmall'])if(typeof b.category?.[key]==='string')category[key]=b.category[key].slice(0,200);
         return json(res,200,suggestMissingLotteCategory({...state.product,category}));
       }
+      if(url.pathname==='/api/lotte-current-brushed-category'){
+        if(state.busy||!state.product||b.style!==state.product.style)throw Error('현재 상품과 작업 상태를 확인해 주세요.');
+        const current=state.product;
+        job('register',async()=>{const result=await bot.applyCurrentBrushedCategory(current);state.product={...current,category:result.category};await productEdits.save({style:current.style,fields:{channelMiddle:result.category.channelMiddle,channelSmall:result.category.channelSmall}},current.style);state.revision++;});
+        return json(res,202,{ok:true});
+      }
       if(url.pathname==='/api/run'){
         if(state.busy)return json(res,409,{error:'진행 중인 작업이 있습니다.'});
         if(!state.product||b.product?.style!==state.product.style)throw Error('먼저 해당 품번 정보를 수집해 주세요.');
