@@ -12,7 +12,8 @@ import { chromium } from 'playwright';
 import {analyzeNotice} from './notice.mjs';
 import {analyzeNoticeCached} from './notice-cache.mjs';
 import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
-import {readSourceImage,inspectDetailSource} from './source-image.mjs';
+import {readSourceImage,inspectDetailSource,sourceImageCandidates} from './source-image.mjs';
+import {extractEmbeddedNotice} from './embedded-notice.mjs';
 
 export const OFFICIAL = 'https://www.giordano.co.kr';
 const juniorPattern=/주니어|쥬니어|키즈|아동|어린이|유아|(?:^|[^a-z])(?:junior|juniors|kids|kid|children|boys|girls)(?:$|[^a-z])/i;
@@ -269,12 +270,12 @@ export function parseProduct(html, detailUrl, style) {
   const {gender,sourceCategory,category}=productClassification(html);
   const images=$('img').map((_,e)=>({src:new URL($(e).attr('src')||'/',detailUrl).href.split('#')[0],alt:$(e).attr('alt')||''})).get();
   const info=images.find(x=>x.src.includes(style+'info.'))?.src;
-  const size=images.find(x=>x.src.includes(style+'size.'))?.src;
+  const size=images.find(x=>new RegExp(style+'size_?\\.(?:jpg|jpeg|png)(?:$|\\?)','i').test(x.src))?.src;
   const check=images.find(x=>x.src.includes(style+'ch.'))?.src;
-  const detail=images.find(x=>new RegExp(style+'\\.jpg(?:$|\\?)').test(x.src))?.src;
+  const detail=images.find(x=>new RegExp(style+'_?\\.jpg(?:$|\\?)','i').test(x.src))?.src;
   const main=images.find(x=>x.src.includes('/_data/attach/'))?.src;
   const gallery=[...new Set($('img.product_image_tooltip_image_gio[data-image_no]').map((_,e)=>new URL($(e).attr('src')||'/',detailUrl).href.split('#')[0]).get())].filter(src=>src!==main&&new URL(src).origin===OFFICIAL).slice(0,2);
-  if(!info||!main) throw Error('공식몰 상품의 고시 또는 대표이미지를 찾지 못했습니다.');
+  if(!main||(!info&&!detail)) throw Error('공식몰 상품의 고시 또는 대표이미지를 찾지 못했습니다.');
   const colors=[...new Set(images.map(x=>x.alt).filter(x=>/^\d{2}\s*\S+/.test(x)))].map(x=>x.replace(/\s+/g,'')).sort();
   const sizes=[...new Set($('a').map((_,e)=>$(e).text().trim()).get().filter(x=>/^(?:XXS|XS|S|M|L|XL|XXL|2XL|3XL|FREE|\d{2,3})$/.test(x)))];
   const consumerPrice=officialConsumerPrice(html);
@@ -366,26 +367,38 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
     await collectColorImages(page,product,log);
   }
   if(cancelled()) throw Error('사용자가 중단했습니다.');
-  const downloads=Object.entries(product.images);
+  let infoFailure;
+  const downloads=Object.entries(product.images).filter(([,src])=>!!src);
   for(let offset=0;offset<downloads.length;offset+=3){
   const completed=await Promise.allSettled(downloads.slice(offset,offset+3).map(async([key,url])=>{
     if(new URL(url).origin!==OFFICIAL)throw Error('공식몰 이미지 주소를 확인해 주세요.');
     let bytes=key==='detail'?originalDetailBytes:null,issue;
+    for(const candidate of sourceImageCandidates(url,product)){
     for(let attempt=0;!bytes&&attempt<2;attempt++){
       try{
-        const response=await context.request.get(url,{headers:{Referer:product.sourceUrl},timeout:20000});
-        bytes=await readSourceImage(response);break;
+        const response=await context.request.get(candidate,{headers:{Referer:product.sourceUrl},timeout:20000});
+        bytes=await readSourceImage(response);
+        if(candidate!==url){product.images[key]=candidate;product.imageSourceRepairs||=[];product.imageSourceRepairs.push({key,original:url,resolved:candidate,basis:'같은 품번의 공식 이미지 주소에 표시된 단일 연도 폴더'});log('공식몰 '+key+' 이미지 주소 보정 · 같은 품번의 공식 연도 폴더 확인');}
+        break;
       }catch(e){issue=e;if(cancelled())throw Error('사용자가 중단했습니다.');}
+    }
+    if(bytes)break;
     }
     if(!bytes){
       if(key==='detail'){const error=Error('기존 상세 원본을 가져오지 못해 수집을 중단했습니다. '+issue?.message+' / 원본 주소: '+url+' / 대표컷·추가컷으로 대체하지 않습니다.');if(/HTML 페이지|HTTP (404|410)\b/.test(issue?.message||''))error.code='DETAIL_SOURCE_MISSING';throw error;}
-      if(['main','info'].includes(key))throw Error('공식몰 필수 이미지 수집 실패: '+key+' — '+issue?.message);
+      if(key==='info'){infoFailure=issue;delete product.images.info;log('별도 정보고시 이미지 수집 실패 · 같은 상품의 상세 하단 대비책 확인');return;}
+      if(key==='main')throw Error('공식몰 필수 이미지 수집 실패: '+key+' — '+issue?.message);
       product.warnings.push('공식몰 '+({size:'사이즈',check:'체크업',detail:'상세'}[key]||key)+' 이미지를 받지 못했습니다.');
       delete product.images[key];log('수집 불가 이미지를 제외하고 진행: '+key);return;
     }
     await writeFile(path.join(folder,`${key}.jpg`),bytes);
   }));
   const failed=completed.find(r=>r.status==='rejected');if(failed)throw failed.reason;
+  }
+  if(!product.images.info){
+    if(!product.images.detail)throw Error('공식몰 필수 이미지 수집 실패: info — '+(infoFailure?.message||'별도 정보고시와 상세 원본이 없습니다.'));
+    try{const recovered=await extractEmbeddedNotice(product,await readFile(path.join(folder,'detail.jpg')),{signal});await writeFile(path.join(folder,'info.jpg'),recovered.bytes);product.noticeSource=recovered.source;product.images.info=product.images.detail;log('별도 고시 누락 대비책 적용 · 같은 품번의 상세 하단 INFORMATION 확인');}
+    catch(error){throw Error('공식몰 필수 이미지 수집 실패: info — '+error.message);}
   }
   if(product.colorImages){const available=new Set(Object.values(product.images));for(const color of Object.keys(product.colorImages))product.colorImages[color]=product.colorImages[color].filter(src=>available.has(src));}
   log('공식 고시 이미지에서 글자 인식 중 (첫 실행은 한국어 모델 다운로드)');

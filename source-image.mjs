@@ -1,4 +1,20 @@
 import sharp from 'sharp';
+export function sourceImageCandidates(address,product){
+ const original=new URL(address),result=[original.href];
+ if(original.origin!=='https://www.giordano.co.kr'||!/^\d{6}$/.test(product.style||''))return result;
+ const file=original.pathname.match(new RegExp('^/_gio_on/+(\\d{2}'+product.style+'(?:info|ch)(?:_)?\\.(?:jpe?g|png|webp))$','i'))?.[1];
+ if(!file)return result;
+ const prefix=file.match(/^\d+/)[0],directories=new Set();
+ for(const source of Object.values(product.images||{})){
+  let peer;try{peer=new URL(source);}catch{continue;}
+  if(peer.origin!==original.origin)continue;
+  const match=peer.pathname.match(new RegExp('^/_gio_on/(20\\d{2})/'+prefix+'(?:size|info|ch)?_?\\.(?:jpe?g|png|webp)$','i'));
+  if(match)directories.add(match[1]);
+ }
+ // Multiple years are ambiguous. Never search arbitrary seasons or another style.
+ if(directories.size===1){const fixed=new URL(original.href);fixed.pathname='/_gio_on/'+[...directories][0]+'/'+file;result.push(fixed.href);}
+ return result;
+}
 export async function readSourceImage(response){
  if(!response.ok())throw Error('공식몰 이미지 HTTP '+response.status());
  const type=response.headers()['content-type']||'';
