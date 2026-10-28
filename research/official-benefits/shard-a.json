@@ -1212,8 +1212,8 @@
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:46:49.664Z",
-      "analyzedAt": "2026-10-28T05:50:19.374Z"
+      "observedAt": "2026-10-28T06:21:15.986Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1802,8 +1802,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:47:09.827Z",
-      "analyzedAt": "2026-10-28T05:50:19.649Z"
+      "observedAt": "2026-10-28T06:21:38.071Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2396,8 +2396,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:46:49.663Z",
-      "analyzedAt": "2026-10-28T05:50:19.366Z"
+      "observedAt": "2026-10-28T06:21:16.166Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3156,15 +3156,15 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "444493ad35fe13b95502425d72551e609eab36899ff6952d951d9c048bec3538",
+      "pageHash": "d5d1753368ff47dc2331a35c76ad150b3dce856ed64ac3b95fbc243e848ac40c",
       "pageText": "",
       "imageText": "",
       "imageScanComplete": false,
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:47:11.649Z",
-      "analyzedAt": "2026-10-28T05:50:19.739Z"
+      "observedAt": "2026-10-28T06:21:39.815Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
