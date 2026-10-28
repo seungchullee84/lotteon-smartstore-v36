@@ -204,7 +204,7 @@ export async function applyImportedPhotos(product,folder,choices,{dataRoot,deskt
  const root=path.join(dataRoot,'smartstore-details',product.style);await mkdir(root,{recursive:true});let old;
  try{old=JSON.parse(await readFile(path.join(root,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(old&&(old.style!==product.style||old.sourceUrl!==product.sourceUrl))throw Error('기존 사진 매칭 자료의 품번·출처를 다시 확인해 주세요.');
- const records=[...(old?.photoMapping?.files||[])];let count=0,importedMainPhoto=old?.importedMainPhoto;
+ const records=(old?.photoMapping?.files||[]).map(r=>{const code=r.source==='seller-detail'&&r.name?.match(/^기존상품_(\d{2})_/)?.[1],color=code&&product.colors.find(c=>c.startsWith(code));return color?{...r,color}:r;});let count=0,importedMainPhoto=old?.importedMainPhoto;
  const main=originals.find(p=>/^1(?:번)?\.(jpe?g|png|webp)$/i.test(p.name));
  signal?.throwIfAborted();
  if(automatic&&main&&importedMainPhoto?.version===1&&importedMainPhoto.style===product.style&&importedMainPhoto.sourceUrl===product.sourceUrl&&importedMainPhoto.name===main.name&&importedMainPhoto.hash===hash(main.bytes)&&!selected.some(p=>p.sha256===importedMainPhoto.hash)){
