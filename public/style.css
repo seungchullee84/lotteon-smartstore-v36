@@ -323,3 +323,15 @@ body[data-channel="smartstore"] #smartstoreStart{background:#087c42}body[data-ch
 #websiteUpdateSummary .website-update-count{color:#c62828;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;}
 
 #githubSyncStatus{display:inline-block;min-width:150px}#websiteUpdateSummary{min-height:26px;line-height:26px}.website-update-count{display:inline-block;min-width:3ch;text-align:center}
+.website-current-heading{font-weight:800;font-size:15px}
+.website-current-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:12px}
+.website-current-group{min-width:0;padding:14px;border:1px solid #e2d7c7;border-radius:10px;background:#fff}
+.website-current-group h3{margin:0 0 12px;color:#c62828;font-size:16px;font-weight:800}
+.website-product-card{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:12px 0;border-top:1px solid #eee6db}
+.website-product-label{font-size:13px;font-weight:800;color:#735339;background:#f5eddf;padding:3px 8px;border-radius:5px}
+.website-updates .website-product-link{font-size:15px;line-height:1.6;overflow-wrap:anywhere;text-decoration:underline;text-underline-offset:3px}
+.website-product-reason{font-size:13px;color:#394b43;line-height:1.6}
+.website-product-status,.website-check-note,.website-group-empty{font-size:12px;color:#756f65;line-height:1.6}
+.website-older-history{margin-top:14px;padding-top:12px;border-top:1px solid #ded5c7}
+.website-older-history>summary{font-size:12px;color:#756f65}
+@media(max-width:700px){.website-current-groups{grid-template-columns:minmax(0,1fr)}}
