@@ -22,3 +22,21 @@ test('최초 기준선은 알리지 않고 이후 신상품·본문·이미지 �
  }finally{await rm(dir,{recursive:true,force:true});}
 });
 test('첫 확인에서 읽지 못한 기존 상품이 나중에 복구돼도 신상품으로 알리지 않는다',()=>{assert.deepEqual(changedOfficialProducts({[id]:{pageHash:null,detailHash:null}},[item()]),[]);});
+
+test('소구점 분석·OCR 완료나 분석 결과 변경은 홈페이지 변경이 아니다',()=>{
+ const old={[id]:{pageHash:'c'.repeat(64),detailHash:hash}};
+ assert.deepEqual(changedOfficialProducts(old,[item({imageScanComplete:true,imageText:'새 OCR 결과',points:[{title:'보온'}],status:'automatic-source-reviewed',analyzedAt:new Date().toISOString()})]),[]);
+});
+test('확인 실패·최초 해시 확보는 실제 변경으로 집계하지 않는다',()=>{
+ assert.deepEqual(changedOfficialProducts({[id]:{pageHash:'c'.repeat(64),detailHash:hash}},[item({pageHash:null,detailHash:null})]),[]);
+ assert.deepEqual(changedOfficialProducts({[id]:{pageHash:'c'.repeat(64),detailHash:null}},[item()]),[]);
+});
+test('일시적 확인 실패에도 마지막 확인된 원본 해시를 보존한다',async()=>{
+ const dir=await mkdtemp(path.join(os.tmpdir(),'benefit-hash-'));try{
+  await saveWebsiteCheck(dir,[item()]);
+  const failed=await saveWebsiteCheck(dir,[item({pageHash:null,detailHash:null})]);
+  assert.equal(failed.products[id].detailHash,hash);assert.equal(failed.batches.at(-1).events.length,0);
+  const changed=await saveWebsiteCheck(dir,[item({detailHash:'d'.repeat(64)})]);
+  assert.deepEqual(changed.batches.at(-1).events[0].changes,['공식 상세이미지 변경']);
+ }finally{await rm(dir,{recursive:true,force:true});}
+});

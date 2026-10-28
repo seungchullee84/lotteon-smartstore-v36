@@ -2,6 +2,7 @@ import {readFile,writeFile,rename} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 export const BENEFIT_CHECK_INTERVAL=20*60*1000;
+const verifiedHash=value=>typeof value==='string'&&/^[a-f0-9]{64}$/i.test(value);
 const digest=value=>createHash('sha256').update(value).digest('hex');
 export function websiteCheckDue(state,now=Date.now()){return !state?.checkedAt||now-Date.parse(state.checkedAt)>=BENEFIT_CHECK_INTERVAL;}
 export function officialProductFingerprint(product,pageText){
@@ -18,14 +19,14 @@ export async function fetchOfficialDetailVersion(url,previous,request,{localImag
 }
 export function changedOfficialProducts(previous,records){
  const events=[];for(const r of records){const id=new URL(r.sourceUrl).searchParams.get('pno');const old=previous[id];if(!old){events.push({type:'new',style:r.style,name:r.rawName,sourceUrl:r.sourceUrl,pageHash:r.pageHash,detailHash:r.detailHash,changes:['새로 발견한 성인 상품']});continue;}
- if(!old.pageHash&&!old.detailHash)continue;const changes=[];if(old.pageHash!==r.pageHash)changes.push('상품 원문·정보 변경');if(old.detailHash!==r.detailHash)changes.push('공식 상세이미지 변경');if(changes.length)events.push({type:'changed',style:r.style,name:r.rawName,sourceUrl:r.sourceUrl,pageHash:r.pageHash,detailHash:r.detailHash,changes});}
+ if(!old.pageHash&&!old.detailHash)continue;const changes=[];if(verifiedHash(old.pageHash)&&verifiedHash(r.pageHash)&&old.pageHash!==r.pageHash)changes.push('상품 원문·정보 변경');if(verifiedHash(old.detailHash)&&verifiedHash(r.detailHash)&&old.detailHash!==r.detailHash)changes.push('공식 상세이미지 변경');if(changes.length)events.push({type:'changed',style:r.style,name:r.rawName,sourceUrl:r.sourceUrl,pageHash:r.pageHash,detailHash:r.detailHash,changes});}
  return events;
 }
 export async function saveWebsiteCheck(catalogDir,records,{now=new Date().toISOString(),errors=0}={}){
  const file=path.join(catalogDir,'website-check.json');let previous;try{previous=JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  const baseline=previous?.products||{};const events=previous?changedOfficialProducts(baseline,records):[];
  if(!previous){let queue=[];try{queue=JSON.parse(await readFile(path.join(catalogDir,'queue.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}for(const item of queue)if(/^[a-f0-9]{16,64}$/i.test(item.pno||''))baseline[item.pno]={pageHash:null,detailHash:null};}
- const products={...baseline};for(const r of records){const id=new URL(r.sourceUrl).searchParams.get('pno');products[id]={pageHash:r.pageHash||null,detailHash:r.detailHash||null};}
+ const products={...baseline};for(const r of records){const id=new URL(r.sourceUrl).searchParams.get('pno');products[id]={pageHash:verifiedHash(r.pageHash)?r.pageHash:baseline[id]?.pageHash||null,detailHash:verifiedHash(r.detailHash)?r.detailHash:baseline[id]?.detailHash||null};}
  const batch={id:digest(now).slice(0,20),checkedAt:now,events};
  const state={version:1,checkedAt:now,nextCheckAt:new Date(Date.parse(now)+BENEFIT_CHECK_INTERVAL).toISOString(),baselineAt:previous?.baselineAt||now,baselineReady:true,errors,products,batches:[...(previous?.batches||[]),batch].slice(-168)};
  await writeFile(file+'.tmp',JSON.stringify(state,null,2));await rename(file+'.tmp',file);return state;
