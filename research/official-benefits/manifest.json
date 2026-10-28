@@ -9970,11 +9970,11 @@
     }
   ],
   "sourceComplete": 1416,
-  "imageComplete": 1279,
+  "imageComplete": 1278,
   "withThreeOrFour": 432,
-  "phase": "discover",
+  "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-27T14:33:52.842Z",
+  "updatedAt": "2026-10-28T00:41:07.758Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-28T00:19:36.206Z",
