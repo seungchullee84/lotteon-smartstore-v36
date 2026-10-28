@@ -75,3 +75,14 @@ test('연속 품번 자동 가져오기는 기존 편집기에 접근하지 않�
   assert.equal(read,1);assert.equal(closed,1);
  }
 });
+
+test('닫힌 읽기 창은 한 번만 재시도하고 사용자 중단·끊긴 브라우저는 재시도하지 않는다',async()=>{
+ for(const mode of ['recover','closed','abort','disconnected']){
+  let created=0,closed=0,read=0;const controller=new AbortController();
+  const context={storageState:async()=>({cookies:[],origins:[]}),browser:()=>({isConnected:()=>mode!=='disconnected',newContext:async()=>{created++;return {close:async()=>closed++};}})};
+  const options={check:()=>controller.signal.throwIfAborted(),readSource:async()=>{read++;if(mode==='recover'&&read===2)return {style:'056933'};if(mode==='abort')controller.abort();throw Error('locator.waitFor: Target page, context or browser has been closed');}};
+  if(mode==='recover')assert.deepEqual(await readIsolatedPhotoSource(context,{style:'056933'},options),{style:'056933'});
+  else await assert.rejects(readIsolatedPhotoSource(context,{style:'056933'},options),mode==='abort'?{name:'AbortError'}:/크롬 연결이 닫혔습니다/);
+  assert.equal(created,mode==='recover'||mode==='closed'?2:1);assert.equal(closed,created);
+ }
+});
