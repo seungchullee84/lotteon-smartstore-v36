@@ -127,14 +127,6 @@ const server=http.createServer(async(req,res)=>{
       const key=url.pathname.split('/').at(-1);const file=key==='main'?await originalListingMain(state.product,{dataRoot}):(await prepareListingImages(state.product,state.folder,{dataRoot})).extras[Number(key.slice(6))];
       if(!file)return json(res,404,{});res.writeHead(200,{'Content-Type':({'.png':'image/png','.webp':'image/webp'})[path.extname(file).toLowerCase()]||'image/jpeg','Cache-Control':'no-store'});return res.end(await readFile(file));
     }
-    if(req.method==='GET'&&(url.pathname==='/api/local-photo-review'||/^\/local-folder-photo\/[a-f0-9]{24}$/.test(url.pathname))){
-      if(!state.product||url.searchParams.get('style')!==state.product.style)throw Error('현재 품번을 다시 확인해 주세요.');
-      const photos=await localPhotoReview(state.product,{dataRoot});
-      if(url.pathname==='/api/local-photo-review')return json(res,200,{style:state.product.style,colors:state.product.colors,photos:photos.map(({id,name,color,role})=>({id,name,color,role}))});
-      const photo=photos.find(p=>p.id===url.pathname.split('/').at(-1));if(!photo)return json(res,404,{error:'사진이 변경됐습니다.'});
-      const preview=await workingProductPhoto(photo,state.product,{dataRoot});
-      res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'no-store'});return res.end(await readFile(preview));
-    }
     if(req.method==='GET'&&/^\/smartstore-import-photo\/[a-f0-9]{24}$/.test(url.pathname)){
       if(!state.folder||!state.product||state.photoImport?.style!==state.product.style)return json(res,404,{});
       const item=state.photoImport.candidates.find(c=>c.id===url.pathname.split('/').at(-1));if(!item||!(/^[a-f0-9]{24}\.(jpg|png|webp)$/.test(item.file)))return json(res,404,{});
@@ -326,17 +318,6 @@ const server=http.createServer(async(req,res)=>{
             }
           });
           if(result.tagStatus)state.tagResult={style:state.product.style,tagStatus:result.tagStatus,tagCount:result.tagCount,tagMissing:result.tagMissing,searchTagsVerified:result.searchTagsVerified,selectedTags:result.selectedTags};state.autoStep='done';await writeFile(path.join(result.folder,'smartstore-auto-completed.json'),JSON.stringify(result,null,2));
-        });return json(res,202,{ok:true});
-      }
-      if(url.pathname==='/api/local-photo-review'){
-        if(state.busy||!state.product||b.style!==state.product.style)throw Error('현재 품번·작업 상태를 다시 확인해 주세요.');
-        const product=state.product,folder=state.folder;
-        job('smartstore-import-photos',async()=>{
-          await applyLocalPhotoReview(product,b.photos,{dataRoot});
-          const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,signal:activeAbort.signal,log});
-          await publishPhotoPreview(prepared,folder);
-          await writeFile(path.join(folder,'product.json'),JSON.stringify(prepared,null,2));
-          log('폴더 사진 선택 저장 · 대표·추가·상세 미리보기 반영 · 원본 보존 · 상품 저장 안 함');
         });return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/smartstore-import-photos'){

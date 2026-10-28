@@ -29,7 +29,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  const style=validStyle(product);const draftRoot=path.join(dataRoot,'smartstore-details',style);
  let draft=null;try{draft=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(draft&&(String(draft.style)!==style||draft.sourceUrl!==product.sourceUrl))throw Error('상세페이지 준비 자료의 품번·공식 출처가 현재 상품과 다릅니다.');
- const imported=importedPhotoSelection(product,draft);
+ const imported=draft?.acceptAllFolderPhotos?null:importedPhotoSelection(product,draft);
  const prepared={style,includeBrandVideo:true,colorImages:{},colorSources:{},storeColorPhotoHashes:{},sellingPoints:[],photoCount:0,photoFiles:{},providedImages:[],sourceUrl:product.sourceUrl,displayColors:[...product.colors]};
  if(draft){
   if(draft.headline)prepared.headline=String(draft.headline).slice(0,200);
@@ -56,7 +56,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
   if(imported&&!imported.get(color)?.includes(sourceHash))return;
   const meta=await sharp(bytes,{limitInputPixels:80000000}).metadata();
   if(!['jpeg','png','webp'].includes(meta.format))throw Error('지원하지 않는 마네킨 이미지 형식');
-  const hash=createHash('sha256').update(bytes).digest('hex').slice(0,24);const name='smartstore-photo-'+hash+'.jpg';
+  const hash=createHash('sha256').update(bytes).update(draft?.acceptAllFolderPhotos?canonical:'').digest('hex').slice(0,24);const name='smartstore-photo-'+hash+'.jpg';
   await writeFile(path.join(folder,name),await readFile(await workingProductPhoto({bytes},product,{dataRoot})));
   const src='/smartstore-photo/'+hash;prepared.photoFiles[src]=name;
   prepared.colorImages[color]||=[];
@@ -100,13 +100,14 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
    const file=await realpath(path.join(draftRoot,relative));if(!inside(canonicalRoot,file))throw Error('마네킨 사진이 자료 폴더 밖에 있습니다.');
    const bytes=await readFile(file),digest=createHash('sha256').update(bytes).digest('hex');
    if(!current.has(digest)||labels.has(digest))continue;
-   const id=digest.slice(0,24),src='/smartstore-photo/'+id,name='smartstore-photo-'+id+'.jpg';
+   const id=createHash('sha256').update(digest).update(draft.acceptAllFolderPhotos?relative:'').digest('hex').slice(0,24),src='/smartstore-photo/'+id,name='smartstore-photo-'+id+'.jpg';
    if(prepared.photoFiles[src])continue;
    await writeFile(path.join(folder,name),await readFile(await workingProductPhoto({bytes},product,{dataRoot})));
    prepared.photoFiles[src]=name;prepared.providedImages.push(src);prepared.photoCount++;
   }
  }
- prepared.pendingPhotoCount=prepared.providedImages.length;
+ prepared.acceptAllFolderPhotos=!!draft?.acceptAllFolderPhotos;
+ prepared.pendingPhotoCount=draft?.acceptAllFolderPhotos?0:prepared.providedImages.length;
  prepared.unclassifiedPhotoCount=prepared.providedImages.length;
  // The product folder's selected 1번 mannequin photo is shared by both templates.
  prepared.heroImage=Object.entries(prepared.colorImages).find(([color,urls])=>prepared.colorSources[color]!=='official'&&urls.length)?.[1][0]||null;

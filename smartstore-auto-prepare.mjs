@@ -44,7 +44,7 @@ export function validateAnalysis(result,product,description,unknown){
  const seen=new Set();for(const p of result.photos){if(seen.has(p.id)||!unknown.some(f=>f.id===p.id))throw Error('사진 대조 대상이 일치하지 않습니다.');seen.add(p.id);if(!(p.role==='care-label'&&(p.color===''||product.colors.includes(p.color))||product.colors.includes(p.color))||p.sameProduct!==true||!Number.isFinite(p.confidence)||p.confidence<.90||p.confidence>1||!['front','detail','side','care-label'].includes(p.role))throw Error('색상·품번 확인이 필요한 사진이 있습니다: '+(unknown.find(f=>f.id===p.id)?.name||p.id)+'. 색상명 폴더에 넣거나 이 채팅에서 확인해 주세요.');}
  return result;
 }
-export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,signal,fetchImpl=fetch,photoRoots,desktop,log=()=>{},trustFolder=!apiKey,recognizePhoto}){
+export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,signal,fetchImpl=fetch,photoRoots,desktop,log=()=>{},trustFolder=true,recognizePhoto}){
  assertAdultProduct(product);
  if(!/^\d{6}$/.test(product.style)||new URL(product.sourceUrl).origin!=='https://www.giordano.co.kr')throw Error('공식 상품 출처를 확인해 주세요.');
  let html;try{html=await readFile(path.join(folder,'smartstore-official.html'),'utf8');}catch(e){if(e.code!=='ENOENT')throw e;}
@@ -74,8 +74,8 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
  for(const [color,hashes] of selected||[])for(const digest of hashes){const prior=known.get(digest);known.set(digest,{color,role:prior?.color===color&&['front','side','back','detail'].includes(prior.role)?prior.role:'detail'});}
  const ignored=new Set((old?.style===product.style&&old.sourceUrl===product.sourceUrl?old.photoMapping?.ignoredPhotos||[]:[]).filter(p=>/^[a-f0-9]{64}$/.test(p.hash)).map(p=>p.hash));
  const found=[];for(const photo of await findPhotos(product,{desktop,photoRoots})){
-  if(ignored.has(hash(photo.bytes))&&known.get(hash(photo.bytes))?.role!=='care-label')continue;
-  const reason=await excludedPhotoReason(photo.bytes,{dataRoot});if(reason){log('착용사진 제외 · '+photo.name+' · '+reason);continue;}found.push(photo);
+  if(!trustFolder&&ignored.has(hash(photo.bytes))&&known.get(hash(photo.bytes))?.role!=='care-label')continue;
+  const reason=trustFolder?null:await excludedPhotoReason(photo.bytes,{dataRoot});if(reason){log('착용사진 제외 · '+photo.name+' · '+reason);continue;}found.push(photo);
  }
  // Only this style's folder is read; keep original bytes for visual-review hashes.
  for(const photo of found){signal?.throwIfAborted();await workingProductPhoto(photo,product,{dataRoot});}

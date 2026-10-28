@@ -43,7 +43,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
   }
  }finally{await worker?.terminate();}
  signal?.throwIfAborted();
- const imported=importedPhotoSelection(product,old);
+ const imported=null; // Every current folder file is authoritative.
  const active=p=>!imported||imported.get(p.color)?.includes(hash(p.bytes));
  const garments=reviewed.filter(p=>p.role!=='care-label'),main=garments.filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name));
  if(main.length!==1)throw Error('현재 품번 폴더에 대표사진 1.jpg 또는 1번.jpg 한 장을 지정해 주세요.');
@@ -60,7 +60,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
   const digest=hash(p.bytes),prior=old?.photoMapping?.files?.find(r=>r.name===p.name&&r.hash===digest);records.push({...prior,name:p.name,hash:digest,color:p.color,role:p.role});
   if(p.role==='care-label')continue;
   if(!active(p))continue;
-  const relative='trusted/'+digest+path.extname(p.name).toLowerCase();await writeFile(path.join(root,relative),p.bytes);
+  const relative='trusted/'+hash(Buffer.from(p.name+'|'+digest))+path.extname(p.name).toLowerCase();await writeFile(path.join(root,relative),p.bytes);
   if(p.color&&p.role!=='provided'){
    let group=groups.find(g=>g.color===p.color);if(!group){group={color:p.color,files:[]};groups.push(group);}
    group.files.push({file:relative,role:p.role,main:p===main[0],hash:digest});
@@ -70,9 +70,9 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  const previous=old?.sourceUrl===product.sourceUrl&&old?.officialDetailHash===detailHash?old:null;
  const officialPoints=officialSellingPoints(description);
  const points=usableSellingPoints(previous?.sellingPoints,description)&&previous.sellingPoints.length>=officialPoints.length?previous.sellingPoints:officialPoints;
- const draft={style:product.style,sourceUrl:product.sourceUrl,headline:previous?.headline||product.name,officialDetailHash:detailHash,photos:groups,importedMainPhoto:old?.importedMainPhoto,importedColorPhotos:old?.importedColorPhotos,unmatchedPhotos:providedPhotos,listingImages,careLabels:await saveCareLabelSelection(root,reviewed.filter(p=>p.role==='care-label')),sellingPoints:points,officialPhotos:previous?.officialPhotos,trustedFolder:true,photoMapping:{basis:'사용자 지시: 현재 품번 폴더 사진 신뢰 · 미확인 색상·각도는 임의 지정하지 않음',files:records,ignoredPhotos:old?.style===product.style&&old?.sourceUrl===product.sourceUrl?old.photoMapping?.ignoredPhotos||[]:[]},preparedAt:new Date().toISOString()};
+ const draft={style:product.style,sourceUrl:product.sourceUrl,headline:previous?.headline||product.name,officialDetailHash:detailHash,photos:groups,importedMainPhoto:old?.importedMainPhoto,importedColorPhotos:undefined,unmatchedPhotos:providedPhotos,listingImages,careLabels:await saveCareLabelSelection(root,reviewed.filter(p=>p.role==='care-label')),sellingPoints:points,officialPhotos:previous?.officialPhotos,trustedFolder:true,acceptAllFolderPhotos:true,photoMapping:{basis:'사용자 지시: 현재 품번 폴더 사진 신뢰 · 미확인 색상·각도는 임의 지정하지 않음',files:records,ignoredPhotos:old?.style===product.style&&old?.sourceUrl===product.sourceUrl?old.photoMapping?.ignoredPhotos||[]:[]},preparedAt:new Date().toISOString()};
  await writeFile(path.join(root,'draft.json'),JSON.stringify(draft,null,2));
  await savePhotoMappings(dataRoot,product,records);
- log('품번 폴더 사진 적용 · 대표 1장 · 폴더 추가 '+extras.length+'장 · 상세 '+groups.reduce((n,g)=>n+Math.min(4,g.files.length),0)+'장 · 매칭 대기 '+providedPhotos.length+'장 · 케어라벨 '+reviewed.filter(p=>p.role==='care-label').length+'장 · 외부 사진분석 없이 진행');
+ log('품번 폴더 사진 적용 · 대표 1장 · 폴더 추가 '+extras.length+'장 · 상세 '+groups.reduce((n,g)=>n+g.files.length,0)+providedPhotos.length+'장 · 색상 미확인 '+providedPhotos.length+'장(모두 반영)' · 케어라벨 '+reviewed.filter(p=>p.role==='care-label').length+'장 · 외부 사진분석 없이 진행');
  return prepareSmartstoreDetail({...product,officialDescription:description},folder,{dataRoot,photoRoots:[...new Set(photos.map(p=>path.dirname(p.file)))]});
 }
