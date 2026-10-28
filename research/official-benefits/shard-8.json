@@ -2093,6 +2093,43 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "286901",
+      "rawName": "NEW 나일론 퀼팅 머플러",
+      "gender": "남성",
+      "sourceCategory": [
+        "MEN",
+        "ALL"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=8B32A86E6B2DACFF376C30CF32BE0FC7&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01286901.jpg",
+      "detailHash": "af614b254907c4c8f2ee1e17562ab6a22480b03cc80d43982318354fb25bac3d",
+      "detailValidators": {
+        "etag": "\"8f79ae460c2562cb34af207118d8f55d\"",
+        "lastModified": "Wed, 28 Oct 2026 01:23:31 GMT"
+      },
+      "pageHash": "c8a057d76d04a53026d369ca5f41c9c019df4ceb9b7b25059421148938dc568c",
+      "pageText": "부드러운 나일론 원단과 SynCloud® 충전재를 사용하여 습기에 강하고 알레르기 유발 방지, 세탁 후에도 볼륨감 유지 \n\n안감에 브러시드 처리된 보아털 원단을 적용해 보온성을 극대화, 자극 없이 부드럽고 다뜻한 착용감\n\n심플한 디자인과 간편한 끼움 디테일",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "안감에 브러시드 처리된 보아털 원단을 적용해 보온성을 극대화, 자극 없이 부드럽고 다뜻한 착용감"
+        },
+        {
+          "title": "부드러운 착용감",
+          "description": "부드러운 나일론 원단과 SynCloud® 충전재를 사용하여 습기에 강.",
+          "evidence": "부드러운 나일론 원단과 SynCloud® 충전재를 사용하여 습기에 강하고 알레르기 유발 방지, 세탁 후에도 볼륨감 유지"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-28T03:31:48.777Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "375947",
       "rawName": "NEW 스웨이드 자켓",
       "gender": "여성",
@@ -2250,8 +2287,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T02:56:06.642Z",
-      "analyzedAt": "2026-10-28T02:56:22.219Z"
+      "observedAt": "2026-10-28T03:31:45.810Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
