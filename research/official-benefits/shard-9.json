@@ -1330,8 +1330,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T05:49:54.419Z",
-      "analyzedAt": "2026-10-28T05:50:21.456Z"
+      "observedAt": "2026-10-28T06:24:20.372Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
