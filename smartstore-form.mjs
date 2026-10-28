@@ -198,11 +198,19 @@ export async function fillSmartstoreSellerCode(page,plan,{check=()=>{},log=()=>{
  if(isSmartstoreDetailEditUrl(page.url())){
   const code=await readDetailOnlySellerCode(page);
   if(!/^\d{6}$/.test(plan.style||''))throw Error('전체 입력할 현재 품번을 확인해 주세요.');
-  if(code.includes(plan.style)){log('같은 품번의 기존 판매자 상품코드 유지');return code;}
-  const next=sellerProductCode(plan);await fillSmartstoreValue(page.locator('#seller-code1'),next,check);log('전체 입력 · 판매자 상품코드를 현재 품번으로 변경');return next;
+  const next=prependSmartstoreSellerStyle(plan.style,code);
+  if(next===code)return code;
+  await fillSmartstoreValue(page.locator('#seller-code1'),next,check);log('현재 품번을 판매자 코드 앞에 추가 · 기존 코드 전체는 뒤에 보존');return next;
  }
  if(!/\/products\/copy\/\d+(?:[?]|$)/.test(page.url())||!isSmartstoreInputUrl(page.url()))throw Error('수정 또는 복사등록 화면에서 실행해 주세요.');
  const code=sellerProductCode(plan);await fillSmartstoreValue(page.locator('#seller-code1'),code,check);return code;
+}
+
+export function prependSmartstoreSellerStyle(style,existing){
+ if(!/^\d{6}$/.test(style||''))throw Error('현재 품번 6자리를 확인해 주세요.');
+ const code=String(existing??'');
+ if(new RegExp('^'+style+'(?:\\D|$)').test(code))return code;
+ return code.trim()?style+' '+code:style;
 }
 
 export async function waitSmartstoreOptionGrid(page,expectedOptions,check=()=>{}){
