@@ -51,7 +51,9 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  }else extras=[];
  const listingImages={...await saveListingSelection(root,{main:main[0],extras}),trustedFolder:true};
  const groups=[],providedPhotos=[],records=[];
- for(const p of reviewed){
+ const roleOrder=['front','side','detail','back','provided','care-label'];
+ const detailPhotos=[...reviewed].sort((a,b)=>Number(/^1(?:번)?\./i.test(b.name))-Number(/^1(?:번)?\./i.test(a.name))||roleOrder.indexOf(a.role)-roleOrder.indexOf(b.role));
+ for(const p of detailPhotos){
   const digest=hash(p.bytes),prior=old?.photoMapping?.files?.find(r=>r.hash===digest);records.push({...prior,name:p.name,hash:digest,color:p.color,role:p.role});
   if(p.role==='care-label')continue;
   if(!active(p))continue;
