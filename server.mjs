@@ -34,6 +34,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
 import {createProductEditStore} from './product-edits.mjs';
+import {suggestMissingLotteCategory} from './lotte-category-suggest.mjs';
 import {searchProductTags,saveSelectedProductTags,selectedProductTagResearch,removeProductTag} from './smartstore-tag-selection.mjs';
 import {assertAdultProduct,collect,parseProductInput,buildKeywords,repairCategoryFields} from './product.mjs';
 import {LotteAutomation} from './automation.mjs';
@@ -477,6 +478,11 @@ const server=http.createServer(async(req,res)=>{
         const input=parseProductInput(b.style);const style=input.style||"url";bot.stopped=false;state.collectionInput=b.style;state.detailFallbackRequest=null;state.photoImport=null;
         if(b.edits)await productEdits.save(b.edits,state.product?.style);
         job('collect',async()=>{const folder=path.join(dataRoot,style+'-'+new Date().toISOString().replace(/[:.]/g,'-'));let product=await collect(b.style,folder,log,()=>bot.stopped,activeAbort.signal,{allowMissingDetail:b.allowMissingDetail===true,saveSmartstoreSource:b.channel==='smartstore',noticeCacheRoot:b.channel==='smartstore'?path.join(dataRoot,'smartstore-notice-cache'):undefined,prepareMain:b.channel!=='smartstore'});product.keywords=buildKeywords(product);product=await productEdits.apply(product);state.product=product;state.folder=folder;state.photoPreparation=null;state.revision++;if(b.channel==='smartstore'){state.photoPreparation={style:product.style,status:'preparing'};try{const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,apiKey:backgroundApiKey,signal:activeAbort.signal,log});await publishPhotoPreview(prepared,folder);}catch(error){if(error.code!=='PHOTO_FOLDER_EMPTY')throw error;state.photoPreparation={style:product.style,status:'missing',message:error.message};log(error.message);}}log('수집 완료. 고시 이미지와 입력값을 검토해 주세요.'+(Object.keys(product.userEditedFields||{}).length?' · 직접 수정한 항목 유지':''));});return json(res,202,{ok:true});
+      }
+      if(url.pathname==='/api/lotte-category-suggest'){
+        if(!state.product||b.style!==state.product.style)throw Error('현재 수집한 상품의 분류만 확인할 수 있습니다.');
+        const category={...state.product.category};for(const key of ['commonMiddle','commonSmall','channelMiddle','channelSmall'])if(typeof b.category?.[key]==='string')category[key]=b.category[key].slice(0,200);
+        return json(res,200,suggestMissingLotteCategory({...state.product,category}));
       }
       if(url.pathname==='/api/run'){
         if(state.busy)return json(res,409,{error:'진행 중인 작업이 있습니다.'});
