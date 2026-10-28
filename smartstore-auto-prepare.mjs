@@ -65,6 +65,7 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
  }
  if(old?.style===product.style&&old.sourceUrl===product.sourceUrl)for(const record of old.careLabels||[])if(/^[a-f0-9]{64}$/.test(record.sourceHash))known.set(record.sourceHash,{role:'care-label',color:''});
  if(old?.style===product.style&&old.sourceUrl===product.sourceUrl)for(const record of old.photoMapping?.files||[]){
+  if(record.role==='provided'&&known.has(record.hash))continue;
   if(/^[a-f0-9]{64}$/.test(record.hash)&&['front','detail','side','back','care-label','provided'].includes(record.role)&&(['care-label','provided'].includes(record.role)||product.colors.includes(record.color)))known.set(record.hash,{role:record.role,color:['care-label','provided'].includes(record.role)?'':record.color});
  }
  const ignored=new Set((old?.style===product.style&&old.sourceUrl===product.sourceUrl?old.photoMapping?.ignoredPhotos||[]:[]).filter(p=>/^[a-f0-9]{64}$/.test(p.hash)).map(p=>p.hash));

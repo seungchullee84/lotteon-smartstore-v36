@@ -106,7 +106,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
    prepared.photoFiles[src]=name;prepared.providedImages.push(src);prepared.photoCount++;
   }
  }
- prepared.pendingPhotoCount=0;
+ prepared.pendingPhotoCount=prepared.providedImages.length;
  prepared.unclassifiedPhotoCount=prepared.providedImages.length;
  // The product folder's selected 1번 mannequin photo is shared by both templates.
  prepared.heroImage=Object.entries(prepared.colorImages).find(([color,urls])=>prepared.colorSources[color]!=='official'&&urls.length)?.[1][0]||null;
