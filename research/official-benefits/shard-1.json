@@ -416,8 +416,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:16:45.480Z",
-      "analyzedAt": "2026-10-28T09:17:08.980Z"
+      "observedAt": "2026-10-28T09:50:30.673Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1076,7 +1076,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "921c207befdd0c8d60d2648589cc41efa4f42334ac37ca0846c69d06ee623121",
+      "pageHash": "1742cb9631cefdc9a4df4207475d8c141cf5dac4cd5c66f8b60ac032a9945681",
       "pageText": "베이직 카라의 셔츠형 집업 재킷입니다. \n\n가벼운 착용감으로 봄 계절 간편하게 걸치기 좋으며 간결한 절개 디테일과 가슴 양옆에 플랩포켓을 더하여 미니멀하고 단정한 외관의 느낌을 살렸습니다.\n\n밀도 높은 탄탄한 C/P 소재로 내구성을 높였으며, 지퍼 안쪽에는 플라켓을 더해 메탈 지퍼의 차가운 질감이 닿지 않도록 보완하였습니다.\n\n여유 있는 실루엣으로 제작되어 아우터로 활용하기 좋으며 다양한 이너와 슬렉스 팬츠 혹은 치노 팬츠와 함께 매치하여 트렌디한 스타일링을 할 수 있습니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -1089,8 +1089,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:16:47.062Z",
-      "analyzedAt": "2026-10-28T09:17:08.983Z"
+      "observedAt": "2026-10-28T09:50:32.548Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1364,8 +1364,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:16:20.969Z",
-      "analyzedAt": "2026-10-28T09:17:08.717Z"
+      "observedAt": "2026-10-28T09:50:06.337Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2989,8 +2989,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:16:48.955Z",
-      "analyzedAt": "2026-10-28T09:17:08.991Z"
+      "observedAt": "2026-10-28T09:50:34.479Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3231,7 +3231,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "e0fb39e1f5b0763d6cf191e0bb823fa6936aa8255debd4299c2a5004390e04a4",
+      "pageHash": "a9c7580b788c9532115c997a076011ff3e49d14aef58fbe149ed93bcb66e3851",
       "pageText": "클래식한 디자인의 카라 블루종입니다.\n\n고밀도 원단 사용과 가먼트 워싱 가공으로 부드러운 터치감과 자연스러운발색이 특징이며 \n세탁 이후 원단의 수축 및 뒤틀림이 적어 변형에 강합니다.\n\n금속 지퍼로 클래식하고 세련된 느낌을 연출하며소매 단과 밑단의 내장된 밴딩으로 멋스러운 코디 연출이 가능합니다.\n\n무난한 디자인으로 폭넓은 코디가 가능하며 여유롭고 부드러운 실루엣을 연출할 수 있습니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -3249,8 +3249,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:16:47.064Z",
-      "analyzedAt": "2026-10-28T09:17:08.984Z"
+      "observedAt": "2026-10-28T09:50:32.547Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",

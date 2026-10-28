@@ -375,8 +375,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:16:52.726Z",
-      "analyzedAt": "2026-10-28T09:17:09.045Z"
+      "observedAt": "2026-10-28T09:50:38.537Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1786,8 +1786,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:16:24.743Z",
-      "analyzedAt": "2026-10-28T09:17:08.778Z"
+      "observedAt": "2026-10-28T09:50:10.041Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2223,7 +2223,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "e257a9bb7bcfaa7460b76627c48b9a40d94d1c6762ccbd3b77c214a0865e74c4",
+      "pageHash": "8b34e01d6be5a6929b9f93c4bce24c28023589ab8f77d1bf16a4011fc7bffbef",
       "pageText": "진한 블루 톤의 데님 트러커 재킷으로, \n워싱을 통한 자연스러운 텍스처와 클래식 데님 특유의 깊이 있는 워싱감을 선명하게 구현했습니다. \n\n정교한 스티치 라인과 캔톤 디테일을 적용해 구조적 완성도를 높였으며, \n트러커 재킷의 특징을 현대적으로 다듬어 균형감 있는 실루엣을 제공합니다.\n\n뒷판 절개 라인과 허리 조절 디테일이 실루엣을 안정적으로 잡아 줍니다.\n\n코튼100%의 스판이 포함되지 않은 탄탄한 소재감의 12oz 적당히 두께감 있는 원단으로 제작되어, \n한여름을 제외한 사계절 내내 활용하기 좋습니다.\n핸드 브러시 가공을 적용하여 프리미엄 데님 고유의 자연스러운 페이드가 돋보이며 깊이감 있는 워싱 컬러를 보여줍니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -2236,8 +2236,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:16:26.472Z",
-      "analyzedAt": "2026-10-28T09:17:08.779Z"
+      "observedAt": "2026-10-28T09:50:11.895Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3163,8 +3163,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:16:47.321Z",
-      "analyzedAt": "2026-10-28T09:17:08.987Z"
+      "observedAt": "2026-10-28T09:50:32.711Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",

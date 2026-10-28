@@ -370,7 +370,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "72e01fd35af289598dbf9b9403aa4a2af9080e00b9fbd68af1ea1f6ea14af521",
+      "pageHash": "b4ce7346bb805e2ceed8972eaa76729254e8a0fa6be1293508e8a2372d29240a",
       "pageText": "숏 기장의 몬스터 파카입니다.\n\n생활 방수 가능한 원단을 사용하여 눈, 비 등의 수분 유입을 막아 보온성이 탁월하며 방풍 효과 또한 뛰어나 FW 시즌 활용도가 높습니다.\n\n깊고 큰 사이즈의 포켓으로 실용성을 더하였습니다.\n\n전체적으로 트렌디하고 깔끔한 디자인으로, 와이드핏 치노 팬츠나 데님 팬츠, 테리 조거 팬츠 등 캐주얼한 아이템과 매칭하여 세련된 무드를 연출할 수 있습니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -388,8 +388,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:16:48.740Z",
-      "analyzedAt": "2026-10-28T09:17:08.988Z"
+      "observedAt": "2026-10-28T09:50:34.327Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1031,15 +1031,15 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "81fba02bc17013ded0fd0d8b5ebde74b5b4d3b4af111d314733bb739f535ec09",
+      "pageHash": "659a80e0b7c2a2d155d43b0595aa066476a6931b788cdd123873dd497b3f21e7",
       "pageText": "미니멀하고 세련된 디자인의 패딩 바머입니다.\n\n냄새 및 황변이 없고 알러지에도 안전한 퍼피안(Puffian)을 충전재로 사용하여 가볍고 보온성이 좋으며 터치감이 소프트한 것이 특징입니다. \n\n전체적으로 과하지 않으면서도 여유있는 핏의 기본 아이템으로, 자연스럽게 떨어지는 실루엣으로 기획되어 누구나 착용하기에 좋습니다.",
       "imageText": "",
       "imageScanComplete": false,
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:16:48.959Z",
-      "analyzedAt": "2026-10-28T09:17:08.991Z"
+      "observedAt": "2026-10-28T09:50:34.330Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1444,8 +1444,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:16:34.063Z",
-      "analyzedAt": "2026-10-28T09:17:08.849Z"
+      "observedAt": "2026-10-28T09:50:19.692Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1626,7 +1626,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "443beff258a297f9ed697b2c1dcf43f7394d6793e3ad5fd70df0d93bf4564fb7",
+      "pageHash": "3c2ba06eced547053602bab664be6d323043e1beb39d12329cf7f6efc558bce4",
       "pageText": "코튼 원사와 폴리 혼방의 하프밀라노 조직의 루즈한 폴로넥 스웨터입니다.\n\n프리미엄 코튼 원사에 폴리를 혼방하여 껄끔하고 탄탄한 조직감으로, 트렌디하고 여유롭게 떨어지는 실루엣으로 제작되었습니다.\n\n촉감이 부드러워 맨살에 입어도 까끌거리지 않고 몸에 감기지 않습니다.\n하프 밀란 조직은 모던하고 세련된 느낌을 살려주며, 소매와 밑단은 모던한 엣지 디테일로 마감했습니다. \n\n뉴트럴 무드에 프레쉬한 팝업 컬러를 사용하여 산뜻한 팔레트로 구성했습니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -1639,8 +1639,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:16:22.679Z",
-      "analyzedAt": "2026-10-28T09:17:08.725Z"
+      "observedAt": "2026-10-28T09:50:07.880Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2435,8 +2435,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:16:24.440Z",
-      "analyzedAt": "2026-10-28T09:17:08.774Z"
+      "observedAt": "2026-10-28T09:50:10.059Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2546,8 +2546,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:16:43.606Z",
-      "analyzedAt": "2026-10-28T09:17:08.972Z"
+      "observedAt": "2026-10-28T09:50:28.640Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3306,8 +3306,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:16:31.871Z",
-      "analyzedAt": "2026-10-28T09:17:08.843Z"
+      "observedAt": "2026-10-28T09:50:17.816Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
