@@ -31,7 +31,14 @@ export async function prepareSmartstoreWithColorRecovery(product,folder,options)
  if(!pending)return prepared;
  log('사진 '+pending+'장 색상 연결 확인 · 같은 품번의 기존 상품 색상 구간을 자동으로 가져옵니다.');
  await onRecovery(prepared);signal?.throwIfAborted();
- const imported=await importSmartstoreColorPhotos(prepared,folder,{...options,isolatedSource:true});
+ let imported;
+ try{imported=await importSmartstoreColorPhotos(prepared,folder,{...options,isolatedSource:true});}
+ catch(error){
+  signal?.throwIfAborted();options.assertCurrent?.(product,folder);
+  if(!/로그인|검색 결과|Target .*has been closed|크롬 연결이 닫혔습니다/.test(error.message))throw error;
+  log('폴더 사진 '+pending+'장 유지 · 기존 상품 조회 실패 · 등록기의 폴더 사진 색상·각도 확인에서 연결해 주세요.');
+  return {...prepared,photoRecoveryWarning:error.message};
+ }
  await onImported(imported);signal?.throwIfAborted();
  log('기존 상품 색상 구간 대조 완료 · '+imported.result.selectedCount+'장 연결 · 상품 저장 안 함');
  return imported.product;

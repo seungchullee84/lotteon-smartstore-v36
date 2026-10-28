@@ -9,6 +9,7 @@ export async function runSmartstoreAuto({input,apiKey,signal,log=()=>{},step=()=
  await onProduct(product,folder);check();
  const prepared=await stage('prepare',`2/${count} 폴더 사진·공식 색상 대조 및 상품 소구점 준비`,()=>prepare(product,folder));
  check();await onPrepared(prepared,folder);check();
+ if(prepared.smartstoreDetail?.pendingPhotoCount){const error=Error('폴더 사진은 미리보기에 유지했습니다. 폴더 사진 색상·각도 확인에서 '+prepared.smartstoreDetail.pendingPhotoCount+'장을 연결한 뒤 다시 시작해 주세요.');error.code='PHOTO_MATCH_REQUIRED';throw error;}
  await stage('connect',`3/${count} 스마트스토어 로그인·복사등록 화면 확인`,preflight);
  const main=includeMain?await stage('compose','4/6 대표사진 배경 합성 · 1500×1500 · 공식 색상칩 적용',()=>synthesize(prepared,folder)):undefined;
  const detail=await stage('detail',`${count-1}/${count} 확정 템플릿 상세페이지 제작·바탕화면 저장`,()=>render(prepared,folder));

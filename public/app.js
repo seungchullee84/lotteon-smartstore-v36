@@ -827,3 +827,30 @@ for(const detailTemplate of [1,2])if($('smartstoreTemplate'+detailTemplate))$('s
  catch(error){$('error').textContent=error.message;}
  finally{requestLock=false;syncButtons();}
 };
+
+// Local folder review never opens or saves a seller-center form.
+const localPhotoButton=document.createElement('button');localPhotoButton.type='button';localPhotoButton.textContent='폴더 사진 색상·각도 확인';localPhotoButton.id='reviewLocalPhotos';localPhotoButton.dataset.channelOnly='smartstore';$('photoPreparationStatus').after(localPhotoButton);
+const localPhotoDialog=document.createElement('dialog');localPhotoDialog.id='localPhotoDialog';localPhotoDialog.setAttribute('aria-label','품번 폴더 사진 연결');document.body.append(localPhotoDialog);
+localPhotoButton.onclick=async()=>{
+ if(!product||serverBusy)return;const style=product.style;localPhotoButton.disabled=true;
+ try{
+  const r=await fetch('/api/local-photo-review?style='+encodeURIComponent(style)),data=await r.json();if(!r.ok)throw Error(data.error);if(product?.style!==style)throw Error('상품이 변경됐습니다.');
+  localPhotoDialog.replaceChildren();const title=document.createElement('h2');title.textContent=style+' 폴더 사진 연결';
+  const note=document.createElement('p');note.textContent='사진을 보며 색상과 각도를 선택하세요. 원본은 변경하지 않습니다. 미확인은 색상에 임의 연결하지 않습니다.';
+  const grid=document.createElement('div');grid.className='photo-import-grid';const rows=[];
+  for(const photo of data.photos){
+   const card=document.createElement('div'),img=document.createElement('img');img.src='/local-folder-photo/'+photo.id+'?style='+style;img.alt=photo.name;img.style.cssText='width:160px;height:210px;object-fit:contain';
+   const label=document.createElement('p');label.textContent=photo.name;
+   const color=document.createElement('select');color.setAttribute('aria-label',photo.name+' 색상');
+   for(const value of ['',...data.colors]){const option=document.createElement('option');option.value=value;option.textContent=value||'색상 미확인';color.append(option);}color.value=photo.color;
+   const role=document.createElement('select');role.setAttribute('aria-label',photo.name+' 각도');
+   for(const [value,text] of [['provided','미확인'],['front','정면'],['side','옆면'],['back','뒷면'],['detail','디테일'],['care-label','택·케어라벨']]){const option=document.createElement('option');option.value=value;option.textContent=text;role.append(option);}role.value=photo.role;
+   card.append(img,label,color,role);grid.append(card);rows.push({photo,color,role});
+  }
+  const message=document.createElement('p');message.setAttribute('role','status');
+  const apply=document.createElement('button');apply.type='button';apply.textContent='선택 저장 · 템플릿 반영';apply.disabled=!rows.length;
+  const close=document.createElement('button');close.type='button';close.textContent='닫기';close.onclick=()=>localPhotoDialog.close();
+  apply.onclick=async()=>{apply.disabled=true;try{if(product?.style!==style)throw Error('상품이 변경됐습니다.');await post('local-photo-review',{style,photos:rows.map(({photo,color,role})=>({id:photo.id,color:color.value,role:role.value}))});message.textContent='사진 선택을 저장하고 템플릿에 반영 중입니다. 완료 상태는 등록기에서 확인해 주세요.';await refresh();}catch(e){message.textContent=e.message;}finally{apply.disabled=false;}};
+  localPhotoDialog.append(title,note,grid,apply,close,message);localPhotoDialog.showModal();
+ }catch(e){announce(e.message,'failed');}finally{localPhotoButton.disabled=false;}
+};
