@@ -106,7 +106,8 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   assert.equal(optimizeCalls,2,'키를 연결해도 사용자가 수정한 이름을 자동으로 덮어쓰지 않음');
   await page.locator('#channelLotte').click();
   currentProduct={...product,style:'000000',name:'남성 아가일 브이넥 니트 000000'};revision++;
-  await page.waitForFunction(()=>document.getElementById('smartstoreName').value.endsWith('000000'));
+  await page.waitForFunction(()=>document.getElementById('source').textContent.includes('000000'));
+  assert(!((await page.locator('#smartstoreName').inputValue()).endsWith('000000')),'비활성 스마트스토어 상품명은 생성하지 않음');
   assert.equal(optimizeCalls,2,'롯데ON 채널에서 새 상품을 수집해도 API 미호출');
   await page.locator('#channelSmartstore').click();
   await page.waitForFunction(()=>document.getElementById('smartstoreName').value==='지오다노 남자 브이넥 아가일 니트 000000');
@@ -132,7 +133,7 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   await page.waitForFunction(()=>document.getElementById('keywordStatus').textContent.includes('자동 적용하지 않았습니다'));
   assert.equal(await page.locator('textarea[name="keywords"]').inputValue(),'지오다노,직접수정');
   currentProduct={...product,style:'376922',name:'여성 후드 숏 푸퍼 자켓 376922',gender:'여성'};revision++;
-  await page.waitForFunction(()=>document.getElementById('smartstoreName').value==='지오다노 여성 후드 숏 패딩 자켓 376922');
+  await page.waitForFunction(()=>document.getElementById('source').textContent.includes('376922'));
   await page.locator('#channelSmartstore').click();
   await page.waitForFunction(()=>document.getElementById('naverTitleResult').textContent.includes('통합검색어 트렌드 API'));
   assert.equal(await page.locator('input[name="name"]').inputValue(),currentProduct.name);

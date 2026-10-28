@@ -47,7 +47,7 @@ test('직접 수정 → 같은 품번 재수집 → 새로고침 → 시작에�
   assert.equal(await page.locator('#smartstoreName').inputValue(),title);assert.equal(current.images.main,'new-main-1.jpg');
   assert.equal(current.material,edits.material);assert.equal(current.consumerPrice,39900);
   await page.locator('#channelLotte').click();await page.locator('#form [name="keywords"]').fill('지오다노,직접수정');await page.locator('#channelSmartstore').click();
-  await collect('026981');await page.waitForFunction(()=>document.querySelector('#keywordStatus').textContent==='직접 수정한 키워드 유지');
+  await collect('026981'); // 비활성 롯데 키워드 상태는 갱신하지 않고 직접 입력값을 보존한다.
   assert.equal(await page.locator('#form [name="keywords"]').inputValue(),'지오다노,직접수정');
   await page.reload();await page.waitForFunction(title=>document.querySelector('#smartstoreName').value===title,title);
   await Promise.all([page.waitForResponse(r=>r.url().endsWith('/api/smartstore-auto')),page.locator('#smartstoreStart').click()]);
