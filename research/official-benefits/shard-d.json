@@ -952,7 +952,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "2c17a69aca25c17eb790377a91230cd500c0ffdbae569a4b9674fe55c406a196",
+      "pageHash": "af852d78389784c655407589958bef6197f927af5afeb387660d21e077a86798",
       "pageText": "메리노울 블렌드 원사로 부드럽고 고급스러운 케이블 크루넥 풀오버입니다.\n\n클래식한 7GG 케이블 조직으로 외관이 매우 고급스럽고 부드러운 촉감이 특징입니다.\nEXTRA MERINO WOOL이 30% 함유되어 더욱 포근하고 따뜻한 감촉을 느낄실 수 있습니다. 구김이 잘 가지 않고 원사 특성상 가볍고 부드러운 감촉으로 피부가 예민하신 분도 착용하시기에 좋습니다. \n\n소맷단과 밑단의 립 연결부는 고급 봉제 기법인 링킹 스티치로 마감하여 입었을 때 형태유지와 함께 안정감을 부여합니다.\n\n레귤러한 핏에\n베이직한 네이비, 헤더그레이, 샌드 컬러와 함께 포인트되는 올리브, 허니 컬러로 구성되었습니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -965,8 +965,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-27T14:32:50.152Z",
-      "analyzedAt": "2026-10-27T14:33:51.683Z"
+      "observedAt": "2026-10-28T00:41:50.921Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1040,8 +1040,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-27T14:32:50.916Z",
-      "analyzedAt": "2026-10-27T14:33:51.691Z"
+      "observedAt": "2026-10-28T00:41:14.598Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1115,8 +1115,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-27T14:32:50.832Z",
-      "analyzedAt": "2026-10-27T14:33:51.688Z"
+      "observedAt": "2026-10-28T00:41:48.721Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1640,8 +1640,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-27T14:32:54.104Z",
-      "analyzedAt": "2026-10-27T14:33:51.737Z"
+      "observedAt": "2026-10-28T00:41:42.209Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1832,8 +1832,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-27T14:32:54.848Z",
-      "analyzedAt": "2026-10-27T14:33:51.750Z"
+      "observedAt": "2026-10-28T00:41:17.253Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3068,8 +3068,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-27T14:33:03.559Z",
-      "analyzedAt": "2026-10-27T14:33:51.886Z"
+      "observedAt": "2026-10-28T00:41:30.521Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
