@@ -54,7 +54,7 @@ export async function prepareListingImages(product,folder,{dataRoot,...photoOpti
   if(entry.role==='official-main'){
    const collected=JSON.parse(await readFile(path.join(folder,'product.json'),'utf8'));
    if(collected.style!==product.style||collected.sourceUrl!==product.sourceUrl||collected.images?.main!==product.images.main||entry.sourceUrl!==product.images.main)throw Error('현재 품번의 공식몰 대표사진을 다시 수집해 주세요.');
-   const official=path.join(folder,'main.jpg');await readFile(official);extras.push(official);continue;
+   const official=path.join(folder,'main.jpg');extras.push(await workingProductPhoto({file:official},product,{dataRoot}));continue;
   }
   if(!product.colors.includes(entry.color)&&!(manifest.trustedFolder&&entry.role==='provided'))throw Error('추가사진의 색상을 확인해 주세요.');
   const matches=photos.filter(p=>entry.sourceHash?hash(p.bytes)===entry.sourceHash:p.name===entry.sourceName);
