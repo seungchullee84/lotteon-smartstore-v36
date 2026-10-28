@@ -318,3 +318,5 @@ body[data-channel="smartstore"] #smartstoreStart{background:#087c42}body[data-ch
 .website-updates{margin:0 0 22px;padding:13px 18px;border:1px solid #d5cbbb;border-radius:12px;background:#fffaf1;color:#36554d;font-size:13px}.website-updates summary{cursor:pointer;font-weight:700}.website-updates p{margin:10px 0;line-height:1.65}.website-updates a{color:#36554d;font-weight:700}
 
 #websiteUpdateSummary.has-updates{color:#c62828;font-weight:700}
+
+header .release-info #benefitResearchStatus .benefit-research-count{color:#c62828;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;}
