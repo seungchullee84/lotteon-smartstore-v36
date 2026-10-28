@@ -161,7 +161,7 @@ function renderWashingIcons(p){
  }
 }
 
-populate=function(p){renderProduct(p);$('categorySource').textContent='공식몰 상품 경로: '+(p.sourceCategory?.join(' → ')||'확인 필요')+(p.gender?' / 롯데 대분류: '+p.gender+'의류 · 브랜드'+p.gender+'의류':'');};
+populate=function(p){renderProduct(p);$('categorySource').textContent='공식몰 상품 경로: '+(p.sourceCategory?.join(' → ')||'확인 필요')+(p.category?.commonMajor&&p.category?.commonMiddle&&p.category?.commonSmall?' / 롯데 공통분류: '+[p.category.commonMajor,p.category.commonMiddle,p.category.commonSmall].map(value=>value.replace(/^[^:：]*[:：]\s*/,'')).join(' → '):p.gender?' / 롯데 대분류: '+p.gender+'의류 · 브랜드'+p.gender+'의류':'');};
 $('form').elements.gender.onchange=()=>{const f=$('form');const gender=f.elements.gender.value;f.elements.name.value=f.elements.name.value.replace(/^(남성|여성)\s+/,'');if(gender)f.elements.name.value=gender+' '+f.elements.name.value;for(const key of ['commonMiddle','commonSmall','channelMiddle','channelSmall'])f.elements[key].value='';};
 function updateDetailOnlyCompletion(state){
  let banner=document.getElementById('detailOnlyCompletion');

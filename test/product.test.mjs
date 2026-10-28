@@ -7,6 +7,13 @@ test('상품명은 기모·라운드·바지처럼 쉬운 표현 사용',()=>{
 });
 test('공통 메뉴의 WOMEN을 남성 상품 성별로 사용하지 않음',()=>{const p=productClassification('<nav><a>WOMEN</a><a>MEN</a></nav><div class="navi"><a>Home</a><a class="prdpath1">MEN</a><a class="prdpath2">PANTS</a><a>데님</a><a>상품명</a></div>');assert.equal(p.gender,'남성');assert.deepEqual(p.sourceCategory,['MEN','PANTS','데님']);assert.equal(p.category.commonMiddle,'남성의류하의');});
 test('여성 긴팔티의 검증된 분류만 채움',()=>{const p=productClassification('<nav><a>MEN</a><a>WOMEN</a></nav><div class="navi"><a>Home</a><a class="prdpath1">WOMEN</a><a class="prdpath2">TOP</a><a>긴팔티</a><a>상품명</a></div>');assert.equal(p.gender,'여성');assert.equal(p.category.commonSmall,'00843 : 여성티셔츠/탑');});
+test('남성 INNERWEAR 지워머는 레깅스·긴팔티 모두 남성속옷의 남성내의로 분류',()=>{
+ for(const name of ['지워머 레깅스(에센셜)','지워머 크루넥 긴팔티(에센셜)']){
+  const p=productClassification('<div class="navi"><a>Home</a><a class="prdpath1">MEN</a><a>INNERWEAR</a><a>'+name+'</a></div>');
+  assert.equal(p.category.commonMajor,'L0014 : 남성의류');assert.equal(p.category.commonMiddle,'M0059 : 남성속옷');assert.equal(p.category.commonSmall,'00715 : 남성내의');
+  assert.equal(p.category.channelSmall,'');
+ }
+});
 test('경로가 없거나 충돌하면 성별 미확정',()=>{assert.equal(productClassification('<a>WOMEN</a><a>MEN</a>').gender,'');assert.equal(productClassification('<div class="navi"><a class="prdpath1">WOMEN</a><a class="prdpath1">MEN</a></div>').gender,'');});
 test('품번은 숫자6자리',()=>{assert.equal(validateStyle('326916'),'326916');for(const v of ['../326916','3269167','32691','x'])assert.throws(()=>validateStyle(v));});
 test('색상번호, 패턴 제거 및 첫색 기준',()=>{assert.equal(baseColor('02그레이ST+블루'),'그레이');assert.equal(matchColor('02블랙1',['블랙','블루']),'블랙');assert.equal(matchColor('보라색',['퍼플','레드']),'퍼플');assert.equal(matchColor('03더스티핑크',['핑크','블루']),'핑크');assert.equal(matchColor('미확인',['그레이']),null);});
