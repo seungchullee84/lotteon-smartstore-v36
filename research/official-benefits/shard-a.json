@@ -856,8 +856,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:13:31.832Z",
-      "analyzedAt": "2026-10-28T09:17:06.109Z"
+      "observedAt": "2026-10-28T09:47:15.716Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1212,8 +1212,8 @@
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:13:37.567Z",
-      "analyzedAt": "2026-10-28T09:17:06.138Z"
+      "observedAt": "2026-10-28T09:47:21.110Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1802,8 +1802,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:13:59.354Z",
-      "analyzedAt": "2026-10-28T09:17:06.488Z"
+      "observedAt": "2026-10-28T09:47:39.335Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2373,7 +2373,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "d8cdb60ba9aa92f5f6c1c1f68e844087bf9a47958349dd98bbf283986d4dfeec",
+      "pageHash": "5a8ad44b1a1fced6dfa4790f6cf5ae843ba542663a167d6c736cae29331ad698",
       "pageText": "탄탄한 내구성과 내추럴한 터치감이 특징인 나일론 후드 파카입니다.\n\n여유 있고 편안한 핏으로 다양한 이너 아이템과 코디하기 유용하며, 밀도 높은 나일론 2LAYER 원단으로 후면에 MILKY LAMI를 가공하여 발수/방풍 기능까지 더한 제품입니다.\n\n후드 안쪽에는 스트링이 내장되어 있어 스토퍼로 실루엣 조절이 가능합니다. \n소매 부분은 사이즈를 조절할 수 있는 비죠 벨크로 디테일을 추가하였으며, 밑단에도 스트링/스토퍼가 내장되어 있어 실루엣 조절이 가능합니다",
       "imageText": "",
       "imageScanComplete": false,
@@ -2396,8 +2396,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:13:37.942Z",
-      "analyzedAt": "2026-10-28T09:17:06.176Z"
+      "observedAt": "2026-10-28T09:47:21.109Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3163,8 +3163,8 @@
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T09:14:00.983Z",
-      "analyzedAt": "2026-10-28T09:17:06.579Z"
+      "observedAt": "2026-10-28T09:47:41.314Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
