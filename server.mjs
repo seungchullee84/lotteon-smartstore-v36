@@ -285,7 +285,7 @@ const server=http.createServer(async(req,res)=>{
         job('smartstore-auto',async()=>{
           const signal=activeAbort.signal;
           const result=await runSmartstoreAuto({input,apiKey:key,signal,log,step:name=>{state.autoStep=name;},
-            preflight:()=>smartBot.preflight(),
+            preflight:p=>smartBot.preflight(p),
             collect:async value=>{
               const folder=path.join(dataRoot,'smartstore-auto-'+Date.now());
               let product=await collect(value,folder,log,()=>signal.aborted,signal,{saveSmartstoreSource:true,sourceUrlHint,noticeCacheRoot:path.join(dataRoot,'smartstore-notice-cache'),prepareMain:false});

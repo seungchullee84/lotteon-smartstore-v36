@@ -47,19 +47,19 @@ export class SmartstoreAutomation extends BrowserAutomation{
     const {writeFile}=await import('node:fs/promises');
     await writeFile(path.join(folder,'smartstore-detail-only-result.json'),JSON.stringify({...result,style:product.style,detailOnly:true,saved:false,published:false},null,2));return result;
   }
-  async preflight(){
-    this.stopped=false;await this.bindCopyForm();
+  async preflight(product){
+    this.stopped=false;await this.bindCopyForm(product);
     const notice=this.page.locator('.modal-content').filter({hasText:'판매상품이 안전기준 준수 대상'});
     if(await notice.isVisible())await notice.getByRole('button',{name:'확인',exact:true}).click();
-    try{await this.page.locator('input[name="product.name"]').waitFor({state:'visible',timeout:10000});}catch{throw Error('전용 크롬에서 스마트스토어 로그인 후 복사등록 화면을 열어 주세요.');}
-    if(!/\/products\/copy\/\d+/.test(this.page.url()))throw Error('복사등록 화면에서 실행해 주세요.');
+    try{await this.page.locator('input[name="product.name"]').waitFor({state:'visible',timeout:10000});}catch{throw Error('전용 크롬에서 스마트스토어 로그인 후 수정 또는 복사등록 화면을 열어 주세요.');}
+    if(!isSmartstoreInputUrl(this.page.url()))throw Error('수정 또는 복사등록 화면에서 실행해 주세요.');
   }
   async uploadPrepared(p,folder,{main,extras,detailParts,careLabels=[]}){
     this.check();const plan={...smartstorePlan(p,p.consumerPrice),tagResearch:selectedProductTagResearch(p,{dataRoot:this.root})};
-    if(!this.page||this.page.isClosed()||this.page.url()!==this.copyFormUrl||!/\/products\/copy\/\d+/.test(this.page.url()))throw Error('자동화 중 등록 화면이 변경됐습니다.');
+    if(!this.page||this.page.isClosed()||this.page.url()!==this.copyFormUrl||!isSmartstoreInputUrl(this.page.url()))throw Error('자동화 중 등록 화면이 변경됐습니다.');
     const check=()=>{this.check();if(this.page.isClosed()||this.page.url()!==this.copyFormUrl)throw Error('등록 화면이 변경되어 업로드를 중단했습니다.');};
     const report=await fillSmartstore({playwright:this.page,url:()=>this.page.url()},plan,{main,extras,careLabels,replaceImages:true,detail:true},this.log,check);
-    check();const detail=await uploadSmartstoreDetail(this.page,detailParts,{check,log:this.log});
+    check();const detail=await uploadSmartstoreDetail(this.page,detailParts,{check,log:this.log,mode:this.formMode||'copy'});
     const {writeFile}=await import('node:fs/promises');const result={...report,...detail,published:false};
     await writeFile(path.join(folder,'smartstore-auto-result.json'),JSON.stringify(result,null,2));return result;
   }
@@ -71,10 +71,10 @@ export class SmartstoreAutomation extends BrowserAutomation{
     if(this.page.url()==='about:blank')await this.page.goto(SMARTSTORE_HOME,{waitUntil:'domcontentloaded'});
     this.page.setDefaultTimeout(8000);await this.page.bringToFront();
     await this.ensureLogin();
-    this.log('스마트스토어 연결 · 원하는 상품의 복사등록 화면을 직접 선택한 뒤 등록기에서 시작을 누르세요.');
+    this.log('스마트스토어 연결 · 원하는 상품의 수정 또는 복사등록 화면을 직접 선택한 뒤 등록기에서 시작을 누르세요.');
   }
   async runTags(product,{validateOnly=false,folder,research=selectedProductTagResearch(product,{dataRoot:this.root})}={}){
-    this.stopped=false;await this.preflight();
+    this.stopped=false;await this.preflight(product);
     const url=this.copyFormUrl,check=()=>{this.check();if(this.page.isClosed()||this.page.url()!==url)throw Error('등록 화면이 변경되었습니다.');};
     const entered=await this.page.locator('input[name="product.name"]').inputValue();
     if(!validateOnly&&!entered.includes(product.style)){const code=this.page.locator('#seller-code1');const sellerCode=await code.count()?await code.inputValue():'';if(!sellerCode.includes(product.style))throw Error('복사등록 화면의 상품명·판매자 코드 품번이 현재 상품과 다릅니다. 태그 검증만 버튼으로 원래 태그를 보존하며 검증할 수 있습니다.');}
@@ -99,15 +99,18 @@ export class SmartstoreAutomation extends BrowserAutomation{
     }
     return {...report,style:product.style,validationOnly:true,originalTagsRestored:true,applied:false,saved:false,published:false};
   }
-  async bindCopyForm(){
+  async bindCopyForm(product){
     await this.connectChrome(SMARTSTORE_HOME);
-    const findCopies=()=>this.context.pages().filter(p=>!p.isClosed()&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+(?:[?]|$)/.test(p.url()));
-    let copies=findCopies();
-    if(!copies.length){await this.open();copies=findCopies();}
-    if(copies.length!==1)throw Error(copies.length?'복사등록 창이 여러 개입니다. 사용할 창 하나만 남긴 뒤 시작을 눌러 주세요.':'스마트스토어에서 원하는 상품의 복사등록 화면을 직접 열고 시작을 눌러 주세요.');
-    this.page=copies[0];this.page.setDefaultTimeout(8000);await this.page.bringToFront();
-    await this.ensureLogin();
-    if(!/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+(?:[?]|$)/.test(this.page.url()))throw Error('로그인 후 원하는 상품의 복사등록 화면을 직접 열고 다시 시작해 주세요.');
+    const forms=()=>this.context.pages().filter(p=>!p.isClosed()&&(/\/products\/copy\/\d+(?:[?]|$)/.test(p.url())||isSmartstoreDetailEditUrl(p.url()))&&isSmartstoreInputUrl(p.url()));
+    let pages=forms();if(!pages.length){await this.open();pages=forms();}
+    if(pages.length!==1)throw Error(pages.length?'수정·복사등록 창이 여러 개입니다. 사용할 창 하나만 남긴 뒤 시작을 눌러 주세요.':'스마트스토어에서 원하는 상품의 수정 또는 복사등록 화면을 열고 시작을 눌러 주세요.');
+    this.page=pages[0];this.page.setDefaultTimeout(8000);await this.page.bringToFront();await this.ensureLogin();
+    if(!isSmartstoreInputUrl(this.page.url()))throw Error('로그인 후 수정 또는 복사등록 화면을 열고 다시 시작해 주세요.');
+    this.formMode=isSmartstoreDetailEditUrl(this.page.url())?'edit':'copy';
+    if(this.formMode==='edit'){
+      assertDetailOnlyProduct(await readDetailOnlySellerCode(this.page),product?.style);
+      this.log('수정 화면 품번 '+product.style+' 확인 · 전체 입력·업로드 · 상품 저장 안 함');
+    }
     this.copyFormUrl=this.page.url();
   }
   async run(p,folder,salePrice,includeImages=false){

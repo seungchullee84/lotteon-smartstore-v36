@@ -1,4 +1,5 @@
-export function isSmartstoreInputUrl(url){return /^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/(?:create(?:[?]|$)|copy\/\d+(?:[?]|$))/.test(url);}
+import {isSmartstoreDetailEditUrl,readDetailOnlySellerCode,assertDetailOnlyProduct} from './smartstore-detail-only.mjs';
+export function isSmartstoreInputUrl(url){return /^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/(?:create(?:[?]|$)|(?:copy|edit)\/\d+(?:[?]|$))/.test(url);}
 import {buildSmartstoreDetail} from './smartstore-detail.mjs';
 import {fillProductAttributes} from './smartstore-attributes.mjs';
 import {smartstoreTitle,assertSmartstoreInputTitle} from './smartstore-title.mjs';
@@ -86,11 +87,13 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   assertSmartstoreInputTitle(plan.name,plan.nameUserEdited);
   const page=tab.playwright;
   if(!isSmartstoreInputUrl(await tab.url()))throw Error('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.');
-  if(!/\/products\/copy\/\d+/.test(await tab.url()))throw Error('기본설정을 복사한 복사등록 화면에서 실행해 주세요.');
+  const editing=isSmartstoreDetailEditUrl(await tab.url());
+  if(!editing&&!/\/products\/copy\/\d+/.test(await tab.url()))throw Error('수정 또는 복사등록 화면에서 실행해 주세요.');
+  if(editing)assertDetailOnlyProduct(await readDetailOnlySellerCode(page),plan.style);
   const learned=learnedFields(plan);
   const fill=(loc,value)=>fillSmartstoreValue(loc,value,check);
   const open=async(name,field)=>{if(!await field.isVisible())await page.getByRole('button',{name}).click();};
-  log('스마트스토어 복사등록 입력 · 조사 자료 태그 자동입력 · 상품 저장/등록 안 함');
+  log('스마트스토어 '+(editing?'수정':'복사등록')+' 입력 · 조사 자료 태그 자동입력 · 상품 저장/등록 안 함');
   log('카테고리 자동선택 중지 · 현재 선택된 분류 유지');
   await fill(page.locator('input[name="product.name"]'),plan.name);
   await fill(page.locator('#prd_price2'),plan.salePrice);
@@ -147,7 +150,8 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   const tagReport=await fillResearchTags(page,plan.tagResearch||researchForProduct(plan),log,check);
   const sellerCode=sellerProductCode(plan);
   await open(/^판매자 코드/,page.locator('#seller-code1'));
-  await fill(page.locator('#seller-code1'),sellerCode);
+  if(!editing)await fill(page.locator('#seller-code1'),sellerCode);
+  else log('수정 화면의 기존 판매자 상품코드 유지');
   log('판매자 상품코드 확인: '+sellerCode+' · 바코드·내부코드 유지');
   await open(/^노출 채널/,page.locator('#material-detail'));
   await fill(page.locator('#material-detail'),learned.material);
