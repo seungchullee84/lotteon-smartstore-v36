@@ -1,6 +1,6 @@
 import {listTwoChoicePackages,readTwoChoicePackage,saveTwoChoicePackage,twoChoiceUploadParts} from './smartstore-two-choice-store.mjs';
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
-import {stageImportedPhotos,applyImportedPhotos,allImportedPhotoChoices,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
+import {applyImportedPhotos,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
 import {resolveDetailTemplate} from './smartstore-template-choice.mjs';
@@ -8,6 +8,7 @@ import {serveBrandVideo,WOMEN_VIDEO_HASH} from './smartstore-brand-video.mjs';
 import {runSmartstoreAuto} from './smartstore-auto.mjs';
 import {runSmartstoreDetailOnly} from './smartstore-detail-only.mjs';
 import {prepareSmartstoreAuto} from './smartstore-auto-prepare.mjs';
+import {prepareSmartstoreWithColorRecovery,importSmartstoreColorPhotos} from './smartstore-color-recovery.mjs';
 import {loadSmartstoreAIKey,saveSmartstoreAIKey} from './smartstore-ai-settings.mjs';
 import {smartstoreUploadParts} from './smartstore-detail-upload.mjs';
 import {listingPreview,originalListingMain,prepareListingImages} from './smartstore-listing-images.mjs';
@@ -84,6 +85,12 @@ let extraImageEdits=Promise.resolve();
 function log(message){state.logs.push({time:new Date().toLocaleTimeString('ko-KR'),message});state.logs=state.logs.slice(-300);console.log(message);}
 const bot=new LotteAutomation(dataRoot,log);bot.onPause=message=>{state.paused=message;};
 const smartBot=new SmartstoreAutomation(dataRoot,log);
+function colorRecoveryOptions(signal,apiKey){return {dataRoot,signal,apiKey,log,
+ readSource:(product,options)=>smartBot.importExistingPhotos(product,options),
+ assertCurrent:(product,folder)=>{if(state.product?.style!==product.style||state.product?.sourceUrl!==product.sourceUrl||state.folder!==folder)throw Error('현재 상품이 변경되어 수집 사진을 적용하지 않았습니다.');},
+ onRecovery:product=>{state.photoPreparation={style:product.style,status:'preparing',pendingPhotoCount:product.smartstoreDetail.pendingPhotoCount,message:'기존 상품의 색상 구간을 자동으로 대조하고 있습니다.'};},
+ onImported:({product,stage,result})=>{state.photoImport={...stage,status:'applied',selectedCount:result.selectedCount,detailReady:!!product.smartstoreDetail?.sellingPoints?.length};}
+};}
 async function publishPhotoPreview(product,folder){const listing=await prepareListingImages(product,folder,{dataRoot});if(!product.smartstoreDetail?.photoCount&&!product.images?.detail&&!product.detailFallbackApproved)throw Error('상세사진 또는 공식 상세 원본을 확인해 주세요.');state.product=product;state.folder=folder;state.photoPreparation={style:product.style,status:product.smartstoreDetail.pendingPhotoCount?'needs-match':'ready',mainCount:1,extraCount:listing.extras.length,detailCount:product.smartstoreDetail.photoCount,pendingPhotoCount:product.smartstoreDetail.pendingPhotoCount||0,message:product.smartstoreDetail.pendingPhotoCount?'제공 사진 '+product.smartstoreDetail.pendingPhotoCount+'장은 색상 연결이 남아 있습니다. 사진의 색상명 폴더 또는 기존 상품 색상 구간을 확인합니다.':undefined};state.revision++;log('미리보기 반영 완료 · 대표 1장 · 추가 '+listing.extras.length+'장 · 상세사진 '+product.smartstoreDetail.photoCount+'장');}
 function json(res,status,data){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));}
 async function body(req){let text='';for await(const chunk of req){text+=chunk;if(text.length>1600000)throw Error('요청이 너무 큽니다.');}return JSON.parse(text||'{}');}
@@ -295,7 +302,7 @@ const server=http.createServer(async(req,res)=>{
             },
             onProduct:async(product,folder)=>{state.product=product;state.folder=folder;state.photoPreparation={style:product.style,status:'preparing'};state.revision++;},
             onPrepared:publishPhotoPreview,
-            prepare:(p,folder)=>prepareSmartstoreAuto(p,folder,{dataRoot,apiKey:key,signal,log}),
+            prepare:(p,folder)=>prepareSmartstoreWithColorRecovery(p,folder,colorRecoveryOptions(signal,key)),
             includeMain:false,
             render:async(p,folder)=>{
               const output=path.join(folder,p.style+'_스마트스토어자동상세_'+Date.now()+'.png');
@@ -325,15 +332,8 @@ const server=http.createServer(async(req,res)=>{
             if(product.style!==style)throw Error('공식몰에서 수집한 품번이 다릅니다.');
           }
           product=await productEdits.apply(product);state.product=product;state.folder=folder;state.photoImport=null;state.revision++;
-          const source=await smartBot.importExistingPhotos(product,{signal});signal.throwIfAborted();
-          const stage=await stageImportedPhotos(source,folder,{signal,dataRoot});signal.throwIfAborted();
-          if(state.product.style!==product.style||state.folder!==folder)throw Error('현재 상품이 변경되어 수집 사진을 적용하지 않았습니다.');
-          let known=[],ignored=[];try{const mapping=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',style,'draft.json'),'utf8')).photoMapping;known=mapping?.files||[];ignored=mapping?.ignoredPhotos||[];}catch(e){if(e.code!=='ENOENT')throw e;}
-          const choices=allImportedPhotoChoices(stage,product,known,ignored);
-          const result=await applyImportedPhotos(product,folder,choices,{dataRoot,signal,automatic:true});signal.throwIfAborted();
-          const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,signal,log});signal.throwIfAborted();
-          assertImportedPhotoCoverage(stage,prepared,choices,{requireSellingPoints:false});
-          await writeFile(path.join(folder,'product.json'),JSON.stringify(prepared,null,2));await publishPhotoPreview(prepared,folder);
+          const {product:prepared,stage,result}=await importSmartstoreColorPhotos(product,folder,colorRecoveryOptions(signal));
+          await publishPhotoPreview(prepared,folder);
           state.photoImport={...stage,status:'applied',selectedCount:result.selectedCount,detailReady:!!prepared.smartstoreDetail?.sellingPoints?.length};
           if(!state.photoImport.detailReady)log('사진 수집·연결 완료 · 소구점은 공식 원문 확인 필요 · 상세 제작·업로드는 확인 전 진행하지 않습니다.');
           log('색상별 사진 전체 '+result.selectedCount+'장 자동 반영 완료 · 상세 템플릿 업데이트 · 상품 저장 안 함');
@@ -487,7 +487,7 @@ const server=http.createServer(async(req,res)=>{
         if(b.allowMissingDetail===true&&state.detailFallbackRequest?.input!==b.style)return json(res,400,{error:'먼저 일반 수집으로 해당 상품의 상세 원본 누락을 확인해 주세요.'});
         const input=parseProductInput(b.style);const style=input.style||"url";bot.stopped=false;state.collectionInput=b.style;state.detailFallbackRequest=null;state.photoImport=null;
         if(b.edits)await productEdits.save(b.edits,state.product?.style);
-        job('collect',async()=>{const folder=path.join(dataRoot,style+'-'+new Date().toISOString().replace(/[:.]/g,'-'));let product=await collect(b.style,folder,log,()=>bot.stopped,activeAbort.signal,{allowMissingDetail:b.allowMissingDetail===true,saveSmartstoreSource:b.channel==='smartstore',noticeCacheRoot:b.channel==='smartstore'?path.join(dataRoot,'smartstore-notice-cache'):undefined,prepareMain:b.channel!=='smartstore'});product.keywords=buildKeywords(product);product=await productEdits.apply(product);state.product=product;state.folder=folder;state.photoPreparation=null;state.revision++;if(b.channel==='smartstore'){state.photoPreparation={style:product.style,status:'preparing'};try{const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,apiKey:backgroundApiKey,signal:activeAbort.signal,log});await publishPhotoPreview(prepared,folder);}catch(error){if(error.code!=='PHOTO_FOLDER_EMPTY')throw error;state.photoPreparation={style:product.style,status:'missing',message:error.message};log(error.message);}}log('수집 완료. 고시 이미지와 입력값을 검토해 주세요.'+(Object.keys(product.userEditedFields||{}).length?' · 직접 수정한 항목 유지':''));});return json(res,202,{ok:true});
+        job('collect',async()=>{const folder=path.join(dataRoot,style+'-'+new Date().toISOString().replace(/[:.]/g,'-'));let product=await collect(b.style,folder,log,()=>bot.stopped,activeAbort.signal,{allowMissingDetail:b.allowMissingDetail===true,saveSmartstoreSource:b.channel==='smartstore',noticeCacheRoot:b.channel==='smartstore'?path.join(dataRoot,'smartstore-notice-cache'):undefined,prepareMain:b.channel!=='smartstore'});product.keywords=buildKeywords(product);product=await productEdits.apply(product);state.product=product;state.folder=folder;state.photoPreparation=null;state.revision++;if(b.channel==='smartstore'){state.photoPreparation={style:product.style,status:'preparing'};try{const prepared=await prepareSmartstoreWithColorRecovery(product,folder,colorRecoveryOptions(activeAbort.signal,backgroundApiKey));await publishPhotoPreview(prepared,folder);}catch(error){if(error.code!=='PHOTO_FOLDER_EMPTY')throw error;state.photoPreparation={style:product.style,status:'missing',message:error.message};log(error.message);}}log('수집 완료. 고시 이미지와 입력값을 검토해 주세요.'+(Object.keys(product.userEditedFields||{}).length?' · 직접 수정한 항목 유지':''));});return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/lotte-category-suggest'){
         if(!state.product||b.style!==state.product.style)throw Error('현재 수집한 상품의 분류만 확인할 수 있습니다.');

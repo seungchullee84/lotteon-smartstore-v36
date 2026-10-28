@@ -300,6 +300,7 @@ function updateCollectionStatus(s){
  const badge=$('collectionStatus');
  if(s.phase==='collect'&&s.busy){badge.hidden=false;badge.className='collect-pending';badge.textContent='정보 수집 중… 잠시 기다려 주세요.';return;}
  if(s.phase==='error'){badge.hidden=false;badge.className='collect-failed';badge.textContent=s.product?'작업 확인 필요 · 기존 수집정보는 유지됩니다. 진행 기록을 확인해 주세요.':'정보 수집을 완료하지 못했습니다. 진행 기록을 확인해 주세요.';return;}
+ if(activeChannel()==='smartstore'&&s.product?.smartstoreDetail?.pendingPhotoCount){badge.hidden=false;badge.className='collect-pending';badge.textContent='품번 '+s.product.style+' · 사진 '+s.product.smartstoreDetail.pendingPhotoCount+'장 색상 연결 확인 필요';return;}
  if(s.product){badge.hidden=false;badge.className='collect-complete';badge.textContent='✓ 정보 수집 완료 · 품번 '+s.product.style+' · 아래 내용을 검토해 주세요.';return;}
  badge.hidden=true;badge.textContent='';
 }
