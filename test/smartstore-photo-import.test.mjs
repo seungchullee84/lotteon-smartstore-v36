@@ -146,3 +146,24 @@ test('색상 사진 앞의 상품 디테일 제목에서는 멈추지 않고 별
 test('마지막 색상 이후 교환 추천방법·매장위치에 있는 매장 전경은 색상 사진이 아니다',async()=>{
  const browser=await chromium.launch({headless:true});try{const p=await browser.newPage();for(const heading of ['롯데 백화점 동탄점 지오다노에서 알려드리는 교환 추천방법 !◆','◆ 매장위치','상담안내','배송안내']){await p.setContent('<div class="se-component se-text">03크림+블랙</div><div class="se-component se-image"><img><img></div><div class="se-component se-text">'+heading+'</div><div class="se-component se-image"><img></div>');assert.equal((await p.evaluate(editorPhotoPositions,['03크림+블랙'])).length,2);}}finally{await browser.close();}
 });
+
+for(const [style,name] of [['116925','남성 치노 바지'],['326922','여성 터틀넥 티셔츠'],['134600','리버서블 가죽 벨트']])test(style+' 다른 색상의 동일 원본은 재수집·폴더·상세에서 4색 8장과 순서를 보존한다',async()=>{
+ const dir=await mkdtemp(path.join(os.tmpdir(),'colors-preserve-'));
+ try{
+  const folder=path.join(dir,'collected'),dataRoot=path.join(dir,'data'),desktop=path.join(dir,'desktop');await mkdir(folder,{recursive:true});
+  const product={style,name,sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno='+style,colors:['01카키','02올리브','03다크그레이','04블랙'],images:{},sizes:['M'],material:'공식 소재'};
+  const buffers=await Promise.all([40,160].map(r=>sharp({create:{width:750,height:1000,channels:3,background:{r,g:90,b:110}}}).jpeg().toBuffer()));
+  const source={...product,sellerCode:style,candidates:product.colors.flatMap(color=>[0,1].map(i=>({colorHint:color,url:'https://shop-phinf.pstatic.net/'+i+'.jpg'})))};
+  const options={recognizePhoto:async()=>'',fetchImpl:async url=>new Response(buffers[Number(new URL(url).pathname.slice(1,-4))],{headers:{'Content-Type':'image/jpeg'}})};
+  for(let pass=0;pass<2;pass++){
+   const stage=await stageImportedPhotos(source,folder,options);assert.equal(stage.candidates.length,8);assert.equal(new Set(stage.candidates.map(p=>p.id)).size,8);
+   await applyImportedPhotos(product,folder,allImportedPhotoChoices(stage,product),{dataRoot,desktop,automatic:true});
+   const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',style,'draft.json'),'utf8'));
+   const photos=await findPhotos(product,{desktop});assert.equal(photos.length,8);
+   const mapped=photos.map(p=>({...p,...draft.photoMapping.files.find(r=>r.name===p.name)}));
+   const prepared=await prepareTrustedFolder(product,folder,{dataRoot,photos,mapped,old:draft,description:'공식 설명',detailHash:null,recognizePhoto:async()=>''});
+   assert.equal(prepared.smartstoreDetail.photoCount,8);assertImportedPhotoCoverage(stage,prepared,undefined,{requireSellingPoints:false});
+   for(const color of product.colors)assert.equal(prepared.smartstoreDetail.colorImages[color].length,2);
+  }
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
