@@ -1,7 +1,7 @@
 import {readFile,writeFile,rename} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-export const BENEFIT_CHECK_INTERVAL=30*60*1000;
+export const BENEFIT_CHECK_INTERVAL=20*60*1000;
 const digest=value=>createHash('sha256').update(value).digest('hex');
 export function websiteCheckDue(state,now=Date.now()){return !state?.checkedAt||now-Date.parse(state.checkedAt)>=BENEFIT_CHECK_INTERVAL;}
 export function officialProductFingerprint(product,pageText){

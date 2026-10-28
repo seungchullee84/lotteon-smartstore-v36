@@ -1,11 +1,11 @@
 let smartstoreListingState=null,tagResearchReady=false;
 function renderWebsiteUpdates(website){
  const summary=$('websiteUpdateSummary'),list=$('websiteUpdateList');if(!summary||!list)return;
- if(!website?.checkedAt){summary.classList.remove('has-updates');summary.textContent='홈페이지 기준선 확인 중 · 30분 간격';return;}
+ if(!website?.checkedAt){summary.classList.remove('has-updates');summary.textContent='홈페이지 기준선 확인 중 · 20분 간격';return;}
  const time=value=>new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(value));
  const batches=website.batches||[],latest=batches.at(-1),events=latest?.events||[];
  summary.classList.toggle('has-updates',events.some(event=>event.type==='new'||event.type==='changed'));
- summary.textContent='홈페이지 확인 '+time(website.checkedAt)+' · 신상품 '+events.filter(e=>e.type==='new').length+'건 · 변경 '+events.filter(e=>e.type==='changed').length+'건 · 30분 간격';
+ summary.textContent='홈페이지 확인 '+time(website.checkedAt)+' · 신상품 '+events.filter(e=>e.type==='new').length+'건 · 변경 '+events.filter(e=>e.type==='changed').length+'건 · 20분 간격';
  const stamp=JSON.stringify(website);if(list.dataset.stamp===stamp)return;list.dataset.stamp=stamp;list.replaceChildren();
  const next=document.createElement('p');next.textContent='다음 확인 '+time(website.nextCheckAt)+(website.errors?' · 일부 원본 확인 실패: 다음 주기에 재확인':'');list.append(next);
  const history=batches.slice().reverse().flatMap(b=>b.events.map(e=>({...e,checkedAt:b.checkedAt}))).slice(0,30);
