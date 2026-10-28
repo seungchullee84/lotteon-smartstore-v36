@@ -398,7 +398,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=12656F338B190AEF1D7229B71AAC0B54&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2022/01072925.jpg",
       "detailHash": "e3314c4932bc9125e5776ec97c067d72421e40999ef53e0bef70761fa69b48dd",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"121c0d517926e317b969875a387e857a\"",
         "lastModified": "Thu, 19 Oct 2023 08:50:21 GMT"
@@ -416,8 +416,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:09:05.760Z",
-      "analyzedAt": "2026-10-28T04:09:25.587Z"
+      "observedAt": "2026-10-28T04:44:09.324Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1076,7 +1076,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "921c207befdd0c8d60d2648589cc41efa4f42334ac37ca0846c69d06ee623121",
+      "pageHash": "1742cb9631cefdc9a4df4207475d8c141cf5dac4cd5c66f8b60ac032a9945681",
       "pageText": "베이직 카라의 셔츠형 집업 재킷입니다. \n\n가벼운 착용감으로 봄 계절 간편하게 걸치기 좋으며 간결한 절개 디테일과 가슴 양옆에 플랩포켓을 더하여 미니멀하고 단정한 외관의 느낌을 살렸습니다.\n\n밀도 높은 탄탄한 C/P 소재로 내구성을 높였으며, 지퍼 안쪽에는 플라켓을 더해 메탈 지퍼의 차가운 질감이 닿지 않도록 보완하였습니다.\n\n여유 있는 실루엣으로 제작되어 아우터로 활용하기 좋으며 다양한 이너와 슬렉스 팬츠 혹은 치노 팬츠와 함께 매치하여 트렌디한 스타일링을 할 수 있습니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -1089,8 +1089,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:09:07.470Z",
-      "analyzedAt": "2026-10-28T04:09:25.628Z"
+      "observedAt": "2026-10-28T04:44:10.367Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1336,7 +1336,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=16963B9AD17F9C91E58F78323B6B6745&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2022/01052906.jpg",
       "detailHash": "598800cb589ee81e1988e144743a5a667b0c4778ffe2b9753602fb75e991eff1",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"36b48eb5b293086082ff4a278c3fb704\"",
         "lastModified": "Thu, 19 Oct 2023 08:39:25 GMT"
@@ -1364,8 +1364,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:08:37.613Z",
-      "analyzedAt": "2026-10-28T04:09:25.399Z"
+      "observedAt": "2026-10-28T04:43:45.896Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2971,7 +2971,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "4089247915a6a61b61c12dd6ef284fbe20b0ec2af0fac8646ce7cc9601d1fe28",
+      "pageHash": "0e76316163c04c4e1447356f8768569bddf024a2a75cae956c42c62bf553cfb9",
       "pageText": "따뜻하고 편안한 플리스 바머 자켓입니다.\n\n표면이 부드럽고 밀도가 높은 플리스 소재로 제작하였습니다. 바머 형태의 디자인으로 올 시즌 트렌드 아이템인 바머를 좀 더 특별하게 연출할 수 있습니다. \n\n자연스럽고 여유로운 오버실루엣으로 활동성이 좋고, 두꺼운 후드티나 맨투맨 등 캐주얼한 다양한 이너와 매치하여도 쉽게 코디할 수 있는 아이템입니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -2989,8 +2989,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:09:09.328Z",
-      "analyzedAt": "2026-10-28T04:09:25.634Z"
+      "observedAt": "2026-10-28T04:44:12.076Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3249,8 +3249,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:09:06.053Z",
-      "analyzedAt": "2026-10-28T04:09:25.593Z"
+      "observedAt": "2026-10-28T04:44:09.111Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",

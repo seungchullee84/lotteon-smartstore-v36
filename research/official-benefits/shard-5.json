@@ -2053,7 +2053,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=5CD03D4102E68CB4FEDFA50AD0F0FECA&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01216701.jpg",
       "detailHash": "2ec9acf34f7c9d1e2425961d5986a5f1517d44055bd0b93945935e9fd95deb19",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"d9106ec109ccdd2f9f0f74261283af5d\"",
         "lastModified": "Mon, 26 Oct 2026 01:46:48 GMT"
@@ -2076,8 +2076,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:09:13.897Z",
-      "analyzedAt": "2026-10-28T04:09:25.681Z"
+      "observedAt": "2026-10-28T04:44:15.525Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2092,7 +2092,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=5CE2E317D62FA08E46F719C90169FF60&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2023/01073955.jpg",
       "detailHash": "481df50df6918db5fea0be1c66ab56c6f8724b416a7906b10e90bcc6060828cb",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"66d6a184c6ffc258eac54785d9c0b7f0\"",
         "lastModified": "Tue, 21 Jan 2025 05:05:16 GMT"
@@ -2125,8 +2125,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:08:58.265Z",
-      "analyzedAt": "2026-10-28T04:09:25.569Z"
+      "observedAt": "2026-10-28T04:44:03.404Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2627,7 +2627,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=5FDE881FB2CFEB165BA4D574EDDDEAAF&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2024/01072924.jpg",
       "detailHash": "0b865446ab94f65d23e8a52291b99b77a5954840d3545000bb740668896f9460",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"eefac456e95c8a37d1e5e310577e4307\"",
         "lastModified": "Thu, 05 Feb 2026 05:35:08 GMT"
@@ -2655,8 +2655,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:09:06.525Z",
-      "analyzedAt": "2026-10-28T04:09:25.614Z"
+      "observedAt": "2026-10-28T04:44:09.869Z",
+      "analyzedAt": null
     }
   ]
 }
