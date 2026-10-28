@@ -49,3 +49,12 @@ test('조사자료는 상품명 후보를 보강하고 API 비교가 없으면 �
  assert.deepEqual(p,before);
  assert(expandedTitleCandidates(p).includes('슬랙스'));
 });
+
+test('기모 후드 집업은 후드티·니트·남성·무지·여름 태그와 구분해 추천한다',()=>{
+ const i={tags:['후드집업','기모후드집업','여성후드집업','여자후드집업','집업후드','후드티','기모후드티','니트집업','남성후드집업','여름후드집업','무지후드집업','여성아우터'].map((name,n)=>tag(name,n+1))};
+ const hoodie={rawName:'NEW [박현지] 브러시드 테리 후드 집업',gender:'여성',officialDescription:'안쪽에 기모 처리로 보온성 높임'};const names=matchResearchTags(hoodie,i).map(t=>t.name);
+ for(const name of ['후드집업','기모후드집업','여성후드집업','여자후드집업','집업후드','여성아우터'])assert(names.includes(name),name);
+ for(const name of ['후드티','기모후드티','니트집업','남성후드집업','여름후드집업','무지후드집업'])assert(!names.includes(name),name);
+ assert(!matchResearchTags({...hoodie,rawName:'기모 후드 풀오버'},i).some(t=>t.name==='후드집업'));
+ assert(!matchResearchTags({...hoodie,rawName:'니트 집업 가디건'},i).some(t=>t.name==='후드집업'));
+});
