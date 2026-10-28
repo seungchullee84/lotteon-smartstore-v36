@@ -102,7 +102,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=E06C1068D7B89487A1B826604E4EFBAA&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2024/05374919.jpg",
       "detailHash": "2c9fb599aeb8933a2195805a97503a42a229d5ab6cde9bce501aead51ce91522",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"735898d15761d08710706c7775d84cb5\"",
         "lastModified": "Mon, 29 Sep 2025 01:45:13 GMT"
@@ -120,8 +120,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:06:29.335Z",
-      "analyzedAt": "2026-10-28T04:09:24.370Z"
+      "observedAt": "2026-10-28T04:41:57.363Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -922,7 +922,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=E4C41C252777997BED1083DCBB46F764&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05555502.jpg",
       "detailHash": "7de34050ee9cb8b9611d50e99135374657f6955a4cc5f6618e07b240f4ae545f",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"d3a006f07dfab0b66837a71fee5ab14f\"",
         "lastModified": "Mon, 29 Sep 2025 03:34:14 GMT"
@@ -940,8 +940,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:06:22.445Z",
-      "analyzedAt": "2026-10-28T04:09:24.301Z"
+      "observedAt": "2026-10-28T04:41:50.735Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1691,7 +1691,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=E8B250D1AA6C076CFF05C5D041476B10&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05165971.jpg",
       "detailHash": "04a62a58ead1be45f4337f6e0cfa15811681bcf947d710578b39db97990b8a91",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"e721c92334e95def1863de7aa9f2d14c\"",
         "lastModified": "Thu, 23 Oct 2025 06:30:41 GMT"
@@ -1719,8 +1719,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:07:02.043Z",
-      "analyzedAt": "2026-10-28T04:09:24.588Z"
+      "observedAt": "2026-10-28T04:42:26.703Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2050,7 +2050,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=EA090F8B84FBC37411578DE421A65911&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2022/05372906.jpg",
       "detailHash": "f37a800035484f029f421d0c60ccec973adebadd732f7f4dd95e3e066904357f",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"4d342bf8565243ce668f258dcba33f75\"",
         "lastModified": "Tue, 28 Feb 2023 02:13:37 GMT"
@@ -2068,8 +2068,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:06:42.684Z",
-      "analyzedAt": "2026-10-28T04:09:24.476Z"
+      "observedAt": "2026-10-28T04:42:08.158Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",

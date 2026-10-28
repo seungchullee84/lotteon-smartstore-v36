@@ -166,7 +166,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=70DFABBA08528A90FE4BF54BC1322D76&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05375921.jpg",
       "detailHash": "4d7965e4c7285af4e7bccb504674bf7654fb73707728384531c4109d487ec063",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"ac446ddd13334e65b99497f4f875b506\"",
         "lastModified": "Tue, 27 Oct 2026 01:18:19 GMT"
@@ -184,8 +184,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:06:36.573Z",
-      "analyzedAt": "2026-10-28T04:09:24.390Z"
+      "observedAt": "2026-10-28T04:42:02.741Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -200,7 +200,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=710CAD0883868C5655F9B7A311FA7B9D&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05375923.jpg",
       "detailHash": "c728ef52cb1b9242f4714205722abfd6445acc9fa5caa9b20f42647874876e76",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"2d2139ccb31fe9d3e15c2a112850f804\"",
         "lastModified": "Tue, 04 Nov 2025 07:10:10 GMT"
@@ -223,8 +223,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:06:37.105Z",
-      "analyzedAt": "2026-10-28T04:09:24.414Z"
+      "observedAt": "2026-10-28T04:42:03.135Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -809,7 +809,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7426197CB762597EAE138AFC18B50D60&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05375903.jpg",
       "detailHash": "b63f684da97824d938b55c55638c2ca083f67c7fb9fd5c713a3d43cf6b47115d",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"5ea0fa24164c4e61f2d673ff92d41a83\"",
         "lastModified": "Fri, 19 Sep 2025 04:35:34 GMT"
@@ -827,8 +827,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:07:00.981Z",
-      "analyzedAt": "2026-10-28T04:09:24.585Z"
+      "observedAt": "2026-10-28T04:42:24.731Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1165,7 +1165,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=76A6659928F87068FD599F6067A305B1&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2024/05554912.jpg",
       "detailHash": "ab9b69fd76287aa962f0e63c47aba93b7abc56cb99525ae0586befa8c9faf211",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"20850202f9930def6c243d2e0945bf23\"",
         "lastModified": "Tue, 07 Jan 2025 05:02:34 GMT"
@@ -1193,8 +1193,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:06:19.276Z",
-      "analyzedAt": "2026-10-28T04:09:24.269Z"
+      "observedAt": "2026-10-28T04:41:48.734Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1209,12 +1209,12 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=76F7FE4D892A6470FF8577818D868AC5&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05415924.jpg",
       "detailHash": "c07edec7958d919887d0c39d1c5739114fe7efc65a1f373c713ada870493c5a7",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"550b71d09b87c770c2071982b7dd67eb\"",
         "lastModified": "Tue, 23 Sep 2025 08:59:15 GMT"
       },
-      "pageHash": "e46ec67202a1d5111f9c50fd1c1ce3d2a5fccd6105292e7aa2c7e1f8517c89d4",
+      "pageHash": "67e927ab6b6e15c018b820d9ff40c91f872f90896057471b4621f8c1f84b9bd3",
       "pageText": "벨루어 코듀로이 밴딩 팬츠입니다.\n\n380g/㎡(480g/yd²) 중량의 폴리 코튼 스판 원단에 두께감 있는 골이 돋보이는 코듀로이 원단을 사용하여, 은은한 광택감과 따뜻하고 포근한 착용감을 제공합니다.\n\n쫀쫀한 풀 밴드로 입고 벗기 편하며, \n일자로 떨어지는 여유로운 바지 핏이 다리를 길어 보이게 하는 것이 특징입니다.\n\n실내는 물론 외출 시에도 활용도가 높으며, \n신경 쓴 듯 안 쓴 듯 편안하면서도 스타일리시함을 더한 아이템입니다.",
       "imageText": " 4\n127\nI\n/\n|             7\n드          IX     로\n여 코듀로이 풀밴 딩 스트레이트 팬츠         STYLE NO. 05415924\n벨루어 코듀로이 밴딩 팬츠입니다.\n380g/mi(480g/yd?) 중량의 폴리 코튼 스판 원단에 두께감 있는 골이\n돋보이는 코듀로이 원단을 사용하여, 은은한 광택감과 따뜻하고 포근한\n착용감을 제공합니다.\nZEoHE 밴드로 입고 벗기 HoH, 일자로 떨어지는 여유로운 바지 핏이\n다리를 길어 보이게 하는 것이 특징입니다.\n실내는 물론 외출 시에도 활용도가 높으며,신경쓴듯 안쓴 듯\n편안하면서도 스타일리시함을 더한 아이템입니다.\n=\n[\n7a                     는 기                       키 17207\n_                                     상의 5 하의 200\nh_—\nB® J\n©\n/\n\nL\n/                        4\n~          =\n몰\nㅣ                              |\n4                                                                                                       |\nA                                                                 내\n4         / )\nCOLORS\n7                                                             /\n4                                                  “\n                  —y                     x\n}       )                     a                                     \\,  4\n|                                                                                  14\n01오프화이트\n\nㅣ|     {\n01오프화이트\n                         ||\n|\n02브라운\n4\n«\n{\n[|\n03블랙\nDETAIL SIZE\noem\neu       Pe                       660 699 737\n—                              1054 1092 1130\ner                                       622 641 660\na                                   495 508 521\n330 340 349\n05 05 105\n|                              1016 1026 1035\n밑단둘레\n* 위 사이즈는 제품의 실측 값이며 케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n＊실측값과신체치수차이로 인한 교환/반품 건은 무상으로 진행해드리기 어려우니 구매에 참고 바랍니다.\n* 실측 사이즈(7))는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\nCHECK UP\n착용시기           [J                        [ ]           [J\n봄           여름          가을          겨울\n두께 감                       [J\n두꺼움          중간          않음         아주않음\n신축성                                                  hd\n전혀없음         보통          좋음         아주좋음\n촉 감                                    °\n살짝까슬         보통         부드러움       매우부드러움\n안 감           °\n없음        있음(신축성이     있음(신축성)        기모\n비 침           @\n없음         조금비침      비침있음(밝은색)\n하 의 핏                               °\n좁음      조금좁음      보통      조금넓음      넓음\nINFORMATION\n스타일코드         05415924\n제품소재          면65,폴리에스터32,폴리우레탄3\n색상             01오프화이트,02브라운,03블랙\n치수             SML\n제조자            (주)지오다노\n제조국            베트남\n\n스타일코드                     05415924\n제품소재                    면65,폴리에스터32,폴리우레탄3\n색상                              01오프화이트,02브라운,03블랙\n치수                              SML\n제조자                           (주)지오다노\n제조국                           베트남\n세탁 방법 A Aa  9\n손세탁 표백제금지 천대고다림질 약하계짜기 aman\n180612090)\n제조연월                        2025.08\n1. 소비자 분쟁해결 기준에 따라 다음과 같이 보상해 드립니다.\n*봉제불량, 원단불량(제작불량,변색,탈색) 부자재 BYERS, AIH AX 등):구입일로부터 1년이내분은\n무상수선, 교환, 환불의 순위로 보상. 단, 봉제불량은 1년경과 후에도 무상 수선.\n품질보증기준                  ㆍ 사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시) 및 소재 구성 부적합으로 인한 세탁 사고:\n재즈15915                    구입일로부터 10일 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격,동일 제품 교환을원칙으로 함.\nㆍ 상하1착중한쪽에만 이상이 있을 경우: 상하 한착 모두 교환 또는 구입가 환불.\n2. 소비자 부주의에 의한제품훼손 및 세탁 잘못에 의한 변형,품질 보증기간(1년)이경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해드립니다.\nA/S 책임자/전화번호          지오다노 / 지오다노 AS 센터 (080-934-3000)\n",
       "imageScanComplete": true,
@@ -1232,8 +1232,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:06:08.031Z",
-      "analyzedAt": "2026-10-28T04:09:24.161Z"
+      "observedAt": "2026-10-28T04:41:37.633Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1530,7 +1530,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=783B3BCB3AD7F8D7110037378B3E694C&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2022/05372922.jpg",
       "detailHash": "67977dc5cf47e7b9b759c3ed38492aa9e05c31292aec7b4c193408e7f7fc241d",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"d2ee3345b0a29bfea2b2418fb83ca744\"",
         "lastModified": "Tue, 28 Feb 2023 03:26:00 GMT"
@@ -1542,8 +1542,8 @@
       "points": [],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:06:43.839Z",
-      "analyzedAt": "2026-10-28T04:09:24.488Z"
+      "observedAt": "2026-10-28T04:42:09.048Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1558,12 +1558,12 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=783CEF5FD84AC1D559D02172D898DE8B&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05375507.jpg",
       "detailHash": "94fa5680d28d22f7193525c9e1ac002a20a6d108fa554cc4d43ce48820e56731",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"809faa686a96db3df1f893c80f68a833\"",
         "lastModified": "Wed, 16 Sep 2026 03:32:02 GMT"
       },
-      "pageHash": "c84d5ca49aa1052d489711ce29560ca029dec15dfa66c21f9db3985cb33e9670",
+      "pageHash": "4aa22249acb8bbac93ad6733d4749cc97b62938ddda12ae14e4ad1c8f1b47f93",
       "pageText": "중기장의 인조 스웨이드 / 페이크 레더 자켓입니다.\n\n힙을 덮는 미들랭스 기장의 전체적으로 여유감이 느껴지는 박시한 오버핏 실루엣의  자켓 입니다.\n카라와 아웃포켓 디테일의 워크자켓 형태로 가볍고 편안하게 착용할 수 있습니다 \n\n자연스러운 링클 표면을 재연한 페이크 레더 소재와 동물성 원료를 사용하지 않은 인조 스웨이드 소재를 사용하였으며,\n두께감 및 표면 터치감을 리얼 레더 텍스쳐와 유사하게 구현하여 레트로한 무드의 캐쥬얼한 매력을 한층 더 높였습니다.\n\n봄 시즌 원하는 무드에 맞춰 연출 할 수 있는 아우터로 슬랙스, 데님, 스커트를 활용하여 손쉽게 활용 가능합니다.",
       "imageText": "4                       |\nDall 4\n-       J\n5 “4\nPp\n|                        gil\n으\n스웨이드 자켓                                                STYLE NO. 05375507\n중기장의 인조 스웨이드 자켓 입니다.\n힙을 덮는 미들랭스 기장의 전체적으로 여유감이 느껴지는 박시한 오버핏\nHR XZ 입니다. 카라와 아웃포켓 디테일의 워크자켓 형태로\n가법고 편안하게착용할 수 있습니다.\n자연스러운 링클 표면을 재연한 인조 스웨이드 소재를 사용하였으며,\n두께감 및 표면 터치감을 리얼 레더 텍스쳐와 유사하게 구현하여 레트로한\n무드의 캐쥬얼한 매력을 한층 더 높였습니다.\n가을 시즌 원하는 무드에 맞춰 연출 할 수 있는 아우터로 슬랙스, 데님,\n스커트를 활용하여 손쉽게 활용 가능합니다.\n|         i\nA         i\nI           |\n내  |       별        는\nfo.      I      13\nE        ㅣ       ㅣ\nㅣ        |                               7| 173cm\n상의 5 하의 260\n\nier\nee\nfrit\n4\n3  5     ,\n빼라             i\na\n쇼바\nfo\nSRR,\n5 og\n=\n턱멸\n=P           9\npre Loner           개\n4         겔\n7            a           \\\nil 12066        a          i\n|      ㅣ 겨\nNi FB gn         i\n해     Ul \\ =            0\n빼                  ti\nI          %       107\n   J 19          |      ;         /// i\n\nCOLORS\n3               7 a\n[\n2                    0\n01카멜(스웨이드)\nDETAIL SIZE\nJ. CE\n{     7.      NE        (cm)     8\n;               |       총길이     43 156\n총장 ｌ         EC TLV NY\n|    NAN Ny     어깨너비     514 527\n|         \\        /     가슴너비     581 616\n|               fi     소매길이     59 572\n+ 위 사이즈는제품의 실측값이며케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n＊실측값과신체치수차이로인한교환/반품건은 무상으로진행해드리기 어려우니 Tojo] 참고 바랍니다.\n＊실측사이즈(ㅇ0)는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\nCHECK UP\n착용시기           [ ]           ㅇ           [ ]           ©\n봄           여름          가을          겨울\n두께 감           0            [ ]            ®            o\n두꺼움          중간          않음         아주않음\n신축성            [J            O            O            O\n전혀없음         보통          좋음         아주좋음\n촉 감           ®           [ ]           O           O\n살짝까슬         보통         부드러움       매우부드러움\n안 감           O           O           ®           O\n없음        있음(신축성)     있음(신축성)        기모\n비 침           [ ]           ㅇ           ®\n없음         조금비침      비침있음(밝은색)\n상 의 핏           ®            0            [ ]\n슬림핏         레글러핏         루즈핏\nINFORMATION\n스타일코드         05375507\n제품소재          겉감: 폴리에스터100\n안감: 폴리에스터100\n색상             01 카멜 (스웨이드)\n치수             SM\n제조자            (주)지오다노\n제조국            베트남\n         삐\n세탁 방법            FE AQ\n세탁기로약하게세탁 BUM EX 천대고다림질 _ 석유계드라이 옷걸이에걸어서 건조기 금지\n(손세탁 가능)        (80°C-120°C)        그늘건조\n제조연월          2024.12\n\n색상                              01 카멜 (스웨이드)\n치수                              SM\n제조자                           (주)지오다노\n제조국                           베트남\n더                                      C=\n세탁 방법   A Aa  or Xl\n세탁기로약하게세탁 표백제금지 천대고다림질 석유계드라이 옷걸이에걸어서 건조기 IX\n(손세탁 가능)                   (80°C~120°C)                    그룰건조\n제조연월                        2024.12\n1 소비자 분쟁해결 기준에 따라 다음과 같이 보상해드립니다.\n+ 봉제불량, 원단불량(제작불량\\변색,탈색) 부자재 불량(단추,지펴,심지 등}: 구입일로부터 1년 이내분은\n무상수선, 교환, 환불의 순위로 보상. 단, 봉제불량은 1년 경과 후에도 무상 수선.\n품질보증기준                  사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시) 및 소재 구성 부적합으로 인한 세탁 사고:\nBEES                    구입일로부터 102 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격,동일 제품 교환을 원칙으로 함.\n＊상하1착중한쪽에만 이상이 있을 경우:상하 한착 모두 교환 또는 구입가 환불.\n2. 소비자 부주의에의한제품훼손 및 세탁 잘못에의한 변형,품질 보증기간(1년)이 경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해 드립니다.\nA/S 책임자/전화번호          지오다노 / 지오다노 AS HIE] (080-934-3000)\n",
       "imageScanComplete": true,
@@ -1576,8 +1576,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:06:58.243Z",
-      "analyzedAt": "2026-10-28T04:09:24.576Z"
+      "observedAt": "2026-10-28T04:42:22.648Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2252,20 +2252,20 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7A98D031BDB49D32787B7D33DEEC59DD&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05165501.jpg",
       "detailHash": "aa0371ee1cd78b0d12dfdf52243b188113679b2d255df41a68fece9af3fad5fd",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"f13ea0c6db31b570d7468ab533361dfb\"",
         "lastModified": "Tue, 04 Mar 2025 10:27:39 GMT"
       },
-      "pageHash": "66baf3b9dd0439d656235fb07418a34702a834ab28b2665c542c3bd5c6a1e7f3",
+      "pageHash": "cb5fd325ba15c62db9ed319f4ad96e83b8446342d9666ff9ee52abc2bfa7225f",
       "pageText": "A LINE 실루엣의 미니스커트입니다.\n모던하면서도 여성스러운 실루엣이 돋보이는 베이직한 아이템입니다.\n\n코튼이 혼방된 이부직 원단을 사용하여 전체적으로 밀도감있는 탄탄한 터치감을 느낄 수 있습니다.\n\n05-37-5508 오버사이즈 블레이져와 셋업으로 차분하면서 세련된 무드로 연출 가능합니다.\n봄 시즌 스웨터, 맨투맨을 이용하여 다양한 무드로도 스타일링 가능한 제품입니다.",
       "imageText": "b=\n로\n|         a\nLd\n-\n개\n미니 스커트                                                   STYLE NO. 05165501\n미니 스커트입니다.\nALINE ARS 미니스커트로 모던하면서도 여성스러운 ARO]\n돋보이는 베이직한 아이템입니다.\n프리미엄 10소재와 코튼이 혼방된 이부직 원단을 사용하여 전체적으로\n밀도감있는 탄탄한 터치감과 고급스러움을 느낄수 있습니다.\n05-37-5508 오버사이즈 블레이저와 셋업으로 차분하면서 세련된 무드로\n연출 가능합니다.\n봄 시즌 스웨터, 맨투맨을 이용하여 다양한 무드들로 스타일링 가능한\n제품입니다.\n키 17207\n상의 5 하의 260\n\n_\nCOLORS\n\n’                          1\n01차콜\n\n01차콜\n02블랙\n허리들레\ni    rT       iy                   613 711\n총기장 {| 앞밑위|      i\ni        aol sy                     908 9468\ni       I       |                2    2\nEET\n1051 108.8\n397 410\n＊ 위 사이즈는제품의 실측값이며케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n＊실측값과신체치수차이로인한교환/반품건은 무상으로진행해드리기 어려우니 Rofo] 참고 바랍니다.\n＊실측사이즈(ㅇ0))는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\n착용시기           °                        °\n봄           여름          가을          겨울\n두께 감                                    [\n두꺼움          Ed          EE]         otFgre\n신축성           J\n전혀없음         보통          좋음         아주좋음\n촉 감                       [J\n살짝까슬         보통         부드러움       매우부드러움\n안 감           J\n없음        있음(신축성이     있음(신축성)        기모\n비 침           J\n없음         조금비침      비침있음(밝은색)\n하의 핏           ㅇ                  J\n좁음      조금좁음      보통      조금넓음      넓음\n스타일코드         05165501\n제품소재          폴리에스터56,레이온24,면15,폴리우레탄5\n색상             01차콜,02블랙\n치수             SM\n제조자            (주)지오다노\n제조국            베트남\n—\n세탁 방법    A DEK &\ni hd ELE Loti 약하게짜기 건조기 금지 석유계드라이\n제조연월          2024.12\n1 소비자 분쟁해결 기준에 따라 다음과 같이 보상해드립니다.\nㆍ 봉제불량, 원단불량(제작불량변색,탈색) 부자재 불량(단추,지퍼,심지 등}:구입일로부터 1년 이내분은\n무상수선, 교환, 환불의 순위로 보상. 단, 봉제불량은 1년 경과 후에도 무상 수선.\n품질보증기준                사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시) 및 소재 구성 부적합으로 인한 세탁 사고:\nBEERS        구입일로부터 102 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격,동일 제품 교환을 원칙으로 함.\n＊상하1착중한쪽에만 이상이 있을 경우:상하 한착 모두 교환 또는 구입가 환불.\n2. 소비자 부주의에의한제품훼손 및 세탁 잘못에의한 변형,품질 보증기간(1년)이 경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해드립니다.\nA/S 책임자/전화번호         지오다노 / 지오다노 AS 센터 (080-934-3000)\n\n(손세탁 가능)      oo (806812090)        2000\n제조연월                        2024.12\n1. 소비자 분쟁해결 기준에 따라 다음과 같이 보상해 드립니다.\n+ EZ, 원단불량(제작불량,변색,탈색) 부자재 불량(단추, 지퍼,심지 등): 구입일로부터 1년 이내분은\n무상수선, 교환, 환불의 순위로 보상. 단, 봉제불량은 1년 경과 후에도 무상 수선.\n품질보증기준                  사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시)및 소재 구성 부적합으로 인한 세탁 사고:\nCede                    구입일로부터 102 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격,동일 제품 교환을원칙으로 함.\n＊상하1착중한쪽에만 이상이 있을 경우: 상하 한착 모두 교환 또는 구입가 환불,\n2. 소비자 부주의에 의한제품훼손 및 세탁 잘못에 의한 변형,품질 보증기간(1년)이경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해드립니다.\nA/S 책임자/전화번호 __ 지오다노 /지오다노 45 센터 (080-934-3000)\n",
       "imageScanComplete": true,
       "points": [],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:07:04.330Z",
-      "analyzedAt": "2026-10-28T04:09:24.630Z"
+      "observedAt": "2026-10-28T04:42:28.353Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2531,12 +2531,12 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7B9F897B9F38F1771C684DC1742B0A04&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2024/05374911.jpg",
       "detailHash": "f6e11f5c6e651443a56751cc0bfbecb3bd453476f2de4c34dae8f417ddc0957b",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"18fb6f82cab3d3bf2556088d6a9c983a\"",
         "lastModified": "Fri, 11 Oct 2024 05:43:55 GMT"
       },
-      "pageHash": "5ac2c1f12c5062d858dce848c20c6cc3273427176ad82b72f3204437d54e6b59",
+      "pageHash": "b8493ebfadd518665d36bff6d844b463bb93620e6fa8f251c06ac46c359c3909",
       "pageText": "울블랜드 집업 숏 자켓입니다.\n\n베이직한 실루엣의 두께감 있는 숏자켓으로 앞 중심에 니켈 샤이니 지퍼를 사용하여 포인트를 주었으며\n집업을 이용해 다양한 카라모양으로 연출 가능합니다 \n\n겉면에 텍스쳐가 돋보이는 밀링지 소재를 사용하여 트렌디 하면서도 캐쥬얼함 느낄 수 있고\n울이 50% 함유되어 있어 가볍고 보온성이 좋습니다.\n \n클래식한 블랙컬러로 구성 되어 있으며 가을 시즌에서 초겨울 시즌까지\n무드에 맞게 다양한 스타일링 가능한 활용만점 아우터입니다.",
       "imageText": "Ho 겐\n3     —   NN\n\\\nJ         |\n|                  o>\n] Yay |\n~                                                    \\\n4                                                            년\nWool Milling Crop Jacket                      STYLE NO. 05374911\n울블랜드 집업 2 자켓입니다.\n베이직한 FAH] 두께감 있는 숫자켓으로 앞 중심에 니켈 샤이니\n지퍼를 사용하여 포인트를 주었으며 집업을 이용해 다양한\n카라모양으로 연출 가능합니다\n겉면에 텍스쳐가 돋보이는 밀링지 소재를 사용하여 트렌디하면서도\n캐쥬얼함 느낄 수 있고 울이 509 함유되어 있어 2h\n보온성이 좋습니다.\n클래식한 블랙컬러로 구성 되어 있으며 가을 시즌에서\n초겨울 시즌까지 무드에 맞게 다양한 스타일링 가능한\n활용만점 아우터입니다.\nㅎ  \\\n|\n         ?\n5330\n키 175cm\n3                   상의 5 하의 2607\nE\n055  는\n|                (\n                 \\\n|\n|                    ㅣ\n|                    |\n|\n\n= 는\n|         /\n{\n\\\n[         \\\n|          \\\n|           ㅣ\n1\n|          |\n|\n|\n/               )\n해\n도 3      SS    A\n\\\n                        |\nTe\n개                       ㅣ\nCima      /          \\\ni                                                                                         = Si tg \"\n:            NRT\n\\   \\ AW [잘    2  \\\nNR        \\\nTe D WAN         |\n|   퀴 2        배 5328         ㅣ.  1\n개\n\n&\ni\n01블랙\n_\n총장          JI 00                                  508 521\n432      445\n/                            189 514\n>                                    60.3       61.0\n* 위 사이즈는 제품의 실측 값이며 케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n실측값과신체치수차이로인한교환/반품건은 무상으로진형해드리기 어려우니구매에 참고 바랍니다.\n« HZ 사이즈(7)는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\n착용시기                          o        [7\n봄                         여름                        가을                        겨울\n두께 감                                              hd\n두꺼움                       중간                        않음                     아주않음\n신 축 성                      _\n전혀없음                      보통                        좋음                      아주좋음\n촉 감                      [\n살짝까슬                  보통                  부드러움              매우부드러움\n안 감                                                                       *\n없음                  있음(신축성이             있음(신축성)                   기모\n비 침                      °\n없음        EEN     Hels (eM)\n스타일코드                     05374911\n제품 소재                    겉감:폴리에스터53,모47, 안감:폴리에스터100\n색상                              orga\n치수                              SM\n제조자        (쥐지오다노\n제조국                           베트남\n      DSR\n세탁 방법        XA QS MK\n물세탁금지 표백제금지 천대고다림질 석유계드라이 약하계짜기 건조기금지\n(80°C~120°C)\n제조연월                        2024.08\n1. 소비자 분쟁해결 기준에 따라 다음과 같이 보상해 드립니다.\n\n=e                              Naud T\n치수                              SM\n제조자                           (주)지오다노\n제조국                           베트남\n=\n세탁 방법        ral & 스\n물세탁금지 표백제금지 천대고다림질 석유계드라이 약하계짜기 건조기금지\n(80°C~120°C)\n제조연월                        2024.08\n1. 소비자 분쟁해결 기준에 따라 cheat ol mts SLC\n+ EZ, 원단불량(제작불량'변색,탈색) 부자재 불량(단추, 지퍼,심지 등}: 구입일로부터 1년 이내분은\n무상수선, 교환, 환불의 £02 보상. 단, 봉제불량은 1년 경과 후에도 무상 수선.\n품질보증기준                  사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시)및 소재 구성 부적합으로 인한 세탁 사고:\nBeas                    구입일로부터 10% 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격, SY 제품 교환을 원칙으로 함.\n＊상하1착중한쪽에만 이상이 있을 경우: 상하 한착 모두 교환 또는 구입가 환불.\n2 소비자 부주의에 의한제품훼손 및 세탁 잘못에 의한 변형,품질 보증기간(1년)이 경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해 드립니다.\nA/S 책임자/전화번호          지오다노 / 지오다노 AS 센터 (080-934-3000)\n",
       "imageScanComplete": true,
@@ -2554,8 +2554,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:06:54.056Z",
-      "analyzedAt": "2026-10-28T04:09:24.563Z"
+      "observedAt": "2026-10-28T04:42:19.433Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2744,12 +2744,12 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7CF1A9243A9663CC5F5903EF48AFC386&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05165541.jpg",
       "detailHash": "aa5aa72f402ec62982cadae9fa8465bc654fd83b331358f217b2b7a8ac47845f",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"0c7f7b46aabb5a913da6a1849d263b09\"",
         "lastModified": "Mon, 29 Sep 2025 02:57:49 GMT"
       },
-      "pageHash": "561456465296cbb84e9470ec47209dd0943eb9dce21db635f7fb04fda6faabf5",
+      "pageHash": "7c123f25264527b32e6467f07bea7a0c711d9328c5e9e7f485779852b2d99330",
       "pageText": "데님 롱 스커트입니다.\n\n허리부터 밑단까지 편안하게 떨어지는 A LINE 실루엣입니다.\n\n편안하게 착용이 가능한 미드라이즈 데님 스커트로 \n발목까지 내려오는 긴 기장의 실루엣이 멋스러운 연출을 도와주며 \n앞쪽의 슬릿 디테일로 착용 시 움직임이 편안합니다.\n\n봄 시즌 다양한 스타일링을 통해 트렌디한 착장하기 좋은 제품입니다.\n\n* 데님 제품의 경우 워싱 가공 특성 상 제품별 디테일의 편차가 있을 수 있으며, 염료의 특성상 이염 및 물빠짐이 있을 수 있습니다.",
       "imageText": "— =\n=\n: ~, 02\n=\n|\nql                     |\n도\n데님 롱 스커트                                     STYLE NO. 05165541\n데님 롱스커트입니다.\n유틸리티 무드의 트렌디한 카고 조거 바지로 입체감을 주는\n무릎 턱 디테일이 특징이며, 힙부터 허벅지까지 와이드하게 떨어지고\n밑단을 조여 조거 핏으로 변형이 가능한 트렌디한 실루옛입니다.\n전체적으로 가먼트 워싱을 가미하여 부드러운 터치감을 느낄 수\n있습니다.\n봄 시즌 맨투맨, 후드티, 스웨터와 매칭하여 트렌디하게 스타일링이\n가능합니다.\nwil SE\n|\n=                  J\n#7: 7    5                        키 173cm\n<= 6 개              상의 5 하의 26in\nSAYS\n—_\n= .\n=\n—\nEE\n3\nml\n\n==\n=\n=\n=\n4\n—\n=\nm\nAe\n~\nPE -       =    i}\n=씨|:\n—     E\nN=\n|\n’   4       pe\n|\na         = \\\n<            ——\n= 36326\nZN             S\n=              =\n에              T\n[\n를 그\nCOLORS\nfie 도\n171       ~ 호손 oe\n끼    A            Sho Se Re Ras EP 6    hi    =\n| 초계   es 0. Ne\nLa        fal BE\nSLE RRS              |, ~ je\na ae | Bo . |\n\n=   &           —  i]      |  ,    \\    Ce\na             65. Vo NL    LL\n4   ae 깨        과 00 0 자    TUN\n01워시드라이트블루\nAETHER\nx                        i PRT\nE                     Wait, 58\n=                         & a Wy  x\nGR iE                 WR\nBR A                       NERY\nSEN EE                Te:\ngin                      1,\ni  Ba #i               [2083\nit     [77                      a\nid       joel                               A\n더  내                        이\n| 8     |                      &   A\nmys               9 55\n02워시드라이트그레이\n는\nJ\ni                    J\n1                   |\n|     1                   |          내\n       |                      |             |\n03린스\nDETAIL SIZE\nel               cm)    XS    N    M    Ｌ\nBRE = seis      718. 768\n총기창 {| wun)    1] Erne       =\ni  hi   | [Lome | amos)         902 953\nLL JLT nse         ew\n밑단둘레\n밀단둘레        1235 1286\n앞밑위         -    -\n안쪽바지길이         -    -\n총기장         832 911\n+ 위사이즈는제품의실측값이며케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n＊실측값과신체치수차이로인한교환/반품건은 무상으로진형해드리기어려우니 구매에 참고 바랍니다.\n+ A Aol (cm)'= ATH] 특성,측정방법에 따라 약간의 차이가있을수있으니 구매에 참고 바랍니다.\nCHECK UP\n착용시기          [J          [J          [J          O\n2         여름         가을         겨울\n두께 감           @           [           0           oO\n두꺼움         중간         않음        아주않음\n신축성           °            oO            o            o\n전혀없음        보통         좋음        아주좋음\n촉 감          ㅇ          °           <\n살짝까슬        보통        부드러움      매우부드러움\n안 감          [J           )          (           >\n없음       있음(신축성이     있음(신축성》)       기모\n비 침          [J          O          (\n없음        조금비침     비침있음(밝은색)\n하 의 핏           0        0         °        ㅇ         )\n좁음     조금좁음     보통     조금넓음     넓음\nINFORMATION\n스타일코드        05165541\n제품 소재         #100\n색상           01워시드라이트블루,02워시드라이트그레이,03린스\n치수           SM\n\n스타일코드                     05165541\n제품소재                    #100\n색상                              01워시드라이트블루,02워시드라이트그레이,03린스\n치수                              SM\n제조자                           (주지오다노\n제조국                           중국\n세탁 방법  A 스 0 9\n손세탁 표백제금지    aw    약하계짜기 건조기 금지\n제조연월                        2025.01\n1 소비자 분쟁해결 기준에 따라 다음과 같이 보상해드립니다.\nㆍ 봉제불량, 원단불량(제작불량\\변색,탈색) 부자재 불량(단추,지퍼,심지 등}: 구입일로부터 1년 이내분은\n무상수선, 교환, 환불의 순위로 보상. Th 봉제불량은 1년 경과 후에도 무상 수선.\n품질보증기준                  사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시) 및 소재 구성 부적합으로 인한 세탁 사고:\nBERRI                      구입일로부터 102 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격,동일 제품 교환을 원칙으로 함.\n＊상하1착중한쪽에만 이상이 있을 경우:상하 한착 모두 교환 또는 구입가 환불.\n2. 소비자 부주의에 의한제품훼손 및 세탁 FRO) oJ 변형,품질 보증기간(1년)이 경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해드립니다.\nA/S 책임자/전화번호          지오다노 / 지오다노 AS 센터 (080-934-3000)\n",
       "imageScanComplete": true,
@@ -2767,8 +2767,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:07:05.263Z",
-      "analyzedAt": "2026-10-28T04:09:24.634Z"
+      "observedAt": "2026-10-28T04:42:29.650Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2783,12 +2783,12 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7CF30F9F244F65B9461803F04481CED7&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05415927.jpg",
       "detailHash": "c43ce73d629cfff0c6d76776e131ce554d2c30f0880f29f022781bb03e4bd1fd",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"ba90886c3d991d66f22c2eae2263684f\"",
         "lastModified": "Thu, 24 Jul 2025 00:14:42 GMT"
       },
-      "pageHash": "9149438fb7ced31304fffb7a3cc4b7026172747f71811734da67d17f402fb11a",
+      "pageHash": "0df968191cf592b8fdbcd1a4289a6235071fa0271ed2a8ae4dcd57ebb32e71e2",
       "pageText": "편안함과 스타일을 모두 갖춘 백밴딩 와이드 핏 나일론 팬츠입니다.\n\n턱 디테일로 볼륨감을 살린 플리츠 와이드 핏으로,\n힙부터 밑단까지 여유있게 떨어지는 자연스러운 실루엣과 멋스러운 분위기를 연출합니다.\n\n발등까지 오는 롱한 기장감으로 다리가 길어 보이는 효과와 세련된 무드를 완성합니다.\n유연한 터치감의 나일론 스판 소재를 사용해 피부에 닿을 때 열을 흡수하고 방출하여 \n청량하고 쾌적한 착용감을 느낄 수 있습니다.\n\n허리 뒷부분에는 밴딩 디테일을 더해 장시간 착용에도 편안하며, 활동성을 높였습니다. \n포멀한 오피스룩부터 캐주얼한 데일리룩까지 다양한 상의와 손쉽게 매치되는 활용도 높은 데일리 팬츠입니다.",
       "imageText": "@& 7\nqe |\nSo\nar           J.   |\nom\nNaot\nH       디프                     2\n백 밴 딩  르 리츠 와이드 = HA                   STYLE NO. 05415927\n편안함과 스타일을 모두 갖춘 백밴딩 와이드 TI LIE 팬츠입니다.\n턱 디테일로 볼륨감을 살린 플리츠 와이드 핏으로, 힙부터 밑단까지\n여유있게 떨어지는 자연스러운 ARAN 멋스러운 분위기를 연출합니다.\n발등까지 오는 롱한 기장감으로 다리가 길어 보이는 효과와 세련된 무드를\n완성합니다.유연한터치감의 나일론 스판 소재를 사용해 피부에 당을 때\n열을 흡수하고 방출하여 청량하고 쾌적한착용감을느낄 수 있습니다.\n허리 뒷부분에는 밴딩 디테일을 더해 장시간 착용에도 편안하며,활동성을\n높었습니다. 포멀한 오피스룩부터 캐주얼한 데일리룩까지 다양한 상의와\n손쉽게 매치되는 활용도 높은 데일리 팬츠입니다.\npy: am    가\n(ORY WHERL    |\nKh               |\n £4         i /\n키 172cm\nCJ                      상의 5 하의 26in\nNt\n3\n'                      7\n| §\n|      J      |\n\n| A A\nI\na          -\n|          /\nCOLORS\n할                          도\n수 |              8   고\nFa\n01베이지\n\n{                                                           |\n|                                             |\n01베이지\n1\n면              TT\n| 척\nA\nㅣ\n9\n-\nrN                                                                     or!\n02네이비\nh 허리 툴레\nus             +      |       {                             68.6       ni       737\n엉덩이둘레\ni                                 덩              991     1016 1041\n허벅지둘레\n출세          |                                                      670 683 695\n완기장                                                         54.0      54.6      55.2\n298      305      311\n}                                                         124      130      737\nill LL                      1013 1026 1038\nwes\n+ 위사이즈는제품의 실측값이며케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n＊실측값과신체치수차이로 인한교환/반품건은 무상으로 진행해드리기 어려우니 구매에 참고 바랍니다.\n＊실측사이즈(ㅇ07)는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\n착용시기                      O                       [J                      [J\n=                      여름                     가을                    겨울\n두께 감                                                                       [\n두꺼움                   중간                     않음                  아주않음\n신축성                                                                       [J\n전혀없음                  보통                     좋음                  아주좋음\n촉 감                                                                       ®\n살짝까슬                  보통                  부드러움              매우부드러움\n안 감                      [J\n없음               있음(신축성이           있음(신축성)                기모\n비 침                      [ ]\n없음                  조금비침            비침있음(밝은색)\n하 의 =                      ㅇㅇ                                                     oO                ®\n좁음            조금좁음            보통            조금넓음            넓음\n스타일코드                  05415927\n제품소재                    나일론87,폴리우레탄13\n색상                          01베이지,02네이비\n치수                          SML\n제조자                       (주)지오다노\n제조국                       베트남\n세탁 방법   & 스 9\n손세탁 표백제금지    lain     약하계짜기 、 긴조기금지\n제조연월                     2025.06\n1. 소비자 분쟁해결 기준에 따라 다음과 같이 보상해드립니다,\n+ 봉제불량, 원단불량(제작불량,변색,탈색) 부자재 불량(단추, 지퍼,심지 등} 구입일로부터 1년 이내분은\n무상수선, 교환, 환불의 순위로 보상. 단, 봉제불량은 1년 경과 후에도 무상 수선.\n품질보증기준                + 사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시) 및 소재 구성 부적합으로 인한 세탁 사고;\n=ETe sls                      구입일로부터 102 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격,동일 제품 교환을 원칙으로 함,\n＊상하1착중 한쪽에만 이상이 있을 경우: 상하 한착 모두 교환 또는 구입가 환불.\n2. 소비자 부주의에 의한 제품 훼손 및 세탁 잘못에 의한 변형, 품질 보증기간(1년)이 경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해 드립니다.\nA/S 책임자/전화번호          지오다노 / 지오다노 AS 센터 (080-934-3000)\n\n1 소비자 분쟁해결 기준에 따라 다음과 같이 보상해 드립니다.\n*봉제불량, 원단불량(제작불량,변색,탈색) 부자재 불량[단추,지퍼,심지 등):구입일로부터 1년이내분은\n무상수선, 교환, 환불의 순위로 보상 단,붕제불량은 1년경과 후에도 무상 수선.\n품질보증기준                  + 사이즈 부정확 및 디자인,색상 불만, 부당표시(미표시 및 부실표시)및 소재 구성 부적합으로 인한 세탁 사고:\nmere                    구입일로부터 10일 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격, 동일 제품교환을원칙으로 함.\n*상하1착중한쪽에만 이상이 있을 경우: 상하 한착 모두 교환 또는 구입가 환불.\n2. 소비자 부주의메 의한제품훼손 및 세탁 잘못에 의한 변형,품질 보증기간(1년)이경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해 드립니다.\n/5 책임자/전화번호 __ 지오다노 /지오다노 AS 센터 (080-934-3000)\n",
       "imageScanComplete": true,
@@ -2816,8 +2816,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:06:10.165Z",
-      "analyzedAt": "2026-10-28T04:09:24.172Z"
+      "observedAt": "2026-10-28T04:41:39.182Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3047,12 +3047,12 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7D44B04F88AC48F99B4EB6A1F02274F9&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05415922.jpg",
       "detailHash": "48e4746e8f948bd19e4b8506e62c632200cbca876352c3080f715c13a89cd67a",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"7cf49435ef9ebccf90fe83d3084ae67b\"",
         "lastModified": "Mon, 08 Sep 2025 02:30:33 GMT"
       },
-      "pageHash": "44ec4e19e064006bb915509b8509a1d6ba923a33bee00a34ed350715c007cc86",
+      "pageHash": "124127751eb5b6a6fcf11c6d84b3bbf40acb6662491c2bb348957b21f5667b38",
       "pageText": "원턱 와이드 팬츠 입니다. \n\n320gsm 중량의 부드러운 CVC 테리 원단을 사용하여 가볍고 편안한 착용감과 \n체형에 구애 받지 않는 여유로운 실루엣이 특징입니다.\n\n허리 부분의 원턱 디테일이 자연스러운 볼륨감을 더해 다리가 길어 보이는 \n롱레그 라인을 연출해주며, 쫀쫀한 허리 밴드로 착용감이 편안합니다.\n\n와이드한 핏이 주는 트렌디함과 함께, \n다양한 상의와 손쉽게 매치 가능하여 실내외 모두에서 캐주얼 데일리 웨어로 활용하기 좋습니다.",
       "imageText": "|\n|    |\n[\n데                         는\n우       =\nof  테 리  원 턱  루즈핏 팬츠                                 STYLE NO. 05415922\nHE 와이드 팬츠입니다.\n3208501중량의 FE CVC 테리 원단을 사용하여 7HH TD 편안한\n착용감과체형에 구애 받지 않는 여유로운 A Ro] 특징입니다.\n허리 부분의 원턱 디테일이 자연스러운 볼륨감을 더해 다리가 길어 보이는\n롱레그 라인을 HEF, Est 허리 밴드로 착용감이 편안합니다.\n와이드한 핏이 주는 트렌디함과 함께, 다양한 상의와 손쉽게 매치\n가능하여 실내외 모두에서 캐주얼 데일리 웨어로 활용하기 좋습니다.\n&\n4\n키 172cm\n.                              상의 5 하의 200\nhs\n논\n\n;\n\n|\n\n|                     |\n\n7\n\n\\ |                                       1\nNN\n\nCOLORS\na 개                   7 1 5   ㅣ    ㅣ\n9% T             | i | 1 A | |    나\nhe   |               2       J\n\n01미드헤더그레이\n\npled               spare xa 가드 (할\nㅣ               EERE an Te eg\ni                    a 수\nEo                      Sa 200\n{1                   | | aoa\nWl aa . . :: 수애\n로 ¥                [wie an | oan)\n\"11                   [oso 00025 | ra\n b 5              BY oot le a\nEe                   coord WERE 0\n=                  be =) 렐6 .\n01미드헤더그레이\n02블랙\nom\nad       [6 아이                  648 686 724\n—                         1207 1245 1283\n총기장                                  73.0   749   76.8\nre                              512 584 597\n34 324 393\n24 124 124\nLd                         994 1003 1013\n밀단들레\n* 위 사이즈는 제품의 실측 값이며 케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n실측 값과 신체치수 차이로 인한 교환/반품 건은 무상으로 진행해드리기 어려우니 구매에 참고 바랍니다.\n* 실측 사이즈(7))는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\n착용시기           J                        [ ]\n봄           여름          가을          겨울\n두께 감                       님\n두꺼움          중간          EE]         아주않음\n신축성                                                  °\n전혀없음         보통          좋음         아주좋음\n촉 감                                    회\n살짝까슬         보통         부드러움       매우부드러움\n안 감           [\n없음        있음(신축성이     AS (AHH)        기모\n비 침           °\n없음         조금비침      비침있음(밝은색)\n스타일코드         05415922\nHZ AT          면60,폴리에스터40\n색상             01미드헤더그레이,02블랙\n치수             XS,5M\n제조자            (주지오다노\n제조국            미얀마\n=\n세탁 방법    A Aa  [일\n세탁.    1세     ps    고 다림질          =\nWAR wwe gy ww aman\n제조연월          2025.07\n1. 소비자 분쟁해결 기준에 따라 다음과 같이 mar 드립니다.\n*봉제불량, 원단불량(제작불량변색,탈색) 부자재 BYERS, XI AX 등):구입일로부터 1년이내분은\n무상수선, 교환, 환불의 순위로 보상. 단, 봉제불량은 1년경과 후에도 무상 수선.\n품질보증기준                ㆍ 사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시) 및 소재구성 부적합으로 인한 세탁 사고:\na                 구입일로부터 10일 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격,동일 제품 교환을원칙으로 함.\nㆍ 상하1착중한쪽에만 이상이 있을 경우: 상하 한착 모두 교환 또는 구입가 환불.\n2. 소비자 부주의에 의한제품훼손 및 세탁 잘못에 의한 변형,품질 보증기간(1년)이경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 많으며 수선 가능시에는 실비로 수선해 드립니다.\nA/S 책임자/전화번호 __ 지오다노 지오다노 45 HIEf (080-934-3000)\n\n2. 소비자 부주의에 의한 제품 훼손 및 세탁 잘못에 의한 변형,품질 보증기간(1년)이 경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해 드립니다.\nAS 책임자/전화번호 __ 지오다노 /지오다노 45 센터 (080-934-3000)\n",
       "imageScanComplete": true,
@@ -3070,8 +3070,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:06:06.078Z",
-      "analyzedAt": "2026-10-28T04:09:24.158Z"
+      "observedAt": "2026-10-28T04:41:36.729Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3086,12 +3086,12 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7D657E361B5E5B0E756ABD5689D2B93D&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2024/05374502.jpg",
       "detailHash": "96b9b7620e60f078f2de4c2a473a7757b686db2fe1afd3ce86a19d2f7507f747",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"9d9c7f20fc75c70d306ace63fee70a88\"",
         "lastModified": "Mon, 22 Jan 2024 00:47:05 GMT"
       },
-      "pageHash": "a02c79798adfb103e6f2f7aa11ad55ee8a8ec7f16b7450f0c6bb98fdf3e1f614",
+      "pageHash": "9c50e0a0ba2c25b59a8e3c44e304102eccf1be93f202fe3e36af72db20e9093a",
       "pageText": "하이넥 카라 디테일이 돋보이는 볼륨감 있는 실루엣의 바머 자켓입니다.\n\n은은한 광택감이 도는 소재를 사용하여 캐주얼하면서도 고급스러우며,\n샤이니 지퍼를 사용하여 포인트를 주었습니다.\n\n안감에 소프트한 패딩 충전재 퀼팅으로\n보온성이 높아 간절기 시즌 유용하게 활용 가능합니다.\n\n봄 시즌 트렌디 하면서도 멋스럽게 스타일링 해보세요.",
       "imageText": "5\ni.\n타기 7 골\npe\n\\     iW\niH\ni 1                 ㅣ\na\n1 J\ndl      |\nI.\n_ 별.         |\nA       |          =\n년 [        |\n|\na 00)    mi\nby     pr\n[   =u 1)   / 10]  픔\nyr Of 1      7\n~\nPQ\nPadding Blouson Jacket                        STYLE NO. 05374502\n하이넥 카라 디테일이 돋보이는 볼륨감 있는 HFN 바머\n자켓입니다.\n은은한 광택감이 도는 소재를 사용하여캐주얼하면서도\n고급스러움을 더했으며, 샤이니 지퍼로 포인트를 주었습니다.\n안감은 소프트한 패딩 충전재 ATOZ 보온성이 높아 간절기 시즌\n유용하게 활용 가능합니다. 봄 시즌 트렌디 하면서도 멋스럽게\n스타일링 해보세요.\n4)\nly\n\\    -\n|        |\n새 i           |\nI.    |        ㅣ\ni    |\n|         |\n오배       |\nBe    개 4  '\na IRAN)\nr   ’ )          =!\n슈 5\n//  &\n/      ;\n”\n/\n\n\"4\n를\n[= §\n'   격   ”\n  A D\nps |  daa\n7 4\nyf\n?   4 |\nIN                |\n, i\n |\n|\n\n『              「\ni.          |\n'             /\n          [\n|                        A\ni\npy\nCOLORS\n©                \\\n4 \"1\"          ㅣ                                          \\ |        /\n4                      1,\n| ㅣ |   |          4    A\nEs Wii |   |    /         |\n:               | | 개\n01카키\n1$ 고   :               기회\n02블랙\nMODEL SIZE\n/ 가       1710\n=8     '\n32     26inch\nDETAIL SIZE\n\n[0  \\               Tem\n> |               50\n= =             M\n=             26inch\nEE\n는 6\namu\nx          .\niy                  530 548\n가슴너비          i\n:           616 641\n832 848\n7)       TT      IY\n* 위 사이즈는 제품의 실측 값이며 케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n＊실측값과신체치수차이로 인한교환/반품건은 무상으로 진행해드리기 어려우니 구매에 참고 바랍니다.\n＊실측사이즈(ㅇ0)는 ATS] 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\n착용시기               [J                                 [ ]                [ ]\n봄               여름              가을              겨울\nEHH                       [J\n두꺼움              중간              Ei             아주않음\n신축성           [ ]\n전혀없음             보통              좋음             아주좋음\n촉 감                                 [ ]\n살짝까슬             보통             부드러움          매우부드러움\n안 감               [ ]\n없음           있음(신축성이        있음(신축성)           기모\n비 침               [ ]\n없음             조금비침         비침있음(밝은색)\n스타일코드             05374502\n제품소재              겉감:폴리에스터100\n안감:폴리에스터100\n충전재:폴리에스터100\n색상                  01카키,02블랙\n치수                  SM\n제조자                (주)지오다노\n제조국                미얀마\n4%!\n세탁 방법   A a\n손세탁. 표백제금지  adm  뉘어서 그늘건조 、 건조기 금지\n제조연월              2023.12\n1. 소비자 분쟁해결 기준에 따라 다음과 같이 보상해드립니다.\n*봉제불량, 원단불량(제작불량\\변색,탈색) 부자재 불량(단추, 지퍼,심지 등}: 구입일로부터 1년 이내분은\n무상수선, 교환, 환불의 순위로 보상. 단, 봉제불량은 1년 경과 후에도 무상 수선.\n품질보증기준                 사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시)및 소재 구성 부적합으로 인한 세탁 사고:\nmemo     구입일로부터 10% 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격, SY 제품 교환을 원칙으로 함.\n＊상하1착중한쪽에만 이상이 있을 경우: 상하 한착 모두 교환 또는 구입가 환불.\n2 소비자부주의에 의한제품훼손 및 세탁 잘못에 의한 변형,품질 보증기간(1년)이 경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해 드립니다.\nNS 책임자/전화번호 _ 지오다노 /지오다노 AS AE (080-934-3000)\n",
       "imageScanComplete": true,
@@ -3104,8 +3104,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:06:48.022Z",
-      "analyzedAt": "2026-10-28T04:09:24.499Z"
+      "observedAt": "2026-10-28T04:42:12.987Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
