@@ -25,6 +25,12 @@ test('복사등록 창이 없어도 사진 준비와 미리보기 반영은 먼�
  await assert.rejects(runSmartstoreAuto({input:'375908',collect:async()=>{order.push('collect');return {product,folder:'current'};},prepare:async p=>{order.push('prepare');return {...p,smartstoreDetail:{photoCount:3}};},onPrepared:async p=>{assert.equal(p.smartstoreDetail.photoCount,3);order.push('preview');},preflight:async()=>{order.push('login');throw Error('복사등록 창 없음');},render:async()=>assert.fail('렌더링은 로그인 확인 이후'),upload:async()=>assert.fail('업로드 금지')}),/복사등록/);
  assert.deepEqual(order,['collect','prepare','preview','login']);
 });
+test('색상 연결 대기 중에는 미리보기까지 반영하고 판매자 입력·업로드를 실행하지 않는다',async()=>{
+ let preview=false;
+ await assert.rejects(runSmartstoreAuto({input:'056933',collect:async()=>({product,folder:'current'}),prepare:async p=>({...p,smartstoreDetail:{pendingPhotoCount:2}}),onPrepared:async()=>{preview=true;},preflight:async()=>assert.fail('로그인 확인까지 진행하지 않음'),render:async()=>assert.fail('제작하지 않음'),upload:async()=>assert.fail('업로드하지 않음')}),e=>e.code==='PHOTO_MATCH_REQUIRED');
+ assert.equal(preview,true);
+});
+
 test('중단 이후 다음 단계와 업로드를 실행하지 않는다',async()=>{
  const controller=new AbortController();let uploads=0;
  await assert.rejects(runSmartstoreAuto({apiKey:'test',signal:controller.signal,preflight:async()=>{},collect:async()=>({product,folder:'.'}),prepare:async()=>{controller.abort();return product;},synthesize:async()=>assert.fail('must not synthesize'),render:async()=>assert.fail('must not render'),upload:async()=>uploads++}),/abort/i);

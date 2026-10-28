@@ -46,7 +46,7 @@ test('로그인 실패·틀린 품번·틀린 공식 출처·중단을 성공으
    await assert.rejects(importSmartstoreColorPhotos(f.product,f.folder,{...f.options,readSource:async()=>source,fetchImpl:()=>assert.fail('출처가 틀리면 다운로드 전 중단')}));
   }
   let completed=0;
-  await assert.rejects(prepareSmartstoreWithColorRecovery(f.product,f.folder,{...f.options,readSource:async()=>{throw Error('로그인 확인 필요');},onImported:()=>completed++}),/로그인 확인 필요/);
+  const pending=await prepareSmartstoreWithColorRecovery(f.product,f.folder,{...f.options,readSource:async()=>{throw Error('로그인 확인 필요');},onImported:()=>completed++});assert.match(pending.photoRecoveryWarning,/로그인/);assert(pending.smartstoreDetail.pendingPhotoCount>0);
   const controller=new AbortController();
   await assert.rejects(prepareSmartstoreWithColorRecovery(f.product,f.folder,{...f.options,signal:controller.signal,readSource:async()=>{controller.abort();return f.source;},onImported:()=>completed++}),{name:'AbortError'});
   assert.equal(completed,0);assert.deepEqual(await readFile(path.join(f.photos,'1.jpg')),f.bytes[0]);
