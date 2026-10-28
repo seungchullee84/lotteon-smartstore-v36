@@ -61,7 +61,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=2016CD1533BB94B303B2AD39E83B8C6D&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05585903.jpg",
       "detailHash": "e5cc27cba068ac6b59f1ef35a8cc873fa95e5ad278c3a43a345d6d80c64c054b",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"f4e45dd65c6ad72d96ea3c0b946482dd\"",
         "lastModified": "Thu, 23 Oct 2025 06:12:39 GMT"
@@ -84,8 +84,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:01:54.854Z",
-      "analyzedAt": "2026-10-28T04:09:22.048Z"
+      "observedAt": "2026-10-28T04:37:53.812Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -237,8 +237,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:02:20.258Z",
-      "analyzedAt": "2026-10-28T04:09:22.256Z"
+      "observedAt": "2026-10-28T04:38:14.897Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1608,7 +1608,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=289F9EE96404FBDF74AF01E31AAF4297&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05415946.jpg",
       "detailHash": "1acf6382795b2d1e833f75a41bcf36f76d2b8f60cddb3d1703f02447b282c360",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"9715247d5ca09ab16f8206261f0e763c\"",
         "lastModified": "Mon, 03 Nov 2025 08:36:24 GMT"
@@ -1631,8 +1631,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:01:44.185Z",
-      "analyzedAt": "2026-10-28T04:09:21.993Z"
+      "observedAt": "2026-10-28T04:37:46.586Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1712,7 +1712,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=2970AA3D325BE49E7B01C34FE9B22F81&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2024/05414917.jpg",
       "detailHash": "2ca63152607dee449bd0d225cfc10b4d92f6aed4c021061819b95578f2750aa1",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"a4a9e56f6c1f752ee9b6d1e17a88fbb6\"",
         "lastModified": "Mon, 29 Sep 2025 01:55:39 GMT"
@@ -1730,8 +1730,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:02:39.069Z",
-      "analyzedAt": "2026-10-28T04:09:22.405Z"
+      "observedAt": "2026-10-28T04:38:31.445Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1903,7 +1903,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=29E20874259A3BF4D949349D87FA2D6E&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2024/01114144.jpg",
       "detailHash": "a62c8a04bcdb8f253cab20775151cfc130b19d9c3b176e6a0f3accafe91e64f2",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"b1e6d24977754c7537d3a0b076807d2f\"",
         "lastModified": "Fri, 04 Oct 2024 00:54:08 GMT"
@@ -1936,8 +1936,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:02:26.829Z",
-      "analyzedAt": "2026-10-28T04:09:22.304Z"
+      "observedAt": "2026-10-28T04:38:20.073Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2109,8 +2109,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:01:41.001Z",
-      "analyzedAt": "2026-10-28T04:09:21.985Z"
+      "observedAt": "2026-10-28T04:37:42.203Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2162,12 +2162,12 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=2ABF123EC15FD1EB4722BC227CD36C16&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05415524.jpg",
       "detailHash": "f649335af6bd9db3da0c26d210a83f041868ed9003004aae3fef72472e78a405",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"642361f900576ce4beebe21f463cd833\"",
         "lastModified": "Fri, 19 Sep 2025 06:49:04 GMT"
       },
-      "pageHash": "c7fe751c4f9d6d9a8c934f1fc7958c1364242c7e950d5b1633d388f8f7d94390",
+      "pageHash": "e5a76d9b5642afa1a7cf3d294d347a7ebbcd0e29ffb8835a95eec81ec9d835bf",
       "pageText": "벨루어 스트레이트 팬츠입니다.\n\n290g/㎡(396g/yd²) 중량의 부드러운 폴리 코튼 벨루어 소재로\n편안하면서도 은은한 광택이 멋스럽고 포근한 착용감을 제공합니다.\n\n쫀쫀한 허리 E-밴드와 스트링 디테일을 활용해 묶어서 연출할 수 있으며, \n일자로 떨어지는 여유로운 바지 핏이 다리를 길어 보이게 하는 것이 특징입니다.\n\n왼쪽 주머니 아래 GRDN 자수를 더해 고급스러운 디테일을 더했습니다.\n실내는 물론 외출 시에도 다양한 아이템과 매치하여 스트릿 룩으로 연출이 가능하며, \n벨루어 후드 집업과 셋업으로도 착용할 수 있는 컬러로 구성되어 있어 캐주얼 데일리 웨어로 적극 추천 드립니다.",
       "imageText": "|    2        {\n|\n/                  |\n52002 |\n(                    N\n、\na\n베르\n벨루어 스트레이트 핏 바지                    STVLE NO. 05415524\n벨루어 스트레이트 바지입니다.\n290g/m (396g/yd?) 중량의 부드러운 폴리 코튼 벨루어 소재로,\n편안하면서도 은은한 광택이 멋스럽고 포근한 착용감을 제공합니다.\nZEB 허리 6밴드와 스트링 디테일을 활용해 묶어서 연출할 수 있으며,\n일자로 떨어지는 여유로운 바지 핏이 다리를 길어 보이게 하는 것이\n특징입니다.\n왼쪽 주머니 아래 GRDN 자수를 더해 고급스러운 디테일을 더했습니다.\n실내는 SE 외출 시에도 다양한 아이템과 매치하여 스트릿 룩으로 연출이\n가능하며,벨루어 후드 집업과 셋업으로도 착용할 수 있는 컬러로\n구성되어 있어 캐주얼 데일리 웨어로 적극 추천 드립니다.\n0, 3\n\\\n1   (\n|            he\n|\n개\n|\n5                                      키 173cm\na,                    상의 5 하의 26in\n1          — =\n\npl 기                          H\nod                         3\nA             -\nile\nfl                            은     갱                                      E ul\n~    :                  [                 주디\n=                gel   }\nIT                    4\n3        :\n1      ny\n기부\n| i     Lo 3\nF         ¥\nㅣ         도\nre                      By                  idee\n개 =    of     WW .\nlr   4\nle |         A\n| i\n1        |    3\n더   적            [1\n17                알투 EN\n   |               Te.\nLe      i    fit\nie    ha                    _    :\n=     Br    y          5           Ser\naE               1                            =\n를.       >                    때\n해   §        기                      |\n내   3        개                      기\nPP   대       i\nＬ 세 5      i\nA          ar 6\ni. +”    Es            er\na             8 0           ad\n-                           4    [기        we\n는        4    '\nBac       B. >\ni                  E\n§        le\n2        il            3\nd       ;     1         더\n12 를 11\ncay:\nLR          Cy\n|\n개\nfe\nhy                              .\nb a                        LAY,\nAd                4\nhi\n\\                  a\nCOLORS\n=\n|  ”                     N     il     1\noh   wie                          1    =\nㅣ   3  I   | a.                 y/         -  ge\nF==      &       gi      ==         4             3\npS           ~]   |            y  i\nBN      된         | 을\noy        게          를 ',\n| 매        ㄴㄴ 빼          ㅣ [개         -\n0132\n\n~\n)\n4\n(             \\\n\\\n0138\n02블랙\n03네이비\n04브라운\n05다크그레이\nDETAIL SIZE\nds\na5              [aoa                                                660 699\n~                                                             997 1035\nsm                                                                              584 603\nid                                                                       83 495\n292 302\n“3 743\n                                                                 1035 1045\nwet gd\n＊ 위 사이즈는 제품의 실측 값이며 케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n© AZ UI 신체치수 차이로 인한 교환/반품 건은 무상으로 진행해드리기 어려우니 구매에 참고 바랍니다.\n＊실측 사이즈(00))는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\n\nFae                                                                       483 495\n292 302\n743 143\n=                                                            1035 1045\n일단둘레\n* 위 사이즈는 제품의 실측 값이며 케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n＊실측값과신체치수차이로 인한 교환/반품 건은 무상으로 진행해드리기 어려우니 구매에 참고 바랍니다.\n＊실측사이즈(ㅇ0)는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\n착용시기                      [ ]                                               [J\n봄                      여름                     가을                     겨울\n두께 감                                              넓\n두꺼움                   중간                     EE                  아주않음\nIER]                                                                       bod\n전혀없음                  보통                     좋음                  아주좋음\n촉 감                                                                       후\n살짝까슬                  보통                  부드러움              매우부드러움\n안 감                      [J\n없음               있음(신축성이           있음(신축성\\)                기모\n비 침                      [ ]\n없음                  조금비침            비침있음(밝은색)\n스타일코드                  05415524\nHZ AT)                    폴리에스터58,면42\n색상                          01크림,02블랙,03네이비,04브라운,05다크그레이\n치수                          SM\n제조자                       (주)지오다노\n제조국                       인도네시아\n—\n세탁 방법        AX    [3\npsa   표백제금지 cman PW _ 건조기 금지\n제조연월                     2024.11\n1. 소비자 분쟁해결 기준에 따라 다음과 같이 보상해드립니다.\n*봉제불량, 원단불량(제작불량\\변색,탈색) 부자재 불량(단추, 지퍼,심지 S) 구입일로부터 1d 이내분은\n무상수선, 교환, 환불의 순위로 보상. 단, 봉제불량은 1년경과 후에도 무상 수선.\n품질보증기준                사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시)및 소재 구성 부적합으로 인한 세탁 사고:\n189051환2                 구입일로부터 10일 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격, 동일 제품 교환을 원칙으로 함.\n＊상하1착중한쪽에만 이상이 있을 경우: 상하 한착 모두 교환 또는 구입가 환불.\n2 소비자부주의에 의한제품훼손 및 세탁 잘못에 의한 변형,품질 보증기간(1년)이 경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해 드립니다.\nA/S 책임자/전화번호          지오다노 / 지오다노 AS 센터 (080-934-3000)\n6 안전 BEA BN Fe\nSetneisinzio 5 8\n",
       "imageScanComplete": true,
@@ -2185,8 +2185,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:01:33.686Z",
-      "analyzedAt": "2026-10-28T04:09:21.965Z"
+      "observedAt": "2026-10-28T04:37:35.178Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2388,8 +2388,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:02:06.528Z",
-      "analyzedAt": "2026-10-28T04:09:22.150Z"
+      "observedAt": "2026-10-28T04:38:03.163Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2963,12 +2963,12 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=2D620FBFC836CBBBE51A5AB0EF7FB0E8&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01026973.jpg",
       "detailHash": "7e2de53278767e3667af77ea00a95e588a241691ea51797f15f4304e12fa6566",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"f3df3e1e1eb5312bdf8d13596950eec0\"",
         "lastModified": "Tue, 25 Aug 2026 04:53:16 GMT"
       },
-      "pageHash": "aa7e9438fe8e3eae8538ecce27c86e132447c300d12be234f75f18f4c2d72822",
+      "pageHash": "43f2d00276a1cf7fad463ba76029735b2befebb4ed7b79b5b36ebdd3a65d2a3a",
       "pageText": "활용도 높은 하프넥 디자인의 Sorona® 와플 집업 긴팔 티셔츠\n\n베이직한 하프넥 집업 디자인과 자연스럽게 떨어지는 레귤러 핏으로 \n다양한 스타일링이 가능한 데일리 긴팔 티셔츠입니다.\n\nSorona® 100% 폴리에스터 와플 소재를 사용해 부드러운 터치감과 우수한 신축성, \n뛰어난 형태 안정성을 갖추었으며, 입체적인 와플 조직이 쾌적한 착용감을 제공합니다. \n\n하프 집업 디테일로 단독 착용은 물론 다양한 레이어드 스타일링에도 활용하기 좋은 아이템입니다.",
       "imageText": "[ fi   ~\n프               총                   파\n지모션 와플 텍스처 하프집업 긴 = E|          STYLE NO. 01026973\n베이직한 하프넥 집업 디자인과 자연스럽게 떨어지는 레글러 핏으로 다양한 스타일링이\n가능한 데일리 긴팔 티셔츠입니다.\nSorona®100% 폴리에스터 와플 소재를 사용해 부드러운 터치감과 우수한 신축성,\n뛰어난 형태 인정성음 갖주었습니다.\n입체적인 와플 조직이 쾌적한 착용감을 제공해 단독 착용 등 활용도가 높습니다.\n키 18507\n£4     래\n    |\n\n어깨선이 자연스럽게 떨어지는 Hot 품과 여유로운 HRA 연출\n허리선을 살짝 덮는 안정적인 기장감으로 체형 구애 없이 편안하게 착용 가능\nWNT           \"                          ㅡ\n도하 N                                         \\)\nL         -_—                  £4\n목을 부드럽게 감싸는 하프넥 디자인에 하프 집업 디테일을 적용해 다양한 스타일 연출\n지퍼를 오픈하거나 클로징하여 활용도가 높은 아이템\n,。 위     AW\nJ\nSorona 100% 폴리에스터 와플 조직 소재를 사용하여 우수한 신축성\n2156514의 적당한 중량감과 입체적인 와플 조직으로 뛰어난 통기성 및 쾌적한 착용감\n、 격\n}\n  p 50\n\nLi\n 4\nwr\n-\n개호\n스텔\nCOLORS\n01블랙\n02그레이\nDETAIL SIZE\nom\n가습녀삐      내                 648 613 699\nbet       we\nwd                 a                 432 457 483\n511 537 562\n629 641 654\n＊ 위 사이즈는 제품의 실측 값이며 케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n＊실측값과신체치수차이로인한교환/반품 건은 무상으로 진행해드리기 어려우니 구매에 참고 바랍니다.\n＊실측 사이즈(007)}는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\nCHECK UP\n착용시기           °                        °\n봄           여름          가을          겨울\nEHH                       [ ]\n두꺼움          중간          않음         아주않음\nMEd                                     °\n전혀없음         보통          좋음         아주좋음\n촉 감                       °\n살짝까슬         보통         부드러움       매우부드러움\n안 감           [J\n없음        있음(신축성이     있음(신축성\\)        기모\n비 침           [ ]\n\n봄                 여름                가을                겨울\n두께 감                                    [ 7\n두꺼움               중간                않음              아주않음\n신축성                                     ®\n전혀없음              보통                좋음              아주좋음\nx 。감                                    [ 7\n살짝까슬              보통              부드러움           매우부드러움\n안 감                 [ 7\n없음            있음(신축성이        있음(신축성)            기모\n비 침                 [ ]\n없음              조금비침          비침있음(밝은색)\n상 의 핏                                    호\n슬림핏             레글러핏              루즈핏\n하의 핏\n좁음         조금좁음          보통         조금넓음         넓음\n스타일코드              01026973\n제품소재                    폴리에스터 100%\n색상                    01네이비, 02그레이\n치수                    M,LXL\n제조자                  (주)지오다노\n제조국                  베트남\n세탁 방법     XO    별\n손세탁     표백제금지 _ 천대고다림질     약하계짜기 _ 건조기 금지\n(80°C~120°C)\n제조연월                2026.07\n1 소비자 분쟁해결 기준에 따라 다음과 같이 보상해드립니다.\n+ 봉제불량, 원단불량(제작불량,변색,탈색) 부자재 불량(단추, 지퍼,심지 등} 구입일로부터 1년 이내분은\n무상수선, 교환, 환불의 순위로 보상. Cf 봉제불량은 1년 경과 후에도 무상 수선.\n품질보증기준                   사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시) 및 소재 구성 부적합으로 인한 세탁 사고:\nEero             구입일로부터 102 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격,동일 제품 교환을 원칙으로 함.\n＊상하1착중한쪽에만 이상이 있을 경우:상하 한착 모두 교환 또는 구입가 환불.\n2 소비자 부주의에의한제품훼손 및 세탁 FRO) 의한 변형,품질 보증기간(1년)이 경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해드립니다.\nA/S 책임자/전화번호       지오다노 / 지오다노 AS 센터 (080-934-3000)\n\n",
       "imageScanComplete": true,
@@ -2991,8 +2991,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:02:11.436Z",
-      "analyzedAt": "2026-10-28T04:09:22.163Z"
+      "observedAt": "2026-10-28T04:38:06.214Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3259,12 +3259,12 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=2FC28A8F038DE2A8749C5624BA1344B9&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05415966.jpg",
       "detailHash": "9b92340cd37d192e4e858d4f27149f309ca8af5ded05183497859745c51b0057",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"95f06e3f19c22d285970996eedb39c1f\"",
         "lastModified": "Fri, 28 Aug 2026 07:13:15 GMT"
       },
-      "pageHash": "6d38691d5c96216284b61ec234976de2f0efb723a25294e06adf15a6bc51f728",
+      "pageHash": "606c174c9be7fe8cd14b05d80018eb2a05e8ed896ee47c2a701cf37ec3ee147e",
       "pageText": "브러시드 코듀로이 와이드 팬츠입니다.\n허리와 힙 라인은 안정감 있게 잡아주면서, 허벅지부터 밑단까지 여유롭게 퍼지는 와이드 핏으로 넉넉하게 떨어지는 실루엣과 감각적인 색감이 돋보이는 아이템입니다.\n\n소재는 신축성 있는 14골 코듀로이를 사용하여 코듀로이 특유의 입체적인 골 라인이 주는 풍부한 질감과 부드러운 터치감이 매력적이며, 적당한 신축성으로 움직임이 자유롭습니다. \n\n또한 구김이 적어 관리가 편리하고, 안쪽에 브러쉬드 기법을 더해 착용시 부드러우며 두께감 있는 원단이 체온을 유지해주어 F/W 시즌에 최적화된 보온성을 제공합니다.\n\n코듀로이 특유의 깊고 따뜻한 색감 위에 가먼트 워싱(Garment Washing) 공정을 더해 자연스럽고 빈티지한 무드와 세련된 트렌디함을 동시에 담았습니다. \n풍부한 톤과 감각적인 컬러감은 다양한 상의와 조화를 이루며, 캐주얼하면서도 스타일리시한 분위기를 연출합니다.\n\n추운 겨울 시즌 감성을 담은 머스트해브 아이템으로, 니트나 셔츠와 매치해 클래식하게, 후드나 스웨트셔츠와 매치해 캐주얼하게 즐길 수 있어 높은 활용도를 자랑합니다.\n\n* 원단 특성 상 눌림 자국과 폴리백 자국이 구김/얼룩 처럼 보일 수 있으나 이는 불량이 아니며 스팀 다림질로 쉽게 제거됩니다.",
       "imageText": "Ｌ\nOCs\nEVER EI ERGY\n0 HER\n|\n|\nVia\n7           2\n|\n=\n브러시드 와이드 코듀로이 팬츠                 STYLE NO. 05415966\n브러시드 코듀로이 와이드 팬츠입니다.\n허리와 힙 라인은 안정감 있게 잡아주면서, 허벅지부터 밑단까지\n여유롭게 퍼지는 와이드 핏으로\n닉녁하게 떨어지는 ARnt 감각적인 색감이 돋보이는 아이템입니다.\n소재는 신축성 있는 14골 코듀로이를 사용하여\n코듀로이 특유의 입체적인 골 라인이 주는 풍부한 질감과 부드러운\n터치감이 매력적이며,적당한 신축성으로 움직임이 자유롭습니다.\n또한 구김이 적어 관리가 편리하고, 안쪽에 브러쉬드 기법을 더해 착용시\n부드러우며 두께감 있는 원단이 체온을 유지해주어 F/W 시즌에 최적화된\n보온성을 제공합니다.\n코듀로이 특유의 깊고 따뜻한 색감 위에 가먼트 워싱(93ㅁ760[\\/390109)\n공정을 더해 자연스럽고 빈티지한 무드와 세련된 트렌디함을 동시에\n담았습니다.풍부한 톤과 감각적인 컬러감은 다양한 상의와 조화를\n이루며, 캐주얼하면서도 스타일리시한 분위기를 연출합니다.\n추운 겨울 시즌 감성을 담은 머스트해브 아이템으로,니트나 셔츠와\n매치해 클래식하게, SEL 스웨트셔츠와 매치해 캐주얼하게 즐길 수\n있어높은 활용도를 자랑합니다.\n7          Ar          '\n/\n/\ni\n키 172cm\n—                                      상의 5 하의 20\n\nis              상의 박고\nㅣ\n\n세\n\nSo’ -\n|\n%\n\\\nCOLORS\n\n§\nCOLORS\n도\nKE\n:     ㅣ\n;          7\n4         |\n샐               \\\n[i\nJB\n'                            1\n=         |.\n0133\n02베이지\n03블루\n-\n&\nfore\n(so\n1; SITE\n04체리 래커\nDETAIL SIZE\nem\nHowl) TV Hk      619 705 130 156 781\n| Tyas |   |      991 1016 1041 1067 1092\nei 가) |        603 616 629 641 654\n| ㅣ| |        508 514 521 52] 533\n| dl    |   .  279 286 292 298 305\nH I |\nㅣ ㅣ ||      :   #9 49 49 156 762\n이 3           1010 1016 1022 1035 1048\n밑단둘레\n* 위 사이즈는 제품의 실측 값이며 케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n＊실측값과신체치수차이로인한교환/반품건은 무상으로 진행해드리기 어려우니 구매에 참고 바랍니다.\n*실측 사이즈(7)는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\nCHECK UP\n착용시기                      °\n봄     여름     가을     겨울\n두 께 감     <      [7\n두꺼움     중간     않음    아주않음\n~                             IN\n\n* 실측 값과 신체치수 차이도 인한 교환/반품 AS 무상으로 신행해드리기 어러우니 구매에 참고 바답니다.\n*실측 사이즈(7)는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\n착용시기                                                                                                .\n봄                         여름                        가을                        겨울\n두께 감                                              [\n두꺼움                       중간                        않음                     아주않음\n신축성                                                                       .\n전혀없음                      보통                        좋음                      아주좋음\n촉 감                                                                       e\n살짝까슬                      보통                     부드러움                 매우부드러움\n안 감                                                                                                od\n없음                  있음(신축성이             있음(신축성\\)                   기모\n비 침                      [ ]\n없음                     조금비침              비침있음(밝은색)\n하 의 핏                                                                             [J\n좁음              조금좁음              보통              조금넓음              넓음\n스타일코드                     05415966\n제품소재                    면99,폴리우레탄1\n색상                              01크림,02베이지,03블루,04체리 래커\n치수                              25,26,27,28,29\n제조자                           (주)지오다노\n제조국                           베트남\n세탁 방법 2 4d eK\n손세탁          금지 천매고 다림질          드            2\n표백제 금지    rae   석유계드라이 건조기 금지\n제조연월                        2025.09\n1. 소비자분쟁해결 기준에 따라 다음과 같이 보상해 드립니다.\n*봉제불량, 원단불량(제작불량.변색,탈색) 부자재 불량(단추, 지퍼,심지 등}: 구입일로부터 1년 이내분은\n무상수선, 교환, 환불의 순위로 보상. 단, 봉제불량은 1년 경과 후에도 무상 수선.\n품질보증기준                  사이즈 부정확 및디자인,색상 불만, 부당표시(미표시 및 부실표시)및 ATH 구성 부적합으로 인한 세탁 사고:\nHERES                    구입일로부터 102 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격,동일 제품 교환을원칙으로 함.\n＊상하1착중한쪽에만 이상이 있을 경우: 상하 한착 모두 교환 또는 구입가 환불.\n2 소비자 부주의에 의한제품훼손 및 세탁 잘못에 의한 변형,품질 보증기간(1년)이 경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해드립니다.\n/5 책임자/전화번호 __ 지오다노 /지오다노 AS 센터 (080-934-3000)\n",
       "imageScanComplete": true,
@@ -3287,8 +3287,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T04:01:52.599Z",
-      "analyzedAt": "2026-10-28T04:09:22.031Z"
+      "observedAt": "2026-10-28T04:37:52.328Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
