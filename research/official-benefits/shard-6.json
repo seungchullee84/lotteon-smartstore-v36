@@ -365,8 +365,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T02:20:22.746Z",
-      "analyzedAt": "2026-10-28T02:20:50.765Z"
+      "observedAt": "2026-10-28T02:56:08.619Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1727,7 +1727,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "d1d0d008952e8a54b13e4e23428852b2b4abb495c4950421184fa927b6e9c0e6",
+      "pageHash": "8d9a76eba2499e5065331fd740d96341dde61a0a2075d2cef220f76eb220468c",
       "pageText": "울  혼방 소재의 12GG 크루넥 스웨터 입니다.\n\n울과 폴리혼방 원사를 사용하여 구김이 덜 가고 부드러우며, 매끈한 표면감과 부드러운 터치가 특징 입니다.\n\n여유로운 루즈 핏으로 착용감이 편안하며 봄/가을 간절기 뿐만 아닌 겨울에도 입을 수 있어 활용도가 굉장히 높습니다.\n\n다양한 하의와 매치할 수 있는 이지한 아이템으로, 슬렉스와 매치하여 모던한 비즈니스 룩으로, 데님 또는 치노팬츠와 매치하여 캐주얼한 룩으로 제안 드립니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -1740,8 +1740,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T02:19:57.036Z",
-      "analyzedAt": "2026-10-28T02:20:36.484Z"
+      "observedAt": "2026-10-28T02:55:41.502Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1820,8 +1820,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T02:19:52.366Z",
-      "analyzedAt": "2026-10-28T02:20:36.429Z"
+      "observedAt": "2026-10-28T02:55:35.556Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2178,8 +2178,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T02:19:58.492Z",
-      "analyzedAt": "2026-10-28T02:20:36.491Z"
+      "observedAt": "2026-10-28T02:55:42.986Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2436,7 +2436,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "17611059c9866804f11c31b30a527b0d35651cdb8c0435341894c944c6d70c18",
+      "pageHash": "c97964e8ef7c3dcb36526f44948abd11b57e3f3fc5c6d82be3b6a5c9052bf790",
       "pageText": "전면에 자수가 새겨진 7gg 코튼 케이블 풀오버입니다.\n\n프리미엄 코튼 7gg원사를 사용하여 피부에 닿는 느낌이 부드럽고 까끌거림이 없습니다. \n세탁 후에도 변형을 최소화 하기 위해 소매와 밑단처리도 탄탄하게 되어 있습니다. \n\n가슴 부분에는 크레스트 자수가 새겨져 있어 한층 클래식하고 고급스러운 느낌입니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -2449,8 +2449,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T02:19:47.579Z",
-      "analyzedAt": "2026-10-28T02:20:36.369Z"
+      "observedAt": "2026-10-28T02:55:30.699Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3081,8 +3081,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T02:20:18.764Z",
-      "analyzedAt": "2026-10-28T02:20:36.694Z"
+      "observedAt": "2026-10-28T02:56:04.200Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
