@@ -321,3 +321,5 @@ body[data-channel="smartstore"] #smartstoreStart{background:#087c42}body[data-ch
 
 
 #websiteUpdateSummary .website-update-count{color:#c62828;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;}
+
+#githubSyncStatus{display:inline-block;min-width:150px}#websiteUpdateSummary{min-height:26px;line-height:26px}.website-update-count{display:inline-block;min-width:3ch;text-align:center}
