@@ -269,7 +269,10 @@ export function parseProduct(html, detailUrl, style) {
   const text=$('body').text();
   const {gender,sourceCategory,category}=productClassification(html);
   const images=$('img').map((_,e)=>({src:new URL($(e).attr('src')||'/',detailUrl).href.split('#')[0],alt:$(e).attr('alt')||''})).get();
-  const info=images.find(x=>x.src.includes(style+'info.'))?.src;
+  // Older accessories include the actual notice as <style>_info.jpg alongside
+  // a legacy <style>info.jpg placeholder that can return an HTML page.
+  const info=images.find(x=>new RegExp(style+'_info\\.(?:jpe?g|png|webp)(?:$|\\?)','i').test(x.src))?.src
+    ||images.find(x=>new RegExp(style+'info\\.(?:jpe?g|png|webp)(?:$|\\?)','i').test(x.src))?.src;
   const size=images.find(x=>new RegExp(style+'size_?\\.(?:jpg|jpeg|png)(?:$|\\?)','i').test(x.src))?.src;
   const check=images.find(x=>x.src.includes(style+'ch.'))?.src;
   const detail=images.find(x=>new RegExp(style+'_?\\.jpg(?:$|\\?)','i').test(x.src))?.src;
