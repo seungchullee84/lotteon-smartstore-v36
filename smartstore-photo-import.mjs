@@ -152,7 +152,13 @@ export async function readExistingPhotos(context,product,{check=()=>{},log=()=>{
   await editor.waitForFunction(i=>{const n=document.querySelectorAll('.se-component img')[i];return n&&/^https?:/.test(n.src)&&n.complete&&n.naturalWidth>0;},pos.index,{timeout:10000});
   const data=await img.evaluate(n=>({url:n.src,width:n.naturalWidth,height:n.naturalHeight}));
   if(data.width<300||data.height<300||data.height>150000||pos.longImage&&data.height<=data.width*3)continue;
-  candidates.push({...pos,...data,url:naverPhotoUrl(data.url)});
+  // A long external store notice can be appended after the product photos.
+  // Do not download it or abort the valid Naver photo collection for it.
+  let url;
+  try{url=naverPhotoUrl(data.url);}catch{
+   log('상품사진 제외 · 네이버 원본이 아닌 외부 안내 이미지');continue;
+  }
+  candidates.push({...pos,...data,url});
  }
  check();assertDetailOnlyProduct(await readDetailOnlySellerCode(page),product.style);
  if(fresh){await editor.close();await fresh.close();}
