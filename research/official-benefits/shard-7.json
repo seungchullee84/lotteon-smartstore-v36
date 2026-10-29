@@ -118,8 +118,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T02:56:42.425Z",
-      "analyzedAt": "2026-10-29T03:09:38.045Z"
+      "observedAt": "2026-10-29T03:30:30.872Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1507,7 +1507,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "65d0f142276398eab9a129ebf39ab3fb6fd4dface045723dfafa0617433edba6",
+      "pageHash": "3402d0c29433244afc7b159f857c7f1f142561ed4fa79d5445ac70b336c3c0e4",
       "pageText": "릴렉스 핏과 스탠드 넥 디자인으로 여유롭고 클래식한 무드의 푸퍼 자켓\n\n은은한 워싱감의 코듀로이 소재와 마이크로 볼타입 패딩을 적용해 깊이 있는 색감과 풍성한 볼륨감 연출\n\nYKK 메탈 지퍼, 소매 이밴드, 밑단 스트링·스토퍼 등 방풍 및 실루엣 조절 디테일",
       "imageText": "",
       "imageScanComplete": false,
@@ -1525,8 +1525,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T02:56:45.622Z",
-      "analyzedAt": "2026-10-29T03:09:38.081Z"
+      "observedAt": "2026-10-29T03:30:33.543Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",

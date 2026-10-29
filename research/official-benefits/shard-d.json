@@ -3168,8 +3168,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T02:56:39.611Z",
-      "analyzedAt": "2026-10-29T03:09:37.992Z"
+      "observedAt": "2026-10-29T03:30:27.772Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
