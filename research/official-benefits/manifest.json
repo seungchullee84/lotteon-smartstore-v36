@@ -10014,9 +10014,9 @@
   "sourceComplete": 1422,
   "imageComplete": 1308,
   "withThreeOrFour": 438,
-  "phase": "sources",
+  "phase": "complete",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-29T09:51:07.727Z",
+  "updatedAt": "2026-10-29T09:51:21.070Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-29T09:51:08.003Z",
