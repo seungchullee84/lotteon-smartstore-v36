@@ -842,5 +842,5 @@ $('smartstoreCombinePhotos').onclick=async()=>{
  const button=$('smartstoreCombinePhotos');requestLock=true;button.textContent='마네킨샷+공홈 조합 중…';syncButtons();
  try{if(product&&(input===product.style||input===product.sourceUrl))await post('smartstore-combine-photos',{style:product.style,channel:'smartstore'});else await post('collect',{style:input,channel:'smartstore'});announce('폴더 원본 전체와 공홈 자료를 조합합니다. 추가·상세 미리보기를 확인해 주세요.','progress');}
  catch(error){announce(error.message,'failed');}
- finally{requestLock=false;button.textContent='📁＋🌐 마네킨샷+공홈 조합 수집';syncButtons();await refresh();}
+ finally{requestLock=false;button.textContent='📁＋🌐 마네킨샷+공홈 조합 (새로 업로드 시 사용)';syncButtons();await refresh();}
 };
