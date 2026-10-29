@@ -2661,6 +2661,13 @@
       ]
     },
     {
+      "pno": "42DA59F393CD0664F11E59F8E67C95DC",
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=42DA59F393CD0664F11E59F8E67C95DC&ctype=1",
+      "categories": [
+        "남성 ALL"
+      ]
+    },
+    {
       "pno": "43D1D6E65B20A9AF42D2B4125A9065DB",
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=43D1D6E65B20A9AF42D2B4125A9065DB&ctype=1",
       "categories": [
@@ -7260,6 +7267,13 @@
       ]
     },
     {
+      "pno": "BDE6D72205E50052043B17DC9D42409F",
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=BDE6D72205E50052043B17DC9D42409F&ctype=1",
+      "categories": [
+        "남성 ALL"
+      ]
+    },
+    {
       "pno": "BDE8BEF559D2220C30C6F576456A7C76",
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=BDE8BEF559D2220C30C6F576456A7C76&ctype=1",
       "categories": [
@@ -10000,9 +10014,9 @@
   "sourceComplete": 1420,
   "imageComplete": 1306,
   "withThreeOrFour": 437,
-  "phase": "complete",
+  "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-29T00:28:37.075Z",
+  "updatedAt": "2026-10-29T00:49:15.073Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-29T00:28:25.047Z",
@@ -18740,7 +18754,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -19305,7 +19319,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
