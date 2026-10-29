@@ -3,6 +3,9 @@ export const BENEFIT_RECIPE_VERSION='official-benefit-recipes-1';
 export function sourceBenefitRecipes(source){
  const text=String(source||'').replace(/\s+/g,' '),points=[];
  const rules=[
+  {id:'relaxed-clean',pattern:/릴렉스\s*핏과\s*목넥\s*디자인으로\s*편안하면서도\s*깔끔한\s*실루엣을\s*연출/,title:'편안하고 깔끔한 실루엣',description:'릴렉스 핏과 목넥으로 편안하고 깔끔하게.',covered:/릴렉스|깔끔한.*실루엣/},
+  {id:'light-warm-filling',pattern:/가벼운\s*착용감과\s*풍성한\s*볼륨감\s*[,，]?\s*뛰어난\s*보온성을\s*제공/,title:'가볍고 따뜻한 착용감',description:'가벼운 착용감에 풍성한 볼륨과 보온성을 더했어요.',covered:/가벼|가볍|경량|보온/},
+  {id:'wind-entry',pattern:/내부\s*인\s*플라켓과\s*소매\s*안쪽\s*이밴드로\s*찬바람\s*유입을\s*차단/,title:'찬바람 유입을 줄여 따뜻하게',description:'내부 플라켓과 소매 안쪽 밴드로 찬바람을 차단해요.',covered:/찬바람|바람.*차단/},
 
   {id:'soft-touch',pattern:/(?:부드러운\s*(?:촉감|터치감)|부드럽고\s*(?:실키한|쾌적한)\s*(?:촉감|터치감)|소프트한\s*(?:촉감|터치감|텍스처))[^.]{0,60}?(?:제공|선사|특징|느껴|우수합니다|우수하며|더했|살렸)/,title:'부드럽게 닿는 촉감',description:'부드러운 촉감이 느껴지는 원단.',covered:/부드|소프트|실키/},
   {id:'breathable',pattern:/통기성(?:이|을)?\s*(?:뛰어나|우수|좋|높)[^.]{0,45}?(?:착용감|쾌적|시원)|통기성이\s*뛰어나/,title:'통기성을 살린 쾌적함',description:'우수한 통기성으로 쾌적하게 입어요.',covered:/통기|쾌적|흡습|속건/},

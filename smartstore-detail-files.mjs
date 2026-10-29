@@ -202,7 +202,7 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
  const videoOptions={...productVideoOptions(product),...options.videoOptions};
  await requireBrandVideo(options.dataRoot,videoOptions);
  const p=await prepareSmartstoreDetail(product,folder,options);const data=new Map();
- if(!p.smartstoreDetail.sellingPoints.length)throw Error('공식 상세 원문에 근거한 소구점 확인이 필요합니다. 임의 문구로 상세이미지를 제작하지 않았습니다.');
+ if(p.smartstoreDetail.sellingPoints.length<3)throw Error('소구점 최소 3개가 필요합니다. 공식 상세 원문에서 서로 다른 장점을 보완 확인해 주세요.');
  const check=()=>{if(signal?.aborted)throw Error('상세페이지 만들기를 중단했습니다.');};check();
  for(const name of TEMPLATE_ASSET_NAMES.filter(n=>!n.endsWith('.ttf')))data.set(TEMPLATE_ASSET_BASE+name,'data:image/'+(name.endsWith('.png')?'png':'jpeg')+';base64,'+(await readFile(path.join(assetsRoot,name))).toString('base64'));
  for(const [key,src] of Object.entries(p.images)){

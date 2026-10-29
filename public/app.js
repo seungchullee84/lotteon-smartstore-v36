@@ -274,7 +274,7 @@ function renderDetailPreview(p){
  detailPreviewResizeObserver?.disconnect();
  const box=$('detailPreview');box.replaceChildren();box.scrollTop=0;
  if(document.body.dataset.channel==='smartstore'){
-  $('detailPreviewStatus').textContent='';
+  $('detailPreviewStatus').textContent=p.smartstoreDetail?.sellingPointReview?.status==='needs-review'?(p.smartstoreDetail.sellingPointReview.message||'소구점 최소 3개 필요 · 공식 원문 확인 필요'):'';
   const frame=document.createElement('iframe');frame.className='smartstore-template-preview';frame.title='스마트스토어 확정 템플릿 상세페이지';frame.allow='autoplay; fullscreen; picture-in-picture';
   frame.src='/smartstore-detail-preview.html?style='+encodeURIComponent(p.style)+'&v='+encodeURIComponent(smartstoreListingState?.release?.version||Date.now())+'&fields='+encodeURIComponent(JSON.stringify(smartstoreDetailFields()));box.append(frame);
   const fit=()=>{
