@@ -118,8 +118,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T06:18:21.031Z",
-      "analyzedAt": "2026-10-29T06:30:10.381Z"
+      "observedAt": "2026-10-29T06:51:02.911Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -315,8 +315,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T06:18:55.686Z",
-      "analyzedAt": "2026-10-29T06:30:10.920Z"
+      "observedAt": "2026-10-29T06:51:41.914Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1507,7 +1507,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "50623e0a7f873edee5186f05f3796230bfc0b11f5aa04d98592b9eff3b5e3522",
+      "pageHash": "299fae887b509ecc38fa784fbb1b567b976a8c0bfa151704c8ab1e96585ccaf0",
       "pageText": "릴렉스 핏과 스탠드 넥 디자인으로 여유롭고 클래식한 무드의 푸퍼 자켓\n\n은은한 워싱감의 코듀로이 소재와 마이크로 볼타입 패딩을 적용해 깊이 있는 색감과 풍성한 볼륨감 연출\n\nYKK 메탈 지퍼, 소매 이밴드, 밑단 스트링·스토퍼 등 방풍 및 실루엣 조절 디테일",
       "imageText": "",
       "imageScanComplete": false,
@@ -1525,8 +1525,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T06:18:23.171Z",
-      "analyzedAt": "2026-10-29T06:30:10.432Z"
+      "observedAt": "2026-10-29T06:51:06.025Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3345,8 +3345,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T06:18:38.826Z",
-      "analyzedAt": "2026-10-29T06:30:10.707Z"
+      "observedAt": "2026-10-29T06:51:23.019Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3508,8 +3508,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T06:18:47.036Z",
-      "analyzedAt": "2026-10-29T06:30:10.790Z"
+      "observedAt": "2026-10-29T06:51:32.364Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
