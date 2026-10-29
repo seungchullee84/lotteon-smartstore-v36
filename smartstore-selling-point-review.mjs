@@ -33,7 +33,16 @@ export async function reviewSellingPoints(product,source,{dataRoot,detailHash=nu
  const root=path.join(dataRoot,'smartstore-details',product.style),file=path.join(root,'selling-point-review.json');
  let imageReview;try{imageReview=JSON.parse(await readFile(path.join(root,'selling-point-image-review.json'),'utf8'));}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
  if(detailHash&&imageReview?.version===1&&imageReview.style===product.style&&imageReview.sourceUrl===product.sourceUrl&&imageReview.detailHash===detailHash&&imageReview.points?.length<=4&&usableSellingPoints(imageReview.points,imageReview.text)){
-  const enough=imageReview.points.length>=3;const record={...identity,method:'visual-official-detail',points:imageReview.points,status:enough?'ready':'needs-review',message:enough?'공식 상세 이미지 원문 대조 완료':'소구점 최소 3개 필요 · 공식 원문 보완 확인',reviewedAt:imageReview.reviewedAt};await writeFile(file,JSON.stringify(record,null,2));return record;
+  const points=[...imageReview.points];
+  if(points.length<3){
+   const normalize=value=>String(value||'').replace(/[\s.!?,，]+/g,'');
+   for(const candidate of officialSellingPoints(source)){
+    const duplicate=points.some(p=>normalize(p.title)===normalize(candidate.title)||normalize(p.description)===normalize(candidate.description)||normalize(p.evidence).includes(normalize(candidate.evidence))||normalize(candidate.evidence).includes(normalize(p.evidence)));
+    if(!duplicate&&usableSellingPoints([candidate],source))points.push(candidate);
+    if(points.length>=3)break;
+   }
+  }
+  const enough=points.length>=3;const record={...identity,method:'visual-official-detail',points,status:enough?'ready':'needs-review',message:enough?'공식 상세 이미지 원문 대조 완료':'소구점 최소 3개 필요 · 공식 원문 보완 확인',reviewedAt:imageReview.reviewedAt};await writeFile(file,JSON.stringify(record,null,2));return record;
  }
  if(!source.trim())return {...identity,points:[],status:'needs-review',message:'공식 상세 원문을 확인해야 합니다.'};
  let cached;try{cached=JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
