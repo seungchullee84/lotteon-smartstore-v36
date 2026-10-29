@@ -388,8 +388,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:17:36.866Z",
-      "analyzedAt": "2026-10-29T09:17:56.957Z"
+      "observedAt": "2026-10-29T09:51:02.889Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1031,15 +1031,15 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "81fba02bc17013ded0fd0d8b5ebde74b5b4d3b4af111d314733bb739f535ec09",
+      "pageHash": "659a80e0b7c2a2d155d43b0595aa066476a6931b788cdd123873dd497b3f21e7",
       "pageText": "미니멀하고 세련된 디자인의 패딩 바머입니다.\n\n냄새 및 황변이 없고 알러지에도 안전한 퍼피안(Puffian)을 충전재로 사용하여 가볍고 보온성이 좋으며 터치감이 소프트한 것이 특징입니다. \n\n전체적으로 과하지 않으면서도 여유있는 핏의 기본 아이템으로, 자연스럽게 떨어지는 실루엣으로 기획되어 누구나 착용하기에 좋습니다.",
       "imageText": "",
       "imageScanComplete": false,
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:17:36.163Z",
-      "analyzedAt": "2026-10-29T09:17:56.930Z"
+      "observedAt": "2026-10-29T09:51:02.734Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
