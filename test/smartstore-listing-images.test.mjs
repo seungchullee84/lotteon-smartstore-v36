@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {chooseListingPhotos,saveListingSelection,prepareListingImages,listingPreview,originalListingMain} from '../smartstore-listing-images.mjs';
+test('색상이 많아도 추가이미지 제한 때문에 준비가 중단되지 않는다',()=>{
+ const colors=Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0')+'색상');
+ const photos=colors.map((color,i)=>({name:i===0?'1.jpg':`color-${i}.jpg`,color,role:'front',bytes:Buffer.from('photo-'+i)}));
+ const selected=chooseListingPhotos(photos,{colors});assert.equal(selected.extras.length,9);assert.equal(selected.main.name,'1.jpg');
+});
 import {mkdtemp,mkdir,writeFile,readFile,rm,unlink} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';

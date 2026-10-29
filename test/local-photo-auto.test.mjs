@@ -1,8 +1,10 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {mkdtemp,rm} from 'node:fs/promises';import os from 'node:os';import path from 'node:path';
 import {classifyLocalPhotos} from '../smartstore-local-photo.mjs';
+import {acceptedLocalPrediction} from '../smartstore-local-photo.mjs';
 import {officialSellingPoints} from '../smartstore-selling-points.mjs';
 const source='릴렉스 핏과 목넥 디자인으로 편안하면서도 깔끔한 실루엣을 연출하는 푸퍼 자켓입니다. 초경량 립스탑 나일론 소재와 Ecoloft® Fluff 충전재를 사용해 가벼운 착용감과 풍성한 볼륨감, 뛰어난 보온성을 제공합니다. 내부 인 플라켓과 소매 안쪽 이밴드로 찬바람 유입을 차단하며, YKK 메탈 지퍼와 밑단 스트링으로 실용성을 강화했습니다.';
+test('확신도나 후보 간 차이가 부족한 자동 판별은 확정하지 않는다',()=>{const p={role:'front',color:'01블랙',roleScore:.9,colorScore:.9,roleMargin:.4,colorMargin:.4};assert(acceptedLocalPrediction(p,['01블랙']));assert(!acceptedLocalPrediction({...p,roleMargin:.02},['01블랙']));assert(!acceptedLocalPrediction({...p,colorScore:.4},['01블랙']));});
 test('new originals use valid local predictions, cached by product, without excluding folder photos',async()=>{
  const dataRoot=await mkdtemp(path.join(os.tmpdir(),'local-photo-'));try{
   let calls=0;const p={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=1',colors:['01블랙']};

@@ -50,6 +50,7 @@ test('정면·옆면 시각 확인은 과거 detail보다 우선하고 재수집
   for(let pass=0;pass<2;pass++){
    const prepared=await prepareSmartstoreAuto(product,folder,options),preview=await listingPreview(prepared,options),upload=await prepareListingImages(prepared,folder,options);
    assert.equal(prepared.smartstoreDetail.photoCount,definitions.length,'중복 바이트·날짜형 파일명도 상세 전체에 연결');assert.deepEqual(preview.extras.map(p=>p.role),['official-main','side','front','front']);assert.deepEqual(preview.extras.map(p=>p.color),['공식몰 대표사진',...product.colors]);assert.equal(upload.extras.length,4);assert.equal(preview.photoReview.status,'ready');
+   for(const color of product.colors)assert.ok(prepared.smartstoreDetail.paletteImages[color],color+' 확인된 정면은 팔레트에 연결');
    const after=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));assert.equal(after.photoMapping.files.length,definitions.length);assert(after.photoMapping.files.every(r=>r.reviewed===true));
    for(const record of records)assert.equal(createHash('sha256').update(await readFile(path.join(pictures,record.name))).digest('hex'),record.hash,'사용자 원본 불변');
    after.photoMapping.files=after.photoMapping.files.map(r=>({...r,role:'detail',reviewed:false}));after.listingImages.extras=[];await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(after));
