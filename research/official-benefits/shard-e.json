@@ -478,7 +478,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=E295402F4BC2D05C3DABA18C489B2DBB&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01055920.jpg",
       "detailHash": "3e84f772668076770241b8dc008bbb0e4fa2baf998995075ec15597cd304e487",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"71b94217eda8eb6f1fd4bd5ba6673d09\"",
         "lastModified": "Tue, 21 Oct 2025 01:39:01 GMT"
@@ -496,8 +496,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:30.505Z",
-      "analyzedAt": "2026-10-28T15:47:16.680Z"
+      "observedAt": "2026-10-29T00:15:53.634Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -646,7 +646,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=E36F521BBBA465574D67BB94634FA0E0&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01026505.jpg",
       "detailHash": "c1423debac8856d421c755d9308d82816f28d059c6473b7581c5aa83954093cf",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"8e1393ff72469a9976453a3c7bdb10e1\"",
         "lastModified": "Sun, 25 Jan 2026 23:51:43 GMT"
@@ -664,8 +664,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:31.504Z",
-      "analyzedAt": "2026-10-28T15:47:16.726Z"
+      "observedAt": "2026-10-29T00:16:37.271Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2550,14 +2550,14 @@
         "ALL"
       ],
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=ECED0C3421CF1BEE809E8B087E808D00&ctype=1",
-      "detailUrl": null,
-      "detailHash": null,
-      "detailImageVerified": false,
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01046507_.jpg",
+      "detailHash": "7f55ca5ecd7072ea338a638cdddb72a95e5eed36ba157e0355e2a03c097456da",
+      "detailImageVerified": true,
       "detailValidators": {
-        "etag": null,
-        "lastModified": null
+        "etag": "\"bab2b0168223cab0a34eeca163fc49f4\"",
+        "lastModified": "Tue, 03 Feb 2026 08:59:14 GMT"
       },
-      "pageHash": "76ae2250df6329937e5f3fa4855ae770a6de8020bcb065704e4ad934e20d0c56",
+      "pageHash": "7a2a1459748b4297b2b258e403967016465d4f68922caa9e9931051a741cfb1c",
       "pageText": "균형감 있게 떨어지는 레귤러 핏으로, 과하지 않은 여유와 단정한 실루엣을 동시에 갖춘 구조입니다. \n어깨선과 몸판이 과한 여유 없이 설계되어 단독 착용 시 깔끔한 인상을 줍니다. \n데님 특유의 질감이 부담 없이 어우러지는 안정적인 실루엣이 특징입니다.\n\n100% 코튼으로 짜인 6.5온스 데님 원단을 사용하여 탄탄하면서도 유연한 착용감을 제공합니다. \n적당한 두께로 간절기 셔츠로서의 활용도를 고려한 적당한 밀도감이 특징입니다. \n시간이 지날수록 자연스럽게 에이징되는 데님의 매력을 느낄 수 있으며, \n단독은 물론, 이너 또는 아우터 레이어드용으로도 유연하게 활용 가능합니다.\n\n전면 포켓 없이 미니멀하게 디자인되어 실루엣이 더욱 정제된 인상을 줍니다. \n버튼다운 칼라 디테일이 캐주얼한 데님 소재와 만나 셔츠 특유의 단정함을 유지하면서도, \n일상 속에서 자연스럽고 편안한 스타일링을 연출할 수 있게 해줍니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -2575,8 +2575,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:42.859Z",
-      "analyzedAt": "2026-10-28T15:47:17.262Z"
+      "observedAt": "2026-10-29T00:16:06.688Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2988,7 +2988,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=EEEDF6D4D717EBA333E1B53F1B5375C8&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01025514.jpg",
       "detailHash": "67a8c99f1d078a146e0ecaadd32199f9236651b1b64d86c419124869fe1b2069",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"adba744335980df33fb15ba1cea45963\"",
         "lastModified": "Fri, 07 Feb 2025 01:01:09 GMT"
@@ -3011,8 +3011,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:45.133Z",
-      "analyzedAt": "2026-10-28T15:47:17.349Z"
+      "observedAt": "2026-10-29T00:15:52.258Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",

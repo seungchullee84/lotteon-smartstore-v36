@@ -10002,7 +10002,7 @@
   "withThreeOrFour": 434,
   "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-29T00:15:41.084Z",
+  "updatedAt": "2026-10-29T00:16:40.748Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-28T15:47:08.608Z",
@@ -12397,7 +12397,7 @@
         "pageHash": "135a82c15b5ef85516fc12eb7f45dece6ef97d0ffd0b93eed7d0d1c3a621a0b0",
         "detailHash": "cb1bc6c933a82f3c6ebdfb93559dfe68e67b409f17e70deaf8fccb44e7927b20",
         "detailPresent": null,
-        "detailImageVerified": null
+        "detailImageVerified": false
       },
       "49EACBFDD48ABAB09C5DBA8F05FE804B": {
         "pageHash": "f640d49cc32780949003785f7c0157940ed1ec98facfdbc22a7f83b9ea42b005",
@@ -12673,7 +12673,7 @@
         "pageHash": "7863e31847dec4df3b57b8f2679b7c0a81ef046426ea5eeb619c58fc38e30dec",
         "detailHash": "98d1fd3be082f8575d09d65b8d12ca73b2c7760c3c13a9f51705944ba01ad07d",
         "detailPresent": null,
-        "detailImageVerified": null
+        "detailImageVerified": false
       },
       "E61465C83D9066A9275F524863C0032D": {
         "pageHash": "b0c7ca96bf9ef29d52701cce84c721ea3e77f38b8b77d02f22d8a5f2ef918844",
@@ -12763,13 +12763,13 @@
         "pageHash": "f59dbd8012dcca1aa1ced007e7e336dda0a5fb55964c10cd600fd6f09f0309e7",
         "detailHash": "8513cf947f54f0513f880edc7bd4af5ad94034b4f325861bdb867a8183469b42",
         "detailPresent": null,
-        "detailImageVerified": null
+        "detailImageVerified": false
       },
       "7C6589B90DEF5A20AD29C76E438461AC": {
         "pageHash": "84af1ecf6b01e1f913fa9ada78e77e65686e479e0f25402fc30c366f9af2fc06",
         "detailHash": "8fc040c5dbfd70aaf96951ba1ffe97bb7d2c23b37c8f7ceea0078669ab1eb31e",
         "detailPresent": null,
-        "detailImageVerified": null
+        "detailImageVerified": false
       },
       "28383C755009C4109567575BCC92FE56": {
         "pageHash": "04418715a9fdcedf0645d13eff027cf315604ff14466b81e97cf50f261f1a286",
@@ -18800,7 +18800,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "analyzing"
           },
           {
             "type": "changed",
@@ -19014,30 +19014,6 @@
           },
           {
             "type": "changed",
-            "style": "416918",
-            "name": "NEW 브러시드 와이드 슬랙스",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=0E9EC0B32522AB21038CBB847D19D25C&ctype=1",
-            "pageHash": "f59dbd8012dcca1aa1ced007e7e336dda0a5fb55964c10cd600fd6f09f0309e7",
-            "detailHash": "3bcd326ff5d3a1e10be7c3304f50db7ad81bd671a5e559e15f7e6d422a66c226",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          },
-          {
-            "type": "changed",
-            "style": "326929",
-            "name": "NEW 플리스 집업",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=128912D8DBDC975FB6BF98F9A594CA4F&ctype=1",
-            "pageHash": "7863e31847dec4df3b57b8f2679b7c0a81ef046426ea5eeb619c58fc38e30dec",
-            "detailHash": "7d2095cf7492979d254ec6d240445376518bf8e568ef38e51aac26b6d1a598ea",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          },
-          {
-            "type": "changed",
             "style": "416581",
             "name": "NEW [박현지] 모달 스트레이트핏 마시멜로 밴딩팬츠",
             "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=14A07BC8EE7D825BBE35A2BB5A2D0514&ctype=1",
@@ -19106,7 +19082,7 @@
             "changes": [
               "공식 상세이미지 변경"
             ],
-            "status": "analyzing"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -19158,18 +19134,6 @@
           },
           {
             "type": "changed",
-            "style": "416917",
-            "name": "NEW 브러시드 스트레이트 슬랙스",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7C6589B90DEF5A20AD29C76E438461AC&ctype=1",
-            "pageHash": "84af1ecf6b01e1f913fa9ada78e77e65686e479e0f25402fc30c366f9af2fc06",
-            "detailHash": "b66621dc9647708ca701d8a1263f31696c5f7a6262a1ea604469eb3bf1acc951",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          },
-          {
-            "type": "changed",
             "style": "355921",
             "name": "하프넥 니트 스웨터",
             "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7D1CBC0CB9BC3FA1EE6FA52D5E21808C&ctype=1",
@@ -19202,7 +19166,7 @@
             "changes": [
               "공식 상세이미지 변경"
             ],
-            "status": "analyzing"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -19262,7 +19226,7 @@
             "changes": [
               "공식 상세이미지 변경"
             ],
-            "status": "analyzing"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -19290,18 +19254,6 @@
           },
           {
             "type": "changed",
-            "style": "356953",
-            "name": "NEW [문가영] 하이넥 풀집 가디건",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=FEE75B05309B665FB5A6EC3B56DDA5E1&ctype=1",
-            "pageHash": "135a82c15b5ef85516fc12eb7f45dece6ef97d0ffd0b93eed7d0d1c3a621a0b0",
-            "detailHash": "f525a288d6b9f7ec14240a733ffbbcd59b0bcff2ed2049f5eb3e92ad913c0ccc",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          },
-          {
-            "type": "changed",
             "style": "096510",
             "name": "그래픽 반팔티 (굿에너지)",
             "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=FF6988A2FACF2FA741FD203CAA634736&ctype=1",
@@ -19317,260 +19269,27 @@
       {
         "id": "a2f97ee7db03e6ac8151",
         "checkedAt": "2026-10-28T13:22:22.542Z",
-        "events": [
-          {
-            "type": "changed",
-            "style": "416918",
-            "name": "NEW 브러시드 와이드 슬랙스",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=0E9EC0B32522AB21038CBB847D19D25C&ctype=1",
-            "pageHash": "f59dbd8012dcca1aa1ced007e7e336dda0a5fb55964c10cd600fd6f09f0309e7",
-            "detailHash": "9d73c00b41c98f2ee8fc9fd2e2fe32bc3f75a6e673747508b4b871e052c7d1bc",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          },
-          {
-            "type": "changed",
-            "style": "326929",
-            "name": "NEW 플리스 집업",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=128912D8DBDC975FB6BF98F9A594CA4F&ctype=1",
-            "pageHash": "7863e31847dec4df3b57b8f2679b7c0a81ef046426ea5eeb619c58fc38e30dec",
-            "detailHash": "e9e9be765bcadb562049d66b4ab3a84cec553b13eab52886705b9a9d214c0bf9",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          },
-          {
-            "type": "changed",
-            "style": "416917",
-            "name": "NEW 브러시드 스트레이트 슬랙스",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7C6589B90DEF5A20AD29C76E438461AC&ctype=1",
-            "pageHash": "84af1ecf6b01e1f913fa9ada78e77e65686e479e0f25402fc30c366f9af2fc06",
-            "detailHash": "97ec370a7cfb1be9aef2bdf981f7937d75aad01a40b8de8e70638081f0976be4",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          }
-        ]
+        "events": []
       },
       {
         "id": "96b0e08424f147e0baf1",
         "checkedAt": "2026-10-28T13:58:10.450Z",
-        "events": [
-          {
-            "type": "changed",
-            "style": "416918",
-            "name": "NEW 브러시드 와이드 슬랙스",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=0E9EC0B32522AB21038CBB847D19D25C&ctype=1",
-            "pageHash": "f59dbd8012dcca1aa1ced007e7e336dda0a5fb55964c10cd600fd6f09f0309e7",
-            "detailHash": "88fb1a89ec19f220a9dd5bbc050e55d943c50afec5896de4c2b8c0ad23b1c964",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          },
-          {
-            "type": "changed",
-            "style": "326929",
-            "name": "NEW 플리스 집업",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=128912D8DBDC975FB6BF98F9A594CA4F&ctype=1",
-            "pageHash": "7863e31847dec4df3b57b8f2679b7c0a81ef046426ea5eeb619c58fc38e30dec",
-            "detailHash": "31ea91e18923eeb80120d113702fdfb9e91bf9075578d31eb3339d50f10c49d9",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          },
-          {
-            "type": "changed",
-            "style": "416917",
-            "name": "NEW 브러시드 스트레이트 슬랙스",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7C6589B90DEF5A20AD29C76E438461AC&ctype=1",
-            "pageHash": "84af1ecf6b01e1f913fa9ada78e77e65686e479e0f25402fc30c366f9af2fc06",
-            "detailHash": "aad5f06d159c41ed5f1005ada05c125cbba05aa5fc77f92148fbf7d89ff607bf",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          },
-          {
-            "type": "changed",
-            "style": "356953",
-            "name": "NEW [문가영] 하이넥 풀집 가디건",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=FEE75B05309B665FB5A6EC3B56DDA5E1&ctype=1",
-            "pageHash": "135a82c15b5ef85516fc12eb7f45dece6ef97d0ffd0b93eed7d0d1c3a621a0b0",
-            "detailHash": "b10f46c4b6e9d85111c1c2c4ae228751932cbcec68b9fafab3dd69db484b9e10",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          }
-        ]
+        "events": []
       },
       {
         "id": "dcf997f48ccc98a65c5c",
         "checkedAt": "2026-10-28T14:34:31.351Z",
-        "events": [
-          {
-            "type": "changed",
-            "style": "416918",
-            "name": "NEW 브러시드 와이드 슬랙스",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=0E9EC0B32522AB21038CBB847D19D25C&ctype=1",
-            "pageHash": "f59dbd8012dcca1aa1ced007e7e336dda0a5fb55964c10cd600fd6f09f0309e7",
-            "detailHash": "920d57e7632e3aa9d97834a2e8850f122eb28392f43956a1e1f6cc5a35e048f9",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          },
-          {
-            "type": "changed",
-            "style": "326929",
-            "name": "NEW 플리스 집업",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=128912D8DBDC975FB6BF98F9A594CA4F&ctype=1",
-            "pageHash": "7863e31847dec4df3b57b8f2679b7c0a81ef046426ea5eeb619c58fc38e30dec",
-            "detailHash": "b484dabe8a8c5b778ca0403c63d026d065a510d48f02cec557e28e91c15a9314",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          },
-          {
-            "type": "changed",
-            "style": "416917",
-            "name": "NEW 브러시드 스트레이트 슬랙스",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7C6589B90DEF5A20AD29C76E438461AC&ctype=1",
-            "pageHash": "84af1ecf6b01e1f913fa9ada78e77e65686e479e0f25402fc30c366f9af2fc06",
-            "detailHash": "8357ec1d53a9be88fa06a889cdea59bae3134d928747c42bd611e081d06bc84e",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          },
-          {
-            "type": "changed",
-            "style": "356953",
-            "name": "NEW [문가영] 하이넥 풀집 가디건",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=FEE75B05309B665FB5A6EC3B56DDA5E1&ctype=1",
-            "pageHash": "135a82c15b5ef85516fc12eb7f45dece6ef97d0ffd0b93eed7d0d1c3a621a0b0",
-            "detailHash": "6dc47866a45c335a565fd622d433acd6eca03b3c200c4c60e5961e943c930add",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          }
-        ]
+        "events": []
       },
       {
         "id": "b6413342c5a8a4c2c663",
         "checkedAt": "2026-10-28T15:10:59.909Z",
-        "events": [
-          {
-            "type": "changed",
-            "style": "416918",
-            "name": "NEW 브러시드 와이드 슬랙스",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=0E9EC0B32522AB21038CBB847D19D25C&ctype=1",
-            "pageHash": "6de0de68f94de99918c08be84ddcd6817f3e143622cb659f89e1ece48b34a610",
-            "detailHash": "7949401bdd663c785eec6f2e67b095b439b956ab63500190863fe62ac7df9cf2",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          },
-          {
-            "type": "changed",
-            "style": "326929",
-            "name": "NEW 플리스 집업",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=128912D8DBDC975FB6BF98F9A594CA4F&ctype=1",
-            "pageHash": "2c04ddbe240e89ea4041301da6f7493646879b8eb36a01eb209d7877e2cff13a",
-            "detailHash": "5b193b65f5746f2a85eb6a0b6dbe00a06417f9d29ee7e4d62f2cc6b07cbf57fa",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          },
-          {
-            "type": "changed",
-            "style": "416917",
-            "name": "NEW 브러시드 스트레이트 슬랙스",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7C6589B90DEF5A20AD29C76E438461AC&ctype=1",
-            "pageHash": "84af1ecf6b01e1f913fa9ada78e77e65686e479e0f25402fc30c366f9af2fc06",
-            "detailHash": "0b1365fd6ec503d76010ef9a9ab84d452e5c695ecb5f1fa89054b1cd706b80f3",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          },
-          {
-            "type": "changed",
-            "style": "356953",
-            "name": "NEW [문가영] 하이넥 풀집 가디건",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=FEE75B05309B665FB5A6EC3B56DDA5E1&ctype=1",
-            "pageHash": "135a82c15b5ef85516fc12eb7f45dece6ef97d0ffd0b93eed7d0d1c3a621a0b0",
-            "detailHash": "e5c59bcefd5576a6e88826abe7294dbfda2f09b5092346978fc5de8f4e7882c4",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "superseded"
-          }
-        ]
+        "events": []
       },
       {
         "id": "467964db89fe6205d668",
         "checkedAt": "2026-10-28T15:47:08.608Z",
-        "events": [
-          {
-            "type": "changed",
-            "style": "416918",
-            "name": "NEW 브러시드 와이드 슬랙스",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=0E9EC0B32522AB21038CBB847D19D25C&ctype=1",
-            "pageHash": "f59dbd8012dcca1aa1ced007e7e336dda0a5fb55964c10cd600fd6f09f0309e7",
-            "detailHash": "8513cf947f54f0513f880edc7bd4af5ad94034b4f325861bdb867a8183469b42",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "analyzing"
-          },
-          {
-            "type": "changed",
-            "style": "326929",
-            "name": "NEW 플리스 집업",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=128912D8DBDC975FB6BF98F9A594CA4F&ctype=1",
-            "pageHash": "7863e31847dec4df3b57b8f2679b7c0a81ef046426ea5eeb619c58fc38e30dec",
-            "detailHash": "98d1fd3be082f8575d09d65b8d12ca73b2c7760c3c13a9f51705944ba01ad07d",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "analyzing"
-          },
-          {
-            "type": "changed",
-            "style": "416917",
-            "name": "NEW 브러시드 스트레이트 슬랙스",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7C6589B90DEF5A20AD29C76E438461AC&ctype=1",
-            "pageHash": "84af1ecf6b01e1f913fa9ada78e77e65686e479e0f25402fc30c366f9af2fc06",
-            "detailHash": "8fc040c5dbfd70aaf96951ba1ffe97bb7d2c23b37c8f7ceea0078669ab1eb31e",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "analyzing"
-          },
-          {
-            "type": "changed",
-            "style": "356953",
-            "name": "NEW [문가영] 하이넥 풀집 가디건",
-            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=FEE75B05309B665FB5A6EC3B56DDA5E1&ctype=1",
-            "pageHash": "135a82c15b5ef85516fc12eb7f45dece6ef97d0ffd0b93eed7d0d1c3a621a0b0",
-            "detailHash": "cb1bc6c933a82f3c6ebdfb93559dfe68e67b409f17e70deaf8fccb44e7927b20",
-            "changes": [
-              "공식 상세이미지 변경"
-            ],
-            "status": "analyzing"
-          }
-        ]
+        "events": []
       }
     ]
   }
