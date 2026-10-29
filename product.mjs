@@ -275,7 +275,7 @@ export function parseProduct(html, detailUrl, style) {
     ||images.find(x=>new RegExp(style+'info\\.(?:jpe?g|png|webp)(?:$|\\?)','i').test(x.src))?.src;
   const size=images.find(x=>new RegExp(style+'size_?\\.(?:jpg|jpeg|png)(?:$|\\?)','i').test(x.src))?.src;
   const check=images.find(x=>x.src.includes(style+'ch.'))?.src;
-  const detail=images.find(x=>new RegExp(style+'_?\\.jpg(?:$|\\?)','i').test(x.src))?.src;
+  const detail=images.find(x=>new RegExp(style+'(?:_\\d+|_)?\\.jpg(?:$|\\?)','i').test(x.src))?.src;
   const main=images.find(x=>x.src.includes('/_data/attach/'))?.src;
   const gallery=[...new Set($('img.product_image_tooltip_image_gio[data-image_no]').map((_,e)=>new URL($(e).attr('src')||'/',detailUrl).href.split('#')[0]).get())].filter(src=>src!==main&&new URL(src).origin===OFFICIAL).slice(0,2);
   if(!main||(!info&&!detail)) throw Error('공식몰 상품의 고시 또는 대표이미지를 찾지 못했습니다.');

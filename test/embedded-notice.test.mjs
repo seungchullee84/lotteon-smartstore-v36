@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import sharp from 'sharp';
 import {extractEmbeddedNotice} from '../embedded-notice.mjs';
 import {parseProduct} from '../product.mjs';
+test('공식 페이지의 같은 품번 숫자 접미 상세이미지를 인식한다',()=>{const p=parseProduct('<title>남성 푸퍼</title><img src="https://www.giordano.co.kr/_gio_on/2026/01076932_1.jpg">','https://www.giordano.co.kr/shop/detail.php?pno=current','076932');assert.equal(p.images.detail,'https://www.giordano.co.kr/_gio_on/2026/01076932_1.jpg');});
 
 test('상세 원본 하단의 현재 품번·소재·제조국·제조연월 확인 후 정보고시만 추출한다',async()=>{
  const bytes=await sharp({create:{width:200,height:1200,channels:3,background:'#fff'}}).png().toBuffer();
