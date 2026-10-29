@@ -1,5 +1,16 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,writeFile,mkdir} from 'node:fs/promises';import {createHash} from 'node:crypto';import path from 'node:path';import os from 'node:os';import {reviewSellingPoints,saveOfficialImagePointReview,officialPointSource} from '../smartstore-selling-point-review.mjs';
 const product={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=test',name:'공식 의류'};
+test('시각 확인한 소구점이 부족하면 현재 공식 원문의 다른 장점으로 보완한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'benefit-supplement-'));try{
+ await writeFile(path.join(root,'detail.jpg'),'official-image');
+ const first='부드러운 원단으로 편안한 착용감을 제공합니다.';
+ const points=[{title:'부드러운 착용감',description:'부드러운 원단으로 편안한 착용감.',evidence:first}];
+ const saved=await saveOfficialImagePointReview(product,root,{text:first,points,dataRoot:root});
+ const source=first+' 허리 스트링으로 둘레를 조절할 수 있습니다. 옆면 포켓으로 수납성을 높였습니다.';
+ const result=await reviewSellingPoints(product,source,{dataRoot:root,detailHash:saved.detailHash});
+ assert.equal(result.status,'ready');assert.equal(result.points.length,3);assert.deepEqual(result.points[0],points[0]);assert(result.points.every(p=>source.includes(p.evidence)));
+ }finally{await rm(root,{recursive:true,force:true});}
+});
 test('구매 장점 기준 이전의 준비 완료 캐시도 모든 품번에서 다시 검증한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'benefit-cache-'));try{
  const source='슬림핏 레글러핏 루즈핏. 부드러운 원단으로 편안한 착용감을 제공합니다.';
