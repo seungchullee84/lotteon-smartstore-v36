@@ -65,15 +65,24 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  };
  if(draft?.acceptAllFolderPhotos){
   const photos=await findPhotos(product,{photoRoots:await configuredPhotoRoots()});
+  const substitutions=[];
   const rank=photo=>{const digest=createHash('sha256').update(photo.bytes).digest('hex'),record=draft.photoMapping?.files?.find(r=>r.name===photo.name&&r.hash===digest),order=draft.importedColorPhotos?.find(g=>g.color===record?.color)?.hashes||[],index=order.indexOf(digest);return index<0?100:index;};
   photos.sort((a,b)=>rank(a)-rank(b));
   for(const photo of photos){
    const digest=createHash('sha256').update(photo.bytes).digest('hex'),record=draft.photoMapping?.files?.find(r=>r.name===photo.name&&r.hash===digest);
+   const replacement=(draft.editedPhotoReplacements||[]).find(r=>r.sourceHash===digest&&r.sourceName===photo.name);
+   if(replacement){
+    if(!record||record.color!==replacement.sourceColor||!product.colors.includes(replacement.color)||!path.isAbsolute(replacement.file))throw Error('편집 사진의 원본과 색상을 다시 확인해 주세요.');
+    const bytes=await readFile(replacement.file),hash=createHash('sha256').update(bytes).digest('hex');
+    if(hash!==replacement.sha256)throw Error('편집 사진의 파일이 변경되었습니다. 다시 확인해 주세요.');
+    substitutions.push(replacement);continue;
+   }
    if(record?.role==='care-label'||(draft.careLabels||[]).some(r=>r.sourceName===photo.name&&r.sourceHash===digest))continue;
    if(record?.color&&record.role!=='provided'&&product.colors.includes(record.color)){await attach(record.color,photo.file,path.dirname(photo.file));continue;}
    const id=createHash('sha256').update(photo.name+'|'+digest).digest('hex').slice(0,24),src='/smartstore-photo/'+id,name='smartstore-photo-'+id+'.jpg';
    await writeFile(path.join(folder,name),await readFile(await workingProductPhoto(photo,product,{dataRoot})));prepared.photoFiles[src]=name;prepared.providedImages.push(src);prepared.photoCount++;
   }
+  for(const replacement of substitutions)await attach(replacement.color,replacement.file,path.dirname(replacement.file));
  }else if(draft?.photos){
   if(!Array.isArray(draft.photos))throw Error('마네킨 컷 연결 자료를 확인해 주세요.');
   for(const group of draft.photos){if(!Array.isArray(group.files))throw Error('색상별 사진 목록이 필요합니다.');for(const relative of group.files){
