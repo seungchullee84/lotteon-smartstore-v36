@@ -10016,7 +10016,7 @@
   "withThreeOrFour": 438,
   "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-29T04:17:51.445Z",
+  "updatedAt": "2026-10-29T04:17:55.889Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-29T04:17:56.380Z",
@@ -18623,7 +18623,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "new",
@@ -18635,7 +18635,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -18713,7 +18713,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "superseded"
+            "status": "ready"
           }
         ]
       },
@@ -19625,7 +19625,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "ready"
+            "status": "superseded"
           }
         ]
       },

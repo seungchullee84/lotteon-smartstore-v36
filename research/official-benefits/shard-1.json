@@ -2994,8 +2994,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T03:42:54.320Z",
-      "analyzedAt": "2026-10-29T03:43:18.610Z"
+      "observedAt": "2026-10-29T04:17:49.293Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
