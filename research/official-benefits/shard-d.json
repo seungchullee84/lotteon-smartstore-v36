@@ -32,7 +32,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:16.449Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:18.702Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -70,7 +70,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:16.848Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:18.704Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -98,7 +98,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:16.950Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:18.707Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -136,7 +136,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:17.260Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:18.710Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -175,7 +175,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:17.714Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:18.735Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -218,7 +218,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:17.742Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:18.738Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -252,7 +252,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:17.987Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:18.741Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -290,7 +290,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:18.412Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:18.743Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -312,13 +312,19 @@
       },
       "pageHash": "31193b3253740e22cd9e2a87e558e8b16a1106fb54de87f76f594ed985fdbc4a",
       "pageText": "카라 크롭 숏 자켓입니다.\n\n카라 디테일이 있는 숏 자켓으로  엠블럼 자수와 샤이니 지퍼를 사용하여 포인트를 주었습니다.\n\n밑단에 스트링 조임 기능이 있어 실루엣 변형이 가능하며 \n다양한 스타일로 활용하기 좋습니다.\n\n은은한 광택이 있는 원단을 사용하여 클래식하면서도 고급스러움을 더했습니다.\n\n봄 시즌 다양한 야외활동 및 실내에서도 유용하게 활용하기 좋은 데일리 아이템입니다.\n\n베이직한 에크루, 블랙 컬러로 구성하여 어느 착장에나 걸쳐입기 좋습니다.",
-      "imageText": "",
-      "imageScanComplete": false,
-      "points": [],
-      "status": "image-pending",
+      "imageText": "i    y.\nAA ol)\nLY\ni.            | !  i\n1 1     /       \\   ]    |\nx,  J\nZ               l\nA           of\nN   이\n|      /\nA\nCollar Crop Jacket                              STYLE NO. 05374510\n카라 디테일이 있는 크롭 기장의 숫 자켓입니다.\n엠블럼 자수와 샤이니 지퍼가 포인트이며 은은한 광택이\n있는 원단을 사용하여 클래식하면서도 고급스럽습니다.\n밑단 스트링 조임 기능으로 AR 변형이 가능합니다.\n봄시즌실내에서나 야외활동 시 두루 활용하기 좋은\n데일리 아이템입니다.\n",
+      "imageScanComplete": true,
+      "points": [
+        {
+          "title": "포인트 있게 연출",
+          "description": "엠블럼 자수와 샤이니 지퍼가 포인트.",
+          "evidence": "엠블럼 자수와 샤이니 지퍼가 포인트이며 은은한 광택이 있는 원단을 사용하여 클래식하면서도 고급스럽습니다."
+        }
+      ],
+      "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:18.436Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:19.663Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -352,7 +358,7 @@
       "status": "image-pending",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:18.632Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:19.665Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -385,7 +391,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:19.250Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:19.690Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -407,13 +413,24 @@
       },
       "pageHash": "ca0621649d19621dfea47b09d6c98af3b291a101be3e047dbd8af54901ff0837",
       "pageText": "코튼 카펜터 팬츠입니다.\n힙 부터 허벅까지 여유감 있으며,\n밑단라인까지 와이드하게\n떨어지는 실루엣으로 트렌디 하면서도\n착용시 편안함과 활동성이 좋습니다.\n트윌조직의 코튼 소재를 사용 하였으며, \n전체적으로 가먼트 워싱을 가미하여\n네츄럴한 터치감을 느낄 수 있습니다.\n뒤쪽의 카펜터 디테일이 포인트로\n가을 시즌 다양한 상의들과 코디하여\n캐주얼한 연출이 가능 합니다",
-      "imageText": "",
-      "imageScanComplete": false,
-      "points": [],
-      "status": "image-pending",
+      "imageText": "2 Ig\n= =)\n—                        =\n=      는 =\n[\nCotton Wide  Carpenter  Pants                        STYLE NO. 05413907\n유틸리티 무드에 와이드한 코튼 카펜터 팬츠입니다.\n힙부터 허벅지까지 여유 있으며, 밑단라인까지 와이드하게\n떨어지는 HEAT\n뒤쪽의 카펜터 디테일 포인트로 트렌디하면서도\n편안한 착용감을 자랑합니다.\n트윌조직의 코튼 소재를 사용하였으며, 전체적으로 가먼트\n워싱을 가미하여 내추럴한 터치감을 느낄 수 있습니다.\n가을 시즌 다양한 상의들과 코디하여 캐주얼하게 연출해보세요.\n",
+      "imageScanComplete": true,
+      "points": [
+        {
+          "title": "다양한 코디에 활용",
+          "description": "가을 시즌 다양한 상의들과 코디하여 캐주얼하게 연출해보세요.",
+          "evidence": "가을 시즌 다양한 상의들과 코디하여 캐주얼하게 연출해보세요."
+        },
+        {
+          "title": "편안한 착용감",
+          "description": "힙부터 허벅지까지 여유 있으며, 밑단라인까지 와이드하게.",
+          "evidence": "힙부터 허벅지까지 여유 있으며, 밑단라인까지 와이드하게"
+        }
+      ],
+      "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:19.264Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.710Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -452,7 +469,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:19.486Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.286Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -479,7 +496,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:19.954Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.289Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -518,7 +535,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:19.971Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.291Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -556,7 +573,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:20.214Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.319Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -600,7 +617,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:20.650Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.322Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -648,7 +665,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:20.781Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.325Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -692,7 +709,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:20.887Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.328Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -730,7 +747,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:21.449Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.331Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -774,7 +791,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:21.595Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.333Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -802,7 +819,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:21.618Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.335Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -840,7 +857,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:22.129Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.363Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -873,7 +890,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:22.423Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.372Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -916,7 +933,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:22.241Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.369Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -960,7 +977,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:22.838Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.375Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -981,8 +998,8 @@
       },
       "pageHash": "0f961109b4c3c55d3ec3f96c5a79a144ef2df05eb4bd92d02d3b6b58e5aafa8d",
       "pageText": "메리노울 블렌드 원사로 부드럽고 고급스러운 케이블 크루넥 풀오버입니다.\n\n클래식한 7GG 케이블 조직으로 외관이 매우 고급스럽고 부드러운 촉감이 특징입니다.\nEXTRA MERINO WOOL이 30% 함유되어 더욱 포근하고 따뜻한 감촉을 느낄실 수 있습니다. 구김이 잘 가지 않고 원사 특성상 가볍고 부드러운 감촉으로 피부가 예민하신 분도 착용하시기에 좋습니다. \n\n소맷단과 밑단의 립 연결부는 고급 봉제 기법인 링킹 스티치로 마감하여 입었을 때 형태유지와 함께 안정감을 부여합니다.\n\n레귤러한 핏에\n베이직한 네이비, 헤더그레이, 샌드 컬러와 함께 포인트되는 올리브, 허니 컬러로 구성되었습니다.",
-      "imageText": "",
-      "imageScanComplete": false,
+      "imageText": "|  : ,\n|\n22\nhb\nAY\n| 4\n\n  3\n기\n글 내\n{       | ) IN\n17 i\n내    , { ¢\n   ㅣ    ”   \\\n|         [기\n'\nUr.   | \"=a\na 7   S a\nOo\n\\_       7a\n1              J\na |\n\\             J a\n“ —\n겁        a i\nem 앙000\nA\n개\n9\nPi          JERE TN\nNE '\n| mm A\nCANNES ie) FE\n18866...\n나가라 1001 어   jE 0\n\\ rE El 2\n117   GE 하이머. EE 을 SE\nNo Jar REE\nFh LE AE 콜이\nPoe) SA A 60 2      JAA\nSe 4 A\nJ. 시. let ad     Ld 4\nRo 관기 를\n2077.) gt Gl SO\nty,  Sine          이 3 wl\nWyo:        271 12\n2) 6     hE oR\nBal\naT\n\n내\n| x  :     |   |\n.| ET\n[i 커\nI             중 ,\nNz             i\n'패\n[7%\n해 Be\nrT WF TT\n\"개                                                       INN\n-                  SN\ndi -            \\           AFT kg\nfed se 7   AN     A NR EARS SE\nwl EN    OL A ERE\nee ng      a  Ab AER Gh\nWe a        Noh oE be Lely\nㅣ Ry wa I     ㅣ 、 ANE ay\na 1...     Joa Ad ARIE ED 1\n2. no Ee 1,   니 13   JALAN 1\na ^     7   a.    be REE\nCR EEE\nLL 00. 0. 1107.71     |, | 기철    CON Na\na   1 ea   601 0010 실소    ¢ Sa    MER Ee SANE 0\nta os Nl  cE IEEE\nSN EEE        EE REE\n1008 4  1   /   TR  [Relate               fi 3   ES Sh\nnh 객     FV bd ade             Ee     HARE 3\n|    I hee   &   Bo MEE NEHER\nBREE       Boob Rie 울\nRY FR      Fiat  bn\nJN      Li 고     {     J SRN\n“le\nun    CCRT EE SE i ER 일 001\n                    Fa 8\nY              HE Se  i i i 111\nbin   fe de\n단    XR ER\n:                 Beal  in\nban |   18004 LL\nFABRIC DETAIL\n고품질의 원사인 메리노울은 부드럽고 따뜻하며 고급스러운 ASUS 지님니다.\n깔끔하고 부드러운 촉감이 돋보이고 모던한 외관과 동시에 따뜻한 터치감을 가집니다.\nＬ      내 i\n[|        체 \"1.\nTINS    18  | 89800\n\nTRADNRILV UL TAIL\n고품질의 원사인 메리노울은 부드럽고 따뜻하며 고급스러운 ARS 시님니다.\n깔끔하고 부드러운 촉감이 돋보이고 모던한 외관과 동시에 따뜻한 터치감을 가집니다.\nEK      Hi    개    음           '\n          1] TE           |\nㅣ        ,      11 i NE\nA     그 81     Fo\n3   >   188           i   %\nCRI 사나이    kd   i   00087 님\n3              ㅣ                 LOR   1\n거     $i)              UHR    |\nCOLORS\ni             fF\n01올리브\n\\                     y.\n©\n02허니\n>\n1 수)\n                         =\n내\n\\\nf    IH i)\nI}   TAN                   “”\n1    \"1                                          >\n\\ wn’ |                                   3\nhi 일\nA\n03샌드\n2                               \\- }\ni                            g   TRIE\nr     © lL                            EL\nSEN                   \\  1” |\nRr                           i      on\nBay                  SF ”,` 의\n이틀               | 에\n,    만 0858 i i   &                     개     ”  JE\nME   3          EN\nCRE              ~\nki ¢ IRERE NT   vi\nA    066 1: i    바화\n1    i 3) 8    LEE\n04헤더그레이\n05다크네이비\n\n{                                      K\n05다크네이비\n18400\nJ                                      72.\n                                  Ｌ\n1/                   30inch\nf/\n(\n어깨너비\n%\n5                                 660 686 71\n=            Fe                                        49 445 470\n521 546 572\n635 648 66.0\n* 위 사이즈는 제품의 실측 값이며 케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n*실측값과 신체치수 차이로 인한 교환/반품 건은 무상으로 진행해드리기 어려우니 구매에 참고 바랍니다.\n＊ 실측 사이즈(ㅇ07)는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\n착용시기                      LJ                                               [ ]                      @\n봄                         여름                        가을                        겨울\n두께 감                                              °\n두꺼움                       중간                        ag                     아주않음\n신축성                                                                       ®\n전혀없음                     보통                        좋음                      아주좋음\n촉 감                                                                       [ ]\n살짝까슬                     보통                     부드러움                매우부드러움\n안 감                      [ ]\n없음                  있음(신축성이             있음(신축성)                   기모\n비 침                      [ ]\n없음         조금비침      비침있음(밝은색)\n스타일코드                     01053926\n제품소재                    나일론55,모30,아크릴15\n색상                              01올리브,02허니,03샌드,04헤더그레이,05다크네이비\n치수                              ML, XL\n제조자                           (주)지오다노\n제조국                           중국\n세탁방법        Mo 시   @\n손세탁 금지       표백제 금지       천대고 다림질       뉘어서 그늘건조      드라이 크리닝\n(80°C~120°C)\n제조연월                        2023.08\n1. 소비자 분쟁해결 기준에 따라 cheat ol 보상해드립니다.\n*봉제불량, 원단불량(제작불량,변색,탈색) 부자재 불량(단추, 지퍼,심지 등}: 구입일로부터 1년 이내분은\n무상수선, 교환, 환불의 순위로 보상. 단, 봉제불량은 1년 경과 후에도 무상 수선.\n품질보증기준                  사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시)및 소재 구성 부적합으로 인한 세탁 사고:\n티른-라시15                    구입일로부터 10일 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격, 동일 제품 교환을 원칙으로 함.\n＊상하1착중한쪽에만 이상이 있을 경우: 상하 한착 모두 교환 또는 구입가 환불.\n2 소비자부주의에 의한제품훼손 및 세탁 잘못에 의한 변형,품질 보증기간(1년)이 경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해 드립니다.\nA/S 책임자/전화번호          지오다노 / 지오다노 AS MIE] (080-934-3000)\n\n품질보증기준                  ㆍ사이즈 부정확 및 디자인,색상 불만, 부당표시(미표시 및 부실표시) 2 소재 구성 부적합으로 인한 세탁 사고:\nCL                    구입일로부터 10% 이내에 교환 가능. 단,제품에 £40] 없어야 fod 동일 가격,동일 제품교환을원칙으로 함.\n상하 1착중한쪽에만 이상이 있을 경우: 상하 한착 모두 교환또는 구입가 환불.\n2. 소비자부주의메의한제품훼손 및 세탁 잘못에 의한 변형,품질 보증기간(1년)이경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 많으며 수선 가능시에는 실비로 수선해 드립니다.\n&/5 책임자/전화번호 __ 지오다노 /지오다노 AS 센터 (080-934-3000)\n",
+      "imageScanComplete": true,
       "points": [
         {
           "title": "부드러운 착용감",
@@ -990,10 +1007,10 @@
           "evidence": "메리노울 블렌드 원사로 부드럽고 고급스러운 케이블 크루넥 풀오버입니다."
         }
       ],
-      "status": "image-pending",
+      "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:23.115Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.381Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1037,7 +1054,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:23.050Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.378Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1070,7 +1087,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:23.847Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.390Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1104,7 +1121,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:23.680Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.385Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1147,7 +1164,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:23.747Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.388Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1191,7 +1208,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:24.495Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.393Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1225,7 +1242,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:24.500Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.396Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1273,7 +1290,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:24.610Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.398Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1312,7 +1329,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:25.224Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.400Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1350,7 +1367,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:25.249Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.427Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1389,7 +1406,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:25.333Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.430Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1422,7 +1439,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:25.962Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.436Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1456,7 +1473,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:26.061Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.440Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1499,7 +1516,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:25.952Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.433Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1527,7 +1544,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:26.682Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.471Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1571,7 +1588,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:26.662Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.442Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1605,7 +1622,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:26.791Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.473Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1648,7 +1665,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:27.304Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.476Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1686,7 +1703,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:27.505Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.479Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1725,7 +1742,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:27.508Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.482Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1768,7 +1785,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:27.923Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.486Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1807,7 +1824,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:28.123Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.511Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1845,7 +1862,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:28.254Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.513Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1883,7 +1900,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:28.531Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.516Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1926,7 +1943,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:28.771Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.519Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1969,7 +1986,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:28.884Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.521Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2008,7 +2025,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:29.328Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.524Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2041,7 +2058,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:29.451Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.549Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2084,7 +2101,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:29.567Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.552Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2127,7 +2144,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:30.014Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.554Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2165,7 +2182,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:30.032Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.558Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2198,7 +2215,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:30.244Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.561Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2237,7 +2254,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:30.669Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.563Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2270,7 +2287,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:30.780Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.590Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2308,7 +2325,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:30.955Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.593Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2341,7 +2358,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:31.474Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.596Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2384,7 +2401,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:31.484Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.598Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2418,7 +2435,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:31.716Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.600Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2457,7 +2474,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:32.180Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.605Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2505,7 +2522,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:47:22.541Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:21.425Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2543,7 +2560,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:32.181Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.608Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2582,7 +2599,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:32.451Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.613Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2615,7 +2632,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:32.891Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.620Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2649,7 +2666,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:32.866Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.617Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2692,7 +2709,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:33.193Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.623Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2720,7 +2737,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:33.584Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.648Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2758,7 +2775,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:33.596Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.651Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2785,7 +2802,7 @@
       "status": "image-pending",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:33.859Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.654Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2819,7 +2836,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:34.313Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.657Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2868,7 +2885,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:34.324Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.660Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2907,7 +2924,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:34.539Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.663Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2940,7 +2957,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:34.977Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.689Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2988,7 +3005,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:34.991Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.692Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3022,7 +3039,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:35.226Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.695Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3050,7 +3067,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:35.666Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.699Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3078,7 +3095,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:35.676Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.702Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3126,7 +3143,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:35.873Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.705Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3169,7 +3186,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:36.256Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.726Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3207,7 +3224,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:36.348Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.744Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3251,7 +3268,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:36.524Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.746Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3285,7 +3302,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:36.923Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.749Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3323,7 +3340,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:37.429Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.757Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3357,7 +3374,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:37.198Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.753Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3390,7 +3407,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:37.689Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.769Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3424,7 +3441,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:38.107Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.775Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3457,7 +3474,7 @@
       "status": "image-pending",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:38.114Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.783Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3484,7 +3501,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:38.359Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.785Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3505,8 +3522,8 @@
       },
       "pageHash": "42b3c6618b89725b10a82b0c028ba072341c4a950eb0808b50ed207f45253328",
       "pageText": "립스탑 조직의 고밀도 나일론 원단을 사용한 목넥 베스트입니다.\n\n나일론 원단을 사용하여 가볍고 내구성은 강하며 표면은 매우 소프트하여 착용감이 우수합니다. 이면에 코팅처리를 하여 찬바람을 막아주며 생활방수가 가능하여 외부 활동 시 쾌적함을 유지해줍니다.\n\n보온재로는 두께감 있는 UNIFIL-SEAL 3온스를 사용하였으며 세탁이 용이하고 극세사 원료를 사용하여 우수한 보온성과 함께 촉감이 부드럽고 습기에 강해 착용감이 우수합니다. \n\n후드로 변형 가능한 목넥 스타일로 목넥 후면에 있는 지퍼 이용해 내부에 내장되어 있는 후드를 꺼내 목넥과 후드 2가지의 스타일로 연출이 가능합니다.\n\n소매에는 접밴드처리하여 실루엣을 안정적으로 잡아주며 밑단에 내장되어 있는 스트링과 스토퍼로 실루엣을 조절하여 원하는 스타일로 연출할 수 있습니다.\n\n*충전재 UNIFIL-SEAL  특징\nMIRCO 화이바를 함유하고 있으며, 양면의 표면을 히팅봉으로 강하게 처리하여 양쪽에 심지를 댄 것 같은 3LAYER 효과를 낸 제품입니다.\n히팅을 하므로 외부로부터의 낮은 기온을 안으로 전도되지 않도록 막아줍니다.",
-      "imageText": "",
-      "imageScanComplete": false,
+      "imageText": "i\n-\ni\nor      3  %\n&\n=   1. 98\n4        —\n:\n를\n\n2                 ㅣ ^\nEb 로 고토\nDo)\nCOLORS\nt\n\n01올리브\n02블랙\n                WW\n032%\nkL                                18800\n045\nL\n32inch\nDETAIL SIZE\n어깨너비\nis                               54 673 692\n스\n.0800!되               m6 495 14\n별                                                       568. 594 619\n＊ 위 사이즈는 제품의 실측 값이며 케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n＊실측값과신체치수차이로인한교환/반품건은 무상으로진행해드리기 어려우니 구매에 참고 바랍니다.\n＊실측 사이즈(ㅇ))는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\nCHECK UP\n착용시기                      [J                                               °\n=                      여름                     가을                    He\n두께 감                                              [J\n두꺼움                   중간                     os                  아주않음\n신 축 성                      ㄱ\n전혀없음                  보통                     좋음                  아주좋음\n촉 감                                                                       로\n살짝까슬                  보통                  부드러움              매우부드러움\n안 감                                                                       54\nHe               이으(시추선())           이으(시추서\\)                기모\n\n착용시기                      [ ]                                               [ ]\n봄                      여름                     가을                    겨울\n두께 감                                              [\n두꺼움                   중간                     않음                  아주않음\n신축성                      °\n전혀없음                  HE                     좋음                  아주좋음\n촉 감                                                                       로\n살짝까슬                  보통                  부드러움              매우부드러움\n안 감                                                                       Ld\n없음               있음(신축성이           있음(신축성)                기모\n비 침                      [ ]\n없음                  조금비침            비침있음(밝은색)\n스타일코드                  01074503\n제품소재                    겉감:폴리에스터100,안감;나일론100,충전재:폴리에스터100\n색상                          01올리브,02블랙,03블루\n치수                          MLXL\n제조자                       (주)지오다노\n제조국                       베트남\n해        &\n세탁 방법                    BAX &\n손세탁 EWHEN 다림질금지 ARASH _ 귀조기금지\n제조연월                     2023.12\n1. 소비자 분쟁해결 기준에 따라 다음과 같이 보상해드립니다.\n*봉제불량, 원단불량(제작불량,변색,탈색) 부자재 BYERS, 지퍼,심지 등):구입일로부터 1년이내분은\n무상수선, 교환, 환불의 순위로 보상. 단, 봉제불량은 1년 경과 후에도 무상 수선.\n품질보증기준                사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시)및 소재 구성 부적합으로 인한 세탁 사고:\nBESS                 구입일로부터 10% 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격, SHE 교환을 원칙으로 함.\n＊상하1착중한쪽에만 이상이 있을 경우: 상하 한착 모두 교환 또는 구입가 환불.\n2 소비자 부주의에 의한제품훼손 및 세탁 잘못에 의한 변형,품질 보증기간(1년)이 경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해 드립니다.\n/5 책임자/전화번호 __ 지오다노 /지오다노 AS 센터 (080-934-3000)\n",
+      "imageScanComplete": true,
       "points": [
         {
           "title": "부드러운 착용감",
@@ -3514,10 +3531,10 @@
           "evidence": "나일론 원단을 사용하여 가볍고 내구성은 강하며 표면은 매우 소프트하여 착용감이 우수합니다."
         }
       ],
-      "status": "image-pending",
+      "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:38.986Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.790Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3555,7 +3572,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:38.820Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.786Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3589,7 +3606,7 @@
       "status": "image-pending",
       "visualReview": false,
       "observedAt": "2026-10-29T11:46:39.107Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:48:20.789Z"
     }
   ]
 }

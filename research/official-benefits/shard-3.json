@@ -32,7 +32,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:36.583Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:48.302Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -75,7 +75,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:36.611Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:48.305Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -96,8 +96,8 @@
       },
       "pageHash": "3bc7c9e7292b5c75295b9a22a219cba9838a46f2fe654093caeda66085aa177b",
       "pageText": "전체적으로 여유 있는 핏에 허리 밴딩으로 캐주얼한 와이드핏 슬랙스입니다.\n\n스판사가 원단의 가로/세로 양방향 모두 들어 있는 사방 스판 원단을 사용하여 신축성과 활동성이 좋습니다. 드레이프성이 뛰어난 프리미엄 TR 소재를 사용하여 우수한 신축성과  함께 부드러운 촉감, 고급스러운 외관을 자랑하는 슬랙스입니다. 필링 현상을 줄여 겉면은 깔끔하며, 뒷면은 기모 가공을 적용하여 부드럽고 따뜻한 소재감이 특징입니다.\n\n허리는 전체적으로 밴딩으로 되어 있어 보다 캐주얼하고 편안하게 누구나 입기 좋은 스타일이며, 밴딩에 따른 자연스러운 플리츠가 와이드핏의 여유로운 실루엣을 더욱 풍성하게 만들어줍니다.\n\n 부드럽고 따뜻한 느낌의 컬러로 구성되어 다양한 룩에 매치하기 좋은 아이템입니다.",
-      "imageText": "",
-      "imageScanComplete": false,
+      "imageText": "purl\n\n＊ 개\n\n| ]    |  기\n\nnr\n\n,  i     Lb   이\n\nre   두       Ee    oi\nBrushed Wide Fit Easy Banding Slacks sien omao\n전체적으로 여유 있는 핏에 허리 밴딩으로 캐주얼한 와이드핏\n슬랙스입니다.\n스판사가 원단의 가로/세로 양방향 모두 들어 있는 사방 스판 원단을\n사용하여 신축성과 활동성이 좋습니다. 드레이프성이 뛰어난\n프리미엄 TRATES 사용하여 우수한 ASHI 함께 부드러운 촉감,\n고급스러운 외관을 자랑하는 슬랙스입니다. 필링 현상을 줄여 겉면은\n깔끔하며, 뒷면은 기모 가공을 적용하여 부드럽고 따뜻한 소재감이\n특징입니다.\n허리는 전체적으로 밴딩으로 되어 있어 보다 캐주얼하고 편안하게\n누구나 입기 좋은 스타일이며, 밴딩에 따른 자연스러운 플리즈가\n와이드핏의 여유로운 HRAS 더욱 풍성하게 만들어줍니다.\n부드럽고 따뜻한 느낌의 컬러로 구성되어 다양한 룩에 매치하기 좋은\n아이템입니다.\n",
+      "imageScanComplete": true,
       "points": [
         {
           "title": "사방으로, 유연하게",
@@ -112,13 +112,18 @@
         {
           "title": "여유로운 와이드핏",
           "description": "넉넉하게 떨어지는 와이드 실루엣.",
-          "evidence": "전체적으로 여유 있는 핏에 허리 밴딩으로 캐주얼한 와이드핏 슬랙스입니다."
+          "evidence": "re 두 Ee oi Brushed Wide Fit Easy Banding Slacks sien omao 전체적으로 여유 있는 핏에 허리 밴딩으로 캐주얼한 와이드핏 슬랙스입니다."
+        },
+        {
+          "title": "편안한 착용감",
+          "description": "허리는 전체적으로 밴딩으로 되어 있어 보다 캐주얼하고 편안하게.",
+          "evidence": "허리는 전체적으로 밴딩으로 되어 있어 보다 캐주얼하고 편안하게"
         }
       ],
-      "status": "image-pending",
+      "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:37.427Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:49.972Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -157,7 +162,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:37.389Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:48.311Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -178,13 +183,13 @@
       },
       "pageHash": "766d835370056def999360412e47b3f0126bfa8a8a57ebaa27726df6788eeebd",
       "pageText": "립스탑 조직의 초경량 고밀도 나일론 원단을 사용한 후디형 자켓입니다.\n\n나일론 원단을 사용하여 가볍고 내구성은 강하며 표면은 매우 소프트하여 착용감이 우수합니다. 이면에 코팅처리를 하여 찬바람을 막아주며 생활방수가 가능하여 외부 활동 시 쾌적함을 유지해줍니다.\n\n보온재로는 두께감 있는 UNIFIL-SEAL 3온스를 사용하였으며 세탁이 용이하고 극세사 원료를 사용하여 우수한 보온성과 함께 촉감이 부드럽고 습기에 강해 착용감이 우수합니다. \n\n후드캡에는 와이어가 내장되어 있어 형태가 무너짐 없이 착용 가능하며, 소매에는 접밴드처리되어 바람이 유입되는 것을 막아주고 실루엣을 안정적으로 잡아줍니다. \n밑단에 좌우 스트링과 스토퍼가 있어 기호에 맞게 실루엣 조정이 가능합니다.\n\n적당히 여유 있는 핏감으로 부피가 상대적으로 크지 않아 아우터로 봄, 가을 단독으로는 물론, 겨울철 미드 레이어로 안쪽에 겹쳐 입기 좋은 스타일입니다.\n\n*충전재 UNIFIL-SEAL  특징\nMIRCO 화이바를 함유하고 있으며, 양면의 표면을 히팅봉으로 강하게 처리하여 양쪽에 심지를 댄 것 같은 3LAYER 효과를 낸 제품입니다.\n히팅을 하므로 외부로부터의 낮은 기온을 안으로 전도되지 않도록 막아줍니다.",
-      "imageText": "",
-      "imageScanComplete": false,
+      "imageText": "3    . J\ny                                      |\nPolyester Hoodie Jacket                      STYLE NO. 01074502\n립스탑 조직의 초경량 고밀도 나일론 원단을 사용한 후디형\n자켓입니다.\n나일론 원단을 사용하여 7H 1 내구성은 강하며 표면은 매우\n소프트하여 착용감이 우수합니다. 이면에 코팅처리를 하여 찬바람을\n막아주며 생활방수가 가능하여 쾌적함을 유지해줍니다. 보온재로는\n두께감 있는 \"UNIFIL-SEAL 324A 2 사용하였으며 세탁이 용이하고,\n극세사 원료를 사용하여 부드러움, 우수한 보온성,습기에 강한 것이\n특징입니다.\n후드캡의 내장 와이어로 형태 무너짐 없이 착용할 수 있고, 소매에는\n접밴드 처리되어 바람을 막아주며 ARS 안정적으로 잡아줍니다.\n밑단 좌우 스트링과 스토퍼로 M2 조정이 가능합니다. 여유 있는\n핏감에 부피가 상대적으로 크지 않아 봄, 가을 단독으로는 물론,\n겨울철 미드 레이어로 안쪽에 겹쳐 입기 좋은 스타일입니다.\n*충전재 UNIFIL-SEAL 특징\n118(0화이바를 함유하고 있으며, 양면의 표면을 히팅봉으로 강하게 처리하여\n양쪽에 심지를 댄 것 같은 .2\\60효과를 낸 제품입니다.히팅을 하므로\n외부로부터의 낮은 기온을 안으로 전도되지 않도록 막아줍니다.\n",
+      "imageScanComplete": true,
       "points": [
         {
-          "title": "가볍게 입기 좋게",
-          "description": "립스탑 조직의 초경량 고밀도 나일론 원단을 사용한 후디형 자켓입니다.",
-          "evidence": "립스탑 조직의 초경량 고밀도 나일론 원단을 사용한 후디형 자켓입니다."
+          "title": "부드러운 착용감",
+          "description": "표면은 매우 소프트하여 착용감이 우수합니다.",
+          "evidence": "나일론 원단을 사용하여 7H 1 내구성은 강하며 표면은 매우 소프트하여 착용감이 우수합니다."
         },
         {
           "title": "편안한 착용감",
@@ -192,10 +197,10 @@
           "evidence": "적당히 여유 있는 핏감으로 부피가 상대적으로 크지 않아 아우터로 봄, 가을 단독으로는 물론, 겨울철 미드 레이어로 안쪽에 겹쳐 입기 좋은 스타일입니다."
         }
       ],
-      "status": "image-pending",
+      "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:37.444Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:51.742Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -228,7 +233,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:38.222Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:49.976Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -276,7 +281,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:38.318Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:49.983Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -310,7 +315,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:38.238Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:49.980Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -337,7 +342,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:39.373Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:49.988Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -370,7 +375,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:39.373Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:49.985Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -409,7 +414,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:39.390Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:49.992Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -452,7 +457,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:40.314Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.025Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -500,7 +505,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:40.265Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.020Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -539,7 +544,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:40.276Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.023Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -577,7 +582,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:41.064Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.028Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -610,7 +615,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:41.158Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.032Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -644,7 +649,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:41.207Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.035Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -687,7 +692,7 @@
       "status": "image-pending",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:42.024Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.094Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -725,7 +730,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:42.093Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.132Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -758,7 +763,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:42.126Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.135Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -806,7 +811,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:43.001Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.138Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -849,7 +854,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:43.002Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.141Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -892,7 +897,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:43.045Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.143Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -940,7 +945,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:43.899Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.149Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -973,7 +978,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:43.818Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.146Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1012,7 +1017,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:43.906Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.174Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1056,7 +1061,7 @@
       "status": "image-pending",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:44.674Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.177Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1084,7 +1089,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:44.701Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.182Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1112,7 +1117,7 @@
       "status": "image-pending",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:44.677Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.180Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1139,7 +1144,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:45.619Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.191Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1187,7 +1192,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:45.569Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.185Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1220,7 +1225,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:45.571Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.188Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1268,7 +1273,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:46.490Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.219Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1306,7 +1311,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:46.500Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.221Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1340,7 +1345,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:46.505Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.224Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1379,7 +1384,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:47.429Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.227Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1400,8 +1405,8 @@
       },
       "pageHash": "050c474b0693c369e896755ccbbd5677d874b7793931e59620757d89548c2164",
       "pageText": "트렌디한 실루엣의 코튼/폴리 후드 파카입니다.\n\n봄, 가을 시즌 착용하기 좋은 두께감으로 제작되었으며, 내추럴한 터치감과 은은한 컬러감이 세련된 무드를 전해줍니다.\n\n후드를 탈착하여 목넥스타일로 연출 가능하며, 앞 중심에 플라켓이 있어 찬 바람이 들어오는 것을 막아줍니다.\n\n소매에는 턱 디테일 있어 활동성이 뛰어나고, 소매단에 비죠 디테일을 추가해 사이즈 조절이 가능합니다.\n양쪽 포켓에는 플랩을 고정하는 히든 스냅이 있어 소지품 분실 우려가 적습니다.",
-      "imageText": "",
-      "imageScanComplete": false,
+      "imageText": "jh       J\n|     FS\nrd     /\n노반         나\nAN       116\n\\         I |                ]\nN\\        | |                Y\n|           :          |                 /\n|        |\n|! AER      ㅣ\ni   ㅣ\n이           i        | 7 \\\n                |         jh =\n          |          =»\n|          | 해         0)\n4 를 분\ns           ㅣ          | 006\n3             Fi              )\nAy\n는 를                 {\n| 회              by:\n|                       ㅋ\nMilitary Hoodie Parka                       STYLE NO. 01074505\n트렌디한 M200] 코튼/폴리 후드 파카입니다.\n봄, 가을 시즌 착용하기 좋은 두께감으로 제작되었으며 내추럴한\n터치감과 은은한 컬러감이 세련된 FES 전해줍니다.\nSEE 탈착하여 목넥스타일로 연출 가능하며,앞중심에 플라켓이\n있어 들어오는 찬바람으로부터 막아줍니다.\n소매에는 턱디테일 있어 활동성이 뛰어나며 소매단에 비죠 디테일을\n추가해 사이즈 조절이 가능하며 양쪽 포켓에는 플랩을 고정하는 히든\nARHO| 있어 소지품 분실 우려가 적습니다.\n",
+      "imageScanComplete": true,
       "points": [
         {
           "title": "움직임은 편안하게",
@@ -1409,10 +1414,10 @@
           "evidence": "소매에는 턱 디테일 있어 활동성이 뛰어나고, 소매단에 비죠 디테일을 추가해 사이즈 조절이 가능합니다."
         }
       ],
-      "status": "image-pending",
+      "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:47.518Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:51.654Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1450,7 +1455,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:47.431Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:50.230Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1493,7 +1498,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:48.190Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:51.657Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1532,7 +1537,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:48.228Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:51.667Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1575,7 +1580,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:48.450Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:51.672Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1608,7 +1613,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:48.831Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:51.687Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1646,7 +1651,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:48.990Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:51.691Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1673,7 +1678,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:49.266Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:51.695Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1721,7 +1726,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:49.650Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:51.697Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1749,7 +1754,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:49.746Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:51.699Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1793,7 +1798,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:50.012Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:51.702Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1831,7 +1836,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:50.440Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:51.704Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1858,7 +1863,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:50.550Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:51.706Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1879,19 +1884,19 @@
       },
       "pageHash": "816ba57bb510216ca759a3283bf2a81f1da18cb53802f4a22570122198b8065d",
       "pageText": "케이블 조직이 더해진 클래식한 무드의울혼방 브이넥 가디건입니다.\n\n보온성이 좋은 울과 탄력성이 좋은 나일론 혼방 소재를 사용하여, \n탄탄한 조직감으로 늘어짐 없이 착용 가능합니다.\n\n안정감 있는 기장감으로 이상적인 실루엣이 연출되며 활동성과 실용성을 높여 \n캐주얼하면서도 클래식한 무드로 손쉽게 스타일링이 가능합니다. \n\n내추럴한 컬러 구성으로 단독 착용하거나 다양한 아우터의 이너로 활용하기에 좋습니다.",
-      "imageText": "",
-      "imageScanComplete": false,
+      "imageText": "ae\nMH,        10008\nLRN 8)\nNA    {이 i | id AE\nI     {    | Fo\ni   1 ay\ni @ 0. 7\nJa    Ny 개, 14\nBN g po {4 af.\nRy\nA ABA 메타 00\nWes\njill ' 1\n7       ee\nb         113]            19\ni                         op\nㅣ                        /\n1            WN        f\n'     00\n개                        \\\n\\                        -¥\nAR\n506 Cable V-neck Cardigan                 STYLE NO, 05353920\n케이블 조직이 더해진 클래식한 무드의 56 BE 브이넥\n가디건입니다.\n보온성이 좋은 울과 탄력성이 좋은 나일론 혼방 소재를\n사용하여,탄탄한 조직감으로 늘어짐없이 착용 가능합니다.\n안정감 있는 기장감으로 이상적인 AE olo] 연줄되며 활동성과\n실용성을 높여 캐주얼하면서도 클래식한 FEZ 손쉽게\n스타일링이 가능합니다.\n내추럴한 컬러 구성으로 단독 착용하거나 다양한 아우터의\n이너로 활용하기에 좋습니다.\n",
+      "imageScanComplete": true,
       "points": [
         {
           "title": "쌀쌀할 때도 따뜻하게",
           "description": "보온성이 좋은 울과 탄력성이 좋은 나일론 혼방 소재를 사용하여.",
-          "evidence": "보온성이 좋은 울과 탄력성이 좋은 나일론 혼방 소재를 사용하여, 탄탄한 조직감으로 늘어짐 없이 착용 가능합니다."
+          "evidence": "보온성이 좋은 울과 탄력성이 좋은 나일론 혼방 소재를 사용하여,탄탄한 조직감으로 늘어짐없이 착용 가능합니다."
         }
       ],
-      "status": "image-pending",
+      "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:50.676Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.650Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1934,7 +1939,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:51.115Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:51.744Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1973,7 +1978,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:51.255Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:51.748Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1995,8 +2000,8 @@
       },
       "pageHash": "38fd3ef54a8989e2cfc953439d4eeed83e86438a297d75c981d9697f9c9dbf97",
       "pageText": "단정하고 깔끔한 룩을 연출하는 울 블렌드 더블니트 풀오버입니다.\n\n울 혼방소재의 12GG 더블니트 조직으로 외관이 매우 고급스럽고 부드러운 촉감이 특징입니다. 구김이 잘 가지 않고 원사 특성상 가볍고 매끈한 감촉으로 피부가 예민하신 분도 착용하시기에 좋습니다. 더블니트 조직으로 적당한 두께감을 가지고 있으며 보다 탄탄한 안정감을 느끼실 수 있습니다.\n\n소맷단과 밑단은 텐션과 복원력을 위해 스판사를 넣은 립을 사용하였고, 연결부는 고급 봉제 기법인 링킹 스티치로 마감하여 입었을 때 형태유지와 함께 안정감을 부여합니다. \n\n세련되고 깊이감 있는 계절감에 맞는 컬러 무드로 구성하였습니다.",
-      "imageText": "",
-      "imageScanComplete": false,
+      "imageText": ":\na\n)\n개 주\ni 글루 1\n도화   =   a\n과                             5 6  1 3\npy                            LANES\n촉                             3  과\nWool-Blend Double Knit Crewneck Pullover sie wo. orosss0s\n단정하고 깔끔한 룩을 연출하는 2 블렌드 더블니트 풀오버입니다.\n울 혼방소재의 1266 더블니트 조직으로 외관이 매우 고급스럽고\n부드러운 촉감이 특징입니다. 구김이 잘 가지 않고 원사 특성상\n710 매끈한 감촉으로 피부가 예민하신 분도 착용하시기에\n좋습니다. 더블니트 조직으로 적당한 두께감을 가지고 있으며 보다\n탄탄한 안정감을느끼실 수 있습니다.\n소맺단과 밑단은 텐션과 복원력을 위해 스판사를 넣은 립을\n사용하였고, HAR = 고급 봉제 기법인 *링킹 스티치로 마감하여\n입었을 때 형태유지와 함께 안정감을 부여합니다.\n계절감에 맞도록 세련되고 깊이감 있는 컬러 REZ\n구성하였습니다.\n*링킹 스티치 : 니트 원사 조직 사이 EME 서로 엮어 봉제하는 방식\n",
+      "imageScanComplete": true,
       "points": [
         {
           "title": "부드럽게 닿는 촉감",
@@ -2004,10 +2009,10 @@
           "evidence": "부드러운 촉감이 특징"
         }
       ],
-      "status": "image-pending",
+      "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:51.446Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.569Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2045,7 +2050,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:51.852Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.572Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2079,7 +2084,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:51.941Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.577Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2113,7 +2118,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:52.225Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.607Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2162,7 +2167,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:52.618Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.611Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2189,7 +2194,7 @@
       "status": "image-pending",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:52.620Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.613Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2228,7 +2233,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:52.914Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.616Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2256,7 +2261,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:53.374Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.619Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2295,7 +2300,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:53.409Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.621Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2323,7 +2328,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:53.766Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.649Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2361,7 +2366,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:54.166Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.652Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2404,7 +2409,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:54.361Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.653Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2442,7 +2447,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:54.629Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.656Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2469,7 +2474,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:55.099Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.660Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2502,7 +2507,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:55.050Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.656Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2540,7 +2545,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:55.349Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.661Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2573,7 +2578,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:55.861Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.663Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2611,7 +2616,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:55.876Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.664Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2649,7 +2654,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:56.141Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.668Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2688,7 +2693,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:56.758Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.668Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2732,7 +2737,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:56.761Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.673Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2771,7 +2776,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:57.125Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.674Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2809,7 +2814,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:57.591Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.678Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2842,7 +2847,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:57.506Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.677Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2881,7 +2886,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:58.078Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.681Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2929,7 +2934,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:58.222Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.692Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2963,7 +2968,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:58.343Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.699Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2996,7 +3001,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:58.780Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.709Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3039,7 +3044,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:59.076Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.711Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3077,7 +3082,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:59.232Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.712Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3110,7 +3115,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:59.514Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.715Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3153,7 +3158,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:43:00.000Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.733Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3186,7 +3191,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:42:59.975Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.718Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3229,7 +3234,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:43:00.234Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.744Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3273,7 +3278,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:43:00.734Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.748Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3311,7 +3316,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:43:00.718Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.744Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3360,7 +3365,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:43:00.936Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.749Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3403,7 +3408,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:43:01.484Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.757Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3442,7 +3447,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:43:01.562Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.762Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3490,7 +3495,7 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-29T11:43:01.577Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.775Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3517,7 +3522,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:43:02.143Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.783Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3556,7 +3561,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:43:02.241Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.784Z"
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3594,7 +3599,7 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-29T11:43:02.329Z",
-      "analyzedAt": null
+      "analyzedAt": "2026-10-29T11:47:53.787Z"
     }
   ]
 }
