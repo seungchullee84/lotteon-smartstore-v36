@@ -255,7 +255,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "dfcb2f49b52f8e08f99328ff8355b1c084fad65e042654bcd102a8ae506a8797",
+      "pageHash": "17c6c22941a7841302b04737e142b555df2baa6e2d84db222865a20eec037c0c",
       "pageText": "여유 있는 핏감의 셔츠형 집업 재킷입니다.\n\n탄탄한 조직감의 고밀도 코튼 폴리 혼용소재를 사용하여 구김이 잘 가지 않고 워싱 가공을 통해 부드러운 터치감과 착용시 안정감 있는 실루엣을 연출합니다.\n\n 앞여밈으로 ykk의 니켈 샤이니 메탈 지퍼를 사용하여 고급스러움을 높였으며 플라켓을 추가하여 찬바람의 유입을 막아줍니다.\n\n소매 커프스는 스냅 헤드를 몸 판 컬러에 맞춰 코팅하여 완성도를 높였으며 체스트에 플랩이 있는 아웃포켓을 추가하여 수납성을 높였습니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -273,8 +273,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T05:21:01.679Z",
-      "analyzedAt": "2026-10-29T05:24:31.964Z"
+      "observedAt": "2026-10-29T05:54:06.255Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -856,8 +856,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T05:21:11.754Z",
-      "analyzedAt": "2026-10-29T05:24:32.144Z"
+      "observedAt": "2026-10-29T05:54:16.199Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1212,8 +1212,8 @@
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T05:21:16.495Z",
-      "analyzedAt": "2026-10-29T05:24:32.213Z"
+      "observedAt": "2026-10-29T05:54:20.421Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1802,8 +1802,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T05:21:38.334Z",
-      "analyzedAt": "2026-10-29T05:24:32.526Z"
+      "observedAt": "2026-10-29T05:54:41.444Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2373,7 +2373,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "d8cdb60ba9aa92f5f6c1c1f68e844087bf9a47958349dd98bbf283986d4dfeec",
+      "pageHash": "5a8ad44b1a1fced6dfa4790f6cf5ae843ba542663a167d6c736cae29331ad698",
       "pageText": "탄탄한 내구성과 내추럴한 터치감이 특징인 나일론 후드 파카입니다.\n\n여유 있고 편안한 핏으로 다양한 이너 아이템과 코디하기 유용하며, 밀도 높은 나일론 2LAYER 원단으로 후면에 MILKY LAMI를 가공하여 발수/방풍 기능까지 더한 제품입니다.\n\n후드 안쪽에는 스트링이 내장되어 있어 스토퍼로 실루엣 조절이 가능합니다. \n소매 부분은 사이즈를 조절할 수 있는 비죠 벨크로 디테일을 추가하였으며, 밑단에도 스트링/스토퍼가 내장되어 있어 실루엣 조절이 가능합니다",
       "imageText": "",
       "imageScanComplete": false,
@@ -2396,8 +2396,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T05:21:17.900Z",
-      "analyzedAt": "2026-10-29T05:24:32.241Z"
+      "observedAt": "2026-10-29T05:54:21.923Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2559,8 +2559,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T05:20:57.062Z",
-      "analyzedAt": "2026-10-29T05:24:31.883Z"
+      "observedAt": "2026-10-29T05:54:01.410Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3163,8 +3163,8 @@
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T05:21:40.151Z",
-      "analyzedAt": "2026-10-29T05:24:32.562Z"
+      "observedAt": "2026-10-29T05:54:42.794Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3599,8 +3599,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T05:21:00.182Z",
-      "analyzedAt": "2026-10-29T05:24:31.905Z"
+      "observedAt": "2026-10-29T05:54:04.557Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
