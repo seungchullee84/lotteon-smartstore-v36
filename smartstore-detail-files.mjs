@@ -54,7 +54,9 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
   if(!inside(canonicalRoot,canonical)||!imageExtension.test(canonical))throw Error('마네킨 컷 파일 위치를 확인해 주세요.');
   const bytes=await readFile(canonical),sourceDigest=createHash('sha256').update(bytes).digest('hex');
   const sourceHash=draft?.photoMapping?.files?.find(r=>r.color===color&&(r.hash===sourceDigest||r.preparedHash===sourceDigest))?.hash||sourceDigest;
-  if(imported&&!imported.get(color)?.includes(sourceHash))return;
+  // The current style folder is authoritative; an older import selection may
+  // set ordering, but must not filter any of its current original photos.
+  if(imported&&!draft?.acceptAllFolderPhotos&&!imported.get(color)?.includes(sourceHash))return;
   const meta=await sharp(bytes,{limitInputPixels:80000000}).metadata();
   if(!['jpeg','png','webp'].includes(meta.format))throw Error('지원하지 않는 마네킨 이미지 형식');
   const hash=createHash('sha256').update(bytes).update(draft?.acceptAllFolderPhotos?canonical:'').digest('hex').slice(0,24);const name='smartstore-photo-'+hash+'.jpg';
