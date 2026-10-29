@@ -1080,7 +1080,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "877973b7b5bbd638b8a8d558670fe639415a9d06fad1cceb12db40514a8fd225",
+      "pageHash": "57eb21b7717bff5c363684db92aa99f8c37730ccc2b7318b5f7a4d2735d0ccd1",
       "pageText": "실용적이고 편안한 TR 소재로 제작된 블레이저입니다.\n\n탄탄하고 구김이 잘 가지 않는 프리미엄 TR 소재를 사용하여 고급스러운 표면감이 특징입니다. 사방 스판 원단을 사용하여 신축성이 뛰어나며 활동성에 용이합니다.\n\n싱글브레스트의 노치드 라펠, 투 버튼 여밈, 플랩 포켓 등의 디자인으로 기본에 충실하였으며 세심한 봉제와 마감으로 완성도를 높였습니다.\n\n\n*셋업 가능 스타일\n- 01114511 테이퍼드 히든밴딩 슬랙스 #01 블랙, #04 카키",
       "imageText": "",
       "imageScanComplete": false,
@@ -1093,8 +1093,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T04:51:07.135Z",
-      "analyzedAt": "2026-10-29T04:51:35.865Z"
+      "observedAt": "2026-10-29T05:24:05.421Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2014,8 +2014,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T04:51:10.371Z",
-      "analyzedAt": "2026-10-29T04:51:35.907Z"
+      "observedAt": "2026-10-29T05:24:07.018Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2520,8 +2520,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T04:51:18.531Z",
-      "analyzedAt": "2026-10-29T04:51:36.037Z"
+      "observedAt": "2026-10-29T05:24:16.568Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
