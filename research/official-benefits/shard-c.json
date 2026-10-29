@@ -95,7 +95,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=C0271CBEA409C4CB07F330748C7B21C9&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05346502.jpg",
       "detailHash": "a6bc8507461f28ece0b0e5291e4e351dbbb0cad64bfd0bff2ab856bff6c9d1fc",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"0a7a760680f32b2aae5b2040943378ff\"",
         "lastModified": "Fri, 13 Mar 2026 07:14:10 GMT"
@@ -113,8 +113,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:45:42.783Z",
-      "analyzedAt": "2026-10-28T15:47:15.264Z"
+      "observedAt": "2026-10-29T00:19:46.689Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -654,7 +654,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=C210B7A505B031A1DF8B8311FB382F46&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05325512.jpg",
       "detailHash": "ff1c47fa611c02e3a8d1710803cf141d43dd595f03c7e9df74b427e89bcc611c",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"7fd2e2f9e8159a581363a7bdf1c9340f\"",
         "lastModified": "Mon, 10 Feb 2025 01:03:27 GMT"
@@ -677,8 +677,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:45:46.617Z",
-      "analyzedAt": "2026-10-28T15:47:15.385Z"
+      "observedAt": "2026-10-29T00:20:08.324Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -735,7 +735,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=C22A8664AD73FF5ACF5BCD342672329C&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05396503.jpg",
       "detailHash": "3815bf9368096a33847d091249a9cab872fdcc06d1bffaf83f18a3742f704409",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"cc112be68cfb8d21eea5c569baa7715d\"",
         "lastModified": "Fri, 28 Aug 2026 02:53:48 GMT"
@@ -758,8 +758,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:45:47.103Z",
-      "analyzedAt": "2026-10-28T15:47:15.392Z"
+      "observedAt": "2026-10-29T00:19:56.194Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1773,7 +1773,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=C6B1D6884D5BB1C71A2F5F9871C2F57F&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05326505.jpg",
       "detailHash": "4b091235d03e79abb6bb9b74b0feaac0f34cc1f2b24d879d8eb557c829962455",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"678f94801ee4f48e6714e65c0036af8b\"",
         "lastModified": "Mon, 09 Feb 2026 08:05:46 GMT"
@@ -1796,8 +1796,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:45:53.506Z",
-      "analyzedAt": "2026-10-28T15:47:15.572Z"
+      "observedAt": "2026-10-29T00:20:03.835Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2875,7 +2875,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=CB2E31E6543C1A8E4C33636B666E5B1D&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05416523.jpg",
       "detailHash": "9d9f78ccbda3004fd6f5fa402f2ef2422724f632130fbde9fa75fc0307cea8f8",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"861a784202ef8744df5076cfc05b1871\"",
         "lastModified": "Thu, 22 Jan 2026 06:06:18 GMT"
@@ -2903,8 +2903,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:45:59.479Z",
-      "analyzedAt": "2026-10-28T15:47:15.738Z"
+      "observedAt": "2026-10-29T00:19:58.166Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3476,20 +3476,20 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=CE09CC91B2AE68BEB950CDE6B1C3CA10&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05345502.jpg",
       "detailHash": "12117fcef80db8b69ed11bbdc569b2209f3f94076c04941b0454b7ec83695336",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"160f525d96469752aac82ebf3bded275\"",
         "lastModified": "Mon, 03 Feb 2025 08:07:48 GMT"
       },
-      "pageHash": "a78c452712970fc116dad96eccbf59fb89e01c911fdf6cdbe26c9c8b89ae2e91",
+      "pageHash": "1dcceaab222a73b80b06882aa9ca555af475b8e17ee234c99360782edf4041b7",
       "pageText": "",
       "imageText": "/                  3\n(                4   D\nㅣ                        ’\nㅣ    §        ㅣ\nil                    #          Ji\n:   \\3                           |\n:          \\\n꿔                [9 개     \\\n4 휴\nAY     잭\n도                          절 =        (\nㅣ.        4\n|\n/\n|\n옥스포드 셔츠                                                           STYLE NO. 05345502\n여성 옥스포드 클래식 셔츠입니다.\n40수 코튼/폴리 AMZ IME 1 부드러운 착용감을 제공합니다.\n가먼트 워싱 기법과 E4=*Coolest Comfort $44 기법이 더해져,\n쾌적한 착용감을 유지해줍니다.\n클래식한 블루와 산뜻한 퍼플 컬러 무드 조합이 조화를 이루며,\n다양한 스트라이프 패턴이 옥스포드 셔츠 특유의 색감과 어우러져\n포인트가 되어집니다.\n클래식한 기본 핏으로 다양한 룩에 7HEH| 스타일링할 수 있어\n실용성과 패션성을 동시에 갖춘 아이템입니다.\n* Coolest Comfort Garment Wash\n셔츠에 사용되는 특수 워싱 기법으로,착용감을 CIS Alisha 편안하게 만들어주는 방법입니다.\n셔츠의 원단에쾌적한 촉감을 부여하고, 부드러운 느낌을 주며 옷의 내구성을 높여주고 편안한\n핏을 유지할 수 있게 도와줍니다.\n노보                4\n=               8)\n=  개 .쾌\nA         3\n/               ㅣ:         |\n|\n키 17207\n상의 5 하의 260\n|\n(            ”\nwy 에 기여\n17 7 투       는\nlly jie                 1\n\na\n9\nㅣ  \\ 0\n/ §\n5)\n7\n3\n~\n= 홀:\n>\n\\\nA\n   a\n= ‘      IE  샐\nTC 7    a J\n]   ;  3\nㅣ    \\ |\nJ    |\nlh    「  //\n\ni  2     b\n/               wr\n1                「 고   / '\n개비 AN                                        // '\nWN                     /\nCOLORS\nWe\n01네이비518\nJ\nA (AA\n\\                   I\n    {         ㅣ 1. ~       :\n\\~/         4                 |\n02라이트블루\n을              나 , 2\n|          | 시\nJ            J\n       |\nFal\n03블루518\n|\n/                                        1\n， 7\n04화이트\nA     _       |\ny : /        a 헤르\n|                   RN,\n\nBEE         |  §\n04화이트\nV 4       |\n>             1 00\n52000          | Hh\nim i    A \\\n/    IAIN   “0  i\n)      I   17000. 2\n7           ㅣ                 ㅣ                    In        4\nAT\nfi            세           i        ㅣ\n11           1   /    70         ㅣ\n1)                      \\                   |               |\n세                      N                   ㅣ               A\ni                    N               ull            |\nJ           |              '                    HC\na    4                         177\n|          i                  |   ㅣ|    (/ 1 | |\n5         i                  i    |\nail        S|      이     i\n05HESTR\n\\   —\n)정        i\n/                |         ㅣ\nI   4                   나    1\n|\n[4   3             \\     {\n~               Tr\n06퍼플\nDETAIL SIZE\n. 어깨너비  ,\n1   <        LR\na =O        7      | 8          (cm)      S\nEIN   A     “Jy,     cm)   8   M   Ｌ\n1 | |   | /    LS    층길이 ㅣ 635 648 660\nLTE a ma     AY, om   94 406 48\nㅣ |] |] iy |    。 ie ws sa so\nHL  1  jis = L    J      소매길이   603 610 616\n+ 위사이즈는제품의 실측값이며케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 3017 있습니다.\n＊실측값과신체치수차이로인한교환/반품건은 무상으로 진행해드리기 어려우니구매에 참고 바랍니다.\n＊실측사이즈(00)는 ATH] 특성,측정방법에 따라 약간의 KO 있을수 있으니 Flo] 참고 바랍니다.\nCHECK UP\n착용시기       J       O       °       O\n봄       여름       가을       겨울\n두께 감           O            [ ]            O            @\n두꺼움      중간       않음      아주않음\n신축성           J            O            O            O\n전혀없음      보통       좋음      아주좋음\n촉 감       o       °       0       0\n살짝까슬      보통      부드러움    매우부드러움\n안 감       [J       oO       O       oO\n없음     있음(신축성이   있음(신축성\\)     기모\n비 침       [ ]       0       ©\n없음      조금비침    비침있음(밝은색)\nINFORMATION\n스타일코드      05345502\n제품소재         면60,폴리에스터40\n28086        01네이비510,02라이트블루,03블루510,04화이트,05퍼플510,06퍼플\n색상\n치수        SML\n제조자       (주)지오다노\n제조국       베트남\n세탁 방법  A a  pag\nARR man 사다 TURE ew\n제조연월       2024.12\n1. 소비자 분쟁해결 기준에 따라 다음과 같이 보상해 드립니다.\nㆍ EXE, NEHER (FEE wd SI) 부자재 불량(단추, WI AK 등):구입일로부터 1년이내분은\n무상수선, 교환, sol 순위로 보상, 단,붕제불량은 1년경과 후에도 무상 수선.\n품질보증기준                  ＊ 사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시) 및 소재 구성 부적합으로 인한 세탁 사고:\naia     구입일로부터 10일 이내에 교환 가능.단,제품에 손상이 없어야 하며 동일 71, So 제품교환을원칙으로 함.\n*상하1척증한쪽이만 이상이 있을 경우:상하한착 BE 교환 또는 구입가 환불.\n2 소비자 부주의에 의한제품휘손 및 세탁 FRO] 의한 변형, 품질 보증기간(1년)이 경과한 HES) 품질이상에\n대해서는 보창의 책임을 지지 많으며 수선 가능시에는 실비로 수선해 드립니다.\n\n제조국                           베트남\n—\np——  x Aa\n세탁기로 약하게 세탁       금)    천대고 다림     2%\nVR swan SIRONE SLIDE asm\n제조연월                        2024.12\n1 소비자 분쟁해결 기준에 따라 다음과 같이 보상해드립니다.\n*봉제불량, 원단불량(제작불량변색,탈색) 부자재 불량(단추,지퍼,심지 등}: 구입일로부터 1년 이내분은\n무상수선, 교환, 환불의 순위로 보상. 단, 봉제불량은 1년 경과 후에도 무상 수선.\n품질보증기준                    . 사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시) 및 소재 구성 부적합으로 인한 세탁 사고;\n구입일로부터 10일 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격,동일 제품 교환을 원칙으로 함.\n＊상하1착중한쪽에만 이상이 있을 경우:상하 한착 모두 교환 또는 구입가 환불.\n2. 소비자 부주의에 의한제품 훼손 및 세탁 잘못에의한 변형,품질 보증기간(1년)이 경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해드립니다.\nA/S 책임자/전화번호          지오다노 / 지오다노 AS 센터 (080-934-3000)\n",
       "imageScanComplete": true,
       "points": [],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:03.256Z",
-      "analyzedAt": "2026-10-28T15:47:15.864Z"
+      "observedAt": "2026-10-29T00:20:41.164Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
