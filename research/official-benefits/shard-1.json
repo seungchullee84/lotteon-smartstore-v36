@@ -449,8 +449,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T08:39:46.796Z",
-      "analyzedAt": "2026-10-29T08:44:46.164Z"
+      "observedAt": "2026-10-29T09:12:29.918Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -656,8 +656,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T08:39:34.909Z",
-      "analyzedAt": "2026-10-29T08:44:45.915Z"
+      "observedAt": "2026-10-29T09:12:15.740Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1138,8 +1138,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T08:40:04.716Z",
-      "analyzedAt": "2026-10-29T08:44:46.473Z"
+      "observedAt": "2026-10-29T09:12:46.959Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1850,8 +1850,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T08:39:48.244Z",
-      "analyzedAt": "2026-10-29T08:44:46.197Z"
+      "observedAt": "2026-10-29T09:12:30.434Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1893,8 +1893,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T08:39:24.804Z",
-      "analyzedAt": "2026-10-29T08:44:45.721Z"
+      "observedAt": "2026-10-29T09:12:03.804Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2065,15 +2065,15 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "bb23808a8cac33e50985ebae335972ead92b24fde97e298e0d84b2504555419e",
+      "pageHash": "ba7d9ae6db089d39f467a8a205df0c88d7ab094b6c26069940d09331fad3f9c4",
       "pageText": "폴라플리스 노카라 스냅 가디건\n\n가벼우면서 적당한 미들 웨이트 210g/sqm(336g/yd) 중량의 부드러운 필(pill)이 특징인 플리스 원단으로, \n부드럽고 보온성이 뛰어납니다.\n\n베이직한 브이넥 노카라 자켓으로, 소매와 밑단에는 접밴드를 사용하여 마감 부분을 바인딩 처리하여 \n깔끔하게 봉제하였으며, 외부에서 바람이 들어오는 것을 차단해줍니다.\n\n추운 겨울철 집에서나 가벼운 외출 시에도 착용이 가능한 활용도 높은 홈웨어 제품입니다.\n*동일 컬러의 팬츠(05-55-4916)와 셋업으로도 착용 가능한 스타일입니다.",
       "imageText": "",
       "imageScanComplete": false,
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T08:39:30.572Z",
-      "analyzedAt": "2026-10-29T08:44:45.821Z"
+      "observedAt": "2026-10-29T09:12:11.204Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2694,8 +2694,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T08:39:29.460Z",
-      "analyzedAt": "2026-10-29T08:44:45.797Z"
+      "observedAt": "2026-10-29T09:12:09.682Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
