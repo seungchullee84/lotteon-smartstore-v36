@@ -26,8 +26,8 @@
       "points": [],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T10:53:55.756Z",
-      "analyzedAt": "2026-10-29T10:58:38.168Z"
+      "observedAt": "2026-10-29T11:43:38.578Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -74,8 +74,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T10:50:02.035Z",
-      "analyzedAt": "2026-10-29T10:58:34.965Z"
+      "observedAt": "2026-10-29T11:43:38.831Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
