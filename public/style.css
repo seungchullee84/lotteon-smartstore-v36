@@ -341,4 +341,4 @@ body[data-channel="smartstore"] #smartstoreStart{background:#087c42}body[data-ch
 
 #browserLoginTypeLabel[hidden]{display:none}#browserLoginType{display:block;width:100%;box-sizing:border-box;margin-top:6px}
 
-.website-category-toggle{display:inline-block;margin:2px 4px;padding:4px 10px;border:1px solid #d7bdb5;border-radius:7px;background:#fff;color:#b52e28;font:inherit;font-weight:800;cursor:pointer}.website-category-toggle[aria-pressed="true"]{background:#b52e28;color:#fff}#websiteUpdateList[hidden]{display:none}
+.website-category-toggle{display:inline-block;margin:0 3px;padding:0 2px;border:0;border-radius:0;background:transparent;color:inherit;box-shadow:none;font:inherit;font-weight:700;cursor:pointer}.website-category-toggle:hover,.website-category-toggle[aria-pressed="true"]{background:transparent;color:inherit;text-decoration:underline;text-underline-offset:4px}#websiteUpdateList[hidden]{display:none}
