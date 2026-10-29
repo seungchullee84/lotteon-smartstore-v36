@@ -3040,8 +3040,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T02:24:00.062Z",
-      "analyzedAt": "2026-10-29T02:35:52.659Z"
+      "observedAt": "2026-10-29T02:56:41.000Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
