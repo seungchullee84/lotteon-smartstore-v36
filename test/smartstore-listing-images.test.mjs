@@ -35,6 +35,13 @@ test('대표 1번은 필수지만 옆면이 없으면 대표만으로 진행한�
  assert.equal(result.main.name,'1.jpg');assert.deepEqual(result.extras,[]);
 });
 
+test('옆면이 없으면 시각 확인한 같은 색 다른 정면을 사용하며 옆면이 있으면 우선한다',()=>{
+ const p={colors:['01화이트','02블랙']},main=photo('1.jpg','01화이트','front','main'),other={...photo('closed.jpg','01화이트','front','closed'),reviewed:true},black=photo('black.jpg','02블랙','front','black'),side=photo('side.jpg','01화이트','side','side');
+ const alternate=chooseListingPhotos([main,other,black],p);assert.deepEqual(alternate.extras.map(x=>x.role),['alternate','front']);assert.equal(alternate.extras[0].name,'closed.jpg');
+ assert.equal(chooseListingPhotos([main,other,black,side],p).extras[0].name,'side.jpg');
+ assert.deepEqual(chooseListingPhotos([main,{...other,reviewed:false},black],p).extras.map(x=>x.name),['black.jpg']);
+});
+
 test('옆면 없이도 다른 색상 정면만 공식 색상 순서로 추가하고 중복·디테일은 넣지 않는다',()=>{
  const photos=[photo('1.jpg','02차콜','front','main'),photo('brown.jpg','03브라운','front','brown'),photo('black.jpg','01블랙','front','black'),photo('duplicate.jpg','01블랙','front','main'),photo('detail.jpg','02차콜','detail','detail')];
  const result=chooseListingPhotos(photos,{colors:['01블랙','02차콜','03브라운']});

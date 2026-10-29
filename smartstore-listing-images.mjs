@@ -6,7 +6,7 @@ import {workingProductPhoto,PHOTO_WORK_VERSION} from './smartstore-photo-work.mj
 const hash=b=>createHash('sha256').update(b).digest('hex');
 function withOfficialMain(product,manifest){
  if(!Array.isArray(manifest.extras))throw Error('추가이미지 선택 자료를 확인해 주세요.');
- const provided=manifest.extras.filter(p=>product.colors?.includes(p.color)&&(p.role==='side'&&p.color===manifest.main?.color||p.role==='front'&&p.color!==manifest.main?.color)&&(!p.sourceHash||p.sourceHash!==manifest.main?.sourceHash));
+ const provided=manifest.extras.filter(p=>product.colors?.includes(p.color)&&((p.role==='side'||p.role==='alternate')&&p.color===manifest.main?.color||p.role==='front'&&p.color!==manifest.main?.color)&&(!p.sourceHash||p.sourceHash!==manifest.main?.sourceHash));
  if(!product.images?.main)return {...manifest,extras:provided.slice(0,9)};
  const source=new URL(product.images.main);if(source.origin!=='https://www.giordano.co.kr')throw Error('현재 상품의 공식몰 대표사진 주소를 확인해 주세요.');
  return {...manifest,extras:[{role:'official-main',color:'공식몰 대표사진',sourceName:'공식몰 대표사진',sourceUrl:source.href},...provided.slice(0,8)],detailRevision:hash(Buffer.from((manifest.detailRevision||'')+'|official-main-first-v1|'+source.href))};
@@ -17,7 +17,9 @@ export function chooseListingPhotos(photos,product){
  const selected=main[0],same=p=>hash(p.bytes)===hash(selected.bytes);
  if(selected.role==='care-label'||!product.colors.includes(selected.color))throw Error('1번 대표사진의 상품·색상을 확인해 주세요. 케어라벨은 대표로 사용하지 않습니다.');
  const side=photos.find(p=>p.color===selected.color&&p.role==='side'&&!same(p));
- const extras=side?[side]:[];
+ // Only a visually verified full front of the same color can substitute for an absent side.
+ const alternative=side?null:photos.find(p=>p.color===selected.color&&p.role==='front'&&p.reviewed===true&&!same(p));
+ const extras=side?[side]:alternative?[{...alternative,role:'alternate'}]:[];
  for(const color of product.colors.filter(color=>color!==selected.color&&photos.some(p=>p.color===color))){const front=photos.find(p=>p.color===color&&p.role==='front'&&!same(p));if(!front)throw Error(color+' 정면 사진이 필요합니다.');extras.push(front);}
  if(extras.length>9)throw Error('스마트스토어 추가이미지는 9장까지 구성할 수 있습니다. 사용할 색상 사진을 정리해 주세요.');
  return {main:selected,extras};
