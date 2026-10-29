@@ -741,8 +741,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T00:28:07.476Z",
-      "analyzedAt": "2026-10-29T00:28:36.891Z"
+      "observedAt": "2026-10-29T00:59:05.927Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1105,8 +1105,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T00:28:06.186Z",
-      "analyzedAt": "2026-10-29T00:28:36.861Z"
+      "observedAt": "2026-10-29T00:59:05.794Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1139,8 +1139,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T00:27:21.122Z",
-      "analyzedAt": "2026-10-29T00:28:36.460Z"
+      "observedAt": "2026-10-29T00:58:36.666Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2270,7 +2270,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "07f5cad7a4314e9351231c776845139d5e520c9f3e9d3e6c80bad44b653d3108",
+      "pageHash": "6a79d82e5fd68d1404dcd248f664f4cf0dd47b9f61dfb8ba62b5bf6c12d18550",
       "pageText": "신축성 좋은 소재에 기모 안감을 더해 부드럽고 편안한 착용감으로 제작된 브러시드 테이퍼드핏 슬랙스입니다.\n\n안감에 기모 원단을 사용해 겨울철까지 따뜻하고 트렌디하게 착용 가능합니다.\n안정적인 밑위 길이, 편안한 힙 라인과 밑단으로 갈수록 자연스럽게 좁아지는 다리라인으로 슬림한 느낌을 주는 핏입니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -2288,8 +2288,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T00:27:34.170Z",
-      "analyzedAt": "2026-10-29T00:28:36.557Z"
+      "observedAt": "2026-10-29T00:58:46.161Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
