@@ -10016,7 +10016,7 @@
   "withThreeOrFour": 438,
   "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-29T06:21:51.284Z",
+  "updatedAt": "2026-10-29T06:22:49.204Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-29T05:57:24.705Z",
@@ -18898,7 +18898,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -19463,7 +19463,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
