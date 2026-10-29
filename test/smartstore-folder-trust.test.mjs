@@ -2,6 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,rm,unlink} from 'node:fs/promises';import path from 'node:path';import os from 'node:os';import sharp from 'sharp';
 import {createHash} from 'node:crypto';
 import {prepareSmartstoreAuto} from '../smartstore-auto-prepare.mjs';
+import {prepareSmartstoreDetail} from '../smartstore-detail-files.mjs';
 import {prepareListingImages} from '../smartstore-listing-images.mjs';
 import {buildSmartstoreDetail} from '../smartstore-detail.mjs';
 import {careLabelText} from '../smartstore-folder-trust.mjs';
@@ -53,6 +54,7 @@ test('정면·옆면 시각 확인은 과거 detail보다 우선하고 재수집
    for(const color of product.colors)assert.ok(prepared.smartstoreDetail.paletteImages[color],color+' 확인된 정면은 팔레트에 연결');
    const after=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));assert.equal(after.photoMapping.files.length,definitions.length);assert(after.photoMapping.files.every(r=>r.reviewed===true));
    for(const record of records)assert.equal(createHash('sha256').update(await readFile(path.join(pictures,record.name))).digest('hex'),record.hash,'사용자 원본 불변');
+   after.listingImages.extras=[];await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(after));const paletteOnly=await prepareSmartstoreDetail(product,folder,options);for(const color of product.colors)assert.ok(paletteOnly.smartstoreDetail.paletteImages[color],'추가이미지에 없어도 확인된 정면을 팔레트에 연결');
    after.photoMapping.files=after.photoMapping.files.map(r=>({...r,role:'detail',reviewed:false}));after.listingImages.extras=[];await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(after));
   }
  }finally{await rm(root,{recursive:true,force:true});}
