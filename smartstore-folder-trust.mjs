@@ -28,8 +28,8 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  const reviewed=[];
  try{
   for(const p of photos){
-   signal?.throwIfAborted();const digest=hash(p.bytes),matches=mapped.filter(m=>hash(m.bytes)===digest);const prior=old?.photoMapping?.files?.find(r=>r.name===p.name&&r.hash===digest&&r.role!=='provided')||known.get(p.name+'|'+digest)||(matches.length===1?matches[0]:undefined);
-   if(prior&&prior.role!=='provided'){const code=prior.source==='seller-detail'&&p.name.match(/^기존상품_(\d{2})_/)?.[1];const color=code&&product.colors.find(c=>c.startsWith(code));reviewed.push({...p,color:color||prior.color,role:prior.role});continue;}
+   signal?.throwIfAborted();const digest=hash(p.bytes),matches=mapped.filter(m=>hash(m.bytes)===digest),mappedPrior=known.get(p.name+'|'+digest)||(matches.length===1?matches[0]:undefined);const prior=mappedPrior?.reviewed===true?mappedPrior:old?.photoMapping?.files?.find(r=>r.name===p.name&&r.hash===digest&&r.role!=='provided')||mappedPrior;
+   if(prior&&prior.role!=='provided'){const code=prior.source==='seller-detail'&&p.name.match(/^기존상품_(\d{2})_/)?.[1];const color=code&&product.colors.find(c=>c.startsWith(code));reviewed.push({...p,color:color||prior.color,role:prior.role,...(prior.reviewed===true?{reviewed:true,reviewedAt:prior.reviewedAt,reviewBasis:prior.reviewBasis,reviewedBy:prior.reviewedBy}:{})});continue;}
    const parent=path.basename(path.dirname(p.file)).replace(/\s+/g,'').toLowerCase();
    const folderColor=product.colors.find(color=>[color.replace(/\s+/g,'').toLowerCase(),color.replace(/^\d+/,'').replace(/\s+/g,'').toLowerCase()].includes(parent));
    let label=isCareLabelPhoto(p,old);
@@ -57,7 +57,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  const roleOrder=['front','side','detail','back','provided','care-label'];
  const detailPhotos=[...reviewed].sort((a,b)=>Number(/^1(?:번)?\./i.test(b.name))-Number(/^1(?:번)?\./i.test(a.name))||roleOrder.indexOf(a.role)-roleOrder.indexOf(b.role));
  for(const p of detailPhotos){
-  const digest=hash(p.bytes),prior=old?.photoMapping?.files?.find(r=>r.name===p.name&&r.hash===digest);records.push({...prior,name:p.name,hash:digest,color:p.color,role:p.role});
+  const digest=hash(p.bytes),prior=old?.photoMapping?.files?.find(r=>r.name===p.name&&r.hash===digest);records.push({...prior,name:p.name,hash:digest,color:p.color,role:p.role,...(p.reviewed===true?{reviewed:true,reviewedAt:p.reviewedAt,reviewBasis:p.reviewBasis,reviewedBy:p.reviewedBy}:{})});
   if(p.role==='care-label')continue;
   if(!active(p))continue;
   const relative='trusted/'+hash(Buffer.from(p.name+'|'+digest))+path.extname(p.name).toLowerCase();await writeFile(path.join(root,relative),p.bytes);

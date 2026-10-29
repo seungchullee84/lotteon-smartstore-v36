@@ -15,7 +15,12 @@ export async function readPhotoMappings(dataRoot,p){
 }
 export async function savePhotoMappings(dataRoot,p,records){
  const files=new Map((await readPhotoMappings(dataRoot,p)).map(r=>[r.hash,r]));
- for(const r of records||[])if(valid(p,r))files.set(r.hash,{hash:r.hash,color:r.color,role:r.role});
+ for(const r of records||[])if(valid(p,r)){
+  const previous=files.get(r.hash);
+  // A later source import's unknown-angle fallback must not erase a visual review.
+  const selected=previous?.reviewed===true&&r.reviewed!==true?previous:r;
+  files.set(r.hash,{hash:selected.hash,color:selected.color,role:selected.role,...(selected.reviewed===true?{reviewed:true,reviewedAt:selected.reviewedAt||new Date().toISOString(),reviewBasis:String(selected.reviewBasis||'visual-photo-review').slice(0,240),reviewedBy:String(selected.reviewedBy||'').slice(0,80)}:{})});
+ }
  const file=cacheFile(dataRoot,p),temporary=file+'.'+randomUUID()+'.tmp';
  await mkdir(path.dirname(file),{recursive:true});
  await writeFile(temporary,JSON.stringify({version:1,style:p.style,sourceUrl:p.sourceUrl,files:[...files.values()]},null,2));

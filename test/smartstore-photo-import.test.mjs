@@ -103,7 +103,7 @@ test('HTML 응답은 거부하고 색상이 다른 동일 원본을 보존하며
  await assert.rejects(applyImportedPhotos(product,folder,[{id:c.id,color:'01화이트',role:''}],{dataRoot,desktop}),/각도|정면/);
  const choices=[{id:c.id,color:'01화이트',role:'front'}];await applyImportedPhotos(product,folder,choices,{dataRoot,desktop});await applyImportedPhotos(product,folder,choices,{dataRoot,desktop});
  const target=path.join(desktop,'상품등록기사진폴더/326922');assert.deepEqual(await readdir(target),['1.jpg']);assert.deepEqual(await readFile(path.join(target,'1.jpg')),bytes);
- const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details/326922/draft.json'),'utf8'));assert.equal(draft.photoMapping.files.length,1);assert.equal(draft.photoMapping.files[0].role,'front');
+ const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details/326922/draft.json'),'utf8'));assert.equal(draft.photoMapping.files.length,1);assert.equal(draft.photoMapping.files[0].role,'front');assert.equal(draft.photoMapping.files[0].reviewed,true,'직접 선택한 정면·옆면은 미확정 자동 분류보다 우선');
  }finally{await rm(dir,{recursive:true,force:true});}
 });
 

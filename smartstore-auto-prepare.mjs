@@ -69,9 +69,10 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
   if(record.role==='provided'&&known.has(record.hash))continue;
   if(/^[a-f0-9]{64}$/.test(record.hash)&&['front','detail','side','back','care-label','provided'].includes(record.role)&&(['care-label','provided'].includes(record.role)||product.colors.includes(record.color)))known.set(record.hash,{role:record.role,color:['care-label','provided'].includes(record.role)?'':record.color});
  }
- for(const record of await readPhotoMappings(dataRoot,product))if(!known.has(record.hash)||known.get(record.hash).role==='provided')known.set(record.hash,record);
- const selected=trustFolder?null:importedPhotoSelection(product,old);
- for(const [color,hashes] of selected||[])for(const digest of hashes){const prior=known.get(digest);known.set(digest,{color,role:prior?.color===color&&['front','side','back','detail'].includes(prior.role)?prior.role:'detail'});}
+ for(const record of await readPhotoMappings(dataRoot,product))if(record.reviewed===true||!known.has(record.hash)||known.get(record.hash).role==='provided')known.set(record.hash,record);
+ // Reuse exact source/hash color evidence without restricting the trusted folder's files.
+ const selected=importedPhotoSelection(product,old);
+ for(const [color,hashes] of selected||[])for(const digest of hashes){const prior=known.get(digest);if(prior?.reviewed===true)continue;known.set(digest,{...prior,color,role:prior?.color===color&&['front','side','back','detail'].includes(prior.role)?prior.role:'detail'});}
  const ignored=new Set((old?.style===product.style&&old.sourceUrl===product.sourceUrl?old.photoMapping?.ignoredPhotos||[]:[]).filter(p=>/^[a-f0-9]{64}$/.test(p.hash)).map(p=>p.hash));
  const found=[];for(const photo of await findPhotos(product,{desktop,photoRoots})){
   if(!trustFolder&&ignored.has(hash(photo.bytes))&&known.get(hash(photo.bytes))?.role!=='care-label')continue;
@@ -82,7 +83,7 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
  const photos=found;
  if(!photos.length){const error=Error('현재 품번 '+product.style+' 폴더에 상품사진을 넣어 주세요. 이전 품번이나 삭제된 사진은 사용하지 않습니다.');error.code='PHOTO_FOLDER_EMPTY';throw error;}
  const unknown=[];const mapped=[];
- for(const file of photos){const previous=old?.photoMapping?.files?.find(r=>r.name===file.name&&r.hash===hash(file.bytes)&&r.role!=='provided')||known.get(hash(file.bytes));if(previous&&(previous.role!=='provided'||trustFolder)){mapped.push({...file,color:previous.color,role:previous.role});continue;}
+ for(const file of photos){const cached=known.get(hash(file.bytes));const previous=cached?.reviewed===true?cached:old?.photoMapping?.files?.find(r=>r.name===file.name&&r.hash===hash(file.bytes)&&r.role!=='provided')||cached;if(previous&&(previous.role!=='provided'||trustFolder)){mapped.push({...file,color:previous.color,role:previous.role,...(previous.reviewed===true?{reviewed:true,reviewedAt:previous.reviewedAt,reviewBasis:previous.reviewBasis,reviewedBy:previous.reviewedBy}:{})});continue;}
   const parent=norm(path.basename(path.dirname(file.file)));const exact=product.colors.find(color=>[norm(color),norm(color).replace(/^\d+/, '')].includes(parent));
   // A color folder can identify its color, but cannot establish front/side/detail.
   unknown.push({...file,...(exact?{colorHint:exact}:{}),...(isCareLabelPhoto(file)?{roleHint:'care-label'}:{})});

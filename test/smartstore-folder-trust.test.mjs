@@ -5,6 +5,8 @@ import {prepareSmartstoreAuto} from '../smartstore-auto-prepare.mjs';
 import {prepareListingImages} from '../smartstore-listing-images.mjs';
 import {buildSmartstoreDetail} from '../smartstore-detail.mjs';
 import {careLabelText} from '../smartstore-folder-trust.mjs';
+import {readPhotoMappings,savePhotoMappings} from '../smartstore-photo-mapping-cache.mjs';
+import {listingPreview} from '../smartstore-listing-images.mjs';
 test('품번 폴더를 API 없이 신뢰하되 미매칭 사진도 색상명 없이 자동 연결하고 라벨을 분리한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'trusted-folder-'));try{
   const folder=path.join(root,'collected'),pictures=path.join(root,'photos'),dataRoot=path.join(root,'data');await mkdir(folder);await mkdir(pictures);
@@ -30,3 +32,26 @@ test('품번 폴더를 API 없이 신뢰하되 미매칭 사진도 색상명 없
  }finally{await rm(root,{recursive:true,force:true});}
 });
 test('케어라벨 판별은 제조·혼용·관리 문구 여러 개를 함께 확인한다',()=>{assert(careLabelText('LOT 05-32-6931 MADE IN VIETNAM 제조국 베트남'));assert(!careLabelText('MANHATTAN NEW YORK 면 티셔츠'));});
+
+test('정면·옆면 시각 확인은 과거 detail보다 우선하고 재수집 뒤에도 추가 구성과 폴더 전체 사진을 보존한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'reviewed-folder-'));try{
+  const dataRoot=path.join(root,'data'),folder=path.join(root,'collected'),pictures=path.join(root,'photos');await mkdir(folder);await mkdir(pictures);
+  const product={style:'326931',rawName:'여성 패딩',name:'여성 패딩 326931',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=reviewed',colors:['01블랙','02그레이','03브라운'],images:{main:'https://www.giordano.co.kr/official-main.jpg',detail:'https://www.giordano.co.kr/detail.jpg'}};
+  await writeFile(path.join(folder,'smartstore-official.html'),'<body>STYLE. 05326931<div class="prd_detail_content_gio">가벼운 원단으로 편안하게 입을 수 있습니다.</div></body>');
+  const definitions=[['1.jpg',0,'front','#111'],['side.jpg',0,'side','#222'],['gray.jpg',1,'front','#888'],['brown.jpg',2,'front','#963'],['detail.jpg',0,'detail','#333'],['20261029_001.jpg',1,'front','#888']];
+  const records=[];for(const [name,index,role,background]of definitions){const bytes=await sharp({create:{width:75,height:100,channels:3,background}}).jpeg().toBuffer();await writeFile(path.join(pictures,name),bytes);records.push({name,hash:createHash('sha256').update(bytes).digest('hex'),color:product.colors[index],role,reviewed:true,reviewBasis:'fixture-visual-review'});}
+  const main=await readFile(path.join(pictures,'1.jpg'));await writeFile(path.join(folder,'detail.jpg'),main);await writeFile(path.join(folder,'main.jpg'),main);await writeFile(path.join(folder,'product.json'),JSON.stringify(product));
+  const draftRoot=path.join(dataRoot,'smartstore-details',product.style);await mkdir(draftRoot,{recursive:true});const draft={style:product.style,sourceUrl:product.sourceUrl,photos:[],photoMapping:{files:records.map(r=>({...r,role:'detail',reviewed:false}))}};await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft));
+  await savePhotoMappings(dataRoot,product,records);await savePhotoMappings(dataRoot,product,records.map(r=>({...r,role:'detail',reviewed:false})));
+  assert.equal((await readPhotoMappings(dataRoot,product)).find(r=>r.hash===records[1].hash).role,'side');
+  assert.deepEqual(await readPhotoMappings(dataRoot,{...product,sourceUrl:product.sourceUrl+'other'}),[]);
+  const options={dataRoot,photoRoots:[pictures],apiKey:'',fetchImpl:()=>assert.fail('외부 서비스 호출 금지'),recognizePhoto:()=>assert.fail('확인한 사진 재분석 금지')};
+  for(let pass=0;pass<2;pass++){
+   const prepared=await prepareSmartstoreAuto(product,folder,options),preview=await listingPreview(prepared,options),upload=await prepareListingImages(prepared,folder,options);
+   assert.equal(prepared.smartstoreDetail.photoCount,definitions.length,'중복 바이트·날짜형 파일명도 상세 전체에 연결');assert.deepEqual(preview.extras.map(p=>p.role),['official-main','side','front','front']);assert.deepEqual(preview.extras.map(p=>p.color),['공식몰 대표사진',...product.colors]);assert.equal(upload.extras.length,4);
+   const after=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));assert.equal(after.photoMapping.files.length,definitions.length);assert(after.photoMapping.files.every(r=>r.reviewed===true));
+   for(const record of records)assert.equal(createHash('sha256').update(await readFile(path.join(pictures,record.name))).digest('hex'),record.hash,'사용자 원본 불변');
+   after.photoMapping.files=after.photoMapping.files.map(r=>({...r,role:'detail',reviewed:false}));after.listingImages.extras=[];await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(after));
+  }
+ }finally{await rm(root,{recursive:true,force:true});}
+});
