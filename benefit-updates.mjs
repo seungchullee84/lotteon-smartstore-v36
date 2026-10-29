@@ -31,7 +31,11 @@ export function changedOfficialProducts(previous,records){
 }
 export async function saveWebsiteCheck(catalogDir,records,{now=new Date().toISOString(),errors=0}={}){
  const file=path.join(catalogDir,'website-check.json');let previous;try{previous=JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
- const baseline=previous?.products||{};const events=previous?changedOfficialProducts(baseline,records):[];
+ const baseline=previous?.products||{};let events=previous?changedOfficialProducts(baseline,records):[];
+ // Recovered or stale baselines may rediscover an image already recorded in history.
+ // Compare by exact official page and most recent valid image, retaining earlier days.
+ const latestImages=new Map();for(const b of (previous?.batches||[]).slice().sort((a,b)=>Date.parse(a.checkedAt)-Date.parse(b.checkedAt)))for(const e of b.events||[])if(e.sourceUrl&&verifiedHash(e.detailHash))latestImages.set(e.sourceUrl,e.detailHash.toLowerCase());
+ events=events.filter(e=>{const hash=verifiedHash(e.detailHash)?e.detailHash.toLowerCase():null;return !(e.type==='changed'&&hash&&latestImages.get(e.sourceUrl)===hash&&e.changes.every(c=>['공식 상세이미지 추가','공식 상세이미지 변경'].includes(c)));});
  if(!previous){let queue=[];try{queue=JSON.parse(await readFile(path.join(catalogDir,'queue.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}for(const item of queue)if(/^[a-f0-9]{16,64}$/i.test(item.pno||''))baseline[item.pno]={pageHash:null,detailHash:null};}
  const products={...baseline};for(const r of records){const id=new URL(r.sourceUrl).searchParams.get('pno'),imageVerified=r.detailImageVerified===true&&verifiedHash(r.detailHash);products[id]={detailPresent:Object.hasOwn(r,'detailUrl')?!!r.detailUrl:baseline[id]?.detailPresent??null,pageHash:verifiedHash(r.pageHash)?r.pageHash:baseline[id]?.pageHash||null,detailHash:imageVerified?r.detailHash:baseline[id]?.detailHash||null,detailImageVerified:imageVerified?true:baseline[id]?.detailImageVerified??false};}
  const batch={id:digest(now).slice(0,20),checkedAt:now,events};

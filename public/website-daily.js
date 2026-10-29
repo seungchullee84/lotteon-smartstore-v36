@@ -12,7 +12,7 @@ globalThis.websiteDailySummary=function(website,now=new Date()){
   if(!['new','changed'].includes(event.type))return [];
   let changes=event.type==='new'?['새로 발견한 성인 상품']:(event.changes||[]).filter(change=>allowed.includes(change));
   const source=event.sourceUrl,hash=/^[a-f0-9]{64}$/i.test(event.detailHash||'')?event.detailHash.toLowerCase():null;
-  if(source&&hash){if(lastHashBySource.get(source)===hash)changes=changes.filter(change=>change!=='공식 상세이미지 추가');lastHashBySource.set(source,hash);}
+  if(source&&hash){if(lastHashBySource.get(source)===hash)changes=changes.filter(change=>!['공식 상세이미지 추가','공식 상세이미지 변경'].includes(change));lastHashBySource.set(source,hash);}
   return changes.length?[{...event,changes,checkedAt:batch.checkedAt,day:dayKey(batch.checkedAt)}]:[];
  })}));
  function uniqueEvents(selected){
