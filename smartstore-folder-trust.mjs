@@ -28,7 +28,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  const reviewed=[];
  try{
   for(const p of photos){
-   signal?.throwIfAborted();const digest=hash(p.bytes),matches=mapped.filter(m=>hash(m.bytes)===digest),mappedPrior=known.get(p.name+'|'+digest)||(matches.length===1?matches[0]:undefined);const prior=mappedPrior?.reviewed===true?mappedPrior:old?.photoMapping?.files?.find(r=>r.name===p.name&&r.hash===digest&&r.role!=='provided')||mappedPrior;
+   signal?.throwIfAborted();const digest=hash(p.bytes),matches=mapped.filter(m=>hash(m.bytes)===digest),mappedPrior=known.get(p.name+'|'+digest)||(matches.length===1?matches[0]:undefined);const prior=mappedPrior?.reviewed===true||mappedPrior?.automatic?mappedPrior:old?.photoMapping?.files?.find(r=>r.name===p.name&&r.hash===digest&&r.role!=='provided')||mappedPrior;
    let cachedLabel=false;
    try{const cached=JSON.parse(await readFile(path.join(dataRoot,'smartstore-photo-label-cache',digest+'.json'),'utf8'));cachedLabel=cached?.version===1&&cached.label===true;}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
    if(cachedLabel||isCareLabelPhoto(p,old)){reviewed.push({...p,color:'',role:'care-label'});continue;}
