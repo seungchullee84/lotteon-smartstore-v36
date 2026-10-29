@@ -115,8 +115,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:12:46.941Z",
-      "analyzedAt": "2026-10-29T09:17:52.631Z"
+      "observedAt": "2026-10-29T09:45:54.802Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2028,8 +2028,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:12:48.587Z",
-      "analyzedAt": "2026-10-29T09:17:52.645Z"
+      "observedAt": "2026-10-29T09:45:56.672Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2139,8 +2139,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:12:39.014Z",
-      "analyzedAt": "2026-10-29T09:17:52.529Z"
+      "observedAt": "2026-10-29T09:45:44.629Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3104,7 +3104,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "e064f2486902a4d6a0847b15813d0e040895faf702c5eef2fc684108d394e3db",
+      "pageHash": "c742c65c19f03a66aa5454833b5a8d89796899cf8f47ccddc5891d0090fa21fd",
       "pageText": "클래식한 일자 퀼팅의 크루넥 경량 베스트입니다.\n\n베이직한 실루엣으로 전체적으로 클래식한 일자 퀼팅 되있으며 입체적인 패턴을 적용하여 더욱더 세련된 핏감을 선사합니다.\n\n아우터와 이너로 모두 활용할 수 있으며, 2-Way 디테일로  넥 안쪽에는 스냅 버튼이 더해져  V넥 스타일로 변형이 가능하며  다양한 스타일링을 즐길 수 있습니다.\n\n충전재로는 지속 가능한 옥수수 등과 같은 식물 자원에서 추출한\n 바이오 기반 소재 ‘신클라우드 소로나(Syncloud Sorona)를 사용 하였습니다. \n전체 원료의 37% 이상이 재생 가능 원료이며, 나일론 생산 방식 대비 30% 적은 에너지를 사용하고 \n63%의 온실가스 배출량을 줄일 수 있습니다. \nPTT(Polytrimethylene terephthalate) 소재로 이루어져  보온성이 우수하며, 복원력이 뛰어납니다. \n\n 마시멜로우 같은 부드러운 무광 텍스쳐가 돋보이는 Nylon원단을 사용 하였으며  20D DTY 원사와 400T 이상의 고밀도 퀄리티로 견고함을 더했습니다. 전체적으로 다운백이 없는 샌드위치 봉제 기법으로 불필요한 부자재를 줄여 한층 더 경량화 했습니다. 또한 바늘 구멍에서 빠져 나오는 깃털 빠짐을 방지하기 위해 봉제 과정에서 7호 미싱 바늘을 2시간에 한번씩 교체하여 생산하였습니다.\n(통상적으로 공업용 미싱에 14호를 가장 많이 사용하며, 얇은 원단일 경우 11호 바늘 사용)\n\n늦가을부터 겨울까지 가볍지만 따뜻하게 착용할 수 있어  단독으로는 물론 코트나 점퍼 안에 레이어드 하기에도 적합하며, 데님· 슬랙스·스커트 등 다양한 아이템과 믹스 매치하여 데일리룩 부터 세미 포멀룩 까지 폭넓게 연출할 수 있는 실용적인 아이템입니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -3127,8 +3127,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:12:31.436Z",
-      "analyzedAt": "2026-10-29T09:17:52.384Z"
+      "observedAt": "2026-10-29T09:45:35.404Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3176,8 +3176,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:12:52.594Z",
-      "analyzedAt": "2026-10-29T09:17:52.726Z"
+      "observedAt": "2026-10-29T09:46:00.826Z",
+      "analyzedAt": null
     }
   ]
 }
