@@ -112,7 +112,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=F0B129C1BAA685598C8A918CD7FCF8F3&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076926.jpg",
       "detailHash": "e74b26af94e4b803dd583a11b7ba78198955d2f108a663d13402d8688795d036",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"ae5c06ea22b7d8223b260fc0733609c9\"",
         "lastModified": "Wed, 16 Sep 2026 23:53:24 GMT"
@@ -130,8 +130,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:47.001Z",
-      "analyzedAt": "2026-10-28T15:47:17.419Z"
+      "observedAt": "2026-10-29T00:15:08.576Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -360,7 +360,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "b9cc977129a15334078faf5c36e124c553de84c85b590454aaf62e1fbc01e9e9",
+      "pageHash": "470af965d6e7485aeb7dfa07c51adb31c653ab4f2195366266e9b4c08df68a97",
       "pageText": "힙과 허벅지는 여유있게 유지하되, 다리 라인을 슬림하게 밸런스를 개선했습니다.\n다양한 체형의 고객이 무리 없이 입을 수 있는 편안한 착용감의 테이퍼드핏입니다.\n\n20수로 코튼 트윌 원단으로 레귤러한 실루엣의 형태감을 느낄 수 있습니다. \n부드러운 터치감에 탄탄한 조직감이 느껴지는, 고품질의 코튼 소재입니다.\n\n클래식한 카키 컬러에서 세련된 워시드 블루 컬러까지, 다양한 컬러로 구성되었습니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -373,8 +373,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:48.353Z",
-      "analyzedAt": "2026-10-28T15:47:17.484Z"
+      "observedAt": "2026-10-29T00:15:29.173Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2144,7 +2144,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=FBA5865C62105F534BBB5A4FFF4FACF4&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01026954.jpg",
       "detailHash": "cf3c6d0c79f30bd9ddd0dcda3a991e1dd8e880850f163738a13778916be44800",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"721219603ae0b87c80bf4bb1f7ae4ff5\"",
         "lastModified": "Mon, 21 Sep 2026 05:33:41 GMT"
@@ -2172,8 +2172,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:59.173Z",
-      "analyzedAt": "2026-10-28T15:47:17.929Z"
+      "observedAt": "2026-10-29T00:15:27.151Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2745,7 +2745,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=FE17F53887EB408F24E042210315F071&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076913.jpg",
       "detailHash": "2abb4f6b2960836f3af1f71c66a750596afdd96eb76d522cab840547ea43fb91",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"9bfb357fe32143d43f44aac9bd9ac87a\"",
         "lastModified": "Mon, 21 Sep 2026 05:36:20 GMT"
@@ -2768,8 +2768,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:47:03.855Z",
-      "analyzedAt": "2026-10-28T15:47:18.147Z"
+      "observedAt": "2026-10-29T00:14:50.784Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2986,7 +2986,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=FEAE0413EFDC4949D00150A4BCB4D4B1&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01026512.jpg",
       "detailHash": "284b5d6079aebd37a64959b02cfddb83af21b9424b25554c855cd481a46075e8",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"7701c3b8d23e9bd0c4b0ab05573c2645\"",
         "lastModified": "Wed, 14 Jan 2026 05:14:18 GMT"
@@ -3009,8 +3009,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:47:05.453Z",
-      "analyzedAt": "2026-10-28T15:47:18.221Z"
+      "observedAt": "2026-10-29T00:15:30.123Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3193,14 +3193,14 @@
         "ALL"
       ],
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=FF6988A2FACF2FA741FD203CAA634736&ctype=1",
-      "detailUrl": null,
-      "detailHash": null,
-      "detailImageVerified": false,
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01096510_.jpg",
+      "detailHash": "44669fca5fbd2a5e7a7000c9669e0aae7bb51f190ff0eea78ccc7cad9578439a",
+      "detailImageVerified": true,
       "detailValidators": {
-        "etag": null,
-        "lastModified": null
+        "etag": "\"f8ad3fd2743eca0c9b35709c46cc7f40\"",
+        "lastModified": "Mon, 23 Mar 2026 01:41:11 GMT"
       },
-      "pageHash": "44638bcbf6b59686d22b96b094ef18a350ecc02e505c35c542a70cdfd91305e6",
+      "pageHash": "7aaea604310c17256aac2875e1522e3b1862b3e46dab48d256f7a8d590e4d32e",
       "pageText": "저지 프린트 티셔츠\n\n프론트 중앙에 배치된 슬로건 ‘GOOD ENERGY EVERYWHERE’는 \n\n컬러와 구성에 따라 다채롭게 디자인된 그래픽 타입으로, \n티셔츠마다 각각 다른 무드를 연출하는 아이템입니다.\n\n넥 라인은 더블 스티치 처리로 깔끔하게 마감하였고, 착용 시 늘어남을 방지합니다. \n전체 봉제 라인은 내구성 있게 마감되어 실루엣을 안정적으로 유지해 줍니다.\n\n고밀도이면서도 부드러운 촉감을 지닌 20수 컴팩 면사(Single Combed Cotton Yarn)를 사용하여, \n기본에 충실하면서도 한층 더 완성도 높은 표면감과 터치감을 구현했습니다. \nSK 저지(Single Knit Jersey) 조직으로 제작되어 적당한 탄력과 안정적인 구조감을 갖추고 있으며, \n밀도 있는 조직 덕분에 비침이 적고, 형태 유지력이 뛰어나 잦은 착용과 세탁에도 흐트러짐 없이 착용 가능합니다.\n\nGARMENT WASH(가먼트 워시) 가공을 통해 세탁 후 수축을 최소화하였고, \n착용 시에는 자연스럽고 유연한 핏감과 편안한 착용감을 제공합니다. \n\n적절한 중량감(190~205g/m²)은 몸에 달라붙지 않고, 실루엣을 안정감 있게 잡아주며, \n일상 속에서 단독으로도 충분히 활용할 수 있는 이중적인 실용성과 완성도를 갖춘 원단입니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -3218,8 +3218,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:47:06.921Z",
-      "analyzedAt": "2026-10-28T15:47:18.486Z"
+      "observedAt": "2026-10-29T00:15:32.311Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",

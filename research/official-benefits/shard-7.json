@@ -93,22 +93,22 @@
         "ALL"
       ],
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=70A8756809ACC19AE6B8AFD9344634F0&ctype=1",
-      "detailUrl": null,
-      "detailHash": null,
-      "detailImageVerified": false,
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076921_.jpg",
+      "detailHash": "d0ee917d20fe2fba2d474e68a0dfbe0b82fd811b946cb49e58af8c61d519a540",
+      "detailImageVerified": true,
       "detailValidators": {
-        "etag": null,
-        "lastModified": null
+        "etag": "\"a5ab933adc519d344d67d915bc667864\"",
+        "lastModified": "Mon, 12 Oct 2026 01:28:39 GMT"
       },
-      "pageHash": "a7a6634c3e8f15902314e9183e87036c5b92d8d2c7dc925f93a57299fb812344",
+      "pageHash": "558f8f62e2956d6a84071baed9dea6bd96e66674a0644a6e3a41f78a27dd2c93",
       "pageText": "일체형 후드 구조로 보온성과 높은 실용성을 갖춘 인슐레이션 경량 자켓입니다. \n고밀도 립스탑 나일론 100% 원단과 ECLoft® Fluff 프리미엄 충전재를 사용하여 \n가볍고 따뜻한 착용감을 제공하며, 세심한 다운백 구조와 샌드 퀼팅 기법으로 \n보온성과 볼륨감을 강화하여 일상부터 액티브 활동까지 다양한 환경에서 착용할 수 있습니다.",
       "imageText": "",
       "imageScanComplete": false,
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:44:04.376Z",
-      "analyzedAt": "2026-10-28T15:47:12.864Z"
+      "observedAt": "2026-10-29T00:14:55.505Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1514,8 +1514,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:44:12.707Z",
-      "analyzedAt": "2026-10-28T15:47:13.026Z"
+      "observedAt": "2026-10-29T00:14:57.969Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3306,7 +3306,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7F85911C38DFB01DFC98888E8C940666&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01026953.jpg",
       "detailHash": "1b0fe89d79cd2ae21083f7a656833bbd0cc99e0906849209197c1f2b83d4ea21",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"5f724844d7485e3bfe1d29a0a406cca3\"",
         "lastModified": "Thu, 20 Aug 2026 01:51:15 GMT"
@@ -3334,8 +3334,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:44:22.637Z",
-      "analyzedAt": "2026-10-28T15:47:13.276Z"
+      "observedAt": "2026-10-29T00:15:21.602Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3469,7 +3469,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7FE1B8EA0ED8D7FA6C4471B20080A990&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01116554.jpg",
       "detailHash": "39b6958c74988e1d63f9f291e6cb03fbe71e1a8af3f9ce069f11008f7ec97df1",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"a4bc58c2b5ee487f220552cfd6097d0c\"",
         "lastModified": "Fri, 18 Sep 2026 02:14:35 GMT"
@@ -3497,8 +3497,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:44:23.384Z",
-      "analyzedAt": "2026-10-28T15:47:13.284Z"
+      "observedAt": "2026-10-29T00:15:31.037Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",

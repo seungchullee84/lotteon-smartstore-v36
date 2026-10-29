@@ -128,7 +128,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=51CC1E1EE5A9DB39AB189D7584F88B2B&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01115911.jpg",
       "detailHash": "c54fdad69776e8a8144a62071f28254515f71d9f35013b62b3f01979a5ad26c8",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"1b50b1912991d7047976aac327edf24d\"",
         "lastModified": "Wed, 27 Aug 2025 07:58:31 GMT"
@@ -146,8 +146,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:43:27.996Z",
-      "analyzedAt": "2026-10-28T15:47:12.227Z"
+      "observedAt": "2026-10-29T00:14:54.353Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
