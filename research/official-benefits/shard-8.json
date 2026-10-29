@@ -619,8 +619,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T05:14:34.805Z",
-      "analyzedAt": "2026-10-29T05:24:26.251Z"
+      "observedAt": "2026-10-29T05:47:36.892Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -914,8 +914,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T05:14:41.488Z",
-      "analyzedAt": "2026-10-29T05:24:26.335Z"
+      "observedAt": "2026-10-29T05:47:44.685Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1779,8 +1779,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T05:14:32.081Z",
-      "analyzedAt": "2026-10-29T05:24:26.221Z"
+      "observedAt": "2026-10-29T05:47:33.991Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1989,8 +1989,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T05:14:03.874Z",
-      "analyzedAt": "2026-10-29T05:24:25.876Z"
+      "observedAt": "2026-10-29T05:47:06.198Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2582,7 +2582,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "575ae10c54484df80212661d7c70812ff8a8859a46704894cb63627ecac72585",
+      "pageHash": "99f68f642501bfa323d61b88725f7f84a82453223d6111998601e8f1eb3d34dd",
       "pageText": "숏 기장의 몬스터 파카입니다.\n\n생활 방수 가능한 원단을 사용하여 눈, 비 등의 수분 유입을 막아 보온성이 탁월하며 방풍 효과 또한 뛰어나 FW 시즌 활용도가 높습니다.\n\n깊고 큰 사이즈의 포켓으로 실용성을 더하였습니다.\n\n전체적으로 트렌디하고 깔끔한 디자인으로, 와이드핏 치노 팬츠나 데님 팬츠, 테리 조거 팬츠 등 캐주얼한 아이템과 매칭하여 세련된 무드를 연출할 수 있습니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -2600,8 +2600,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T05:14:03.849Z",
-      "analyzedAt": "2026-10-29T05:24:25.871Z"
+      "observedAt": "2026-10-29T05:47:05.008Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2739,8 +2739,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T05:14:11.106Z",
-      "analyzedAt": "2026-10-29T05:24:25.961Z"
+      "observedAt": "2026-10-29T05:47:12.548Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2968,8 +2968,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T05:13:57.763Z",
-      "analyzedAt": "2026-10-29T05:24:25.767Z"
+      "observedAt": "2026-10-29T05:47:00.338Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3040,8 +3040,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T05:13:51.713Z",
-      "analyzedAt": "2026-10-29T05:24:25.642Z"
+      "observedAt": "2026-10-29T05:46:54.257Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
