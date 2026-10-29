@@ -15,7 +15,7 @@ export async function readPhotoMappings(dataRoot,p){
 }
 export async function savePhotoMappings(dataRoot,p,records){
  const files=new Map((await readPhotoMappings(dataRoot,p)).map(r=>[r.hash,r]));
- for(const r of records||[])if(valid(p,r)){
+ for(const r of records||[])if(valid(p,r)&&r.automatic!==true){
   const previous=files.get(r.hash);
   // A later source import's unknown-angle fallback must not erase a visual review.
   const selected=previous?.reviewed===true&&r.reviewed!==true?previous:r;

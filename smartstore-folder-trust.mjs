@@ -42,7 +42,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
     if(record?.version===1&&typeof record.label==='boolean')label=record.label;
     else{try{label=careLabelText(await recognize(p.bytes));await mkdir(path.dirname(cache),{recursive:true});await writeFile(cache,JSON.stringify({version:1,label}));}catch(error){signal?.throwIfAborted();log('라벨 문구 인식은 생략하고 제공 사진으로 연결합니다: '+p.name);}}
    }
-   reviewed.push({...p,color:label?'':prior?.automatic?prior.color:folderColor||'',role:label?'care-label':prior?.automatic?prior.role:folderColor?'detail':'provided'});
+   reviewed.push({...p,color:label?'':prior?.automatic?prior.color:folderColor||'',role:label?'care-label':prior?.automatic?prior.role:folderColor?'detail':'provided',...(prior?.automatic&&!label?{automatic:true}:{})});
   }
  }finally{await worker?.terminate();}
  signal?.throwIfAborted();
@@ -60,7 +60,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  const roleOrder=['front','side','detail','back','provided','care-label'];
  const detailPhotos=[...reviewed].sort((a,b)=>Number(/^1(?:번)?\./i.test(b.name))-Number(/^1(?:번)?\./i.test(a.name))||roleOrder.indexOf(a.role)-roleOrder.indexOf(b.role));
  for(const p of detailPhotos){
-  const digest=hash(p.bytes),prior=old?.photoMapping?.files?.find(r=>r.name===p.name&&r.hash===digest);records.push({...prior,name:p.name,hash:digest,color:p.color,role:p.role,...(p.reviewed===true?{reviewed:true,reviewedAt:p.reviewedAt,reviewBasis:p.reviewBasis,reviewedBy:p.reviewedBy}:{})});
+  const digest=hash(p.bytes),prior=old?.photoMapping?.files?.find(r=>r.name===p.name&&r.hash===digest);records.push({...prior,name:p.name,hash:digest,color:p.color,role:p.role,automatic:!!p.automatic,...(p.reviewed===true?{reviewed:true,reviewedAt:p.reviewedAt,reviewBasis:p.reviewBasis,reviewedBy:p.reviewedBy}:{})});
   if(p.role==='care-label')continue;
   if(!active(p))continue;
   const relative='trusted/'+hash(Buffer.from(p.name+'|'+digest))+path.extname(p.name).toLowerCase();await writeFile(path.join(root,relative),p.bytes);

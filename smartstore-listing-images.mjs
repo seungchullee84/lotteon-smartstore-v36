@@ -35,8 +35,9 @@ export async function listingManifest(product,{dataRoot}){
  const records=draft.photoMapping?.files||[],unclassified=records.filter(r=>r.role!=='care-label'&&(!product.colors?.includes(r.color)||r.role==='provided')).length;
  const mainColor=draft.listingImages.main?.color;
  const missingFrontColors=(product.colors||[]).filter(color=>color!==mainColor&&records.some(r=>r.color===color)&&!records.some(r=>r.color===color&&r.role==='front'));
- const needsReview=unclassified>0||missingFrontColors.length>0;
- const photoReview={status:needsReview?'needs-review':'ready',unclassified,missingFrontColors,message:needsReview?'폴더 사진은 모두 상세에 보존했습니다. 색상·정면·옆면 연결 확인 필요'+(unclassified?' · 미분류 '+unclassified+'장':'')+(missingFrontColors.length?' · 정면 미확인 '+missingFrontColors.join(', '):''):''};
+ const automatic=records.filter(r=>r.automatic===true&&r.reviewed!==true).length;
+ const needsReview=unclassified>0||missingFrontColors.length>0||automatic>0;
+ const photoReview={status:needsReview?'needs-review':'ready',unclassified,missingFrontColors,automatic,message:needsReview?'폴더 사진은 모두 상세에 보존했습니다. 색상·정면·옆면 연결 확인 필요'+(unclassified?' · 미분류 '+unclassified+'장':'')+(missingFrontColors.length?' · 정면 미확인 '+missingFrontColors.join(', '):'')+(automatic?' · 자동 판별 확인 필요 '+automatic+'장':''):''};
  return withOfficialMain(product,{...draft.listingImages,photoReview,detailRevision:hash(Buffer.from(JSON.stringify(draft)+'|'+PHOTO_WORK_VERSION))});
 }
 export async function listingPreview(product,options){
