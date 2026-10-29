@@ -1,6 +1,7 @@
 let smartstoreListingState=null,tagResearchReady=false;
 const activeChannel=()=>document.body.dataset.channel==='smartstore'?'smartstore':'lotte';
 let refreshTimer=null,refreshPending=false,refreshAgain=false,smartstoreDetailTimer,channelViewId=0;
+let websiteSelection=null;
 let lastWebsiteCheck=null;try{lastWebsiteCheck=JSON.parse(localStorage.getItem('registrar-website-check-v1')||'null');}catch{} 
 function renderWebsiteUpdates(website){
  const summary=$('websiteUpdateSummary'),list=$('websiteUpdateList');if(!summary||!list)return;
@@ -11,7 +12,11 @@ function renderWebsiteUpdates(website){
  const stamp=daily.day+'|'+JSON.stringify(website);if(list.dataset.stamp===stamp)return;list.dataset.stamp=stamp;
  if(!loading){lastWebsiteCheck={checkedAt:website.checkedAt,nextCheckAt:website.nextCheckAt,errors:website.errors,batches:website.batches||[]};try{localStorage.setItem('registrar-website-check-v1',JSON.stringify(lastWebsiteCheck));}catch{}}
  summary.classList.toggle('has-updates',events.some(event=>event.type==='new'||event.type==='changed'));
- summary.replaceChildren(document.createTextNode('홈페이지 오늘 누적 '+daily.day.slice(5).replace('-','.')+' · 신상품 '));const newCount=document.createElement('strong'),changedCount=document.createElement('strong');newCount.className=changedCount.className='website-update-count';newCount.textContent=daily.newCount+'건';changedCount.textContent=daily.changedCount+'건';summary.append(newCount,document.createTextNode(' · 변경 '),changedCount,document.createTextNode(' · 마지막 확인 '+time(website.checkedAt)+' (한국 시간) · 20분 간격'));
+ summary.replaceChildren(document.createTextNode('홈페이지 오늘 누적 '+daily.day.slice(5).replace('-','.')+' · '));
+ for(const [type,label,count] of [['new','신상품',daily.newCount],['changed','변경',daily.changedCount]]){
+  const button=document.createElement('button');button.type='button';button.id=type==='new'?'websiteNewToggle':'websiteChangedToggle';button.className='website-category-toggle';button.setAttribute('aria-pressed',String(websiteSelection===type));button.textContent=label+' '+count+'건';button.onclick=()=>{websiteSelection=websiteSelection===type?null:type;delete list.dataset.stamp;renderWebsiteUpdates(website);};summary.append(button,document.createTextNode(' '));
+ }
+ summary.append(document.createTextNode(' · 마지막 확인 '+time(website.checkedAt)+' (한국 시간) · 20분 간격'));list.hidden=!websiteSelection;
  list.replaceChildren();
  const heading=document.createElement('p');heading.className='website-current-heading';heading.textContent='오늘 누적 · '+daily.day.replaceAll('-','.')+' · 같은 상품 중복 제외';list.append(heading);
  function addProduct(parent,event,checkedAt){
@@ -25,6 +30,7 @@ function renderWebsiteUpdates(website){
  function addDayGroups(parent,dayRecord){
  const groups=document.createElement('div');groups.className='website-current-groups';
  for(const [type,title] of [['new','신상품'],['changed','상세이미지 추가·변경']]){
+  if(type!==websiteSelection)continue;
   const items=dayRecord.events.filter(event=>event.type===type),section=document.createElement('section'),titleNode=document.createElement('h3');section.className='website-current-group';titleNode.textContent=title+' '+items.length+'건';section.append(titleNode);
   for(const event of items)addProduct(section,event,event.checkedAt);
   if(!items.length){const empty=document.createElement('p');empty.className='website-group-empty';empty.textContent=dayRecord.hasCheck?'이 날짜에 확인된 해당 상품이 없습니다.':dayRecord.label==='오늘'?'오늘 홈페이지 확인 결과를 기다리고 있습니다.':'이 날짜의 저장된 확인 기록이 없습니다.';section.append(empty);}

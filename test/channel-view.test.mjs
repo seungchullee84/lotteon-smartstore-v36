@@ -12,7 +12,7 @@ test('선택한 채널의 사진·미리보기만 요청하고 전환해도 입�
   const url=new URL(req.url,'http://localhost');requests.push(url.pathname+url.search);
   if(url.pathname==='/api/state'){
    const smart=url.searchParams.get('channel')==='smartstore';if(smart&&slowSmartstore)await new Promise(resolve=>setTimeout(resolve,250));
-   return reply(res,{product,revision:1,busy:false,phase:'done',logs:[],capabilities:{manualTags:true},smartstoreListing:smart?{sourceNames:['1.jpg','side.jpg'],mainColor:'01블랙',extraColors:['01블랙'],extraRoles:['side'],detailRevision:'one'}:null,tagResearch:smart?{configured:true,count:1,candidates:[{id:'1',name:'여성후드집업'}]}:null});
+   const now=new Date().toISOString(),events=[{type:'new',style:'111111',name:'신상품 테스트',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=new',changes:['새로 발견한 성인 상품']},{type:'changed',style:'222222',name:'변경 테스트',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=changed',changes:['공식 상세이미지 변경']}];return reply(res,{benefitResearch:{website:{checkedAt:now,nextCheckAt:now,batches:[{checkedAt:now,events}]}},product,revision:1,busy:false,phase:'done',logs:[],capabilities:{manualTags:true},smartstoreListing:smart?{sourceNames:['1.jpg','side.jpg'],mainColor:'01블랙',extraColors:['01블랙'],extraRoles:['side'],detailRevision:'one'}:null,tagResearch:smart?{configured:true,count:1,candidates:[{id:'1',name:'여성후드집업'}]}:null});
   }
   if(url.pathname==='/api/naver-status')return reply(res,{configured:false});
   if(url.pathname==='/api/branding')return reply(res,{visible:false});
@@ -26,7 +26,9 @@ test('선택한 채널의 사진·미리보기만 요청하고 전환해도 입�
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const browser=await chromium.launch({headless:true});
  try{
   const page=await browser.newPage();page.setDefaultTimeout(10000);page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:'+server.address().port);
-  await page.locator('#review').waitFor({state:'visible'});assert.equal(requests.some(r=>r.startsWith('/smartstore-detail-preview.html')),false);
+  await page.locator('#review').waitFor({state:'visible'});
+  await page.locator('#websiteNewToggle').click();assert.equal(await page.getByText('신상품 · 품번 111111').count(),1);assert.equal(await page.getByText('상세 변경 · 품번 222222').count(),0);await page.locator('#websiteChangedToggle').click();assert.equal(await page.getByText('신상품 · 품번 111111').count(),0);assert.equal(await page.getByText('상세 변경 · 품번 222222').count(),1);await page.locator('#websiteChangedToggle').click();assert.equal(await page.locator('#websiteUpdateList').isVisible(),false);
+assert.equal(requests.some(r=>r.startsWith('/smartstore-detail-preview.html')),false);
   await page.locator('[name="material"]').fill('직접 수정 소재');await page.locator('#channelSmartstore').click();
   await page.waitForFunction(()=>document.querySelector('#main').getAttribute('src')?.startsWith('/smartstore-listing/main'));
   assert.equal(await page.locator('#detailPreview iframe').count(),1);assert.equal(await page.locator('#originalExtraPreviews').isVisible(),false);
