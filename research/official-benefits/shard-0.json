@@ -370,7 +370,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "72e01fd35af289598dbf9b9403aa4a2af9080e00b9fbd68af1ea1f6ea14af521",
+      "pageHash": "b4ce7346bb805e2ceed8972eaa76729254e8a0fa6be1293508e8a2372d29240a",
       "pageText": "숏 기장의 몬스터 파카입니다.\n\n생활 방수 가능한 원단을 사용하여 눈, 비 등의 수분 유입을 막아 보온성이 탁월하며 방풍 효과 또한 뛰어나 FW 시즌 활용도가 높습니다.\n\n깊고 큰 사이즈의 포켓으로 실용성을 더하였습니다.\n\n전체적으로 트렌디하고 깔끔한 디자인으로, 와이드핏 치노 팬츠나 데님 팬츠, 테리 조거 팬츠 등 캐주얼한 아이템과 매칭하여 세련된 무드를 연출할 수 있습니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -388,8 +388,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T10:24:23.805Z",
-      "analyzedAt": "2026-10-29T10:24:44.294Z"
+      "observedAt": "2026-10-29T10:58:20.684Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1031,15 +1031,15 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "81fba02bc17013ded0fd0d8b5ebde74b5b4d3b4af111d314733bb739f535ec09",
+      "pageHash": "659a80e0b7c2a2d155d43b0595aa066476a6931b788cdd123873dd497b3f21e7",
       "pageText": "미니멀하고 세련된 디자인의 패딩 바머입니다.\n\n냄새 및 황변이 없고 알러지에도 안전한 퍼피안(Puffian)을 충전재로 사용하여 가볍고 보온성이 좋으며 터치감이 소프트한 것이 특징입니다. \n\n전체적으로 과하지 않으면서도 여유있는 핏의 기본 아이템으로, 자연스럽게 떨어지는 실루엣으로 기획되어 누구나 착용하기에 좋습니다.",
       "imageText": "",
       "imageScanComplete": false,
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T10:24:24.121Z",
-      "analyzedAt": "2026-10-29T10:24:44.320Z"
+      "observedAt": "2026-10-29T10:58:20.460Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2546,8 +2546,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T10:24:18.645Z",
-      "analyzedAt": "2026-10-29T10:24:44.224Z"
+      "observedAt": "2026-10-29T10:58:15.937Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
