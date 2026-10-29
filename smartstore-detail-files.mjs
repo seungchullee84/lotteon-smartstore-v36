@@ -136,7 +136,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  // previously confirmed front image for each palette tile.
  if(prepared.acceptAllFolderPhotos){
   prepared.paletteImages={};
-  const confirmed=[draft?.listingImages?.main,...(draft?.listingImages?.extras||[])].filter(r=>r?.role==='front'&&r.color&&r.sourceHash);
+  const confirmed=[draft?.listingImages?.main,...(draft?.listingImages?.extras||[]),...(draft?.photoMapping?.files||[]).filter(r=>r.reviewed===true).map(r=>({...r,sourceHash:r.hash}))].filter(r=>r?.role==='front'&&r.color&&r.sourceHash);
   for(const entry of confirmed){
    const index=(prepared.storeColorPhotoHashes[entry.color]||[]).indexOf(entry.sourceHash);
    if(index>=0&&!prepared.paletteImages[entry.color])prepared.paletteImages[entry.color]=prepared.colorImages[entry.color][index];

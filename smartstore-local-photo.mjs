@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 const run=promisify(execFile);
 export function acceptedLocalPrediction(result,colors){
- return !!result&&['front','side','back','detail'].includes(result.role)&&colors.includes(result.color)&&Number.isFinite(result.roleScore)&&Number.isFinite(result.colorScore);
+ return !!result&&['front','side','back','detail'].includes(result.role)&&colors.includes(result.color)&&Number.isFinite(result.roleScore)&&result.roleScore>=0.65&&Number.isFinite(result.roleMargin)&&result.roleMargin>=0.15&&Number.isFinite(result.colorScore)&&result.colorScore>=0.65&&Number.isFinite(result.colorMargin)&&result.colorMargin>=0.15;
 }
 // Runs once per original hash. Uncertain results remain in the full detail gallery.
 export async function classifyLocalPhotos(product,photos,{dataRoot,signal,log=()=>{},predict}={}){

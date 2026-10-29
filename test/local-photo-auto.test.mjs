@@ -8,7 +8,7 @@ test('new originals use valid local predictions, cached by product, without excl
   let calls=0;const p={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=1',colors:['01블랙']};
   const photos=[{name:'a.jpg',bytes:Buffer.from('a')},{name:'b.jpg',bytes:Buffer.from('b')}];
   const predict=async()=>{calls++;return [{role:'front',color:'01블랙',roleScore:.98,roleMargin:.8,colorScore:.98,colorMargin:.8},{role:'front',color:'01블랙',roleScore:.6,roleMargin:.1,colorScore:.98,colorMargin:.8}];};
-  assert.equal((await classifyLocalPhotos(p,photos,{dataRoot,predict})).length,2);assert.equal(photos.length,2);
+  assert.equal((await classifyLocalPhotos(p,photos,{dataRoot,predict})).length,1);assert.equal(photos.length,2);
   await classifyLocalPhotos(p,photos,{dataRoot,predict});assert.equal(calls,1);
   await classifyLocalPhotos({...p,style:'654321'},photos,{dataRoot,predict});assert.equal(calls,2);
  }finally{await rm(dataRoot,{recursive:true,force:true});}

@@ -21,8 +21,7 @@ export function chooseListingPhotos(photos,product){
  const alternative=side?null:photos.find(p=>p.color===selected.color&&p.role==='front'&&p.reviewed===true&&!same(p));
  const extras=side?[side]:alternative?[{...alternative,role:'alternate'}]:[];
  for(const color of product.colors.filter(color=>color!==selected.color&&photos.some(p=>p.color===color))){const front=photos.find(p=>p.color===color&&p.role==='front'&&!same(p));if(!front)throw Error(color+' 정면 사진이 필요합니다.');extras.push(front);}
- if(extras.length>9)throw Error('스마트스토어 추가이미지는 9장까지 구성할 수 있습니다. 사용할 색상 사진을 정리해 주세요.');
- return {main:selected,extras};
+ return {main:selected,extras:extras.slice(0,9)};
 }
 export async function saveListingSelection(root,selection){
  await mkdir(path.join(root,'listing'),{recursive:true});
