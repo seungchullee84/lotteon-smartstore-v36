@@ -6,7 +6,7 @@ import {readFile,writeFile,mkdir,rename,unlink} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
-import {findPhotos} from './smartstore-photo-files.mjs';
+import {findPhotos,resolveStylePhotoFolders} from './smartstore-photo-files.mjs';
 import {imageDownloadFolder} from './desktop-downloads.mjs';
 import {assertDetailOnlyProduct,readDetailOnlySellerCode,isSmartstoreDetailEditUrl} from './smartstore-detail-only.mjs';
 import {openSmartstoreEditor} from './smartstore-detail-upload.mjs';
@@ -206,7 +206,7 @@ export async function applyImportedPhotos(product,folder,choices,{dataRoot,deskt
   const bytes=await readFile(path.join(folder,'smartstore-photo-import',source.file));if(hash(bytes)!==source.sha256)throw Error('수집 후 사진 원본이 변경되었습니다.');selected.push({...choice,...source,bytes});
  }
  // Validate the entire batch before touching the style folder. Existing photos are never overwritten.
- desktop||=path.dirname(await imageDownloadFolder());const target=path.join(desktop,'상품등록기사진폴더',product.style);await mkdir(target,{recursive:true});
+ desktop||=path.dirname(await imageDownloadFolder());const parent=path.join(desktop,'상품등록기사진폴더'),folders=await resolveStylePhotoFolders(parent,product.style);if(folders.length>1)throw Error('같은 품번의 사진 폴더가 여러 개입니다. 기존 상품 사진을 가져올 폴더를 하나로 정리해 주세요.');const target=folders[0]||path.join(parent,product.style);await mkdir(target,{recursive:true});
  const originals=await findPhotos(product,{desktop});let hasMain=originals.some(p=>/^1(?:번)?\.(jpe?g|png|webp)$/i.test(p.name));
  if(!automatic&&!hasMain&&!selected.some(p=>p.role==='front'))throw Error('대표사진이 없으므로 정면 사진을 한 장 선택해 주세요.');
  const root=path.join(dataRoot,'smartstore-details',product.style);await mkdir(root,{recursive:true});let old;
