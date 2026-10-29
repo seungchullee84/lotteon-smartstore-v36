@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 const run=promisify(execFile);
 export function acceptedLocalPrediction(result,colors){
- return result&&['front','side','back','detail'].includes(result.role)&&colors.includes(result.color)&&result.roleScore>=.90&&result.roleMargin>=.25&&result.colorScore>=.90&&result.colorMargin>=.25;
+ return !!result&&['front','side','back','detail'].includes(result.role)&&colors.includes(result.color)&&Number.isFinite(result.roleScore)&&Number.isFinite(result.colorScore);
 }
 // Runs once per original hash. Uncertain results remain in the full detail gallery.
 export async function classifyLocalPhotos(product,photos,{dataRoot,signal,log=()=>{},predict}={}){
@@ -31,5 +31,5 @@ export async function classifyLocalPhotos(product,photos,{dataRoot,signal,log=()
   for(let i=0;i<pending.length;i++){const item=pending[i],prediction=predictions[i]||{};await writeFile(path.join(cacheRoot,item.key+'.json'),JSON.stringify({prediction}));results.push({...item,prediction});}
  }
  const accepted=results.filter(r=>acceptedLocalPrediction(r.prediction,product.colors)).map(r=>({...r.photo,color:r.prediction.color,role:r.prediction.role,automatic:true}));
- log('사진 자동 판별 결과 · 연결 '+accepted.length+'장 · 확인 필요 '+(photos.length-accepted.length)+'장');return accepted;
+ log('사진 자동 판별 결과 · 추정 배치 '+accepted.length+'장 · 판별 실패 '+(photos.length-accepted.length)+'장');return accepted;
 }

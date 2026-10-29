@@ -29,7 +29,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  try{
   for(const p of photos){
    signal?.throwIfAborted();const digest=hash(p.bytes),matches=mapped.filter(m=>hash(m.bytes)===digest),mappedPrior=known.get(p.name+'|'+digest)||(matches.length===1?matches[0]:undefined);const prior=mappedPrior?.reviewed===true?mappedPrior:old?.photoMapping?.files?.find(r=>r.name===p.name&&r.hash===digest&&r.role!=='provided')||mappedPrior;
-   if(prior&&prior.role!=='provided'){const code=prior.source==='seller-detail'&&p.name.match(/^기존상품_(\d{2})_/)?.[1];const color=code&&product.colors.find(c=>c.startsWith(code));reviewed.push({...p,color:color||prior.color,role:prior.role,...(prior.reviewed===true?{reviewed:true,reviewedAt:prior.reviewedAt,reviewBasis:prior.reviewBasis,reviewedBy:prior.reviewedBy}:{})});continue;}
+   if(prior&&prior.role!=='provided'&&!prior.automatic){const code=prior.source==='seller-detail'&&p.name.match(/^기존상품_(\d{2})_/)?.[1];const color=code&&product.colors.find(c=>c.startsWith(code));reviewed.push({...p,color:color||prior.color,role:prior.role,...(prior.reviewed===true?{reviewed:true,reviewedAt:prior.reviewedAt,reviewBasis:prior.reviewBasis,reviewedBy:prior.reviewedBy}:{})});continue;}
    const parent=path.basename(path.dirname(p.file)).replace(/\s+/g,'').toLowerCase();
    const folderColor=product.colors.find(color=>[color.replace(/\s+/g,'').toLowerCase(),color.replace(/^\d+/,'').replace(/\s+/g,'').toLowerCase()].includes(parent));
    let label=isCareLabelPhoto(p,old);
@@ -39,7 +39,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
     if(record?.version===1&&typeof record.label==='boolean')label=record.label;
     else{try{label=careLabelText(await recognize(p.bytes));await mkdir(path.dirname(cache),{recursive:true});await writeFile(cache,JSON.stringify({version:1,label}));}catch(error){signal?.throwIfAborted();log('라벨 문구 인식은 생략하고 제공 사진으로 연결합니다: '+p.name);}}
    }
-   reviewed.push({...p,color:label?'':folderColor||'',role:label?'care-label':folderColor?'detail':'provided'});
+   reviewed.push({...p,color:label?'':prior?.automatic?prior.color:folderColor||'',role:label?'care-label':prior?.automatic?prior.role:folderColor?'detail':'provided'});
   }
  }finally{await worker?.terminate();}
  signal?.throwIfAborted();
