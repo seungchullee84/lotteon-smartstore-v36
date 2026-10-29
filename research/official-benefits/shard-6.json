@@ -1713,8 +1713,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:50:10.939Z",
-      "analyzedAt": "2026-10-29T09:51:20.148Z"
+      "observedAt": "2026-10-29T10:23:15.440Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1786,8 +1786,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:50:43.086Z",
-      "analyzedAt": "2026-10-29T09:51:20.738Z"
+      "observedAt": "2026-10-29T10:24:00.342Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1868,8 +1868,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:50:39.272Z",
-      "analyzedAt": "2026-10-29T09:51:20.673Z"
+      "observedAt": "2026-10-29T10:23:53.901Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2241,8 +2241,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:50:44.492Z",
-      "analyzedAt": "2026-10-29T09:51:20.775Z"
+      "observedAt": "2026-10-29T10:24:02.150Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2506,7 +2506,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "c97964e8ef7c3dcb36526f44948abd11b57e3f3fc5c6d82be3b6a5c9052bf790",
+      "pageHash": "17611059c9866804f11c31b30a527b0d35651cdb8c0435341894c944c6d70c18",
       "pageText": "전면에 자수가 새겨진 7gg 코튼 케이블 풀오버입니다.\n\n프리미엄 코튼 7gg원사를 사용하여 피부에 닿는 느낌이 부드럽고 까끌거림이 없습니다. \n세탁 후에도 변형을 최소화 하기 위해 소매와 밑단처리도 탄탄하게 되어 있습니다. \n\n가슴 부분에는 크레스트 자수가 새겨져 있어 한층 클래식하고 고급스러운 느낌입니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -2519,8 +2519,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:50:36.326Z",
-      "analyzedAt": "2026-10-29T09:51:20.555Z"
+      "observedAt": "2026-10-29T10:23:48.721Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
