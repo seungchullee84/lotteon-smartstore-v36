@@ -935,8 +935,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T10:23:26.581Z",
-      "analyzedAt": "2026-10-29T10:24:43.489Z"
+      "observedAt": "2026-10-29T10:57:28.657Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1317,7 +1317,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "01d96adbee02ff309fefdb983a32d7a32475cebf2afae6bbe742d4d37024bbeb",
+      "pageHash": "7c1f0d3698a5335fa3153e6690017ee8aba6221acf878200b1c4c079d5c0a593",
       "pageText": "코튼 소재의 데님 트러커 자켓 입니다.\n\n탄탄한 소재감의 기본 데님으로, 12.5oz~12oz 의 적당히 두께감 있는 원단으로 제작되어, 사계절 내내 활용하기 좋은 스타일 입니다.\n\n데님의 오리지널한 워싱 무드가 돋보이는 클래식한 워싱 컬러로 구성 하였습니다. \n\n\n*셋업 가능 스타일\n#01, #03 컬러는 01114544 와이드핏 데님 팬츠와 셋업 스타일로 연출 가능 합니다.\n\n\n데님 염료의 특성상 이염 및 물 빠짐이 있을 수 있습니다. \n반드시 미지근한 물에 뒤집어서 단독 세탁하시기 바랍니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -1330,8 +1330,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T10:24:11.222Z",
-      "analyzedAt": "2026-10-29T10:24:44.125Z"
+      "observedAt": "2026-10-29T10:58:08.932Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2633,8 +2633,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T10:24:02.444Z",
-      "analyzedAt": "2026-10-29T10:24:43.994Z"
+      "observedAt": "2026-10-29T10:58:00.378Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2791,8 +2791,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T10:23:39.376Z",
-      "analyzedAt": "2026-10-29T10:24:43.680Z"
+      "observedAt": "2026-10-29T10:57:41.676Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
