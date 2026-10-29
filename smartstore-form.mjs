@@ -14,8 +14,9 @@ export function smartstorePlan(p,salePrice){
   if(!/^20\d{2}-(0[1-9]|1[0-2])$/.test(p.manufactured))throw Error('제조연월은 YYYY-MM 형식이어야 합니다.');
   if(!p.colors?.length||!p.sizes?.length)throw Error('색상과 사이즈가 필요합니다.');
   const category=null; // Keep the category selected in the copy form.
-  if(!['미얀마','중국','베트남','방글라데시','인도네시아','캄보디아','인도','태국','필리핀','파키스탄','스리랑카','일본','대한민국','한국'].includes(p.country))throw Error('스마트스토어 제조국 선택을 먼저 검증해야 합니다.');
-  return {style:p.style,rawName:p.rawName,officialDescription:p.officialDescription,sourceUrl:p.sourceUrl,reviewedGarmentAttributes:p.reviewedGarmentAttributes,name:smartstoreTitle(p),nameUserEdited:!!p.smartstoreNameUserEdited,salePrice:+salePrice,consumerPrice:+p.consumerPrice,category,colors:[...p.colors],sizes:[...p.sizes],stockPerOption:10,expectedOptions:p.colors.length*p.sizes.length,material:p.material,country:p.country,washing:p.washing,manufactured:p.manufactured,html:buildSmartstoreDetail(p).html,keywords:false,save:false};
+  const country=String(p.country).trim();
+  if(!['미얀마','중국','베트남','방글라데시','인도네시아','캄보디아','인도','태국','필리핀','파키스탄','스리랑카','일본','대한민국','한국'].includes(country))throw Error('스마트스토어 제조국 선택을 먼저 검증해야 합니다.');
+  return {style:p.style,rawName:p.rawName,officialDescription:p.officialDescription,sourceUrl:p.sourceUrl,reviewedGarmentAttributes:p.reviewedGarmentAttributes,name:smartstoreTitle(p),nameUserEdited:!!p.smartstoreNameUserEdited,salePrice:+salePrice,consumerPrice:+p.consumerPrice,category,colors:[...p.colors],sizes:[...p.sizes],stockPerOption:10,expectedOptions:p.colors.length*p.sizes.length,material:p.material,country,washing:p.washing,manufactured:p.manufactured,html:buildSmartstoreDetail(p).html,keywords:false,save:false};
 }
 
 export function verifySmartstoreOptions(plan,rows){
