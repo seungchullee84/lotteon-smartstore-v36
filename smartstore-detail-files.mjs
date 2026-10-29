@@ -172,6 +172,20 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
    if(prepared.paletteImages&&prepared.colorImages[group.color]?.length)prepared.paletteImages[group.color]=prepared.colorImages[group.color][0];
   }
  }
+ // A reviewed front crop from the current official detail can fill a
+ // palette gap without replacing or excluding any user-supplied photo.
+ if(prepared.paletteImages&&Array.isArray(draft?.officialPaletteFronts)&&draft.officialPaletteFronts.length){
+  const bytes=await readFile(path.join(folder,'detail.jpg'));
+  const sourceHash=createHash('sha256').update(bytes).digest('hex');
+  const meta=await sharp(bytes,{limitInputPixels:80000000}).metadata();
+  for(const entry of draft.officialPaletteFronts){
+   const r=entry.rect;
+   if(prepared.paletteImages[entry.color]||!product.colors.includes(entry.color)||entry.verified!==true||entry.sourceUrl!==product.sourceUrl||entry.sourceImageUrl!==product.images.detail||entry.sourceImageHash!==sourceHash)continue;
+   if(!r||!['left','top','width','height'].every(k=>Number.isInteger(r[k]))||r.left<0||r.top<0||r.width<100||r.height<100||r.left+r.width>meta.width||r.top+r.height>meta.height)continue;
+   const output=await sharp(bytes).extract(r).jpeg({quality:95}).toBuffer(),id=createHash('sha256').update(output).digest('hex').slice(0,24),name='smartstore-photo-'+id+'.jpg',src='/smartstore-photo/'+id;
+   await writeFile(path.join(folder,name),output);prepared.photoFiles[src]=name;prepared.paletteImages[entry.color]=src;
+  }
+ }
  prepared.captionTones=await collectCaptionTones(product,folder);
  prepared.embeddedOfficialSections=await embeddedOfficialSections(product,folder);
  const p={...product,smartstoreDetail:prepared};
