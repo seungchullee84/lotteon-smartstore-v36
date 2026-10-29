@@ -17,7 +17,7 @@ test('두 템플릿 팔레트는 확인된 정면만 표시하고 다른 사진�
   const p={...product,detailTemplate,smartstoreDetail:{style:product.style,acceptAllFolderPhotos:true,colorImages:{'01핑크':['/smartstore-photo/side','/smartstore-photo/front'],'02화이트':['/smartstore-photo/closeup']},paletteImages:{'01핑크':'/smartstore-photo/front'}}};
   const html=buildSmartstoreDetail(p).html,palette=html.match(/<div data-color-palette[\s\S]*?<\/div>/)?.[0];
   assert(palette);assert.match(palette,/smartstore-photo\/front/);assert.doesNotMatch(palette,/smartstore-photo\/(side|closeup)/);
-  assert.match(html,/smartstore-photo\/side/);assert.match(html,/smartstore-photo\/closeup/);assert.match(html,/취향에 맞춰, 1가지/);
+  assert.match(html,/smartstore-photo\/side/);assert.match(html,/smartstore-photo\/closeup/);assert.match(html,/취향에 맞춰, 2가지/);assert.match(html,/data-palette-photo-pending/);assert.match(html,/02화이트/);
  }
 });
 
