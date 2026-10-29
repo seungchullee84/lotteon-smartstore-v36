@@ -886,8 +886,8 @@
       "points": [],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:38:28.943Z",
-      "analyzedAt": "2026-10-29T09:51:11.359Z"
+      "observedAt": "2026-10-29T10:11:59.110Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3159,8 +3159,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:38:38.626Z",
-      "analyzedAt": "2026-10-29T09:51:11.503Z"
+      "observedAt": "2026-10-29T10:12:07.638Z",
+      "analyzedAt": null
     }
   ]
 }
