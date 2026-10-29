@@ -1,5 +1,5 @@
 import {originalListingMain} from './smartstore-listing-images.mjs';
-import {findPhotos} from './smartstore-photo-files.mjs';
+import {findPhotos,resolveStylePhotoFolders} from './smartstore-photo-files.mjs';
 import {mannequinPhotoRegions,registerLongPhotoLayout} from './smartstore-long-photo-import.mjs';
 import {collectCaptionTones} from './smartstore-caption-tone.mjs';
 import {reviewSellingPoints,officialPointSource} from './smartstore-selling-point-review.mjs';
@@ -27,6 +27,7 @@ function validStyle(p){if(!/^\d{5,8}$/.test(p?.style||''))throw Error('현재 �
 
 export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join(appRoot,'data'),mannequinRoots,photoRoots}={}){
  const style=validStyle(product);const draftRoot=path.join(dataRoot,'smartstore-details',style);
+ const configuredPhotoRoots=async()=>photoRoots||(mannequinRoots?(await Promise.all(mannequinRoots.map(root=>/^\d{6}$/.test(style)?resolveStylePhotoFolders(root,style):[path.join(root,style)]))).flat():undefined);
  let draft=null;try{draft=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(draft&&(String(draft.style)!==style||draft.sourceUrl!==product.sourceUrl))throw Error('상세페이지 준비 자료의 품번·공식 출처가 현재 상품과 다릅니다.');
  const imported=draft?.acceptAllFolderPhotos?null:importedPhotoSelection(product,draft);
@@ -63,7 +64,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
   if(!prepared.colorImages[color].includes(src)){prepared.colorImages[color].push(src);(prepared.storeColorPhotoHashes[color]||=[]).push(sourceHash);prepared.photoCount++;}
  };
  if(draft?.acceptAllFolderPhotos){
-  const photos=await findPhotos(product,{photoRoots:photoRoots||mannequinRoots?.map(root=>path.join(root,style))});
+  const photos=await findPhotos(product,{photoRoots:await configuredPhotoRoots()});
   const rank=photo=>{const digest=createHash('sha256').update(photo.bytes).digest('hex'),record=draft.photoMapping?.files?.find(r=>r.name===photo.name&&r.hash===digest),order=draft.importedColorPhotos?.find(g=>g.color===record?.color)?.hashes||[],index=order.indexOf(digest);return index<0?100:index;};
   photos.sort((a,b)=>rank(a)-rank(b));
   for(const photo of photos){
@@ -86,8 +87,8 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
   }
  }else{
   if(!mannequinRoots){const desktop=path.dirname(await imageDownloadFolder());mannequinRoots=[path.join(desktop,'상품등록기사진폴더')];}
-  for(const root of mannequinRoots){
-   const productRoot=path.join(root,style);let entries;
+  for(const productRoot of await configuredPhotoRoots()){
+   let entries;
    try{entries=await readdir(productRoot,{withFileTypes:true});}catch(e){if(e.code==='ENOENT')continue;throw e;}
    // Unlabelled loose files are left for the assistant's visual mapping; never infer a product from a date filename.
    for(const color of product.colors||[]){
@@ -103,7 +104,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  }
  // The current style folder is authoritative; unknown colors are shown without color claims.
  if(draft?.trustedFolder&&!draft.acceptAllFolderPhotos&&draft.sourceUrl===product.sourceUrl){
-  const current=new Set((await findPhotos(product,{photoRoots:photoRoots||mannequinRoots?.map(root=>path.join(root,style))})).map(p=>createHash('sha256').update(p.bytes).digest('hex')));
+  const current=new Set((await findPhotos(product,{photoRoots:await configuredPhotoRoots()})).map(p=>createHash('sha256').update(p.bytes).digest('hex')));
   const labels=new Set((draft.careLabels||[]).map(p=>p.sourceHash));
   const canonicalRoot=await realpath(draftRoot);
   for(const relative of draft.unmatchedPhotos||draft.providedPhotos||[]){
@@ -123,7 +124,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  // The product folder's selected 1번 mannequin photo is shared by both templates.
  prepared.heroImage=Object.entries(prepared.colorImages).find(([color,urls])=>prepared.colorSources[color]!=='official'&&urls.length)?.[1][0]||null;
  try{
-  const main=await originalListingMain(product,{dataRoot,photoRoots:mannequinRoots?.map(root=>path.join(root,style))});
+  const main=await originalListingMain(product,{dataRoot,photoRoots:await configuredPhotoRoots()});
   const bytes=await readFile(main),id=createHash('sha256').update(bytes).digest('hex').slice(0,24);
   const name='smartstore-photo-'+id+'.jpg',src='/smartstore-photo/'+id;
   await writeFile(path.join(folder,name),bytes);prepared.photoFiles[src]=name;prepared.heroImage=src;
