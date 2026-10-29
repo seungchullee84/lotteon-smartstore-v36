@@ -18,6 +18,7 @@ test('품번 폴더를 API 없이 신뢰하되 미매칭 사진도 색상명 없
   const prepared=await prepareSmartstoreAuto(product,folder,options),files=await prepareListingImages(prepared,folder,options);
   assert.equal(files.extras.length,0,'미확정 각도 사진은 추가에 섞지 않음');assert.equal(prepared.smartstoreDetail.photoCount,2);assert.equal(prepared.smartstoreDetail.providedImages.length,2);assert.equal(prepared.smartstoreDetail.pendingPhotoCount,0);assert.deepEqual(prepared.smartstoreDetail.colorImages,{});
   const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'draft.json'),'utf8'));assert.equal(draft.careLabels.length,1);assert.equal(draft.trustedFolder,true);
+  assert.equal((await listingPreview(prepared,options)).photoReview.status,'needs-review','전체 사진을 보존해도 미분류 색상·각도를 연결 완료로 표시하지 않음');
   const html=buildSmartstoreDetail(prepared).html;assert(!html.includes('data-mannequin-unclassified'));assert(!html.includes('https://example.com/unmatched.jpg'));assert(prepared.smartstoreDetail.providedImages.every(src=>html.includes(src)));
   for(const record of draft.photoMapping.files)if(record.role==='provided'){record.role=record.name==='1.jpg'?'front':'side';record.color='01그레이';}
   draft.photoMapping.ignoredPhotos=[{hash:'f'.repeat(64),reason:'확인 후 제외한 사진'}];await writeFile(path.join(dataRoot,'smartstore-details',product.style,'draft.json'),JSON.stringify(draft));
@@ -48,7 +49,7 @@ test('정면·옆면 시각 확인은 과거 detail보다 우선하고 재수집
   const options={dataRoot,photoRoots:[pictures],apiKey:'',fetchImpl:()=>assert.fail('외부 서비스 호출 금지'),recognizePhoto:()=>assert.fail('확인한 사진 재분석 금지')};
   for(let pass=0;pass<2;pass++){
    const prepared=await prepareSmartstoreAuto(product,folder,options),preview=await listingPreview(prepared,options),upload=await prepareListingImages(prepared,folder,options);
-   assert.equal(prepared.smartstoreDetail.photoCount,definitions.length,'중복 바이트·날짜형 파일명도 상세 전체에 연결');assert.deepEqual(preview.extras.map(p=>p.role),['official-main','side','front','front']);assert.deepEqual(preview.extras.map(p=>p.color),['공식몰 대표사진',...product.colors]);assert.equal(upload.extras.length,4);
+   assert.equal(prepared.smartstoreDetail.photoCount,definitions.length,'중복 바이트·날짜형 파일명도 상세 전체에 연결');assert.deepEqual(preview.extras.map(p=>p.role),['official-main','side','front','front']);assert.deepEqual(preview.extras.map(p=>p.color),['공식몰 대표사진',...product.colors]);assert.equal(upload.extras.length,4);assert.equal(preview.photoReview.status,'ready');
    const after=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));assert.equal(after.photoMapping.files.length,definitions.length);assert(after.photoMapping.files.every(r=>r.reviewed===true));
    for(const record of records)assert.equal(createHash('sha256').update(await readFile(path.join(pictures,record.name))).digest('hex'),record.hash,'사용자 원본 불변');
    after.photoMapping.files=after.photoMapping.files.map(r=>({...r,role:'detail',reviewed:false}));after.listingImages.extras=[];await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(after));
