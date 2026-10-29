@@ -386,8 +386,13 @@ const server=http.createServer(async(req,res)=>{
             connect:p=>smartBot.preflightDetailOnly(p),
             render:async(p,folder)=>{
               const output=path.join(folder,p.style+'_상세설명만수정_'+Date.now()+'.png');
-              const detail=await saveSmartstoreDetail(p,folder,output,{signal,log,dataRoot});
-              return smartstoreUploadParts(output,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{includeVideo:detail.includeVideo,dataRoot,videoOptions:detail.videoOptions,brandIntroHeight:detail.brandIntroHeight,videoAfterTop:detail.videoAfterTop,footerTop:detail.footerTop,bannerTop:detail.bannerTop,officialTop:detail.officialTop});
+              const started=Date.now();
+              const detail=await saveSmartstoreDetail(p,folder,output,{signal,log,dataRoot,uploadOnly:true});
+              log('상세이미지 제작 완료 · '+((Date.now()-started)/1000).toFixed(1)+'초'+(detail.renderCacheHit?' · 기존 이미지 재사용':''));
+              const partsStarted=Date.now();
+              const parts=await smartstoreUploadParts(output,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{includeVideo:detail.includeVideo,dataRoot,videoOptions:detail.videoOptions,brandIntroHeight:detail.brandIntroHeight,videoAfterTop:detail.videoAfterTop,footerTop:detail.footerTop,bannerTop:detail.bannerTop,officialTop:detail.officialTop});
+              log('첨부 이미지 준비 완료 · '+((Date.now()-partsStarted)/1000).toFixed(1)+'초');
+              return parts;
             },
             upload:(p,folder,parts)=>smartBot.updateDetailOnly(p,folder,parts)
           });

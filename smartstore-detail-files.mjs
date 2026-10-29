@@ -212,6 +212,10 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
   await cacheRenderedDetail(cacheRoot,p.style,cacheKey,output,height,{brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,photoRegions});
   }
   await registerLongPhotoLayout(await readFile(output),{style:p.style,regions:photoRegions,brandIntroHeight,videoAfterTop,officialTop,dataRoot:options.dataRoot||path.join(appRoot,'data')});
+  // The editor upload only needs the rendered image, section boundaries and
+  // existing brand video. Avoid generating the HTML, duplicate video and
+  // separate banner/footer exports used by the manual download workflow.
+  if(options.uploadOnly)return {width:860,height,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,photoCount:p.smartstoreDetail.photoCount,includeVideo:true,videoOptions,renderCacheHit};
   const stem=output.replace(/\.[^.]+$/,'');
   const video=await exportBrandVideo(stem,options.dataRoot,videoOptions);check();
   await writeFile(stem+'.html',smartstoreDetailDocument(p,{imageUrl,fontUrl,videoUrl:encodeURIComponent(video.filename)}).html);
