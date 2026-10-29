@@ -43,3 +43,11 @@ test('이전 날짜 상품도 30건에서 자르지 않아 표시 건수와 전�
  const result=summary({batches:[batch('2026-10-27T01:00:00Z',events)]},'2026-10-28T04:00:00Z');
  assert.equal(result.days[1].newCount,40);assert.equal(result.days[1].events.length,40);assert.equal(result.history.length,40);assert.equal(result.days[2].hasCheck,false);
 });
+test('전날 같은 공식 주소·이미지 해시의 추가를 오늘 다시 감지해도 누적에서 제외한다',()=>{
+ const hash='a'.repeat(64),added=event('changed','116521',{detailHash:hash,changes:['공식 상세이미지 추가']});
+ const website={batches:[batch('2026-10-28T11:17:49Z',[added]),batch('2026-10-29T00:28:25Z',[added]),batch('2026-10-29T01:00:00Z',[event('changed','076925',{detailHash:'b'.repeat(64)})])]};
+ const result=summary(website,'2026-10-29T04:00:00Z');assert.equal(result.changedCount,1);assert.equal(result.events[0].style,'076925');assert.equal(result.days[1].changedCount,1);
+});
+test('이미지가 바뀐 뒤 같은 주소에 새 해시가 추가되면 정당한 변경은 보존한다',()=>{
+ const item=(hash,change)=>event('changed','116521',{detailHash:hash.repeat(64),changes:[change]});const result=summary({batches:[batch('2026-10-28T01:00:00Z',[item('a','공식 상세이미지 추가')]),batch('2026-10-28T02:00:00Z',[item('b','공식 상세이미지 변경')]),batch('2026-10-29T01:00:00Z',[item('a','공식 상세이미지 추가')])]},'2026-10-29T04:00:00Z');assert.equal(result.changedCount,1);
+});
