@@ -12,6 +12,15 @@ import {publishable} from '../github-sync.mjs';
 import {prepareVideo,videoOptions,fixtureVideo} from './helpers/brand-video.mjs';
 const product={detailTemplate:1,style:'375908',name:'여성 경량 패딩 자켓 375908',rawName:'여성 경량 패딩 자켓',gender:'여성',colors:['01핑크','02화이트'],sizes:['S','M'],material:'나일론100%',country:'미얀마',washing:'손세탁',manufactured:'2025-08',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=sample',originalDetailUrl:'https://www.giordano.co.kr/detail.jpg',images:{detail:'https://www.giordano.co.kr/detail.jpg',size:'https://www.giordano.co.kr/size.jpg',info:'https://www.giordano.co.kr/info.jpg'}};
 
+test('두 템플릿 팔레트는 확인된 정면만 표시하고 다른 사진은 상세에 유지한다',()=>{
+ for(const detailTemplate of [1,2]){
+  const p={...product,detailTemplate,smartstoreDetail:{style:product.style,acceptAllFolderPhotos:true,colorImages:{'01핑크':['/smartstore-photo/side','/smartstore-photo/front'],'02화이트':['/smartstore-photo/closeup']},paletteImages:{'01핑크':'/smartstore-photo/front'}}};
+  const html=buildSmartstoreDetail(p).html,palette=html.match(/<div data-color-palette[\s\S]*?<\/div>/)?.[0];
+  assert(palette);assert.match(palette,/smartstore-photo\/front/);assert.doesNotMatch(palette,/smartstore-photo\/(side|closeup)/);
+  assert.match(html,/smartstore-photo\/side/);assert.match(html,/smartstore-photo\/closeup/);assert.match(html,/취향에 맞춰, 1가지/);
+ }
+});
+
 test('기본 템플릿1과 명시적으로 선택한 템플릿2는 독립적으로 보존한다',()=>{
  const base={...product,detailTemplate:undefined},one=buildSmartstoreDetail(base),two=buildSmartstoreDetail({...base,detailTemplate:2});
  assert.equal(one.templateVariant,1);assert.equal(one.templateLabel,'템플릿 1');assert(one.html.indexOf('data-product-intro')<one.html.indexOf('data-official-detail'));assert(one.html.indexOf('data-official-detail')<one.html.indexOf('data-brand-intro'));assert(one.html.indexOf('data-brand-intro')<one.html.indexOf('data-brand-video-heading'));assert(one.html.indexOf('data-brand-video-heading')<one.html.indexOf('data-store-banner'));assert(!one.html.includes('data-aida-action'));
