@@ -10012,11 +10012,11 @@
     }
   ],
   "sourceComplete": 1422,
-  "imageComplete": 1305,
-  "withThreeOrFour": 436,
-  "phase": "images",
+  "imageComplete": 1308,
+  "withThreeOrFour": 438,
+  "phase": "complete",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-29T00:59:32.220Z",
+  "updatedAt": "2026-10-29T00:59:46.774Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-29T00:59:20.538Z",
@@ -19601,7 +19601,7 @@
             "changes": [
               "공식 상세이미지 변경"
             ],
-            "status": "analyzing"
+            "status": "ready"
           },
           {
             "type": "new",
@@ -19613,7 +19613,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "analyzing"
+            "status": "ready"
           },
           {
             "type": "new",
@@ -19625,7 +19625,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "analyzing"
+            "status": "ready"
           }
         ]
       }
