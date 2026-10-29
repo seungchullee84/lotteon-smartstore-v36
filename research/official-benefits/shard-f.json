@@ -818,8 +818,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:40:06.390Z",
-      "analyzedAt": "2026-10-29T09:51:12.792Z"
+      "observedAt": "2026-10-29T10:13:35.919Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1784,8 +1784,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:39:44.340Z",
-      "analyzedAt": "2026-10-29T09:51:12.488Z"
+      "observedAt": "2026-10-29T10:13:16.543Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2465,8 +2465,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T09:40:17.662Z",
-      "analyzedAt": "2026-10-29T09:51:12.960Z"
+      "observedAt": "2026-10-29T10:13:46.887Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
