@@ -163,8 +163,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T04:40:43.458Z",
-      "analyzedAt": "2026-10-29T04:51:27.845Z"
+      "observedAt": "2026-10-29T05:14:08.286Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -190,8 +190,8 @@
       "points": [],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T04:41:22.846Z",
-      "analyzedAt": "2026-10-29T04:51:28.341Z"
+      "observedAt": "2026-10-29T05:14:43.952Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -210,7 +210,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "b05344cc4a4ce62cdf1cb75cc3ea7f864162b86edfda77dde5ab99ec0aa2fda2",
+      "pageHash": "246005346e2cd81d44adf5b8c311478ff2e2a7df89947658704789061df4698f",
       "pageText": "힙과 허벅지는 여유 있게 편안하도록 유지하고, 다리 라인의 밸런스를 슬림하게 개선한 다양한 체형의 고객이 무리 없이 입을 수 있는 테이퍼드 핏입니다.\n허리의 히든 밴딩 디테일로 보다 편안한 착용감을 느낄 수 있습니다.\n\n기능성 소재감의 양방향 스트레치 폴리 원단으로 제작되었으며 가벼운 착용감과 우수한 신축성을 갖추어 활동성이 뛰어나며, 장시간 착용에도 편안함을 제공합니다. 구김이 적고 복원력이 좋아 깔끔한 실루엣을 유지할 수 있으며, 비즈니스 캐주얼부터 데일리 룩까지 다양한 스타일에 활용할 수 있는 아이템입니다. 측면 사이드 심에 콘솔 지퍼를 적용하여 깔끔한 디자인을 유지하면서도 실용성을 더했습니다. 간편한 수납이 가능합니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -223,8 +223,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T04:41:28.228Z",
-      "analyzedAt": "2026-10-29T04:51:28.400Z"
+      "observedAt": "2026-10-29T05:14:49.262Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -294,8 +294,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T04:41:00.058Z",
-      "analyzedAt": "2026-10-29T04:51:28.055Z"
+      "observedAt": "2026-10-29T05:14:22.982Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -631,8 +631,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T04:40:51.907Z",
-      "analyzedAt": "2026-10-29T04:51:27.976Z"
+      "observedAt": "2026-10-29T05:14:15.715Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1226,15 +1226,15 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "b7d7cad74a2c0f18f07d2a6a141c8b902336ce5bdfdb5e91298989e44039ac59",
+      "pageHash": "4927ffdcd3c33a1871c25f8aa35c306575972ecfc1098571d3532ff46982d9a8",
       "pageText": "목넥 스타일의 퀼팅 베스트입니다.\n\n고밀도 나일론 소재로 제작되어 내구성이 뛰어나며 이면에 코팅처리 및 본딩처리를 하여 봉제선 사이로 충전재가 튀어나오는 것을 막아줍니다.\n\n보온재로는 웰론(ECO BALL)을 사용하여 충전재의 뭉침을 최소화하며 가벼운 무게감과 뛰어난 볼륨감으로 착용감이 우수합니다.\n\n밑단에 내장되어 있는 스트링과 스토퍼로 실루엣을 조절하여 원하는 스타일로 연출할 수 있습니다.",
       "imageText": "",
       "imageScanComplete": false,
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T04:41:02.029Z",
-      "analyzedAt": "2026-10-29T04:51:28.069Z"
+      "observedAt": "2026-10-29T05:14:24.622Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1627,8 +1627,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T04:40:32.642Z",
-      "analyzedAt": "2026-10-29T04:51:27.697Z"
+      "observedAt": "2026-10-29T05:13:56.661Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1675,8 +1675,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T04:40:55.331Z",
-      "analyzedAt": "2026-10-29T04:51:28.029Z"
+      "observedAt": "2026-10-29T05:14:18.690Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1963,8 +1963,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T04:40:40.572Z",
-      "analyzedAt": "2026-10-29T04:51:27.797Z"
+      "observedAt": "2026-10-29T05:14:05.496Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2924,8 +2924,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T04:40:57.898Z",
-      "analyzedAt": "2026-10-29T04:51:28.041Z"
+      "observedAt": "2026-10-29T05:14:20.148Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
