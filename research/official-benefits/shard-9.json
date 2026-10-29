@@ -1330,8 +1330,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T08:12:21.791Z",
-      "analyzedAt": "2026-10-29T08:12:48.541Z"
+      "observedAt": "2026-10-29T08:44:15.822Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2633,8 +2633,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T08:12:14.352Z",
-      "analyzedAt": "2026-10-29T08:12:48.424Z"
+      "observedAt": "2026-10-29T08:44:08.315Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
