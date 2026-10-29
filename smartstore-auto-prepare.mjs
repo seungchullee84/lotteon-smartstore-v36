@@ -17,6 +17,7 @@ import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 import {officialPointSource} from './smartstore-selling-point-review.mjs';
 import {importedPhotoSelection} from './smartstore-imported-selection.mjs';
 import {readPhotoMappings,savePhotoMappings} from './smartstore-photo-mapping-cache.mjs';
+import {classifyLocalPhotos} from './smartstore-local-photo.mjs';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const norm=value=>String(value).replace(/\s+/g,'').toLowerCase();
 const image=/\.(jpe?g|png|webp)$/i;
@@ -88,7 +89,11 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
   // A color folder can identify its color, but cannot establish front/side/detail.
   unknown.push({...file,...(exact?{colorHint:exact}:{}),...(isCareLabelPhoto(file)?{roleHint:'care-label'}:{})});
  }
- if(trustFolder)return applyGarmentReview(await prepareTrustedFolder(product,folder,{dataRoot,photos,mapped,old,description,detailHash,signal,log,recognizePhoto}),folder,{dataRoot,photoRoots,desktop});
+ if(trustFolder){
+  const classified=await classifyLocalPhotos(product,unknown,{dataRoot,signal,log});
+  mapped.push(...classified);
+  return applyGarmentReview(await prepareTrustedFolder(product,folder,{dataRoot,photos,mapped,old,description,detailHash,signal,log,recognizePhoto}),folder,{dataRoot,photoRoots,desktop});
+ }
  const currentReview=await applyGarmentReview(product,folder,{dataRoot,photoRoots,desktop});
  if((currentReview.reviewedGarmentAttributes||!apiKey)&&!unknown.length&&old?.sourceUrl===product.sourceUrl&&old?.officialDetailHash===detailHash&&old?.sellingPoints?.length&&old.sellingPoints.every(p=>p.title&&p.description&&p.evidence)){
   const listingImages=await saveListingSelection(root,chooseListingPhotos(mapped,product));
