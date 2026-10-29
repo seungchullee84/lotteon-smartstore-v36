@@ -176,6 +176,18 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='POST'){
       const b=await body(req);
       requireChannel(url.pathname.slice(5),b.channel);
+      if(url.pathname==='/api/smartstore-combine-photos'){
+        if(!state.product||b.style!==state.product.style)throw Error('현재 수집된 상품의 품번을 확인해 주세요.');
+        const product=state.product,folder=state.folder;
+        job('smartstore-combine-photos',async()=>{
+          state.photoPreparation={style:product.style,status:'preparing'};
+          const prepared=await prepareSmartstoreAuto(product,folder,{dataRoot,apiKey:backgroundApiKey,signal:activeAbort.signal,log});
+          if(state.product?.style!==product.style||state.folder!==folder)throw Error('조합 중 상품이 변경되었습니다.');
+          await writeFile(path.join(folder,'product.json'),JSON.stringify(prepared,null,2));
+          await publishPhotoPreview(prepared,folder);
+          log('마네킨샷+공홈 조합 준비 · 폴더 원본 전체 보존 · 판매처 입력·업로드 실행 안 함');
+        });return json(res,202,{ok:true});
+      }
       if(url.pathname==='/api/smartstore-template'){
         if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 템플릿을 선택해 주세요.');
         if(!state.product||b.style!==state.product.style)throw Error('현재 상품의 품번을 확인해 주세요.');
