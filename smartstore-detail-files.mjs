@@ -130,6 +130,16 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  prepared.acceptAllFolderPhotos=!!draft?.acceptAllFolderPhotos;
  prepared.pendingPhotoCount=draft?.acceptAllFolderPhotos?0:prepared.providedImages.length;
  prepared.unclassifiedPhotoCount=prepared.providedImages.length;
+ // The first detailed photo may be a side or close-up. Select only a
+ // previously confirmed front image for each palette tile.
+ if(prepared.acceptAllFolderPhotos){
+  prepared.paletteImages={};
+  const confirmed=[draft?.listingImages?.main,...(draft?.listingImages?.extras||[])].filter(r=>r?.role==='front'&&r.color&&r.sourceHash);
+  for(const entry of confirmed){
+   const index=(prepared.storeColorPhotoHashes[entry.color]||[]).indexOf(entry.sourceHash);
+   if(index>=0&&!prepared.paletteImages[entry.color])prepared.paletteImages[entry.color]=prepared.colorImages[entry.color][index];
+  }
+ }
  // The product folder's selected 1번 mannequin photo is shared by both templates.
  prepared.heroImage=Object.entries(prepared.colorImages).find(([color,urls])=>prepared.colorSources[color]!=='official'&&urls.length)?.[1][0]||null;
  try{
