@@ -169,6 +169,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
     await writeFile(path.join(folder,name),bytes);prepared.photoFiles[src]=name;prepared.colorImages[group.color]||=[];prepared.colorImages[group.color].push(src);
    }
    prepared.colorSources[group.color]='official';
+   if(prepared.paletteImages&&prepared.colorImages[group.color]?.length)prepared.paletteImages[group.color]=prepared.colorImages[group.color][0];
   }
  }
  prepared.captionTones=await collectCaptionTones(product,folder);
