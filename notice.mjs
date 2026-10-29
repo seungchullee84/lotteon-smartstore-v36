@@ -49,11 +49,23 @@ export function parseWashing(text){
  return {value:out.join(', '),complete:out.length>=5&&out.some(x=>/세탁|드라이/.test(x))};
 }
 function wordsFromTSV(tsv){return tsv.trim().split('\n').slice(1).map(l=>{const c=l.split('\t');return {level:+c[0],left:+c[6],top:+c[7],width:+c[8],height:+c[9],text:c[11]||''};}).filter(x=>x.level===5);}
-export async function analyzeNotice(file,log=()=>{},signal){
+export async function analyzeNotice(file,log=()=>{},signal,options={}){
+ signal?.throwIfAborted();
+ let worker,aborted=false;
+ const stop=()=>{aborted=true;if(worker)void worker.terminate().catch(()=>{});};
+ const pending=analyzeNoticeWork(file,log,signal,options,created=>{worker=created;if(aborted)void worker.terminate().catch(()=>{});});
+ if(!signal)return pending;
+ let rejectAbort;
+ const cancelled=new Promise((_,reject)=>{rejectAbort=()=>{stop();reject(signal.reason||new DOMException('Aborted','AbortError'));};});
+ signal.addEventListener('abort',rejectAbort,{once:true});
+ if(signal.aborted)rejectAbort();
+ try{return await Promise.race([pending,cancelled]);}finally{signal.removeEventListener('abort',rejectAbort);}
+}
+async function analyzeNoticeWork(file,log,signal,options,onWorker){
  const src=sharp(file);const {width,height}=await src.metadata();const raw=await src.clone().greyscale().raw().toBuffer();
  const rules=[];for(let y=0;y<height;y++){let n=0;for(let x=Math.floor(width*.06);x<width*.94;x++)if(raw[y*width+x]<245)n++;if(n>width*.68&&(rules.length===0||y-rules.at(-1)>3))rules.push(y);}
  if(signal?.aborted)throw Error('사용자가 중단했습니다.');
- const worker=await createWorker('kor+eng');let numeric;
+ const worker=await (options.createWorker||createWorker)('kor+eng');onWorker(worker);signal?.throwIfAborted();let numeric;
  const abort=()=>{void worker.terminate().catch(()=>{});if(numeric)void numeric.terminate().catch(()=>{});};
  signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted){abort();throw Error('사용자가 중단했습니다.');}
  try{
