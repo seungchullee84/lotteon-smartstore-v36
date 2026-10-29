@@ -65,3 +65,6 @@ test('3일의 20분 확인 기록이 공유·다음 체크포인트에서 168개
   const next=await saveWebsiteCheck(dir,[],{now:'2026-10-28T10:00:00Z'});assert.equal(next.batches.length,201);
  }finally{await rm(dir,{recursive:true,force:true});}
 });
+test('기준선 복원으로 기존 이미지가 재발견돼도 과거 기록을 유지하고 새 변경으로 추가하지 않는다',async()=>{
+ const dir=await mkdtemp(path.join(os.tmpdir(),'website-replay-'));try{const old={checkedAt:'2026-10-28T11:17:49Z',events:[{type:'changed',style:'375908',sourceUrl:url,detailHash:hash,changes:['공식 상세이미지 추가']}]};await writeFile(path.join(dir,'website-check.json'),JSON.stringify({version:1,checkedAt:old.checkedAt,products:{[id]:{detailHash:null,detailImageVerified:false}},batches:[old]}));const result=await saveWebsiteCheck(dir,[item()],{now:'2026-10-29T00:28:25Z'});assert.equal(result.batches.length,2);assert.equal(result.batches[0].events.length,1);assert.equal(result.batches[1].events.length,0);assert.equal(result.products[id].detailHash,hash);}finally{await rm(dir,{recursive:true,force:true});}
+});
