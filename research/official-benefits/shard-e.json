@@ -178,7 +178,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=E0912F72340715F8277265F104ACD4B7&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01155508.jpg",
       "detailHash": "05f1403e4b499c97e5633b96a36f4f4dc2c82ef8c06bd05eaa8bfaa16bfff4d6",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"810b3c7014bc8c6ae735af514962591d\"",
         "lastModified": "Mon, 12 May 2025 08:57:11 GMT"
@@ -190,8 +190,8 @@
       "points": [],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:28.527Z",
-      "analyzedAt": "2026-10-28T15:47:16.647Z"
+      "observedAt": "2026-10-29T00:17:50.470Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -210,7 +210,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "b05344cc4a4ce62cdf1cb75cc3ea7f864162b86edfda77dde5ab99ec0aa2fda2",
+      "pageHash": "246005346e2cd81d44adf5b8c311478ff2e2a7df89947658704789061df4698f",
       "pageText": "힙과 허벅지는 여유 있게 편안하도록 유지하고, 다리 라인의 밸런스를 슬림하게 개선한 다양한 체형의 고객이 무리 없이 입을 수 있는 테이퍼드 핏입니다.\n허리의 히든 밴딩 디테일로 보다 편안한 착용감을 느낄 수 있습니다.\n\n기능성 소재감의 양방향 스트레치 폴리 원단으로 제작되었으며 가벼운 착용감과 우수한 신축성을 갖추어 활동성이 뛰어나며, 장시간 착용에도 편안함을 제공합니다. 구김이 적고 복원력이 좋아 깔끔한 실루엣을 유지할 수 있으며, 비즈니스 캐주얼부터 데일리 룩까지 다양한 스타일에 활용할 수 있는 아이템입니다. 측면 사이드 심에 콘솔 지퍼를 적용하여 깔끔한 디자인을 유지하면서도 실용성을 더했습니다. 간편한 수납이 가능합니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -223,8 +223,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:28.616Z",
-      "analyzedAt": "2026-10-28T15:47:16.650Z"
+      "observedAt": "2026-10-29T00:17:55.834Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1248,7 +1248,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=E645FAC0EB6BA202E3DC7B413DAB7B7F&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01105541.jpg",
       "detailHash": "3e2a0161c7cae548d37644701697fd2e7a9db009cd3d702794c351070f933b14",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"7135ff948826e8736eaebb827418cd66\"",
         "lastModified": "Wed, 18 Jun 2025 03:18:53 GMT"
@@ -1271,8 +1271,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:35.028Z",
-      "analyzedAt": "2026-10-28T15:47:16.847Z"
+      "observedAt": "2026-10-29T00:18:15.241Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1800,7 +1800,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=E916529E860A299572BE92887CD7FAC8&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2023/01143502.jpg",
       "detailHash": "024e50ecc149f1d029b0d8725a489156765cb2903879358daeb4dd66c512cf90",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"7c3385195d5f4bd132b36f2f97eb5a9f\"",
         "lastModified": "Tue, 10 Dec 2024 05:06:59 GMT"
@@ -1823,8 +1823,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:38.200Z",
-      "analyzedAt": "2026-10-28T15:47:17.017Z"
+      "observedAt": "2026-10-29T00:18:17.598Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1978,7 +1978,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=E9AC1F73BE8C016431593514E9D70EA1&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2023/01153903.jpg",
       "detailHash": "3fb7729f8523ff6855e81b72194c7bf87c68b92df9f40a870f4fde775d10f444",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"cda101ff58c536b6d59022613237402c\"",
         "lastModified": "Fri, 17 Nov 2023 07:56:03 GMT"
@@ -2001,8 +2001,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:38.948Z",
-      "analyzedAt": "2026-10-28T15:47:17.105Z"
+      "observedAt": "2026-10-29T00:18:18.420Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2303,7 +2303,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=EBD155D2BE3BF28AC63184063BFBA2B0&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01025506.jpg",
       "detailHash": "5a9d645e89999463e51791f3c2c8268204bfb6b831f248a103274871e5a3c48c",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"35afe044df0a4e4109c6bd86ea29a8cb\"",
         "lastModified": "Mon, 10 Feb 2025 07:22:02 GMT"
@@ -2321,8 +2321,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:41.040Z",
-      "analyzedAt": "2026-10-28T15:47:17.192Z"
+      "observedAt": "2026-10-29T00:18:25.687Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2336,7 +2336,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=EBD9EE59E252D66CB304676D19B56618&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05356951.jpg",
       "detailHash": "30e069d8b91f35dec19cfadb75a181049bff4c616936f12bc555b2524db0da53",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"9cb3d52ceaf495e4ba40394b2e04fc37\"",
         "lastModified": "Tue, 29 Sep 2026 07:57:59 GMT"
@@ -2364,8 +2364,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:41.576Z",
-      "analyzedAt": "2026-10-28T15:47:17.239Z"
+      "observedAt": "2026-10-29T00:18:34.990Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2638,12 +2638,12 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=ED2502DB0E92A845107CCE7191242504&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05505901.jpg",
       "detailHash": "e418ab848dd6367942e4f6a5f9c9730babc61f281b82c9c9b71a1f7edcdf5d6a",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"92485f928122230df343d6f04ac5fda1\"",
         "lastModified": "Fri, 28 Aug 2026 07:19:50 GMT"
       },
-      "pageHash": "7a49f74ceea9425a8f7c6d1430e98692627ab9f846ab749f9264ef80595c122f",
+      "pageHash": "955020433c1c60fd3778c54276fb94dbff843ff235b1728c60735cfbb53b18a2",
       "pageText": "지오다노의 시그니처 레터링 ‘My Life Is Good Energy Everywhere’ 자수 코듀로이 볼캡입니다.\n\n레터링 자수로 클래식한 무드를 더하여 포인트로 착용하기 좋은 볼캡입니다.\n\n100% 면 코듀로이 원단으로 제작되어 은은한 광택감과 내추럴한 터치감이 특징입니다.\n\n후면의 버클 스트랩으로 사이즈 조절이 간편하며 측면의 홀에 남는 스트랩을 숨겨 깔끔하게 정돈 가능합니다.\n\nFW 무드가 물씬 느껴지는 컬러로, 손 쉽게 매치 가능한 컬러들로구성되어 \n가을 겨울 시즌 다양한 코디에 활용될 수 있습니다.",
       "imageText": "FVERYWHERG,\n=\n코듀로이  볼캡                                                               STYLE NO. 05505901\n지오다노의 시그니처 레터링 ‘My Life Is Good Energy Everywhere’\n자수 코듀로이 볼캡입니다.\n레터링 자수로 클래식한 REE 더하여 포인트로착용하기 좋은\n볼캡입니다.\n100%면 코듀로이 원단으로 제작되어 은은한 광택감과 내추럴한\n터치감이 특징입니다.\n후면의 버클 스트랩으로 사이즈 조절이 간편하며 측면의 홀에 남는\n스트랩을 숨겨 깔끔하게 정돈 가능합니다.\nFW 무드가 물씬 느껴지는 컬러로, 손 쉽게 매치 가능한 컬러들로구성되어\n가을 겨울 시즌 다양한 코디에 활용될 수 있습니다.\nLISTE 0 7) 5 RE (RERERY\nG00D ENERGY\nSVERYWHERE\ner 아우초소\n20209\nWDENERCY\nisang\n= TULRE\n\npa——\" 5 1 LIFE 5 ———\nGOOD ENERGY\nEVERY WHERE\n\n77700\nEEN\n1    [할 \\    3\nEAT\nEN         Sr WY LIFE 8 wos\nGOO)     10                     3       8    t\n#9 GOOD ENERG\n1    를 개   4    f 3   ¥   |\nRY WHERE\nHH ㅣ\n{     {   {    Lkb\nPETTY odd    1 i\nSFEF EL    pH    |\n01라이트베이지\ncmos ME LIFE [8 ~\nOBER                              |\noki             GOOD ENERGY\nfos fideadadsionimtnmmbanishiong\n02다크브라운\nprema MY EIFE IS wees\n000                   An de LR ERE\n00D ENERGY                          PEL VE MET FAR\nE             TNE DUI TeD ©\n!    ,     토(튼/ RES\nEVERY WHER!\n03네이비\nDETAIL SIZE\n길이         둘레\n7N IN                            27\n주해    J  |  ~  ㅣ                     7\nSS [가    ’\n=             azo                     15\n밸                                    57\n* 위 사이즈는 제품의 실측 값이며 케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n* 실측 값과 신체치수 차이로 인한 교환/반품 건은 무상으로 진행해드리기 어려우니 구매에 참고 바랍니다.\n* 실측 사이즈(ㅇ07)는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\nCHECK UP\n착용시기                                 °          °\n봄          여름          가을          겨울\n두께 감                       [J\n두꺼움         중간          않음         아주않음\n신축성           [ ]\n전혀없음         보통          좋음         아주좋음\n촉 감                      °\n살짝까슬         보통         부드러움       매우부드러움\n안 감          [J\n없음       있음(신축성이     있음(신축성)       기모\n비 침          J\n없음         조금비침      비침있음(밝은색)\n하의 핏\n좁음     조금좁음      보통      조금넓음      넓음\nINFORMATION\n스타일코드        05505901\nHE 소재         2100\n색상            01라이트베이지,02브라운,03네이비\n치수            FREE\n제조자           (주)지오다노\n\n스타일코드          05505901\n제품소재           면100\n색상              01라이트베이지,02브라운,03네이비\n치수              FREE\n제조자            (주)지오다노\n제조국            중국\n세탁 방법  AX   [일\n손세탁 표배제금지 다림질금지 Fea aman\n제조연월           2025.08\n1. 소비자 분쟁해결 기준에 따라다음과 같이 보상해드립니다.\n*봉제불량, 원단불량(제작불량,변색,탈색) 부자재 불량(단추, 지퍼,심지 등): 구입일로부터 1년이내분은\n무상수선, 교환, 환불의 순위로 보상. 단, 봉제불량은 1년 경과 후에도 무상 수선.\n품질보증기준                  사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시)및 소재 구성 부적합으로 인한 세탁 사고:\n785 제     구입일로부터 10일 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격,동일 제품 교환을 원칙으로 함.\n＊상하1착중한쪽에만 이상이 있을 경우:상하 한착 모두 교환 또는 구입가 환불.\n2. 소비자 부주의에 의한제품훼손 및 세탁 잘못에의한 변형,품질 보증기간(1년)이 경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해드립니다.\nA/S 책임자/전화번호         지오다노 / 지오다노 AS 센터 (080-934-3000)\n",
       "imageScanComplete": true,
@@ -2661,8 +2661,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:43.097Z",
-      "analyzedAt": "2026-10-28T15:47:17.270Z"
+      "observedAt": "2026-10-29T00:18:17.098Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3065,7 +3065,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=EF718DF1BDEC4AC0C3E62EC36C8705B7&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2022/01022510.jpg",
       "detailHash": "946bf22490a2682f69bd84d0e769d6128c3230f8e02a53d6eafd5ab755e63d28",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"0368cbe6bb5896eba0b5fbd2c2222546\"",
         "lastModified": "Mon, 18 Dec 2023 01:56:13 GMT"
@@ -3088,8 +3088,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:46:45.706Z",
-      "analyzedAt": "2026-10-28T15:47:17.358Z"
+      "observedAt": "2026-10-29T00:18:24.685Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
