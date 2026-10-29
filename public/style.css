@@ -344,3 +344,5 @@ body[data-channel="smartstore"] #smartstoreStart{background:#087c42}body[data-ch
 .website-category-toggle{display:inline-block;margin:0 3px;padding:0 2px;border:0;border-radius:0;background:transparent;color:inherit;box-shadow:none;font:inherit;font-weight:700;cursor:pointer}.website-category-toggle:hover,.website-category-toggle[aria-pressed="true"]{background:transparent;color:inherit;text-decoration:underline;text-underline-offset:4px}#websiteUpdateList[hidden]{display:none}
 
 body[data-channel="smartstore"] .website-category-toggle,body[data-channel="smartstore"] .website-category-toggle:not(:disabled):hover,body[data-channel="smartstore"] .website-category-toggle[aria-pressed="true"]{background:transparent;box-shadow:none;color:inherit}
+
+body[data-channel="smartstore"] .search :is(#smartstoreCombinePhotos,#smartstoreImportPhotos){background:#176740;color:#fff;border-color:#105332;font-weight:700;box-shadow:none}body[data-channel="smartstore"] .search :is(#smartstoreCombinePhotos,#smartstoreImportPhotos):not(:disabled):hover{background:#105332;color:#fff;border-color:#0b4328}
