@@ -1317,7 +1317,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "01d96adbee02ff309fefdb983a32d7a32475cebf2afae6bbe742d4d37024bbeb",
+      "pageHash": "7c1f0d3698a5335fa3153e6690017ee8aba6221acf878200b1c4c079d5c0a593",
       "pageText": "코튼 소재의 데님 트러커 자켓 입니다.\n\n탄탄한 소재감의 기본 데님으로, 12.5oz~12oz 의 적당히 두께감 있는 원단으로 제작되어, 사계절 내내 활용하기 좋은 스타일 입니다.\n\n데님의 오리지널한 워싱 무드가 돋보이는 클래식한 워싱 컬러로 구성 하였습니다. \n\n\n*셋업 가능 스타일\n#01, #03 컬러는 01114544 와이드핏 데님 팬츠와 셋업 스타일로 연출 가능 합니다.\n\n\n데님 염료의 특성상 이염 및 물 빠짐이 있을 수 있습니다. \n반드시 미지근한 물에 뒤집어서 단독 세탁하시기 바랍니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -1330,8 +1330,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:44:48.075Z",
-      "analyzedAt": "2026-10-28T15:47:13.847Z"
+      "observedAt": "2026-10-29T00:28:07.689Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2600,7 +2600,7 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=9C6622B616A79CBE98F154FC6BBF3E96&ctype=1",
       "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076501.jpg",
       "detailHash": "f98f938b475586f575480d41b74795ead0912f15bac1739b03b33d392efe97ae",
-      "detailImageVerified": false,
+      "detailImageVerified": true,
       "detailValidators": {
         "etag": "\"44169a9e97557acfe4e0342d7c596ee3\"",
         "lastModified": "Wed, 11 Feb 2026 08:46:17 GMT"
@@ -2633,8 +2633,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-28T15:44:55.610Z",
-      "analyzedAt": "2026-10-28T15:47:14.017Z"
+      "observedAt": "2026-10-29T00:27:58.444Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
