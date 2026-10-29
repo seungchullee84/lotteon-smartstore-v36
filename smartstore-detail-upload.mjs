@@ -231,8 +231,10 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
   await applySmartstoreImageLayout(editor,lastImage,{check,layout:smartstorePartLayout(parts,index)});
  };
  for(let index=0;index<parts.files.length;index++){
+  const imageStarted=Date.now();
   await choose(parts.files[index],index);
-  if(parts.includeVideo!==false&&index===(parts.videoAfterIndex??0)){await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});parts.videoIdentity=await insertSmartstoreVideo(editor,{check,dataRoot:parts.dataRoot,videoOptions:parts.videoOptions});}
+  log('상세이미지 '+(index+1)+'/'+parts.files.length+'장 첨부 · '+((Date.now()-imageStarted)/1000).toFixed(1)+'초');
+  if(parts.includeVideo!==false&&index===(parts.videoAfterIndex??0)){const videoStarted=Date.now();await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});parts.videoIdentity=await insertSmartstoreVideo(editor,{check,dataRoot:parts.dataRoot,videoOptions:parts.videoOptions});log('브랜드 영상 첨부 · '+((Date.now()-videoStarted)/1000).toFixed(1)+'초');}
  }
  const order=await editor.locator('.se-component').evaluateAll(ns=>ns.filter(n=>/se-image|se-video|se-oembed/.test(n.className)).map(n=>n.className));
  const includeVideo=parts.includeVideo!==false;
