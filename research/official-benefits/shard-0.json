@@ -943,8 +943,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T01:20:15.154Z",
-      "analyzedAt": "2026-10-29T01:31:01.963Z"
+      "observedAt": "2026-10-29T01:51:56.967Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
