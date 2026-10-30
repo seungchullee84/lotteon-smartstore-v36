@@ -26,6 +26,9 @@ export async function focusSmartstoreEditorInput(editor,{check=()=>{}}={}){
  // ONE's visible SVG caret sits above the paragraph and receives its pointer
  // events. Click through that layer, then verify ONE owns keyboard focus.
  await editor.locator('.se-component.se-text .se-text-paragraph').filter({visible:true}).last().click({force:true});
+ // After attaching a photo, ONE can move its caret while leaving browser
+ // focus on body. Focus its existing input buffer before sending any keys.
+ if(!await editor.evaluate(()=>document.activeElement?.id?.startsWith('input_buffer')))await editor.locator('iframe[id^="input_buffer"]').focus();
  await editor.waitForFunction(()=>document.activeElement?.id?.startsWith('input_buffer'),null,{timeout:5000});
  check();
 }

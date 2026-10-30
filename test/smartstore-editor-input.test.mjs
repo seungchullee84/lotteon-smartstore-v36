@@ -43,3 +43,15 @@ test('입력 버퍼만 준비된 상태에서는 보이는 본문 문단이 생�
   await assert.rejects(waitForSmartstoreEditorInput(editor,{check:()=>{throw Error('사용자 중단');}}),/사용자 중단/);
  }finally{await browser.close();}
 });
+
+test('사진 첨부 뒤 커서 클릭이 body에 초점을 남겨도 기존 입력 버퍼로 연결한다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const editor=await browser.newPage();
+  await editor.setContent('<iframe id="input_buffer1" tabindex="-1"></iframe><div class="se-component se-image">기존 사진</div><div class="se-component se-text"><p class="se-text-paragraph">사진 뒤 입력 문단</p></div>');
+  assert.equal(await editor.evaluate(()=>document.activeElement.tagName),'BODY');
+  await focusSmartstoreEditorInput(editor);
+  assert.equal(await editor.evaluate(()=>document.activeElement.id),'input_buffer1');
+  assert.equal(await editor.locator('.se-component.se-image').textContent(),'기존 사진');
+ }finally{await browser.close();}
+});
