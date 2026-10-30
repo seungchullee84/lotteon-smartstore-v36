@@ -41,7 +41,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  if(draft&&String(draft.style)!==String(p.style))throw Error('다른 품번의 상세페이지 자료는 적용하지 않습니다.');
  const allGroups=(draft?.displayColors||p.colors||[]).map((color,index)=>({color,index,urls:[...new Set(draft?.colorImages?.[color]||p.colorImages?.[color]||[])]}));
  const groups=allGroups.filter(g=>g.urls.length);
- const points=displaySellingPoints(draft?.sellingPoints?.length?draft.sellingPoints.slice(0,4):productSellingPoints(p));
+ const points=draft?.omitSellingPoints?[]:displaySellingPoints(draft?.sellingPoints?.length?draft.sellingPoints.slice(0,4):productSellingPoints(p));
  const sources=[];
  const photo=(src,alt='',extra='')=>{const url=imageUrl(src);sources.push(src);return `<img src="${safeImage(url)}" alt="${esc(draft?.photoSources?.[src]==='official-model'?alt.replace(/디테일$/,'공식 모델 착용 모습'):alt)}" style="display:block;width:100%;height:auto;border:0;margin:0;${extra}">${draft?.photoSources?.[src]==='official-model'?'<p data-official-model-note style="font-size:19px;line-height:1.7;margin:12px 0 0;text-align:center;">지오다노 공식 모델 착용사진</p>':''}`;};
  const common=(name,alt)=>photo(assetBase+name,alt);
@@ -65,7 +65,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  }
  // Brand story and native MP4 precede the product points in preview/export/ONE.
  body+=divider+brandIntro+(includeVideo?brandVideoHtml(videoUrl||productVideoUrl(p)):brandVideoHeadingHtml());
- body+=divider+`<section data-aida="interest" style="padding:72px 6%;">${pointHeading}<div data-product-points data-point-count="${points.length}" style="display:${points.length===4?'grid;grid-template-columns:repeat(2,minmax(0,1fr))':'flex'};gap:16px;align-items:stretch;">${points.map((point,i)=>`<div style="flex:1;min-width:0;border:1px solid #e0e5dc;border-radius:12px;background:#f7f8f4;padding:28px 24px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">${sellingPointIcon(point,p)}<span style="font-size:17px;color:#6b785f;">${String(i+1).padStart(2,'0')}</span></div><h3 style="font-size:28px;line-height:1.6;margin:20px 0 18px;">${esc(point.title)}</h3><p style="font-size:24px;line-height:1.9;margin:0;color:#303d35;">${esc(point.description)}</p></div>`).join('')}</div></section>`;
+ if(points.length)body+=divider+`<section data-aida="interest" style="padding:72px 6%;">${pointHeading}<div data-product-points data-point-count="${points.length}" style="display:${points.length===4?'grid;grid-template-columns:repeat(2,minmax(0,1fr))':'flex'};gap:16px;align-items:stretch;">${points.map((point,i)=>`<div style="flex:1;min-width:0;border:1px solid #e0e5dc;border-radius:12px;background:#f7f8f4;padding:28px 24px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">${sellingPointIcon(point,p)}<span style="font-size:17px;color:#6b785f;">${String(i+1).padStart(2,'0')}</span></div><h3 style="font-size:28px;line-height:1.6;margin:20px 0 18px;">${esc(point.title)}</h3><p style="font-size:24px;line-height:1.9;margin:0;color:#303d35;">${esc(point.description)}</p></div>`).join('')}</div></section>`;
  body+=palette;
  if(groups.length){
   if(draft?.photoCount>0&&groups.some(group=>draft.colorSources?.[group.color]!=='official')){

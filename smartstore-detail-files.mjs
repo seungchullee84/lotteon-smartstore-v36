@@ -2,7 +2,7 @@ import {originalListingMain} from './smartstore-listing-images.mjs';
 import {findPhotos,resolveStylePhotoFolders} from './smartstore-photo-files.mjs';
 import {mannequinPhotoRegions,registerLongPhotoLayout} from './smartstore-long-photo-import.mjs';
 import {collectCaptionTones} from './smartstore-caption-tone.mjs';
-import {reviewSellingPoints,officialPointSource} from './smartstore-selling-point-review.mjs';
+import {reviewSellingPoints,officialPointSource,sellingPointsOmitted} from './smartstore-selling-point-review.mjs';
 import {importedPhotoSelection} from './smartstore-imported-selection.mjs';
 import {readFile,writeFile,mkdir,readdir,realpath,access,unlink} from 'node:fs/promises';
 import path from 'node:path';
@@ -39,17 +39,18 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
   if(draft.sellingPoints){if(!Array.isArray(draft.sellingPoints)||draft.sellingPoints.some(p=>!p.title||!p.description||!p.evidence))throw Error('소구점의 공식 확인 근거를 함께 저장해 주세요.');prepared.sellingPoints=draft.sellingPoints.slice(0,4);}
  }
  // Preview, export and upload must re-check the current official wording, too.
+ const omitPoints=await sellingPointsOmitted(product,dataRoot);prepared.omitSellingPoints=omitPoints;
  let sourceText=product.officialDetailText||product.officialDescription||'';
  try{const html=await readFile(path.join(folder,'smartstore-official.html'),'utf8');if(styleFromDetail(html)!==style)throw Error('소구점 원문의 공식 품번이 다릅니다.');sourceText=cheerio.load(html)('.prd_detail_content_gio').first().text().trim()||sourceText;}catch(error){if(error.code!=='ENOENT')throw error;}
  {
   let detailHash=null;try{detailHash=createHash('sha256').update(await readFile(path.join(folder,'detail.jpg'))).digest('hex');}catch(e){if(e.code!=='ENOENT')throw e;}
-  const checkedSource=await officialPointSource(product,folder,sourceText,{dataRoot});sourceText=checkedSource.text;
+  const checkedSource=omitPoints?{text:sourceText,imageChecked:false}:await officialPointSource(product,folder,sourceText,{dataRoot});sourceText=checkedSource.text;
   const review=await reviewSellingPoints(product,sourceText,{dataRoot,detailHash,existing:prepared.sellingPoints});
   prepared.sellingPoints=review.points;prepared.sellingPointReview={status:review.status,message:review.message||''};
   if(draft&&review.points.length){draft.sellingPoints=review.points;await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft,null,2));}
   prepared.sellingPointSource={style,sourceUrl:product.sourceUrl,textHash:createHash('sha256').update(sourceText).digest('hex'),detailHash,imageChecked:checkedSource.imageChecked};
  }
- if(!sourceText.trim()&&!prepared.sellingPoints.length){prepared.sellingPoints=[];prepared.sellingPointReview={status:'needs-review',message:'현재 공식 상세 원문을 확인해야 합니다.'};}
+ if(!omitPoints&&!sourceText.trim()&&!prepared.sellingPoints.length){prepared.sellingPoints=[];prepared.sellingPointReview={status:'needs-review',message:'현재 공식 상세 원문을 확인해야 합니다.'};}
  const attach=async(color,file,allowedRoot)=>{
   if(!product.colors.includes(color))throw Error('현재 상품에 없는 색상의 마네킨 컷입니다: '+color);
   const canonicalRoot=await realpath(allowedRoot),canonical=await realpath(file);
@@ -212,7 +213,7 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
  const videoOptions={...productVideoOptions(product),...options.videoOptions};
  await requireBrandVideo(options.dataRoot,videoOptions);
  const p=await prepareSmartstoreDetail(product,folder,options);const data=new Map();
- if(p.smartstoreDetail.sellingPoints.length<3)throw Error('소구점 최소 3개가 필요합니다. 공식 상세 원문에서 서로 다른 장점을 보완 확인해 주세요.');
+ if(!p.smartstoreDetail.omitSellingPoints&&p.smartstoreDetail.sellingPoints.length<3)throw Error('소구점 최소 3개가 필요합니다. 공식 상세 원문에서 서로 다른 장점을 보완 확인해 주세요.');
  const check=()=>{if(signal?.aborted)throw Error('상세페이지 만들기를 중단했습니다.');};check();
  for(const name of TEMPLATE_ASSET_NAMES.filter(n=>!n.endsWith('.ttf')))data.set(TEMPLATE_ASSET_BASE+name,'data:image/'+(name.endsWith('.png')?'png':'jpeg')+';base64,'+(await readFile(path.join(assetsRoot,name))).toString('base64'));
  for(const [key,src] of Object.entries(p.images)){

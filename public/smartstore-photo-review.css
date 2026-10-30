@@ -4,6 +4,10 @@
 #manualPhotoSelectionStatus{margin:0 0 4px;flex-basis:100%;font-size:20px;font-weight:700;color:#b94b00;line-height:1.65}
 #photoPointPicker{margin:16px 0;padding:14px;border:1px solid #bed4c5;border-radius:9px;background:#f6faf7}
 #photoPointPicker summary{cursor:pointer;font-size:18px;font-weight:700}
+#photoPointPicker label.point-omit{display:flex;flex-direction:row;justify-content:flex-start;gap:10px;align-items:center;padding:12px;font-weight:700}
+#photoPointOmit{width:18px;min-width:18px;height:18px;flex:none;margin:0}
+#manualPhotoReviewGrid .photo-main-choice{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-weight:700;color:#245d3d}
+#manualPhotoReviewGrid .photo-main-choice input{width:18px;height:18px;margin:0}
 #photoPointCandidates{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
 #photoPointCandidates label{display:flex;align-items:flex-start;gap:10px;padding:12px;background:white;border:1px solid #cbdcd0;border-radius:8px}
 #photoPointCandidates input{width:18px;min-width:18px;margin:4px 0}

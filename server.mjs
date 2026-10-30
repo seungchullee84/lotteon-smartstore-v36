@@ -213,8 +213,8 @@ const server=http.createServer(async(req,res)=>{
       if(url.pathname==='/api/smartstore-point-selection'){
         if(state.busy||b.channel!=='smartstore'||!state.product||b.style!==state.product.style)throw Error('현재 스마트스토어 상품과 작업 상태를 확인해 주세요.');
         const product=state.product,folder=state.folder;const selection=await savePointSelection(product,folder,b,{dataRoot});if(state.product?.style!==product.style||state.folder!==folder)throw Error('상품이 변경됐습니다.');
-        if(product.smartstoreDetail){product.smartstoreDetail.sellingPoints=selection.points;product.smartstoreDetail.sellingPointReview={status:'ready',message:'선택한 소구점 적용'};const listing=await listingPreview(product,{dataRoot});if(listing)state.photoPreparation=smartstorePreparationStatus(product,listing);}
-        state.revision++;await writeFile(path.join(folder,'product.json'),JSON.stringify(product,null,2));return json(res,200,{ok:true,count:selection.points.length,previewReady:!product.photoSelectionPending});
+        if(product.smartstoreDetail){product.smartstoreDetail.sellingPoints=selection.points;product.smartstoreDetail.omitSellingPoints=selection.omit===true;product.smartstoreDetail.sellingPointReview={status:'ready',message:'선택한 소구점 적용'};const listing=await listingPreview(product,{dataRoot});if(listing)state.photoPreparation=smartstorePreparationStatus(product,listing);}
+        state.revision++;await writeFile(path.join(folder,'product.json'),JSON.stringify(product,null,2));return json(res,200,{ok:true,count:selection.points.length,omitted:selection.omit===true,previewReady:!product.photoSelectionPending});
       }
       if(url.pathname==='/api/smartstore-photo-review-draft'){
         if(state.busy)throw Error('현재 작업이 끝난 뒤 선택을 저장해 주세요.');

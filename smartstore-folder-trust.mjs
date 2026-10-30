@@ -9,6 +9,7 @@ import {prepareSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {officialSellingPoints,usableSellingPoints} from './smartstore-selling-points.mjs';
 import {importedPhotoSelection} from './smartstore-imported-selection.mjs';
 import {savePhotoMappings} from './smartstore-photo-mapping-cache.mjs';
+import {selectedMainPhoto} from './smartstore-main-selection.mjs';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 export function careLabelText(text){
  const words=['제조국','제조연월','혼용률','취급주의','관리번호','LOT','MADE IN','폴리에스터','소비자상담'];
@@ -49,8 +50,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  signal?.throwIfAborted();
  const imported=null; // Every current folder file is authoritative.
  const active=p=>!imported||imported.get(p.color)?.includes(hash(p.bytes));
- const garments=reviewed.filter(p=>p.role!=='care-label'),main=garments.filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name));
- if(main.length!==1)throw Error('현재 품번 폴더에 대표사진 1.jpg 또는 1번.jpg 한 장을 지정해 주세요.');
+ const garments=reviewed.filter(p=>p.role!=='care-label'),main=[await selectedMainPhoto(garments,product,dataRoot)];main[0].mainSelected=true;
  let extras;
  if(product.colors.includes(main[0].color)){
   const frontColors=new Set(garments.filter(p=>p.role==='front').map(p=>p.color));frontColors.add(main[0].color);

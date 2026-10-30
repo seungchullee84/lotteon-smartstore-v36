@@ -2,6 +2,7 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {findPhotos} from './smartstore-photo-files.mjs';
+import {selectedMainPhoto} from './smartstore-main-selection.mjs';
 import {workingProductPhoto,PHOTO_WORK_VERSION} from './smartstore-photo-work.mjs';
 const hash=b=>createHash('sha256').update(b).digest('hex');
 function withOfficialMain(product,manifest){
@@ -12,7 +13,7 @@ function withOfficialMain(product,manifest){
  return {...manifest,extras:[{role:'official-main',color:'공식몰 대표사진',sourceName:'공식몰 대표사진',sourceUrl:source.href},...provided.slice(0,8)],detailRevision:hash(Buffer.from((manifest.detailRevision||'')+'|official-main-first-v1|'+source.href))};
 }
 export function chooseListingPhotos(photos,product){
- const main=photos.filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name||''));
+ const picked=photos.filter(p=>p.mainSelected===true),main=picked.length?picked:photos.filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name||''));
  if(main.length!==1)throw Error('품번 폴더에서 대표로 사용할 사진 한 장의 파일명을 1.jpg 또는 1번.jpg로 지정해 주세요.');
  const selected=main[0],same=p=>hash(p.bytes)===hash(selected.bytes);
  if(selected.role==='care-label'||!product.colors.includes(selected.color))throw Error('1번 대표사진의 상품·색상을 확인해 주세요. 케어라벨은 대표로 사용하지 않습니다.');
@@ -47,17 +48,15 @@ export async function listingPreview(product,options){
  return {main:{sourceName:main[0].name,color:'색상 대조 전'},extras:[],previewOnly:true};
 }
 export async function originalListingMain(product,options){
- const originals=(await findPhotos(product,options)).filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name));
- if(originals.length!==1)throw Error('바탕화면 상품등록기사진폴더의 해당 품번 폴더에서 1.jpg 또는 1번.jpg 한 장을 확인해 주세요.');
- return workingProductPhoto(originals[0],product,options);
+ const original=await selectedMainPhoto(await findPhotos(product,options),product,options.dataRoot||path.resolve('data'));
+ return workingProductPhoto(original,product,options);
 }
 export async function prepareListingImages(product,folder,{dataRoot,...photoOptions}){
  const manifest=await listingManifest(product,{dataRoot});if(!manifest)throw Error('대표·추가이미지 사진 선택을 먼저 준비해 주세요.');
  if(!manifest.main||!Array.isArray(manifest.extras)||manifest.extras.length>9)throw Error('스마트스토어 이미지 선택 자료를 확인해 주세요.');
  const photos=await findPhotos(product,{...photoOptions,dataRoot});
- const originals=photos.filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name||''));
- if(originals.length!==1)throw Error('품번 폴더의 원본 1.jpg 또는 1번.jpg 한 장을 확인해 주세요.');
- const main=await workingProductPhoto(originals[0],product,{dataRoot}),extras=[];
+ const original=await selectedMainPhoto(photos,product,dataRoot);
+ const main=await workingProductPhoto(original,product,{dataRoot}),extras=[];
  for(const entry of manifest.extras){
   if(entry.role==='official-main'){
    const collected=JSON.parse(await readFile(path.join(folder,'product.json'),'utf8'));

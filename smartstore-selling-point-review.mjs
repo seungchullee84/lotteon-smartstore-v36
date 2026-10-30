@@ -6,6 +6,7 @@ import {officialSellingPoints,usableSellingPoints,officialImageBenefitText} from
 import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 const digest=text=>createHash('sha256').update(text).digest('hex');
 const sourceJobs=new Map();
+export async function sellingPointsOmitted(product,dataRoot){try{const s=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'selling-point-selection.json'),'utf8'));return s.style===product.style&&s.sourceUrl===product.sourceUrl&&s.omit===true;}catch(e){if(e.code!=='ENOENT')throw e;return false;}}
 export async function officialPointSource(product,folder,pageText,{dataRoot=path.resolve('data'),signal,log,recognize}={}){
  if(!product.images?.detail)return {text:pageText,imageChecked:false,detailHash:null};
  let bytes;try{bytes=await readFile(path.join(folder,'detail.jpg'));}catch(e){if(e.code==='ENOENT')return {text:pageText,imageChecked:false,detailHash:null};throw e;}
@@ -32,6 +33,7 @@ export async function reviewSellingPoints(product,source,{dataRoot,detailHash=nu
  const identity={version:10,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
  const root=path.join(dataRoot,'smartstore-details',product.style),file=path.join(root,'selling-point-review.json');
  let selection;try{selection=JSON.parse(await readFile(path.join(root,'selling-point-selection.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+ if(selection?.sourceUrl===product.sourceUrl&&selection.omit===true)return {...identity,method:'user-omitted-points',points:[],omitted:true,status:'ready',message:'소구점 없이 제작'};
  if(selection?.sourceUrl===product.sourceUrl&&selection.detailHash===detailHash&&(detailHash||selection.textHash===digest(source))&&selection.points?.length>=3&&selection.points.length<=4&&usableSellingPoints(selection.points,source)){
   const record={...identity,method:'user-selected-official-points',points:selection.points,status:'ready',message:'사용자가 선택한 공식 근거 소구점 적용',reviewedAt:selection.selectedAt};await writeFile(file,JSON.stringify(record,null,2));return record;
  }

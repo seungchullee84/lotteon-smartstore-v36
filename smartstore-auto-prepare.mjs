@@ -14,7 +14,7 @@ import {prepareSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {chooseListingPhotos,saveListingSelection} from './smartstore-listing-images.mjs';
 import {prepareTrustedFolder} from './smartstore-folder-trust.mjs';
 import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
-import {officialPointSource} from './smartstore-selling-point-review.mjs';
+import {officialPointSource,sellingPointsOmitted} from './smartstore-selling-point-review.mjs';
 import {importedPhotoSelection} from './smartstore-imported-selection.mjs';
 import {readPhotoMappings,savePhotoMappings} from './smartstore-photo-mapping-cache.mjs';
 import {classifyLocalPhotos} from './smartstore-local-photo.mjs';
@@ -52,8 +52,9 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
  if(!html){const response=await fetchImpl(product.sourceUrl,{signal,redirect:'error'});if(!response.ok)throw Error('공식 상품 소개를 가져오지 못했습니다.');html=await response.text();}
  assertAdultProductPage(html,product.sourceUrl);
  let description=officialDescription(html,product);
- description=(await officialPointSource(product,folder,description,{dataRoot,signal,log})).text;
- if(!description.trim())throw Error('공식 상세 원문을 확인하지 못했습니다. 상세이미지의 소구점을 확인해 주세요.');
+ const omitPoints=await sellingPointsOmitted(product,dataRoot);
+ if(!omitPoints)description=(await officialPointSource(product,folder,description,{dataRoot,signal,log})).text;
+ if(!omitPoints&&!description.trim())throw Error('공식 상세 원문을 확인하지 못했습니다. 상세이미지의 소구점을 확인해 주세요.');
  const detailHash=product.images.detail?hash(await readFile(path.join(folder,'detail.jpg'))):null;
  const root=path.join(dataRoot,'smartstore-details',product.style);await mkdir(root,{recursive:true});
  let old;try{old=JSON.parse(await readFile(path.join(root,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
