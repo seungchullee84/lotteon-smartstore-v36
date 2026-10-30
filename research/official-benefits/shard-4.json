@@ -496,8 +496,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T00:41:56.694Z",
-      "analyzedAt": "2026-10-30T00:43:32.637Z"
+      "observedAt": "2026-10-30T01:13:30.993Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -732,8 +732,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-30T00:42:20.056Z",
-      "analyzedAt": "2026-10-30T00:43:32.916Z"
+      "observedAt": "2026-10-30T01:13:49.134Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1059,8 +1059,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T00:41:40.232Z",
-      "analyzedAt": "2026-10-30T00:43:32.414Z"
+      "observedAt": "2026-10-30T01:13:17.824Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1087,8 +1087,8 @@
       "points": [],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T00:42:16.472Z",
-      "analyzedAt": "2026-10-30T00:43:32.896Z"
+      "observedAt": "2026-10-30T01:13:46.260Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1557,15 +1557,15 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "dbbeb632458ec96d70cd7c504bcfe46016eadf792d13820174f6b9dccf81e795",
+      "pageHash": "1745eea40f4655e44cad034a34f9f321e94e45c0698ebbf1b703041401765555",
       "pageText": "",
       "imageText": "",
       "imageScanComplete": false,
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-30T00:42:27.065Z",
-      "analyzedAt": "2026-10-30T00:43:33.045Z"
+      "observedAt": "2026-10-30T01:13:55.630Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
