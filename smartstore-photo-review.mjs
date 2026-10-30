@@ -1,15 +1,16 @@
-import {readFile,writeFile,mkdir,stat} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,stat,rename} from 'node:fs/promises';
 import path from 'node:path';
-import {createHash} from 'node:crypto';
+import {createHash,randomUUID} from 'node:crypto';
 import {findPhotos} from './smartstore-photo-files.mjs';
 import {readPhotoMappings,savePhotoMappings} from './smartstore-photo-mapping-cache.mjs';
 import {saveCareLabelSelection} from './smartstore-care-label.mjs';
 import sharp from 'sharp';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const inventories=new Map(),thumbnails=new Map();
-const inventoryKey=(p,{dataRoot,photoRoots,desktop})=>JSON.stringify([path.resolve(dataRoot),p.style,p.sourceUrl,photoRoots,desktop]);
+const inventoryKey=(p,{dataRoot,photoRoots,desktop})=>JSON.stringify([path.resolve(dataRoot),p.style,p.sourceUrl,p.colors,photoRoots,desktop]);
 const stamp=s=>s.size+':'+s.mtimeMs+':'+s.ctimeMs;
 const roles=new Set(['front','back','side','detail','care-label','excluded']);
+const selectionFile=(dataRoot,p)=>{if(!/^\d{6}$/.test(p.style))throw Error('사진 품번을 확인해 주세요.');return path.join(dataRoot,'smartstore-photo-review-drafts',p.style+'.json');};
 async function draftFor(dataRoot,p){try{const d=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',p.style,'draft.json'),'utf8'));return d.sourceUrl===p.sourceUrl?d:{};}catch(e){if(e.code!=='ENOENT')throw e;return {};}}
 export async function photoReview(product,{dataRoot,...options}){
  const photos=await findPhotos(product,{...options,dataRoot,includeExcluded:true}),draft=await draftFor(dataRoot,product),saved=await readPhotoMappings(dataRoot,product);
@@ -17,7 +18,18 @@ export async function photoReview(product,{dataRoot,...options}){
  inventories.delete(key);inventories.set(key,inventory);while(inventories.size>3)inventories.delete(inventories.keys().next().value);
  const items=photos.map(p=>{const id=hash(p.bytes),mapping=saved.find(r=>r.hash===id&&r.reviewed)||draft.photoMapping?.files?.find(r=>r.hash===id);const care=draft.careLabels?.some(r=>r.sourceHash===id);return {id:p.id,hash:id,name:p.name,main:/^1(?:번)?\.(jpe?g|png|webp)$/i.test(p.name),color:mapping?.color||'',role:care?'care-label':roles.has(mapping?.role)?mapping.role:'',reviewed:!!mapping?.reviewed};});
  const revision=hash(JSON.stringify([product.style,product.sourceUrl,product.colors,items.map(p=>[p.id,p.name])]));
- return {style:product.style,sourceUrl:product.sourceUrl,colors:product.colors,revision,items};
+ let selection;try{selection=JSON.parse(await readFile(selectionFile(dataRoot,product),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+ const match=selection?.sourceUrl===product.sourceUrl&&selection.revision===revision;
+ if(match)for(const item of items){const saved=selection.items.find(i=>i.id===item.id);if(saved&&(saved.color===''||product.colors.includes(saved.color))&&(saved.role===''||roles.has(saved.role))){item.color=saved.color;item.role=saved.role;}}
+ const result={style:product.style,sourceUrl:product.sourceUrl,colors:product.colors,revision,items,selectionSavedAt:match?selection.savedAt:null};inventory.review=result;return result;
+}
+export async function savePhotoReviewDraft(product,input,options){
+ const current=inventories.get(inventoryKey(product,options))?.review||await photoReview(product,options);
+ if(input.channel!=='smartstore'||input.style!==current.style||input.sourceUrl!==current.sourceUrl||input.revision!==current.revision)throw Error('상품 또는 사진 폴더가 변경됐습니다. 다시 열어 주세요.');
+ if(!Array.isArray(input.items)||input.items.length!==current.items.length)throw Error('사진 선택 목록을 다시 확인해 주세요.');
+ const ids=new Set();for(const i of input.items){if(ids.has(i.id)||!current.items.some(p=>p.id===i.id)||(i.color!==''&&!current.colors.includes(i.color))||(i.role!==''&&!roles.has(i.role)))throw Error('사진 선택 값을 확인해 주세요.');ids.add(i.id);}
+ const file=selectionFile(options.dataRoot,product),temporary=file+'.'+randomUUID()+'.tmp',savedAt=new Date().toISOString();
+ await mkdir(path.dirname(file),{recursive:true});await writeFile(temporary,JSON.stringify({style:product.style,sourceUrl:product.sourceUrl,revision:current.revision,savedAt,items:input.items.map(({id,color,role})=>({id,color,role}))},null,2));await rename(temporary,file);return {savedAt};
 }
 export async function photoReviewThumbnail(product,id,options){
  const key=inventoryKey(product,options);if(!inventories.has(key))await photoReview(product,options);

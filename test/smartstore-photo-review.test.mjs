@@ -4,7 +4,7 @@ import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import sharp from 'sharp';
-import {photoReview,savePhotoReview,validatePhotoReview,photoReviewThumbnail} from '../smartstore-photo-review.mjs';
+import {photoReview,savePhotoReview,validatePhotoReview,photoReviewThumbnail,savePhotoReviewDraft} from '../smartstore-photo-review.mjs';
 import {readPhotoMappings} from '../smartstore-photo-mapping-cache.mjs';
 import {findPhotos} from '../smartstore-photo-files.mjs';
 
@@ -32,5 +32,18 @@ test('미리보기는 재사용하되 원본 변경·삭제 후 이전 이미지
   const image=color=>sharp({create:{width:800,height:1200,channels:3,background:color}}).jpeg().toBuffer();await writeFile(file,await image('black'));
   let review=await photoReview(p,options);const id=review.items[0].id,first=await photoReviewThumbnail(p,id,options);assert.equal((await sharp(first).metadata()).width,400);assert.strictEqual(await photoReviewThumbnail(p,id,options),first);
   await writeFile(file,await image('white'));assert.equal(await photoReviewThumbnail(p,id,options),null);review=await photoReview(p,options);assert.notEqual(review.items[0].id,id);assert(await photoReviewThumbnail(p,review.items[0].id,options));await rm(file);assert.equal(await photoReviewThumbnail(p,review.items[0].id,options),null);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
+
+test('색상만 선택한 중간 상태도 저장·복원하며 템플릿용 확정 연결을 만들지 않는다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'review-draft-')),dataRoot=path.join(root,'data'),folder=path.join(root,'photos');await mkdir(folder);
+ const p={style:'115927',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=draft',colors:['01블랙','02그레이']},options={dataRoot,photoRoots:[folder]};
+ try{
+  await writeFile(path.join(folder,'1.jpg'),await sharp({create:{width:80,height:120,channels:3,background:'black'}}).jpeg().toBuffer());
+  const current=await photoReview(p,options),input={...current,channel:'smartstore',items:current.items.map(i=>({...i,color:'02그레이',role:''}))};await savePhotoReviewDraft(p,input,options);
+  const reopened=await photoReview(p,options);assert.equal(reopened.items[0].color,'02그레이');assert.equal(reopened.items[0].role,'');assert(reopened.selectionSavedAt);assert.equal((await readPhotoMappings(dataRoot,p)).length,0);
+  await assert.rejects(savePhotoReviewDraft(p,{...input,channel:'lotte'},options));await assert.rejects(savePhotoReviewDraft(p,{...input,sourceUrl:p.sourceUrl+'other'},options));
+  await assert.rejects(savePhotoReview(p,input,options),/색상과 구도/);
+  await writeFile(path.join(folder,'1.jpg'),await sharp({create:{width:80,height:120,channels:3,background:'white'}}).jpeg().toBuffer());const changed=await photoReview(p,options);assert.equal(changed.items[0].color,'');assert.equal(changed.selectionSavedAt,null);
  }finally{await rm(root,{recursive:true,force:true});}
 });

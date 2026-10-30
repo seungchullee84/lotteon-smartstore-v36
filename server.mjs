@@ -1,5 +1,5 @@
 import {smartstorePreparationStatus} from './smartstore-preparation-status.mjs';
-import {photoReview,savePhotoReview,photoReviewThumbnail} from './smartstore-photo-review.mjs';
+import {photoReview,savePhotoReview,photoReviewThumbnail,savePhotoReviewDraft} from './smartstore-photo-review.mjs';
 import {listTwoChoicePackages,readTwoChoicePackage,saveTwoChoicePackage,twoChoiceUploadParts} from './smartstore-two-choice-store.mjs';
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {applyImportedPhotos,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
@@ -193,6 +193,11 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='POST'){
       const b=await body(req);
       requireChannel(url.pathname.slice(5),b.channel);
+      if(url.pathname==='/api/smartstore-photo-review-draft'){
+        if(state.busy)throw Error('현재 작업이 끝난 뒤 선택을 저장해 주세요.');
+        if(b.channel!=='smartstore'||!state.product||b.style!==state.product.style||b.sourceUrl!==state.product.sourceUrl)throw Error('현재 스마트스토어 상품을 확인해 주세요.');
+        return json(res,200,{ok:true,...await savePhotoReviewDraft(state.product,b,{dataRoot})});
+      }
       if(state.product?.photoSelectionPending&&['/api/smartstore-detail-only','/api/smartstore-two-choice-upload'].includes(url.pathname))throw Error('사진을 먼저 선택하고 템플릿·추가이미지에 반영해 주세요.');
       if(url.pathname==='/api/smartstore-photo-review'){
         if(b.channel!=='smartstore'||!state.product||b.style!==state.product.style||b.sourceUrl!==state.product.sourceUrl)throw Error('스마트스토어의 현재 상품을 확인해 주세요.');
