@@ -25,3 +25,5 @@ test('소구점 생략·근거 부족은 상품명으로 대체하고 다른 상
  assert.throws(()=>buildSmartstoreDetail({...product,detailTemplate:2,smartstoreDetail:{...product.smartstoreDetail,style:'654321'}}),/다른 품번/);
  const a=smartstoreDetailDocument({...product,detailTemplate:2},{includeVideo:false});assert(!a.html.includes('<video '));assert(a.html.includes('data-brand-video-heading'));
 });
+
+test('템플릿2 상단은 공식 로고 두 개와 성별만 유지하고 품번은 별도 STYLE NO에 표시한다',()=>{for(const [gender,label] of [['여성','WOMEN'],['남성','MEN']]){const $=load(buildSmartstoreDetail({...product,gender,detailTemplate:2}).html);assert.equal($('.ss2-header [data-giordano-logo] img').length,1);assert.equal($('.ss2-header [data-lotte-logo] img').length,1);assert.equal($('.ss2-meta').text(),label);assert(!$('.ss2-header').text().includes(product.style));assert($('[data-style-number]').text().includes(product.style));}});
