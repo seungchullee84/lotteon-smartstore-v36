@@ -6826,6 +6826,13 @@
       ]
     },
     {
+      "pno": "B2220A4899B1779A89CB042380048E96",
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=B2220A4899B1779A89CB042380048E96&ctype=1",
+      "categories": [
+        "여성 ALL"
+      ]
+    },
+    {
       "pno": "B233DE520F8DF7332776900A935C66A1",
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=B233DE520F8DF7332776900A935C66A1&ctype=1",
       "categories": [
@@ -10037,7 +10044,7 @@
   "withThreeOrFour": 444,
   "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-30T01:48:11.215Z",
+  "updatedAt": "2026-10-30T02:09:02.991Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-30T01:47:16.337Z",
@@ -18680,7 +18687,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           }
         ]
       },
@@ -18811,7 +18818,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -18859,7 +18866,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -19376,7 +19383,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -19424,7 +19431,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20031,7 +20038,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
