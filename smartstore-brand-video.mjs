@@ -8,7 +8,7 @@ export const BRAND_VIDEO_HASH='de5190da3e0320e926d4a5393451210420cf8a032df1a4ea3
 export const BRAND_VIDEO_URL='/smartstore-brand-video.mp4?v='+BRAND_VIDEO_HASH.slice(0,16);
 export const BRAND_VIDEO_FILENAME='common.mp4';
 export const BRAND_VIDEO_TITLE='GIORDANO BRAND 26 F/W FILM';
-export const BRAND_VIDEO_HEADING_HEIGHT=88;
+export const BRAND_VIDEO_HEADING_HEIGHT=176;
 export const WOMEN_VIDEO_HASH='fe6e9b1ba13962a619459029971c21495b9682fb1b8d5e4feba6475fac7625b9';
 export function productVideoOptions(product){
  const gender=String(product?.gender||'').trim();
@@ -30,10 +30,10 @@ export async function requireBrandVideo(dataRoot,{expectedHash=BRAND_VIDEO_HASH,
 }
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function brandVideoHeadingHtml(){
- return `<section data-brand-video-heading style="height:${BRAND_VIDEO_HEADING_HEIGHT}px;display:flex;align-items:center;justify-content:center;background:#f4f3ec;text-align:center;"><h2 style="font-size:30px;line-height:1.5;font-weight:700;margin:0;">${BRAND_VIDEO_TITLE}</h2></section>`;
+ return `<section data-brand-video-heading style="height:${BRAND_VIDEO_HEADING_HEIGHT}px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px 28px;background:#171b20;color:#fff;text-align:center;"><p style="font-size:17px;letter-spacing:3px;margin:0;color:#c4c9ce;">GIORDANO FILM</p><h2 style="font-size:34px;line-height:1.5;font-weight:700;margin:0;">영상으로 만나는 지오다노</h2><p style="font-size:18px;line-height:1.5;margin:0;color:#c4c9ce;">${BRAND_VIDEO_TITLE}</p></section>`;
 }
 export function brandVideoHtml(src=BRAND_VIDEO_URL){
- return brandVideoHeadingHtml()+`<section data-brand-video="mp4" style="padding:0 28px 28px;background:#f4f3ec;"><video src="${escape(src)}" title="지오다노 공통 브랜드 영상" controls autoplay muted loop playsinline preload="metadata" width="720" height="1280" style="display:block;width:100%;max-width:540px;height:auto;aspect-ratio:9/14;object-fit:contain;margin:0 auto;background:#f4f3ec;"></video></section>`;
+ return brandVideoHeadingHtml()+`<section data-brand-video="mp4" style="padding:0 28px 40px;background:#171b20;"><video src="${escape(src)}" title="지오다노 공통 브랜드 영상" controls autoplay muted loop playsinline preload="metadata" width="720" height="1280" style="display:block;width:100%;max-width:680px;height:auto;object-fit:contain;margin:0 auto;background:#171b20;"></video></section>`;
 }
 export async function exportBrandVideo(stem,dataRoot,videoOptions){
  const {file,sha256}=await requireBrandVideo(dataRoot,videoOptions);const output=stem+'_브랜드영상.mp4';
