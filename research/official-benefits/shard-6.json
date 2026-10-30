@@ -1954,8 +1954,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-30T08:07:36.835Z",
-      "analyzedAt": "2026-10-30T08:12:01.589Z"
+      "observedAt": "2026-10-30T08:38:58.097Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
