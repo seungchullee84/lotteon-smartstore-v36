@@ -10,3 +10,7 @@ test('두 템플릿 모두 브랜드 소개 없이 동영상을 고를 때 확�
   for(let i=1;i<order.length;i++)assert(html.indexOf(order[i-1])<html.indexOf(order[i]));
  }
 });
+
+test('브랜드 소개 파일 없이도 실제 영상 좌표에서 PNG를 분할한다',async()=>{
+ const {mkdtemp,rm}=await import('node:fs/promises'),{tmpdir}=await import('node:os'),path=await import('node:path'),sharp=(await import('sharp')).default;const {smartstoreUploadParts}=await import('../smartstore-detail-upload.mjs');const folder=await mkdtemp(path.join(tmpdir(),'video-only-'));try{const png=path.join(folder,'detail.png');await sharp({create:{width:860,height:2200,channels:3,background:'white'}}).png().toFile(png);const result=await smartstoreUploadParts(png,folder,path.join(folder,'removed-brand.jpg'),{includeVideo:false,brandIntroHeight:0,videoAfterTop:600,officialTop:1200,bannerTop:1700,footerTop:1900});assert.equal((await sharp(result.files[0]).metadata()).height,600);let total=0;for(const file of result.files)total+=(await sharp(file).metadata()).height;assert.equal(total,2200);assert.equal(result.videoAfterIndex,0);}finally{await rm(folder,{recursive:true,force:true});}
+});
