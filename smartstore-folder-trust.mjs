@@ -31,6 +31,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
    signal?.throwIfAborted();const digest=hash(p.bytes),matches=mapped.filter(m=>hash(m.bytes)===digest),mappedPrior=known.get(p.name+'|'+digest)||(matches.length===1?matches[0]:undefined);const prior=mappedPrior?.reviewed===true||mappedPrior?.automatic?mappedPrior:old?.photoMapping?.files?.find(r=>r.name===p.name&&r.hash===digest&&r.role!=='provided'&&r.automatic!==true)||mappedPrior;
    let cachedLabel=false;
    try{const cached=JSON.parse(await readFile(path.join(dataRoot,'smartstore-photo-label-cache',digest+'.json'),'utf8'));cachedLabel=cached?.version===1&&cached.label===true;}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
+   if(prior?.reviewed===true&&product.colors.includes(prior.color)&&['front','back','side','detail'].includes(prior.role)){reviewed.push({...p,...prior,name:p.name,file:p.file,bytes:p.bytes});continue;}
    if(cachedLabel||prior?.role==='care-label'||isCareLabelPhoto(p,old)){reviewed.push({...p,color:'',role:'care-label'});continue;}
    if(prior&&prior.role!=='provided'&&!prior.automatic){const code=prior.source==='seller-detail'&&p.name.match(/^기존상품_(\d{2})_/)?.[1];const color=code&&product.colors.find(c=>c.startsWith(code));reviewed.push({...p,color:color||prior.color,role:prior.role,...(prior.reviewed===true?{reviewed:true,reviewedAt:prior.reviewedAt,reviewBasis:prior.reviewBasis,reviewedBy:prior.reviewedBy}:{})});continue;}
    const parent=path.basename(path.dirname(p.file)).replace(/\s+/g,'').toLowerCase();

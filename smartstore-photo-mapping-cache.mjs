@@ -2,8 +2,8 @@ import {readFile,writeFile,mkdir,rename} from 'node:fs/promises';
 import {randomUUID} from 'node:crypto';
 import path from 'node:path';
 
-const roles=new Set(['front','side','back','detail']);
-const valid=(p,r)=>/^[a-f0-9]{64}$/.test(r?.hash||'')&&p.colors.includes(r.color)&&roles.has(r.role);
+const roles=new Set(['front','side','back','detail','care-label']);
+const valid=(p,r)=>/^[a-f0-9]{64}$/.test(r?.hash||'')&&roles.has(r.role)&&(r.role==='care-label'?r.color==='':p.colors.includes(r.color));
 function cacheFile(dataRoot,p){
  if(!/^\d{6}$/.test(p.style))throw Error('사진 연결 품번을 확인해 주세요.');
  return path.join(dataRoot,'smartstore-photo-mappings',p.style+'.json');
