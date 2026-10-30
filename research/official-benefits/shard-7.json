@@ -282,8 +282,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-30T05:21:54.977Z",
-      "analyzedAt": "2026-10-30T05:33:54.662Z"
+      "observedAt": "2026-10-30T05:55:43.251Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -315,8 +315,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T05:21:44.944Z",
-      "analyzedAt": "2026-10-30T05:33:54.459Z"
+      "observedAt": "2026-10-30T05:55:30.304Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -497,7 +497,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "f091dcfc69cab8cf2a0958212dbc53eade271c82a75f332e97c6be488ae25ac1",
+      "pageHash": "0e26217d188dfbfb9f74bde5f18c39b166d9857523dcc68ae58bb0a856ec5f34",
       "pageText": "세미 와이드 핏으로 힙과 허벅지에 여유를 주어 편안한 착용감을 제공합니다.\n\n밑단까지 자연스럽게 떨어지는 균형 잡힌 라인과 전면 턱(플리츠) 디테일이 어우러져 코듀로이 특유의 질감을 한층 돋보이게 합니다. 모던하면서도 클래식한 분위기가 특징이며, 다양한 스타일링에 손쉽게 활용할 수 있습니다.\n\n코튼 100%의 8골 코듀로이 원단으로 제작되어 밀도 높은 조직감과 뛰어난 내구성을 갖추었습니다. 워싱 공정을 거쳐 세탁 시 수축을 최소화했으며, 부드럽고 따뜻한 터치감으로 차가운 날에도 포근한 착용감을 제공합니다. 또한 컬러와 매치된 YKK 지퍼를 사용해 디테일까지 높은 완성도를 더했습니다.\n\n* 01045907 남자 코듀로이 셔켓 제품과 셋업으로 연출 가능합니다.\n* 원단 특성 상 눌림 자국과 폴리백 자국이 구김/얼룩 처럼 보일 수 있으나 이는 불량이 아니며 스팀 다림질로 쉽게 제거됩니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -520,8 +520,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-30T05:21:52.256Z",
-      "analyzedAt": "2026-10-30T05:33:54.633Z"
+      "observedAt": "2026-10-30T05:55:40.073Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2252,8 +2252,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T05:21:59.318Z",
-      "analyzedAt": "2026-10-30T05:33:54.737Z"
+      "observedAt": "2026-10-30T05:55:46.567Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2411,8 +2411,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T05:22:16.773Z",
-      "analyzedAt": "2026-10-30T05:33:54.963Z"
+      "observedAt": "2026-10-30T05:56:05.527Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2975,8 +2975,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T05:22:00.147Z",
-      "analyzedAt": "2026-10-30T05:33:54.742Z"
+      "observedAt": "2026-10-30T05:55:48.111Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3513,8 +3513,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-30T05:21:35.116Z",
-      "analyzedAt": "2026-10-30T05:33:54.307Z"
+      "observedAt": "2026-10-30T05:55:20.489Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3551,8 +3551,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T05:22:16.746Z",
-      "analyzedAt": "2026-10-30T05:33:54.959Z"
+      "observedAt": "2026-10-30T05:56:04.805Z",
+      "analyzedAt": null
     }
   ]
 }
