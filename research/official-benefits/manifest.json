@@ -5503,6 +5503,13 @@
       ]
     },
     {
+      "pno": "9226CD8692FDDE96E68695FCE3F4D299",
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=9226CD8692FDDE96E68695FCE3F4D299&ctype=1",
+      "categories": [
+        "남성 ALL"
+      ]
+    },
+    {
       "pno": "922A252AF82A01791D9EDA1DF62A5D39",
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=922A252AF82A01791D9EDA1DF62A5D39&ctype=1",
       "categories": [
@@ -5514,6 +5521,13 @@
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=922BEF8CB435BADB8DBC882B084AC5BC&ctype=1",
       "categories": [
         "남성 ALL"
+      ]
+    },
+    {
+      "pno": "922C880F024161B6DF70AA90C1E14DEA",
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=922C880F024161B6DF70AA90C1E14DEA&ctype=1",
+      "categories": [
+        "여성 ALL"
       ]
     },
     {
@@ -6317,6 +6331,13 @@
     {
       "pno": "A7271CDBB3699B2B4CA61F3CDA0B78D6",
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=A7271CDBB3699B2B4CA61F3CDA0B78D6&ctype=1",
+      "categories": [
+        "여성 ALL"
+      ]
+    },
+    {
+      "pno": "A75BB7D319DE8EA22CADAC3A17DAE28F",
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=A75BB7D319DE8EA22CADAC3A17DAE28F&ctype=1",
       "categories": [
         "여성 ALL"
       ]
@@ -10014,9 +10035,9 @@
   "sourceComplete": 1422,
   "imageComplete": 1357,
   "withThreeOrFour": 444,
-  "phase": "discover",
+  "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-30T01:14:50.832Z",
+  "updatedAt": "2026-10-30T01:36:01.930Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-30T01:14:33.700Z",
@@ -18647,7 +18668,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           }
         ]
       },
@@ -18766,7 +18787,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -18790,7 +18811,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -18802,7 +18823,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -18814,7 +18835,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -19331,7 +19352,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -19355,7 +19376,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -19367,7 +19388,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -19379,7 +19400,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -19601,7 +19622,7 @@
             "changes": [
               "공식 상세이미지 변경"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "new",
