@@ -30,6 +30,10 @@ export function sourceBenefitRecipes(source){
   {id:'washed-colour',pattern:/가먼트\s*워싱\s*공정을?\s*더해\s*코듀로이\s*특유의\s*깊이감?\s*있는\s*색감과\s*빈티지한\s*워싱감\s*구현/,title:'깊은 색감으로 멋스럽게',description:'자연스러운 워싱감으로 다양한 코디에 활용.',covered:/워싱.*색감|빈티지|깊은.*색감/},
   {id:'neck-shape',pattern:/스판사(?:를?\s*사용한)?\s*넥라인\s*바인딩[^.]{0,55}?(?:형태\s*변형\s*최소화|늘어남[^.]{0,15}최소화)/,title:'목선은 깔끔하고 탄탄하게',description:'넥라인 형태 변형을 줄여 깔끔한 실루엣.',covered:/넥라인.*형태|목선.*탄탄|형태.*변형/},
  ];
- for(const rule of rules){const match=text.match(rule.pattern);if(match)points.push({id:rule.id,title:rule.title,description:rule.description,evidence:match[0],covered:rule.covered});}
+ for(const rule of rules){const match=text.match(rule.pattern);if(!match)continue;
+  const start=text.lastIndexOf('.',match.index)+1,next=text.indexOf('.',match.index+match[0].length),sentence=text.slice(start,next<0?undefined:next);
+  if(/없(?:는|습니다|음)|아닌|아닙니다|미확인|확인\s*필요|추정|(?:갖추|제공|보장)지\s*않/.test(sentence))continue;
+  points.push({id:rule.id,title:rule.title,description:rule.description,evidence:match[0],covered:rule.covered});
+ }
  return points;
 }

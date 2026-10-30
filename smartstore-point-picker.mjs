@@ -3,6 +3,8 @@ import {createHash,randomUUID} from 'node:crypto';import path from 'node:path';
 import {officialPointSource} from './smartstore-selling-point-review.mjs';
 import {officialSellingPoints,usableSellingPoints} from './smartstore-selling-points.mjs';
 const hash=value=>createHash('sha256').update(value).digest('hex');
+const benefitTopics=[/부드|소프트|촉감|터치/,/편안|편하게|여유|넉넉/,/스타일링|코디|매치|레이어드/,/내구|오래\s*입/,/흡습|속건|통기|쾌적/,/보온|따뜻|포근/,/조절/,/수납|포켓/,/신축|유연|움직임/,/가벼|가볍|경량/,/수축|변형|워싱/];
+const topics=point=>benefitTopics.flatMap((pattern,index)=>pattern.test(point.title+' '+point.description)?[index]:[]);
 export async function pointPicker(product,folder,{dataRoot,sourceOverride}={}){
  const source=sourceOverride||await officialPointSource(product,folder,product.officialDescription||'',{dataRoot});
  const text=source.text,detailHash=source.detailHash||null;
@@ -12,7 +14,14 @@ export async function pointPicker(product,folder,{dataRoot,sourceOverride}={}){
   let reviewed;try{reviewed=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,name),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
   if(reviewed?.style===product.style&&reviewed.sourceUrl===product.sourceUrl&&reviewed.detailHash===detailHash&&usableSellingPoints(reviewed.points,text))seed.push(...reviewed.points);
  }
- const pool=[];for(const p of [...seed,...officialSellingPoints(text,{limit:5})])if(!pool.some(q=>q.title===p.title||q.description===p.description||q.evidence===p.evidence))pool.push(p);
+ const pool=[];
+ for(const p of seed)if(!pool.some(q=>q.title===p.title||q.description===p.description||q.evidence===p.evidence))pool.push(p);
+ for(const p of officialSellingPoints(text,{limit:5})){
+  if(pool.some(q=>q.title===p.title||q.description===p.description||q.evidence===p.evidence))continue;
+  const kinds=topics(p),covered=new Set(pool.flatMap(topics));
+  if(kinds.length&&kinds.every(kind=>covered.has(kind)))continue;
+  pool.push(p);
+ }
  const candidates=pool.slice(0,5).map(point=>({...point,id:hash(JSON.stringify(point)).slice(0,20)}));
  let selected;try{selected=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'selling-point-selection.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  const valid=selected?.sourceUrl===product.sourceUrl&&selected.detailHash===detailHash&&(detailHash||selected.textHash===identity.textHash);
