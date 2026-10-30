@@ -1,3 +1,4 @@
+import {load} from 'cheerio';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
@@ -17,14 +18,14 @@ test('두 템플릿 팔레트는 확인된 정면만 표시하고 다른 사진�
   const p={...product,detailTemplate,smartstoreDetail:{style:product.style,acceptAllFolderPhotos:true,colorImages:{'01핑크':['/smartstore-photo/side','/smartstore-photo/front'],'02화이트':['/smartstore-photo/closeup']},paletteImages:{'01핑크':'/smartstore-photo/front'}}};
   const html=buildSmartstoreDetail(p).html,palette=html.match(/<div data-color-palette[\s\S]*?<\/div>/)?.[0];
   assert(palette);assert.match(palette,/smartstore-photo\/front/);assert.doesNotMatch(palette,/smartstore-photo\/(side|closeup)/);
-  assert.match(html,/smartstore-photo\/side/);assert.match(html,/smartstore-photo\/closeup/);assert.match(html,/취향에 맞춰, 2가지/);assert.match(html,/data-palette-photo-pending/);assert.match(html,/02화이트/);
+  assert.match(html,/smartstore-photo\/side/);assert.match(html,/smartstore-photo\/closeup/);if(detailTemplate===1)assert.match(html,/취향에 맞춰, 2가지/);assert.match(html,/data-palette-photo-pending/);assert.match(html,/02화이트/);
  }
 });
 
 test('기본 템플릿1과 명시적으로 선택한 템플릿2는 독립적으로 보존한다',()=>{
  const base={...product,detailTemplate:undefined},one=buildSmartstoreDetail(base),two=buildSmartstoreDetail({...base,detailTemplate:2});
  assert.equal(one.templateVariant,1);assert.equal(one.templateLabel,'템플릿 1');assert(one.html.indexOf('data-product-intro')<one.html.indexOf('data-official-detail'));assert(!one.html.includes('data-brand-intro'));assert(one.html.indexOf('data-brand-video-heading')<one.html.indexOf('data-store-banner'));assert(!one.html.includes('data-aida-action'));
- assert.equal(two.templateVariant,2);assert.equal(two.templateLabel,'템플릿 2');assert(two.html.indexOf('data-product-intro')<two.html.indexOf('data-brand-video-heading'));assert(one.html.includes('data-aida="attention"'));assert(two.html.includes('data-intro-layout="title-and-benefits"'));assert(!two.html.includes('data-aida-action'));
+ assert.equal(two.templateVariant,2);assert.equal(two.templateLabel,'템플릿 2');assert(two.html.indexOf('data-product-intro')<two.html.indexOf('data-brand-video-heading'));assert(one.html.includes('data-aida="attention"'));assert(two.html.includes('data-intro-layout="benefit-and-mannequin"'));assert(!two.html.includes('data-aida-action'));
  assert.throws(()=>buildSmartstoreDetail({...base,detailTemplate:3}),/템플릿 1 또는 2/);
 });
 
@@ -114,15 +115,6 @@ test('색상 팔레트는 한 줄 최대 4개로 표시하며 상세 사진 네 
 });
 
 
-test('템플릿2 상단은 사진 없이 제목 중심, 템플릿1은 현재 마네킹을 사용한다',()=>{
- const hero='/smartstore-photo/'+'a'.repeat(24);
- for(const detailTemplate of [1,2]){
-  const p={...product,detailTemplate,images:{...product.images,main:'https://www.giordano.co.kr/official-main.jpg'},smartstoreDetail:{style:product.style,heroImage:hero,colorImages:{},sellingPoints:[]}};
-  const html=buildSmartstoreDetail(p).html;
-  if(detailTemplate===1)assert.match(html,/data-product-hero/);else assert.doesNotMatch(html,/data-product-hero/);
-  if(detailTemplate===1)assert.match(html,new RegExp('src="'+hero+'"'));
-  assert.doesNotMatch(html,/src="https:\/\/www.giordano.co.kr\/official-main.jpg"/);
-  const changed=buildSmartstoreDetail({...p,smartstoreDetail:{...p.smartstoreDetail,heroImage:hero.replace(/a/g,'b')}}).html;
-  if(detailTemplate===1)assert.notEqual(html,changed,'대표 마네킹 변경 시 렌더 캐시 입력도 달라진다');else assert.equal(html,changed,'사진 없는 상단은 마네킹 메인 변경에 영향받지 않는다');
- }
+test('두 템플릿은 현재 선택한 매장 대표사진을 사용하고 변경하면 캐시 입력도 바뀐다',()=>{
+ const hero='/smartstore-photo/'+'a'.repeat(24);for(const detailTemplate of [1,2]){const p={...product,detailTemplate,images:{...product.images,main:'https://www.giordano.co.kr/official-main.jpg'},smartstoreDetail:{style:product.style,heroImage:hero,colorImages:{},sellingPoints:[]}};const html=buildSmartstoreDetail(p).html,$=load(html);assert.equal($('[data-product-intro] img').filter((i,n)=>$(n).attr('src')===hero).length,1);assert.equal($('[data-product-intro] img').filter((i,n)=>$(n).attr('src')===p.images.main).length,0);const changed=buildSmartstoreDetail({...p,smartstoreDetail:{...p.smartstoreDetail,heroImage:hero.replace(/a/g,'b')}}).html;assert.notEqual(html,changed);}
 });
