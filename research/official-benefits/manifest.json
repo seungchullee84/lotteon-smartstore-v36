@@ -10058,7 +10058,7 @@
   "withThreeOrFour": 443,
   "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-30T07:36:12.743Z",
+  "updatedAt": "2026-10-30T07:37:13.532Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-30T07:13:09.526Z",
@@ -18934,7 +18934,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -19499,7 +19499,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -19890,7 +19890,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20429,7 +20429,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           }
         ]
       },
