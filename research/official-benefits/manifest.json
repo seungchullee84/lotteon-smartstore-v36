@@ -10061,11 +10061,11 @@
   "updatedAt": "2026-10-30T12:36:11.403Z",
   "websiteCheck": {
     "version": 1,
-    "checkedAt": "2026-10-30T12:56:29.215Z",
-    "nextCheckAt": "2026-10-30T13:16:29.215Z",
+    "checkedAt": "2026-10-30T13:16:43.440Z",
+    "nextCheckAt": "2026-10-30T13:36:43.440Z",
     "baselineAt": "2026-10-28T00:19:36.206Z",
     "baselineReady": true,
-    "errors": 1455,
+    "errors": 1456,
     "products": {
       "6D1FCB29E5811EA0E105CFFF4AAFD6DA": {
         "pageHash": "a83a8139a85e36d5e8d5574d0940ac009fa6007d3b5a83d18851aa7ad40885b3",
@@ -20630,6 +20630,11 @@
       {
         "id": "7abe5b2c9f767c46ad56",
         "checkedAt": "2026-10-30T12:56:29.215Z",
+        "events": []
+      },
+      {
+        "id": "3a58804ac9762c82b153",
+        "checkedAt": "2026-10-30T13:16:43.440Z",
         "events": []
       }
     ]
