@@ -47,6 +47,7 @@
   cards.sort((a,b)=>group(a)-group(b)||Number(a.dataset.originalOrder)-Number(b.dataset.originalOrder));
   grid.querySelectorAll('.photo-group-heading,.photo-color-empty').forEach(e=>e.remove());
   for(let index=0;index<current.colors.length+3;index++){const members=cards.filter(c=>group(c)===index);if(index>=current.colors.length&&!members.length)continue;const heading=document.createElement('h3');heading.className='photo-group-heading';heading.textContent=(current.colors[index]||(['색상 선택 필요','케어라벨','사용 안 함'][index-current.colors.length]))+' · '+members.length+'장';decorateColor(heading,index<current.colors.length?index:-1);grid.append(heading);if(!members.length){const empty=document.createElement('p');empty.className='photo-color-empty';empty.textContent='사진 미지정 · 이 색상의 판매 옵션은 유지됩니다.';grid.append(empty);}for(const card of members)grid.append(card);}
+  updateOrderControls();
  }
  const channel=()=>document.body.dataset.channel||document.querySelector('[data-channel].active')?.dataset.channel;
  function isSmartstore(){return typeof activeChannel==='function'?activeChannel()==='smartstore':channel()==='smartstore';}
