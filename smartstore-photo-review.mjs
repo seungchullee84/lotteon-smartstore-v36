@@ -27,6 +27,8 @@ export async function photoReview(product,{dataRoot,...options}){
  const match=selection?.sourceUrl===product.sourceUrl&&selection.revision===revision;
  if(match)for(const item of items){const saved=selection.items.find(i=>i.id===item.id);if(saved&&(saved.color===''||product.colors.includes(saved.color))&&(saved.role===''||roles.has(saved.role))){if(saved.color||saved.colorOverride){item.color=saved.color;item.colorSuggested=false;}if(saved.role)item.role=saved.role;item.colorOverride=!!saved.colorOverride;}}
  if(match&&selection.mainId&&items.some(p=>p.id===selection.mainId))mainId=selection.mainId;for(const item of items)item.main=item.id===mainId;
+ // This is a user-requested initial choice, not a confirmed angle analysis.
+ for(const item of items)if(!item.role){item.role='detail';item.roleDefaulted=true;}
  const result={mainId,style:product.style,sourceUrl:product.sourceUrl,colors:numberedPhotoColors(product.colors),revision,items,selectionSavedAt:match?selection.savedAt:null};inventory.review=result;return result;
 }
 export async function savePhotoReviewDraft(product,input,options){

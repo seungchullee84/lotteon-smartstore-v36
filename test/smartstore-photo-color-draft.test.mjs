@@ -11,7 +11,7 @@ test('새 상품 색상 초안은 자동 반영하고 수동 변경·공란 지�
  try{
   for(const [name,color] of [['1.jpg','gray'],['b.jpg','black']])await writeFile(path.join(folder,name),await sharp({create:{width:90,height:120,channels:3,background:color}}).jpeg().toBuffer());
   const result=await prefillPhotoColors(p,folder,{...options,classify:async(_,photos,o)=>{assert(o.draftColors);return photos.map((f,i)=>({...f,color:p.colors[i],role:'front'}));}});assert.equal(result.filled,2);
-  let r=await photoReview(p,options);assert.deepEqual(r.items.map(i=>i.color),p.colors);assert(r.items.every(i=>i.role===''));await assert.rejects(readFile(path.join(dataRoot,'smartstore-details',p.style,'draft.json')),e=>e.code==='ENOENT');
+  let r=await photoReview(p,options);assert.deepEqual(r.items.map(i=>i.color),p.colors);assert(r.items.every(i=>i.role==='detail'&&i.roleDefaulted&&!i.reviewed));await assert.rejects(readFile(path.join(dataRoot,'smartstore-details',p.style,'draft.json')),e=>e.code==='ENOENT');
   const payload={...r,channel:'smartstore',items:r.items.map((i,n)=>({...i,color:n?'':'02블랙',colorOverride:true}))};await savePhotoReviewDraft(p,payload,options);
   await prefillPhotoColors(p,folder,{...options,classify:async()=>assert.fail('수동으로 선택한 원본은 재판독하지 않는다')});r=await photoReview(p,options);assert.equal(r.items[0].color,'02블랙');assert.equal(r.items[1].color,'');
  }finally{await rm(root,{recursive:true,force:true});}

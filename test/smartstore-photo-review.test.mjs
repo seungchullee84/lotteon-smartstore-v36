@@ -13,7 +13,7 @@ test('신규 원본 선택 저장·재열기·케어라벨 오판 수정 및 원
  const p={style:'076922',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=test',colors:['01그레이','02블랙']},options={dataRoot,photoRoots:[folder]};
  try{
   const a=await sharp({create:{width:80,height:120,channels:3,background:'gray'}}).jpeg().toBuffer(),b=await sharp({create:{width:80,height:120,channels:3,background:'black'}}).jpeg().toBuffer();await writeFile(path.join(folder,'1.jpg'),a);await writeFile(path.join(folder,'b.jpg'),b);
-  const current=await photoReview(p,options);assert.equal(current.items.length,2);assert(current.items.every(i=>i.role===''));
+  const current=await photoReview(p,options);assert.equal(current.items.length,2);assert(current.items.every(i=>i.role==='detail'&&i.roleDefaulted&&!i.reviewed));
   let input={...current,channel:'smartstore',items:current.items.map((i,n)=>({...i,color:p.colors[n],role:n?'care-label':'front'}))};
   assert.throws(()=>validatePhotoReview(current,{...input,channel:'lotte'}));assert.throws(()=>validatePhotoReview(current,{...input,revision:'old'}));assert.throws(()=>validatePhotoReview(current,{...input,items:[input.items[0],input.items[0]]}));
   await savePhotoReview(p,input,options);let next=await photoReview(p,options);assert.equal(next.items[1].role,'care-label');assert((await readPhotoMappings(dataRoot,p)).every(i=>i.reviewed));
@@ -41,7 +41,7 @@ test('색상만 선택한 중간 상태도 저장·복원하며 템플릿용 확
  try{
   await writeFile(path.join(folder,'1.jpg'),await sharp({create:{width:80,height:120,channels:3,background:'black'}}).jpeg().toBuffer());
   const current=await photoReview(p,options),input={...current,channel:'smartstore',items:current.items.map(i=>({...i,color:'02그레이',role:''}))};await savePhotoReviewDraft(p,input,options);
-  const reopened=await photoReview(p,options);assert.equal(reopened.items[0].color,'02그레이');assert.equal(reopened.items[0].role,'');assert(reopened.selectionSavedAt);assert.equal((await readPhotoMappings(dataRoot,p)).length,0);
+  const reopened=await photoReview(p,options);assert.equal(reopened.items[0].color,'02그레이');assert.equal(reopened.items[0].role,'detail');assert(reopened.selectionSavedAt);assert.equal((await readPhotoMappings(dataRoot,p)).length,0);
   await assert.rejects(savePhotoReviewDraft(p,{...input,channel:'lotte'},options));await assert.rejects(savePhotoReviewDraft(p,{...input,sourceUrl:p.sourceUrl+'other'},options));
   await assert.rejects(savePhotoReview(p,input,options),/색상과 구도/);
   await writeFile(path.join(folder,'1.jpg'),await sharp({create:{width:80,height:120,channels:3,background:'white'}}).jpeg().toBuffer());const changed=await photoReview(p,options);assert.equal(changed.items[0].color,'');assert.equal(changed.selectionSavedAt,null);
