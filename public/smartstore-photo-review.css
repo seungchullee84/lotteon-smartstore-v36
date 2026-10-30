@@ -5,6 +5,7 @@
 #manualPhotoReviewGrid .photo-color-badge,#manualPhotoReviewLegend .photo-color-badge{display:inline-block;margin:0 0 10px;padding:6px 12px;border-radius:7px;background:var(--photo-accent,#59665f);color:#fff;font-size:15px;font-weight:700;line-height:1.3}
 #manualPhotoReviewLegend{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
 #manualPhotoReviewLegend .photo-color-badge{margin:0}
+#manualPhotoReviewGrid .photo-group-heading{grid-column:1/-1;margin:14px 0 0;padding:10px 14px;border-left:7px solid var(--photo-accent);background:var(--photo-tint);color:var(--photo-accent);font-size:19px;line-height:1.4}
 #manualPhotoReviewGrid img{width:100%;height:330px;object-fit:contain;background:#f4f6f4}
 #manualPhotoReviewGrid p{overflow-wrap:anywhere;font-size:12px}
 #manualPhotoReviewGrid select{display:block;width:100%;margin:6px 0;padding:8px}
