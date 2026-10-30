@@ -10058,7 +10058,7 @@
   "withThreeOrFour": 444,
   "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-30T12:33:12.089Z",
+  "updatedAt": "2026-10-30T12:34:12.467Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-30T11:22:28.885Z",
@@ -19673,7 +19673,7 @@
             "changes": [
               "공식 상세이미지 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "new",
@@ -19742,7 +19742,7 @@
             "changes": [
               "공식 상세이미지 변경"
             ],
-            "status": "needs-review"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -19766,7 +19766,7 @@
             "changes": [
               "공식 상세이미지 변경"
             ],
-            "status": "superseded"
+            "status": "needs-review"
           }
         ]
       },
@@ -20178,7 +20178,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20190,7 +20190,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20202,7 +20202,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20226,7 +20226,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "needs-review"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20250,7 +20250,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20262,7 +20262,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -20529,7 +20529,7 @@
             "changes": [
               "공식 상세이미지 변경"
             ],
-            "status": "superseded"
+            "status": "ready"
           }
         ]
       },
