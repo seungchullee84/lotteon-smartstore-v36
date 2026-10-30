@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {waitForSmartstoreEditorInput} from '../smartstore-detail-upload.mjs';
+import {waitForSmartstoreEditorInput,focusSmartstoreEditorInput} from '../smartstore-detail-upload.mjs';
 
 test('숨겨진 사진 캡션과 숨겨진 본문 앞에서도 실제 표시된 입력 문단으로 준비를 확인한다',async()=>{
  const browser=await chromium.launch({headless:true});
@@ -14,6 +14,17 @@ test('숨겨진 사진 캡션과 숨겨진 본문 앞에서도 실제 표시된 
   assert.equal(checks,2);
   assert.equal(await editor.locator('.se-component.se-image').count(),1,'준비 확인은 기존 사진을 변경하지 않는다');
   assert.equal(await editor.locator('.se-component.se-text').last().innerText(),'현재 본문');
+ }finally{await browser.close();}
+});
+
+test('문단 위 ONE 커서 레이어를 클릭하고 입력 버퍼 초점을 확인한다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const editor=await browser.newPage();
+  await editor.setContent('<iframe id="input_buffer1" tabindex="-1"></iframe><div class="se-component se-text" style="position:relative;width:500px;height:80px"><p class="se-text-paragraph" style="width:500px;height:80px">유지할 본문</p><div class="se-selection" style="position:absolute;inset:0" onclick="document.querySelector(\'iframe\').focus()"><svg class="se-caret" style="width:100%;height:100%"></svg></div></div><div class="se-component se-text" hidden><p class="se-text-paragraph">숨겨진 마지막 문단</p></div>');
+  await focusSmartstoreEditorInput(editor);
+  assert.equal(await editor.evaluate(()=>document.activeElement?.id),'input_buffer1');
+  assert.equal(await editor.locator('.se-text-paragraph').first().textContent(),'유지할 본문');
  }finally{await browser.close();}
 });
 

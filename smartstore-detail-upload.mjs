@@ -21,6 +21,14 @@ export async function waitForSmartstoreEditorInput(editor,{check=()=>{}}={}){
  await editor.locator('.se-component.se-text .se-text-paragraph').filter({visible:true}).first().waitFor({state:'visible',timeout:30000});
  check();
 }
+export async function focusSmartstoreEditorInput(editor,{check=()=>{}}={}){
+ check();
+ // ONE's visible SVG caret sits above the paragraph and receives its pointer
+ // events. Click through that layer, then verify ONE owns keyboard focus.
+ await editor.locator('.se-component.se-text .se-text-paragraph').filter({visible:true}).last().click({force:true});
+ await editor.waitForFunction(()=>document.activeElement?.id?.startsWith('input_buffer'),null,{timeout:5000});
+ check();
+}
 export async function openSmartstoreEditor(page,{check=()=>{}}={}){
  check();
  // Reuse ONE's named window: Chrome does not emit a new popup event for it.
@@ -212,8 +220,7 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
    return signature&&performance.now()-state.since>800;
  });
  // Select inside ONE's document. Never send Ctrl+A to the seller's product form.
- await editor.locator('.se-component.se-text .se-text-paragraph').filter({visible:true}).last().click();
- await editor.waitForFunction(()=>document.activeElement?.id?.startsWith('input_buffer'));
+ await focusSmartstoreEditorInput(editor,{check});
  await editor.keyboard.press('Control+A');await editor.evaluate(()=>new Promise(requestAnimationFrame));
  await editor.keyboard.press('Control+A');await editor.evaluate(()=>new Promise(requestAnimationFrame));
  await editor.keyboard.press('Backspace');
@@ -223,7 +230,7 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  const choose=async(file,index)=>{
   check();const before=await editor.locator('.se-component.se-image').count();
   const empty=editor.locator('.se-component.se-text .se-text-paragraph').filter({visible:true}).last();
-  if(await empty.count())await empty.click();
+  if(await empty.count())await focusSmartstoreEditorInput(editor,{check});
   if(parts.bannerLink?.index===index&&index>0&&await empty.count()){
    check();await editor.keyboard.press('End');await editor.keyboard.press('Enter');
    await editor.evaluate(()=>new Promise(requestAnimationFrame));log('배너 앞 빈 줄 한 칸 분리');
@@ -241,7 +248,7 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
   const imageStarted=Date.now();
   await choose(parts.files[index],index);
   log('상세이미지 '+(index+1)+'/'+parts.files.length+'장 첨부 · '+((Date.now()-imageStarted)/1000).toFixed(1)+'초');
-  if(parts.includeVideo!==false&&index===(parts.videoAfterIndex??0)){const videoStarted=Date.now();await editor.locator('.se-component.se-text .se-text-paragraph').filter({visible:true}).last().click();parts.videoIdentity=await insertSmartstoreVideo(editor,{check,dataRoot:parts.dataRoot,videoOptions:parts.videoOptions});log('브랜드 영상 첨부 · '+((Date.now()-videoStarted)/1000).toFixed(1)+'초');}
+  if(parts.includeVideo!==false&&index===(parts.videoAfterIndex??0)){const videoStarted=Date.now();await focusSmartstoreEditorInput(editor,{check});parts.videoIdentity=await insertSmartstoreVideo(editor,{check,dataRoot:parts.dataRoot,videoOptions:parts.videoOptions});log('브랜드 영상 첨부 · '+((Date.now()-videoStarted)/1000).toFixed(1)+'초');}
  }
  const order=await editor.locator('.se-component').evaluateAll(ns=>ns.filter(n=>/se-image|se-video|se-oembed/.test(n.className)).map(n=>n.className));
  const includeVideo=parts.includeVideo!==false;
