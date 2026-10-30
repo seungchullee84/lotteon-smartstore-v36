@@ -1895,9 +1895,14 @@
           "title": "쾌적하게 입기 좋게",
           "description": "조직의 표면감이 특징으로 통기성이 우수하며,피부에 달라붙지 않아.",
           "evidence": "조직의 표면감이 특징으로 통기성이 우수하며,피부에 달라붙지 않아"
+        },
+        {
+          "title": "여유롭게 편안한 착용감",
+          "description": "여유 있는 실루엣으로 편안하게 입어요.",
+          "evidence": "여유감의 실루엣으로 데일리하게 매치하기 좋으며, 모든 연령대가 부담 없이 착용"
         }
       ],
-      "status": "needs-review",
+      "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-30T16:23:13.100Z",
       "analyzedAt": "2026-10-30T16:24:19.380Z"
