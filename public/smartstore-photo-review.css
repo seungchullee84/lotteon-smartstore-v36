@@ -2,6 +2,13 @@
 #manualPhotoReviewDialog::backdrop{background:#102c1e88}
 .photo-selection-toolbar{position:sticky;top:-22px;z-index:2;padding:12px 0;background:#fff;border-bottom:1px solid #d6e3d9;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 #manualPhotoSelectionStatus{margin:0;flex-basis:100%;font-weight:600;color:#245d3d;line-height:1.6}
+#photoPointPicker{margin:16px 0;padding:14px;border:1px solid #bed4c5;border-radius:9px;background:#f6faf7}
+#photoPointPicker summary{cursor:pointer;font-size:18px;font-weight:700}
+#photoPointCandidates{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+#photoPointCandidates label{display:flex;align-items:flex-start;gap:10px;padding:12px;background:white;border:1px solid #cbdcd0;border-radius:8px}
+#photoPointCandidates input{width:18px;min-width:18px;margin:4px 0}
+#photoPointCandidates strong,#photoPointCandidates span span,#photoPointCandidates small{display:block;margin-bottom:7px;line-height:1.6}
+#photoPointCandidates small{color:#607065;font-size:12px}
 #manualPhotoReviewGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 #manualPhotoReviewGrid>div{padding:10px;border:2px solid var(--photo-accent,#b2bdb6);border-top-width:7px;border-radius:10px;background:var(--photo-tint,#fff)}
 #manualPhotoReviewGrid .photo-color-badge,#manualPhotoReviewLegend .photo-color-badge{display:inline-block;margin:0 0 10px;padding:6px 12px;border-radius:7px;background:var(--photo-accent,#59665f);color:#fff;font-size:15px;font-weight:700;line-height:1.3}

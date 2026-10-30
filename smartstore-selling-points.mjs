@@ -44,7 +44,7 @@ function benefitTitle(text){
  return null;
 }
 // Extract short, complete source clauses locally; never invent a benefit from a noun.
-export function officialProsePoints(source,existing=[]){
+export function officialProsePoints(source,existing=[],limit=4){
  const rules=[
   {kind:'원단',feature:/(?:원단|소재|조직|짜임|니트|저지|코튼|면|울|캐시미어|린넨|리넨|모달|레이온|나일론|폴리에스터|충전재)/,claim:/(?:부드|탄탄|촉감|보온|신축|통기|흡습|흡한|속건|가벼|경량|쾌적|유연|소프트|시원|따뜻|포근|입체|텍스처)/},
   {kind:'핏과 실루엣',feature:/(?:핏|실루엣|라인|기장|길이|어깨선|허리선)/,claim:/(?:여유|슬림|와이드|레귤러|오버|넉넉|좁아|넓어|떨어|덮|밀착|편안|조절|크롭|롱|숏|스트레이트|테이퍼드|플레어|A라인)/},
@@ -72,7 +72,7 @@ export function officialProsePoints(source,existing=[]){
    const point={title:benefitTitle(clause),description,evidence:sentence};
    if(existing.some(p=>p.title===point.title)||points.some(p=>p.title===point.title))continue;
    if(compactSellingPoint(point)){points.push(point);used.add(rule.kind);}
-   if(points.length+existing.length>=4)return points;
+   if(points.length+existing.length>=limit)return points;
   }
  }
  return points;
@@ -81,10 +81,10 @@ export function officialProsePoints(source,existing=[]){
 export function compactSellingPoint(point){
  return !!point?.title&&!!point?.description&&point.title.length<=18&&point.description.length<=42&&point.title!==point.description&&!genericTitle.test(point.title)&&cleanSource(point.title+' '+point.description)&&completeCopy(point.description)&&benefitPattern.test(point.title+' '+point.description)&&(!point.evidence||(cleanSource(point.evidence)&&benefitPattern.test(point.evidence)))&&!/[.…]$/.test(point.title)&&!/[.…]$/.test(point.description.replace(/\.$/,''));
 }
-function extractOfficialSellingPoints(description){
+function extractOfficialSellingPoints(description,limit=4){
  const text=String(description||'').replace(/\s+/g,' ');const points=[],covered=new Set(),labels=new Map();
  const sections=[...String(description||'').matchAll(/POINT\s*0?[1-9]\s*[（(]([^）)]+)[）)]/gi)].map(m=>m[1].trim());
- const finish=()=>[...points,...officialProsePoints(description,points)].filter(compactSellingPoint).sort((a,b)=>{const rank=p=>{const i=sections.indexOf(labels.get(p));return i<0?99:i;};return rank(a)-rank(b);}).slice(0,4);
+ const finish=()=>[...points,...officialProsePoints(description,points,limit)].filter(compactSellingPoint).sort((a,b)=>{const rank=p=>{const i=sections.indexOf(labels.get(p));return i<0?99:i;};return rank(a)-rank(b);}).slice(0,limit);
  // Shared apparel features: use only an affirmative, explicit source sentence.
  const sentences=officialBenefitSentences(description);
  for(const [pattern,title,copy,label] of [
@@ -121,7 +121,7 @@ function extractOfficialSellingPoints(description){
   const description=/^부드럽고, 따뜻하게$/.test(title)&&/기모/.test(evidence)&&!/브러쉬드|브러시드/.test(evidence)?'기모 가공으로 더한 보온성.':copy;
   const point={title,description,evidence};if(!compactSellingPoint(point))continue;
   points.push(point);labels.set(points.at(-1),label);covered.add(label);
-  if(points.length>=4&&!sections.length)return finish();
+  if(points.length>=limit&&!sections.length)return finish();
  }
  const fabric=text.match(/\d+g\/(?:㎡|m2)의[^.\n]*?(?:실키한|실키)[^.\n]*(?:특징|제공합니다)/);
  if(fabric&&/저지/.test(fabric[0])&&/부드럽|소프트/.test(fabric[0])){
@@ -139,7 +139,7 @@ function extractOfficialSellingPoints(description){
  if(slim&&/레이어드/.test(slim[0])){points.push({title:'슬림하게, 레이어드',description:'몸에 자연스럽게 밀착되는 슬림 실루엣.',evidence:slim[0]});covered.add('실루엣');covered.add('핏');labels.set(points.at(-1),sections.includes('실루엣')?'실루엣':'핏');}
  const neck=text.match(/적당한 폭의 터틀넥[^.\n]*?(?:착용감[^.\n]*?(?:더했으며|제공)|착용감)/);
  if(neck){points.push({title:'부담 적은 터틀넥',description:'적당한 폭으로 편안한 착용감.',evidence:neck[0]});covered.add('디테일');covered.add('네크라인');labels.set(points.at(-1),sections.includes('디테일')?'디테일':'네크라인');}
- if(points.length>=4&&!sections.length)return finish();
+ if(points.length>=limit&&!sections.length)return finish();
  // Keep the official POINT headings and wording for other clothing categories.
  const original=String(description||'').replace(/\\n/g,'\n');
  const blocks=[...original.matchAll(/POINT\s*0?[1-9]\s*(?:[（(]([^）)]+)[）)])?\s*([\s\S]*?)(?=POINT\s*0?[1-9]|\n\s*\*|$)/gi)];
@@ -152,7 +152,7 @@ function extractOfficialSellingPoints(description){
   labels.set(points.at(-1),block[1]?.trim());
  }
  if(points.length)return finish();
- return officialProsePoints(description);
+ return officialProsePoints(description,[],limit);
 }
 export function usableSellingPoints(points,source){
  const compact=s=>String(s).replace(/\s+/g,'');
@@ -164,10 +164,10 @@ export function displaySellingPoints(points){
  const copy=value=>String(value||'').replace(/브러쉬드|브러시드|brushed/gi,'기모');
  return points.map(point=>({...point,title:copy(point.title),description:copy(point.description)}));
 }
-export function officialSellingPoints(description){
- const points=extractOfficialSellingPoints(description);
+export function officialSellingPoints(description,{limit=4}={}){
+ const points=extractOfficialSellingPoints(description,limit);
  for(const recipe of sourceBenefitRecipes(description)){
-  if(points.length>=4)break;
+  if(points.length>=limit)break;
   if(points.some(p=>recipe.covered.test(p.title+' '+p.description)))continue;
   const {id,covered,...point}=recipe;if(compactSellingPoint(point))points.push(point);
  }

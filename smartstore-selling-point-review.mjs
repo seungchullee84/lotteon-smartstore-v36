@@ -11,7 +11,7 @@ export async function officialPointSource(product,folder,pageText,{dataRoot=path
  let bytes;try{bytes=await readFile(path.join(folder,'detail.jpg'));}catch(e){if(e.code==='ENOENT')return {text:pageText,imageChecked:false,detailHash:null};throw e;}
  const detailHash=digest(bytes);
  // A visual review already checked this exact official image, including its captions.
- try{const manual=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'selling-point-image-review.json'),'utf8'));if(manual.version===1&&manual.style===product.style&&manual.sourceUrl===product.sourceUrl&&manual.detailHash===detailHash&&usableSellingPoints(manual.points,manual.text))return {text:manual.text+'\n•\n'+pageText,imageChecked:true,detailHash,method:'visual-official-detail'};}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
+ for(const name of ['selling-point-candidates-reviewed.json','selling-point-image-review.json'])try{const manual=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,name),'utf8'));if(manual.version===1&&manual.style===product.style&&manual.sourceUrl===product.sourceUrl&&manual.detailHash===detailHash&&usableSellingPoints(manual.points,manual.text))return {text:manual.text+'\n•\n'+pageText,imageChecked:true,detailHash,method:'visual-official-detail'};}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
  const catalog=await catalogImageSource(product,detailHash,{dataRoot});
  if(catalog)return {text:[officialImageBenefitText(catalog.imageText),pageText].filter(Boolean).join('\n•\n'),imageChecked:true,detailHash,method:'official-catalog-image-cache'};
  const key=JSON.stringify([dataRoot,product.style,product.sourceUrl,detailHash]);
@@ -31,6 +31,10 @@ export async function reviewSellingPoints(product,source,{dataRoot,detailHash=nu
  signal?.throwIfAborted();
  const identity={version:10,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
  const root=path.join(dataRoot,'smartstore-details',product.style),file=path.join(root,'selling-point-review.json');
+ let selection;try{selection=JSON.parse(await readFile(path.join(root,'selling-point-selection.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+ if(selection?.sourceUrl===product.sourceUrl&&selection.detailHash===detailHash&&(detailHash||selection.textHash===digest(source))&&selection.points?.length>=3&&selection.points.length<=4&&usableSellingPoints(selection.points,source)){
+  const record={...identity,method:'user-selected-official-points',points:selection.points,status:'ready',message:'사용자가 선택한 공식 근거 소구점 적용',reviewedAt:selection.selectedAt};await writeFile(file,JSON.stringify(record,null,2));return record;
+ }
  let imageReview;try{imageReview=JSON.parse(await readFile(path.join(root,'selling-point-image-review.json'),'utf8'));}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
  if(detailHash&&imageReview?.version===1&&imageReview.style===product.style&&imageReview.sourceUrl===product.sourceUrl&&imageReview.detailHash===detailHash&&imageReview.points?.length<=4&&usableSellingPoints(imageReview.points,imageReview.text)){
   const points=[...imageReview.points];

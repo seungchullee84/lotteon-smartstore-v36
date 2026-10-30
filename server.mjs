@@ -1,4 +1,5 @@
 import {smartstorePreparationStatus} from './smartstore-preparation-status.mjs';
+import {pointPicker,savePointSelection} from './smartstore-point-picker.mjs';
 import {prefillPhotoColors} from './smartstore-photo-color-draft.mjs';
 import {photoReview,savePhotoReview,photoReviewThumbnail,savePhotoReviewDraft} from './smartstore-photo-review.mjs';
 import {listTwoChoicePackages,readTwoChoicePackage,saveTwoChoicePackage,twoChoiceUploadParts} from './smartstore-two-choice-store.mjs';
@@ -140,6 +141,10 @@ const server=http.createServer(async(req,res)=>{
       const listing=includeSmartstore&&state.product&&!state.product.photoSelectionPending?await listingPreview(state.product,{dataRoot}):null;
       return json(res,200,{...state,folder:undefined,capabilities:{manualTags:true,photoAnalysisSettings:true},tagResearch:includeSmartstore&&state.product?selectedProductTagResearch(state.product,{dataRoot}):null,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,photoReview:listing.photoReview,detailRevision:listing.detailRevision,mainColor:listing.main.color||'품번 폴더 사진',extraColors:listing.extras.map(p=>p.color||'제공한 상품사진'),extraRoles:listing.extras.map(p=>p.role),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state,benefitResearch:benefitResearchView(benefitResearch.state)});
     }
+    if(req.method==='GET'&&url.pathname==='/api/smartstore-point-picker'){
+      if(url.searchParams.get('channel')!=='smartstore'||!state.product||url.searchParams.get('style')!==state.product.style)throw Error('현재 스마트스토어 상품을 확인해 주세요.');
+      const product=state.product,folder=state.folder,result=await pointPicker(product,folder,{dataRoot});if(state.product?.style!==product.style||state.folder!==folder)throw Error('상품이 변경됐습니다.');return json(res,200,result);
+    }
     if(req.method==='GET'&&(url.pathname==='/api/smartstore-photo-review'||url.pathname.startsWith('/smartstore-review-photo/'))){
       if(url.searchParams.get('channel')!=='smartstore'||!state.product||url.searchParams.get('style')!==state.product.style)throw Error('스마트스토어의 현재 품번을 확인해 주세요.');
       if(state.busy)throw Error('사진 작업이 끝난 뒤 열어 주세요.');
@@ -205,6 +210,12 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='POST'){
       const b=await body(req);
       requireChannel(url.pathname.slice(5),b.channel);
+      if(url.pathname==='/api/smartstore-point-selection'){
+        if(state.busy||b.channel!=='smartstore'||!state.product||b.style!==state.product.style)throw Error('현재 스마트스토어 상품과 작업 상태를 확인해 주세요.');
+        const product=state.product,folder=state.folder;const selection=await savePointSelection(product,folder,b,{dataRoot});if(state.product?.style!==product.style||state.folder!==folder)throw Error('상품이 변경됐습니다.');
+        if(product.smartstoreDetail){product.smartstoreDetail.sellingPoints=selection.points;product.smartstoreDetail.sellingPointReview={status:'ready',message:'선택한 소구점 적용'};const listing=await listingPreview(product,{dataRoot});if(listing)state.photoPreparation=smartstorePreparationStatus(product,listing);}
+        state.revision++;await writeFile(path.join(folder,'product.json'),JSON.stringify(product,null,2));return json(res,200,{ok:true,count:selection.points.length,previewReady:!product.photoSelectionPending});
+      }
       if(url.pathname==='/api/smartstore-photo-review-draft'){
         if(state.busy)throw Error('현재 작업이 끝난 뒤 선택을 저장해 주세요.');
         if(b.channel!=='smartstore'||!state.product||b.style!==state.product.style||b.sourceUrl!==state.product.sourceUrl)throw Error('현재 스마트스토어 상품을 확인해 주세요.');
