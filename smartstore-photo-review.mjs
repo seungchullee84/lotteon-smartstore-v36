@@ -73,5 +73,6 @@ export async function savePhotoReview(product,input,{dataRoot,...options}){
  draft.careLabels=await saveCareLabelSelection(root,photos.filter(p=>items.find(i=>i.id===p.id)?.role==='care-label'));
  draft.manualPhotoOrder={style:product.style,sourceUrl:product.sourceUrl,groups:current.colors.map(color=>({color,hashes:items.filter(item=>item.color===color&&!['care-label','excluded'].includes(item.role)).map(item=>current.items.find(photo=>photo.id===item.id).hash)}))};
  await mkdir(root,{recursive:true});await writeFile(path.join(root,'draft.json'),JSON.stringify({...draft,style:product.style,sourceUrl:product.sourceUrl},null,2));
+ await savePhotoReviewDraft(product,{...input,mainId:input.mainId||current.mainId},{dataRoot,...options});
  return {count:items.length};
 }
