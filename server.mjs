@@ -1,6 +1,5 @@
 import {smartstorePreparationStatus} from './smartstore-preparation-status.mjs';
-import {photoReview,savePhotoReview} from './smartstore-photo-review.mjs';
-import {findPhotos} from './smartstore-photo-files.mjs';
+import {photoReview,savePhotoReview,photoReviewThumbnail} from './smartstore-photo-review.mjs';
 import {listTwoChoicePackages,readTwoChoicePackage,saveTwoChoicePackage,twoChoiceUploadParts} from './smartstore-two-choice-store.mjs';
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {applyImportedPhotos,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
@@ -134,8 +133,8 @@ const server=http.createServer(async(req,res)=>{
       if(state.busy)throw Error('사진 작업이 끝난 뒤 열어 주세요.');
       if(url.pathname==='/api/smartstore-photo-review')return json(res,200,await photoReview(state.product,{dataRoot}));
       const id=url.pathname.split('/').at(-1);if(!/^[a-f0-9]{20}$/.test(id))return json(res,404,{});
-      const photo=(await findPhotos(state.product,{dataRoot,includeExcluded:true})).find(p=>p.id===id);if(!photo)return json(res,404,{});
-      res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'no-store'});return res.end(await sharp(photo.bytes).rotate().resize({width:400,withoutEnlargement:true}).jpeg().toBuffer());
+      const thumbnail=await photoReviewThumbnail(state.product,id,{dataRoot});if(!thumbnail)return json(res,404,{});
+      res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'private, max-age=3600'});return res.end(thumbnail);
     }
     if(req.method==='GET'&&/^\/smartstore-listing\/(?:main|extra-\d+)$/.test(url.pathname)){
       if(!state.product||url.searchParams.get('style')!==state.product.style)throw Error('현재 품번을 확인해 주세요.');
