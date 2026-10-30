@@ -29,6 +29,9 @@ export async function photoReview(product,{dataRoot,...options}){
  if(match&&selection.mainId&&items.some(p=>p.id===selection.mainId))mainId=selection.mainId;for(const item of items)item.main=item.id===mainId;
  // This is a user-requested initial choice, not a confirmed angle analysis.
  for(const item of items)if(!item.role){item.role='detail';item.roleDefaulted=true;}
+ const savedOrder=match?selection.items.map(item=>item.id):null;
+ const appliedOrder=draft.manualPhotoOrder?.style===product.style&&draft.manualPhotoOrder?.sourceUrl===product.sourceUrl?draft.manualPhotoOrder.groups.flatMap(group=>group.hashes):[];
+ if(savedOrder||appliedOrder.length){const ranks=new Map((savedOrder||appliedOrder).map((id,index)=>[id,index]));items.sort((a,b)=>(ranks.get(savedOrder?a.id:a.hash)??Infinity)-(ranks.get(savedOrder?b.id:b.hash)??Infinity));}
  const result={mainId,style:product.style,sourceUrl:product.sourceUrl,colors:numberedPhotoColors(product.colors),revision,items,selectionSavedAt:match?selection.savedAt:null};inventory.review=result;return result;
 }
 export async function savePhotoReviewDraft(product,input,options){
@@ -68,6 +71,7 @@ export async function savePhotoReview(product,input,{dataRoot,...options}){
  await mkdir(path.join(dataRoot,'smartstore-photo-label-cache'),{recursive:true});
  for(const p of items)await writeFile(path.join(dataRoot,'smartstore-photo-label-cache',current.items.find(i=>i.id===p.id).hash+'.json'),JSON.stringify({version:1,label:p.role==='care-label',reviewed:true}));
  draft.careLabels=await saveCareLabelSelection(root,photos.filter(p=>items.find(i=>i.id===p.id)?.role==='care-label'));
+ draft.manualPhotoOrder={style:product.style,sourceUrl:product.sourceUrl,groups:current.colors.map(color=>({color,hashes:items.filter(item=>item.color===color&&!['care-label','excluded'].includes(item.role)).map(item=>current.items.find(photo=>photo.id===item.id).hash)}))};
  await mkdir(root,{recursive:true});await writeFile(path.join(root,'draft.json'),JSON.stringify({...draft,style:product.style,sourceUrl:product.sourceUrl},null,2));
  return {count:items.length};
 }

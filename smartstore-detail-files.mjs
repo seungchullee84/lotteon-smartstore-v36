@@ -76,7 +76,9 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
    const digest=createHash('sha256').update(photo.bytes).digest('hex'),record=draft.photoMapping?.files?.find(r=>r.name===photo.name&&r.hash===digest);
    const color=product.colors.indexOf(record?.color),role=['front','back','side','detail'].indexOf(record?.role);
    const order=draft.importedColorPhotos?.find(g=>g.color===record?.color)?.hashes||[],index=order.indexOf(digest);
-   return [color<0?999:color,digest===draft.listingImages?.main?.sourceHash?0:1,role<0?99:role,index<0?999:index];
+   const manual=draft.manualPhotoOrder?.style===product.style&&draft.manualPhotoOrder?.sourceUrl===product.sourceUrl?draft.manualPhotoOrder.groups?.find(g=>g.color===record?.color)?.hashes:undefined;
+   const manualIndex=manual?.indexOf(digest)??-1;
+   return [color<0?999:color,manualIndex<0?999:manualIndex,digest===draft.listingImages?.main?.sourceHash?0:1,role<0?99:role,index<0?999:index];
   };
   photos.sort((a,b)=>{const ar=rank(a),br=rank(b);for(let i=0;i<ar.length;i++)if(ar[i]!==br[i])return ar[i]-br[i];return a.file.localeCompare(b.file);});
   for(const photo of photos){
