@@ -18,7 +18,7 @@ export async function pointPicker(product,folder,{dataRoot,sourceOverride}={}){
  for(const p of seed)if(!pool.some(q=>q.title===p.title||q.description===p.description||q.evidence===p.evidence))pool.push(p);
  for(const p of officialSellingPoints(text,{limit:5})){
   if(pool.some(q=>q.title===p.title||q.description===p.description||q.evidence===p.evidence))continue;
-  const kinds=topics(p),covered=new Set(pool.flatMap(topics));
+  const kinds=topics(p),covered=new Set(seed.flatMap(topics));
   if(kinds.length&&kinds.every(kind=>covered.has(kind)))continue;
   pool.push(p);
  }
