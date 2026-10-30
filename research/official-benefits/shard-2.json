@@ -199,8 +199,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T10:41:55.809Z",
-      "analyzedAt": "2026-10-30T10:50:01.291Z"
+      "observedAt": "2026-10-30T11:13:28.485Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1684,7 +1684,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "a43ce2280bf93f982e93319259b9139b56b3c4ff179df5bdb868358b077d9c65",
+      "pageHash": "4ef5e6e2c485c16c1c4de3fa36fa42c8807a757410bc92d6a259cebf3b1e9b26",
       "pageText": "노치드 라펠의 싱글 블레이저입니다.\n\n살짝 여유 있는 실루엣으로 무겁지 않고, 가볍게 착용할 수 있으며,스트레치성을 더해 활동성을 높였습니다.탄탄한 소재감으로 고급스러운 표면과 컬러감이 우수하며형태의 변함없이 깔끔한 아웃핏을 연출할 수 있습니다.\n\n다양한 하의와 스타일링하여 단품으로도 활용 가능하며,동일한 소재의 슬랙스와 함께 셋업으로 활용 가능합니다.\n\n*함께 착용 가능한 슬랙스 품번 - 01112511 #02블랙 #05헤더카키, 01112513 #02블랙, 01112514 #01블랙",
       "imageText": "",
       "imageScanComplete": false,
@@ -1702,8 +1702,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-30T10:41:46.536Z",
-      "analyzedAt": "2026-10-30T10:50:01.207Z"
+      "observedAt": "2026-10-30T11:13:18.680Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2645,8 +2645,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-30T10:41:56.044Z",
-      "analyzedAt": "2026-10-30T10:50:01.292Z"
+      "observedAt": "2026-10-30T11:13:28.732Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3078,8 +3078,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T10:41:10.835Z",
-      "analyzedAt": "2026-10-30T10:50:00.616Z"
+      "observedAt": "2026-10-30T11:12:41.333Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3217,8 +3217,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-30T10:41:55.689Z",
-      "analyzedAt": "2026-10-30T10:50:01.287Z"
+      "observedAt": "2026-10-30T11:13:28.471Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
