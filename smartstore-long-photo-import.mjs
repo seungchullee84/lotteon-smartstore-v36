@@ -14,7 +14,7 @@ const closePixels=(a,b,coarse=false)=>{if(a.length!==b.length)return false;let s
 export function mannequinPhotoRegions(){
  return [...document.querySelectorAll('section[id^="smartstore-color-"]')].flatMap(section=>{
   if(section.dataset.colorSource==='official'||[...section.querySelectorAll('p')].some(p=>p.textContent.trim()==='지오다노 공식 상품 사진'))return [];
-  const heading=section.querySelector('h2'),color=heading?.textContent.trim();if(!color)return [];
+  const heading=section.querySelector('h2'),color=section.dataset.colorName||heading?.textContent.trim();if(!color)return [];
   return [...section.querySelectorAll('img')].map(img=>{const r=img.getBoundingClientRect();return {color,left:Math.ceil(r.left),top:Math.ceil(r.top+scrollY),width:Math.floor(r.width),height:Math.floor(r.height)};});
  });
 }

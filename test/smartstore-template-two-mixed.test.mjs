@@ -27,3 +27,5 @@ test('소구점 생략·근거 부족은 상품명으로 대체하고 다른 상
 });
 
 test('템플릿2 상단은 공식 로고 두 개와 성별만 유지하고 품번은 별도 STYLE NO에 표시한다',()=>{for(const [gender,label] of [['여성','WOMEN'],['남성','MEN']]){const $=load(buildSmartstoreDetail({...product,gender,detailTemplate:2}).html);assert.equal($('.ss2-header [data-giordano-logo] img').length,1);assert.equal($('.ss2-header [data-lotte-logo] img').length,1);assert.equal($('.ss2-meta').text(),label);assert(!$('.ss2-header').text().includes(product.style));assert($('[data-style-number]').text().includes(product.style));}});
+
+test('큰 강조 번호를 유지하고 옆 색상명의 중복 번호만 제외하며 사진 매칭용 원래 색상은 보존한다',()=>{const $=load(buildSmartstoreDetail({...product,detailTemplate:2}).html);const first=$('section[id^="smartstore-color-"]').first();assert.equal(first.find('.ss2-color-number').text(),'01');assert.equal(first.find('h2').text(),'화이트');assert.equal(first.attr('data-color-name'),'01화이트');assert.deepEqual(product.colors,['01화이트','02블랙','03그린']);});
