@@ -11,7 +11,7 @@ export function acceptedLocalPrediction(result,colors){
  return !!result&&['front','side','back','detail'].includes(result.role)&&colors.includes(result.color)&&Number.isFinite(result.roleScore)&&result.roleScore>=0.65&&Number.isFinite(result.roleMargin)&&result.roleMargin>=0.15&&Number.isFinite(result.colorScore)&&result.colorScore>=0.65&&Number.isFinite(result.colorMargin)&&result.colorMargin>=0.15;
 }
 // Runs once per original hash. Uncertain results remain in the full detail gallery.
-export async function classifyLocalPhotos(product,photos,{dataRoot,signal,log=()=>{},predict,folder}={}){
+export async function classifyLocalPhotos(product,photos,{dataRoot,signal,log=()=>{},predict,folder,draftColors=false}={}){
  signal?.throwIfAborted();
  if(!photos.length)return [];
  let settings;
@@ -38,5 +38,7 @@ export async function classifyLocalPhotos(product,photos,{dataRoot,signal,log=()
   for(let i=0;i<pending.length;i++){const item=pending[i],prediction=predictions[i]||{};await writeFile(path.join(cacheRoot,item.key+'.json'),JSON.stringify({analysisVersion:revision,prediction}));results.push({...item,prediction});}
  }
  const accepted=results.filter(r=>acceptedLocalPrediction(r.prediction,product.colors)).map(r=>({...r.photo,color:r.prediction.color,role:r.prediction.role,automatic:true,autoValidated:r.prediction.method===LOCAL_PHOTO_POLICY,evidence:r.prediction.evidence}));
- log('사진 자동 판별 결과 · 추정 배치 '+accepted.length+'장 · 추가 확인 '+(photos.length-accepted.length)+'장');return accepted;
+ log('사진 자동 판별 결과 · 추정 배치 '+accepted.length+'장 · 추가 확인 '+(photos.length-accepted.length)+'장');
+ if(draftColors)return results.filter(r=>acceptedLocalPrediction(r.prediction,product.colors)||(product.colors.includes(r.prediction?.color)&&r.prediction?.evidence?.coverage>=.05)).map(r=>({...r.photo,color:r.prediction.color,role:r.prediction.role,automatic:true,needsReview:!acceptedLocalPrediction(r.prediction,product.colors),evidence:r.prediction.evidence}));
+ return accepted;
 }

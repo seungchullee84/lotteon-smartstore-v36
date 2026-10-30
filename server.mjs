@@ -1,4 +1,5 @@
 import {smartstorePreparationStatus} from './smartstore-preparation-status.mjs';
+import {prefillPhotoColors} from './smartstore-photo-color-draft.mjs';
 import {photoReview,savePhotoReview,photoReviewThumbnail,savePhotoReviewDraft} from './smartstore-photo-review.mjs';
 import {listTwoChoicePackages,readTwoChoicePackage,saveTwoChoicePackage,twoChoiceUploadParts} from './smartstore-two-choice-store.mjs';
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
@@ -103,6 +104,17 @@ async function publishPhotoPreview(product,folder){
 function json(res,status,data){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));}
 async function body(req){let text='';for await(const chunk of req){text+=chunk;if(text.length>1600000)throw Error('요청이 너무 큽니다.');}return JSON.parse(text||'{}');}
 let activeAbort=null;
+let colorDraftAbort=null;
+function startPhotoColorDraft(product,folder){
+ colorDraftAbort?.abort();const controller=new AbortController();colorDraftAbort=controller;
+ const current=()=>state.product?.style===product.style&&state.product?.sourceUrl===product.sourceUrl&&state.folder===folder;
+ state.photoColorDraft={style:product.style,status:'running',message:'로컬 모델로 색상을 먼저 추정하는 중 · 수동 선택 가능'};
+ void prefillPhotoColors(product,folder,{dataRoot,signal:controller.signal,log:message=>{if(current()){log(message);if(message.startsWith('사진 대조 '))state.photoColorDraft.message=message+' · 색상 초안 판별 중';}}}).then(result=>{
+  if(!current()||controller.signal.aborted)return;
+  state.photoColorDraft={style:product.style,status:'ready',...result,message:'색상 초안 '+result.filled+'장 · 미지정 '+result.remaining+'장 · 자동 추정이므로 색상을 확인해 주세요.'};
+  state.photoPreparation={style:product.style,status:'selecting',message:state.photoColorDraft.message+' 구도 확인 후 반영하면 템플릿을 만듭니다.'};log(state.photoColorDraft.message);
+ }).catch(e=>{if(current()&&!controller.signal.aborted){state.photoColorDraft={style:product.style,status:'needs-review',message:'색상 자동 추정 확인 필요: '+e.message};state.photoPreparation={style:product.style,status:'selecting',message:state.photoColorDraft.message};log(state.photoColorDraft.message);}});
+}
 function job(phase,fn){if(state.busy)throw Error('진행 중인 작업이 있습니다.');const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase=phase;state.error=null;state.completedJob=null;Promise.resolve().then(fn).then(()=>{state.phase=controller.signal.aborted?'stopped':'done';if(!controller.signal.aborted){state.completedJob=phase;if(phase==='smartstore-detail-only')log('상세설명 교체 완료 · 편집기에서 확인해 주세요. 상품 저장·등록은 하지 않았습니다.');}}).catch(e=>{state.error=controller.signal.aborted?null:e.message;if(state.photoPreparation?.status==='preparing')state.photoPreparation={...state.photoPreparation,status:controller.signal.aborted?'stopped':'needs-review',message:controller.signal.aborted?'사진 준비를 중단했습니다.':e.message};if(['PHOTO_ANALYSIS_REQUIRED','PHOTO_FOLDER_EMPTY'].includes(e.code)&&!controller.signal.aborted)state.photoPreparation={style:state.product?.style,status:e.code==='PHOTO_ANALYSIS_REQUIRED'?'needs-analysis':'missing',photoCount:e.photoCount||0,unknownCount:e.unknownCount||0,message:e.message};if(e.code==='DETAIL_SOURCE_MISSING'&&!controller.signal.aborted)state.detailFallbackRequest={input:state.collectionInput};state.phase=controller.signal.aborted?'stopped':'error';log(controller.signal.aborted?'작업을 중단했습니다.':e.message);}).finally(()=>{state.busy=false;state.paused=null;activeAbort=null;});}
 const server=http.createServer(async(req,res)=>{
   try{
@@ -542,7 +554,7 @@ const server=http.createServer(async(req,res)=>{
         if(b.allowMissingDetail===true&&state.detailFallbackRequest?.input!==b.style)return json(res,400,{error:'먼저 일반 수집으로 해당 상품의 상세 원본 누락을 확인해 주세요.'});
         const input=parseProductInput(b.style);const style=input.style||"url";bot.stopped=false;state.collectionInput=b.style;state.detailFallbackRequest=null;state.photoImport=null;
         if(b.edits)await productEdits.save(b.edits,state.product?.style);
-        job('collect',async()=>{const folder=path.join(dataRoot,style+'-'+new Date().toISOString().replace(/[:.]/g,'-'));let product=await collect(b.style,folder,log,()=>bot.stopped,activeAbort.signal,{allowMissingDetail:b.allowMissingDetail===true,saveSmartstoreSource:b.channel==='smartstore',noticeCacheRoot:b.channel==='smartstore'?path.join(dataRoot,'smartstore-notice-cache'):undefined,prepareMain:b.channel!=='smartstore'});product.keywords=buildKeywords(product);product=await productEdits.apply(product);state.product=product;state.folder=folder;state.photoPreparation=null;state.revision++;if(b.channel==='smartstore'){product.photoSelectionPending=true;delete product.smartstoreDetail;state.photoPreparation={style:product.style,status:'selecting',message:'사진을 먼저 선택해 주세요. 선택 반영 전에는 자동 판독·템플릿·추가이미지를 만들지 않습니다.'};await writeFile(path.join(folder,'product.json'),JSON.stringify(product,null,2));log(state.photoPreparation.message);}log('수집 완료. 고시 이미지와 입력값을 검토해 주세요.'+(Object.keys(product.userEditedFields||{}).length?' · 직접 수정한 항목 유지':''));});return json(res,202,{ok:true});
+        job('collect',async()=>{const folder=path.join(dataRoot,style+'-'+new Date().toISOString().replace(/[:.]/g,'-'));let product=await collect(b.style,folder,log,()=>bot.stopped,activeAbort.signal,{allowMissingDetail:b.allowMissingDetail===true,saveSmartstoreSource:b.channel==='smartstore',noticeCacheRoot:b.channel==='smartstore'?path.join(dataRoot,'smartstore-notice-cache'):undefined,prepareMain:b.channel!=='smartstore'});product.keywords=buildKeywords(product);product=await productEdits.apply(product);state.product=product;state.folder=folder;state.photoPreparation=null;state.revision++;if(b.channel==='smartstore'){product.photoSelectionPending=true;delete product.smartstoreDetail;state.photoPreparation={style:product.style,status:'selecting',message:'색상을 자동 추정한 뒤 직접 수정할 수 있습니다. 템플릿·추가이미지는 선택 반영 후에 만듭니다.'};await writeFile(path.join(folder,'product.json'),JSON.stringify(product,null,2));log(state.photoPreparation.message);startPhotoColorDraft(product,folder);}log('수집 완료. 고시 이미지와 입력값을 검토해 주세요.'+(Object.keys(product.userEditedFields||{}).length?' · 직접 수정한 항목 유지':''));});return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/lotte-category-suggest'){
         if(!state.product||b.style!==state.product.style)throw Error('현재 수집한 상품의 분류만 확인할 수 있습니다.');
@@ -584,6 +596,7 @@ const server=http.createServer(async(req,res)=>{
   }catch(e){json(res,400,{error:e.message});}
 });
 server.listen(desktopSession?.port||0,'127.0.0.1',()=>{
+  if(state.product?.photoSelectionPending&&state.folder)startPhotoColorDraft(state.product,state.folder);
   const url=`http://127.0.0.1:${server.address().port}/?key=${token}`;
   console.log('\n지오다노 등록 도우미: '+url+'\n이 창을 닫으면 프로그램이 종료됩니다.');
   if(!desktopSession&&!process.env.NO_AUTO_OPEN){const child=spawn('cmd.exe',['/c','start','',url],{windowsHide:true,stdio:'ignore'});child.on('error',()=>{});}

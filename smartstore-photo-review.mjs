@@ -10,6 +10,7 @@ const inventories=new Map(),thumbnails=new Map();
 const inventoryKey=(p,{dataRoot,photoRoots,desktop})=>JSON.stringify([path.resolve(dataRoot),p.style,p.sourceUrl,p.colors,photoRoots,desktop]);
 const stamp=s=>s.size+':'+s.mtimeMs+':'+s.ctimeMs;
 const roles=new Set(['front','back','side','detail','care-label','excluded']);
+export function numberedPhotoColors(colors){const number=c=>{const n=Number(String(c).match(/^\s*(\d{1,2})(?!\d)/)?.[1]);return n>=1&&n<=99?n:100;};return [...colors].sort((a,b)=>number(a)-number(b));}
 const selectionFile=(dataRoot,p)=>{if(!/^\d{6}$/.test(p.style))throw Error('사진 품번을 확인해 주세요.');return path.join(dataRoot,'smartstore-photo-review-drafts',p.style+'.json');};
 async function draftFor(dataRoot,p){try{const d=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',p.style,'draft.json'),'utf8'));return d.sourceUrl===p.sourceUrl?d:{};}catch(e){if(e.code!=='ENOENT')throw e;return {};}}
 export async function photoReview(product,{dataRoot,...options}){
@@ -18,10 +19,12 @@ export async function photoReview(product,{dataRoot,...options}){
  inventories.delete(key);inventories.set(key,inventory);while(inventories.size>3)inventories.delete(inventories.keys().next().value);
  const items=photos.map(p=>{const id=hash(p.bytes),mapping=saved.find(r=>r.hash===id&&r.reviewed)||draft.photoMapping?.files?.find(r=>r.hash===id);const care=draft.careLabels?.some(r=>r.sourceHash===id);return {id:p.id,hash:id,name:p.name,main:/^1(?:번)?\.(jpe?g|png|webp)$/i.test(p.name),color:mapping?.color||'',role:care?'care-label':roles.has(mapping?.role)?mapping.role:'',reviewed:!!mapping?.reviewed};});
  const revision=hash(JSON.stringify([product.style,product.sourceUrl,product.colors,items.map(p=>[p.id,p.name])]));
+ let automatic;try{automatic=JSON.parse(await readFile(path.join(dataRoot,'smartstore-photo-color-drafts',product.style+'.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+ if(automatic?.sourceUrl===product.sourceUrl&&JSON.stringify(automatic.colors)===JSON.stringify(product.colors))for(const item of items){const suggested=automatic.files.find(p=>p.hash===item.hash);if(suggested&&!item.reviewed){if(!item.color&&product.colors.includes(suggested.color)){item.color=suggested.color;item.colorSuggested=true;}if(!item.role&&suggested.careLabel)item.role='care-label';}}
  let selection;try{selection=JSON.parse(await readFile(selectionFile(dataRoot,product),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  const match=selection?.sourceUrl===product.sourceUrl&&selection.revision===revision;
- if(match)for(const item of items){const saved=selection.items.find(i=>i.id===item.id);if(saved&&(saved.color===''||product.colors.includes(saved.color))&&(saved.role===''||roles.has(saved.role))){item.color=saved.color;item.role=saved.role;}}
- const result={style:product.style,sourceUrl:product.sourceUrl,colors:product.colors,revision,items,selectionSavedAt:match?selection.savedAt:null};inventory.review=result;return result;
+ if(match)for(const item of items){const saved=selection.items.find(i=>i.id===item.id);if(saved&&(saved.color===''||product.colors.includes(saved.color))&&(saved.role===''||roles.has(saved.role))){if(saved.color||saved.colorOverride){item.color=saved.color;item.colorSuggested=false;}if(saved.role)item.role=saved.role;item.colorOverride=!!saved.colorOverride;}}
+ const result={style:product.style,sourceUrl:product.sourceUrl,colors:numberedPhotoColors(product.colors),revision,items,selectionSavedAt:match?selection.savedAt:null};inventory.review=result;return result;
 }
 export async function savePhotoReviewDraft(product,input,options){
  const current=inventories.get(inventoryKey(product,options))?.review||await photoReview(product,options);
@@ -29,7 +32,7 @@ export async function savePhotoReviewDraft(product,input,options){
  if(!Array.isArray(input.items)||input.items.length!==current.items.length)throw Error('사진 선택 목록을 다시 확인해 주세요.');
  const ids=new Set();for(const i of input.items){if(ids.has(i.id)||!current.items.some(p=>p.id===i.id)||(i.color!==''&&!current.colors.includes(i.color))||(i.role!==''&&!roles.has(i.role)))throw Error('사진 선택 값을 확인해 주세요.');ids.add(i.id);}
  const file=selectionFile(options.dataRoot,product),temporary=file+'.'+randomUUID()+'.tmp',savedAt=new Date().toISOString();
- await mkdir(path.dirname(file),{recursive:true});await writeFile(temporary,JSON.stringify({style:product.style,sourceUrl:product.sourceUrl,revision:current.revision,savedAt,items:input.items.map(({id,color,role})=>({id,color,role}))},null,2));await rename(temporary,file);return {savedAt};
+ await mkdir(path.dirname(file),{recursive:true});await writeFile(temporary,JSON.stringify({style:product.style,sourceUrl:product.sourceUrl,revision:current.revision,savedAt,items:input.items.map(({id,color,role,colorOverride})=>({id,color,role,colorOverride:!!colorOverride}))},null,2));await rename(temporary,file);return {savedAt};
 }
 export async function photoReviewThumbnail(product,id,options){
  const key=inventoryKey(product,options);if(!inventories.has(key))await photoReview(product,options);
