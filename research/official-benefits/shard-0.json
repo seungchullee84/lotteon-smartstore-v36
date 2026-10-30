@@ -1397,6 +1397,11 @@
           "title": "포근한 울혼방 터치",
           "description": "포근하고 부드러운 울혼방 소재로 편안하게.",
           "evidence": "포근하고 부드러운 터치의 7GG 울 혼방 소재를 사용하여 편안한 착용감을 제공"
+        },
+        {
+          "title": "오래 입기 좋은 내구성",
+          "description": "우수한 내구성을 갖췄어요.",
+          "evidence": "높은 내구성"
         }
       ],
       "status": "needs-review",
@@ -1806,11 +1811,6 @@
           "title": "부드러운 착용감",
           "description": "부드러운 울·캐시미어 블렌드 소재.",
           "evidence": "부드러운 울·캐시미어 블렌드 소재, 헤링본 패턴과 솔리드 소재로 구성한 3가지 컬러"
-        },
-        {
-          "title": "쌀쌀할 때도 따뜻하게",
-          "description": "보온성을 더해 따뜻하게 입어요.",
-          "evidence": "우수한 보온성과 고급스러운 결감 구현"
         }
       ],
       "status": "automatic-source-reviewed",
@@ -2011,11 +2011,6 @@
           "title": "포인트 있게 연출",
           "description": "후면 아웃포켓을더해 캐주얼한포인트를 살렸습니다.",
           "evidence": "후면 아웃포켓을더해 캐주얼한포인트를 살렸으며, 데일리 웨어부터 가벼운 아웃도어 활동까지 다양한 스타일에 활용하기 좋습니다."
-        },
-        {
-          "title": "부드럽게 닿는 촉감",
-          "description": "부드러운 촉감이 느껴지는 원단.",
-          "evidence": "부드러운 터치감 선사"
         }
       ],
       "status": "automatic-source-reviewed",
@@ -2511,12 +2506,17 @@
           "evidence": "허리전체품밴드 사양적용으로 편안하고 안정적인 착용감 제공 양측면 일자 포켓 디테일로 간결하고 높은 실용성 구현 데일리 웨어부터 가벼운 외출까지 자유롭게 활용 가능한 디자인 완성"
         },
         {
+          "title": "오래 입기 좋은 내구성",
+          "description": "우수한 내구성을 갖췄어요.",
+          "evidence": "뛰어난 내구성"
+        },
+        {
           "title": "소지품을 간편하게",
           "description": "편리한 포켓으로 간편하게 수납해요.",
           "evidence": "포켓 디테일로 간결하고 높은 실용성"
         }
       ],
-      "status": "needs-review",
+      "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-30T15:51:59.938Z",
       "analyzedAt": "2026-10-30T15:57:52.534Z"
