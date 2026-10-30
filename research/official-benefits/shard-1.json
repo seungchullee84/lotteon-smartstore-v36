@@ -416,8 +416,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T02:47:26.634Z",
-      "analyzedAt": "2026-10-30T02:47:49.579Z"
+      "observedAt": "2026-10-30T03:18:53.691Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1076,7 +1076,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "1742cb9631cefdc9a4df4207475d8c141cf5dac4cd5c66f8b60ac032a9945681",
+      "pageHash": "921c207befdd0c8d60d2648589cc41efa4f42334ac37ca0846c69d06ee623121",
       "pageText": "베이직 카라의 셔츠형 집업 재킷입니다. \n\n가벼운 착용감으로 봄 계절 간편하게 걸치기 좋으며 간결한 절개 디테일과 가슴 양옆에 플랩포켓을 더하여 미니멀하고 단정한 외관의 느낌을 살렸습니다.\n\n밀도 높은 탄탄한 C/P 소재로 내구성을 높였으며, 지퍼 안쪽에는 플라켓을 더해 메탈 지퍼의 차가운 질감이 닿지 않도록 보완하였습니다.\n\n여유 있는 실루엣으로 제작되어 아우터로 활용하기 좋으며 다양한 이너와 슬렉스 팬츠 혹은 치노 팬츠와 함께 매치하여 트렌디한 스타일링을 할 수 있습니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -1089,8 +1089,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-30T02:47:28.044Z",
-      "analyzedAt": "2026-10-30T02:47:49.628Z"
+      "observedAt": "2026-10-30T03:18:54.761Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1167,11 +1167,6 @@
           "title": "편안한 착용감",
           "description": "티셔츠나 셔츠 위에 여유로운 밸런스로 레이어링하기 좋은 깔끔한 핏 완성.",
           "evidence": "티셔츠나 셔츠 위에 여유로운 밸런스로 레이어링하기 좋은 깔끔한 핏 완성"
-        },
-        {
-          "title": "포근한 울혼방 터치",
-          "description": "포근하고 부드러운 울혼방 소재로 편안하게.",
-          "evidence": "포근하고 부드러운 터치의 7GG 울 혼방 소재를 사용하여 편안한 착용감을 제공"
         }
       ],
       "status": "needs-review",
@@ -1369,8 +1364,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-30T02:47:09.274Z",
-      "analyzedAt": "2026-10-30T02:47:49.287Z"
+      "observedAt": "2026-10-30T03:18:36.961Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2999,8 +2994,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-30T02:47:29.983Z",
-      "analyzedAt": "2026-10-30T02:47:49.638Z"
+      "observedAt": "2026-10-30T03:18:57.023Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3259,8 +3254,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-30T02:47:27.837Z",
-      "analyzedAt": "2026-10-30T02:47:49.612Z"
+      "observedAt": "2026-10-30T03:18:54.356Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
