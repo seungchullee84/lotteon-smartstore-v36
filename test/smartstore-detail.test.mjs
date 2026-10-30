@@ -24,7 +24,7 @@ test('두 템플릿 팔레트는 확인된 정면만 표시하고 다른 사진�
 test('기본 템플릿1과 명시적으로 선택한 템플릿2는 독립적으로 보존한다',()=>{
  const base={...product,detailTemplate:undefined},one=buildSmartstoreDetail(base),two=buildSmartstoreDetail({...base,detailTemplate:2});
  assert.equal(one.templateVariant,1);assert.equal(one.templateLabel,'템플릿 1');assert(one.html.indexOf('data-product-intro')<one.html.indexOf('data-official-detail'));assert(one.html.indexOf('data-brand-intro')<one.html.indexOf('data-product-point-heading'));assert(one.html.indexOf('data-brand-intro')<one.html.indexOf('data-brand-video-heading'));assert(one.html.indexOf('data-brand-video-heading')<one.html.indexOf('data-store-banner'));assert(!one.html.includes('data-aida-action'));
- assert.equal(two.templateVariant,2);assert.equal(two.templateLabel,'템플릿 2');assert(two.html.indexOf('data-product-intro')<two.html.indexOf('data-brand-intro'));assert(one.html.includes('data-aida="attention"'));assert(two.html.includes('data-intro-layout="title-and-benefits"'));assert(!two.html.includes('data-aida-action'));
+ assert.equal(two.templateVariant,2);assert.equal(two.templateLabel,'템플릿 2');assert(two.html.indexOf('data-product-intro')<two.html.indexOf('data-brand-video-heading'));assert(one.html.includes('data-aida="attention"'));assert(two.html.includes('data-intro-layout="title-and-benefits"'));assert(!two.html.includes('data-aida-action'));
  assert.throws(()=>buildSmartstoreDetail({...base,detailTemplate:3}),/템플릿 1 또는 2/);
 });
 
@@ -32,7 +32,7 @@ test('모든 의류의 AIDA 순서는 상품·구매 장점부터 시작하고 �
  const point={title:'편안한 움직임',description:'여유로운 품으로 편안하게 입어요.',evidence:'여유로운 품으로 편안한 착용감을 제공합니다.'};
  for(const name of ['남성 맨투맨','여성 스커트','공용 경량 자켓']){
   const p={...product,name,colorImages:{'01핑크':['https://example.com/current.jpg']},smartstoreDetail:{style:product.style,sellingPoints:[point],colorImages:{'01핑크':['https://example.com/current.jpg']}}},html=buildSmartstoreDetail(p).html;
-  const order=['data-product-intro','data-brand-intro','data-brand-video-heading','<video ','data-aida="interest"','data-color-palette','id="smartstore-color-0"','data-official-detail','data-store-banner','data-store-footer'].map(marker=>html.indexOf(marker));
+  const order=['data-product-intro','data-brand-video-heading','<video ','data-aida="interest"','data-color-palette','id="smartstore-color-0"','data-official-detail','data-store-banner','data-store-footer'].map(marker=>html.indexOf(marker));
   assert(order.every((index,i)=>index>=0&&(!i||index>order[i-1])));assert.doesNotMatch(html,/data-product-hero/);assert.match(html,/data-attention-benefit[^>]*>편안한 움직임/);assert.doesNotMatch(html,/나의 한 벌 고르기|마음에 드는 색상과|나에게 맞는 한 벌을 선택/);assert.equal((html.match(/<video /g)||[]).length,1);assert(!html.includes('<button'));
  }
 });
@@ -49,7 +49,7 @@ test('스마트스토어에만 확정 템플릿·영상·공식 원본·INFORMAT
  const approved=buildSmartstoreDetail(product).html;assert.ok(approved.indexOf('data-store-banner')<approved.indexOf('data-store-footer'));assert.match(approved,/store-discovery-women(?:-[2-4])?\.jpg/);assert.equal(approved.includes('href="https://shopping.naver.com'),false);const lotte=buildDetailContent(product.images,product.colors,{},product.originalDetailUrl).html;
  assert.match(smartstorePlan(product,50000).html,/data-smartstore-template=/);
  assert.doesNotMatch(lotte,/smartstore-template|youtube|benefits/);
- assert.ok(approved.indexOf('brand-intro-pair-')<approved.indexOf('<video '));
+ assert(!approved.includes('data-brand-intro'));assert(approved.includes('영상으로 만나는 지오다노'));
  assert.ok(approved.indexOf('/info.jpg')<approved.indexOf('benefits.jpg'));
  assert.match(approved,/controls autoplay muted loop playsinline/);assert.doesNotMatch(approved,/youtube|클릭하면 해당 색상|href="#smartstore-color-/);assert.doesNotMatch(approved,/26920|모달|기모|CARE GUIDE/);
  assert.deepEqual(productSellingPoints(product),[]);assert.equal(productSellingPoints({...product,officialDescription:'가벼운 원단을 사용한 경량 패딩 상품입니다.'})[0].evidence,'가벼운 원단을 사용한 경량 패딩 상품입니다.');

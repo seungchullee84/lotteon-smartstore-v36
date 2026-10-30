@@ -10,6 +10,6 @@ test('공식 상품 성별·품목을 실제 착장 태그와 비교하고 같�
  const p={style:'116926',rawName:'남성 브러시드 테이퍼드 치노 팬츠',gender:'남성',images:{}};assert.equal(brandIntroSelection(p).id,9);assert.deepEqual(brandIntroSelection(p),brandIntroSelection({...p,name:'사용자가 수정한 이름'}));
  const female=brandIntroSelection({style:'376915',rawName:'여성 CLOUD LIGHT 경량 패딩 자켓',gender:'여성'});assert.equal(female.id,7);
  const cardigan=brandIntroSelection({style:'356000',rawName:'여성 울블렌드 가디건',gender:'여성'});assert.equal(cardigan.id,1);
- const html=buildSmartstoreDetail(p).html;assert(html.includes(brandIntroSelection(p).file));assert(html.includes('일상의 기본을, 나답게.'));assert(html.indexOf('brand-intro-pair-')<html.indexOf('<video'));
+ const html=buildSmartstoreDetail(p).html;assert(!html.includes('data-brand-intro'));assert(!html.includes(brandIntroSelection(p).file));assert(html.includes('영상으로 만나는 지오다노'));assert(html.indexOf('data-brand-video-heading')<html.indexOf('<video'));
  for(const gender of ['남성','여성','공용',''])assert(BRAND_INTRO_ASSET_NAMES.includes(brandIntroSelection({style:'123456',rawName:'공식 의류',gender}).file));
 });

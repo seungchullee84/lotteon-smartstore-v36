@@ -38,7 +38,7 @@ export async function openSmartstoreEditor(page,{check=()=>{}}={}){
 export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,videoOptions,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop}={}){
  const video=includeVideo?await requireBrandVideo(dataRoot,videoOptions):null;
  const meta=await sharp(png,{limitInputPixels:false}).metadata();
- const brand=await sharp(brandFile).metadata();const firstHeight=videoAfterTop??(brandIntroHeight??Math.round(meta.width*brand.height/brand.width))+BRAND_VIDEO_HEADING_HEIGHT;
+ const brand=videoAfterTop===undefined&&brandIntroHeight===undefined?await sharp(brandFile).metadata():null;const firstHeight=videoAfterTop??(brandIntroHeight??Math.round(meta.width*brand.height/brand.width))+BRAND_VIDEO_HEADING_HEIGHT;
  if(meta.width!==860||meta.height<=firstHeight)throw Error('상세페이지 이미지 크기를 확인해 주세요.');
  if(footerTop!==undefined&&(!Number.isInteger(footerTop)||footerTop<firstHeight||footerTop>=meta.height))throw Error('구매 혜택부터 하단까지의 이미지 구간을 확인해 주세요.');
  if(bannerTop!==undefined&&(!Number.isInteger(bannerTop)||footerTop===undefined||bannerTop<firstHeight||bannerTop>=footerTop))throw Error('하단 안내 위 배너 이미지 구간을 확인해 주세요.');
