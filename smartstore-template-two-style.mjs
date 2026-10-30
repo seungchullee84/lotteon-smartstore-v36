@@ -5,4 +5,6 @@ export const templateTwoCss=`
 .ss2-video{padding-bottom:64px}.ss2-palette{margin-top:32px;padding-top:64px;padding-bottom:64px}.ss2-photo-heading{margin-top:40px;padding-top:48px;padding-bottom:40px}.ss2-photo-heading+.ss2-source-note{margin-bottom:28px!important}@media(max-width:600px){.ss2-video{padding-bottom:48px}.ss2-palette{margin-top:24px;padding-top:48px;padding-bottom:48px}.ss2-photo-heading{margin-top:30px;padding-top:38px;padding-bottom:32px}}
 /* Larger complete mannequin photographs, with no crop or source changes. */
 .ss2-intro{padding-left:8%;padding-right:8%}.ss2-color{padding-left:3%;padding-right:3%}.ss2-color-photos{gap:14px}@media(max-width:600px){.ss2-intro{padding-left:6%;padding-right:6%}.ss2-color{padding-left:3%;padding-right:3%}.ss2-color-photos{gap:10px}}
+/* Keep the introduction photograph; enlarge only the color photographs. */
+.ss2-color{padding-left:0;padding-right:0}.ss2-color-head{padding-left:4%;padding-right:4%}.ss2-color-photos{gap:4px}.ss2-color-photos figure:nth-child(2){margin-top:20px}.ss2-color-photos[data-count-many] figure:nth-child(2){margin-top:0}@media(max-width:600px){.ss2-color{padding-left:0;padding-right:0}.ss2-color-photos{gap:4px}.ss2-color-photos figure:nth-child(2){margin-top:12px}.ss2-color-photos[data-count-many] figure:nth-child(2){margin-top:0}}
 `;
