@@ -511,8 +511,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T01:05:05.995Z",
-      "analyzedAt": "2026-10-30T01:14:38.149Z"
+      "observedAt": "2026-10-30T01:36:38.471Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -630,8 +630,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T01:05:15.334Z",
-      "analyzedAt": "2026-10-30T01:14:38.281Z"
+      "observedAt": "2026-10-30T01:36:48.328Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -668,8 +668,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T01:04:40.392Z",
-      "analyzedAt": "2026-10-30T01:14:37.736Z"
+      "observedAt": "2026-10-30T01:36:11.733Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -816,8 +816,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T01:05:16.908Z",
-      "analyzedAt": "2026-10-30T01:14:38.296Z"
+      "observedAt": "2026-10-30T01:36:49.920Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1472,8 +1472,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T01:05:24.083Z",
-      "analyzedAt": "2026-10-30T01:14:38.446Z"
+      "observedAt": "2026-10-30T01:36:58.249Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1619,8 +1619,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T01:04:57.428Z",
-      "analyzedAt": "2026-10-30T01:14:37.992Z"
+      "observedAt": "2026-10-30T01:36:29.695Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1975,8 +1975,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T01:04:36.179Z",
-      "analyzedAt": "2026-10-30T01:14:37.687Z"
+      "observedAt": "2026-10-30T01:36:06.544Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1995,15 +1995,15 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "3ac017f216447151c366d546005a3f5c075b1dabd9d5a93c5651e7f0bf0cd647",
+      "pageHash": "df4fd06acde7e420efe59ff3fa1fde7f6dbfedd1ddcc29de6fd71c306a69a21b",
       "pageText": "어떤 체형에도 안정적으로 어울리는 REGULAR FIT의 헤비웨이트 티셔츠입니다.\n\n과하지 않은 여유감의 실루엣으로 데일리하게 매치하기 좋으며, 모든 연령대가 부담 없이 착용할 수 있는 기본 아이템입니다.\n넥라인에는 바인딩 넥 디테일을 적용해 형태 안정성을 높였으며, 반복 착용 후에도 늘어짐이 적어 탄탄한 핏을 유지합니다.\n베이직한 실루엣으로 다양한 스타일에 자연스럽게 어울립니다.\n\n100% COTTON 소재의 240 GSM 헤비웨이트 원단을 사용하여 탄탄하고 안정적인 착용감이 특징입니다.\n\n솔리드 컬러와 스트라이프 컬러로 구성해 선택의 폭을 넓혔으며,\n두께감 있는 원단으로 비침이 적고 안정적인 실루엣 연출이 가능합니다.\n\n코튼 특유의 내추럴한 터치감과 우수한 내구성으로 오래도록 편안하게 착용할 수 있습니다.",
       "imageText": "",
       "imageScanComplete": false,
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-30T01:04:41.682Z",
-      "analyzedAt": "2026-10-30T01:14:37.743Z"
+      "observedAt": "2026-10-30T01:36:12.401Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2747,8 +2747,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T01:04:37.662Z",
-      "analyzedAt": "2026-10-30T01:14:37.715Z"
+      "observedAt": "2026-10-30T01:36:08.179Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2949,8 +2949,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-30T01:04:56.306Z",
-      "analyzedAt": "2026-10-30T01:14:37.979Z"
+      "observedAt": "2026-10-30T01:36:28.417Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
