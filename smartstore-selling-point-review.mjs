@@ -30,11 +30,11 @@ export async function saveOfficialImagePointReview(product,folder,{text,points,d
 }
 export async function reviewSellingPoints(product,source,{dataRoot,detailHash=null,signal}={}){
  signal?.throwIfAborted();
- const identity={version:10,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
+ const identity={version:11,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
  const root=path.join(dataRoot,'smartstore-details',product.style),file=path.join(root,'selling-point-review.json');
  let selection;try{selection=JSON.parse(await readFile(path.join(root,'selling-point-selection.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(selection?.sourceUrl===product.sourceUrl&&selection.omit===true)return {...identity,method:'user-omitted-points',points:[],omitted:true,status:'ready',message:'소구점 없이 제작'};
- if(selection?.sourceUrl===product.sourceUrl&&selection.detailHash===detailHash&&(detailHash||selection.textHash===digest(source))&&selection.points?.length>=3&&selection.points.length<=4&&usableSellingPoints(selection.points,source)){
+ if(selection?.sourceUrl===product.sourceUrl&&selection.detailHash===detailHash&&(detailHash||selection.textHash===digest(source))&&selection.points?.length>=1&&selection.points.length<=4&&usableSellingPoints(selection.points,source)){
   const record={...identity,method:'user-selected-official-points',points:selection.points,status:'ready',message:'사용자가 선택한 공식 근거 소구점 적용',reviewedAt:selection.selectedAt};await writeFile(file,JSON.stringify(record,null,2));return record;
  }
  let imageReview;try{imageReview=JSON.parse(await readFile(path.join(root,'selling-point-image-review.json'),'utf8'));}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
@@ -48,13 +48,11 @@ export async function reviewSellingPoints(product,source,{dataRoot,detailHash=nu
     if(points.length>=3)break;
    }
   }
-  const enough=points.length>=3;const record={...identity,method:'visual-official-detail',points,status:enough?'ready':'needs-review',message:enough?'공식 상세 이미지 원문 대조 완료':'소구점 최소 3개 필요 · 공식 원문 보완 확인',reviewedAt:imageReview.reviewedAt};await writeFile(file,JSON.stringify(record,null,2));return record;
+  const record={...identity,method:'visual-official-detail',points,status:'ready',message:'공식 상세 이미지 원문 대조 완료',reviewedAt:imageReview.reviewedAt};await writeFile(file,JSON.stringify(record,null,2));return record;
  }
- if(!source.trim())return {...identity,points:[],status:'needs-review',message:'공식 상세 원문을 확인해야 합니다.'};
  let cached;try{cached=JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
- if(Object.entries(identity).every(([key,value])=>cached?.[key]===value)&&cached.points?.length>=3&&usableSellingPoints(cached.points,source))return {...cached,status:'ready'};
+ if(Object.entries(identity).every(([key,value])=>cached?.[key]===value)&&cached.points?.length>=1&&usableSellingPoints(cached.points,source))return {...cached,status:'ready'};
  const points=officialSellingPoints(source),ready=usableSellingPoints(points,source);
- const enough=ready&&points.length>=3;
- const record={...identity,points:ready?points:[],status:enough?'ready':'needs-review',message:enough?'':'소구점 최소 3개 필요 · 공식 상세 원문에서 서로 다른 장점을 보완 확인해 주세요.',reviewedAt:new Date().toISOString()};
+ const record={...identity,points:ready?points:[],omitted:!ready,status:'ready',message:ready?'':'확인된 소구점이 없어 해당 구간을 생략합니다.',reviewedAt:new Date().toISOString()};
  await mkdir(root,{recursive:true});await writeFile(file,JSON.stringify(record,null,2));return record;
 }

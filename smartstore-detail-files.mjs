@@ -46,11 +46,10 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
   let detailHash=null;try{detailHash=createHash('sha256').update(await readFile(path.join(folder,'detail.jpg'))).digest('hex');}catch(e){if(e.code!=='ENOENT')throw e;}
   const checkedSource=omitPoints?{text:sourceText,imageChecked:false}:await officialPointSource(product,folder,sourceText,{dataRoot});sourceText=checkedSource.text;
   const review=await reviewSellingPoints(product,sourceText,{dataRoot,detailHash,existing:prepared.sellingPoints});
-  prepared.sellingPoints=review.points;prepared.sellingPointReview={status:review.status,message:review.message||''};
-  if(draft&&review.points.length){draft.sellingPoints=review.points;await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft,null,2));}
+  prepared.sellingPoints=review.points;prepared.omitSellingPoints=review.omitted===true||!review.points.length;prepared.sellingPointReview={status:review.status,message:review.message||''};
+  if(draft){draft.sellingPoints=review.points;await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft,null,2));}
   prepared.sellingPointSource={style,sourceUrl:product.sourceUrl,textHash:createHash('sha256').update(sourceText).digest('hex'),detailHash,imageChecked:checkedSource.imageChecked};
  }
- if(!omitPoints&&!sourceText.trim()&&!prepared.sellingPoints.length){prepared.sellingPoints=[];prepared.sellingPointReview={status:'needs-review',message:'현재 공식 상세 원문을 확인해야 합니다.'};}
  const attach=async(color,file,allowedRoot)=>{
   if(!product.colors.includes(color))throw Error('현재 상품에 없는 색상의 마네킨 컷입니다: '+color);
   const canonicalRoot=await realpath(allowedRoot),canonical=await realpath(file);
@@ -215,7 +214,6 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
  const videoOptions={...productVideoOptions(product),...options.videoOptions};
  await requireBrandVideo(options.dataRoot,videoOptions);
  const p=await prepareSmartstoreDetail(product,folder,options);const data=new Map();
- if(!p.smartstoreDetail.omitSellingPoints&&p.smartstoreDetail.sellingPoints.length<3)throw Error('소구점 최소 3개가 필요합니다. 공식 상세 원문에서 서로 다른 장점을 보완 확인해 주세요.');
  const check=()=>{if(signal?.aborted)throw Error('상세페이지 만들기를 중단했습니다.');};check();
  for(const name of TEMPLATE_ASSET_NAMES.filter(n=>!n.endsWith('.ttf')))data.set(TEMPLATE_ASSET_BASE+name,'data:image/'+(name.endsWith('.png')?'png':'jpeg')+';base64,'+(await readFile(path.join(assetsRoot,name))).toString('base64'));
  for(const [key,src] of Object.entries(p.images)){
