@@ -68,7 +68,7 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
  if(old?.style===product.style&&old.sourceUrl===product.sourceUrl)for(const record of old.careLabels||[])if(/^[a-f0-9]{64}$/.test(record.sourceHash))known.set(record.sourceHash,{role:'care-label',color:''});
  if(old?.style===product.style&&old.sourceUrl===product.sourceUrl)for(const record of old.photoMapping?.files||[]){
   if(record.role==='provided'&&known.has(record.hash))continue;
-  if(/^[a-f0-9]{64}$/.test(record.hash)&&['front','detail','side','back','care-label','provided'].includes(record.role)&&(['care-label','provided'].includes(record.role)||product.colors.includes(record.color)))known.set(record.hash,{role:record.role,color:['care-label','provided'].includes(record.role)?'':record.color});
+  if(/^[a-f0-9]{64}$/.test(record.hash)&&['front','detail','side','back','care-label','provided'].includes(record.role)&&(['care-label','provided'].includes(record.role)||product.colors.includes(record.color)))known.set(record.hash,{...record,role:record.role,color:['care-label','provided'].includes(record.role)?'':record.color});
  }
  for(const record of await readPhotoMappings(dataRoot,product))if(record.reviewed===true||!known.has(record.hash)||known.get(record.hash).role==='provided')known.set(record.hash,record);
  // Reuse exact source/hash color evidence without restricting the trusted folder's files.
@@ -84,13 +84,13 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
  const photos=found;
  if(!photos.length){const error=Error('현재 품번 '+product.style+' 폴더에 상품사진을 넣어 주세요. 이전 품번이나 삭제된 사진은 사용하지 않습니다.');error.code='PHOTO_FOLDER_EMPTY';throw error;}
  const unknown=[];const mapped=[];
- for(const file of photos){const cached=known.get(hash(file.bytes));const previous=cached?.reviewed===true?cached:old?.photoMapping?.files?.find(r=>r.name===file.name&&r.hash===hash(file.bytes)&&r.role!=='provided')||cached;if(previous&&previous.role==='detail'&&previous.reviewed!==true&&product.colors.includes(previous.color)){unknown.push({...file,colorHint:previous.color,existingMapping:previous});continue;}if(previous&&previous.role!=='provided'){mapped.push({...file,color:previous.color,role:previous.role,...(previous.automatic===true?{automatic:true}:{}),...(previous.reviewed===true?{reviewed:true,reviewedAt:previous.reviewedAt,reviewBasis:previous.reviewBasis,reviewedBy:previous.reviewedBy}:{})});continue;}
+ for(const file of photos){const cached=known.get(hash(file.bytes));const previous=cached?.reviewed===true?cached:old?.photoMapping?.files?.find(r=>r.name===file.name&&r.hash===hash(file.bytes)&&r.role!=='provided')||cached;if(previous?.automatic===true&&previous.reviewed!==true){unknown.push({...file});continue;}if(previous&&previous.role==='detail'&&previous.reviewed!==true&&product.colors.includes(previous.color)){unknown.push({...file,colorHint:previous.color,existingMapping:previous});continue;}if(previous&&previous.role!=='provided'){mapped.push({...file,color:previous.color,role:previous.role,...(previous.automatic===true?{automatic:true,autoValidated:previous.autoValidated===true,evidence:previous.evidence}:{}),...(previous.reviewed===true?{reviewed:true,reviewedAt:previous.reviewedAt,reviewBasis:previous.reviewBasis,reviewedBy:previous.reviewedBy}:{})});continue;}
   const parent=norm(path.basename(path.dirname(file.file)));const exact=product.colors.find(color=>[norm(color),norm(color).replace(/^\d+/, '')].includes(parent));
   // A color folder can identify its color, but cannot establish front/side/detail.
   unknown.push({...file,...(exact?{colorHint:exact}:{}),...(isCareLabelPhoto(file)?{roleHint:'care-label'}:{})});
  }
  if(trustFolder){
-  const classified=await classifyLocalPhotos(product,unknown,{dataRoot,signal,log});
+  const classified=await classifyLocalPhotos(product,unknown,{dataRoot,folder,signal,log});
   for(const photo of unknown){const result=classified.find(p=>p.name===photo.name&&hash(p.bytes)===hash(photo.bytes));if(photo.existingMapping){mapped.push(result&&result.color===photo.existingMapping.color?result:{...photo,color:photo.existingMapping.color,role:photo.existingMapping.role});}else if(result)mapped.push(result);}
   return applyGarmentReview(await prepareTrustedFolder(product,folder,{dataRoot,photos,mapped,old,description,detailHash,signal,log,recognizePhoto}),folder,{dataRoot,photoRoots,desktop});
  }

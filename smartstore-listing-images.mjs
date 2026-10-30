@@ -18,7 +18,7 @@ export function chooseListingPhotos(photos,product){
  if(selected.role==='care-label'||!product.colors.includes(selected.color))throw Error('1번 대표사진의 상품·색상을 확인해 주세요. 케어라벨은 대표로 사용하지 않습니다.');
  const side=photos.find(p=>p.color===selected.color&&p.role==='side'&&!same(p));
  // Only a visually verified full front of the same color can substitute for an absent side.
- const alternative=side?null:photos.find(p=>p.color===selected.color&&p.role==='front'&&p.reviewed===true&&!same(p));
+ const alternative=side?null:photos.find(p=>p.color===selected.color&&p.role==='front'&&(p.reviewed===true||p.autoValidated===true)&&!same(p));
  const extras=side?[side]:alternative?[{...alternative,role:'alternate'}]:[];
  for(const color of product.colors.filter(color=>color!==selected.color&&photos.some(p=>p.color===color))){const front=photos.find(p=>p.color===color&&p.role==='front'&&!same(p));if(!front)throw Error(color+' 정면 사진이 필요합니다.');extras.push(front);}
  return {main:selected,extras:extras.slice(0,9)};
@@ -35,7 +35,7 @@ export async function listingManifest(product,{dataRoot}){
  const records=draft.photoMapping?.files||[],unclassified=records.filter(r=>r.role!=='care-label'&&(!product.colors?.includes(r.color)||r.role==='provided')).length;
  const mainColor=draft.listingImages.main?.color;
  const missingFrontColors=(product.colors||[]).filter(color=>color!==mainColor&&records.some(r=>r.color===color)&&!records.some(r=>r.color===color&&r.role==='front'));
- const automatic=records.filter(r=>r.automatic===true&&r.reviewed!==true).length;
+ const automatic=records.filter(r=>r.automatic===true&&r.reviewed!==true&&r.autoValidated!==true).length;
  const needsReview=unclassified>0||missingFrontColors.length>0||automatic>0;
  const photoReview={status:needsReview?'needs-review':'ready',unclassified,missingFrontColors,automatic,message:needsReview?'폴더 사진은 모두 상세에 보존했습니다. 색상·정면·옆면 연결 확인 필요'+(unclassified?' · 미분류 '+unclassified+'장':'')+(missingFrontColors.length?' · 정면 미확인 '+missingFrontColors.join(', '):'')+(automatic?' · 자동 판별 확인 필요 '+automatic+'장':''):''};
  return withOfficialMain(product,{...draft.listingImages,photoReview,detailRevision:hash(Buffer.from(JSON.stringify(draft)+'|'+PHOTO_WORK_VERSION))});
