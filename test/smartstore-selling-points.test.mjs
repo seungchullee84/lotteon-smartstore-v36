@@ -66,6 +66,14 @@ test('마침표 없는 공식 불릿 설명도 원단·핏·디테일 세 특징
  assert.equal(officialSellingPoints('울 50%와 캐시미어 5% 혼방 소재 • 부드러운 촉감과 우수한 보온성').length,0);
 });
 
+test('공식 울혼방·레귤러핏·풀집업 근거는 품번 예외 없이 세 장점으로 보완한다',()=>{
+ const source='포근하고 부드러운 터치의 7GG 울 혼방 소재를 사용하여 편안한 착용감을 제공합니다. 적당한 여유감의 레귤러 실루엣으로 몸에 자연스럽게 안착되어 편안한 착용감 제공. 목을 감싸는 하이넥과 전면 풀집업 여밈으로 다채로운 스타일링 연출.';
+ const points=officialSellingPoints(source);
+ assert(points.length>=3);assert(usableSellingPoints(points,source));
+ assert(points.every(p=>source.includes(p.evidence)));
+ assert.deepEqual(officialSellingPoints('레귤러핏. 울 혼방. 풀집업 가디건.'),[]);
+});
+
 test('모든 상품 소구점의 브러시드 표시는 기모로 통일하고 원문 근거를 보존한다',()=>{
  for(const word of ['브러쉬드','브러시드','brushed','BRUSHED']){
   const evidence=word+' 가공으로 보온력이 우수하고 따뜻합니다.';

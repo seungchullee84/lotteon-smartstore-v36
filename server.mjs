@@ -1,3 +1,4 @@
+import {smartstorePreparationStatus} from './smartstore-preparation-status.mjs';
 import {listTwoChoicePackages,readTwoChoicePackage,saveTwoChoicePackage,twoChoiceUploadParts} from './smartstore-two-choice-store.mjs';
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {applyImportedPhotos,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
@@ -91,7 +92,13 @@ function colorRecoveryOptions(signal,apiKey){return {dataRoot,signal,apiKey,log,
  onRecovery:product=>{state.photoPreparation={style:product.style,status:'preparing',pendingPhotoCount:product.smartstoreDetail.pendingPhotoCount,message:'기존 상품의 색상 구간을 자동으로 대조하고 있습니다.'};},
  onImported:({product,stage,result})=>{state.photoImport={...stage,status:'applied',selectedCount:result.selectedCount,detailReady:!!product.smartstoreDetail?.sellingPoints?.length};}
 };}
-async function publishPhotoPreview(product,folder){const listing=await prepareListingImages(product,folder,{dataRoot});if(!product.smartstoreDetail?.photoCount&&!product.images?.detail&&!product.detailFallbackApproved)throw Error('상세사진 또는 공식 상세 원본을 확인해 주세요.');state.product=product;state.folder=folder;state.photoPreparation={style:product.style,status:listing.manifest.photoReview?.status==='needs-review'?'needs-review':product.smartstoreDetail.pendingPhotoCount?'needs-match':'ready',mainCount:1,extraCount:listing.extras.length,detailCount:product.smartstoreDetail.photoCount,pendingPhotoCount:product.smartstoreDetail.pendingPhotoCount||0,message:listing.manifest.photoReview?.message|| (product.smartstoreDetail.pendingPhotoCount?'제공 사진 '+product.smartstoreDetail.pendingPhotoCount+'장은 색상 연결이 남아 있습니다. 사진의 색상명 폴더 또는 기존 상품 색상 구간을 확인합니다.':undefined)};state.revision++;log('미리보기 반영 완료 · 대표 1장 · 추가 '+listing.extras.length+'장 · 상세사진 '+product.smartstoreDetail.photoCount+'장');}
+async function publishPhotoPreview(product,folder){
+ const listing=await prepareListingImages(product,folder,{dataRoot});
+ if(!product.smartstoreDetail?.photoCount&&!product.images?.detail&&!product.detailFallbackApproved)throw Error('상세사진 또는 공식 상세 원본을 확인해 주세요.');
+ state.product=product;state.folder=folder;
+ state.photoPreparation=smartstorePreparationStatus(product,listing);state.revision++;
+ log('미리보기 갱신 · 대표 1장 · 추가 '+listing.extras.length+'장 · 상세사진 '+(product.smartstoreDetail?.photoCount||0)+'장 · '+(state.photoPreparation.templateReady?'사진·템플릿 준비 완료':state.photoPreparation.message));
+}
 function json(res,status,data){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));}
 async function body(req){let text='';for await(const chunk of req){text+=chunk;if(text.length>1600000)throw Error('요청이 너무 큽니다.');}return JSON.parse(text||'{}');}
 let activeAbort=null;

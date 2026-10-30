@@ -3,6 +3,9 @@ export const BENEFIT_RECIPE_VERSION='official-benefit-recipes-1';
 export function sourceBenefitRecipes(source){
  const text=String(source||'').replace(/\s+/g,' '),points=[];
  const rules=[
+  {id:'soft-wool-touch',pattern:/포근하고\s*부드러운\s*터치의\s*(?:\d+\s*GG\s*)?울\s*혼방\s*소재를\s*사용하여\s*편안한\s*착용감을\s*제공/i,title:'포근한 울혼방 터치',description:'포근하고 부드러운 울혼방 소재로 편안하게.',covered:/울혼방|울.*터치|포근|부드러/},
+  {id:'regular-layering',pattern:/적당한\s*여유감의\s*레귤러\s*실루엣으로\s*몸에\s*자연스럽게\s*안착되어\s*편안한\s*착용감\s*제공/,title:'여유로운 레귤러핏',description:'적당한 여유감으로 자연스럽고 편안하게.',covered:/레귤러|여유|편안한.*착용감/},
+  {id:'highneck-fullzip',pattern:/목을\s*감싸는\s*하이넥과\s*전면\s*풀집업\s*여밈으로\s*다채로운\s*스타일링\s*연출/,title:'다양하게 연출하는 풀집업',description:'목을 감싸는 하이넥과 풀집업으로 다양한 연출.',covered:/풀집업|하이넥.*연출|지퍼.*연출/},
   {id:'relaxed-clean',pattern:/릴렉스\s*핏과\s*목넥\s*디자인으로\s*편안하면서도\s*깔끔한\s*실루엣을\s*연출/,title:'편안하고 깔끔한 실루엣',description:'릴렉스 핏과 목넥으로 편안하고 깔끔하게.',covered:/릴렉스|깔끔한.*실루엣/},
   {id:'light-warm-filling',pattern:/가벼운\s*착용감과\s*풍성한\s*볼륨감\s*[,，]?\s*뛰어난\s*보온성을\s*제공/,title:'가볍고 따뜻한 착용감',description:'가벼운 착용감에 풍성한 볼륨과 보온성을 더했어요.',covered:/가벼|가볍|경량|보온/},
   {id:'wind-entry',pattern:/내부\s*인\s*플라켓과\s*소매\s*안쪽\s*이밴드로\s*찬바람\s*유입을\s*차단/,title:'찬바람 유입을 줄여 따뜻하게',description:'내부 플라켓과 소매 안쪽 밴드로 찬바람을 차단해요.',covered:/찬바람|바람.*차단/},

@@ -112,7 +112,10 @@ function syncFeedbackWithState(state){
  const job=feedbackJob||(serverBusy?serverPhase:null);
  if(!job)return;
  if(state.phase==='done'){
-  const label=({'smartstore-detail-only':'상세설명 교체 완료','smartstore-auto':'자동 작업 완료','smartstore-tags':'태그 작업 완료','smartstore-import-photos':'착용사진 가져오기 완료',collect:'정보 수집 완료',register:'입력 작업 완료'})[job]||'작업 완료';
+  if(['collect','smartstore-combine-photos','smartstore-import-photos'].includes(job)&&state.photoPreparation&&state.photoPreparation.status!=='ready'){
+   announce('확인 필요 · '+(state.photoPreparation.message||'사진·소구점 보완이 남아 있습니다.'),'failed');return;
+  }
+  const label=({'smartstore-detail-only':'상세설명 교체 완료','smartstore-auto':'자동 작업 완료','smartstore-tags':'태그 작업 완료','smartstore-import-photos':'착용사진 가져오기 완료','smartstore-combine-photos':'사진·템플릿 준비 완료',collect:'정보 수집 완료',register:'입력 작업 완료'})[job]||'작업 완료';
   announce('✓ '+label+(job==='smartstore-detail-only'?' · 편집기에서 확인해 주세요. 상품 저장·등록 전입니다.':''),'success');
  }else if(state.phase==='error'){
   announce('확인 필요 · '+(state.error||'진행 기록을 확인해 주세요.'),'failed');
@@ -777,7 +780,7 @@ function syncEnhancedFeatures(state){
  try{const url=new URL(p.sourceUrl);officialProductLink.href=url.origin==='https://www.giordano.co.kr'?url.href:'https://www.giordano.co.kr/';}catch{officialProductLink.href='https://www.giordano.co.kr/';}
  officialProductLink.title=p.style+' 지오다노 공식 상품페이지 열기';
  const status=state.photoPreparation?.style===p.style?state.photoPreparation:null;
- photoPreparationStatus.textContent=state.smartstoreListing?.photoReview?.message|| (status?.status==='ready'?'사진 연결 확인 · 대표 1장 · 추가 '+status.extraCount+'장 · 상세사진 '+status.detailCount+'장':status?.status==='preparing'?'품번 폴더 사진을 추가이미지·상세 미리보기에 연결 중…':status?.message||(!state.smartstoreListing?'현재 품번 폴더의 사진을 확인해 주세요.':state.smartstoreListing.previewOnly?'대표사진만 우선 표시 중 · 정보 수집 또는 시작을 누르면 추가·상세사진을 연결합니다.':'품번 폴더 사진을 추가이미지·상세 미리보기에 연결했습니다.'));
+ photoPreparationStatus.textContent=status?.message||state.smartstoreListing?.photoReview?.message|| (status?.status==='ready'?'사진 연결 확인 · 대표 1장 · 추가 '+status.extraCount+'장 · 상세사진 '+status.detailCount+'장':status?.status==='preparing'?'품번 폴더 사진을 추가이미지·상세 미리보기에 연결 중…':status?.message||(!state.smartstoreListing?'현재 품번 폴더의 사진을 확인해 주세요.':state.smartstoreListing.previewOnly?'대표사진만 우선 표시 중 · 정보 수집 또는 시작을 누르면 추가·상세사진을 연결합니다.':'품번 폴더 사진을 추가이미지·상세 미리보기에 연결했습니다.'));
  if(manualTagStyle!==p.style){manualTagStyle=p.style;manualTagHasSelection=!!state.tagResearch?.manual;manualTagChoices=new Map((state.tagResearch?.manualTags||[]).map(t=>[t.id,t]));let saved;try{saved=JSON.parse(localStorage.getItem('smartstore-tags.v1.'+p.style));}catch{}if(saved?.sourceUrl===p.sourceUrl&&Array.isArray(saved.tags)&&saved.tags.length<=10){manualTagHasSelection=true;manualTagChoices=new Map(saved.tags.map(t=>[t.id,t]));}$('manualTagSaveStatus').textContent=manualTagHasSelection?'선택한 태그를 등록기에 적용했습니다. 네이버 입력은 태그 자동입력 또는 시작을 누르세요.':'';$('manualTagResults').replaceChildren();tagPicker.hidden=!manualTagHasSelection;drawManualTagChoices();}
  const selectedResearch=effectiveTagResearch(state);if(selectedResearch?.manual){const pairs=tags=>(tags||[]).map(t=>t.id+'\t'+t.name).sort().join('\n');const verified=state.tagResult?.searchTagsVerified&&pairs(state.tagResult.selectedTags)===pairs(selectedResearch.candidates);$('researchTagStatus').textContent='직접 선택한 태그 '+selectedResearch.candidates.length+'/10개 · '+(verified?'최근 검색 적용 확인':'입력 시 네이버 검색 적용 재검증');}
  $('manualTagSearch').disabled=!!state.busy||!state.capabilities?.manualTags;$('applyManualTags').disabled=!!state.busy||!manualTagHasSelection;
