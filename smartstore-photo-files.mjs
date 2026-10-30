@@ -3,6 +3,7 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {imageDownloadFolder} from './desktop-downloads.mjs';
 import {readPhotoMappings} from './smartstore-photo-mapping-cache.mjs';
+import {readPhotoFileSelection} from './smartstore-photo-file-selection.mjs';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const image=/\.(jpe?g|png|webp)$/i;
 export async function resolveStylePhotoFolders(parent,style){
@@ -20,5 +21,12 @@ export async function findPhotos(product,{desktop,photoRoots,dataRoot=path.resol
   await walk(canonical);
  }
  const excluded=includeExcluded?new Set():new Set((await readPhotoMappings(dataRoot,product)).filter(p=>p.reviewed&&p.role==='excluded').map(p=>p.hash));
- return [...found.values()].filter(p=>!excluded.has(hash(p.bytes))).sort((a,b)=>a.file.localeCompare(b.file));
+ const selected=includeExcluded?new Map():new Map((await readPhotoFileSelection(dataRoot,product)).map(item=>[item.id,item]));
+ return [...found.values()].filter(p=>{
+  const digest=hash(p.bytes),choice=selected.get(p.id);
+  // A file choice is bound to its path/content id. Excluding a duplicate copy
+  // must not exclude the separately selected original with identical bytes.
+  if(choice?.hash===digest)return choice.role!=='excluded';
+  return !excluded.has(digest);
+ }).sort((a,b)=>a.file.localeCompare(b.file));
 }

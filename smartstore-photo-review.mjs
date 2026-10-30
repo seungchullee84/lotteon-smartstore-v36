@@ -7,6 +7,7 @@ import {saveCareLabelSelection} from './smartstore-care-label.mjs';
 import sharp from 'sharp';
 import {readMainSelection,saveMainSelection} from './smartstore-main-selection.mjs';
 import {photoReviewChips} from './smartstore-photo-review-chips.mjs';
+import {readPhotoFileSelection,savePhotoFileSelection} from './smartstore-photo-file-selection.mjs';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const inventories=new Map(),thumbnails=new Map();
 const inventoryKey=(p,{dataRoot,photoRoots,desktop})=>JSON.stringify([path.resolve(dataRoot),p.style,p.sourceUrl,p.colors,photoRoots,desktop]);
@@ -20,6 +21,8 @@ export async function photoReview(product,{dataRoot,officialFolder,...options}){
  const key=inventoryKey(product,{...options,dataRoot}),inventory=new Map(await Promise.all(photos.map(async p=>[p.id,{file:p.file,stamp:stamp(await stat(p.file))}])));
  inventories.delete(key);inventories.set(key,inventory);while(inventories.size>3)inventories.delete(inventories.keys().next().value);
  const items=photos.map(p=>{const id=hash(p.bytes),mapping=saved.find(r=>r.hash===id&&r.reviewed)||draft.photoMapping?.files?.find(r=>r.hash===id);const care=draft.careLabels?.some(r=>r.sourceHash===id);return {id:p.id,hash:id,name:p.name,main:/^1(?:번)?\.(jpe?g|png|webp)$/i.test(p.name),color:mapping?.color||'',role:care?'care-label':roles.has(mapping?.role)?mapping.role:'',reviewed:!!mapping?.reviewed};});
+ const applied=new Map((await readPhotoFileSelection(dataRoot,product)).map(item=>[item.id,item]));
+ for(const item of items){const choice=applied.get(item.id);if(choice?.hash===item.hash){item.role=choice.role;item.color=choice.color;item.reviewed=true;}}
  const mainSelection=await readMainSelection(product,dataRoot);let mainId=mainSelection?items.find(p=>p.hash===mainSelection.sourceHash&&p.name===mainSelection.sourceName)?.id:items.filter(p=>p.main).length===1?items.find(p=>p.main).id:null;
  const revision=hash(JSON.stringify([product.style,product.sourceUrl,product.colors,items.map(p=>[p.id,p.name])]));
  let automatic;try{automatic=JSON.parse(await readFile(path.join(dataRoot,'smartstore-photo-color-drafts',product.style+'.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
@@ -58,7 +61,12 @@ export function validatePhotoReview(current,input){
  if(input.channel!=='smartstore'||input.style!==current.style||input.sourceUrl!==current.sourceUrl||input.revision!==current.revision)throw Error('상품 또는 사진 폴더가 변경됐습니다. 사진 목록을 다시 열어 주세요.');
  if(!Array.isArray(input.items)||input.items.length!==current.items.length)throw Error('모든 사진의 색상과 구도를 확인해 주세요.');
  const seen=new Set();for(const item of input.items){if(seen.has(item.id)||!current.items.some(p=>p.id===item.id)||!roles.has(item.role)||(!['care-label','excluded'].includes(item.role)&&!current.colors.includes(item.color)))throw Error('사진별 색상과 구도를 모두 선택해 주세요.');seen.add(item.id);}
- const duplicates=new Map();for(const item of input.items){const digest=current.items.find(p=>p.id===item.id).hash,selection=item.role+'|'+(['care-label','excluded'].includes(item.role)?'':item.color);if(duplicates.has(digest)&&duplicates.get(digest)!==selection)throw Error('동일한 원본 사진은 같은 색상·구도로 선택해 주세요.');duplicates.set(digest,selection);}
+ const duplicates=new Map();for(const item of input.items){
+  if(item.role==='excluded')continue;
+  const photo=current.items.find(p=>p.id===item.id),selection=item.role+'|'+(item.role==='care-label'?'':item.color),previous=duplicates.get(photo.hash);
+  if(previous&&previous.selection!==selection)throw Error('같은 사진인 '+previous.name+'와 '+photo.name+'의 색상·구도가 다릅니다. 사용할 사본만 남기고 나머지는 사용 안 함으로 지정해 주세요.');
+  duplicates.set(photo.hash,{selection,name:photo.name});
+ }
  if(input.items.filter(p=>p.role==='care-label').length>3)throw Error('케어라벨은 최대 3장입니다.');
  const mainId=input.mainId||current.mainId;const main=input.items.find(i=>i.id===mainId);if(!main||['care-label','excluded'].includes(main.role))throw Error('대표사진을 한 장 선택해 주세요. 케어라벨·사용 안 함 사진은 대표가 될 수 없습니다.');
  return input.items;
@@ -68,12 +76,15 @@ export async function savePhotoReview(product,input,{dataRoot,...options}){
  const photos=await findPhotos(product,{...options,dataRoot,includeExcluded:true});if(hash(JSON.stringify([product.style,product.sourceUrl,product.colors,photos.map(p=>[p.id,p.name])]))!==current.revision)throw Error('사진 폴더가 변경됐습니다. 다시 열어 주세요.');
  await saveMainSelection(product,photos.find(p=>p.id===(input.mainId||current.mainId)),dataRoot);
  const reviewedAt=new Date().toISOString(),root=path.join(dataRoot,'smartstore-details',product.style),draft=await draftFor(dataRoot,product);
- await savePhotoMappings(dataRoot,product,items.map(p=>({hash:current.items.find(i=>i.id===p.id).hash,color:['care-label','excluded'].includes(p.role)?'':p.color,role:p.role,reviewed:true,reviewedAt,reviewedBy:'사용자 사진 선택',reviewBasis:'등록기 사진별 색상·구도·사용 여부 직접 선택'})));
+ const activeHashes=new Set(items.filter(item=>item.role!=='excluded').map(item=>current.items.find(photo=>photo.id===item.id).hash));
+ const mappings=items.filter(item=>item.role!=='excluded'||!activeHashes.has(current.items.find(photo=>photo.id===item.id).hash));
+ await savePhotoMappings(dataRoot,product,mappings.map(p=>({hash:current.items.find(i=>i.id===p.id).hash,color:['care-label','excluded'].includes(p.role)?'':p.color,role:p.role,reviewed:true,reviewedAt,reviewedBy:'사용자 사진 선택',reviewBasis:'등록기 사진별 색상·구도·사용 여부 직접 선택'})));
  await mkdir(path.join(dataRoot,'smartstore-photo-label-cache'),{recursive:true});
- for(const p of items)await writeFile(path.join(dataRoot,'smartstore-photo-label-cache',current.items.find(i=>i.id===p.id).hash+'.json'),JSON.stringify({version:1,label:p.role==='care-label',reviewed:true}));
+ for(const p of mappings)await writeFile(path.join(dataRoot,'smartstore-photo-label-cache',current.items.find(i=>i.id===p.id).hash+'.json'),JSON.stringify({version:1,label:p.role==='care-label',reviewed:true}));
  draft.careLabels=await saveCareLabelSelection(root,photos.filter(p=>items.find(i=>i.id===p.id)?.role==='care-label'));
  draft.manualPhotoOrder={style:product.style,sourceUrl:product.sourceUrl,groups:current.colors.map(color=>({color,hashes:items.filter(item=>item.color===color&&!['care-label','excluded'].includes(item.role)).map(item=>current.items.find(photo=>photo.id===item.id).hash)}))};
  await mkdir(root,{recursive:true});await writeFile(path.join(root,'draft.json'),JSON.stringify({...draft,style:product.style,sourceUrl:product.sourceUrl},null,2));
  await savePhotoReviewDraft(product,{...input,mainId:input.mainId||current.mainId},{dataRoot,...options});
+ await savePhotoFileSelection(dataRoot,product,items.map(item=>({...item,hash:current.items.find(photo=>photo.id===item.id).hash,name:current.items.find(photo=>photo.id===item.id).name})));
  return {count:items.length};
 }
