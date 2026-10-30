@@ -1,5 +1,5 @@
 // Reusable wording recipes. Each requires matching evidence in THIS product.
-export const BENEFIT_RECIPE_VERSION='official-benefit-recipes-1';
+export const BENEFIT_RECIPE_VERSION='official-benefit-recipes-2';
 export function sourceBenefitRecipes(source){
  const text=String(source||'').replace(/\s+/g,' '),points=[];
  const rules=[
@@ -10,13 +10,15 @@ export function sourceBenefitRecipes(source){
   {id:'light-warm-filling',pattern:/가벼운\s*착용감과\s*풍성한\s*볼륨감\s*[,，]?\s*뛰어난\s*보온성을\s*제공/,title:'가볍고 따뜻한 착용감',description:'가벼운 착용감에 풍성한 볼륨과 보온성을 더했어요.',covered:/가벼|가볍|경량|보온/},
   {id:'wind-entry',pattern:/내부\s*인\s*플라켓과\s*소매\s*안쪽\s*이밴드로\s*찬바람\s*유입을\s*차단/,title:'찬바람 유입을 줄여 따뜻하게',description:'내부 플라켓과 소매 안쪽 밴드로 찬바람을 차단해요.',covered:/찬바람|바람.*차단/},
 
-  {id:'soft-touch',pattern:/(?:부드러운\s*(?:촉감|터치감)|부드럽고\s*(?:실키한|쾌적한)\s*(?:촉감|터치감)|소프트한\s*(?:촉감|터치감|텍스처))[^.]{0,60}?(?:제공|선사|특징|느껴|우수합니다|우수하며|더했|살렸)/,title:'부드럽게 닿는 촉감',description:'부드러운 촉감이 느껴지는 원단.',covered:/부드|소프트|실키/},
+  {id:'soft-touch',pattern:/(?:부드러운\s*(?:촉감|터치감)|부드럽고\s*(?:실키한|쾌적한)\s*(?:촉감|터치감)|소프트한\s*(?:촉감|터치감|텍스처))[^.]{0,60}?(?:제공|선사|특징|느껴|우수합니다|우수하며|더했|살렸|갖추)/,title:'부드럽게 닿는 촉감',description:'부드러운 촉감이 느껴지는 원단.',covered:/부드|소프트|실키/},
+  {id:'durable',pattern:/(?:우수한|뛰어난|높은)\s*내구성/,title:'오래 입기 좋은 내구성',description:'우수한 내구성을 갖췄어요.',covered:/내구|오래\s*입/},
+  {id:'daily-styling',pattern:/다양한\s*스타일링(?:이|에)?\s*가능|단독\s*(?:및|과)\s*레이어드\s*착용에?\s*(?:용이|좋|적합)/,title:'다양한 스타일링에 활용',description:'다양한 스타일링에 활용하기 좋아요.',covered:/코디|매치|스타일링|활용|레이어드/},
   {id:'breathable',pattern:/통기성(?:이|을)?\s*(?:뛰어나|우수|좋|높)[^.]{0,45}?(?:착용감|쾌적|시원)|통기성이\s*뛰어나/,title:'통기성을 살린 쾌적함',description:'우수한 통기성으로 쾌적하게 입어요.',covered:/통기|쾌적|흡습|속건/},
   {id:'wash-shape',pattern:/세탁\s*후(?:에도)?[^.]{0,80}?(?:변형|수축)[^.]{0,25}?(?:최소화|최소|방지|줄였|거의\s*없)/,title:'세탁 후에도 깔끔하게',description:'세탁 후 변형 부담을 줄여 깔끔하게.',covered:/세탁|수축|변형|워싱으로.*안정/},
   {id:'flexible',pattern:/신축성(?:이|을|과)?\s*(?:뛰어나|우수|좋|더해|더한)[^.]{0,45}?(?:편안|활동성|착용감)|신축성이\s*뛰어나/,title:'움직일 때도 유연하게',description:'뛰어난 신축성으로 편안하게 움직여요.',covered:/신축|유연|움직임|활동성|사방.*스판/},
   {id:'easy-care',pattern:/구김(?:이)?[^.]{0,30}?(?:덜\s*가|적고)[^.]{0,30}?(?:관리(?:가)?\s*용이|관리하기\s*편)/,title:'구김 부담 줄인 관리',description:'구김이 덜 가고 관리하기 편안해요.',covered:/구김|관리/},
   {id:'versatile',pattern:/(?:다양한|어떠한)\s*(?:상의|하의|아이템)[^.]{0,35}?(?:매치(?:하기)?\s*(?:좋|가능)|매치\s*가능|코디(?:하기)?\s*좋|활용)/,title:'다양한 코디에 두루',description:'다양한 아이템과 매치하기 좋아요.',covered:/코디|매치|스타일링|활용/},
-  {id:'relaxed-comfort',pattern:/(?:여유로운|넉넉한)\s*(?:핏|실루엣)[^.]{0,70}?(?:편안한\s*착용감|편안하게\s*착용|부담\s*없이\s*착용)/,title:'여유롭게 편안한 착용감',description:'여유 있는 실루엣으로 편안하게 입어요.',covered:/여유|넉넉|편안한.*착용감|체형.*커버/},
+  {id:'relaxed-comfort',pattern:/(?:여유로운|넉넉한|여유의|여유감의)\s*(?:핏|실루엣)[^.]{0,70}?(?:편안한\s*착용감|편안하게\s*착용|부담\s*없이\s*착용)/,title:'여유롭게 편안한 착용감',description:'여유 있는 실루엣으로 편안하게 입어요.',covered:/여유|넉넉|편안한.*착용감|체형.*커버/},
   {id:'thermal',pattern:/(?:보온성|보온력)(?:이|을|도)?\s*(?:우수|뛰어나|좋|높)[^.]{0,45}?(?:따뜻|착용)|우수한\s*보온성[^.]{0,35}?(?:제공|선사|유지|구현|완성)/,title:'쌀쌀할 때도 따뜻하게',description:'보온성을 더해 따뜻하게 입어요.',covered:/보온|따뜻|포근/},
   {id:'practical-pocket',pattern:/(?:포켓|주머니)[^.]{0,45}?(?:간편한\s*수납|수납이?\s*(?:가능|편리)|실용성|편리한\s*수납)/,title:'소지품을 간편하게',description:'편리한 포켓으로 간편하게 수납해요.',covered:/포켓|주머니|수납/},
   {id:'two-way-layering',pattern:/(?:풀\s*집업\s*및\s*)?투웨이\s*지퍼[^.]{0,95}?(?:레이어드\s*(?:연출이?\s*)?(?:가능|가능합니다)|레이어드\s*연출)/i,title:'지퍼 하나로 다양한 연출',description:'투웨이 지퍼로 다양한 레이어드 코디.',covered:/투웨이|하이넥.*카라|지퍼.*연출/},
