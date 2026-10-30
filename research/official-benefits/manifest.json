@@ -3592,6 +3592,13 @@
       ]
     },
     {
+      "pno": "602755DCC0177F7AB9FD73D86BC9EB54",
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=602755DCC0177F7AB9FD73D86BC9EB54&ctype=1",
+      "categories": [
+        "남성 ALL"
+      ]
+    },
+    {
       "pno": "60283C0D0A4B69F71CDA553552F365B0",
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=60283C0D0A4B69F71CDA553552F365B0&ctype=1",
       "categories": [
@@ -10049,9 +10056,9 @@
   "sourceComplete": 1425,
   "imageComplete": 1360,
   "withThreeOrFour": 443,
-  "phase": "discover",
+  "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-30T07:13:24.199Z",
+  "updatedAt": "2026-10-30T07:34:12.666Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-30T07:13:09.526Z",
@@ -18700,7 +18707,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           }
         ]
       },
@@ -18819,7 +18826,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -18843,7 +18850,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -19384,7 +19391,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -19408,7 +19415,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -19654,7 +19661,7 @@
             "changes": [
               "공식 상세이미지 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "new",
