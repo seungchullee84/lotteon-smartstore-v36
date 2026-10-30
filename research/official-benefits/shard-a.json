@@ -604,8 +604,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-30T04:53:56.837Z",
-      "analyzedAt": "2026-10-30T05:00:24.025Z"
+      "observedAt": "2026-10-30T05:26:12.215Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2292,8 +2292,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T04:53:59.652Z",
-      "analyzedAt": "2026-10-30T05:00:24.045Z"
+      "observedAt": "2026-10-30T05:26:14.704Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2325,8 +2325,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T04:54:27.661Z",
-      "analyzedAt": "2026-10-30T05:00:24.589Z"
+      "observedAt": "2026-10-30T05:26:42.579Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3152,8 +3152,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-30T04:54:53.543Z",
-      "analyzedAt": "2026-10-30T05:00:25.001Z"
+      "observedAt": "2026-10-30T05:27:08.544Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3261,8 +3261,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-30T04:54:20.015Z",
-      "analyzedAt": "2026-10-30T05:00:24.438Z"
+      "observedAt": "2026-10-30T05:26:35.354Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3491,8 +3491,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T04:54:43.110Z",
-      "analyzedAt": "2026-10-30T05:00:24.777Z"
+      "observedAt": "2026-10-30T05:26:57.795Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3697,8 +3697,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-30T04:54:20.476Z",
-      "analyzedAt": "2026-10-30T05:00:24.442Z"
+      "observedAt": "2026-10-30T05:26:36.539Z",
+      "analyzedAt": null
     }
   ]
 }
