@@ -18,3 +18,8 @@ test('카키를 올리브·그린으로 부르지 않고 토프·다크네이비
  assert.match(colorCaption('01워시드올리브'),/차분|올리브|그린/);assert.notEqual(colorCaption('토프'),colorCaption('알 수 없음'));assert.notEqual(colorCaption('다크네이비'),colorCaption('네이비'));assert.notEqual(colorCaption('라이트베이지'),colorCaption('다크베이지'));assert.notEqual(colorCaption('더스티블루'),colorCaption('블루'));
  for(const [,values]of COLOR_CAPTION_GROUPS)for(const text of values){assert(text.length<=14,text);assert.doesNotMatch(text,/보온|기모|신축|방수|면100|울100/);}
 });
+
+test('그레이지·그레이시블루·포레스트그린은 고유 색조와 상품별 안정된 문구를 사용한다',()=>{
+ for(const color of ['02그레이지','04그레이시블루','03포레이스트그린','03포레스트그린']){const styles=['326921','326922','326923','326924','326925','326926'];const captions=styles.map(style=>colorCaption(color,{style}));assert(new Set(captions).size>1);for(let i=0;i<styles.length;i++){assert.equal(captions[i],colorCaption(color,{style:styles[i]}));assert(captions[i].length<=14);assert.doesNotMatch(captions[i],/보온|기모|신축|방수/);}}
+ assert.match(colorCaption('그레이지'),/뉴트럴/);assert.match(colorCaption('그레이시블루'),/블루/);assert.match(colorCaption('포레이스트그린'),/초록/);
+});
