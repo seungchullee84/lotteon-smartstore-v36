@@ -24,6 +24,6 @@ test('MP4 range·suffix·HEAD·범위 오류 응답과 로컬 재생 옵션',asy
   }
   for(const range of ['bytes=999-','bytes=8-4','bytes=','bytes=-0','bytes=1-2,4-5']){const res=await fetch(url,{headers:{Range:range}});assert.equal(res.status,416);}
   const head=await fetch(url,{method:'HEAD'});assert.equal(head.headers.get('content-length'),String(fixtureVideo.length));assert.equal((await head.arrayBuffer()).byteLength,0);
-  const html=brandVideoHtml('detail_브랜드영상.mp4');assert.match(html,/controls autoplay muted loop playsinline/);assert.match(html,/aspect-ratio:9\/14/);assert.doesNotMatch(html,/iframe|youtube|<script/);
+  const html=brandVideoHtml('detail_브랜드영상.mp4');assert.match(html,/controls autoplay muted loop playsinline/);assert.match(html,/height:auto;object-fit:contain/);assert.doesNotMatch(html,/aspect-ratio|iframe|youtube|<script/);
  }finally{await new Promise(r=>server.close(r));await rm(root,{recursive:true,force:true});}
 });
