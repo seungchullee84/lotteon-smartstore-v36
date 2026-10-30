@@ -1,5 +1,5 @@
 import sharp from 'sharp';import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,writeFile,readFile} from 'node:fs/promises';import path from 'node:path';import os from 'node:os';
-import {websiteCheckDue,BENEFIT_CHECK_INTERVAL,officialProductFingerprint,fetchOfficialDetailVersion,saveWebsiteCheck,changedOfficialProducts} from '../benefit-updates.mjs';
+import {websiteCheckDue,BENEFIT_CHECK_INTERVAL,MAX_OFFICIAL_DETAIL_BYTES,officialProductFingerprint,fetchOfficialDetailVersion,saveWebsiteCheck,changedOfficialProducts} from '../benefit-updates.mjs';
 import {sharedWebsiteState} from '../benefit-sharing.mjs';
 const id='a'.repeat(32),url='https://www.giordano.co.kr/shop/detail.php?pno='+id+'&ctype=1',hash='b'.repeat(64);
 const item=(extra={})=>({style:'375908',rawName:'여성 경량 패딩 자켓',sourceUrl:url,pageHash:'c'.repeat(64),detailHash:hash,detailImageVerified:true,...extra});
@@ -17,6 +17,14 @@ test('같은 주소의 이미지도 조건부 요청으로 재확인하고 변�
 });
 test('HTTP 200 안내 HTML과 손상 파일은 상세이미지 변경으로 인정하지 않는다',async()=>{
  for(const bytes of [Buffer.from('<!DOCTYPE html><html>안내 페이지</html>'),Buffer.from('broken-image')])await assert.rejects(fetchOfficialDetailVersion('https://www.giordano.co.kr/detail.jpg',null,async()=>({status:200,bytes})),/실제 상세이미지가 아닌/);
+});
+
+test('24MB를 넘는 정상 공식 상세이미지도 검증하고 96MiB 초과는 제한한다',async()=>{
+ const image=await sharp({create:{width:4,height:8,channels:3,background:'white'}}).jpeg().toBuffer();
+ const bytes=Buffer.concat([image,Buffer.alloc(24*1024*1024)]);
+ const version=await fetchOfficialDetailVersion('https://www.giordano.co.kr/detail.jpg',null,async()=>({status:200,bytes}));
+ assert.match(version.detailHash,/^[a-f0-9]{64}$/);assert.equal(version.bytes,bytes);
+ await assert.rejects(fetchOfficialDetailVersion('https://www.giordano.co.kr/detail.jpg',null,async()=>({status:200,bytes:Buffer.alloc(MAX_OFFICIAL_DETAIL_BYTES+1)})),/용량/);
 });
 test('최초 기준선은 알리지 않고 이후 신상품·본문·이미지 변경만 별도 배치로 기록',async()=>{
  const dir=await mkdtemp(path.join(os.tmpdir(),'benefit-update-'));try{

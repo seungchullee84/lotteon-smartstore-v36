@@ -3,6 +3,7 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 export const BENEFIT_CHECK_INTERVAL=20*60*1000;
+export const MAX_OFFICIAL_DETAIL_BYTES=96*1024*1024;
 const verifiedHash=value=>typeof value==='string'&&/^[a-f0-9]{64}$/i.test(value);
 const digest=value=>createHash('sha256').update(value).digest('hex');
 export function websiteCheckDue(state,now=Date.now()){return !state?.checkedAt||now-Date.parse(state.checkedAt)>=BENEFIT_CHECK_INTERVAL;}
@@ -15,7 +16,7 @@ export async function fetchOfficialDetailVersion(url,previous,request,{localImag
  const response=await request(url,headers);
  if(response.status===304){if(!reusable||!Object.keys(headers).length)throw Error('공식 이미지 변경 확인 응답을 검증하지 못했습니다.');return {bytes:null,detailHash:previous.detailHash,detailValidators:previous.detailValidators};}
  if(response.status!==200)throw Error('공식 이미지 응답 '+response.status);
- const bytes=response.bytes;if(!Buffer.isBuffer(bytes)||bytes.length>24000000)throw Error('공식 이미지 원본 용량을 확인해 주세요.');
+ const bytes=response.bytes;if(!Buffer.isBuffer(bytes)||bytes.length>MAX_OFFICIAL_DETAIL_BYTES)throw Error('공식 이미지 원본 용량을 확인해 주세요.');
  try{const metadata=await sharp(bytes).metadata();if(!metadata.width||!metadata.height||!['jpeg','png','webp','gif','avif','tiff'].includes(metadata.format))throw Error();await sharp(bytes).resize(1,1).raw().toBuffer();}catch{throw Error('실제 상세이미지가 아닌 응답입니다. 안내 페이지·손상 파일은 변경에서 제외합니다.');}
  return {bytes,detailHash:digest(bytes),detailValidators:{etag:response.headers?.etag||null,lastModified:response.headers?.['last-modified']||null}};
 }
