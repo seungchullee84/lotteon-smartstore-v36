@@ -540,15 +540,15 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "d71e2c515a8c80823d4dee4f54ff2c3d43d86d914d5d78c537e1a9887bbc6348",
+      "pageHash": "c3785cf68bb57352adfa1bd845be796e4d257d3e7553edfdd237a7cdc623d219",
       "pageText": "폴라플리스 홈웨어 크루넥 탑입니다.\n\n가벼우면서 포근한 180g/sqm(255g/yd) 중량의 부드러운 필(pill)이 특징인 플리스 원단으로, \n부드럽고 보온성이 뛰어납니다.\n\n베이직한 디자인과 깔끔한 단색 컬러로 여유 있는 품과 U넥 라인 덕분에 답답하지 않아 편안한 착용감이 특징입니다.\n\n가슴에는 ‘DREAM’이라는 테마로 컬러 매칭된 3D 자수를 더해 작은 그래픽 포인트로 재미를 더했습니다.\n\n겨울철 집에서나 가벼운 외출 시에도 착용이 가능한 활용도 높은 폴라 플리스 크루넥으로 따뜻한 겨울을 보내 보세요.\n*동일 컬러의 팬츠(05-55-4916)와 셋업으로도 착용 가능한 스타일입니다",
       "imageText": "",
       "imageScanComplete": false,
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-30T01:41:37.842Z",
-      "analyzedAt": "2026-10-30T01:47:27.877Z"
+      "observedAt": "2026-10-30T02:41:59.847Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1786,8 +1786,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T01:41:50.248Z",
-      "analyzedAt": "2026-10-30T01:47:28.308Z"
+      "observedAt": "2026-10-30T02:42:15.461Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2318,8 +2318,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T01:41:48.892Z",
-      "analyzedAt": "2026-10-30T01:47:28.261Z"
+      "observedAt": "2026-10-30T02:42:13.232Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2371,15 +2371,15 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "dea3bf3de11061c173ff3735e4db1a716a76331c002a063deaf6265104ac0206",
+      "pageHash": "19dd91a95683addc2e63a65faae66ff597087824cde267e85de5224c814e1a39",
       "pageText": "",
       "imageText": "",
       "imageScanComplete": false,
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-30T01:41:34.628Z",
-      "analyzedAt": "2026-10-30T01:47:27.788Z"
+      "observedAt": "2026-10-30T02:41:55.910Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
