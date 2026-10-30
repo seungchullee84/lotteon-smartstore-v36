@@ -10056,16 +10056,16 @@
   "sourceComplete": 1427,
   "imageComplete": 1361,
   "withThreeOrFour": 444,
-  "phase": "discover",
+  "phase": "complete",
   "startedAt": "2026-10-27T05:53:33.467Z",
   "updatedAt": "2026-10-30T12:36:11.403Z",
   "websiteCheck": {
     "version": 1,
-    "checkedAt": "2026-10-30T12:36:01.988Z",
-    "nextCheckAt": "2026-10-30T12:56:01.988Z",
+    "checkedAt": "2026-10-30T12:56:29.215Z",
+    "nextCheckAt": "2026-10-30T13:16:29.215Z",
     "baselineAt": "2026-10-28T00:19:36.206Z",
     "baselineReady": true,
-    "errors": 19,
+    "errors": 1455,
     "products": {
       "6D1FCB29E5811EA0E105CFFF4AAFD6DA": {
         "pageHash": "a83a8139a85e36d5e8d5574d0940ac009fa6007d3b5a83d18851aa7ad40885b3",
@@ -20625,6 +20625,11 @@
       {
         "id": "382570e423b1854bdadb",
         "checkedAt": "2026-10-30T12:36:01.988Z",
+        "events": []
+      },
+      {
+        "id": "7abe5b2c9f767c46ad56",
+        "checkedAt": "2026-10-30T12:56:29.215Z",
         "events": []
       }
     ]
