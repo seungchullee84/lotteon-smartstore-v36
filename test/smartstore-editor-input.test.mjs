@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-import {waitForSmartstoreEditorInput,focusSmartstoreEditorInput} from '../smartstore-detail-upload.mjs';
+import {waitForSmartstoreEditorInput,focusSmartstoreEditorInput,attachSmartstorePhoto} from '../smartstore-detail-upload.mjs';
 
 test('숨겨진 사진 캡션과 숨겨진 본문 앞에서도 실제 표시된 입력 문단으로 준비를 확인한다',async()=>{
  const browser=await chromium.launch({headless:true});
@@ -53,5 +53,32 @@ test('사진 첨부 뒤 커서 클릭이 body에 초점을 남겨도 기존 입�
   await focusSmartstoreEditorInput(editor);
   assert.equal(await editor.evaluate(()=>document.activeElement.id),'input_buffer1');
   assert.equal(await editor.locator('.se-component.se-image').textContent(),'기존 사진');
+ }finally{await browser.close();}
+});
+
+for(const alreadyOpen of [false,true])test('사진 선택 창의 내 사진 버튼을 사용하고 과거 파일 입력은 건드리지 않는다 · '+(alreadyOpen?'열린 창':'새 창'),async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const editor=await browser.newPage();
+  await editor.setContent(`<button data-group="documentToolbar" data-name="image" onclick="window.toolbarClicks=(window.toolbarClicks||0)+1;document.querySelector('[role=dialog]').hidden=false">사진</button><input id="stale" type="file" hidden onchange="window.staleUploads=(window.staleUploads||0)+1"><div role="dialog" ${alreadyOpen?'':'hidden'}><h4>내 사진 불러오기</h4><button onclick="document.querySelector('#current').click()">내 사진</button><input id="current" type="file" accept="image/png" hidden onchange="window.photoUploads=(window.photoUploads||0)+1;document.querySelector('[role=dialog]').hidden=true"></div><button onclick="window.registered=true">등록</button>`);
+  const bytes=Buffer.from('current photo fixture');
+  await attachSmartstorePhoto(editor,{name:'current.png',mimeType:'image/png',buffer:bytes});
+  assert.equal(await editor.evaluate(()=>window.staleUploads||0),0);
+  assert.equal(await editor.evaluate(()=>window.photoUploads),1);
+  assert.equal(await editor.evaluate(()=>window.toolbarClicks||0),alreadyOpen?0:1);
+  assert.equal(await editor.locator('#current').evaluate(n=>n.files[0].name),'current.png');
+  assert.equal(await editor.evaluate(()=>window.registered),undefined);
+  assert.equal(editor.listenerCount('filechooser'),0);
+ }finally{await browser.close();}
+});
+
+test('사진 툴바가 파일 선택기를 바로 여는 경우에도 한 번만 첨부한다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const editor=await browser.newPage();
+  await editor.setContent('<button data-group="documentToolbar" data-name="image" onclick="document.querySelector(\'input\').click()">사진</button><input type="file" hidden onchange="window.uploads=(window.uploads||0)+1">');
+  await attachSmartstorePhoto(editor,{name:'direct.png',mimeType:'image/png',buffer:Buffer.from('fixture')});
+  assert.equal(await editor.evaluate(()=>window.uploads),1);
+  assert.equal(editor.listenerCount('filechooser'),0);
  }finally{await browser.close();}
 });
