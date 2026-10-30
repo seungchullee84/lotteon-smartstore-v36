@@ -31,7 +31,9 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  let draft=null;try{draft=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(draft&&(String(draft.style)!==style||draft.sourceUrl!==product.sourceUrl))throw Error('상세페이지 준비 자료의 품번·공식 출처가 현재 상품과 다릅니다.');
  const imported=draft?.acceptAllFolderPhotos?null:importedPhotoSelection(product,draft);
- const prepared={style,includeBrandVideo:true,colorImages:{},colorSources:{},storeColorPhotoHashes:{},sellingPoints:[],photoCount:0,photoFiles:{},providedImages:[],sourceUrl:product.sourceUrl,displayColors:[...product.colors]};
+ const prepared={style,includeBrandVideo:true,colorImages:{},colorSources:{},photoSources:{},storeColorPhotoHashes:{},sellingPoints:[],photoCount:0,photoFiles:{},providedImages:[],sourceUrl:product.sourceUrl,displayColors:[...product.colors]};
+ let officialMainHash=null;
+ if(product.images?.main)try{officialMainHash=createHash('sha256').update(await readFile(path.join(folder,'main.jpg'))).digest('hex');}catch(e){if(e.code!=='ENOENT')throw e;}
  if(draft){
   if(draft.headline)prepared.headline=String(draft.headline).slice(0,200);
   if(draft.sellingPoints){if(!Array.isArray(draft.sellingPoints)||draft.sellingPoints.some(p=>!p.title||!p.description||!p.evidence))throw Error('소구점의 공식 확인 근거를 함께 저장해 주세요.');prepared.sellingPoints=draft.sellingPoints.slice(0,4);}
@@ -62,14 +64,20 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
   const hash=createHash('sha256').update(bytes).update(draft?.acceptAllFolderPhotos?canonical:'').digest('hex').slice(0,24);const name='smartstore-photo-'+hash+'.jpg';
   await writeFile(path.join(folder,name),await readFile(await workingProductPhoto({bytes},product,{dataRoot})));
   const src='/smartstore-photo/'+hash;prepared.photoFiles[src]=name;
+  if(sourceDigest===officialMainHash)prepared.photoSources[src]='official-model';
   prepared.colorImages[color]||=[];
   if(!prepared.colorImages[color].includes(src)){prepared.colorImages[color].push(src);(prepared.storeColorPhotoHashes[color]||=[]).push(sourceHash);prepared.photoCount++;}
  };
  if(draft?.acceptAllFolderPhotos){
   const photos=await findPhotos(product,{photoRoots:await configuredPhotoRoots()});
   const substitutions=[];
-  const rank=photo=>{const digest=createHash('sha256').update(photo.bytes).digest('hex'),record=draft.photoMapping?.files?.find(r=>r.name===photo.name&&r.hash===digest),order=draft.importedColorPhotos?.find(g=>g.color===record?.color)?.hashes||[],index=order.indexOf(digest);return index<0?100:index;};
-  photos.sort((a,b)=>rank(a)-rank(b));
+  const rank=photo=>{
+   const digest=createHash('sha256').update(photo.bytes).digest('hex'),record=draft.photoMapping?.files?.find(r=>r.name===photo.name&&r.hash===digest);
+   const color=product.colors.indexOf(record?.color),role=['front','back','side','detail'].indexOf(record?.role);
+   const order=draft.importedColorPhotos?.find(g=>g.color===record?.color)?.hashes||[],index=order.indexOf(digest);
+   return [color<0?999:color,digest===draft.listingImages?.main?.sourceHash?0:1,role<0?99:role,index<0?999:index];
+  };
+  photos.sort((a,b)=>{const ar=rank(a),br=rank(b);for(let i=0;i<ar.length;i++)if(ar[i]!==br[i])return ar[i]-br[i];return a.file.localeCompare(b.file);});
   for(const photo of photos){
    const digest=createHash('sha256').update(photo.bytes).digest('hex'),record=draft.photoMapping?.files?.find(r=>r.name===photo.name&&r.hash===digest);
    const replacement=(draft.editedPhotoReplacements||[]).find(r=>r.sourceHash===digest&&r.sourceName===photo.name);

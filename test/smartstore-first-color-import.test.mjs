@@ -95,7 +95,7 @@ test('품번 폴더는 동일 원본·과거 제외·미분류 여부와 관계�
   await mkdir(f.options.dataRoot,{recursive:true});await writeFile(path.join(f.options.dataRoot,'smartstore-photo-exclusions.json'),JSON.stringify([{sha256:hash,reason:'과거 다른 작업의 제외 기록'}]));
   const prepare=()=>prepareSmartstoreWithColorRecovery(f.product,f.folder,{...f.options,readSource:()=>assert.fail('신뢰 폴더의 사진을 다시 찾으러 판매자센터에 접근하면 안 됨')});
   const p=await prepare();assert.equal(p.smartstoreDetail.photoCount,5);assert.equal(p.smartstoreDetail.pendingPhotoCount,0);assert.equal(p.smartstoreDetail.providedImages.length,5);
-  for(const detailTemplate of [1,2]){const html=buildSmartstoreDetail({...p,detailTemplate}).html;for(const src of p.smartstoreDetail.providedImages)assert(html.includes(src));assert(html.includes('data-folder-photo-block'));assert(html.includes('착용 모습과 디테일'));assert(!html.includes('data-mannequin-unclassified'));}
+  for(const detailTemplate of [1,2]){const html=buildSmartstoreDetail({...p,detailTemplate}).html;for(const src of p.smartstoreDetail.providedImages)assert(html.includes(src));}
   const file=path.join(f.options.dataRoot,'smartstore-details',f.product.style,'draft.json'),draft=JSON.parse(await readFile(file,'utf8'));draft.photoMapping.ignoredPhotos=[{hash,reason:'이전 제외'}];await writeFile(file,JSON.stringify(draft));
   const again=await prepare();assert.equal(again.smartstoreDetail.photoCount,5);assert.deepEqual(await readFile(path.join(f.photos,'1.jpg')),f.bytes[0]);
  }finally{await rm(f.root,{recursive:true,force:true});}

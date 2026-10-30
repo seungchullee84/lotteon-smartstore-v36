@@ -19,10 +19,7 @@ test('품번 폴더를 API 없이 신뢰하되 미매칭 사진도 색상명 없
   const prepared=await prepareSmartstoreAuto(product,folder,options),files=await prepareListingImages(prepared,folder,options);
   assert.equal(files.extras.length,0,'미확정 각도 사진은 추가에 섞지 않음');assert.equal(prepared.smartstoreDetail.photoCount,2);assert.equal(prepared.smartstoreDetail.providedImages.length,2);assert.equal(prepared.smartstoreDetail.pendingPhotoCount,0);assert.deepEqual(prepared.smartstoreDetail.colorImages,{});
   const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'draft.json'),'utf8'));assert.equal(draft.careLabels.length,1);assert.equal(draft.trustedFolder,true);
-  const review=(await listingPreview(prepared,options)).photoReview;
-  assert.equal(review.status,'ready','품번 폴더 사진은 분류 대기 없이 템플릿에 배치한다');
-  assert.equal(review.layout,'folder-gallery');assert.equal(review.unclassified,0);
-  assert.match(review.message,/템플릿에 배치/);assert(!review.message.includes('미분류'));
+  assert.equal((await listingPreview(prepared,options)).photoReview.status,'needs-review','전체 사진을 보존해도 미분류 색상·각도를 연결 완료로 표시하지 않음');
   const html=buildSmartstoreDetail(prepared).html;assert(!html.includes('data-mannequin-unclassified'));assert(!html.includes('https://example.com/unmatched.jpg'));assert(prepared.smartstoreDetail.providedImages.every(src=>html.includes(src)));
   for(const record of draft.photoMapping.files)if(record.role==='provided'){record.role=record.name==='1.jpg'?'front':'side';record.color='01그레이';}
   draft.photoMapping.ignoredPhotos=[{hash:'f'.repeat(64),reason:'확인 후 제외한 사진'}];await writeFile(path.join(dataRoot,'smartstore-details',product.style,'draft.json'),JSON.stringify(draft));

@@ -36,10 +36,8 @@ export async function listingManifest(product,{dataRoot}){
  const mainColor=draft.listingImages.main?.color;
  const missingFrontColors=(product.colors||[]).filter(color=>color!==mainColor&&records.some(r=>r.color===color)&&!records.some(r=>r.color===color&&r.role==='front'));
  const automatic=records.filter(r=>r.automatic===true&&r.reviewed!==true).length;
- const folderGallery=draft.trustedFolder===true&&draft.acceptAllFolderPhotos===true;
- const needsReview=!folderGallery&&(unclassified>0||missingFrontColors.length>0||automatic>0);
- const galleryPhotoCount=records.filter(r=>r.role!=='care-label').length;
- const photoReview={status:needsReview?'needs-review':'ready',layout:folderGallery?'folder-gallery':'color-groups',unclassified:folderGallery?0:unclassified,galleryPhotoCount:folderGallery?galleryPhotoCount:0,missingFrontColors:folderGallery?[]:missingFrontColors,automatic:folderGallery?0:automatic,message:folderGallery?'품번 폴더 사진 '+galleryPhotoCount+'장 · 착용·디테일 템플릿에 배치':needsReview?'색상·정면·옆면 연결 확인 필요'+(unclassified?' · 사진 '+unclassified+'장':'')+(missingFrontColors.length?' · 정면 미확인 '+missingFrontColors.join(', '):'')+(automatic?' · 자동 판별 확인 필요 '+automatic+'장':''):''};
+ const needsReview=unclassified>0||missingFrontColors.length>0||automatic>0;
+ const photoReview={status:needsReview?'needs-review':'ready',unclassified,missingFrontColors,automatic,message:needsReview?'폴더 사진은 모두 상세에 보존했습니다. 색상·정면·옆면 연결 확인 필요'+(unclassified?' · 미분류 '+unclassified+'장':'')+(missingFrontColors.length?' · 정면 미확인 '+missingFrontColors.join(', '):'')+(automatic?' · 자동 판별 확인 필요 '+automatic+'장':''):''};
  return withOfficialMain(product,{...draft.listingImages,photoReview,detailRevision:hash(Buffer.from(JSON.stringify(draft)+'|'+PHOTO_WORK_VERSION))});
 }
 export async function listingPreview(product,options){
