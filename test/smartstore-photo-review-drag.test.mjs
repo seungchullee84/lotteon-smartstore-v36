@@ -4,7 +4,7 @@ test('같은 색상 드래그는 순서를 저장·복원하며 다른 색상으
  const data={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=drag',revision:'test-revision',colors:['01화이트','02블랙'],mainId:'a',items:[{id:'a',name:'1.jpg',color:'01화이트',role:'detail',roleDefaulted:true,main:true},{id:'b',name:'2.jpg',color:'01화이트',role:'front',main:false},{id:'c',name:'3.jpg',color:'02블랙',role:'detail',roleDefaulted:true,main:false}]};let lastSaved;
  const browser=await chromium.launch({headless:true});try{const page=await browser.newPage({viewport:{width:1200,height:1000}});page.setDefaultTimeout(8000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.route('http://review.test/**',async route=>{const url=new URL(route.request().url());let body={},type='application/json';
- if(url.pathname==='/'){type='text/html';body='<div id="photoPreparationStatus"></div><div id="error"></div><script>window.activeChannel=()=>"smartstore";</script><script src="/smartstore-photo-review.js"></script>';}
+ if(url.pathname==='/'){type='text/html';body='<meta charset="utf-8"><div id="photoPreparationStatus"></div><div id="error"></div><script>window.activeChannel=()=>"smartstore";</script><script src="/smartstore-photo-review.js"></script>';}
  else if(url.pathname==='/smartstore-photo-review.js'){body=js;type='text/javascript';}else if(url.pathname==='/smartstore-photo-review.css'){body=css;type='text/css';}
  else if(url.pathname==='/api/state')body={busy:false,product:{style:data.style}};
  else if(url.pathname==='/api/smartstore-photo-review')body=data;
