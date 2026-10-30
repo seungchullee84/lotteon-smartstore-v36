@@ -23,7 +23,7 @@ test('두 템플릿 팔레트는 확인된 정면만 표시하고 다른 사진�
 
 test('기본 템플릿1과 명시적으로 선택한 템플릿2는 독립적으로 보존한다',()=>{
  const base={...product,detailTemplate:undefined},one=buildSmartstoreDetail(base),two=buildSmartstoreDetail({...base,detailTemplate:2});
- assert.equal(one.templateVariant,1);assert.equal(one.templateLabel,'템플릿 1');assert(one.html.indexOf('data-product-intro')<one.html.indexOf('data-official-detail'));assert(one.html.indexOf('data-brand-intro')<one.html.indexOf('data-product-point-heading'));assert(one.html.indexOf('data-brand-intro')<one.html.indexOf('data-brand-video-heading'));assert(one.html.indexOf('data-brand-video-heading')<one.html.indexOf('data-store-banner'));assert(!one.html.includes('data-aida-action'));
+ assert.equal(one.templateVariant,1);assert.equal(one.templateLabel,'템플릿 1');assert(one.html.indexOf('data-product-intro')<one.html.indexOf('data-official-detail'));assert(!one.html.includes('data-brand-intro'));assert(one.html.indexOf('data-brand-video-heading')<one.html.indexOf('data-store-banner'));assert(!one.html.includes('data-aida-action'));
  assert.equal(two.templateVariant,2);assert.equal(two.templateLabel,'템플릿 2');assert(two.html.indexOf('data-product-intro')<two.html.indexOf('data-brand-video-heading'));assert(one.html.includes('data-aida="attention"'));assert(two.html.includes('data-intro-layout="title-and-benefits"'));assert(!two.html.includes('data-aida-action'));
  assert.throws(()=>buildSmartstoreDetail({...base,detailTemplate:3}),/템플릿 1 또는 2/);
 });

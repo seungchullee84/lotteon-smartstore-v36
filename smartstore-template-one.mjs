@@ -1,4 +1,3 @@
-import {BRAND_INTRO_ASSET_NAMES} from './smartstore-brand-intro.mjs';
 import {storeBannerAsset,STORE_BANNER_ASSET_NAMES} from './smartstore-store-banner.mjs';
 import {buildDetailContent} from './detail-html.mjs';
 import {sellingPointIcon} from './smartstore-point-icons.mjs';
@@ -7,7 +6,7 @@ import {brandVideoHtml,brandVideoHeadingHtml,productVideoUrl} from './smartstore
 import {officialSellingPoints,displaySellingPoints} from './smartstore-selling-points.mjs';
 
 export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-aida-20261027';
-export const TEMPLATE_ASSET_NAMES=['brand-intro.jpg',...BRAND_INTRO_ASSET_NAMES,'giordano-official.png','lotte-department-official.png','benefits.jpg','shipping.jpg','returns.jpg','store.jpg',...STORE_BANNER_ASSET_NAMES,'GowunDodum-Regular.ttf'];
+export const TEMPLATE_ASSET_NAMES=['giordano-official.png','lotte-department-official.png','benefits.jpg','shipping.jpg','returns.jpg','store.jpg',...STORE_BANNER_ASSET_NAMES,'GowunDodum-Regular.ttf'];
 export const TEMPLATE_ASSET_BASE='https://raw.githubusercontent.com/seungchullee84/lotteon-smartstore-v36/main/public/smartstore-template/';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const style='font-family:GowunDodum,\'Malgun Gothic\',sans-serif;color:#25372e;word-break:keep-all;overflow-wrap:break-word;line-height:2.1;';
@@ -61,7 +60,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  if(paletteGroups.length){
   palette=divider+`<section data-aida="desire" style="padding:72px 3% 64px;">${header('COLOR PALETTE',paletteGroups.length>=10?'취향대로 <strong data-color-count style="font-size:56px;font-weight:900;color:#92551c;white-space:nowrap;">'+esc(paletteGroups.length)+'가지</strong>':'취향에 맞춰, '+esc(paletteGroups.length)+'가지.')}${includeNavigation?'<p style="padding:12px 16px;background:#fff1e7;color:#a43c23;border-left:3px solid #c35b36;font-size:19px;font-weight:700;">색상 사진을 클릭하면 해당 색상으로 이동합니다.</p>':''}<div data-color-palette style="display:grid;grid-template-columns:repeat(${Math.min(4,paletteGroups.length)},minmax(0,1fr));gap:28px 12px;align-items:start;">${paletteGroups.map(g=>`<${includeNavigation&&g.urls.length?'a href="#smartstore-color-'+g.index+'"':'div'} style="flex:1;min-width:0;text-decoration:none;color:inherit;">${g.paletteUrl?photo(g.paletteUrl,g.color,'aspect-ratio:3/4;object-fit:cover;border-radius:10px;'):'<div data-palette-photo-pending style="aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;background:#f3f3f0;border-radius:10px;color:#667064;text-align:center;font-size:18px;padding:8px;">사진 준비 중</div>'}<b style="display:block;font-size:22px;line-height:1.65;margin-top:20px;">${esc(g.color)}</b></${includeNavigation&&g.urls.length?'a':'div'}>`).join('')}</div><p style="font-size:20px;line-height:1.9;margin:36px 0 0;color:#465149;">촬영 조명과 화면 설정에 따라 실제 색상과 차이가 있을 수 있습니다. 공식 상품 이미지도 함께 확인해 주세요.</p></section>`;
  }
- // Brand story and native MP4 precede the product points in preview/export/ONE.
+ // Native MP4 precede the product points in preview/export/ONE.
  body+=divider+(includeVideo?brandVideoHtml(videoUrl||productVideoUrl(p)):brandVideoHeadingHtml());
  if(points.length)body+=divider+`<section data-aida="interest" style="padding:72px 6%;">${pointHeading}<div data-product-points data-point-count="${points.length}" style="display:${points.length===4?'grid;grid-template-columns:repeat(2,minmax(0,1fr))':'flex'};gap:16px;align-items:stretch;">${points.map((point,i)=>`<div style="flex:1;min-width:0;border:1px solid #e0e5dc;border-radius:12px;background:#f7f8f4;padding:28px 24px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">${sellingPointIcon(point,p)}<span style="font-size:17px;color:#6b785f;">${String(i+1).padStart(2,'0')}</span></div><h3 style="font-size:28px;line-height:1.6;margin:20px 0 18px;">${esc(point.title)}</h3><p style="font-size:24px;line-height:1.9;margin:0;color:#303d35;">${esc(point.description)}</p></div>`).join('')}</div></section>`;
  body+=palette;

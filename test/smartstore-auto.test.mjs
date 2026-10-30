@@ -57,7 +57,7 @@ test('업로드용 조각은 브랜드 소개·본문을 빠짐없이 보존하�
  const noVideo=await smartstoreUploadParts(png,root,brand,{includeVideo:false});
  assert.equal(noVideo.includeVideo,false);assert.equal(noVideo.video,null);assert.deepEqual(noVideo.files,files);
  const expanded=await smartstoreUploadParts(png,root,brand,{...await prepareVideo(root),brandIntroHeight:1800});
- assert.equal((await sharp(expanded.files[0]).metadata()).height,1888,'확장된 브랜드 소개와 영상 제목 뒤에서 분할');
+ assert.equal((await sharp(expanded.files[0]).metadata()).height,1976,'이전 구성의 높이 정보와 새 영상 제목 뒤에서 분할');
  const joinedFooter=await smartstoreUploadParts(png,root,brand,{includeVideo:false,footerTop:10000});
  assert.equal((await sharp(joinedFooter.files.at(-1)).metadata()).height,8500,'구매 혜택부터 맨 아래까지 8000px을 넘어도 한 장 유지');
  assert.deepEqual(await sharp(joinedFooter.files.at(-1)).raw().toBuffer(),await sharp(png).extract({left:0,top:10000,width:860,height:8500}).raw().toBuffer());

@@ -1,5 +1,4 @@
 import {officialTemplateTitle,officialTemplateTitleLayout} from './smartstore-template-title.mjs';
-import {BRAND_INTRO_ASSET_NAMES} from './smartstore-brand-intro.mjs';
 import {storeBannerAsset,STORE_BANNER_ASSET_NAMES} from './smartstore-store-banner.mjs';
 import {buildDetailContent} from './detail-html.mjs';
 import {sellingPointIcon} from './smartstore-point-icons.mjs';
@@ -8,7 +7,7 @@ import {brandVideoHtml,brandVideoHeadingHtml,productVideoUrl} from './smartstore
 import {officialSellingPoints,displaySellingPoints} from './smartstore-selling-points.mjs';
 
 export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-approved-20261024';
-export const TEMPLATE_ASSET_NAMES=['brand-intro.jpg',...BRAND_INTRO_ASSET_NAMES,'giordano-official.png','lotte-department-official.png','benefits.jpg','shipping.jpg','returns.jpg','store.jpg',...STORE_BANNER_ASSET_NAMES,'GowunDodum-Regular.ttf'];
+export const TEMPLATE_ASSET_NAMES=['giordano-official.png','lotte-department-official.png','benefits.jpg','shipping.jpg','returns.jpg','store.jpg',...STORE_BANNER_ASSET_NAMES,'GowunDodum-Regular.ttf'];
 export const TEMPLATE_ASSET_BASE='https://raw.githubusercontent.com/seungchullee84/lotteon-smartstore-v36/main/public/smartstore-template/';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const style='font-family:GowunDodum,\'Malgun Gothic\',sans-serif;color:#25372e;word-break:keep-all;overflow-wrap:break-word;line-height:2.1;';
