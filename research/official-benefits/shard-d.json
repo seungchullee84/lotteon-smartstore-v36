@@ -2521,8 +2521,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-30T04:28:22.709Z",
-      "analyzedAt": "2026-10-30T04:28:40.402Z"
+      "observedAt": "2026-10-30T05:00:13.053Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
