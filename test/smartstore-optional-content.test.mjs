@@ -6,7 +6,7 @@ import {prepareSmartstoreDetail} from '../smartstore-detail-files.mjs';
 test('소구점이 없는 새 상품은 수동 선택 없이 두 템플릿에서 자동 생략한다',async()=>{
  const dataRoot=await mkdtemp(path.join(os.tmpdir(),'automatic-empty-points-'));
  try{
-  const p={style:'654321',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=empty',name:'공식 상의',rawName:'공식 상의',gender:'남성',colors:[],images:{detail:'https://www.giordano.co.kr/detail.jpg'},officialDescription:'면 100%. SIZE S M L.'};
+  const p={style:'654321',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=empty',name:'공식 상의',rawName:'공식 상의',gender:'남성',colors:[],images:{main:'https://www.giordano.co.kr/main.jpg'},detailFallbackApproved:true,officialDescription:'면 100%. SIZE S M L.'};
   const prepared=await prepareSmartstoreDetail(p,dataRoot,{dataRoot,photoRoots:[]});
   assert.equal(prepared.smartstoreDetail.omitSellingPoints,true);assert.deepEqual(prepared.smartstoreDetail.sellingPoints,[]);
   assert.equal(smartstorePreparationStatus(prepared,{extras:[],manifest:{}}).templateReady,true);
