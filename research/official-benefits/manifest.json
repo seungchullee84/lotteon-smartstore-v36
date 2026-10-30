@@ -10047,11 +10047,11 @@
     }
   ],
   "sourceComplete": 1425,
-  "imageComplete": 1359,
+  "imageComplete": 1360,
   "withThreeOrFour": 443,
-  "phase": "images",
+  "phase": "complete",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-30T07:13:09.195Z",
+  "updatedAt": "2026-10-30T07:13:24.199Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-30T07:13:09.526Z",
@@ -20528,7 +20528,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "analyzing"
+            "status": "ready"
           }
         ]
       }
