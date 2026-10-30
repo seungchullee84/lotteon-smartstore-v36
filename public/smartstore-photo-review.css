@@ -1,4 +1,4 @@
-#manualPhotoReviewDialog{width:min(1100px,94vw);max-height:90vh;overflow:auto;border:1px solid #a6c9b1;border-radius:14px;padding:22px}
+#manualPhotoReviewDialog{width:min(1100px,94vw);max-height:90vh;overflow:auto;overflow-anchor:none;border:1px solid #a6c9b1;border-radius:14px;padding:22px}
 #manualPhotoReviewDialog::backdrop{background:#102c1e88}
 .photo-selection-toolbar{position:sticky;top:-22px;z-index:2;padding:12px 0;background:#fff;border-bottom:1px solid #d6e3d9;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 #manualPhotoSelectionStatus{margin:0;flex-basis:100%;font-weight:600;color:#245d3d;line-height:1.6}
