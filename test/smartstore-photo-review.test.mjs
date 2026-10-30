@@ -7,6 +7,8 @@ import sharp from 'sharp';
 import {photoReview,savePhotoReview,validatePhotoReview,photoReviewThumbnail,savePhotoReviewDraft} from '../smartstore-photo-review.mjs';
 import {readPhotoMappings} from '../smartstore-photo-mapping-cache.mjs';
 import {findPhotos} from '../smartstore-photo-files.mjs';
+import {createHash} from 'node:crypto';
+import {prepareTrustedFolder} from '../smartstore-folder-trust.mjs';
 
 test('신규 원본 선택 저장·재열기·케어라벨 오판 수정 및 원본 변경 방어',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'photo-review-'));const dataRoot=path.join(root,'data'),folder=path.join(root,'photos');await mkdir(folder);
@@ -45,6 +47,32 @@ test('색상만 선택한 중간 상태도 저장·복원하며 템플릿용 확
   await assert.rejects(savePhotoReviewDraft(p,{...input,channel:'lotte'},options));await assert.rejects(savePhotoReviewDraft(p,{...input,sourceUrl:p.sourceUrl+'other'},options));
   await assert.rejects(savePhotoReview(p,input,options),/색상과 구도/);
   await writeFile(path.join(folder,'1.jpg'),await sharp({create:{width:80,height:120,channels:3,background:'white'}}).jpeg().toBuffer());const changed=await photoReview(p,options);assert.equal(changed.items[0].color,'');assert.equal(changed.selectionSavedAt,null);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
+
+test('동일 사진의 사본만 제외해도 대표 원본은 유지하고 재열기·상세 제작에 파일별 선택을 적용한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'duplicate-photo-review-')),dataRoot=path.join(root,'data'),folder=path.join(root,'photos'),output=path.join(root,'output');await mkdir(folder);await mkdir(output);
+ const p={style:'123458',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=duplicate',name:'상의',images:{},colors:['01블랙']},options={dataRoot,photoRoots:[folder]};
+ const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
+ try{
+  const original=await sharp({create:{width:80,height:120,channels:3,background:'black'}}).jpeg().toBuffer(),detail=await sharp({create:{width:80,height:120,channels:3,background:'gray'}}).jpeg().toBuffer();
+  await writeFile(path.join(folder,'1.jpg'),original);await writeFile(path.join(folder,'copy.jpg'),original);await writeFile(path.join(folder,'detail.jpg'),detail);
+  const current=await photoReview(p,options),input={...current,channel:'smartstore',items:current.items.map(item=>({...item,color:p.colors[0],role:item.name==='1.jpg'?'front':item.name==='copy.jpg'?'excluded':'detail'}))};
+  const conflict={...input,items:input.items.map(item=>item.name==='copy.jpg'?{...item,role:'back'}:item)};
+  assert.throws(()=>validatePhotoReview(current,conflict),/1\.jpg.*copy\.jpg.*색상·구도/);
+  await savePhotoReviewDraft(p,input,options);assert.equal((await findPhotos(p,options)).length,3,'자동 저장만으로 실제 사진 선택을 바꾸지 않는다');
+  await savePhotoReview(p,input,options);
+  const photos=await findPhotos(p,options),mappings=await readPhotoMappings(dataRoot,p);
+  assert.deepEqual(photos.map(photo=>photo.name),['1.jpg','detail.jpg']);assert.equal((await findPhotos(p,{...options,includeExcluded:true})).length,3);
+  assert.equal(mappings.find(record=>record.hash===digest(original)).role,'front','제외한 사본이 대표 원본 해시 매핑을 덮어쓰지 않는다');
+  const reopened=await photoReview(p,options);assert.equal(reopened.items.find(item=>item.name==='copy.jpg').role,'excluded');assert.equal(reopened.items.find(item=>item.name==='1.jpg').role,'front');assert.equal(reopened.mainId,current.mainId);
+  const old=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',p.style,'draft.json'),'utf8'));
+  const prepared=await prepareTrustedFolder(p,output,{dataRoot,photos,mapped:photos.map(photo=>({...photo,...mappings.find(record=>record.hash===digest(photo.bytes))})),old,description:'',detailHash:null,recognizePhoto:()=>assert.fail('직접 선택한 사진 재분석 금지')});
+  assert.equal(prepared.smartstoreDetail.photoCount,2);assert.deepEqual(prepared.smartstoreDetail.storeColorPhotoHashes[p.colors[0]],[digest(original),digest(detail)]);
+  assert.deepEqual(await readFile(path.join(folder,'1.jpg')),original);assert.deepEqual(await readFile(path.join(folder,'copy.jpg')),original);
+  assert.equal((await findPhotos({...p,sourceUrl:p.sourceUrl+'-changed'},options)).length,3,'다른 공식 주소에 이전 제외 선택을 적용하지 않는다');
+  const changed=await sharp({create:{width:80,height:120,channels:3,background:'white'}}).jpeg().toBuffer();await writeFile(path.join(folder,'copy.jpg'),changed);
+  assert.equal((await findPhotos(p,options)).length,3,'내용이 바뀐 파일에 이전 제외 선택을 적용하지 않는다');assert.notEqual((await photoReview(p,options)).items.find(item=>item.name==='copy.jpg').role,'excluded');
  }finally{await rm(root,{recursive:true,force:true});}
 });
 
