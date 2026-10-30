@@ -130,8 +130,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T08:02:19.631Z",
-      "analyzedAt": "2026-10-30T08:11:56.866Z"
+      "observedAt": "2026-10-30T08:32:49.786Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -371,7 +371,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "b9cc977129a15334078faf5c36e124c553de84c85b590454aaf62e1fbc01e9e9",
+      "pageHash": "470af965d6e7485aeb7dfa07c51adb31c653ab4f2195366266e9b4c08df68a97",
       "pageText": "힙과 허벅지는 여유있게 유지하되, 다리 라인을 슬림하게 밸런스를 개선했습니다.\n다양한 체형의 고객이 무리 없이 입을 수 있는 편안한 착용감의 테이퍼드핏입니다.\n\n20수로 코튼 트윌 원단으로 레귤러한 실루엣의 형태감을 느낄 수 있습니다. \n부드러운 터치감에 탄탄한 조직감이 느껴지는, 고품질의 코튼 소재입니다.\n\n클래식한 카키 컬러에서 세련된 워시드 블루 컬러까지, 다양한 컬러로 구성되었습니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -384,8 +384,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-30T08:02:34.591Z",
-      "analyzedAt": "2026-10-30T08:11:57.071Z"
+      "observedAt": "2026-10-30T08:33:04.494Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2183,8 +2183,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-30T08:02:31.816Z",
-      "analyzedAt": "2026-10-30T08:11:57.060Z"
+      "observedAt": "2026-10-30T08:33:02.531Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2791,8 +2791,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T08:02:06.671Z",
-      "analyzedAt": "2026-10-30T08:11:56.666Z"
+      "observedAt": "2026-10-30T08:32:37.471Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3032,8 +3032,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T08:02:34.629Z",
-      "analyzedAt": "2026-10-30T08:11:57.110Z"
+      "observedAt": "2026-10-30T08:33:04.677Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3252,8 +3252,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T08:02:36.165Z",
-      "analyzedAt": "2026-10-30T08:11:57.118Z"
+      "observedAt": "2026-10-30T08:33:06.121Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
