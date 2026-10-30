@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm} from 'node:fs/promises';import os from 'node:os';import path from 'node:path';
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,mkdir,writeFile} from 'node:fs/promises';import os from 'node:os';import path from 'node:path';
 import {pointPicker,savePointSelection} from '../smartstore-point-picker.mjs';import {reviewSellingPoints} from '../smartstore-selling-point-review.mjs';
 test('공식 후보 5개 중 고른 순서를 저장하고 템플릿 검토에서도 선택을 유지한다',async()=>{
  const dataRoot=await mkdtemp(path.join(os.tmpdir(),'point-picker-'));const text='부드러운 코튼 원단으로 편안한 착용감을 제공합니다.\n여유 있는 와이드 핏으로 편안하게 입을 수 있습니다.\n밑단 스트링으로 핏 조절이 가능합니다.\n포켓으로 소지품을 간편하게 수납합니다.\n기모 가공으로 따뜻한 보온성을 더했습니다.';
