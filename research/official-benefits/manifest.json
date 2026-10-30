@@ -10053,19 +10053,19 @@
       ]
     }
   ],
-  "sourceComplete": 1426,
+  "sourceComplete": 1427,
   "imageComplete": 1361,
   "withThreeOrFour": 444,
   "phase": "complete",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-30T11:22:41.583Z",
+  "updatedAt": "2026-10-30T11:34:11.565Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-30T11:22:28.885Z",
     "nextCheckAt": "2026-10-30T11:42:28.885Z",
     "baselineAt": "2026-10-28T00:19:36.206Z",
     "baselineReady": true,
-    "errors": 20,
+    "errors": 19,
     "products": {
       "6D1FCB29E5811EA0E105CFFF4AAFD6DA": {
         "pageHash": "a83a8139a85e36d5e8d5574d0940ac009fa6007d3b5a83d18851aa7ad40885b3",
@@ -18652,6 +18652,12 @@
         "detailHash": "dff23f97dfee8b2ca245fd7fa16540f7c08d99f1398e31fdd54aab8ff2af9aa0",
         "detailPresent": true,
         "detailImageVerified": true
+      },
+      "B2220A4899B1779A89CB042380048E96": {
+        "pageHash": "8c403d37b72c5b360c67eabd11a1698bdd64ed0af53dc5d2a8e1418173991e3a",
+        "detailHash": "6cae51318b84c292db929ec24885c61b53a5419feb0f631582e3feef79bb7b6d",
+        "detailPresent": true,
+        "detailImageVerified": true
       }
     },
     "batches": [
@@ -20597,6 +20603,24 @@
         "id": "cfd087769527480277fe",
         "checkedAt": "2026-10-30T11:22:28.885Z",
         "events": []
+      },
+      {
+        "id": "716eda62a6ed5c4068b2",
+        "checkedAt": "2026-10-30T11:34:40.948Z",
+        "events": [
+          {
+            "type": "changed",
+            "style": "326930",
+            "name": "[예약판매] NEW [박현지] 브러시드 테리 풀오버",
+            "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=B2220A4899B1779A89CB042380048E96&ctype=1",
+            "pageHash": "8c403d37b72c5b360c67eabd11a1698bdd64ed0af53dc5d2a8e1418173991e3a",
+            "detailHash": "6cae51318b84c292db929ec24885c61b53a5419feb0f631582e3feef79bb7b6d",
+            "changes": [
+              "공식 상세이미지 추가"
+            ],
+            "status": "analyzing"
+          }
+        ]
       }
     ]
   }

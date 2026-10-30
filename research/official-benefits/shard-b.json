@@ -647,6 +647,54 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "326930",
+      "rawName": "[예약판매] NEW [박현지] 브러시드 테리 풀오버",
+      "gender": "여성",
+      "sourceCategory": [
+        "WOMEN",
+        "ALL"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=B2220A4899B1779A89CB042380048E96&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05326930.jpg",
+      "detailHash": "6cae51318b84c292db929ec24885c61b53a5419feb0f631582e3feef79bb7b6d",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"3177bfc90f2045424a97a0a15924c2c3-4\"",
+        "lastModified": "Fri, 30 Oct 2026 08:24:30 GMT"
+      },
+      "pageHash": "8c403d37b72c5b360c67eabd11a1698bdd64ed0af53dc5d2a8e1418173991e3a",
+      "pageText": "브러쉬드 테리 소재의 크루넥 스웻셔츠로, 적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감을 제공합니다. 더블 립 넥 디테일을 적용해 세탁 후에도 형태 변형을 최소화했으며, 솔리드와 그래픽을 함께 구성한 총 14가지 컬러로 다양한 스타일링이 가능합니다. “NEW YORK”을 테마로 클래식한 졸 프린트와 입체감 있는 플로킹, TWILL과 자수를 활용한 다양한 그래픽 기법이 특징입니다. 코튼 100%, 260g/㎡의 두께감 있는 원단을 사용하여 안정적인 실루엣을 유지하며 안쪽 기모 처리로 높은 보온성을 제공합니다.\n\nPOINT 01 (실루엣)\n브러쉬드 테리 크루넥 스웻셔츠\n적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감\n\nPOINT 02 (디테일)\n더블립 넥 디테일로 세탁 후에도 형태 변형 최소화\n솔리드와 그래픽를 함께 구성하여 총 14가지 컬러로 다양한 스타일링 활용 가능\n\nPOINT 03 (원단)\n코튼 100%, 260g/m2 중량의 두께감 있는 원단을 사용하여 흐트러짐 없이 안정적인 실루엣 유지\n안쪽에 기모 처리로 보온성 높임",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감",
+          "evidence": "브러쉬드 테리 크루넥 스웻셔츠\n적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감"
+        },
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "안쪽에 기모 처리로 보온성 높임",
+          "evidence": "코튼 100%, 260g/m2 중량의 두께감 있는 원단을 사용하여 흐트러짐 없이 안정적인 실루엣 유지\n안쪽에 기모 처리로 보온성 높임"
+        },
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "코튼 100%, 260g/㎡의 두께감 있는 원단을 사용하여 안정적인 실루엣을 유지하며 안쪽 기모 처리로 높은 보온성을 제공합니다."
+        },
+        {
+          "title": "세탁 후에도 깔끔하게",
+          "description": "세탁 후 변형 부담을 줄여 깔끔하게.",
+          "evidence": "세탁 후에도 형태 변형을 최소화"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-30T11:34:11.565Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "026972",
       "rawName": "NEW G-MOTION 와플 텍스처 소로나 긴팔티",
       "gender": "",
