@@ -13,6 +13,14 @@ import sharp from 'sharp';
 import {createHash} from 'node:crypto';
 import {STORE_BANNER_URL} from './smartstore-store-banner.mjs';
 import {isSmartstoreDetailEditUrl} from './smartstore-detail-only.mjs';
+export async function waitForSmartstoreEditorInput(editor,{check=()=>{}}={}){
+ check();
+ await editor.locator('iframe[id^="input_buffer"]').waitFor({state:'attached',timeout:30000});
+ // Image captions also use se-text-paragraph, including hidden captions at
+ // the start of restored documents. Wait for an actual visible text component.
+ await editor.locator('.se-component.se-text .se-text-paragraph').filter({visible:true}).first().waitFor({state:'visible',timeout:30000});
+ check();
+}
 export async function openSmartstoreEditor(page,{check=()=>{}}={}){
  check();
  // Reuse ONE's named window: Chrome does not emit a new popup event for it.
@@ -194,8 +202,7 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  check();
  const editor=await openSmartstoreEditor(page,{check});
  await editor.bringToFront();
- await editor.locator('iframe[id^="input_buffer"]').waitFor({state:'attached',timeout:30000});
- await editor.locator('.se-text-paragraph').first().waitFor({state:'visible',timeout:30000});check();
+ await waitForSmartstoreEditorInput(editor,{check});
  if(parts.includeVideo!==false){await requireBrandVideo(parts.dataRoot,parts.videoOptions);await assertNativeVideoToolbar(editor);}
  // The restored document and ONE's input buffer initialise asynchronously.
  await editor.waitForFunction(()=>{
@@ -205,7 +212,7 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
    return signature&&performance.now()-state.since>800;
  });
  // Select inside ONE's document. Never send Ctrl+A to the seller's product form.
- await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});
+ await editor.locator('.se-component.se-text .se-text-paragraph').filter({visible:true}).last().click();
  await editor.waitForFunction(()=>document.activeElement?.id?.startsWith('input_buffer'));
  await editor.keyboard.press('Control+A');await editor.evaluate(()=>new Promise(requestAnimationFrame));
  await editor.keyboard.press('Control+A');await editor.evaluate(()=>new Promise(requestAnimationFrame));
@@ -215,8 +222,8 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
  if(existing)throw Error('기존 상세설명이 남아 있어 새 이미지를 올리지 않았습니다.');
  const choose=async(file,index)=>{
   check();const before=await editor.locator('.se-component.se-image').count();
-  const empty=editor.locator('.se-component.se-text .se-text-paragraph').last();
-  if(await empty.count())await empty.click({force:true});
+  const empty=editor.locator('.se-component.se-text .se-text-paragraph').filter({visible:true}).last();
+  if(await empty.count())await empty.click();
   if(parts.bannerLink?.index===index&&index>0&&await empty.count()){
    check();await editor.keyboard.press('End');await editor.keyboard.press('Enter');
    await editor.evaluate(()=>new Promise(requestAnimationFrame));log('배너 앞 빈 줄 한 칸 분리');
@@ -234,7 +241,7 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
   const imageStarted=Date.now();
   await choose(parts.files[index],index);
   log('상세이미지 '+(index+1)+'/'+parts.files.length+'장 첨부 · '+((Date.now()-imageStarted)/1000).toFixed(1)+'초');
-  if(parts.includeVideo!==false&&index===(parts.videoAfterIndex??0)){const videoStarted=Date.now();await editor.locator('.se-component.se-text .se-text-paragraph').last().click({force:true});parts.videoIdentity=await insertSmartstoreVideo(editor,{check,dataRoot:parts.dataRoot,videoOptions:parts.videoOptions});log('브랜드 영상 첨부 · '+((Date.now()-videoStarted)/1000).toFixed(1)+'초');}
+  if(parts.includeVideo!==false&&index===(parts.videoAfterIndex??0)){const videoStarted=Date.now();await editor.locator('.se-component.se-text .se-text-paragraph').filter({visible:true}).last().click();parts.videoIdentity=await insertSmartstoreVideo(editor,{check,dataRoot:parts.dataRoot,videoOptions:parts.videoOptions});log('브랜드 영상 첨부 · '+((Date.now()-videoStarted)/1000).toFixed(1)+'초');}
  }
  const order=await editor.locator('.se-component').evaluateAll(ns=>ns.filter(n=>/se-image|se-video|se-oembed/.test(n.className)).map(n=>n.className));
  const includeVideo=parts.includeVideo!==false;
