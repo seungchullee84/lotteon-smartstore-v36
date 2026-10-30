@@ -1,6 +1,9 @@
 // Styling impressions only: colour names never establish fabric/performance claims.
 // Stable per product so preview, PNG export and repeat collection keep identical copy.
 export const COLOR_CAPTION_GROUPS=[
+ [/그레이지|greige/i,['은은한 뉴트럴의 균형','차분하게 어우러지는 색','그레이와 베이지 사이','담백하게 스미는 중간빛']],
+ [/그레이시블루|그레이쉬블루|gr[ae]yish\s*blue/i,['잔잔한 회색빛 블루','차분하게 번지는 푸른빛','은은하게 낮춘 블루','회색빛을 머금은 파랑']],
+ [/포레?이?스트그린|forest\s*green/i,['깊은 초록의 여유','짙게 머무는 초록','차분한 숲빛의 깊이','은은한 초록의 존재감']],
  [/토프|taupe/i,['그레이와 브라운의 조화','차분하게 어우러진 토프빛','담백한 토프의 분위기']],
  [/(?:다크|딥|dark|deep).*(?:네이비|남색|navy)/i,['깊고 단정한 네이비','짙은 남색의 차분한 매력','깊은 푸른빛의 단정함']],
  [/(?:라이트|연|light).*(?:베이지|beige)/i,['밝고 은은한 베이지','가볍게 밝히는 베이지빛','부드럽게 어우러진 밝은 톤']],
