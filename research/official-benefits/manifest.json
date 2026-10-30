@@ -10040,11 +10040,11 @@
     }
   ],
   "sourceComplete": 1424,
-  "imageComplete": 1359,
-  "withThreeOrFour": 444,
+  "imageComplete": 1358,
+  "withThreeOrFour": 443,
   "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-30T06:32:47.990Z",
+  "updatedAt": "2026-10-30T06:33:48.499Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-30T06:07:16.743Z",
@@ -20290,7 +20290,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "needs-review"
+            "status": "superseded"
           },
           {
             "type": "changed",
