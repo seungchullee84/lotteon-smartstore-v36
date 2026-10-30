@@ -32,6 +32,28 @@ export async function focusSmartstoreEditorInput(editor,{check=()=>{}}={}){
  await editor.waitForFunction(()=>document.activeElement?.id?.startsWith('input_buffer'),null,{timeout:5000});
  check();
 }
+export async function attachSmartstorePhoto(editor,file,{check=()=>{},timeout=15000}={}){
+ const picker=editor.getByRole('dialog').filter({hasText:'내 사진 불러오기'}).filter({visible:true});
+ let chooser=null,clickedPicker=false,toolbarAttempts=0,nextToolbarAttempt=0;
+ const capture=value=>{chooser=value;};
+ editor.on('filechooser',capture);
+ try{
+  const deadline=Date.now()+timeout;
+  while(Date.now()<deadline){
+   check();
+   if(chooser){await chooser.setFiles(file);check();return;}
+   if(await picker.count()){
+    if(await picker.count()!==1)throw Error('사진 선택 창을 한 곳으로 확인하지 못했습니다.');
+    if(!clickedPicker){await picker.getByRole('button',{name:'내 사진',exact:true}).click({timeout:3000});clickedPicker=true;}
+   }else if(!clickedPicker&&toolbarAttempts<3&&Date.now()>=nextToolbarAttempt){
+    toolbarAttempts++;nextToolbarAttempt=Date.now()+1500;
+    await editor.locator('button[data-group="documentToolbar"][data-name="image"]').click({timeout:3000});
+   }
+   await new Promise(resolve=>setTimeout(resolve,100));
+  }
+  throw Error('현재 사진 선택 창의 내 사진 버튼과 파일 선택기를 확인하지 못했습니다.');
+ }finally{editor.off('filechooser',capture);}
+}
 export async function openSmartstoreEditor(page,{check=()=>{}}={}){
  check();
  // Reuse ONE's named window: Chrome does not emit a new popup event for it.
@@ -238,9 +260,7 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
    check();await editor.keyboard.press('End');await editor.keyboard.press('Enter');
    await editor.evaluate(()=>new Promise(requestAnimationFrame));log('배너 앞 빈 줄 한 칸 분리');
   }
-  await editor.locator('button[data-group="documentToolbar"][data-name="image"]').click();
-  const input=editor.locator('input[type="file"]');
-  await input.waitFor({state:'attached',timeout:15000});await input.setInputFiles(file);
+  await attachSmartstorePhoto(editor,file,{check});
   await editor.waitForFunction(count=>document.querySelectorAll('.se-component.se-image').length>count,before,{timeout:60000});
   const lastImage=editor.locator('.se-component.se-image img').last();
   await lastImage.scrollIntoViewIfNeeded();
