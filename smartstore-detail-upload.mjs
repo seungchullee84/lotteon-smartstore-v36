@@ -261,10 +261,15 @@ export async function uploadSmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
    await editor.evaluate(()=>new Promise(requestAnimationFrame));log('배너 앞 빈 줄 한 칸 분리');
   }
   await attachSmartstorePhoto(editor,file,{check});
-  await editor.waitForFunction(count=>document.querySelectorAll('.se-component.se-image').length>count,before,{timeout:60000});
-  const lastImage=editor.locator('.se-component.se-image img').last();
+  // A new component can exist before its img is attached. Do not mistake the
+  // preceding hosted image for this upload or apply layout to the wrong one.
+  await editor.waitForFunction(({count,name})=>{
+   const images=[...document.querySelectorAll('.se-component.se-image img')],last=images.at(-1);
+   if(images.length!==count||!last||!/^https:\/\//.test(last.src))return false;
+   try{return decodeURIComponent(new URL(last.src).pathname.split('/').at(-1))===name;}catch{return false;}
+  },{count:before+1,name:path.basename(file)},{timeout:60000});
+  check();const lastImage=editor.locator('.se-component.se-image img').nth(before);
   await lastImage.scrollIntoViewIfNeeded();
-  await editor.waitForFunction(()=>/^https:\/\//.test([...document.querySelectorAll('.se-component.se-image img')].at(-1)?.src||''),null,{timeout:60000});
   await applySmartstoreImageLayout(editor,lastImage,{check,layout:smartstorePartLayout(parts,index)});
  };
  for(let index=0;index<parts.files.length;index++){
