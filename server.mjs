@@ -148,7 +148,7 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='GET'&&(url.pathname==='/api/smartstore-photo-review'||url.pathname.startsWith('/smartstore-review-photo/'))){
       if(url.searchParams.get('channel')!=='smartstore'||!state.product||url.searchParams.get('style')!==state.product.style)throw Error('스마트스토어의 현재 품번을 확인해 주세요.');
       if(state.busy)throw Error('사진 작업이 끝난 뒤 열어 주세요.');
-      if(url.pathname==='/api/smartstore-photo-review')return json(res,200,await photoReview(state.product,{dataRoot}));
+      if(url.pathname==='/api/smartstore-photo-review')return json(res,200,await photoReview(state.product,{dataRoot,officialFolder:state.folder}));
       const id=url.pathname.split('/').at(-1);if(!/^[a-f0-9]{20}$/.test(id))return json(res,404,{});
       const thumbnail=await photoReviewThumbnail(state.product,id,{dataRoot});if(!thumbnail)return json(res,404,{});
       res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'private, max-age=3600'});return res.end(thumbnail);
