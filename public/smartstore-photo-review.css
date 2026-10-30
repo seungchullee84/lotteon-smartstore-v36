@@ -19,6 +19,7 @@
 #manualPhotoReviewLegend{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
 #manualPhotoReviewLegend .photo-color-badge{margin:0}
 #manualPhotoReviewGrid .photo-group-heading{grid-column:1/-1;margin:14px 0 0;padding:10px 14px;border-left:7px solid var(--photo-accent);background:var(--photo-tint);color:var(--photo-accent);font-size:19px;line-height:1.4}
+#manualPhotoReviewGrid .photo-color-empty{grid-column:1/-1;margin:0;padding:18px;border:1px dashed #b9c6bf;color:#59675e;background:#f5f7f6;font-size:15px}
 #manualPhotoReviewGrid img{width:100%;height:330px;object-fit:contain;background:#f4f6f4}
 #manualPhotoReviewGrid p{overflow-wrap:anywhere;font-size:12px}
 #manualPhotoReviewGrid select{display:block;width:100%;margin:6px 0;padding:8px}

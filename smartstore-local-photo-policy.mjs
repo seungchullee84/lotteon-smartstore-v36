@@ -16,6 +16,10 @@ export function colorDistance(q,reference,{lightWeight=.12}={}){
 }
 export function resolveDraftPhotoColor(raw,colors,references){
  if(!raw.quantiles)return {supported:false,reason:'의류 영역 확인 필요'};
+ const median=raw.quantiles.map(q=>q[1]),brightness=median.reduce((s,v)=>s+v,0)/3,chroma=Math.max(...median)-Math.min(...median);
+ const black=colors.filter(c=>/블랙|검정/.test(c)),brown=colors.filter(c=>/브라운|초코|밤색|커피/.test(c));
+ if(black.length===1&&brightness<45&&chroma<10)return {supported:false,color:black[0],basis:'색상 초안 · 낮은 명도의 무채색 의류 영역',reason:'어두운 색상 비교 · 수동 확인 필요'};
+ if(brown.length===1&&brightness<125&&median[0]-median[2]>=12&&median[0]>median[1]&&median[1]>=median[2])return {supported:false,color:brown[0],basis:'색상 초안 · 어두운 갈색 계열의 색조 비교',reason:'갈색 계열 추정 · 수동 확인 필요'};
  const candidates=colors.map((color,i)=>({color,distance:references[i]?.quantiles?colorDistance(raw.quantiles,references[i].quantiles,{lightWeight:.9}):Infinity})).sort((a,b)=>a.distance-b.distance);
  const best=candidates[0];return best&&Number.isFinite(best.distance)?{supported:true,color:best.color,distance:best.distance,basis:'색상 초안 · 의류 영역의 색조·명도와 공식 칩 비교'}:{supported:false,reason:'공식 색상칩 확인 필요'};
 }

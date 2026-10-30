@@ -45,7 +45,7 @@ export function validateAnalysis(result,product,description,unknown){
  const seen=new Set();for(const p of result.photos){if(seen.has(p.id)||!unknown.some(f=>f.id===p.id))throw Error('사진 대조 대상이 일치하지 않습니다.');seen.add(p.id);if(!(p.role==='care-label'&&(p.color===''||product.colors.includes(p.color))||product.colors.includes(p.color))||p.sameProduct!==true||!Number.isFinite(p.confidence)||p.confidence<.90||p.confidence>1||!['front','detail','side','care-label'].includes(p.role))throw Error('색상·품번 확인이 필요한 사진이 있습니다: '+(unknown.find(f=>f.id===p.id)?.name||p.id)+'. 색상명 폴더에 넣거나 이 채팅에서 확인해 주세요.');}
  return result;
 }
-export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,signal,fetchImpl=fetch,photoRoots,desktop,log=()=>{},trustFolder=true,recognizePhoto}){
+async function prepareSmartstoreAutoImpl(product,folder,{dataRoot,apiKey,signal,fetchImpl=fetch,photoRoots,desktop,log=()=>{},trustFolder=true,recognizePhoto}){
  assertAdultProduct(product);
  if(!/^\d{6}$/.test(product.style)||new URL(product.sourceUrl).origin!=='https://www.giordano.co.kr')throw Error('공식 상품 출처를 확인해 주세요.');
  let html;try{html=await readFile(path.join(folder,'smartstore-official.html'),'utf8');}catch(e){if(e.code!=='ENOENT')throw e;}
@@ -127,3 +127,5 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
  const prepared=await applyGarmentReview(await prepareSmartstoreDetail(product,folder,{dataRoot}),folder,{dataRoot,photoRoots,desktop});
  return {...prepared,officialDescription:description};
 }
+
+export async function prepareSmartstoreAuto(product,folder,options){const colors=[...product.colors],sizes=[...(product.sizes||[])];const prepared=await prepareSmartstoreAutoImpl(product,folder,options);if(JSON.stringify(prepared.colors)!==JSON.stringify(colors)||JSON.stringify(prepared.sizes||[])!==JSON.stringify(sizes))throw Error('사진 처리 중 판매 옵션 변경을 감지했습니다. 전체 색상·사이즈를 보존해야 합니다.');return prepared;}
