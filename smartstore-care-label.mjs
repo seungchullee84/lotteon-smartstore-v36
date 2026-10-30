@@ -18,7 +18,7 @@ export async function prepareCareLabelImages(product,folder,{dataRoot,...options
  try{draft=JSON.parse(await readFile(path.join(root,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(draft&&(draft.style!==product.style||draft.sourceUrl!==product.sourceUrl))throw Error('택/케어라벨의 품번·출처를 확인해 주세요.');
  // Always inspect the current folder: a cached photo must not survive removal.
- const photos=(await findPhotos(product,options)).filter(p=>isCareLabelPhoto(p,draft));
+ const photos=(await findPhotos(product,{...options,dataRoot})).filter(p=>isCareLabelPhoto(p,draft));
  const selection=await saveCareLabelSelection(root,photos),files=[];
  for(const label of selection){const file=path.join(folder,'smartstore-carelabel-'+label.sourceHash.slice(0,24)+'.jpg');await writeFile(file,await readFile(path.join(root,label.file)));files.push(file);}
  return files;

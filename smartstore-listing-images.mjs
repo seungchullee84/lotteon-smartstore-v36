@@ -54,7 +54,7 @@ export async function originalListingMain(product,options){
 export async function prepareListingImages(product,folder,{dataRoot,...photoOptions}){
  const manifest=await listingManifest(product,{dataRoot});if(!manifest)throw Error('대표·추가이미지 사진 선택을 먼저 준비해 주세요.');
  if(!manifest.main||!Array.isArray(manifest.extras)||manifest.extras.length>9)throw Error('스마트스토어 이미지 선택 자료를 확인해 주세요.');
- const photos=await findPhotos(product,photoOptions);
+ const photos=await findPhotos(product,{...photoOptions,dataRoot});
  const originals=photos.filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name||''));
  if(originals.length!==1)throw Error('품번 폴더의 원본 1.jpg 또는 1번.jpg 한 장을 확인해 주세요.');
  const main=await workingProductPhoto(originals[0],product,{dataRoot}),extras=[];

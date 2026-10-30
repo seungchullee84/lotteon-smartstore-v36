@@ -75,7 +75,7 @@ export async function prepareSmartstoreAuto(product,folder,{dataRoot,apiKey,sign
  const selected=importedPhotoSelection(product,old);
  for(const [color,hashes] of selected||[])for(const digest of hashes){const prior=known.get(digest);if(prior?.reviewed===true)continue;known.set(digest,{...prior,color,role:prior?.color===color&&['front','side','back','detail'].includes(prior.role)?prior.role:'detail'});}
  const ignored=new Set((old?.style===product.style&&old.sourceUrl===product.sourceUrl?old.photoMapping?.ignoredPhotos||[]:[]).filter(p=>/^[a-f0-9]{64}$/.test(p.hash)).map(p=>p.hash));
- const found=[];for(const photo of await findPhotos(product,{desktop,photoRoots})){
+ const found=[];for(const photo of await findPhotos(product,{desktop,photoRoots,dataRoot})){
   if(!trustFolder&&ignored.has(hash(photo.bytes))&&known.get(hash(photo.bytes))?.role!=='care-label')continue;
   const reason=trustFolder?null:await excludedPhotoReason(photo.bytes,{dataRoot});if(reason){log('착용사진 제외 · '+photo.name+' · '+reason);continue;}found.push(photo);
  }

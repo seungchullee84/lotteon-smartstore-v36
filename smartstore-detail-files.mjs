@@ -69,7 +69,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
   if(!prepared.colorImages[color].includes(src)){prepared.colorImages[color].push(src);(prepared.storeColorPhotoHashes[color]||=[]).push(sourceHash);prepared.photoCount++;}
  };
  if(draft?.acceptAllFolderPhotos){
-  const photos=await findPhotos(product,{photoRoots:await configuredPhotoRoots()});
+  const photos=await findPhotos(product,{dataRoot,photoRoots:await configuredPhotoRoots()});
   const substitutions=[];
   const rank=photo=>{
    const digest=createHash('sha256').update(photo.bytes).digest('hex'),record=draft.photoMapping?.files?.find(r=>r.name===photo.name&&r.hash===digest);
@@ -123,7 +123,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  }
  // The current style folder is authoritative; unknown colors are shown without color claims.
  if(draft?.trustedFolder&&!draft.acceptAllFolderPhotos&&draft.sourceUrl===product.sourceUrl){
-  const current=new Set((await findPhotos(product,{photoRoots:await configuredPhotoRoots()})).map(p=>createHash('sha256').update(p.bytes).digest('hex')));
+  const current=new Set((await findPhotos(product,{dataRoot,photoRoots:await configuredPhotoRoots()})).map(p=>createHash('sha256').update(p.bytes).digest('hex')));
   const labels=new Set((draft.careLabels||[]).map(p=>p.sourceHash));
   const canonicalRoot=await realpath(draftRoot);
   for(const relative of draft.unmatchedPhotos||draft.providedPhotos||[]){

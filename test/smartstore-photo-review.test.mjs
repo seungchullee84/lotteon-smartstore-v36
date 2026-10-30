@@ -6,6 +6,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 import {photoReview,savePhotoReview,validatePhotoReview} from '../smartstore-photo-review.mjs';
 import {readPhotoMappings} from '../smartstore-photo-mapping-cache.mjs';
+import {findPhotos} from '../smartstore-photo-files.mjs';
 
 test('신규 원본 선택 저장·재열기·케어라벨 오판 수정 및 원본 변경 방어',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'photo-review-'));const dataRoot=path.join(root,'data'),folder=path.join(root,'photos');await mkdir(folder);
@@ -17,6 +18,9 @@ test('신규 원본 선택 저장·재열기·케어라벨 오판 수정 및 원
   assert.throws(()=>validatePhotoReview(current,{...input,channel:'lotte'}));assert.throws(()=>validatePhotoReview(current,{...input,revision:'old'}));assert.throws(()=>validatePhotoReview(current,{...input,items:[input.items[0],input.items[0]]}));
   await savePhotoReview(p,input,options);let next=await photoReview(p,options);assert.equal(next.items[1].role,'care-label');assert((await readPhotoMappings(dataRoot,p)).every(i=>i.reviewed));
   input={...next,channel:'smartstore',items:next.items.map((i,n)=>({...i,color:p.colors[n],role:n?'back':'front'}))};await savePhotoReview(p,input,options);next=await photoReview(p,options);assert.equal(next.items[1].role,'back');assert.equal(JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',p.style,'draft.json'))).careLabels.length,0);assert.deepEqual(await readFile(path.join(folder,'1.jpg')),a);
+  input={...next,channel:'smartstore',items:next.items.map((i,n)=>({...i,color:p.colors[n],role:n?'excluded':'front'}))};await savePhotoReview(p,input,options);
+  assert.equal((await findPhotos(p,options)).length,1);next=await photoReview(p,options);assert.equal(next.items.length,2);assert.equal(next.items[1].role,'excluded');assert.deepEqual(await readFile(path.join(folder,'b.jpg')),b);
+  input={...next,channel:'smartstore',items:next.items.map((i,n)=>({...i,color:p.colors[n],role:n?'back':'front'}))};await savePhotoReview(p,input,options);assert.equal((await findPhotos(p,options)).length,2);
   await writeFile(path.join(folder,'new.jpg'),a);await assert.rejects(savePhotoReview(p,input,options),/変更|변경/);
  }finally{await rm(root,{recursive:true,force:true});}
 });
