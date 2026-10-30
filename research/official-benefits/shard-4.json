@@ -569,7 +569,7 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T12:09:21.278Z",
+      "observedAt": "2026-10-30T00:39:35.857Z",
       "analyzedAt": null
     },
     {
@@ -656,7 +656,7 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-29T12:09:21.373Z",
+      "observedAt": "2026-10-30T00:39:04.386Z",
       "analyzedAt": null
     },
     {
@@ -907,7 +907,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "48e488ac245b52b9174ace9bbb0cfef79824a779964f264fd532630d07b577b9",
+      "pageHash": "3118fc4946d2f4bbd99bf45c41a5a62b3e1af9c02003c0c34e42b5f01a2c4f1d",
       "pageText": "맥코트 실루엣의 클래식한 감성을 더한 트렌치코트입니다.\n\n나일론 코튼 폴리 혼방의 소재를 밀도높게 제직하여 구김이 덜 가면서도,형태감 있는 고급스러운 외관을 살렸습니다.\n\n봄 시즌 활용하기 좋은 아이템으로 카라를 세워서 여닫을 수 있으며,소맷단의 스트랩과 단추 디테일로 원하는 실루엣 조절할 수 있습니다.\n\n여유있는 품과 기장이 길지 않아 무난하면서 다양한 이너와 함께 레이어링하여여러 스타일의 코디 연출이 용이합니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -920,7 +920,7 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-29T12:09:22.778Z",
+      "observedAt": "2026-10-30T00:39:57.564Z",
       "analyzedAt": null
     },
     {
@@ -2593,7 +2593,7 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-29T12:09:32.696Z",
+      "observedAt": "2026-10-30T00:39:31.061Z",
       "analyzedAt": null
     },
     {
