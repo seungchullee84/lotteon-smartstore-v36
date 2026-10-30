@@ -93,7 +93,7 @@ function colorRecoveryOptions(signal,apiKey){return {dataRoot,signal,apiKey,log,
  readSource:(product,options)=>smartBot.importExistingPhotos(product,options),
  assertCurrent:(product,folder)=>{if(state.product?.style!==product.style||state.product?.sourceUrl!==product.sourceUrl||state.folder!==folder)throw Error('현재 상품이 변경되어 수집 사진을 적용하지 않았습니다.');},
  onRecovery:product=>{state.photoPreparation={style:product.style,status:'preparing',pendingPhotoCount:product.smartstoreDetail.pendingPhotoCount,message:'기존 상품의 색상 구간을 자동으로 대조하고 있습니다.'};},
- onImported:({product,stage,result})=>{state.photoImport={...stage,status:'applied',selectedCount:result.selectedCount,detailReady:!!product.smartstoreDetail?.sellingPoints?.length};}
+ onImported:({product,stage,result})=>{state.photoImport={...stage,status:'applied',selectedCount:result.selectedCount,detailReady:!!(product.smartstoreDetail?.omitSellingPoints||product.smartstoreDetail?.sellingPoints?.length)};}
 };}
 async function publishPhotoPreview(product,folder){
  const listing=await prepareListingImages(product,folder,{dataRoot});
@@ -407,8 +407,8 @@ const server=http.createServer(async(req,res)=>{
           product=await productEdits.apply(product);state.product=product;state.folder=folder;state.photoImport=null;state.revision++;
           const {product:prepared,stage,result}=await importSmartstoreColorPhotos(product,folder,colorRecoveryOptions(signal));
           await publishPhotoPreview(prepared,folder);
-          state.photoImport={...stage,status:'applied',selectedCount:result.selectedCount,detailReady:!!prepared.smartstoreDetail?.sellingPoints?.length};
-          if(!state.photoImport.detailReady)log('사진 수집·연결 완료 · 소구점은 공식 원문 확인 필요 · 상세 제작·업로드는 확인 전 진행하지 않습니다.');
+          state.photoImport={...stage,status:'applied',selectedCount:result.selectedCount,detailReady:!!(prepared.smartstoreDetail?.omitSellingPoints||prepared.smartstoreDetail?.sellingPoints?.length)};
+          if(!state.photoImport.detailReady)log('사진 수집·연결 완료 · 템플릿 준비 상태를 확인해 주세요.');
           log('색상별 사진 전체 '+result.selectedCount+'장 자동 반영 완료 · 상세 템플릿 업데이트 · 상품 저장 안 함');
         });return json(res,202,{ok:true});
       }
