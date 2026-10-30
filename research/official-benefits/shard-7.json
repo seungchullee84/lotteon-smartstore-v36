@@ -3263,8 +3263,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-30T10:18:25.226Z",
-      "analyzedAt": "2026-10-30T10:18:47.024Z"
+      "observedAt": "2026-10-30T10:49:45.501Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
