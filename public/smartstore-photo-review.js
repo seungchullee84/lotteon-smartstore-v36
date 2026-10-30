@@ -36,7 +36,7 @@
   const color=current?.colors?.[index],chip=current?.colorChips?.[color],tone=/^#[a-f0-9]{6}$/i.test(chip?.color||'')?chip.color:'#b8beb9';
   node.style.setProperty('--photo-accent',tone);node.style.setProperty('--photo-tint','#fff');
   const old=node.querySelector(':scope > .photo-official-chip');if(old)old.remove();
-  if(chip?.image&&/^data:image\/jpeg;base64,/.test(chip.image)){const image=document.createElement('img');image.className='photo-official-chip';image.src=chip.image;image.alt=color+' 공식 색상칩';image.draggable=false;node.prepend(image);}
+  if(!node.dataset.photoId&&chip?.image&&/^data:image\/jpeg;base64,/.test(chip.image)){const image=document.createElement('img');image.className='photo-official-chip';image.src=chip.image;image.alt=color+' 공식 색상칩';image.draggable=false;node.prepend(image);}
  }
  function updateOrderControls(){
   const counts=new Map();for(const card of grid.querySelectorAll(':scope > [data-photo-id]')){const key=dragGroup(card);if(!key)continue;counts.set(key,(counts.get(key)||0)+1);}
