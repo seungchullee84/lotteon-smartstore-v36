@@ -7,12 +7,28 @@ export function subjectColors(caption,kind='upper'){
  for(const s of sentences){const match=s.match(noun);if(!match)continue;const prefix=s.slice(Math.max(0,match.index-65),match.index);if(/under|behind|row of|shelves|display behind/i.test(prefix))continue;const last=prefix.split(/\b(?:shirt|sweater|cardigan|jacket|coat|vest|hoodie|top|pants|jeans|trousers|shorts|skirt|dress)\b/i).at(-1);let found=terms.filter(([, ,re])=>re.test(last)).map(([name])=>name);if(!found.length&&/^\s*(?:is|has a)\b/i.test(s.slice(match.index+match[0].length))){const suffix=s.slice(match.index+match[0].length).split(/\b(?:pants|jeans|trousers|shirt|sweater|jacket|coat)\b/i)[0];found=terms.filter(([, ,re])=>re.test(suffix)).map(([name])=>name);}if(found.length)return found;}
  return [];
 }
-export function colorDistance(q,reference){
+export function colorDistance(q,reference,{lightWeight=.12}={}){
  const a=q.map(v=>v[1]),b=reference.map(v=>v[1]);const light=x=>x.reduce((s,n)=>s+n,0)/3,texture=x=>x.reduce((s,v)=>s+v[2]-v[0],0)/3;
  // Solid fabric acquires a broad brightness range under shop lighting;
  // plaid swatches retain useful contrast information about their pattern.
  const contrastWeight=texture(reference)>30?.5:.1;
- return Math.hypot((a[0]-a[1])-(b[0]-b[1]),(a[1]-a[2])-(b[1]-b[2]),contrastWeight*(texture(q)-texture(reference)),.12*(light(a)-light(b)));
+ return Math.hypot((a[0]-a[1])-(b[0]-b[1]),(a[1]-a[2])-(b[1]-b[2]),contrastWeight*(texture(q)-texture(reference)),lightWeight*(light(a)-light(b)));
+}
+export function resolveDraftPhotoColor(raw,colors,references){
+ if(!raw.quantiles)return {supported:false,reason:'의류 영역 확인 필요'};
+ const candidates=colors.map((color,i)=>({color,distance:references[i]?.quantiles?colorDistance(raw.quantiles,references[i].quantiles,{lightWeight:.9}):Infinity})).sort((a,b)=>a.distance-b.distance);
+ const best=candidates[0];return best&&Number.isFinite(best.distance)?{supported:true,color:best.color,distance:best.distance,basis:'색상 초안 · 의류 영역의 색조·명도와 공식 칩 비교'}:{supported:false,reason:'공식 색상칩 확인 필요'};
+}
+export function refineNeutralDraftColors(rows,colors,references){
+ const light=q=>q.reduce((s,c)=>s+c[1],0)/3,neutral=q=>Math.max(...q.map(c=>c[1]))-Math.min(...q.map(c=>c[1]))<25;
+ if(colors.length<2||colors.length>6||references.length!==colors.length||references.some(r=>!r.quantiles||!neutral(r.quantiles)))return;
+ const candidates=rows.filter(r=>r.quantiles&&neutral(r.quantiles)&&(r.roleScores?.find(s=>s.role==='care-label')?.score||0)<.8);
+ if(candidates.length<colors.length*2)return;
+ const values=candidates.map(r=>light(r.quantiles)).sort((a,b)=>a-b);let centers=colors.map((_,i)=>values[Math.round(i*(values.length-1)/(colors.length-1))]);
+ for(let n=0;n<20;n++){const buckets=centers.map(()=>[]);for(const v of values){let i=0;for(let j=1;j<centers.length;j++)if(Math.abs(v-centers[j])<Math.abs(v-centers[i]))i=j;buckets[i].push(v);}const next=centers.map((v,i)=>buckets[i].length?buckets[i].reduce((a,b)=>a+b)/buckets[i].length:v);if(next.every((v,i)=>Math.abs(v-centers[i])<.01))break;centers=next;}
+ centers.sort((a,b)=>a-b);if(centers.some((v,i)=>i&&v-centers[i-1]<15))return;
+ const ordered=references.map((r,i)=>({color:colors[i],light:light(r.quantiles)})).sort((a,b)=>a.light-b.light);
+ for(const r of candidates){const value=light(r.quantiles);let i=0;for(let j=1;j<centers.length;j++)if(Math.abs(value-centers[j])<Math.abs(value-centers[i]))i=j;r.colorResult={supported:false,color:ordered[i].color,basis:'색상 초안 · 동일 상품 무채색 명도 묶음 비교',reason:'조명 차이를 보정한 추정 · 수동 확인 필요',distance:Math.abs(value-centers[i])};}
 }
 export function resolvePhotoColor(raw,colors,references,kind){
  if(!raw.quantiles)return {supported:false,reason:'의류 영역 확인 필요'};
