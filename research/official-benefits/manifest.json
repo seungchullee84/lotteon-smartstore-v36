@@ -11916,9 +11916,9 @@
   "sourceComplete": 1794,
   "imageComplete": 1725,
   "withThreeOrFour": 638,
-  "phase": "discover",
+  "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-31T07:06:05.581Z",
+  "updatedAt": "2026-10-31T07:27:08.037Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-31T07:05:45.670Z",
@@ -22933,7 +22933,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -22959,7 +22959,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -23542,7 +23542,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -23568,7 +23568,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -23808,7 +23808,7 @@
             "changes": [
               "공식 상세이미지 변경"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
