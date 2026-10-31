@@ -3418,8 +3418,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T06:59:05.001Z",
-      "analyzedAt": "2026-10-31T07:06:00.144Z"
+      "observedAt": "2026-10-31T07:36:07.639Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
