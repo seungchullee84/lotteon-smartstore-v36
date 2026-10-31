@@ -19,6 +19,13 @@ test('새 템플릿2는 상품별 근거 제목·공식 로고·원본 전체·�
  assert.equal($('[data-store-banner]').prev().attr('data-official-detail'),'');assert.equal($('[data-store-banner] a').attr('href'),'https://shopping.naver.com/window/department/store/101731950');assert($('[data-store-banner]').text().includes('누르면 스토어로 이동'));assert($('[data-store-footer]').text().includes('왕복 6,000원'));assert.equal($('[data-store-footer] img').length,1);assert.equal($('img').filter((i,n)=>$(n).attr('src').endsWith('giordano-official.png')).length,2);
  assert(!html.includes('127.0.0.1'));assert(!html.includes('object-fit:cover'));assert.equal(product.colors.length,3);
 });
+test('전체 공식 상세가 있으면 대표·추가 사진을 상세 앞뒤에 다시 붙이지 않는다',()=>{
+ const p={...product,detailTemplate:2,images:{...product.images,extra1:'https://x.test/extra1.jpg',extra2:'https://x.test/extra2.jpg',info:'https://x.test/info.jpg'},smartstoreDetail:{...product.smartstoreDetail,embeddedOfficialSections:['info']}};
+ const $=load(buildSmartstoreDetail(p).html),srcs=$('[data-official-detail] img').toArray().map(n=>$(n).attr('src'));
+ assert.deepEqual(srcs,[p.images.detail,p.images.size]);
+ const fallback=load(buildSmartstoreDetail({...p,images:{main:p.images.main,extra1:p.images.extra1,info:p.images.info},smartstoreDetail:{style:p.style}}).html);
+ assert.equal(fallback('[data-official-detail] img').length,3);
+});
 test('소구점 생략·근거 부족은 상품명으로 대체하고 다른 상품 제목을 재사용하지 않는다',()=>{
  assert.deepEqual(templateTwoHeadline({...product,rawName:'남성 울 코트'},[]),['남성 울 코트']);
  const $=load(buildSmartstoreDetail({...product,detailTemplate:2,smartstoreDetail:{...product.smartstoreDetail,omitSellingPoints:true}}).html);assert.equal($('[data-benefit-headline]').text(),'여성 웜 립 터틀넥');assert.equal($('[data-product-points]').length,0);

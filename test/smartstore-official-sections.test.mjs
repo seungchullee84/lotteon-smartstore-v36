@@ -10,6 +10,11 @@ test('긴 원본 속 전체 섹션을 확인하며 다른 사진과 빈 이미�
  assert.equal((await officialSectionMatch(detail,different)).included,false);
  const blank=await sharp({create:{width:500,height:300,channels:3,background:'#fff'}}).jpeg().toBuffer();assert.equal((await officialSectionMatch(detail,blank)).included,false);
 });
+test('다른 해상도로 축소된 정보고시도 포함 여부를 확인한다',async()=>{
+ const info=await chart('INFORMATION'),scaled=await sharp(info).resize({width:373}).jpeg({quality:90}).toBuffer();
+ const detail=await sharp({create:{width:373,height:1763,channels:3,background:'#7393b5'}}).composite([{input:scaled,left:0,top:1500}]).jpeg({quality:90}).toBuffer();
+ assert.equal((await officialSectionMatch(detail,info)).included,true);
+});
 test('원본 바이트를 유지하고 이미지가 바뀌면 포함 여부 캐시를 재검증한다',async()=>{
  const folder=await mkdtemp(path.join(os.tmpdir(),'official-inclusion-'));try{
  const info=await chart('INFORMATION'),detail=await sharp({create:{width:500,height:900,channels:3,background:'#345678'}}).composite([{input:info,left:0,top:600}]).jpeg({quality:92}).toBuffer();
