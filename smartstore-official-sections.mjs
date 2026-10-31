@@ -28,11 +28,13 @@ export async function officialSectionMatch(detail,section){
  if(best.included)return best;
  // Compare at the same sampling scale in both directions. Resized official
  // charts have subpixel text offsets that the full-height comparison rejects.
- const dh=Math.round(dm.height*width/dm.width),sh=Math.round(sm.height*width/sm.width);
- const [small,needle]=await Promise.all([pixels(detail,dh),pixels(section,sh)]);
+ const scaled=bytes=>sharp(bytes,{limitInputPixels:false}).flatten({background:'#fff'}).resize({width}).greyscale().raw().toBuffer({resolveWithObject:true});
+ const [haystack,sample]=await Promise.all([scaled(detail),scaled(section)]);
+ const small=haystack.data,needle=sample.data,dh=haystack.info.height,sh=sample.info.height;
  const needleInk=needle.reduce((sum,v)=>sum+255-v,0);
  if(needleInk/(width*sh)<1)return best;
  let squared=0;for(const v of needle)squared+=(255-v)**2;
+ if(squared/needle.length-(needleInk/needle.length)**2<25)return best;
  for(let top=0;top<=dh-sh;top++){
   let loss=0,dot=0,norm=0;
   for(let i=0;i<needle.length;i++){const x=255-small[top*width+i],y=255-needle[i];loss+=Math.abs(x-y);dot+=x*y;norm+=x*x;}
