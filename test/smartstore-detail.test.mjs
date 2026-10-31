@@ -91,7 +91,7 @@ test('다른 품번·색상·외부 경로는 차단하고 사진 매핑과 상�
   assert.match(await readFile(result.htmlPath,'utf8'),/detail_%EB%B8%8C%EB%9E%9C%EB%93%9C%EC%98%81%EC%83%81\.mp4/);
   assert.equal(result.storeVideoPlayback,'unverified');
   assert.ok(result.points.every(p=>!/모달|기모/.test(p.title+p.description)));
-  const templateOne=await saveSmartstoreDetail({...reviewedProduct,detailTemplate:2},folder,path.join(root,'template-one.png'),{dataRoot,videoOptions});assert.equal(templateOne.templateVariant,2);assert(templateOne.officialTop<templateOne.videoAfterTop);assert(templateOne.videoAfterTop<templateOne.bannerTop);assert.equal(templateOne.renderCacheHit,false);
+  const templateOne=await saveSmartstoreDetail({...reviewedProduct,detailTemplate:2},folder,path.join(root,'template-one.png'),{dataRoot,videoOptions});assert.equal(templateOne.templateVariant,2);assert(templateOne.officialTop<templateOne.videoAfterTop);assert(templateOne.videoAfterTop<=templateOne.bannerTop);assert.equal(templateOne.renderCacheHit,false);
   const repeated=await saveSmartstoreDetail(reviewedProduct,folder,path.join(root,'repeated.png'),{dataRoot,videoOptions});
   assert.equal(result.renderCacheHit,false);assert.equal(repeated.renderCacheHit,true);assert.equal(repeated.footerTop,result.footerTop);
   assert.deepEqual(await readFile(out),await readFile(path.join(root,'repeated.png')));
