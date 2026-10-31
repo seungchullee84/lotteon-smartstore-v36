@@ -698,7 +698,7 @@ $('smartstoreAutoTags').onclick=async()=>{
 
 
 // Preserve deliberate edits per style; newly collected source images stay server-owned.
-const manualProductFields=new Set(['name','gender','consumerPrice','colors','sizes','material','country','manufactured','washing','keywords','commonMiddle','commonSmall','channelMiddle','channelSmall','smartstoreName','templateHeadline']);
+const manualProductFields=new Set(['name','gender','consumerPrice','colors','sizes','material','country','manufactured','washing','keywords','commonMiddle','commonSmall','channelMiddle','channelSmall','smartstoreName','templateHeadline','templateHeadline1','templateHeadline2']);
 const localProductEdits=new Map();
 function editedValuesFor(p){
  if(!localProductEdits.has(p.style)){
@@ -834,7 +834,7 @@ $('photoImportApply').onclick=async()=>{
 for(const detailTemplate of [1,2])if($('smartstoreTemplate'+detailTemplate))$('smartstoreTemplate'+detailTemplate).onclick=async()=>{
  if(requestLock||serverBusy||!product||document.body.dataset.channel!=='smartstore')return;
  const style=product.style;requestLock=true;syncButtons();
- try{await post('smartstore-template',{style,detailTemplate,edits:currentProductEdits()});if(product?.style!==style)return;product.detailTemplate=detailTemplate;renderDetailPreview(product);announce('템플릿 '+detailTemplate+' 선택됨','success');}
+ try{await post('smartstore-template',{style,detailTemplate,edits:currentProductEdits()});if(product?.style!==style)return;product.detailTemplate=detailTemplate;if(typeof syncTemplateHeadlineInput==='function')syncTemplateHeadlineInput();renderDetailPreview(product);announce('템플릿 '+detailTemplate+' 선택됨','success');}
  catch(error){$('error').textContent=error.message;}
  finally{requestLock=false;syncButtons();}
 };

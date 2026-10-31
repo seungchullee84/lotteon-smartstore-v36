@@ -4,7 +4,7 @@ import {templateMainHeadline} from './smartstore-template-headline.mjs';
 // Only template 2: preserve the existing source images and seller data.
 export function templateTwoSxoBody(html,product,name,points=[]){
  const $=load(html,null,false);
- const title=templateMainHeadline(product,name);
+ const title=templateMainHeadline(product,name,2);
  const heading=$('[data-template-main-title]');
  heading.text(title).attr('data-template-default-title',name);
  $('.ss2-kicker,.ss2-description,.ss2-product-line>span').remove();
