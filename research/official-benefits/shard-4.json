@@ -2092,6 +2092,33 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "116947",
+      "rawName": "NEW 브러시드 스트레이트 데님",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=4838EE0AE072CAB29985721C1A2457BB&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01116947.jpg",
+      "detailHash": "e477f0dace38ef7b82c6f84689e6f26a721f7e06cae8963b803ef805b5d63f1c",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"d560e35f8969773db179cdd2a4d83427\"",
+        "lastModified": "Wed, 21 Oct 2026 08:32:27 GMT"
+      },
+      "pageHash": "e903a268196aeed9091451c8a172cde085630b3fed76fe8d858d71fb9ae81583",
+      "pageText": "",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:28:06.931Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "326924",
       "rawName": "NEW [문가영] 브러시드 헨리넥 긴팔티",
       "gender": "여성",
@@ -2315,6 +2342,39 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:22:26.456Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "146902",
+      "rawName": "NEW 나일론 코튼 백팩",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=49B19EE985A01C93C4C5969584C3BDDA&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01146902.jpg",
+      "detailHash": "d0c91d4d1876d6d3938c1004056f75c1abfaeef5b969cd549f48186fec381289",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"bed1168fa25cb112e04bce3d06fb28ef\"",
+        "lastModified": "Wed, 30 Sep 2026 02:47:21 GMT"
+      },
+      "pageHash": "d1ada0f346e4f8aff26fda5a89c5ac8eab69523d4d9005f348e371d571b4dfbf",
+      "pageText": "데일리 백팩\n\n불필요한 디테일을 덜어낸 심플한 디자인으로 일상부터 라이프스타일 전반에 어우러져 착용할 수 있는 백팩입니다. 뛰어난 내구성과 실용적인 수납력을 담아내고 거친 사용 환경에서도 형태가 쉽게 망가지지 않습니다. 등하교, 출퇴근, 가벼운 여행 등 어떤 상황에서도 편안하게 착용 가능합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "오래 입기 좋은 내구성",
+          "description": "우수한 내구성을 갖췄어요.",
+          "evidence": "뛰어난 내구성"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:50.794Z",
       "analyzedAt": null
     },
     {

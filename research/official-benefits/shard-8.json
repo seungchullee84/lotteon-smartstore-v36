@@ -76,6 +76,33 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "076926",
+      "rawName": "NEW [변우석] CLOUD LIGHT 퀼팅 패딩 베스트",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=8050CB758CE927318E00BBCC31DD2891&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076926.jpg",
+      "detailHash": "e74b26af94e4b803dd583a11b7ba78198955d2f108a663d13402d8688795d036",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"ae5c06ea22b7d8223b260fc0733609c9\"",
+        "lastModified": "Wed, 16 Sep 2026 23:53:24 GMT"
+      },
+      "pageHash": "12f1a7825977ebd886838246596f785e424839a07d8f32b0938bb450b4081484",
+      "pageText": "전체적으로 여유 있는 사이즈와 볼륨감이 특징인 릴랙스 핏의 퀼팅 베스트입니다. \n고밀도 직조된 원단 및 백 코팅 가공으로 내구성과 방풍성이 뛰어나면서도 가볍고 편안합니다. \n\n보온성이 뛰어난 신세틱 충전재와 부드러운 터치감으로 \n자연스러운 볼륨감을 보여주며 레이어드하여 착용하기 좋은 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:45.000Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "024933",
       "rawName": "브러시드 테리 그래픽 후드티",
       "gender": "",
@@ -1098,6 +1125,44 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "076510",
+      "rawName": "NEW 트리코트 목넥 집업 자켓",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=849ED1DAC4ACDCA5A7BE906FE9C212CF&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076510.jpg",
+      "detailHash": "529597178b14486207afd59e88be341bde8b09e1952921983873ce67a508ba7a",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"620a8c3d7caa0c2dbacfec9ff6f016f2\"",
+        "lastModified": "Thu, 05 Mar 2026 02:06:15 GMT"
+      },
+      "pageHash": "be2ac8b125cee07493d2d9bfefc1b88ca1ee9c484f75c917086094d40c0f5d2a",
+      "pageText": "적당히 여유로운 릴렉스 핏의 스탠드 넥 집업 재킷으로, 지퍼 여밈을 적용해 착용하기 편합니다. \n\n홑겹 구조에 메쉬 포켓 안감을 사용해 통기성을 높였으며, YKK 나일론 지퍼를 적용해 내구성과 사용감을 강화했습니다. \n양사이드 포켓에 지퍼를 더해 소지품 보관 시 빠질 위험 없이 안전한 보관이 가능합니다. \n\n밑단에는 고무 밴딩을 적용해 허리 라인을 자연스럽게 잡아 주어, \n움직임 시 실루엣이 흐트러지지 않는 안정적인 핏을 제공합니다.\n\n폴리에스터 100% 소재에 메카니컬 스트레치 구조를 적용했습니다.\n스판 원사 없이도 우수한 신축성과 복원력을 갖춰, 장시간 착용 시에도 편안함을 유지합니다.\n\n형태 안정성이 좋아 세탁 후 변형이 적습니다.\n구김이 잘 생기지 않아 관리가 용이하며, 다공성 구조로 통기성이 뛰어나 쾌적하게 착용할 수 있습니다.\n\n톤다운된 계열의 컬러로 구성해 데일리 웨어와 액티브 웨어 모두에 적합한 실용적인 구성으로 완성했습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "여유로운 릴렉스핏",
+          "description": "여유 있게 떨어지는 릴렉스 실루엣.",
+          "evidence": "적당히 여유로운 릴렉스 핏의 스탠드 넥 집업 재킷으로, 지퍼 여밈을 적용해 착용하기 편합니다."
+        },
+        {
+          "title": "통기성을 살린 쾌적함",
+          "description": "우수한 통기성으로 쾌적하게 입어요.",
+          "evidence": "통기성이 뛰어나 쾌적"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:43.451Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "353921",
       "rawName": "울 캐시미어 터틀넥 니트",
       "gender": "",
@@ -1203,6 +1268,49 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:16:48.100Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "115935",
+      "rawName": "NEW [변우석] 와이드 본딩 브러시드 밴딩 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=85054B382185D4B1F62402CA8B93F220&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01115935.jpg",
+      "detailHash": "4fe7b3b0e639622f08f5c323088d4367f236ad11755376f451db014a81c2a17b",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"354cfe47759f882f37704f30064516cb\"",
+        "lastModified": "Wed, 22 Oct 2025 02:00:54 GMT"
+      },
+      "pageHash": "95534ac2915a6b7e31ebd396fe249a307a291c09336bf643770626abcfa32f1e",
+      "pageText": "여유 있는 실루엣의 플리스 밴딩 와이드핏 팬츠입니다.\n\n허리에는 백밴딩 디테일을 더해 편안하고 안정적으로 착용되며, 전면 단추 여밈으로 깔끔한 아웃핏과 간편한 착용을 제공합니다.\n본딩 원단으로 제작되어 형태가 쉽게 무너지지 않고 실루엣을 단정하게 유지합니다.\n여유로운 핏으로 움직임이 자유롭고 캐주얼한 코디에 손쉽게 활용할 수 있는 아이템입니다.\n\n겉면은 탄탄한 조직감의 원단으로, 은은한 표면감과 부드러운 터치감이 특징입니다.\n구김에 강하고 형태 변형이 적어 오랜 기간 깔끔한 실루엣을 유지합니다.\n안쪽은 플리스 원단을 본딩 처리해 보온성을 높였으며, 바람을 효과적으로 차단합니다.\n적당한 두께감으로 자연스러운 움직임이 가능한 편안한 착용감을 제공합니다.\n\nYKK사의 지퍼를 사용해 완성도를 높였습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "여유로운 와이드핏",
+          "description": "넉넉하게 떨어지는 와이드 실루엣.",
+          "evidence": "여유 있는 실루엣의 플리스 밴딩 와이드핏 팬츠입니다."
+        },
+        {
+          "title": "편안한 착용감",
+          "description": "허리에는 백밴딩 디테일을 더해 편안.",
+          "evidence": "허리에는 백밴딩 디테일을 더해 편안하고 안정적으로 착용되며, 전면 단추 여밈으로 깔끔한 아웃핏과 간편한 착용을 제공합니다."
+        },
+        {
+          "title": "부드러운 착용감",
+          "description": "은은한 표면감과 부드러운 터치감이 특징입니다.",
+          "evidence": "겉면은 탄탄한 조직감의 원단으로, 은은한 표면감과 부드러운 터치감이 특징입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:28:00.635Z",
       "analyzedAt": null
     },
     {
@@ -3198,6 +3306,39 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "216701",
+      "rawName": "NEW 지워머 크루넥 긴팔티(에센셜)",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=8DAEB5E666AB3521155DFDB36CE8C6CF&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01216701.jpg",
+      "detailHash": "2ec9acf34f7c9d1e2425961d5986a5f1517d44055bd0b93945935e9fd95deb19",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"d9106ec109ccdd2f9f0f74261283af5d\"",
+        "lastModified": "Mon, 26 Oct 2026 01:46:48 GMT"
+      },
+      "pageHash": "6118722702e7bb0796ab8faaee58ed2eff161dcc570578b1479732c9c13a1fb2",
+      "pageText": "레귤러핏: 편안하고 안정적인 착용감의 긴팔 티셔츠\n\n우수한 보온성: 가볍고 따뜻하며 정전기 발생 감소\n\n뛰어난 신축성: 활동성이 좋고 이너웨어·홈웨어로 활용 가능",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "레귤러핏: 편안하고 안정적인 착용감의 긴팔 티셔츠.",
+          "evidence": "레귤러핏: 편안하고 안정적인 착용감의 긴팔 티셔츠"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:28:12.135Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "326913",
       "rawName": "NEW 퍼펙트 긴팔 티셔츠 (STR)",
       "gender": "",
@@ -3259,6 +3400,44 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:17:48.458Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "076932",
+      "rawName": "NEW CLOUD PUFF 코듀로이 목넥 패딩 푸퍼",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=8E3F73EB00E2D6CFB8DCFCE426DCA660&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076932_1.jpg",
+      "detailHash": "dccee83ff939fe886a1a78a1ced5e5b5485aaa16338a69552604c9a34f24344a",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"944833ac53ac26b5de0db4570516303f\"",
+        "lastModified": "Mon, 26 Oct 2026 06:52:07 GMT"
+      },
+      "pageHash": "ff83a514fae672baeac4a31e228cf0649cd0bc07b4eafc98434d9959a47a99c1",
+      "pageText": "릴렉스 핏과 스탠드 넥 디자인으로 여유롭고 클래식한 무드의 푸퍼 자켓\n\n은은한 워싱감의 코듀로이 소재와 마이크로 볼타입 패딩을 적용해 깊이 있는 색감과 풍성한 볼륨감 연출\n\nYKK 메탈 지퍼, 소매 이밴드, 밑단 스트링·스토퍼 등 방풍 및 실루엣 조절 디테일",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "여유로운 릴렉스핏",
+          "description": "여유 있게 떨어지는 릴렉스 실루엣.",
+          "evidence": "릴렉스 핏과 스탠드 넥 디자인으로 여유롭고 클래식한 무드의 푸퍼 자켓"
+        },
+        {
+          "title": "원하는 핏으로 조절",
+          "description": "밑단 스트링·스토퍼 등 방풍 및 실루엣 조절 디테일.",
+          "evidence": "YKK 메탈 지퍼, 소매 이밴드, 밑단 스트링·스토퍼 등 방풍 및 실루엣 조절 디테일"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:28:09.881Z",
       "analyzedAt": null
     },
     {

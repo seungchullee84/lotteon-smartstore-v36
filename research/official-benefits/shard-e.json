@@ -1493,6 +1493,39 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "026988",
+      "rawName": "NEW 브러시드 인터락 터틀넥 긴팔티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=E5C858909EB32FD4FCDDD1C66BAD1A15&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01026988.jpg",
+      "detailHash": "6c4b476dd20d03ee009a60ba5057dc89e9434e32c1f3665ac3ed39a999517b38",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"a910f70fe98f9d793d4346f6b1c4ed3a\"",
+        "lastModified": "Mon, 26 Oct 2026 01:01:19 GMT"
+      },
+      "pageHash": "e498838e19557e83da3ddaddc89e70bdb6d32eb8b995c530a3be473ccf40424a",
+      "pageText": "베이직한 터틀넥 디자인과 몸에 과하게 붙지 않는 자연스러운 레귤러핏 \n\n40수 코튼 인터락 소재에 캐시미어 터치 가공을 더해 탄탄하면서도 부드러운 착용감\n\n가먼트 워시 가공을 거쳐 수축 최소화, 세탁 후에도 안정적인 형태 유지",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "워싱으로, 안정감 있게",
+          "description": "가먼트 워싱으로 수축을 최소화.",
+          "evidence": "가먼트 워시 가공을 거쳐 수축 최소화, 세탁 후에도 안정적인 형태 유지"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:28:08.249Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "055504",
       "rawName": "목넥 하프집업 니트",
       "gender": "",
@@ -2444,6 +2477,44 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:22:59.598Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "115939",
+      "rawName": "NEW 스트레이트 브러시드 이지 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=E98257FCF2C2146E3A4BFD5FDB0BCDFE&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01115939.jpg",
+      "detailHash": "30042649e55b4fdf45efb4eaccc3cb45534fc998e8e96e1b6eacb0c973b87974",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"804ed7ea07bc598801527a3bdafb8bbd\"",
+        "lastModified": "Mon, 03 Nov 2025 05:06:17 GMT"
+      },
+      "pageHash": "267056dfccb4c0e912765b1013964c2a9eed54c5b34158b86941caf9648ad9cd",
+      "pageText": "풀밴딩 허리 디테일로 장시간 착용에도 편안하며, 밑위 균형을 안정감 있게 잡아 활동성을 높였습니다. 전체적으로 여유 있게 떨어지는 스트레이트 라인이 이지밴딩 팬츠 특유의 편안함을 살리면서도 댄디한 분위기를 연출합니다.\n\n스트레치 져지와 플리스 안감을 본딩한 이중 구조로 우수한 보온성과 함께 피부에 닿는 순간 전해지는 부드러운 촉감과 포근한 착용감을 제공합니다. 신축성이 있어 자유로운 움직임이 가능하며, 무게감이 적어 가볍게 착용할 수 있습니다. \n\n편안한 이지밴딩 팬츠 감각에 정제된 실루엣을 더해 일상부터 여행, 가벼운 아웃도어까지 폭넓게 활용할 수 있는 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "편안한 이지밴딩 팬츠 감각에 정제된 실루엣을 더해 일상부터 여행.",
+          "evidence": "편안한 이지밴딩 팬츠 감각에 정제된 실루엣을 더해 일상부터 여행, 가벼운 아웃도어까지 폭넓게 활용할 수 있는 아이템입니다."
+        },
+        {
+          "title": "부드럽게 닿는 촉감",
+          "description": "부드러운 촉감이 느껴지는 원단.",
+          "evidence": "부드러운 촉감과 포근한 착용감을 제공"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:28:02.073Z",
       "analyzedAt": null
     },
     {

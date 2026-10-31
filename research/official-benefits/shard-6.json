@@ -461,6 +461,33 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "116918",
+      "rawName": "NEW 브러시드 스트레이트 슬랙스",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=61434336175AF359217B55C4119F600E&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01116918.jpg",
+      "detailHash": "0ee3dba8e3b2083c0b4f28961f2cf0c5ec26f0f452854371cdfa676e6870016b",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"6ed9632146a350fdd05648708d5db83b\"",
+        "lastModified": "Mon, 26 Oct 2026 02:23:42 GMT"
+      },
+      "pageHash": "14cb307544fd4b9ccbc558c2534fd3685b47975776dfff4480341f039b58b679",
+      "pageText": "POINT 1 스트레이트 핏의 세미 와이드 실루엣\nPOINT 2 사방 스판 TR 소재 사용\nPOINT 4 필링 현상 최소화\nPOINT 5 뒷면에 기모 가공을 적용하여 부드럽고 따뜻하게 착용 가능\nPOINT 5 YKK社 지퍼사용",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:28:08.676Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "054503",
       "rawName": "목넥 하프집업 니트",
       "gender": "",
@@ -1974,6 +2001,44 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "146903",
+      "rawName": "NEW 유틸리티 크로스백",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=6721D6102A26F181A8EEBBE812AD67E6&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01146903.jpg",
+      "detailHash": "ddf40051f9e85cd5fc441d7be4aeff950f235a08d8157a33b19a4e57f3848b25",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"587ed25a8399ec9f2f936f897c85f4c4\"",
+        "lastModified": "Wed, 30 Sep 2026 02:47:19 GMT"
+      },
+      "pageHash": "94cec0ea791a5e72ea525999af5397617350d01bf4c9c5b9766e8ac1d4bcc021",
+      "pageText": "유틸리티 크로스백\n\n언제 어디서나 라이프스타일에 맞춰 다용도로 활용 가능한 적당한 사이즈의 크로스백입니다. 경량 패브릭을 기반으로 마찰에 강하며 높은 내구성과 가벼운 경량성을 가지고 있습니다. 사이드에 적용된 입체포켓과 스트링 디테일은 소지품을 더욱 용이하게 보관할 수 있게 해주며, 메인 수납부 외에 후면 추가 지퍼 수납부가 있어 실용성을 극대화한 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "가볍게, 부담 없이",
+          "description": "가벼운 원단의 경량 디자인.",
+          "evidence": "경량 패브릭을 기반으로 마찰에 강하며 높은 내구성과 가벼운 경량성을 가지고 있습니다."
+        },
+        {
+          "title": "오래 입기 좋은 내구성",
+          "description": "우수한 내구성을 갖췄어요.",
+          "evidence": "높은 내구성"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:49.369Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "415913",
       "rawName": "코듀로이 와이드 팬츠",
       "gender": "",
@@ -2344,6 +2409,49 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:21:35.262Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "115949",
+      "rawName": "NEW 와이드 브러시드 카고 데님 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=693BA9A344F3E2A5BE083E7A99F1EBEE&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01115949.jpg",
+      "detailHash": "ef11e65d3f5297b095b6ab1942650cc49776fd09657910cc912b8bc1e8731c40",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"3048c7d70be5068002bfdf2bc93b4dfd\"",
+        "lastModified": "Tue, 28 Oct 2025 07:54:33 GMT"
+      },
+      "pageHash": "06710a2b52c8c12b3ddac1f0994854021a9ebe01eb2207dc61012ca4a73f4de4",
+      "pageText": "여유로운 와이드핏 핏에 무릎 턱 디테일을 더해 입체적인 볼륨감을 구현했습니다.\n균형 잡힌 비율로 트렌디하면서도 편안한 착용감을 제공하며, 다양한 스타일링에 어울립니다.\n\n코튼 100% 원단에 기모 브러시 가공을 더한 브러쉬드 카고 핏 데님 팬츠입니다.\n스판이 포함되지 않은 탄탄한 코튼 원단으로, 데님 특유의 질감과 자연스러운 실루엣을 그대로 느낄 수 있습니다. 13.3oz 중량의 원단으로, 바지 안쪽에 브러쉬드(기모) 가공을 더해 부드러운 터치감과 보온성을 높여 겨울 시즌 활용하기 좋은 아이템입니다.\n\n전반적인 핸드 브러시 워싱 공정을 적용해 자연스럽고 입체적인 텍스처를 구현하고, 클래식한 데님 본연의 깊은 컬러에 트렌디한 워싱 무드를 더해 세련된 분위기로 완성했습니다.\n\n움직임이 부드럽고 견고한 프리미엄 지퍼인 YKK 지퍼를 사용 하였습니다.\n\n**데님 제품의 경우 워싱 가공 특성상 제품 별 디테일의 편차가 있을 수 있습니다.\n**데님 염료의 특성상 이염 및 물빠짐이 불가피하므로 반드시 미지근한 물에 뒤집어서 단독 세탁하시기 바랍니다.\n**데님 원단 특성 상 컬러 별로 상세 스펙 차이가 있을 수 있습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "13.3oz 중량의 원단으로, 바지 안쪽에 브러쉬드(기모) 가공을 더해 부드러운 터치감과 보온성을 높여 겨울 시즌 활용하기 좋은 아이템입니다."
+        },
+        {
+          "title": "여유로운 와이드핏",
+          "description": "넉넉하게 떨어지는 와이드 실루엣.",
+          "evidence": "여유로운 와이드핏 핏에 무릎 턱 디테일을 더해 입체적인 볼륨감을 구현했습니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "다양한 스타일링에 어울립니다.",
+          "evidence": "균형 잡힌 비율로 트렌디하면서도 편안한 착용감을 제공하며, 다양한 스타일링에 어울립니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:28:06.763Z",
       "analyzedAt": null
     },
     {
@@ -2837,6 +2945,54 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:15:39.649Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "075917",
+      "rawName": "NEW CLOUD LIGHT 목넥 경량 패딩 자켓",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=6BE9F81645B69FEA7466A6B55973D893&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01075917.jpg",
+      "detailHash": "d6bb46aa9fe520239c72d46f1c8866c9a7a3fe44dcb05ad60a7627d790efe0da",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"6a9433e76e6fa731122e358b7da1d88c\"",
+        "lastModified": "Mon, 22 Sep 2025 08:15:17 GMT"
+      },
+      "pageHash": "c8d75c74146382387f66d94db200fad56813ca756723668ab64579fac517d69f",
+      "pageText": "레귤러핏의 목넥 경량 퀼팅 자켓 입니다.\n\n고밀도 코튼 라이크 원사로 제작된 경량 나일론 원단을 사용하여 자연스러운 면 감촉을 구현했으며,\n뛰어난 내구성과 쾌적한 착용감을 제공합니다. 가볍지만 적당한 볼륨감을 살려 부담 없이 세련된 실루엣을 완성합니다.\n\n충전재는 태평양사의 SynCloud® Sorona 프리미엄 충전재를 사용하였으며, 천연 다운에 준하는 보온성과 복원력을 확보합니다.\n가벼운 무게감과 형태 유지력, 습기에 강하고 알레르기 걱정이 없는 일상과 아웃도어 모두에서 안심하고 착용할 수 있습니다.\n\n간절기 시즌에는 단독으로, 겨울철에는 아우터 안에 레이어드하여 보온성을 높일 수 있는 활용도 높은 경량 자켓입니다.\n\n목 위까지 올라오는 스탠드 카라 디자인이 바람을 막아주며 목을 따뜻하게 감싸줍니다. 전면에는 스냅 버튼 여밈을 통해 간편한 탈착의가 가능하고, 포켓은 양 옆에 두 개, 안쪽 포켓은 소지품 수납에 편리합니다. 절개 디테일이 캐주얼하면서도 트렌디한 무드를 더해주어, 폭넓은 스타일링에 활용할 수 있는 아이템입니다.\n\n* 01285901 제품과 세트로 착용 가능합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "가볍게 입기 좋게",
+          "description": "레귤러핏의 목넥 경량 퀼팅 자켓 입니다.",
+          "evidence": "레귤러핏의 목넥 경량 퀼팅 자켓 입니다."
+        },
+        {
+          "title": "소지품을 간편하게",
+          "description": "안쪽 포켓은 소지품 수납에 편리합니다.",
+          "evidence": "전면에는 스냅 버튼 여밈을 통해 간편한 탈착의가 가능하고, 포켓은 양 옆에 두 개, 안쪽 포켓은 소지품 수납에 편리합니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "폭넓은 스타일링에 활용할 수 있는 아이템입니다.",
+          "evidence": "절개 디테일이 캐주얼하면서도 트렌디한 무드를 더해주어, 폭넓은 스타일링에 활용할 수 있는 아이템입니다."
+        },
+        {
+          "title": "오래 입기 좋은 내구성",
+          "description": "우수한 내구성을 갖췄어요.",
+          "evidence": "뛰어난 내구성"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:41.086Z",
       "analyzedAt": null
     },
     {
@@ -3738,6 +3894,49 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:20:59.647Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "076930",
+      "rawName": "NEW [변우석] CLOUD PUFF 나일론 목넥 패딩 푸퍼",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=6FB613F403579F053ED7F1B0C583CA52&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076930.jpg",
+      "detailHash": "b4fbd9273ab667e5ea2cac1ee9264fc860ce6bf6c2c63e20c8530db0b134c94c",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"8feb3c6e5c203955730f989b70ea7639\"",
+        "lastModified": "Wed, 21 Oct 2026 02:10:46 GMT"
+      },
+      "pageHash": "296ccb09c1f04486a3d995bdeffa19aef39b77ce6186c2017158ad352a9c94ef",
+      "pageText": "릴렉스 핏과 목넥 디자인으로 편안하면서도 깔끔한 실루엣을 연출하는 푸퍼 자켓\n\n초경량 립스탑 나일론 소재와 Ecoloft® Fluff 충전재를 사용해 가벼운 착용감과 풍성한 볼륨감, 뛰어난 보온성을 제공\n\n내부 인 플라켓과 소매 안쪽 이밴드로 찬바람 유입을 차단하며, YKK 메탈 지퍼와 밑단 스트링으로 실용성을 강화",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "가볍게, 부담 없이",
+          "description": "가벼운 원단의 경량 디자인.",
+          "evidence": "초경량 립스탑 나일론 소재와 Ecoloft® Fluff 충전재를 사용해 가벼운 착용감과 풍성한 볼륨감, 뛰어난 보온성을 제공"
+        },
+        {
+          "title": "편안하고 깔끔한 실루엣",
+          "description": "릴렉스 핏과 목넥으로 편안하고 깔끔하게.",
+          "evidence": "릴렉스 핏과 목넥 디자인으로 편안하면서도 깔끔한 실루엣을 연출"
+        },
+        {
+          "title": "찬바람 유입을 줄여 따뜻하게",
+          "description": "내부 플라켓과 소매 안쪽 밴드로 찬바람을 차단해요.",
+          "evidence": "내부 인 플라켓과 소매 안쪽 이밴드로 찬바람 유입을 차단"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:28:05.821Z",
       "analyzedAt": null
     }
   ]

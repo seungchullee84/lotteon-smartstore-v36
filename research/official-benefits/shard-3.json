@@ -237,6 +237,54 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "115928",
+      "rawName": "NEW 브러시드 히든밴딩 울트라 스트레치 치노 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=31CBDF5366C4C79A99253A9A5AEB1492&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01115928.jpg",
+      "detailHash": "b23e6e326ab0bc66ca0be8d77f97f743b0d1a734800e2c7f6aeb18c5103827df",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"f6e143e712913eaedcfa5d6c45a91413\"",
+        "lastModified": "Tue, 14 Oct 2025 07:09:12 GMT"
+      },
+      "pageHash": "c48a0201a0e992a520cfaac3f3ae4879854fedb3ae97c5ce9b8ab2ece5ad4a32",
+      "pageText": "히든 밴딩 울트라 스트레치 치노 팬츠입니다.\n\n탁월한 신축성과 웨이스트 라인의 히든 밴딩 디테일로 유연한 움직임과 편안한 착용감을 제공합니다. 클래식한 디자인과 고급스러운 소재감으로 캐주얼과 스마트한 스타일 모두에 자연스럽게 어우러지는 실용적인 아이템입니다.\n\n밑단으로 갈수록 자연스럽게 좁아지는 테이퍼드 실루엣에, 착용감을 극대화한 밑위 밸런스를 더해 체형에 관계없이 안정적인 핏을 유지합니다.\n\n스판사가 원단의 가로/세로 양방향 모두 들어 있는 사방 스판 원단으로 착용감이 뛰어납니다. \n브러쉬드 가공으로 보온력이 우수하며 부드러운 터치감으로 겨울에도 따뜻하게 착용하기 좋습니다. 밀도 높은 코튼 원단을 사용하여 내구성이 우수하고 탄탄합니다. 가먼트 워싱을 통해 세탁시 수축 현상을 최소화하였습니다. \n\nYKK사의 컬러별 매칭된 지퍼와 독자적으로 개발한 견고한 버튼 사용으로 기능적인 안정성 역시 갖추었습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "히든밴딩, 편안하게",
+          "description": "허리 안쪽 밴딩으로 편안하게.",
+          "evidence": "탁월한 신축성과 웨이스트 라인의 히든 밴딩 디테일로 유연한 움직임과 편안한 착용감을 제공합니다."
+        },
+        {
+          "title": "사방으로, 유연하게",
+          "description": "가로·세로로 늘어나는 사방 스판.",
+          "evidence": "스판사가 원단의 가로/세로 양방향 모두 들어 있는 사방 스판 원단으로 착용감이 뛰어납니다."
+        },
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "브러쉬드 가공으로 보온력이 우수하며 부드러운 터치감으로 겨울에도 따뜻하게 착용하기 좋습니다."
+        },
+        {
+          "title": "워싱으로, 안정감 있게",
+          "description": "가먼트 워싱으로 수축을 최소화.",
+          "evidence": "가먼트 워싱을 통해 세탁시 수축 현상을 최소화하였습니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:57.111Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "076501",
       "rawName": "[변우석] 코튼 트윌 풀집 자켓",
       "gender": "남성",
@@ -319,6 +367,33 @@
       "status": "image-pending",
       "visualReview": false,
       "observedAt": "2026-10-31T06:27:18.455Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "076931",
+      "rawName": "NEW [변우석] CLOUD PUFF 스웨이드 목넥 패딩 푸퍼",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=31E0C7852F304011FCAE3D1E5228843F&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076931.jpg",
+      "detailHash": "1ab24316a7f9f261b9ffdbbea7edd2d005cb766238e256617384349ea93a6881",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"ec4c1c2a5b04413a235e01795422479c\"",
+        "lastModified": "Wed, 28 Oct 2026 00:06:06 GMT"
+      },
+      "pageHash": "8abc463624f6e76c0834efb8e965135dc17a9db4d7d5f996f5e259adeb8494a9",
+      "pageText": "",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:28:04.646Z",
       "analyzedAt": null
     },
     {
@@ -768,6 +843,49 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:14:10.231Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "115934",
+      "rawName": "NEW 본딩 플리스 파라슈트 카고 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=33E7DD5A85A5A6DF56A6BA7F5EB5F90E&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01115934.jpg",
+      "detailHash": "1d56df94aba11ccd09ca5b8fc5ba8ae9a4ec25dc6362c838627ab7e96830298a",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"ec0bd3d1a7a3c3c0edf87ce03b9801f0\"",
+        "lastModified": "Wed, 22 Oct 2025 01:58:29 GMT"
+      },
+      "pageHash": "bef931a715aa03547f5bf3242fe6217ca70081c4394466a47fdd986d595d676b",
+      "pageText": "여유 있는 핏으로 편안하게 착용할 수 있는 파라슈트 팬츠입니다.\n적당히 여유있는 릴렉스 핏으로 부담 없이 다양한 스타일에 매치할 수 있습니다.\n무릎의 턱 디테일로 입체적인 형태를 구현했으며, 사이드 플랩 포켓으로 수납이 가능합니다.\n밑단의 스토퍼 스트링으로 실루엣 조절이 가능해 취향에 따라 연출할 수 있습니다.\n\n겉면은 내구성이 높은 고밀도 나일론 원단으로, 면과 유사한 텍스처감과 탄탄한 조직이 특징입니다.\n마찰에 강하고 형태 변형이 적어 오랜 기간 깔끔한 실루엣을 유지합니다.\n안쪽은 부드러운 플리스 원단을 본딩 처리해 보온성을 높였습니다.\n겉감과 안감이 밀착된 본딩 구조로 바람을 효과적으로 차단하며, 적당한 두께감으로 자연스러운 움직임이 가능한 편안한 착용감을 제공합니다.\n\n내구성 있는 YKK사의 지퍼를 사용해 완성도를 높였습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "여유로운 릴렉스핏",
+          "description": "여유 있게 떨어지는 릴렉스 실루엣.",
+          "evidence": "적당히 여유있는 릴렉스 핏으로 부담 없이 다양한 스타일에 매치할 수 있습니다."
+        },
+        {
+          "title": "소지품을 간편하게",
+          "description": "사이드 플랩 포켓으로 수납이 가능합니다.",
+          "evidence": "무릎의 턱 디테일로 입체적인 형태를 구현했으며, 사이드 플랩 포켓으로 수납이 가능합니다."
+        },
+        {
+          "title": "탄탄한 착용감",
+          "description": "면과 유사한 텍스처감과 탄탄한 조직이 특징입니다.",
+          "evidence": "겉면은 내구성이 높은 고밀도 나일론 원단으로, 면과 유사한 텍스처감과 탄탄한 조직이 특징입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:28:01.007Z",
       "analyzedAt": null
     },
     {
@@ -3556,6 +3674,77 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:20:25.186Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "285902",
+      "rawName": "NEW 울캐시 머플러 (공용)",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=3E164C79D748915AD0DF91758E66269B&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01285902.jpg",
+      "detailHash": "e3797f9fc83d6dd38a42022ba24bb86b74d76b8e0e6373840636ae7d38e6bfad",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"f6fcca20ed423c3b26e8eb2042f3a68a\"",
+        "lastModified": "Wed, 22 Oct 2025 08:20:07 GMT"
+      },
+      "pageHash": "4dd788507b97fdddd825df577a913263ef202451f1a08dcc679c3cfd60c72f37",
+      "pageText": "섬세하고 부드러운 캐시미어 원사가 블렌드 된 울 캐시미어 머플러입니다. \n\n적당한 폭과 기장으로 어느 착장에나 부담 없이 코디할 수 있으며, 적당한 두께감의 부드러운 촉감으로 편안하고 따뜻한 착용감을 느낄 수 있습니다. 스마트 착장뿐만 아니라 캐주얼한 재킷과 함께 레이어드하여 스타일링 가능한 아이템입니다.\n\n베이직한 솔리드 칼라에 트렌디하고 클래식한 체크 패턴을 더해 선택의 폭을 넓혔습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드러운 착용감",
+          "description": "섬세하고 부드러운 캐시미어 원사가 블렌드 된 울 캐시미어 머플러입니다.",
+          "evidence": "섬세하고 부드러운 캐시미어 원사가 블렌드 된 울 캐시미어 머플러입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:51.855Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "286901",
+      "rawName": "NEW 나일론 퀼팅 머플러",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=3E1AC440E1D21116170F1971BFEF94CC&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01286901.jpg",
+      "detailHash": "af614b254907c4c8f2ee1e17562ab6a22480b03cc80d43982318354fb25bac3d",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"8f79ae460c2562cb34af207118d8f55d\"",
+        "lastModified": "Wed, 28 Oct 2026 01:23:31 GMT"
+      },
+      "pageHash": "b619937e2c0813bc90b40ca6c8d982bf48d9493457c1e24602c4bb60177d1221",
+      "pageText": "부드러운 나일론 원단과 SynCloud® 충전재를 사용하여 습기에 강하고 알레르기 유발 방지, 세탁 후에도 볼륨감 유지 \n\n안감에 브러시드 처리된 보아털 원단을 적용해 보온성을 극대화, 자극 없이 부드럽고 다뜻한 착용감\n\n심플한 디자인과 간편한 끼움 디테일",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "안감에 브러시드 처리된 보아털 원단을 적용해 보온성을 극대화, 자극 없이 부드럽고 다뜻한 착용감"
+        },
+        {
+          "title": "부드러운 착용감",
+          "description": "부드러운 나일론 원단과 SynCloud® 충전재를 사용하여 습기에 강.",
+          "evidence": "부드러운 나일론 원단과 SynCloud® 충전재를 사용하여 습기에 강하고 알레르기 유발 방지, 세탁 후에도 볼륨감 유지"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:28:10.026Z",
       "analyzedAt": null
     },
     {

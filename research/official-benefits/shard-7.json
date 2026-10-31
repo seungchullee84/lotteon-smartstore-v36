@@ -1043,6 +1043,44 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "116955",
+      "rawName": "NEW 브러시드 테리 스트레이트 스웻 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=747612BB62CFE1851AAE7F7C4666E4F4&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01116955.jpg",
+      "detailHash": "c17fd795e8a53d698c2234f31ff3a254db704323403a2be2c28c7b3f0e42e3d8",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"c4f7626f81e8851660d9973be1e645fd\"",
+        "lastModified": "Wed, 28 Oct 2026 06:07:30 GMT"
+      },
+      "pageHash": "46cae57b99abc89fa46976a12a0708508b7ae5277aa7dfd77b65be2ff9ff0304",
+      "pageText": "POINT 01  • 스트레이트 핏\n다리 라인을 따라 일자로 자연스럽게 떨어지는 스트레이트 핏 \n\nPOINT 02 \n• 허리 밴드 + 스트링 디테일\n체형에 맞게 사이즈 조절 가능,장시간 착용에도 편안한 착용감\n\nPOINT 03 •  BRUSHED TERRY (60% COTTON, 40% POLYESTER),260GSM\n부담 없이 가볍게 착용 가능 \n원단 안쪽에 기모 가공을 더해 부드러운 촉감과 따뜻하고 포근한 착용감",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "BRUSHED TERRY (60% COTTON, 40% POLYESTER),260GSM 부담 없이 가볍게 착용 가능 원단 안쪽에 기모 가공을 더해 부드러운 촉감과 따뜻하고 포근한 착용감"
+        },
+        {
+          "title": "여밈을 편하게 조절",
+          "description": "체형에 맞게 사이즈 조절 가능,장시간 착용에도 편안한 착용감",
+          "evidence": "• 허리 밴드 + 스트링 디테일\n체형에 맞게 사이즈 조절 가능,장시간 착용에도 편안한 착용감"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:28:13.769Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "074930",
       "rawName": "코듀로이 카라 경량 패딩",
       "gender": "남성",
@@ -1565,6 +1603,54 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:23:54.015Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "075922",
+      "rawName": "NEW [변우석] 울캐시미어 더블 코트",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=77A2B1EA07497F3975B1377D3A7A85CB&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01075922.jpg",
+      "detailHash": "d787a4dfefbc247632fa1135d9989677a5005128f47f77180e46abfe9f6fdfa7",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"0ca833aca7906204ac60ec00b218b16d\"",
+        "lastModified": "Wed, 22 Oct 2025 01:49:34 GMT"
+      },
+      "pageHash": "4923c84038aed1c7aa1d48b82ad6db6d08d0fa0d385c2e3c2f2d9c7d43956fa6",
+      "pageText": "레귤러 핏의 울/캐시미어 더블 코트입니다.\n\n허벅지를 덮는 기장감이 안정적이며, 적당한 여유로움으로 다양한 이너와 매치하기 좋습니다. \n클래식하면서도 세련된 아웃핏을 완성합니다.\n\n울과 캐시미어를 블렌딩한 이중지 원단으로, 부드러운 터치감과 은은한 광택이 특징입니다. \n밀도 높은 조직감이 안정적인 형태를 유지해 주며, 적당한 두께감으로 한겨울에도 뛰어난 보온성을 제공합니다. 고급스러운 컬러감으로 세련된 무드를 더했습니다.\n\n더블 브레스티드 디자인에 모던하게 다듬은 카라와 라펠을 더해 클래식함과 트렌드를 동시에 담았습니다. 어깨 내부에는 7mm 패드와 슬리브 헤드를 적용해 안정적인 어깨 라인을 구현하며, 가슴 한쪽의 이너 포켓은 간단한 소지품 수납이 가능합니다. 뒷면 중앙 슬릿은 활동성을 높여주어 편안한 착용감을 선사합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "다양한 코디에 활용",
+          "description": "적당한 여유로움으로 다양한 이너와 매치하기 좋습니다.",
+          "evidence": "허벅지를 덮는 기장감이 안정적이며, 적당한 여유로움으로 다양한 이너와 매치하기 좋습니다."
+        },
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "적당한 두께감으로 한겨울에도 뛰어난 보온성을 제공합니다.",
+          "evidence": "밀도 높은 조직감이 안정적인 형태를 유지해 주며, 적당한 두께감으로 한겨울에도 뛰어난 보온성을 제공합니다."
+        },
+        {
+          "title": "소지품을 간편하게",
+          "description": "가슴 한쪽의 이너 포켓은 간단한 소지품 수납이 가능합니다.",
+          "evidence": "어깨 내부에는 7mm 패드와 슬리브 헤드를 적용해 안정적인 어깨 라인을 구현하며, 가슴 한쪽의 이너 포켓은 간단한 소지품 수납이 가능합니다."
+        },
+        {
+          "title": "부드럽게 닿는 촉감",
+          "description": "부드러운 촉감이 느껴지는 원단.",
+          "evidence": "부드러운 터치감과 은은한 광택이 특징"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:54.375Z",
       "analyzedAt": null
     },
     {
@@ -3441,6 +3527,49 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:22:40.557Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "115927",
+      "rawName": "NEW [변우석] 브러시드 이지 와이드 치노 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=7D68163716E5172CE9329B5348079F2C&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01115927.jpg",
+      "detailHash": "7bce38e077d55a8547e24f90826ef4936aaee473660f62b8f84abaa769bf5528",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"56124cca3c09b94b958da894f1b923b7\"",
+        "lastModified": "Tue, 28 Oct 2025 04:50:09 GMT"
+      },
+      "pageHash": "169603223ce7b2b45ad0d10be881939ad10aeb7ffea08f55addffd4b806ee3c8",
+      "pageText": "트렌디한 실루엣이 돋보이는 코튼 와이드핏 이지 팬츠입니다.\n\n웨이스트 밴딩 디테일로 허리에 자연스럽게 안착되며, 여유로운 실루엣으로 움직임이 편안합니다. 단추 여밈으로 간편하게 착용할 수 있으며, 다양한 캐주얼 코디에 손쉽게 활용할 수 있는 아이템입니다.\n\n후가공과 워싱 공정을 통해 소프트한 터치감과 클래식한 컬러로 완성도 있는 치노 무드를 완성했습니다. 워싱으로 다듬어진 균형 잡힌 조직감과 탄탄한 밀도감이 안정된 실루엣을 만들어줍니다. 기모 가공을 더해 따뜻하고 포근한 착용감을 선사하며, 보온성과 편안함을 모두 갖춘 아이템입니다.\n\n내구성이 뛰어난 YKK社의 지퍼를 사용해 완성도를 높였습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "기모 가공을 더해 따뜻하고 포근한 착용감을 선사하며, 보온성과 편안함을 모두 갖춘 아이템입니다."
+        },
+        {
+          "title": "움직임은 편안하게",
+          "description": "여유로운 실루엣으로 움직임이 편안합니다.",
+          "evidence": "웨이스트 밴딩 디테일로 허리에 자연스럽게 안착되며, 여유로운 실루엣으로 움직임이 편안합니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "다양한 캐주얼 코디에 손쉽게 활용할 수 있는 아이템입니다.",
+          "evidence": "단추 여밈으로 간편하게 착용할 수 있으며, 다양한 캐주얼 코디에 손쉽게 활용할 수 있는 아이템입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:57.514Z",
       "analyzedAt": null
     },
     {

@@ -127,6 +127,49 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "216710",
+      "rawName": "NEW 지워머 레깅스(에센셜)",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=90465B562BA7F237E4EA8EADDB93E325&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01216710.jpg",
+      "detailHash": "b4fa367fe7cc4d642892b3dc16f60793aa90612a1c4652b028af4ce5ea169036",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"0ae9bfe864b6d34da665c48a785b8ca2\"",
+        "lastModified": "Mon, 26 Oct 2026 01:46:45 GMT"
+      },
+      "pageHash": "3747fb1d611bb0d932ef62f53778ea9ce8c1f3c29377c110887300a950ab8d13",
+      "pageText": "편안한 레귤러 핏: 허리부터 발목까지 안정적으로 밀착되는 실루엣\n\n우수한 보온성: 체온 유지 및 겨울철 정전기 발생 감소\n\n부드러운 착용감: 가볍고 신축성이 뛰어나 이너웨어·홈웨어로 활용 가능",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "편안한 레귤러 핏: 허리부터 발목까지 안정적으로 밀착되는 실루엣.",
+          "evidence": "편안한 레귤러 핏: 허리부터 발목까지 안정적으로 밀착되는 실루엣"
+        },
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "우수한 보온성: 체온 유지 및 겨울철 정전기 발생 감소.",
+          "evidence": "우수한 보온성: 체온 유지 및 겨울철 정전기 발생 감소"
+        },
+        {
+          "title": "움직일 때도 유연하게",
+          "description": "뛰어난 신축성으로 편안하게 움직여요.",
+          "evidence": "신축성이 뛰어나"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:28:12.082Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "355510",
       "rawName": "라운드넥 반팔 니트 스웨터",
       "gender": "여성",
@@ -1967,6 +2010,49 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "115511",
+      "rawName": "NEW 테이퍼드 히든밴딩 슬랙스",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=969DDBBC983952DFAE77BACDFBF4A2D2&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01115511.jpg",
+      "detailHash": "614ab69fd8dd7de86e1e2fb7da825f802748e48e0247fa6dbca04567259894dc",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"394750025d0a6c84c322c16901209f7d\"",
+        "lastModified": "Thu, 17 Sep 2026 05:50:20 GMT"
+      },
+      "pageHash": "e0b430d87bf694cddfbc85b49e23549752b418f8fd01473904a86fa61071d34e",
+      "pageText": "프리미엄 TR소재의 히든 밴딩 테이퍼드 슬랙스입니다. \n\n허리에서 밑단으로 갈수록 자연스럽게 좁아지는 테이퍼드 핏으로 군더더기 없이 깔끔하게 떨어집니다\n웨이스트 히든 밴딩 디테일로 보다 편안한 착용감을 느낄 수 있습니다. . \n클래식한 핏과 소재로 베이직하고 스마트한 무드를 연출할 수 있는 실용적인 아이템입니다. \n\n스판사가 원단의 가로/세로 양방향 모두 들어 있는 사방 스판 원단을 사용하여 활동성이 좋습니다. \n드레이프성이 뛰어난 TR 소재를 사용하여 착용 시 군더더기 없는 피팅이 돋보입니다. \n필링 현상을 줄여 겉면은 깔끔하며, 내구성이 뛰어난 YKK社의 지퍼를 사용해 완성도를 높였습니다. \n\n어디에나 쉽게 코디되어지는 클래식한 컬러 무드로 구성되었습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "히든밴딩, 편안하게",
+          "description": "허리 안쪽 밴딩으로 편안하게.",
+          "evidence": "허리에서 밑단으로 갈수록 자연스럽게 좁아지는 테이퍼드 핏으로 군더더기 없이 깔끔하게 떨어집니다 웨이스트 히든 밴딩 디테일로 보다 편안한 착용감을 느낄 수 있습니다."
+        },
+        {
+          "title": "사방으로, 유연하게",
+          "description": "가로·세로로 늘어나는 사방 스판.",
+          "evidence": "스판사가 원단의 가로/세로 양방향 모두 들어 있는 사방 스판 원단을 사용하여 활동성이 좋습니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "어디에나 쉽게 코디되어지는 클래식한 컬러 무드로 구성되었습니다.",
+          "evidence": "어디에나 쉽게 코디되어지는 클래식한 컬러 무드로 구성되었습니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:43.337Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "372922",
       "rawName": "덕다운 후드 숏 푸퍼",
       "gender": "여성",
@@ -2319,6 +2405,54 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:14:29.358Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "076922",
+      "rawName": "NEW [변우석] 울캐시미어 피크드 라펠 더블 코트",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=98A436975927BAA51588F6A167C8160F&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076922.jpg",
+      "detailHash": "fb5cad7e28133b9bce9a1178c8a4915874963e3a603a72f1113f45a248bb880a",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"a430661554f749171b3fd02534649037\"",
+        "lastModified": "Wed, 07 Oct 2026 01:27:19 GMT"
+      },
+      "pageHash": "1134817976dab83f2146ed13e5321f022536fea2f4554b4101a1bafdde221658",
+      "pageText": "클래식한 디자인과 여유로운 실루엣이 돋보이는 더블 코트\n\n• 울 50%와 캐시미어 5% 혼방 소재로 부드러운 촉감과 포근한 착용감\n• 적당히 여유로운 실루엣과 안정적인 기장감으로 다양한 이너와 레이어링하기 좋은 핏\n• 더블 브레스티드 여밈과 피크드 라펠을 적용해 클래식하고 세련된 디자인\n• 하단 양쪽에 큼직한 아웃포켓을 배치해 실용성과 캐주얼한 포인트를 더한 아이템",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "클래식한 디자인과 여유로운 실루엣이 돋보이는 더블 코트.",
+          "evidence": "클래식한 디자인과 여유로운 실루엣이 돋보이는 더블 코트"
+        },
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "울 50%와 캐시미어 5% 혼방 소재로 부드러운 촉감과 포근한 착용감.",
+          "evidence": "울 50%와 캐시미어 5% 혼방 소재로 부드러운 촉감과 포근한 착용감"
+        },
+        {
+          "title": "포인트 있게 연출",
+          "description": "더블 브레스티드 여밈과 피크드 라펠을 적용해 클래식하고 세련된 디자인.",
+          "evidence": "더블 브레스티드 여밈과 피크드 라펠을 적용해 클래식하고 세련된 디자인"
+        },
+        {
+          "title": "소지품을 간편하게",
+          "description": "편리한 포켓으로 간편하게 수납해요.",
+          "evidence": "포켓을 배치해 실용성"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:56.645Z",
       "analyzedAt": null
     },
     {
@@ -2800,6 +2934,49 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:18:15.339Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "075907",
+      "rawName": "NEW 울 블레이저 자켓",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=9AC4F88C3516C28AF867598EBA8B1AD5&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01075907.jpg",
+      "detailHash": "31cdc05b7544f2757d11f247ae68589184de7eba3907a8c3d6f508ee76a0e8d4",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"bc80ac8667a24009a165ec643471053b\"",
+        "lastModified": "Thu, 18 Sep 2025 00:38:49 GMT"
+      },
+      "pageHash": "74d74a9672043845c834308c00cd7b98309494266c44ef8b61edbd6597378543",
+      "pageText": "적당한 기장감과 몸에 여유 있게 맞는 레귤러 핏의 울 블레이저입니다.\n\n클래식하면서도 모던한 무드를 담은 헤링본 패턴으로 짜여진 울 혼방 소재로, 견고한 표면감을 보여주며, 부드러운 촉감으로 편안한 착용감을 제공합니다.\n\n깔끔한 실루엣을 연출하고, 적당한 중량감으로 보온성과 내구성이 우수합니다.\n\n투 버튼 여밈과 노치드 라펠, 가슴 웰트 포켓과 양쪽 플랩 포켓을 갖춘 기본 싱글 브레스티드 블레이저입니다. 내부에는 간단한 소지품을 수납할 수 있는 인사이드 포켓이 있으며, 뒷중심 슬릿으로 활동성을 높였습니다. \n\n다양한 하의와 매치가 가능하며, 유행에 구애받지 않는 클래식 아이템으로 오래 착용할 수 있는 제품입니다. 블랙&그레이, 베이지&그레이 두 가지 헤링본 패턴으로 구성되었으며, 헤링본 조직 특유의 깊이 있는 컬러감이 더해져 울 블레이저의 고급스러움을 한층 강조합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "적당한 기장감과 몸에 여유 있게 맞는 레귤러 핏의 울 블레이저입니다.",
+          "evidence": "적당한 기장감과 몸에 여유 있게 맞는 레귤러 핏의 울 블레이저입니다."
+        },
+        {
+          "title": "움직임은 편안하게",
+          "description": "뒷중심 슬릿으로 활동성을 높였습니다.",
+          "evidence": "내부에는 간단한 소지품을 수납할 수 있는 인사이드 포켓이 있으며, 뒷중심 슬릿으로 활동성을 높였습니다."
+        },
+        {
+          "title": "부드럽게 닿는 촉감",
+          "description": "부드러운 촉감이 느껴지는 원단.",
+          "evidence": "부드러운 촉감으로 편안한 착용감을 제공"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:48.962Z",
       "analyzedAt": null
     },
     {
@@ -3343,6 +3520,49 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:19:01.312Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "075923",
+      "rawName": "NEW [변우석] 울캐시미어 발마칸 코트",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=9C7976873DC6B64A3A6FA4E08F4D9B59&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01075923.jpg",
+      "detailHash": "7d9e5969a6e92385dab31e183d2f2fa089ed86d5d8887e324834bceb391d490f",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"ec3275f2483cb385b5cc351898db0a02\"",
+        "lastModified": "Mon, 17 Nov 2025 06:53:30 GMT"
+      },
+      "pageHash": "f8ae3815da1f0702a4485d3234f6b280d1f57b456801221fbe318ed803e9e642",
+      "pageText": "여유 있는 핏과 깔끔하게 떨어지는 라인으로 무릎 기장의 균형 잡힌 실루엣의 울/캐시미어 발마칸 코트입니다. \n\n다양한 이너와 함께 매치하기 좋으며, 클래식하면서도 세련된 무드를 완성합니다.\n\n높은 울 함량에 캐시미어가 블렌딩된 이중지 원단으로 부드러운 터치감과 자연스러운 광택이 특징입니다. 두께감 있고 밀도 높은 조직은 한겨울에도 우수한 보온성을 제공하며, 밀도 높은 원단으로 단단하고 균형 잡힌 안정된 아웃핏을 보여줍니다. 또한 고급스러운 컬러감이 세련된 분위기를 더해 다양한 스타일링에 활용하기 좋습니다.\n\n히든 버튼 플라이 여밈으로 간결하고 모던한 인상을 주며, 상단 버튼과 탈부착 가능한 비죠 디테일로 목을 안정감 있게 감쌀 수 있습니다. 래글런 소매는 어깨선을 자연스럽게 드롭시켜 보여주며, 여유 있는 사이즈로 두꺼운 이너와도 편안하게 착용할 수 있습니다. 소매 밑단의 비죠 디테일과 사선 웰트 포켓은 실용성과 디자인 완성도를 높였고, 가슴 인포켓에는 간단한 소지품을 수납할 수 있습니다. 뒷면 슬릿을 더해 활동성을 높이면서도 군더더기 없는 실루엣을 완성합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "소지품을 간편하게",
+          "description": "가슴 인포켓에는 간단한 소지품을 수납할 수 있습니다.",
+          "evidence": "소매 밑단의 비죠 디테일과 사선 웰트 포켓은 실용성과 디자인 완성도를 높였고, 가슴 인포켓에는 간단한 소지품을 수납할 수 있습니다."
+        },
+        {
+          "title": "부드럽게 닿는 촉감",
+          "description": "부드러운 촉감이 느껴지는 원단.",
+          "evidence": "부드러운 터치감과 자연스러운 광택이 특징"
+        },
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "보온성을 더해 따뜻하게 입어요.",
+          "evidence": "우수한 보온성을 제공"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:53.827Z",
       "analyzedAt": null
     },
     {

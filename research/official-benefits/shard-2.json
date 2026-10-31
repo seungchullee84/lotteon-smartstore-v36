@@ -1506,6 +1506,33 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "056504",
+      "rawName": "NEW 스티치 폴로 니트",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=2729F04D0B595159562BFBE8D84AF0AD&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01056504.jpg",
+      "detailHash": "015a47c728c6a58d3b01e44a898f8f1702e8f8da7e71104b4cf3a7c8c49bc6b7",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"e917434971ee167c9ba7f378a7701ba5\"",
+        "lastModified": "Fri, 16 Jan 2026 06:06:37 GMT"
+      },
+      "pageHash": "ea93332d92acf54153b43e5221860074741a3a442ff04186083c8e7fe8d075e6",
+      "pageText": "9gg 스티치 폴로넥 풀오버입니다.\n\n9gg로 편직된 스티치 조직이고, 가로 방향으로 형성된 스티치 루프가 입체적인 표면감과 적당한 두께감을 \n만들어 착용 시 실루엣을 안정적으로 유지해줍니다.\n\n레귤러 실루엣으로 바디에 자연스럽게 안착하며, 편안하면서도 단정한 착용감을 제공합니다.\n레이어링 없이 단독 착용에도 균형 잡힌 실루엣을 유지하는 활용도 높은 핏입니다.\n\n적당한 폭의 세련된 폴로 카라의 스웨터입니다. 가로 스티치 조직이 리드미컬한 입체 텍스처를 만들며\n제품의 표면 포인트를 강화합니다. 소매와 밑단은 스판사를 더한 립 마감으로 유연한 텐션과 \n안정적인 실루엣을 유지합니다.\n\n블루 라바의 차분한 깊이감에 헤더 브라운과 다크 베리의 내추럴·리치 톤이 균형 있게 어우러집니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:39.139Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "026991",
       "rawName": "[입고알림신청] NEW [변우석] 플리스 목넥 하프집업 배색 풀오버",
       "gender": "남성",
@@ -1584,6 +1611,33 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:15:00.614Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "146901",
+      "rawName": "NEW 폴리 백팩",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=277087F01C6E831A55E0FDE3531BA3F4&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01146901.jpg",
+      "detailHash": "6ef9bfb0a5ebe0f45bd9e3e46090f415687510440d6f7d64ab4a429da53c0722",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"43e50fb67637a5ba0faf2d44e215ee32\"",
+        "lastModified": "Wed, 30 Sep 2026 02:47:24 GMT"
+      },
+      "pageHash": "427718c91c23d1b44077537b9da85092501cc128cc9727e68ed01586aeb5bd85",
+      "pageText": "유틸리티 백팩\n\n유틸리티 구조와 기능성으로 일상 또는 다양한 활동에서 착용할 수 있는 백팩입니다. 경량 원단을 사용한 입체적인 구조와 넉넉한 사이즈감으로 짐을 여유롭게 수납할 수 있으며, 전면과 사이드에 실용성과 편의성을 고려하여 설계된 수납 시스템과 버클 스트랩 디테일로 다양한 환경과 상황에서 실용적으로 사용할 수 있는 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:51.600Z",
       "analyzedAt": null
     },
     {
