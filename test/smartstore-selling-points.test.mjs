@@ -1,6 +1,18 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {officialSellingPoints,usableSellingPoints,displaySellingPoints} from '../smartstore-selling-points.mjs';
 
+test('가볍고를 74 1 또는 741로 오독한 문장과 쾌적한으로 끊긴 문장은 노출하지 않는다',()=>{
+ for(const noise of ['고밀도 경량 원단을 사용하여 74 1 내구성이 뛰어나 쾌적한','고밀도 경량 원단을 사용하여 741 내구성이 뛰어나 쾌적한 착용감을 제공합니다.','쾌적한','보온성이 우수한']){
+  assert(!usableSellingPoints([{title:'쾌적한 착용감',description:noise+'.',evidence:noise}],noise));
+ }
+ const clean='고밀도 경량 원단을 사용하여 가볍고 내구성이 뛰어나 쾌적한 착용감을 제공합니다. 단독 및 레이어드 착용에 용이합니다.';
+ const points=officialSellingPoints('고밀도 경량 원단을 사용하여 74 1 내구성이 뛰어나 쾌적한\n•\n'+clean);
+ assert(points.length>=2);assert(usableSellingPoints(points,clean));assert(points.every(p=>!/74\s*1|쾌적하게 입기 좋게|쾌적한\.$/.test(p.title+' '+p.description+' '+p.evidence)));
+ // Real specification values with their units remain valid.
+ const valid='300GSM 원단과 면 60%, 폴리에스터 40%의 혼방으로 편안한 착용감을 제공합니다.';
+ assert(usableSellingPoints([{title:'편안한 착용감',description:'300GSM 혼방 원단으로 편안하게.',evidence:valid}],valid));
+});
+
 test('공식 문장의 연결어를 나눠도 강화했 같은 미완성 서술어로 끝내지 않는다',()=>{
  const source='양쪽의 웰트 포켓과 내부 인포켓은 실용적인 수납공간을 제공하고, 소매 안쪽에는 이밴드를 더해 바람 유입을 차단하여 보온성을 강화했으며, 밑단의 스트링과 스토퍼는 필요에 따라 실루엣을 자유롭게 조절할 수 있습니다.';
  const points=officialSellingPoints(source);

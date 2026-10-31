@@ -7,9 +7,10 @@ function cleanSource(text){
  const value=String(text||'');
  const fits=value.match(/(?:슬림|레귤러|레글러|루즈|와이드|오버)\s*핏/g)||[];
  const unknownAcronym=(value.match(/\b[A-Z]{2,5}\b/g)||[]).some(word=>!['FIT','REGULAR','RELAXED','SLIM','WIDE','OVER','SPAN','POLY','GG','GSM','SQM','YD','RIB','NECK','CREW','FRENCH','TERRY','PTT','YKK','CVC','HEAT','COOL','WARM','DRY','WOOL','MODAL','NYLON','RAYON','DENIM','LINEN','SILK','LYCRA','NYC','UPF','SPF','UV'].includes(word));
- return !unknownAcronym&&!/[\uFFFD\[\]{}=|\\]/.test(value)&&!/[A-Za-z][A-Za-z0-9]*\]/.test(value)&&new Set(fits.map(s=>s.replace(/\s/g,''))).size<2;
+ const brokenNumber=/[가-힣]\s+\d+(?:\s+\d+)+\s+[가-힣]|[가-힣]\s+\d{2,}\s+[가-힣]/.test(value);
+ return !brokenNumber&&!unknownAcronym&&!/[\uFFFD\[\]{}=|\\]/.test(value)&&!/[A-Za-z][A-Za-z0-9]*\]/.test(value)&&new Set(fits.map(s=>s.replace(/\s/g,''))).size<2;
 }
-function completeCopy(text){const value=String(text).replace(/[.!?]+$/,'').trim();return !/[,，;:]$/.test(value)&&!/(?:부터|으로|위한|통해|이며|으며|하며|하고|하지만|더해진|경량|로|며|좋|했|였|렸|췄|줬|뒀|웠|었|았|있|없)$/.test(value);}
+function completeCopy(text){const value=String(text).replace(/[.!?]+$/,'').trim();return !/[,，;:]$/.test(value)&&!/(?:부터|으로|위한|통해|이며|으며|하며|하고|하지만|더해진|경량|로|며|좋|했|였|렸|췄|줬|뒀|웠|었|았|있|없|한|된|되는|있는|없는|하는|좋은|위해|살린|높인)$/.test(value);}
 function finishSourceClause(text){
  // Splitting "강화했으며" leaves "강화했". Finish only the past-tense
  // ending; the claim and its full original evidence remain unchanged.
@@ -35,7 +36,7 @@ function benefitTitle(text){
   [/(?:보온|따뜻|포근)/,'쌀쌀할 때도 따뜻하게'],
   [/(?:부드|소프트)/,'부드러운 착용감'],
   [/(?:탄탄)/,'탄탄한 착용감'],
-  [/(?:통기|쾌적|흡습|속건|시원)/,'쾌적하게 입기 좋게'],
+  [/(?:통기|쾌적|흡습|속건|시원)/,'쾌적한 착용감'],
   [/(?:유연|신축)/,'움직임에 맞춰 유연하게'],
   [/(?:가벼|가볍|경량)/,'가볍게 입기 좋게'],
   [/(?:편안|편하|여유|넉넉)/,'편안한 착용감'],
