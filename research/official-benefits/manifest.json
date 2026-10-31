@@ -11918,7 +11918,7 @@
   "withThreeOrFour": 638,
   "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-31T10:48:20.084Z",
+  "updatedAt": "2026-10-31T10:49:19.395Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-31T10:14:14.164Z",
@@ -27031,7 +27031,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27070,7 +27070,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27083,7 +27083,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27109,7 +27109,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27122,7 +27122,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "needs-review"
           },
           {
             "type": "discovered",
@@ -27135,7 +27135,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27213,7 +27213,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27252,7 +27252,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27265,7 +27265,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27291,7 +27291,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27330,7 +27330,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27343,7 +27343,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27369,7 +27369,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27382,7 +27382,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27434,7 +27434,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27447,7 +27447,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27460,7 +27460,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "needs-review"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27486,7 +27486,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27512,7 +27512,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27538,7 +27538,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27564,7 +27564,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27577,7 +27577,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27590,7 +27590,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27681,7 +27681,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27733,7 +27733,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27785,7 +27785,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27798,7 +27798,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "needs-review"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27811,7 +27811,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27850,7 +27850,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27863,7 +27863,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27889,7 +27889,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27902,7 +27902,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27915,7 +27915,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27928,7 +27928,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27941,7 +27941,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27954,7 +27954,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -27980,7 +27980,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -27993,7 +27993,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -28006,7 +28006,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -28019,7 +28019,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -28071,7 +28071,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -28123,7 +28123,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -28149,7 +28149,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -28175,7 +28175,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -28188,7 +28188,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -28201,7 +28201,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -28227,7 +28227,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -28240,7 +28240,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
@@ -28305,7 +28305,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "discovered",
@@ -28383,7 +28383,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "discovered",
