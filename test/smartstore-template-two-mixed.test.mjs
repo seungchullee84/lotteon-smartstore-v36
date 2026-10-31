@@ -11,12 +11,12 @@ test('공식 성별 필드로 여성 로즈·남성 네이비를 고르고 이�
  assert.equal(female('[data-template-theme]').attr('data-template-theme'),'women');assert.equal(male('[data-template-theme]').attr('data-template-theme'),'men');assert.match(female('.ss2').attr('style'),/--button:#673247/);assert.match(male('.ss2').attr('style'),/--button:#223d60/);
  assert.deepEqual(female('img').toArray().map(n=>female(n).attr('src')),male('img').toArray().map(n=>male(n).attr('src')),'성별 배색은 원본 사진을 바꾸지 않는다');
 });
-test('새 템플릿2는 상품별 근거 제목·공식 로고·원본 전체·정면 팔레트·상단 영상·하단 링크를 보존한다',()=>{
+test('새 템플릿2는 상품명·공식 근거 장점·원본 전체·정면 팔레트·하단 영상·하단 링크를 보존한다',()=>{
  const {html}=buildSmartstoreDetail({...product,detailTemplate:2}),$=load(html);
- assert.equal($('[data-benefit-headline]').text(),'단독으로도,겹쳐 입어도편안하게.');assert.equal($('[data-brand-intro]').length,0);assert.equal($('video').length,1);assert.equal($('[data-brand-video-heading] h2').text(),'지오다노가 담은 일상의 순간');
+ assert.equal($('[data-benefit-headline]').text(),product.rawName);assert.equal($('[data-brand-intro]').length,0);assert.equal($('video').length,1);assert.equal($('[data-brand-video-heading] h2').text(),'지오다노가 담은 일상의 순간');
  assert.equal($('[data-product-point-heading]').text(),'이 옷을 고르는 이유');assert.equal($('[data-color-palette] img').length,1);assert.equal($('[data-palette-photo-pending]').length,2);
  assert.equal($('section[id^="smartstore-color-"] img').length,3);for(const src of product.smartstoreDetail.colorImages['01화이트'])assert.equal($('section[id^="smartstore-color-"] img').filter((i,n)=>$(n).attr('src')===src).length,1);
- assert.equal($('[data-store-banner]').prev().attr('data-official-detail'),'');assert.equal($('[data-store-banner] a').attr('href'),'https://shopping.naver.com/window/department/store/101731950');assert($('[data-store-banner]').text().includes('누르면 스토어로 이동'));assert($('[data-store-footer]').text().includes('왕복 6,000원'));assert.equal($('[data-store-footer] img').length,1);assert.equal($('img').filter((i,n)=>$(n).attr('src').endsWith('giordano-official.png')).length,2);
+ assert.equal($('[data-store-banner]').prev().attr('data-brand-video'),'mp4');const order=['data-product-intro','<section class="ss2-points"','data-color-palette','data-official-detail','data-brand-video-heading','data-store-banner','data-store-footer'].map(x=>html.indexOf(x));assert(order.every((v,i)=>v>=0&&(!i||v>order[i-1])));assert.equal($('[data-store-banner] a').attr('href'),'https://shopping.naver.com/window/department/store/101731950');assert($('[data-store-banner]').text().includes('누르면 스토어로 이동'));assert($('[data-store-footer]').text().includes('왕복 6,000원'));assert.equal($('[data-store-footer] img').length,1);assert.equal($('img').filter((i,n)=>$(n).attr('src').endsWith('giordano-official.png')).length,1);
  assert(!html.includes('127.0.0.1'));assert(!html.includes('object-fit:cover'));assert.equal(product.colors.length,3);
 });
 test('전체 공식 상세가 있으면 대표·추가 사진을 상세 앞뒤에 다시 붙이지 않는다',()=>{

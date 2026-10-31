@@ -16,6 +16,13 @@ export function templateTwoSxoBody(html,product,name){
  $('.ss2-palette-grid').attr('style','--columns:4');
  $('.ss2-palette>.ss2-section-title').text('색상, 한눈에 비교해 보세요.');
  $('.ss2-detail-bridge').remove();
+ const summary=product.smartstoreDetail?.sizeSummary;
+ if(summary?.style===product.style&&summary.sourceUrl===product.sourceUrl&&summary.verified===true){
+  const table=$('<table data-size-summary><caption>공식 실측 주요 치수 · 단위 cm</caption><thead><tr><th scope="col">사이즈</th></tr></thead><tbody></tbody></table>');
+  for(const size of summary.sizes)table.find('thead tr').append($('<th scope="col">').text(size));
+  for(const row of summary.rows){const tr=$('<tr>').append($('<th scope="row">').text(row.label));for(const value of row.values)tr.append($('<td>').text(String(value)));table.find('tbody').append(tr);}
+  $('.ss2-material').append(table);
+ }
  $('.ss2-material').append('<p data-size-comparison-note>평소 잘 맞는 옷과 아래 공식 실측표를 비교해 주세요.</p>');
  return $.html();
 }
@@ -46,6 +53,10 @@ export const templateTwoSxoCss=`
 .ss2-material{margin:0;padding:36px 48px;text-align:center;border:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--alternate)}
 .ss2-material p{font-size:22px}
 .ss2-material [data-size-comparison-note]{font-size:18px;margin-top:16px}
+.ss2 [data-size-summary]{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:22px;font-size:24px}
+.ss2 [data-size-summary] caption{font-size:18px;text-align:left;color:var(--muted);padding-bottom:12px}
+.ss2 [data-size-summary] th,.ss2 [data-size-summary] td{padding:14px 8px;border-bottom:1px solid var(--border);text-align:center;font-weight:500}
+.ss2 [data-size-summary] thead{background:var(--soft)}
 .ss2-official{padding:48px 0 0}
 .ss2-official>.ss2-section-title{padding:0 48px}
 .ss2-official figure{margin:0}
@@ -59,6 +70,7 @@ export const templateTwoSxoCss=`
  .ss2-palette-name{font-size:12px;overflow-wrap:anywhere}
  .ss2-color{padding:30px 6px}.ss2-color-photos{gap:6px}
  .ss2-material{padding:28px 22px}.ss2-material p{font-size:18px}
+ .ss2 [data-size-summary]{font-size:18px}.ss2 [data-size-summary] caption{font-size:15px}
  .ss2-official>.ss2-section-title{padding:0 22px}
  .ss2-service-grid,.ss2-contact-grid{grid-template-columns:1fr}
 }
