@@ -118,8 +118,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:04.090Z",
-      "analyzedAt": "2026-10-31T13:34:18.573Z"
+      "observedAt": "2026-10-31T14:01:18.991Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -293,8 +293,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:04.111Z",
-      "analyzedAt": "2026-10-31T13:34:18.573Z"
+      "observedAt": "2026-10-31T14:01:19.349Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -320,8 +320,8 @@
       "points": [],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:04.665Z",
-      "analyzedAt": "2026-10-31T13:34:18.578Z"
+      "observedAt": "2026-10-31T14:01:19.418Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -397,8 +397,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:04.815Z",
-      "analyzedAt": "2026-10-31T13:34:18.595Z"
+      "observedAt": "2026-10-31T14:01:19.608Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -545,8 +545,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:04.816Z",
-      "analyzedAt": "2026-10-31T13:34:18.602Z"
+      "observedAt": "2026-10-31T14:01:19.990Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -876,8 +876,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:05.312Z",
-      "analyzedAt": "2026-10-31T13:34:18.614Z"
+      "observedAt": "2026-10-31T14:01:20.094Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1517,8 +1517,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:05.683Z",
-      "analyzedAt": "2026-10-31T13:34:18.618Z"
+      "observedAt": "2026-10-31T14:01:20.227Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1612,8 +1612,8 @@
       "points": [],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:05.680Z",
-      "analyzedAt": "2026-10-31T13:34:18.615Z"
+      "observedAt": "2026-10-31T14:01:20.646Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1955,8 +1955,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:06.014Z",
-      "analyzedAt": "2026-10-31T13:34:18.619Z"
+      "observedAt": "2026-10-31T14:01:20.722Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2022,8 +2022,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:06.764Z",
-      "analyzedAt": "2026-10-31T13:34:18.630Z"
+      "observedAt": "2026-10-31T14:01:21.236Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2232,8 +2232,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:06.315Z",
-      "analyzedAt": "2026-10-31T13:34:18.628Z"
+      "observedAt": "2026-10-31T14:01:21.392Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2265,8 +2265,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:06.765Z",
-      "analyzedAt": "2026-10-31T13:34:18.633Z"
+      "observedAt": "2026-10-31T14:01:21.314Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2562,8 +2562,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:07.107Z",
-      "analyzedAt": "2026-10-31T13:34:18.634Z"
+      "observedAt": "2026-10-31T14:01:22.036Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2735,8 +2735,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:07.423Z",
-      "analyzedAt": "2026-10-31T13:34:18.637Z"
+      "observedAt": "2026-10-31T14:01:21.978Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2981,7 +2981,7 @@
         "etag": "\"2db2751c0e9c37f9d72b134ebf6a3d1e\"",
         "lastModified": "Wed, 21 Oct 2026 00:13:27 GMT"
       },
-      "pageHash": "9226d14325c08f3864d132fc3d2bf01cdc2ae06e2bc4905b2803106b29d2cb41",
+      "pageHash": "0b031cd06098a79fb327a63ecfabb3b896b4a0566676eb71835516e060881776",
       "pageText": "브러쉬드 테리 소재의 후드 풀오버로, 적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감을 제공합니다. 넉넉한 사이즈의 후드로 편안한 착용감을 더했으며, 3가지 코어 컬러 구성과 클래식한 그래픽 조합으로 다양한 스타일링이 가능합니다. “MANHATTAN” 을 테마로 클래식한 졸 프린트와 입체감 있는 플로킹 기법을 적용해 그래픽 포인트를 더했습니다. 코튼 100%, 260g/㎡의 두께감 있는 원단을 사용하여 안정적인 실루엣을 유지하며 안쪽 기모 처리로 높은 보온성을 제공합니다.\n\nPOINT 01 (실루엣)\n브러쉬드 테리 후드 풀오버\n적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감\n\nPOINT 02 (디테일)\n넉넉한 사이즈의 후드로 편안한 착용감\n3가지 코어 컬러 구성과 클래식한 그래픽 조합으로 다양한 스타일링 활용 가능\n\nPOINT 03 (원단)\n코튼 100%, 260g/m2 중량의 두께감 있는 원단을 사용하여 흐트러짐 없이 안정적인 실루엣 유지\n안쪽에 기모 처리로 보온성 높임",
       "imageText": "-\n3   2\n23425,\nTHE CITY NEVER SLEEPS\nEstablished 1981\nie       Ix\nof 브러시드 테리 후드 풀오버                        STYLE NO. 05326932\n부드러운 브러시드 테리 소재에 기모 가공을 더해 포근하고\n따뜻한 착용감이 돋보이는 후드 풀오버입니다.\n여유로운 루즈핏과 HUS 후드 디자인으로 편안하면서도 캐주얼한 MRS 연출하며,\n3가지 감각적인 컬러와 MANHATTAN 레터링 그래픽으로\n트렌디한 데일리 스타일을 완성합니다.\n9),\nSoin\n(                )\n*                              키 172cm\nsli                               =e\n» -         i\n= NN\n개\n객              <\n=\nEEPS\nTHE CITY AENEESS\n\n목을 따뜻하게 감싸주는 높이감 있는 스탠드 칼라 디자인 적용\n밑단 스트링을 통해 자유로운 HRA 조절 및 편안한 핏 연출\n©        oy\nnr                 |\n넥에서 플라켓으로 이어지는 파이핑 포인트 및 소지품 수남용 Ari 포켓 탑재\n바라클라바 추가 구성으로 단독 착용부터 후드 레이어드까지 폭넓은 활용성 제공\nad\nTHE CITY NEVER SLEEPS\nEstablished 1981\n[기\n1\n개\n1\n3408/07^중량의 가변고 포근한 양면 폴라 플리스 원단 사용\n부드러운 터치감과 뛰어난 보온성으로 쾌적한 착용감 구현\nLi)\n4\n개\n\nCOLORS\n01오트밀\npT\neT                                             Fd\n§                                                  we\n{TA\nAina\ni 3\n02미드헤더그레이\ntits\nneCTUEEET\n03블랙\nDETAIL SIZE\nme\n밭                                 622 841\nw=     [om      님                 616 635\n597 622\n521 537\n* 위 사이즈는 제품의 실측 값이며 케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n*실측값과 신체치수 차이로 인한 교환/반품 건은 무상으로 진행해드리기 어려우니 구매에 참고 바랍니다.\n＊실측사이즈(0)는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\nCHECK UP\n착용시기                   °                                         °                    °\n=                   여름                  가을                  겨울\nEHH                                         [J\n\nRa a a He Sd haat oi Se lB 만 EN 지간 a Rh 아이\n＊실측값과신체치수차이로 인한교환/반품 HE 무상으로 진행해드리기 어려우니 구매에 참고 바랍니다.\n＊실측사이즈(0)는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\n착용시기                      LJ                                               [ ]                      [ ]\n봄                         여름                        가을                        겨울\nEHH                                              [J\n두꺼움                       중간                        EE]                     otFge\n신축성                                                                       [ ]\n전혀없음                     보통                        좋음                      아주좋음\n촉 감                                              [ ]\n살짝까슬                     HE                      부드러움                 매우부드러움\n안 감                      J\n없음                  있음(신축성이             있음(신축성)                   기모\n비 침                      J\n없음         조금비침(밝은색)        비침있음\n상의 핏                                                                       [ ]\n슬림핏                    레글러핏                    루즈핏\n스타일코드                     03026932\n제품소재                    면 60%,폴리에스터 40%\n색상                              01오트밀, 02미드헤더그레이, 03블랙\n치수                              5,\n제조자                           (주)지오다노\n제조국                           베트남\n—s\n세탁 방법   AA 스 pel\npy \"maa    pris     약하게짜기 건조기금지\n제조연월                        2026.07\n1 소비자 분쟁해결 기준에 따라 다음과 같이 보상해드립니다.\n+ 봉제불량, 원단불량(제작불량변색,탈색) 부자재 불량(단추,지퍼,심지 등}: 구입일로부터 1년 이내분은\n무상수선, 교환, 환불의 순위로 보상. 단, 봉제불량은 1년 경과 후에도 무상 수선.\n품질보증기준                  사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시) 및 소재 구성 부적합으로 인한 세탁 사고:\nBE=orE                    구입일로부터 10% 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격, 동일 제품 교환을 원칙으로 함.\n＊상하1착중한쪽에만 이상이 있을 경우: 상하 한착 모두 교환 또는 구입가 환불.\n2 소비자부주의에의한제품훼손 및 세탁 잘못에 의한 변형,품질 보증기간(1년)이 경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해 드립니다.\nA/S 책임자/전화번호          지오다노 / 지오다노 AS 센터 (080-934-3000)\n[€ 안전 품질표시기준에서 규정한\n유해성분안전요건이 적합한 제품\n",
       "imageScanComplete": true,
@@ -3004,8 +3004,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:07.528Z",
-      "analyzedAt": "2026-10-31T13:34:18.641Z"
+      "observedAt": "2026-10-31T14:01:22.048Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3076,8 +3076,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:07.956Z",
-      "analyzedAt": "2026-10-31T13:34:18.663Z"
+      "observedAt": "2026-10-31T14:01:22.735Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3425,8 +3425,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:08.196Z",
-      "analyzedAt": "2026-10-31T13:34:18.684Z"
+      "observedAt": "2026-10-31T14:01:22.736Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3988,7 +3988,7 @@
         "etag": "\"8c23d0a587c2319e0e175027b6974cba\"",
         "lastModified": "Wed, 29 Oct 2025 02:09:47 GMT"
       },
-      "pageHash": "9543ce36d10e99ac6fc45a770bc5d79c01f8be8f0334e19a1a22746de8818b55",
+      "pageHash": "34134f74780db0794c5ce7f66f918ede755c7fbf89b4dadd914ac3bdfd788557",
       "pageText": "브러시드 슬림핏 슬랙스 입니다.\n\n허벅부터 밑단라인까지 슬림하게 떨어지는 깔끔한 라인에 체형을 고려한 입체 패턴 설계로 안정적인 핏을 구현했으며, \n안쪽에 기모(Brushed) 처리가 되어있는 TR 혼방 브러쉬드 원단을 사용하여 보온성이 탁월하며, 부드러운 착용감을 제공합니다.\n원단이 트윌 조직으로 짜여져 있어 밀도가 높고, 우수한 스트레치성으로 활동성을 극대화했습니다. \n\n밑위가 너무 낮지 않아 한층 편안하면서도\n레직기선 디테일이 더해져 다리 라인이 길고 곧아 보이는 효과를 주어 한층 세련된 실루엣을 완성합니다.\n\n구김이 적고 관리가 용이하여 일상과 오피스룩 모두에 적합하며,\n겨울시즌 다양한 상의와 함께 연출하기 좋은 베이직 에센셜 아이템입니다.",
       "imageText": "168 ]\n'\n-\n/            )\n7\n로\nA      A\nof  브러시드 슬림  슬랙스                                  STYLE NO. 05415915\n브러시드 슬림핏 EBA 입니다.\n허벅부터 밑단라인까지 슬림하게 떨어지는 깔끔한 라인에 체형을 고려한\n입체 패턴 설계로 안정적인 핏을 구현했으며, 안쪽에 7| 2 (Brushed)\n처리가 되어있는 18 혼방 브러쉬드 원단을 사용하여 보온성이 탁월하며,\n부드러운 착용감을 제공합니다.원단이 트윌 조직으로 짜여져 있어\n밀도가 높고, 우수한 스트레치성으로 활동성을 극대화했습니다.\n밑위가 너무 낮지 않아 한층 편안하면서도 레직기선 디테일이 더해져 다리\n라인이 길고 ZO} 보이는 효과를 주어 한층 세련된 HRS 완성합니다.\n구김이 적고 관리가 용이하여 일상과 오피스룩 모두에 적합하며,\n겨울시즌 다양한 상의와 함께 연출하기 좋은 베이직 에센셜\n아이템입니다.\nA                키 172cm\n상의 5 하의 20\n\noad 96\n]\n\n01그레이\n:       =\n02블랙\nsega\nha  eis     686 711 737 62 787 813\nhin         819 845 810 895 921 946\na  1          559 512 584 597 60 622\nrid           315 381 387 394 400 408\n0 261 213 219 286 292\n686 686 686 692 699 451\nLL hed         946 953 959 912 984 997\n밑단둘레\n＊ 위 사이즈는제품의 실측값이며 케어라벨에 표기된 치수는 실측사이즈가 아닌 신체치수이기에 차이가 있습니다.\n＊실측값과신체치수차이로인한교환/반품건은 무상으로진행해드리기 어려우니 Tojo] 참고 바랍니다.\n＊실측사이즈(07)는 소재의 특성, 측정방법에 따라 약간의 차이가 있을 수 있으니 구매에 참고 바랍니다.\n착용시기                    [\n봄     여름    가을    겨울\n두께 감          [\n두꺼움    중간    않음    아주않음\n신축성               [\n전혀없음    보통    좋음    아주좋음\n촉 감            .\n살짝까슬    보통    부드러움   매우부드러움\n안 감                hd\n없음   있음(신축성이  있음(신축성)   기모\n비 침    [ ]\n없음    조금비침   비침있음(밝은색)\n하 의 핏         [ ]\n좁음  조금좁음   HE   조금넓음   넓음\n스타일코드    05415915\n제품소재    겉감:폴리에스터62,레이온34,폴리우레탄4\n색상     01그레이,02블랙\n치수     25,26,27,28,29,30\n제조자     (주)지오다노\n제조국     베트남\n—\nHep A 4 Xi\nHORSE 표택제금지 천매고다림질 섞유계드라이 aman\n제조연월    2025.09\n1. 소비자 분쟁해결 기준에 따라다음과 ol 보상해 드립니다.\n*봉제불량, 원단불량(제작불량.변색,탈색) 부자재 불량(단추, 지퍼,심지 등}: 구입일로부터 1년 이내분은\n무상수선, 교환, 환불의 순위로 보상. 단, 봉제불량은 1년 경과 후에도 무상 수선.\n품질보증기준                사이즈 부정확 및 디자인, 색상 불만, 부당표시(미표시 및 부실표시)및 소재 구성 부적합으로 인한 세탁 사고:\nBESS                 구입일로부터 102 이내에 교환 가능. 단,제품에 손상이 없어야 하며 동일 가격,동일 제품 교환을 원칙으로 함.\n＊상하1착중한쪽에만 이상이 있을 경우: 상하 한착 모두 교환 또는 구입가 환불.\n2 소비자 부주의에 Of HIE FA 및 세탁 잘못에의한 변형,품질 보증기간(1년)이경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해 드립니다.\n《&/5책임자/전화번호         지오다노 /지오다노 AS 센터 (080-934-3000)\n\n—                                         =\nMme            세탁 드로  5  f=   [입\n기                  금지 Ac                      =\nRoy man COONS asso aman\n제조연월                        2025.09\n1 소비자 분쟁해결 기준에 따라 다음과 같이 보상해 드립니다.\n*봉제불량, AER ER a Eh) 부자재 불량[단추, 지퍼,심지 등,:구입일로부터 1년이내분은\n무상수선, 교환, 환불의 순위로 보상. CF HERS 1년경과 후에도 무상 수선.\n품질보증기준                  ㆍ사이즈 부정확 및 디자인 색상 불만, 부당표시(미표시 및 부실표시) 2 소재 구성 부적합으로 인한 세탁 사고:\ni=    SNE;             구입일로부터 102 이내에 교환 가능. 단, 제품에 손상이 없어야 하며 동일 가격,동일 제품 교환을 원칙으로 함.\n« 상하 1착중 한쪽에만 이상이 있을 경우: 상하 한착 모두 교환 또는 구입가 환불.\n2. 소비자 부주의에 의한제품 훼손 및 세탁 잘못에 의한 변형,품질 보증기간{1년)이 경과한 제품의 품질이상에\n대해서는 보상의 책임을 지지 않으며 수선 가능시에는 실비로 수선해 드립니다.\nA/S 책임자/전화번호          지오다노 / 지오다노 AS 센터 (080-934-3000)\n",
       "imageScanComplete": true,
@@ -4001,8 +4001,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T13:34:08.299Z",
-      "analyzedAt": "2026-10-31T13:34:18.685Z"
+      "observedAt": "2026-10-31T14:01:22.749Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
