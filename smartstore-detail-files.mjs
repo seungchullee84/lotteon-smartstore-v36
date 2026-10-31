@@ -47,7 +47,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  try{const html=await readFile(path.join(folder,'smartstore-official.html'),'utf8');if(styleFromDetail(html)!==style)throw Error('소구점 원문의 공식 품번이 다릅니다.');sourceText=cheerio.load(html)('.prd_detail_content_gio').first().text().trim()||sourceText;}catch(error){if(error.code!=='ENOENT')throw error;}
  {
   let detailHash=null;try{detailHash=createHash('sha256').update(await readFile(path.join(folder,'detail.jpg'))).digest('hex');}catch(e){if(e.code!=='ENOENT')throw e;}
-  const checkedSource=omitPoints?{text:sourceText,imageChecked:false}:await officialPointSource(product,folder,sourceText,{dataRoot});sourceText=checkedSource.text;
+  const checkedSource=omitPoints?{text:sourceText,imageChecked:false}:await officialPointSource(product,folder,sourceText,{dataRoot});sourceText=[sourceText,checkedSource.text].filter(Boolean).join('\n•\n');
   const review=await reviewSellingPoints(product,sourceText,{dataRoot,detailHash,existing:prepared.sellingPoints});
   prepared.sellingPoints=review.points;prepared.omitSellingPoints=false;prepared.sellingPointReview={status:review.status,message:review.message||''};
   if(draft){draft.sellingPoints=review.points;await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft,null,2));}

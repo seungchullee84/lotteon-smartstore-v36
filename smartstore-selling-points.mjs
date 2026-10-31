@@ -179,9 +179,31 @@ export function assertRequiredSellingPoints(detail){
 }
 
 // Normalize customer-facing benefit copy only; preserve official evidence verbatim.
-export function displaySellingPoints(points){
+const hasFinalConsonant=text=>{const c=text.charCodeAt(text.length-1);return c>=0xac00&&c<=0xd7a3&&(c-0xac00)%28!==0;};
+export function friendlyBenefitDescription(value){
+ const sentence=part=>{
+  let text=part.trim().replace(/[.!?]+$/,'');if(!text)return '';
+  if(/요$/.test(text))return text+'.';
+  for(const [ending,replacement] of [
+   [/하였습니다$/,'했어요'],[/되었습니다$/,'됐어요'],[/합니다$/,'해요'],[/됩니다$/,'돼요'],[/했습니다$/,'했어요'],[/됐습니다$/,'됐어요'],
+   [/있습니다$/,'있어요'],[/없습니다$/,'없어요'],[/좋습니다$/,'좋아요'],[/쉽습니다$/,'쉬워요'],[/어렵습니다$/,'어려워요'],[/돕습니다$/,'도와줘요'],
+   [/뛰어납니다$/,'뛰어나요'],[/느껴집니다$/,'느껴져요'],[/줍니다$/,'줘요'],[/갖습니다$/,'갖고 있어요'],[/갖췄습니다$/,'갖췄어요'],
+   [/높였습니다$/,'높였어요'],[/줄였습니다$/,'줄였어요'],[/살렸습니다$/,'살렸어요'],[/입습니다$/,'입어요'],[/높습니다$/,'높아요'],[/낮습니다$/,'낮아요'],[/적습니다$/,'적어요'],[/많습니다$/,'많아요'],[/않습니다$/,'않아요']
+  ])if(ending.test(text))return text.replace(ending,replacement)+'.';
+  if(/입니다$/.test(text)){text=text.slice(0,-3);return text+(hasFinalConsonant(text)?'이에요.':'예요.');}
+  const added=text.match(/^(.+(?:으로|로))\s*더한\s+(.+)$/);
+  if(added)return added[1]+' '+added[2]+(hasFinalConsonant(added[2])?'을':'를')+' 더했어요.';
+  if(/(?:편안하게|따뜻하게|포근하게|가볍게|깔끔하게|부드럽게|탄탄하게|유연하게)$/.test(text))return text+' 입어요.';
+  if(/가능$/.test(text))return text+'해요.';
+  const action=text.match(/^(.+?)\s*(제공|유지|조절|연출|구현|확보|완성|강화)$/);
+  if(action){const [,subject,verb]=action,object=/(?:으로|로|을|를|게)$/.test(subject)?subject:subject+(hasFinalConsonant(subject)?'을':'를');return object+' '+({제공:'제공해요',유지:'유지해요',조절:'조절할 수 있어요',연출:'연출할 수 있어요',구현:'구현했어요',확보:'확보했어요',완성:'완성해요',강화:'강화했어요'}[verb])+'.';}
+  return text+(hasFinalConsonant(text)?'이에요.':'예요.');
+ };
+ return String(value||'').split(/(?<=[.!?])\s+/).map(sentence).filter(Boolean).join(' ');
+}
+export function displaySellingPoints(points,{tone=true}={}){
  const copy=value=>String(value||'').replace(/브러쉬드|브러시드|brushed/gi,'기모');
- return points.map(point=>({...point,title:copy(point.title),description:copy(point.description),...(point.shortTitle?{shortTitle:copy(point.shortTitle)}:{})}));
+ return points.map(point=>({...point,title:copy(point.title),description:tone?friendlyBenefitDescription(copy(point.description)):copy(point.description),...(point.shortTitle?{shortTitle:copy(point.shortTitle)}:{})}));
 }
 export function officialSellingPoints(description,{limit=4}={}){
  const points=extractOfficialSellingPoints(description,limit);
@@ -190,6 +212,6 @@ export function officialSellingPoints(description,{limit=4}={}){
   if(points.some(p=>recipe.covered.test(p.title+' '+p.description)))continue;
   const {id,covered,...point}=recipe;if(compactSellingPoint(point))points.push(point);
  }
- return displaySellingPoints(points);
+ return displaySellingPoints(points,{tone:false});
 
 }

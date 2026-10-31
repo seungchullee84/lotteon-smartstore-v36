@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {officialSellingPoints,usableSellingPoints,displaySellingPoints} from '../smartstore-selling-points.mjs';
+import {officialSellingPoints,usableSellingPoints,displaySellingPoints,friendlyBenefitDescription} from '../smartstore-selling-points.mjs';
 
 test('가볍고를 74 1 또는 741로 오독한 문장과 쾌적한으로 끊긴 문장은 노출하지 않는다',()=>{
  for(const noise of ['고밀도 경량 원단을 사용하여 74 1 내구성이 뛰어나 쾌적한','고밀도 경량 원단을 사용하여 741 내구성이 뛰어나 쾌적한 착용감을 제공합니다.','쾌적한','보온성이 우수한']){
@@ -90,8 +90,13 @@ test('모든 상품 소구점의 브러시드 표시는 기모로 통일하고 �
  for(const word of ['브러쉬드','브러시드','brushed','BRUSHED']){
   const evidence=word+' 가공으로 보온력이 우수하고 따뜻합니다.';
   const [point]=displaySellingPoints([{title:word+'의 따뜻함',description:word+' 가공으로 포근하게.',evidence}]);
-  assert.equal(point.title,'기모의 따뜻함');assert.equal(point.description,'기모 가공으로 포근하게.');assert.equal(point.evidence,evidence);
+  assert.equal(point.title,'기모의 따뜻함');assert.equal(point.description,'기모 가공으로 포근하게 입어요.');assert.equal(point.evidence,evidence);
  }
  const source='브러쉬드 가공으로 보온력이 우수하고 따뜻합니다.';
  const points=officialSellingPoints(source);assert(points.length);assert(points.every(p=>!/브러쉬드|브러시드/.test(p.title+p.description)));assert(points.some(p=>p.evidence.includes('브러쉬드')));
 });
+
+ test('두 템플릿의 표시 설명은 저장된 원문을 바꾸지 않고 자연스러운 해요체로 통일한다',()=>{
+ const cases=[['다양한 스타일링에 활용합니다.','다양한 스타일링에 활용해요.'],['세탁 후에도 볼륨감이 유지됩니다.','세탁 후에도 볼륨감이 유지돼요.'],['기모 가공으로 더한 보온성.','기모 가공으로 보온성을 더했어요.'],['적당한 폭으로 편안한 착용감.','적당한 폭으로 편안한 착용감이에요.'],['밑단 스트링으로 핏 조절.','밑단 스트링으로 핏을 조절할 수 있어요.'],['가볍고 따뜻하게 입기 좋아요.','가볍고 따뜻하게 입기 좋아요.']];
+ for(const [original,expected] of cases){assert.equal(friendlyBenefitDescription(original),expected);assert.equal(friendlyBenefitDescription(expected),expected);const p={title:'장점',description:original,evidence:original};assert.equal(displaySellingPoints([p])[0].description,expected);assert.equal(p.description,original);assert.equal(displaySellingPoints([p])[0].evidence,original);}
+ });

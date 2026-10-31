@@ -44,5 +44,5 @@ test('상단 특징은 같은 상품의 선택 장점에서 최대 세 개만 �
  assert.equal($('[data-intro-features] li').eq(1).children().length,0,'문구는 HTML로 해석하지 않는다');
  assert.equal($('[data-template-main-title]').next().attr('data-intro-features'),'');
  assert.deepEqual($('[data-product-points] h3').toArray().map(n=>$(n).text()),points.map(p=>p.title));
- assert.equal($('[data-product-points] p').first().text(),points[0].description);
+ assert.equal($('[data-product-points] p').first().text(),'단독 착용과 레이어드에 활용해요.');
 });
