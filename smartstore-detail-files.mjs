@@ -18,7 +18,7 @@ import {renderCacheKey,restoreRenderedDetail,cacheRenderedDetail} from './smarts
 import {workingProductPhoto} from './smartstore-photo-work.mjs';
 import {embeddedOfficialSections} from './smartstore-official-sections.mjs';
 import {verifiedSizeSummary} from './smartstore-size-summary.mjs';
-import {assertRequiredSellingPoints} from './smartstore-selling-points.mjs';
+import {assertRequiredSellingPoints,displaySellingPoints} from './smartstore-selling-points.mjs';
 import * as cheerio from 'cheerio';
 import {styleFromDetail} from './product.mjs';
 const appRoot=path.dirname(fileURLToPath(import.meta.url));
@@ -218,7 +218,7 @@ export function localSmartstorePreview(p){
 export async function saveSmartstoreDetail(product,folder,output,{signal,...options}={}){
  const videoOptions={...productVideoOptions(product),...options.videoOptions};
  await requireBrandVideo(options.dataRoot,videoOptions);
- const p=await prepareSmartstoreDetail(product,folder,options);assertRequiredSellingPoints(p.smartstoreDetail);const data=new Map();
+ const p=await prepareSmartstoreDetail(product,folder,options);assertRequiredSellingPoints({...p.smartstoreDetail,sellingPoints:displaySellingPoints(p.smartstoreDetail.sellingPoints)});const data=new Map();
  const check=()=>{if(signal?.aborted)throw Error('상세페이지 만들기를 중단했습니다.');};check();
  for(const name of TEMPLATE_ASSET_NAMES.filter(n=>!n.endsWith('.ttf')))data.set(TEMPLATE_ASSET_BASE+name,'data:image/'+(name.endsWith('.png')?'png':'jpeg')+';base64,'+(await readFile(path.join(assetsRoot,name))).toString('base64'));
  for(const [key,src] of Object.entries(p.images)){
