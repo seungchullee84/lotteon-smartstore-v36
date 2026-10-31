@@ -49,10 +49,12 @@ export class LotteAutomation extends BrowserAutomation {
     if(ids.length!==1)throw Error('상품등록 탭을 하나 열어 주세요.');
     const tab=this.page.locator('[id="'+ids[0]+'_tabbuttonTextBoxElement"]');
     const active=await this.page.locator('[id*="WorkFrame_OCPIPMPiMPrdcInfoRgstM_"][id$="cbo_PrdcClCd_comboedit_input"]').evaluateAll(es=>es.some(e=>{
-      const r=e.getBoundingClientRect(),hit=e.ownerDocument.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
-      return r.width>0&&r.height>0&&hit&&(hit===e||e.contains(hit));
+      // A scrolled form is still the active registration screen. Hit-testing
+      // an offscreen input incorrectly caused a second click on its covered tab.
+      const r=e.getBoundingClientRect(),win=e.ownerDocument.defaultView;
+      return r.width>0&&r.height>0&&win.getComputedStyle(e).visibility!=='hidden';
     }));
-    if(!active){await tab.click();await this.settle();}
+    if(!active){await this.click(tab);await this.settle();}
   }
   async reveal(loc){
     this.check();if(loc.waitFor)await loc.waitFor({state:'attached',timeout:8000});
