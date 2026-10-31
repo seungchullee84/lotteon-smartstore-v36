@@ -11914,11 +11914,11 @@
     }
   ],
   "sourceComplete": 1794,
-  "imageComplete": 1715,
-  "withThreeOrFour": 631,
-  "phase": "images",
+  "imageComplete": 1725,
+  "withThreeOrFour": 638,
+  "phase": "complete",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-31T06:29:39.517Z",
+  "updatedAt": "2026-10-31T06:29:46.395Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-31T06:28:14.012Z",
@@ -29027,7 +29027,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "analyzing"
+            "status": "ready"
           },
           {
             "type": "new",
@@ -29051,7 +29051,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "analyzing"
+            "status": "ready"
           },
           {
             "type": "new",
@@ -29063,7 +29063,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "analyzing"
+            "status": "ready"
           },
           {
             "type": "new",
@@ -29099,7 +29099,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "analyzing"
+            "status": "ready"
           },
           {
             "type": "new",
@@ -29123,7 +29123,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "analyzing"
+            "status": "ready"
           },
           {
             "type": "new",
@@ -29135,7 +29135,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "analyzing"
+            "status": "ready"
           },
           {
             "type": "new",
@@ -29159,7 +29159,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "analyzing"
+            "status": "ready"
           },
           {
             "type": "new",
@@ -29171,7 +29171,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "analyzing"
+            "status": "ready"
           },
           {
             "type": "new",
@@ -29183,7 +29183,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "analyzing"
+            "status": "ready"
           },
           {
             "type": "new",
@@ -29195,7 +29195,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "analyzing"
+            "status": "ready"
           }
         ]
       }
