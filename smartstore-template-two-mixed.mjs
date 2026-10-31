@@ -21,7 +21,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  const original=buildDetailContent(p.images,p.colors,p.colorImages,p.originalDetailUrl),draft=p.smartstoreDetail;
  if(draft&&String(draft.style)!==String(p.style))throw Error('다른 품번의 상세페이지 자료는 적용하지 않습니다.');
  const groups=(draft?.displayColors||p.colors||[]).map((color,index)=>({color,index,urls:[...new Set(draft?.colorImages?.[color]||p.colorImages?.[color]||[])]}));
- const points=draft?.omitSellingPoints?[]:displaySellingPoints(draft?.sellingPoints?.length?draft.sellingPoints.slice(0,4):productSellingPoints(p));
+ const points=displaySellingPoints(draft?.sellingPoints?.length?draft.sellingPoints.slice(0,4):productSellingPoints(p));
  const theme=templateTwoTheme(p),headline=templateTwoHeadline(p,points),name=officialTemplateTitle(p),sources=[];
  const photo=(src,alt)=>{const url=imageUrl(src);sources.push(src);return `<img src="${safe(url)}" alt="${esc(alt)}">`;};
  const common=(file,alt)=>photo(assetBase+file,alt);

@@ -2,11 +2,12 @@ import {catalogImageSource} from './official-benefit-catalog.mjs';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {officialSellingPoints,usableSellingPoints,officialImageBenefitText} from './smartstore-selling-points.mjs';
+import {officialSellingPoints,usableSellingPoints,officialImageBenefitText,completeSellingPoints} from './smartstore-selling-points.mjs';
 import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 const digest=text=>createHash('sha256').update(text).digest('hex');
 const sourceJobs=new Map();
-export async function sellingPointsOmitted(product,dataRoot){try{const s=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'selling-point-selection.json'),'utf8'));return s.style===product.style&&s.sourceUrl===product.sourceUrl&&s.omit===true;}catch(e){if(e.code!=='ENOENT')throw e;return false;}}
+// Legacy omission flags no longer skip official-source analysis.
+export async function sellingPointsOmitted(){return false;}
 export async function officialPointSource(product,folder,pageText,{dataRoot=path.resolve('data'),signal,log,recognize}={}){
  if(!product.images?.detail)return {text:pageText,imageChecked:false,detailHash:null};
  let bytes;try{bytes=await readFile(path.join(folder,'detail.jpg'));}catch(e){if(e.code==='ENOENT')return {text:pageText,imageChecked:false,detailHash:null};throw e;}
@@ -30,29 +31,25 @@ export async function saveOfficialImagePointReview(product,folder,{text,points,d
 }
 export async function reviewSellingPoints(product,source,{dataRoot,detailHash=null,signal}={}){
  signal?.throwIfAborted();
- const identity={version:11,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
+ const identity={version:12,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
  const root=path.join(dataRoot,'smartstore-details',product.style),file=path.join(root,'selling-point-review.json');
+ const finish=async(record,text=source)=>{
+  const points=record.points?.length>=2?record.points.slice(0,4):completeSellingPoints(record.points,text);
+  const ready=usableSellingPoints(points,text)&&points.length>=2&&points.length<=4;
+  const result={...record,points,omitted:false,status:ready?'ready':'needs-review',message:ready?'공식 근거 구매 장점 '+points.length+'개 적용':'공식 상품 설명·상세이미지에서 서로 다른 구매 장점 2~4개 확인 필요'};
+  await mkdir(root,{recursive:true});await writeFile(file,JSON.stringify(result,null,2));return result;
+ };
  let selection;try{selection=JSON.parse(await readFile(path.join(root,'selling-point-selection.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
- if(selection?.sourceUrl===product.sourceUrl&&selection.omit===true)return {...identity,method:'user-omitted-points',points:[],omitted:true,status:'ready',message:'소구점 없이 제작'};
  if(selection?.sourceUrl===product.sourceUrl&&selection.detailHash===detailHash&&(detailHash||selection.textHash===digest(source))&&selection.points?.length>=1&&selection.points.length<=4&&usableSellingPoints(selection.points,source)){
-  const record={...identity,method:'user-selected-official-points',points:selection.points,status:'ready',message:'사용자가 선택한 공식 근거 소구점 적용',reviewedAt:selection.selectedAt};await writeFile(file,JSON.stringify(record,null,2));return record;
+  return finish({...identity,method:'user-selected-official-points',points:selection.points,reviewedAt:selection.selectedAt});
  }
  let imageReview;try{imageReview=JSON.parse(await readFile(path.join(root,'selling-point-image-review.json'),'utf8'));}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
  if(detailHash&&imageReview?.version===1&&imageReview.style===product.style&&imageReview.sourceUrl===product.sourceUrl&&imageReview.detailHash===detailHash&&imageReview.points?.length<=4&&usableSellingPoints(imageReview.points,imageReview.text)){
-  const points=[...imageReview.points];
-  if(points.length<3){
-   const normalize=value=>String(value||'').replace(/[\s.!?,，]+/g,'');
-   for(const candidate of officialSellingPoints(source)){
-    const duplicate=points.some(p=>normalize(p.title)===normalize(candidate.title)||normalize(p.description)===normalize(candidate.description)||normalize(p.evidence).includes(normalize(candidate.evidence))||normalize(candidate.evidence).includes(normalize(p.evidence)));
-    if(!duplicate&&usableSellingPoints([candidate],source))points.push(candidate);
-    if(points.length>=3)break;
-   }
-  }
-  const record={...identity,method:'visual-official-detail',points,status:'ready',message:'공식 상세 이미지 원문 대조 완료',reviewedAt:imageReview.reviewedAt};await writeFile(file,JSON.stringify(record,null,2));return record;
+  const text=[imageReview.text,source].join('\n');
+  const points=completeSellingPoints(imageReview.points,text);
+  return finish({...identity,method:'visual-official-detail',points,reviewedAt:imageReview.reviewedAt},text);
  }
  let cached;try{cached=JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
- if(Object.entries(identity).every(([key,value])=>cached?.[key]===value)&&cached.points?.length>=1&&usableSellingPoints(cached.points,source))return {...cached,status:'ready'};
- const points=officialSellingPoints(source),ready=usableSellingPoints(points,source);
- const record={...identity,points:ready?points:[],omitted:!ready,status:'ready',message:ready?'':'확인된 소구점이 없어 해당 구간을 생략합니다.',reviewedAt:new Date().toISOString()};
- await mkdir(root,{recursive:true});await writeFile(file,JSON.stringify(record,null,2));return record;
+ if(Object.entries(identity).every(([key,value])=>cached?.[key]===value)&&cached.points?.length>=2&&usableSellingPoints(cached.points,source))return finish(cached);
+ return finish({...identity,points:completeSellingPoints([],source),reviewedAt:new Date().toISOString()});
 }

@@ -262,5 +262,5 @@ export function assertImportedPhotoCoverage(stage,prepared,choices,{requireSelli
   }
  }
  if(!prepared.smartstoreDetail?.acceptAllFolderPhotos)for(const [color,count] of Object.entries(prepared.smartstoreDetail?.storeColorPhotoCounts||{}))if(count&&!expected.has(color))throw Error(color+' 사진이 최신 수집 선택에 없습니다. 이전 사진이 남았는지 확인해 주세요.');
- if(requireSellingPoints&&!prepared.smartstoreDetail?.sellingPoints?.length)throw Error(prepared.smartstoreDetail?.sellingPointReview?.message||'공식 원문 소구점 확인이 필요합니다. 소구점 없는 상세페이지는 완료 처리하지 않습니다.');
+ if(requireSellingPoints&&((prepared.smartstoreDetail?.sellingPoints?.length||0)<2||prepared.smartstoreDetail?.sellingPoints?.length>4||prepared.smartstoreDetail?.sellingPointReview?.status==='needs-review'))throw Error(prepared.smartstoreDetail?.sellingPointReview?.message||'공식 근거 구매 장점 2~4개를 확인해야 합니다.');
 }

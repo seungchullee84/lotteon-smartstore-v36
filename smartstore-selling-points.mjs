@@ -159,6 +159,21 @@ export function usableSellingPoints(points,source){
  return Array.isArray(points)&&points.length>0&&points.every(p=>compactSellingPoint(p)&&p.evidence&&!/^혼용 소재$|^\d+ COLORS$|^SIZE$|^PRODUCT$/.test(p.title)&&!/혼용 여부는.*확인해/.test(p.description)&&(source===undefined||compact(source).includes(compact(p.evidence.split(/\s+\/\s+https?:\/\//)[0]))));
 }
 
+// Preserve selected wording, then read the rest of THIS official source for
+// independent purchase reasons. Never pad the count with duplicate claims.
+export function completeSellingPoints(points,source,{limit=4}={}){
+ const result=[];const norm=s=>String(s||'').replace(/[\s.!?,，]+/g,'');
+ for(const point of [...(points||[]),...officialSellingPoints(source,{limit:12})]){
+  if(!usableSellingPoints([point],source))continue;
+  if(result.some(p=>norm(p.title)===norm(point.title)||norm(p.description)===norm(point.description)||norm(p.evidence).includes(norm(point.evidence))||norm(point.evidence).includes(norm(p.evidence))))continue;
+  result.push(point);if(result.length>=limit)break;
+ }
+ return result;
+}
+export function assertRequiredSellingPoints(detail){
+ if(detail?.sellingPointReview?.status==='needs-review'||!Array.isArray(detail?.sellingPoints)||detail.sellingPoints.length<2||detail.sellingPoints.length>4)throw Error('공식 상품 설명과 상세이미지에서 서로 다른 구매 장점 2~4개를 확인해야 합니다.');
+}
+
 // Normalize customer-facing benefit copy only; preserve official evidence verbatim.
 export function displaySellingPoints(points){
  const copy=value=>String(value||'').replace(/브러쉬드|브러시드|brushed/gi,'기모');
