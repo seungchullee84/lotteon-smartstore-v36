@@ -42,7 +42,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  body+=`<section class="ss2-material"><h2>소재와 사이즈</h2><p>${esc(p.material||'소재는 공식 상품고시를 확인해 주세요.')}<br>사이즈 ${esc((p.sizes||[]).join(' · '))}</p></section>`;
  body+=`<section data-official-detail-bridge class="ss2-detail-bridge"><div class="ss2-detail-bridge-logo">${common('giordano-official.png','지오다노 공식 홈페이지 로고')}</div><h2>상품을 조금 더 자세히</h2><p>공식 이미지와 상품 정보를 확인해 주세요.</p><span class="ss2-detail-bridge-rule" aria-hidden="true"></span></section>`;
  const embedded=new Set(p.images.detail?(draft?.embeddedOfficialSections||[]).map(k=>p.images[k]).filter(Boolean):[]);
- const officialSources=[...new Set([p.images.main,...original.sources,p.images.extra1,p.images.extra2].filter(Boolean))].filter(src=>src===p.images.detail||!embedded.has(src));
+ const officialSources=original.sources.filter(src=>src===p.images.detail||!embedded.has(src));
  body+='<section data-official-detail class="ss2-official"><h2 class="ss2-section-title">공식 사진과 상품 정보</h2>'+officialSources.map(src=>'<figure>'+photo(src,'현재 상품의 공식 상세 및 상품정보')+'</figure>').join('')+'</section>';
  body+=`<section data-store-banner><a class="ss2-banner" href="${STORE_BANNER_URL}" target="_blank" rel="noopener" aria-label="지오다노 다른 상품 보기 · 롯데백화점 동탄점 스토어로 이동"><div class="ss2-banner-copy"><span class="ss2-banner-badge">지오다노 상품 더 보기</span><span class="ss2-banner-label">GIORDANO · 롯데백화점 동탄점</span><h2>지오다노의<br><strong>다른 상품도</strong><br>살펴보세요.</h2><span class="ss2-banner-action">다른 상품 보러 가기 <b aria-hidden="true">↗</b></span><p>이 배너를 누르면 스토어로 이동합니다.</p></div>${p.images.main?'<div class="ss2-banner-model">'+photo(p.images.main,'현재 상품의 지오다노 공식 상품사진')+'</div>':''}</a></section>`;
  body+=templateTwoFooter(common);

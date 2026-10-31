@@ -46,11 +46,11 @@ export async function officialSectionMatch(detail,section){
 export async function embeddedOfficialSections(product,folder){
  if(!product.images?.detail)return [];
  const detail=await readFile(path.join(folder,'detail.jpg')),files={detail:hash(detail)},sections={};
- for(const key of ['size','check','info','main','extra1','extra2'])if(product.images[key]){
+ for(const key of ['size','check','info'])if(product.images[key]){
   try{sections[key]=await readFile(path.join(folder,key+'.jpg'));files[key]=hash(sections[key]);}catch(e){if(e.code!=='ENOENT')throw e;}
  }
  const key=hash(Buffer.from(JSON.stringify({rule,files}))),cache=path.join(folder,'smartstore-official-section-inclusion.json');
- try{const saved=JSON.parse(await readFile(cache,'utf8'));if(saved.key===key&&Array.isArray(saved.included)&&saved.included.every(n=>['size','check','info','main','extra1','extra2'].includes(n)&&files[n]))return saved.included;}catch{}
+ try{const saved=JSON.parse(await readFile(cache,'utf8'));if(saved.key===key&&Array.isArray(saved.included)&&saved.included.every(n=>['size','check','info'].includes(n)&&files[n]))return saved.included;}catch{}
  const matches={};for(const [name,bytes]of Object.entries(sections))matches[name]=await officialSectionMatch(detail,bytes);
  const included=Object.keys(matches).filter(name=>matches[name].included);
  await writeFile(cache,JSON.stringify({key,rule,style:product.style,files,included,matches},null,2));return included;
