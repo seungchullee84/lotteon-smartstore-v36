@@ -40,7 +40,7 @@ export async function reviewSellingPoints(product,source,{dataRoot,detailHash=nu
   await mkdir(root,{recursive:true});await writeFile(file,JSON.stringify(result,null,2));return result;
  };
  let selection;try{selection=JSON.parse(await readFile(path.join(root,'selling-point-selection.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
- if(selection?.sourceUrl===product.sourceUrl&&selection.detailHash===detailHash&&(detailHash||selection.textHash===digest(source))&&selection.points?.length>=1&&selection.points.length<=4&&usableSellingPoints(selection.points,source)){
+ if(selection?.style===product.style&&selection.sourceUrl===product.sourceUrl&&selection.detailHash===detailHash&&(detailHash||selection.textHash===digest(source))&&selection.points?.length>=1&&selection.points.length<=4&&usableSellingPoints(selection.points,source)){
   return finish({...identity,method:'user-selected-official-points',points:selection.points,reviewedAt:selection.selectedAt});
  }
  let imageReview;try{imageReview=JSON.parse(await readFile(path.join(root,'selling-point-image-review.json'),'utf8'));}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
