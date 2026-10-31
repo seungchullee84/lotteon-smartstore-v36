@@ -2373,7 +2373,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "4ef5e6e2c485c16c1c4de3fa36fa42c8807a757410bc92d6a259cebf3b1e9b26",
+      "pageHash": "a43ce2280bf93f982e93319259b9139b56b3c4ff179df5bdb868358b077d9c65",
       "pageText": "노치드 라펠의 싱글 블레이저입니다.\n\n살짝 여유 있는 실루엣으로 무겁지 않고, 가볍게 착용할 수 있으며,스트레치성을 더해 활동성을 높였습니다.탄탄한 소재감으로 고급스러운 표면과 컬러감이 우수하며형태의 변함없이 깔끔한 아웃핏을 연출할 수 있습니다.\n\n다양한 하의와 스타일링하여 단품으로도 활용 가능하며,동일한 소재의 슬랙스와 함께 셋업으로 활용 가능합니다.\n\n*함께 착용 가능한 슬랙스 품번 - 01112511 #02블랙 #05헤더카키, 01112513 #02블랙, 01112514 #01블랙",
       "imageText": "",
       "imageScanComplete": false,
@@ -2391,8 +2391,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-31T06:16:22.674Z",
-      "analyzedAt": "2026-10-31T06:28:20.161Z"
+      "observedAt": "2026-10-31T06:51:59.291Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3853,8 +3853,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T06:15:49.629Z",
-      "analyzedAt": "2026-10-31T06:28:19.653Z"
+      "observedAt": "2026-10-31T06:51:15.500Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -4018,7 +4018,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "e626482e11912165f5094d8a7a7b872243d9f1f838777e1fdf37fef1af81ba34",
+      "pageHash": "8fbdb70c51cfabf3c13204ab3d8544e924f7ab7bf2029d73a485ea50089c4f6a",
       "pageText": "맥코트 실루엣의 클래식한 감성을 더한 트렌치코트입니다.\n\n나일론 코튼 폴리 혼방의 소재를 밀도높게 제직하여 구김이 덜 가면서도,형태감 있는 고급스러운 외관을 살렸습니다.\n\n봄 시즌 활용하기 좋은 아이템으로 카라를 세워서 여닫을 수 있으며,소맷단의 스트랩과 단추 디테일로 원하는 실루엣 조절할 수 있습니다.\n\n여유있는 품과 기장이 길지 않아 무난하면서 다양한 이너와 함께 레이어링하여여러 스타일의 코디 연출이 용이합니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -4031,8 +4031,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-31T06:16:30.794Z",
-      "analyzedAt": "2026-10-31T06:28:20.294Z"
+      "observedAt": "2026-10-31T06:52:10.102Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
