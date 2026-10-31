@@ -39,7 +39,7 @@ export const templateTwoSxoCss=`
 .ss2-point-grid{display:block;margin-top:14px}
 .ss2-point-grid>div{border:0;border-bottom:1px solid var(--border);padding:22px 0}
 .ss2-point-grid>div:last-child{border-bottom:0}
-.ss2-point-grid h3{font-size:28px;line-height:1.6;color:var(--accent)}
+.ss2-point-grid h3{font-size:28px;font-weight:700;line-height:1.6;color:var(--accent)}
 .ss2-point-grid p{font-size:24px;line-height:1.8;margin-top:8px}
 .ss2-palette{margin:0;padding:48px;background:var(--alternate)}
 .ss2-palette-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:24px 14px}
