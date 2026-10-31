@@ -21,17 +21,18 @@ test('현재 원본 해시와 일치하는 이미지 검증 소구점을 사진 
   const current=await pointPicker(product,dataRoot,options);assert(current.candidates.some(p=>p.title===point.title));
   const changed=await pointPicker(product,dataRoot,{...options,sourceOverride:{text,detailHash:'changed-image'}});assert(!changed.candidates.some(p=>p.title===point.title));
   const wrongUrl=await pointPicker({...product,sourceUrl:product.sourceUrl+'-different'},dataRoot,options);assert(!wrongUrl.candidates.some(p=>p.title===point.title));
-  await savePointSelection(product,dataRoot,{channel:'smartstore',style:product.style,revision:current.revision,selectedIds:[current.candidates[0].id]},options);
-  const review=await reviewSellingPoints(product,text,{dataRoot,detailHash:'current-image'});assert.equal(review.method,'user-selected-official-points');assert.equal(review.points.length,1);
+  await assert.rejects(savePointSelection(product,dataRoot,{channel:'smartstore',style:product.style,revision:current.revision,selectedIds:[current.candidates[0].id]},options),/2~4/);
+  await writeFile(path.join(root,'selling-point-selection.json'),JSON.stringify({...product,detailHash:'current-image',points:[point]}));
+  const review=await reviewSellingPoints(product,text,{dataRoot,detailHash:'current-image'});assert.equal(review.method,'user-selected-official-points');assert.equal(review.points.length,1);assert.equal(review.status,'needs-review');
  }finally{await rm(dataRoot,{recursive:true,force:true});}
 });
 
-test('공식 근거가 없을 때만 자동 생략하고 다른 상품의 장점은 가져오지 않는다',async()=>{
+test('공식 근거가 없어도 자동 생략 완료로 처리하지 않고 다른 상품의 장점은 가져오지 않는다',async()=>{
  const dataRoot=await mkdtemp(path.join(os.tmpdir(),'empty-point-picker-'));
  try{
   const p={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=empty'};
   const empty=await pointPicker(p,dataRoot,{dataRoot,sourceOverride:{text:'면 100%. SIZE S M L.',detailHash:null}});
-  assert.deepEqual(empty.candidates,[]);assert.equal(empty.omit,true);assert.equal(empty.autoOmitted,true);
+  assert.deepEqual(empty.candidates,[]);assert.equal(empty.omit,false);assert.equal(empty.autoOmitted,false);
   const text='적당한 여유의 실루엣과 안정적인 기장감으로 편안한 착용감을 제공하며, CVC 프렌치 테리 소재를 사용해 부드러운 터치감과 우수한 내구성을 갖추었습니다. 다양한 스타일링이 가능한 데일리 스웨트셔츠입니다.';
   const enough=await pointPicker(p,dataRoot,{dataRoot,sourceOverride:{text,detailHash:null}});
   assert(enough.candidates.length>=3);assert.equal(enough.omit,false);assert(enough.candidates.every(point=>text.includes(point.evidence)));

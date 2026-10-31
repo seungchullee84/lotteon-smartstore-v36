@@ -17,7 +17,7 @@ test('구매 장점 기준 이전의 준비 완료 캐시도 모든 품번에서
  for(const style of ['123456','654321','456789']){
   const p={...product,style},dir=path.join(root,'smartstore-details',style);await mkdir(dir,{recursive:true});
   await writeFile(path.join(dir,'selling-point-review.json'),JSON.stringify({version:5,method:'local-official-text',style,sourceUrl:p.sourceUrl,textHash:createHash('sha256').update(source).digest('hex'),detailHash:null,status:'ready',points:[{title:'핏과 실루엣',description:'슬림핏 레글러핏 루즈핏.',evidence:'슬림핏 레글러핏 루즈핏.'}]}));
-  const result=await reviewSellingPoints(p,source,{dataRoot:root});assert.equal(result.version,11);assert.equal(result.points.length,1);assert.equal(result.points[0].title,'부드러운 착용감');
+  const result=await reviewSellingPoints(p,source,{dataRoot:root});assert.equal(result.version,12);assert.equal(result.points.length,1);assert.equal(result.points[0].title,'부드러운 착용감');
  }
  }finally{await rm(root,{recursive:true,force:true});}
 });
@@ -43,8 +43,8 @@ test('공식 이미지 시각 확인은 품번·공식 주소·이미지 해시�
  const text='특유의 부드러운 결감이 느껴지는 페이크 스웨이드 외피 원단 사용';
  const points=[{title:'부드러운 스웨이드 결감',description:'부드러운 결감의 페이크 스웨이드 외피.',evidence:text}];
  const record=await saveOfficialImagePointReview(product,root,{text,points,dataRoot:root});
- for(const source of ['','공식 상품명과 소재만 있는 짧은 설명']){const reviewed=await reviewSellingPoints(product,source,{dataRoot:root,detailHash:record.detailHash});assert.equal(reviewed.status,'ready');assert.equal(reviewed.method,'visual-official-detail');assert.deepEqual(reviewed.points,points);}
- for(const [p,detailHash] of [[product,'changed-image'],[{...product,sourceUrl:product.sourceUrl+'-changed'},record.detailHash],[{...product,style:'654321'},record.detailHash]]){const reviewed=await reviewSellingPoints(p,'상품명만 확인됨',{dataRoot:root,detailHash});assert.equal(reviewed.status,'ready');assert.equal(reviewed.points.length,0);}
+ for(const source of ['','공식 상품명과 소재만 있는 짧은 설명']){const reviewed=await reviewSellingPoints(product,source,{dataRoot:root,detailHash:record.detailHash});assert.equal(reviewed.status,'needs-review');assert.equal(reviewed.method,'visual-official-detail');assert.deepEqual(reviewed.points,points);}
+ for(const [p,detailHash] of [[product,'changed-image'],[{...product,sourceUrl:product.sourceUrl+'-changed'},record.detailHash],[{...product,style:'654321'},record.detailHash]]){const reviewed=await reviewSellingPoints(p,'상품명만 확인됨',{dataRoot:root,detailHash});assert.equal(reviewed.status,'needs-review');assert.equal(reviewed.points.length,0);}
  await assert.rejects(saveOfficialImagePointReview(product,root,{text:'면 100%',points,dataRoot:root}),/원문/);
  }finally{await rm(root,{recursive:true,force:true});}
 });
@@ -60,5 +60,5 @@ test('별도 API 없이 상의·하의·아우터·원피스·스커트 원문�
  }finally{await rm(root,{recursive:true,force:true});}});
 test('근거 없는 품목·혼용률·색상수나 빈 원문에는 장점을 추정하지 않고 과거 결과도 넘기지 않는다',async()=>{const root=await mkdtemp(path.join(os.tmpdir(),'local-invalid-'));try{
  await reviewSellingPoints(product,'뒷면 단추로 여밈을 조절할 수 있습니다.',{dataRoot:root});
- for(const source of ['', '원피스. 면 100%. 4 COLORS. SIZE S M L.', '현재 상품에는 단추 여밈이 없습니다.']){const result=await reviewSellingPoints(product,source,{dataRoot:root});assert.equal(result.status,'ready');assert.equal(result.omitted,true);assert.equal(result.points.length,0);assert(!/연결|API/.test(result.message));}
+ for(const source of ['', '원피스. 면 100%. 4 COLORS. SIZE S M L.', '현재 상품에는 단추 여밈이 없습니다.']){const result=await reviewSellingPoints(product,source,{dataRoot:root});assert.equal(result.status,'needs-review');assert.equal(result.omitted,false);assert.equal(result.points.length,0);assert(!/연결|API/.test(result.message));}
  }finally{await rm(root,{recursive:true,force:true});}});

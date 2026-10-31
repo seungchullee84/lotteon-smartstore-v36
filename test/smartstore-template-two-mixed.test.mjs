@@ -26,9 +26,9 @@ test('전체 공식 상세가 있으면 대표·추가 사진을 상세 앞뒤�
  const fallback=load(buildSmartstoreDetail({...p,images:{main:p.images.main,extra1:p.images.extra1,info:p.images.info},smartstoreDetail:{style:p.style}}).html);
  assert.equal(fallback('[data-official-detail] img').length,3);
 });
-test('소구점 생략·근거 부족은 상품명으로 대체하고 다른 상품 제목을 재사용하지 않는다',()=>{
+test('과거 생략 설정은 현재 검증된 장점을 숨기지 않으며 다른 상품 제목을 재사용하지 않는다',()=>{
  assert.deepEqual(templateTwoHeadline({...product,rawName:'남성 울 코트'},[]),['남성 울 코트']);
- const $=load(buildSmartstoreDetail({...product,detailTemplate:2,smartstoreDetail:{...product.smartstoreDetail,omitSellingPoints:true}}).html);assert.equal($('[data-benefit-headline]').text(),'여성 웜 립 터틀넥');assert.equal($('[data-product-points]').length,0);assert.equal($('[data-intro-features]').length,0);
+ const $=load(buildSmartstoreDetail({...product,detailTemplate:2,smartstoreDetail:{...product.smartstoreDetail,omitSellingPoints:true}}).html);assert.equal($('[data-benefit-headline]').text(),'여성 웜 립 터틀넥');assert.equal($('[data-product-points] h3').length,2);assert.equal($('[data-intro-features] li').length,2);
  assert.throws(()=>buildSmartstoreDetail({...product,detailTemplate:2,smartstoreDetail:{...product.smartstoreDetail,style:'654321'}}),/다른 품번/);
  const a=smartstoreDetailDocument({...product,detailTemplate:2},{includeVideo:false});assert(!a.html.includes('<video '));assert(a.html.includes('data-brand-video-heading'));
 });
