@@ -1382,6 +1382,55 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "326930",
+      "rawName": "[예약판매] NEW [박현지] 브러시드 테리 풀오버",
+      "gender": "여성",
+      "sourceCategory": [
+        "WOMEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=B4BDBF653B832C3563F682F1FCBC2C16&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05326930.jpg",
+      "detailHash": "6cae51318b84c292db929ec24885c61b53a5419feb0f631582e3feef79bb7b6d",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"3177bfc90f2045424a97a0a15924c2c3-4\"",
+        "lastModified": "Fri, 30 Oct 2026 08:24:30 GMT"
+      },
+      "pageHash": "4ce944437655d66959ad7c74d21033c9707d395640a04717859ab0954900af12",
+      "pageText": "브러쉬드 테리 소재의 크루넥 스웻셔츠로, 적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감을 제공합니다. 더블 립 넥 디테일을 적용해 세탁 후에도 형태 변형을 최소화했으며, 솔리드와 그래픽을 함께 구성한 총 14가지 컬러로 다양한 스타일링이 가능합니다. “NEW YORK”을 테마로 클래식한 졸 프린트와 입체감 있는 플로킹, TWILL과 자수를 활용한 다양한 그래픽 기법이 특징입니다. 코튼 100%, 260g/㎡의 두께감 있는 원단을 사용하여 안정적인 실루엣을 유지하며 안쪽 기모 처리로 높은 보온성을 제공합니다.\n\nPOINT 01 (실루엣)\n브러쉬드 테리 크루넥 스웻셔츠\n적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감\n\nPOINT 02 (디테일)\n더블립 넥 디테일로 세탁 후에도 형태 변형 최소화\n솔리드와 그래픽를 함께 구성하여 총 14가지 컬러로 다양한 스타일링 활용 가능\n\nPOINT 03 (원단)\n코튼 100%, 260g/m2 중량의 두께감 있는 원단을 사용하여 흐트러짐 없이 안정적인 실루엣 유지\n안쪽에 기모 처리로 보온성 높임",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감",
+          "evidence": "브러쉬드 테리 크루넥 스웻셔츠\n적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감"
+        },
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "안쪽에 기모 처리로 보온성 높임",
+          "evidence": "코튼 100%, 260g/m2 중량의 두께감 있는 원단을 사용하여 흐트러짐 없이 안정적인 실루엣 유지\n안쪽에 기모 처리로 보온성 높임"
+        },
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "코튼 100%, 260g/㎡의 두께감 있는 원단을 사용하여 안정적인 실루엣을 유지하며 안쪽 기모 처리로 높은 보온성을 제공합니다."
+        },
+        {
+          "title": "세탁 후에도 깔끔하게",
+          "description": "세탁 후 변형 부담을 줄여 깔끔하게.",
+          "evidence": "세탁 후에도 형태 변형을 최소화"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:51.204Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "374918",
       "rawName": "오버핏 무스탕",
       "gender": "여성",
@@ -1628,6 +1677,44 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "356943",
+      "rawName": "NEW 캐시 블렌드 오픈 폴로넥 니트 스웨터",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=B7FEF06FC36AC2458078F6FEA4F66B7D&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05356943.jpg",
+      "detailHash": "1f01ddd23acf7ac9a0fc07bb1086603a1be698904b0ce73f00702f0aa09b5696",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"e8131aea6c5321e38bf63d9979c1fcd0\"",
+        "lastModified": "Wed, 16 Sep 2026 06:22:34 GMT"
+      },
+      "pageHash": "49cc8332041484672062c9cb10d69a533ff3d7800ae3bf952ee5cd06abe51051",
+      "pageText": "오픈 카라 디자인에 프리미엄 캐시미어 혼방 원사가 더해져 자연스럽고 고급스러운 무드를 자아내는 12GG 오픈 카라 풀오버입니다.\n\nPOINT 01 (핏/실루엣)\n1) 여유롭고 내추럴한 릴렉스드 핏 - 바디 라인을 따라 편안하게 흐르듯 떨어지는 실루엣으로, 단독 착용 시 여리여리한 무드를 연출하며 티셔츠 등과 가볍게 레이어드하기에도 좋은 편안한 핏\n\n2) 너무 길지않은 레귤러한 기장감으로 다양한 하의와 매치 가능\n\nPOINT 02(디테일)\n1) 단추 없이 자연스럽게 브이 라인으로 트인 오픈 카라 디자인이 목선을 한층 슬림하고 길어 보이게 해줌\n2)  카라와 앞단작은 이중편직하여 탄탄하게 편직\n3) 카라 꺾임선을 넣어 카라가 안정감있게 유지되도록 함\n4) 소매 끝단과 밑단을 1X1 립(Lip) 조직으로 마감하여 안정감 있는 착용감\n5) 차분하고 모던한 2가지 컬러 웨이\n\nPOINT 03(소재)\n1) CASHMERE/WOOL/ACRYLIC/NYLON 혼용 원사로 포근하고 부드러운 터치감\n2) 소재 특유의 부드러움과 유연함이 돋보이는 12게이지 평직(Plain) 조직으로 짜여져, 부해 보이지 않고 차분하게 가라앉는 실루엣을 선사",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "다양한 코디에 활용",
+          "description": "2) 너무 길지않은 레귤러한 기장감으로 다양한 하의와 매치 가능.",
+          "evidence": "2) 너무 길지않은 레귤러한 기장감으로 다양한 하의와 매치 가능"
+        },
+        {
+          "title": "가볍게 입기 좋게",
+          "description": "티셔츠 등과 가볍게 레이어드하기에도 좋은 편안한 핏.",
+          "evidence": "1) 여유롭고 내추럴한 릴렉스드 핏 - 바디 라인을 따라 편안하게 흐르듯 떨어지는 실루엣으로, 단독 착용 시 여리여리한 무드를 연출하며 티셔츠 등과 가볍게 레이어드하기에도 좋은 편안한 핏"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:32.124Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "416952",
       "rawName": "NEW 부츠컷 슬랙스",
       "gender": "여성",
@@ -1826,6 +1913,49 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:14:35.967Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "326933",
+      "rawName": "NEW [박현지] 브러시드 테리 후드 집업",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=B88DBA1879BD21CC00DCF08E03BAB60A&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05326933.jpg",
+      "detailHash": "b827919add576413398763b1ab9c360e03de2a26cc2e81439f112c3ffd34e9b6",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"f1aa33e93553b5f47f5fc2bd37c8f755\"",
+        "lastModified": "Mon, 26 Oct 2026 06:30:34 GMT"
+      },
+      "pageHash": "3911f88f1f961b46191773623008e4892eff8b0fb79a029157884273eefa0bab",
+      "pageText": "브러쉬드 테리 소재의 후드 집업으로, 적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감을 제공합니다. 넉넉한 사이즈의 후드로 편안한 착용감을 더했으며, 2가지 코어 컬러 구성과 클래식한 그래픽 조합으로 다양한 스타일링이 가능합니다. ‘NEW YORK’를 테마로 2도 졸 프린트 기법을 적용해 그래픽 포인트를 더했습니다. 코튼 100%, 260g/㎡의 두께감 있는 원단을 사용하여 안정적인 실루엣을 유지하며 안쪽 기모 처리로 높은 보온성을 제공합니다.\n\nPOINT 01 (실루엣)\n브러쉬드 테리 후드 집업\n적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감\n\nPOINT 02 (디테일)\n넉넉한 사이즈의 후드로 편안한 착용감\n2가지 코어 컬러 구성과 클래식한 그래픽 조합으로 다양한 스타일링 활용 가능\n\nPOINT 03 (원단)\n코튼 100%, 260g/m2 중량의 두께감 있는 원단을 사용하여 흐트러짐 없이 안정적인 실루엣 유지\n안쪽에 기모 처리로 보온성 높임",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감",
+          "evidence": "브러쉬드 테리 후드 집업\n적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감"
+        },
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "안쪽에 기모 처리로 보온성 높임",
+          "evidence": "코튼 100%, 260g/m2 중량의 두께감 있는 원단을 사용하여 흐트러짐 없이 안정적인 실루엣 유지\n안쪽에 기모 처리로 보온성 높임"
+        },
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "코튼 100%, 260g/㎡의 두께감 있는 원단을 사용하여 안정적인 실루엣을 유지하며 안쪽 기모 처리로 높은 보온성을 제공합니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:10.184Z",
       "analyzedAt": null
     },
     {
@@ -2446,6 +2576,44 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:23:08.153Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "416946",
+      "rawName": "NEW [박현지] 브러시드 배럴핏 데님",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=BAE8CF8F6FAD90301CBF84B137083A17&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05416946.jpg",
+      "detailHash": "e8921e074cb69808ccdf99b4cc4b2470aff970f4b7cb18882f51017563d42061",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"28b957fb0f1091ca8674e60e00770d94\"",
+        "lastModified": "Thu, 22 Oct 2026 08:58:40 GMT"
+      },
+      "pageHash": "db7947703b44e3a0b82e7f88c3c8d6611a839ec599d6b72809bbb608d0bba8bb",
+      "pageText": "[배럴핏 윈터 데님 팬츠] \n허리는 안정적으로 잡아주고, 허벅지부터 무릎 라인까지 볼륨감을 더한 배럴핏 실루엣의 윈터 데님 팬츠입니다. 아웃심에 곡선적인 볼륨을 적용하고 밑단으로 갈수록 자연스럽게 좁아지는 커브 라인으로, 클래식한 데님 팬츠에 현대적인 균형감을 더했습니다. 입체적인 패턴 설계를 통해 과하지 않으면서도 트렌디한 실루엣을 완성했으며, 움직임에 따라 자연스럽게 살아나는 볼륨감이 세련된 스타일을 연출합니다. 특히 원단 뒷면에 브러쉬 가공을 더해 부드러운 기모감을 살린 윈터 데님 소재로, 데님 특유의 탄탄한 형태감은 유지하면서 안쪽은 포근하고 부드러운 터치감을 더해 겨울 시즌에도 따뜻하고 편안하게 착용할 수 있습니다. 컬러는 베이지 다잉, 워시드 미디엄 블루, 워시드 다크 블루 세 가지로 구성했습니다. 트렌디한 가먼트 다잉 컬러와 자연스러운 워싱, 은은한 페이딩을 더해 각 컬러마다 깊이감 있는 색감을 완성했습니다. 트렌디한 배럴핏 실루엣에 겨울철 착용을 고려한 브러쉬 기모 가공을 더해, 스타일과 보온성을 함께 갖춘 시즌 데님 팬츠입니다.\n\nPOINT 01\n아웃심의 곡선적인 볼륨과 밑단으로 갈수록 자연스럽게 좁아지는 커브 라인\n입체적인 패턴 설계로 과하지 않으면서도 트렌디하게 완성한 실루엣\n\nPOINT 02\n원단 뒷면에 브러쉬 가공을 더해 부드럽고 포근한 기모감 구현\n데님 특유의 탄탄한 형태감은 유지하면서 안쪽에 따뜻하고 부드러운 착용감 제공\n겨울철 데일리 아이템으로 활용하기 좋은 윈터 데님\n\nPOINT 03\n베이지 다잉 컬러와 워시드 미디엄 블루, 워시드 다크 블루 세 가지 컬러 구성\n자연스러운 워싱과 은은한 페이딩으로 완성한 깊이감 있는 컬러 표현\n티셔츠, 셔츠, 스웨터 등 다양한 상의와 손쉬운 스타일링\n벨트와 함께 연출하면 더욱 완성도 높은 캐주얼 룩 완성\n겨울 시즌 데일리룩에 활용하기 좋은 트렌디한 윈터 데님 팬츠\n\n※ 데님 제품의 경우, 워싱 가공 특성상 제품별 디테일 차이가 있을 수 있습니다.\n※ 염료 특성상 이염 및 물 빠짐이 발생할 수 있으므로 착용 및 세탁 시 주의 바랍니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "특히 원단 뒷면에 브러쉬 가공을 더해 부드러운 기모감을 살린 윈터 데님 소재로, 데님 특유의 탄탄한 형태감은 유지하면서 안쪽은 포근하고 부드러운 터치감을 더해 겨울 시즌에도 따뜻하고 편안하게 착용할 수 있습니다."
+        },
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "원단 뒷면에 브러쉬 가공을 더해 부드럽고 포근한 기모감 구현.",
+          "evidence": "원단 뒷면에 브러쉬 가공을 더해 부드럽고 포근한 기모감 구현"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:06.808Z",
       "analyzedAt": null
     },
     {

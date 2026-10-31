@@ -3,6 +3,54 @@
   "records": [
     {
       "rule": "adult-official-benefits-1",
+      "style": "416970",
+      "rawName": "NEW 브러시드 테리 조거 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=100B7398A6EB39417C1B18716F1074EA&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05416970.jpg",
+      "detailHash": "bd7191b49d27f6bbb8b944136d5cf85977efb281afdab3c7288c2549fcf17767",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"21c3357865305f7c378c7376f37f2dfa\"",
+        "lastModified": "Wed, 21 Oct 2026 05:55:08 GMT"
+      },
+      "pageHash": "f9059a5b3e407cf307a351443c8cc5138fb1bb11c0e71ae4fe5726364d4b249b",
+      "pageText": "브러쉬드 테리 소재의 조거팬츠입니다. 허리와 밑단의 엘라스틱 밴드를 더해 캐주얼하면서도 편안한 조거핏을 연출합니다. 허리 밴드와 스트링으로 체형에 맞게 사이즈를 조절할 수 있으며, 양옆 포켓을 더해 간단한 소지품 보관이 가능합니다. 코튼 100%, 260g/㎡의 두께감 있는 원단을 사용해 흐트러짐 없이 안정적인 실루엣을 유지하며, 안쪽 기모 처리로 보온성을 높였습니다.\n\nPOINT 01 (실루엣)\n브러쉬드 테리 조거팬츠\n허리와 밑단의 엘라스틱 밴드로 캐주얼하면서도 편안한 조거핏 연출\n\nPOINT 02 (디테일)\n허리의 밴드와 스트링으로 허리 사이즈 조절 용이\n간단한 소지품을 보관할 수 있는 옆포켓\n\nPOINT 03 (원단)\n코튼 60% 폴리에스터 40%, 260g/m2 중량의 두께감 있는 원단을 사용하여 흐트러짐 없이 안정적인 실루엣 유지\n안쪽에 기모 처리로 보온성 높임",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "허리와 밑단의 엘라스틱 밴드로 캐주얼하면서도 편안한 조거핏 연출",
+          "evidence": "브러쉬드 테리 조거팬츠\n허리와 밑단의 엘라스틱 밴드로 캐주얼하면서도 편안한 조거핏 연출"
+        },
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "안쪽에 기모 처리로 보온성 높임",
+          "evidence": "코튼 60% 폴리에스터 40%, 260g/m2 중량의 두께감 있는 원단을 사용하여 흐트러짐 없이 안정적인 실루엣 유지\n안쪽에 기모 처리로 보온성 높임"
+        },
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "코튼 100%, 260g/㎡의 두께감 있는 원단을 사용해 흐트러짐 없이 안정적인 실루엣을 유지하며, 안쪽 기모 처리로 보온성을 높였습니다."
+        },
+        {
+          "title": "원하는 핏으로 조절",
+          "description": "허리의 밴드와 스트링으로 허리 사이즈 조절 용이.",
+          "evidence": "허리의 밴드와 스트링으로 허리 사이즈 조절 용이"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:20.439Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "394917",
       "rawName": "그래픽 목넥 긴팔 티셔츠",
       "gender": "",
@@ -574,6 +622,92 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "376910",
+      "rawName": "NEW CLOUD LIGHT 미드렝스 경량 자켓",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=130E24E19697C4B29F9DEFDB782E267C&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05376910.jpg",
+      "detailHash": "4c04b18c48c5ad1f559b56182a6ec2e4dcc094d4db1f2d7780b4055096d7f0c3",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"f6ae04272ba3132cfc770b8209d2c4f6\"",
+        "lastModified": "Thu, 17 Sep 2026 08:12:45 GMT"
+      },
+      "pageHash": "5e9a9c5ac88625b975f62f416cad05efa05f86bccb66be86277228647f5d9eca",
+      "pageText": "[어니언 퀼팅 경량 자켓]\n입체적인 어니언 퀼팅과 가벼운 보온성을 갖춘 크루넥 경량 자켓\n전체적으로 어니언 형태의 퀼팅을 적용해 클래식한 경량 자켓의 실루엣에 입체적인 표면감을 더한 크루넥 자켓입니다. 베이직한 핏을 기반으로 입체적인 패턴 설계를 적용해 편안하면서도 정돈된 실루엣으로 완성했습니다. 충전재는 바이오 기반 소재인 신클라우드 소로나(Syncloud Sorona)를 사용해 가벼우면서도 보온성과 복원력을 높였으며, 겉감은 20D 고밀도 나일론을 적용해 가벼운 착용감을 살렸습니다. 무광의 자연스러운 크리즈 텍스처가 은은한 포인트를 더해 늦가을부터 겨울까지 단독 아우터 또는 레이어드 아이템으로 활용하기 좋습니다.\n\nPOINT 01 (FIT)\n깔끔한 크루넥 & 베이직 실루엣 \n군더더기 없는 크루넥 디자인과 베이직한 핏을 기반으로 입체적인 패턴 설계를 적용해 편안하면서도 안정감 있는 실루엣을 완성했습니다. 다양한 이너와 자연스럽게 매치할 수 있어 데일리 아우터로 활용하기 좋습니다.\n\nPOINT 02 (DETAIL)\n입체적인 어니언 퀼팅 디자인 \n전체적으로 부드러운 곡선 형태의 어니언 퀼팅을 적용해 경량 자켓 특유의 가벼운 분위기는 유지하면서 입체적인 볼륨감과 세련된 표면감을 더했습니다.\n얇은 7호 미싱 바늘을 사용한 섬세한 봉제 \n얇은 20D 원단의 특성과 충전재 이탈을 고려해 일반적인 봉제보다 가는 7호 미싱 바늘을 사용하고 생산 과정에서 2시간마다 교체하여 바늘 구멍을 최소화하도록 세심하게 봉제했습니다.\n\nPOINT 03 (FABRIC) (N100% 20D 400T )\n\n20D 고밀도 나일론 & 신클라우드 소로나(Syncloud Sorona) 충전재 겉\n감은 가볍고 촘촘한 20D 고밀도 나일론 소재를 사용했으며, 무광의 자연스러운 크리즈 텍스처로 세련된 외관을 완성했습니다. 충전재는 식물 유래 원료를 포함한 PTT 기반의 신클라우드 소로나를 적용해 가벼우면서도 보온성과 복원력이 우수한 것이 특징입니다.\n\n※ 소로나의 37% 재생 가능 원료, 나일론 6 대비 에너지 사용량 약 30% 절감 및 온실가스 배출량 63% 절감 등의 수치는 소재 공급사의 공식 인증·시험자료가 있는 경우 별도의 소재 설명 영역에서 강조하는 것을 권장합니다. 상품 본문에서는 위처럼 소재 특성을 중심으로 정리하면 훨씬 깔끔하고 신뢰감 있게 보입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "입체적인 어니언 퀼팅",
+          "description": "어니언 패턴으로 살린 입체감.",
+          "evidence": "입체적인 어니언 퀼팅과 가벼운 보온성을 갖춘 크루넥 경량 자켓"
+        },
+        {
+          "title": "따뜻하고, 탄탄하게",
+          "description": "보온성과 복원력이 뛰어난 PTT 충전재.",
+          "evidence": "충전재는 식물 유래 원료를 포함한 PTT 기반의 신클라우드 소로나를 적용해 가벼우면서도 보온성과 복원력이 우수한 것이 특징입니다."
+        },
+        {
+          "title": "가볍게, 부담 없이",
+          "description": "가벼운 원단의 경량 디자인.",
+          "evidence": "입체적인 어니언 퀼팅과 가벼운 보온성을 갖춘 크루넥 경량 자켓"
+        },
+        {
+          "title": "가볍게 입기 좋게",
+          "description": "겉감은 20D 고밀도 나일론을 적용해 가벼운 착용감을 살렸습니다.",
+          "evidence": "충전재는 바이오 기반 소재인 신클라우드 소로나(Syncloud Sorona)를 사용해 가벼우면서도 보온성과 복원력을 높였으며, 겉감은 20D 고밀도 나일론을 적용해 가벼운 착용감을 살렸습니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:35.626Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "326924",
+      "rawName": "NEW [문가영] 브러시드 헨리넥 긴팔티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=133DCD22941F9A98E89E8242DB81F928&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05326924.jpg",
+      "detailHash": "e081e71ce765803f4b07ee3902cebee7f0692026d5de8f4492c9c7792a30c122",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"a870e0ae9a156a65dd38a23d69146980\"",
+        "lastModified": "Thu, 15 Oct 2026 07:45:32 GMT"
+      },
+      "pageHash": "a6d2d41b08dae8a0eed3ec67d8b9522a9a9afe310528fb402c2b27384a2710d3",
+      "pageText": "브러쉬드 헨리넥 긴팔 티셔츠로, 적당히 파인 넥과 몸에 자연스럽게 밀착되는 실루엣으로 편안함과 따뜻함을 더해 단독 착용은 물론 레이어드에도 활용하기 좋습니다. 넥 바인딩 디테일을 적용해 세탁 후에도 형태 변형을 최소화했으며, 화이트·MHG·D/GRAY의 3가지 코어 컬러 구성으로 다양한 코디에 활용 가능합니다. 265g/㎡ 중량의 폴리 레이온 혼방 원단을 사용해 은은하게 브러쉬 처리된 표면으로 부드럽고 따뜻한 터치감이 특징입니다.\n\nPOINT 01 (실루엣)\n브러쉬드 헨리넥 긴팔 티셔츠\n적당히 파진 넥과 몸에 자연스럽게 밀착되는 실루엣으로 편안함과 따뜻함을 더해 단독 착용은 물론 레이어드 용으로 적합\n\nPOINT 02 (디테일)\n넥 바인딩 디테일로 세탁 후에도 형태 변형 최소화\n화이트, MHG, D/GRAY 세가지 코어 컬러 구성으로 다양한 코디에 활용 가능\n\nPOINT 03 (원단)\n265g/㎡ 중량의 폴리 레이온 혼방 원단으로 은은하게 브러쉬 처리된 표면으로 부드럽고 따뜻한 터치감이 특징",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "브러쉬드 헨리넥 긴팔 티셔츠로, 적당히 파인 넥과 몸에 자연스럽게 밀착되는 실루엣으로 편안함과 따뜻함을 더해 단독 착용은 물론 레이어드에도 활용하기 좋습니다."
+        },
+        {
+          "title": "세탁 후에도 깔끔하게",
+          "description": "세탁 후 변형 부담을 줄여 깔끔하게.",
+          "evidence": "세탁 후에도 형태 변형을 최소화"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:28.451Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "074923",
       "rawName": "[변우석] 덕다운 패딩 푸퍼",
       "gender": "",
@@ -811,6 +945,44 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:15:10.153Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "326928",
+      "rawName": "NEW [박현지] 플리스 버튼 아노락 풀오버 (바라클라바 SET)",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=1460AB745AD9092CBA608BA9F884BEB0&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05326928.jpg",
+      "detailHash": "638f84509a860f81cde04af78ecd51952cbae429205cd86b77797ad16fc9540e",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"8f54300d3e65b3182f8967137396d59b\"",
+        "lastModified": "Thu, 08 Oct 2026 04:33:26 GMT"
+      },
+      "pageHash": "0ce37f38a20b8254b8c0ad7634db61aade086ff0b2a50a3d3daa9ac98df26ae2",
+      "pageText": "POINT 01 (실루엣)\n폴라 플리스 아노락 탑\n높이감 있는 스탠드 칼라가 목을 감싸주어 따뜻하며, 밑단의 스트링으로 캐주얼하면서도 편안한 실루엣 연출\n\nPOINT 02 (디테일)\n넥에서 플라켓까지 이어지는 파이핑 디테일로 디자인 포인트\n간단한 소지품을 보관할 수 있는 캥거루 포켓\n바라클라바 추가 구성된 상품으로, 단독으로 착용하거나 바라클라바 후드 함께 연출 가능\n\nPOINT 03 (원단)\n340g/m2 중량의 가벼운 양면 폴라 플리스 원단으로 부드러운 착용감과 뛰어난 보온성이 특징",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "밑단의 스트링으로 캐주얼하면서도 편안한 실루엣 연출.",
+          "evidence": "높이감 있는 스탠드 칼라가 목을 감싸주어 따뜻하며, 밑단의 스트링으로 캐주얼하면서도 편안한 실루엣 연출"
+        },
+        {
+          "title": "포인트 있게 연출",
+          "description": "넥에서 플라켓까지 이어지는 파이핑 디테일로 디자인 포인트.",
+          "evidence": "넥에서 플라켓까지 이어지는 파이핑 디테일로 디자인 포인트"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:18.985Z",
       "analyzedAt": null
     },
     {
@@ -2976,6 +3148,44 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:23:14.960Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "356954",
+      "rawName": "NEW 메리노울 터틀넥 니트 스웨터",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=1EAEC67A18166C29042B9FCB115291B3&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05356954.jpg",
+      "detailHash": "65907ca585f7806dccc2219773b123389af20835fcb43ea5badef9d1e2678e8b",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"d4a11c8619b3a1f2feaf40e491c1ee43\"",
+        "lastModified": "Thu, 22 Oct 2026 04:50:45 GMT"
+      },
+      "pageHash": "3c4de809ce6fc3875d52f41ba300379986eecaa226a62c4c72e1587a24d480ce",
+      "pageText": "7GG 메리노 울 100% 터틀넥 스웨터목을 차분하게 감싸주는 터틀넥 디자인과 고급스러운 파인 메리노 울 100% 소재가 어우러진 스웨터입니다. 단독 착용은 물론 겨울철 다양한 아우터 안의 이너로 매치하기 좋아 한겨울까지 클래식하게 활용하기 좋은 베이직 아이템입니다.\n\nPOINT 01 (핏/실루엣)\n바디 라인을 따라 자연스럽게 떨어지는 깔끔하고 여유 있는 실루엣\n과하지 않은 부피감으로 겨울철 아우터 안에 착용해도 둔해지지 않고 세련된 레이어드 연출 가능\n\nPOINT 02 (디테일)\n민자(Plain Jersey) 조직으로 부피감 없이 군더더기 없는 차분한 무드 완성\n넥 라인의 1*1 립 조직으로 답답함 없이 목을 부드럽게 감싸주며 탄탄한 마감\n\nPOINT 03 (소재)\n파인 메리노 울 100% 을 사용해 부드럽고 가벼운 터치감 선사\n7게이지(7GG) 조직감으로 F/W 시즌에 적합한 보온성과 기분 좋은 포근함 제공\n은은하고 클래식한 2가지 세련된 컬러(크림, 베이지) 구성",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "바디 라인을 따라 자연스럽게 떨어지는 깔끔하고 여유 있는 실루엣.",
+          "evidence": "바디 라인을 따라 자연스럽게 떨어지는 깔끔하고 여유 있는 실루엣"
+        },
+        {
+          "title": "부드러운 착용감",
+          "description": "파인 메리노 울 100% 을 사용해 부드럽고 가벼운 터치감 선사.",
+          "evidence": "파인 메리노 울 100% 을 사용해 부드럽고 가벼운 터치감 선사"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:24.190Z",
       "analyzedAt": null
     },
     {

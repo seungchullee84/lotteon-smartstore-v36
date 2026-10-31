@@ -348,6 +348,49 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "376911",
+      "rawName": "NEW [박현지] CLOUD LIGHT 후드 패딩 자켓",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=419D1DCBC72C375D5A1EC8927F4E8476&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05376911.jpg",
+      "detailHash": "518f361cf890e43653d78b56d53240dda666027ec7970fc3826a572766bb6361",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"6939be8a20aa82fc0fdf533c970a84e5\"",
+        "lastModified": "Wed, 16 Sep 2026 07:35:25 GMT"
+      },
+      "pageHash": "41c5a2d2caf99d0f585d94fd944eeda57d99b215fe5c0553c251acd5e8235c66",
+      "pageText": "[후드 경량 패딩 자켓]\n15D 초경량 나일론과 3레이어 구조로 가벼움과 보온성을 높인 후드 패딩 자켓\n가벼운 착용감과 보온성을 동시에 고려한 스탠다드 숏 기장의 후드 경량 패딩 자켓입니다. 입체적인 패턴 설계를 적용해 편안한 착용감과 안정적인 실루엣을 완성했으며, 밑단에 내장된 스트링을 조절해 자연스럽게 볼륨감 있는 실루엣으로도 연출할 수 있습니다. 겉감은 얇고 가벼운 15D 나일론 100% 소재를 사용하고, 안쪽에만 다운백을 적용한 3레이어 구조로 불필요한 원단 사용을 줄여 전체적인 중량감을 낮췄습니다. 충전재는 바이오 기반 소재인 신클라우드 소로나(Syncloud Sorona)를 적용해 가벼우면서도 보온성과 복원력을 갖춰 가을·겨울 시즌 데일리 아우터로 활용하기 좋습니다.\n\nPOINT 01 (FIT)\n스탠다드 숏 기장 & 입체적인 후드 실루엣 깔끔하게 떨어지는 스탠다드 숏 기장에 입체적인 패턴 설계를 적용해 편안하면서도 안정감 있는 실루엣을 완성했습니다. 후드 디자인으로 캐주얼한 무드를 더해 다양한 이너와 부담 없이 매치할 수 있습니다.\n\nPOINT 02 (DETAIL)\n밑단 스트링으로 조절하는 다양한 실루엣 밑단 안쪽에 스트링을 내장해 원하는 만큼 조절할 수 있으며, 자연스럽게 떨어지는 기본 실루엣부터 볼륨감 있는 블루종 실루엣까지 다양하게 연출할 수 있습니다.\nYKK 지퍼 & 경량 3레이어 구조 프런트에는 YKK 지퍼를 적용해 깔끔하게 완성했습니다. 겉감과 충전재, 안쪽에만 다운백을 적용하는 3레이어 구조로 설계해 충전재를 안정적으로 잡아주면서 전체적인 중량감을 최소화했습니다.\n\nPOINT 03 (FABRIC)\n15D 나일론 100% & 신클라우드 소로나(Syncloud Sorona) 충전재 겉감은 얇고 가벼운 15데니아 나일론 100% 소재를 사용해 경량성을 높였습니다. 충전재는 식물 유래 원료를 포함한 PTT 기반의 신클라우드 소로나를 적용해 가벼우면서도 보온성과 복원력이 우수한 것이 특징입니다. 간절기부터 가을·겨울까지 가볍고 따뜻하게 활용하기 좋은 소재 구성입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "따뜻하고, 탄탄하게",
+          "description": "보온성과 복원력이 뛰어난 PTT 충전재.",
+          "evidence": "충전재는 식물 유래 원료를 포함한 PTT 기반의 신클라우드 소로나를 적용해 가벼우면서도 보온성과 복원력이 우수한 것이 특징입니다."
+        },
+        {
+          "title": "가볍게, 부담 없이",
+          "description": "가벼운 원단의 경량 디자인.",
+          "evidence": "15D 초경량 나일론과 3레이어 구조로 가벼움과 보온성을 높인 후드 패딩 자켓"
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "간절기부터 가을·겨울까지 가볍고 따뜻하게 활용하기 좋은 소재 구성입니다.",
+          "evidence": "간절기부터 가을·겨울까지 가볍고 따뜻하게 활용하기 좋은 소재 구성입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:35.712Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "075904",
       "rawName": "코튼 포켓 자켓",
       "gender": "남성",
@@ -579,6 +622,44 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "356955",
+      "rawName": "NEW 케이블 크루넥 긴팔 니트 스웨터",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=42C4FF3480C6C92237FABF513FA8AE2C&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05356955.jpg",
+      "detailHash": "4ab32d4027ca83a1dcf9ae2c2e63d0924fd555e59967836c165874e3dd8b0ee9",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"e8ef42ba49372b84c7cc41622c3475f1\"",
+        "lastModified": "Fri, 30 Oct 2026 01:09:29 GMT"
+      },
+      "pageHash": "84242b1cec497faac43203e223364d8947d943d1e8cfc027e05c0cb94e18a6c0",
+      "pageText": "목을 차분하게 감싸주는 터틀넥 디자인과 고급스러운 파인 메리노 울 100% 소재가 어우러진 스웨터입니다. 클래식하면서도 아늑한 감성을 선사하며, 단독 착용만으로도 확실한 스타일링 포인트가 되어주는 아이템입니다.\n\nPOINT 01 (핏/실루엣)\n바디에 약간 여유있게 떨어지는 릴렉스드 레귤러 핏\n다양한 아이템과 용이하게 매치되는 적당한 기장감\n\nPOINT 02(디테일)\n바디 앞뒤에 피셔맨 케이블 조직으로 풍성한 입체감과 고유의 텍스처감 완성\n넥 라인의 1*1 립 조직으로 답답함 없이 목을 부드럽게 감싸주며 탄탄한 마감\n소매 끝단과 밑단의 1*1 립 조직으로 단정하고 탄탄한 핏 유지\n\nPOINT 03(소재)\n폴리/나일론/울 혼방 원사를 사용해 가벼우면서도 두툼하고 포근한 착용감 \n3게이지의 로우게이지 특유의 볼륨감과 우수한 보온성으로 한겨울까지 따뜻하게 착용 가능\n사랑스럽고 포근한 무드의 2가지 컬러 구성",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "바디에 약간 여유있게 떨어지는 릴렉스드 레귤러 핏.",
+          "evidence": "바디에 약간 여유있게 떨어지는 릴렉스드 레귤러 핏"
+        },
+        {
+          "title": "포인트 있게 연출",
+          "description": "바디 앞뒤에 피셔맨 케이블 조직으로 풍성한 입체감과 고유의 텍스처감 완성.",
+          "evidence": "바디 앞뒤에 피셔맨 케이블 조직으로 풍성한 입체감과 고유의 텍스처감 완성"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:03.659Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "116935",
       "rawName": "NEW 브러시드 이지 카고 팬츠",
       "gender": "남성",
@@ -695,6 +776,39 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:16:23.241Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "356942",
+      "rawName": "NEW 캐시 블렌드 브이넥 아가일 니트 스웨터",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=4406716701A1CCA0400E388DDC1427B9&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05356942.jpg",
+      "detailHash": "9065648dddd64803e6f02ecf3af9940c7db0b5865a25004869ffa330a5a0e39a",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"b82808e6a948023fcd47ae64ee40f6a8\"",
+        "lastModified": "Thu, 27 Aug 2026 05:28:50 GMT"
+      },
+      "pageHash": "cd6e91444ad6836cb33b67f28b7e464908ae18164157c38e028be4b2f518bb4f",
+      "pageText": "클래식한 아가일 패턴과 세련된 브이넥 디자인이 어우러져 트래디셔널하면서도 감각적인 무드를 연출하는 12GG 아가일 풀오버입니다.\n\nPOINT 01 (핏/실루엣)\n1) 바디라인에 깔끔하게 안착되는 단정하고 정돈된 레귤러 핏\n2) 너무 길지않은 레귤러한 기장감으로 다양한 하의와 매치 가능\n\nPOINT 02(디테일)\n1) 목선을 길고 슬림해 보이게 만들어주는 브이넥 디자인\n2) 고급스러운 인타르시아/자카드 아가일 패턴 - 전면에 더해진 정교한 아가일 체크 패턴이 룩에 확실한 클래식 포인트를 더해주며, 바탕색(Ground)과 패턴색의 세련된 콤보 배색이 깊이감 있는 무드\n3) 소매 끝단과 밑단을 1X1 립(Lip) 조직으로 마감하여 안정감 있는 착용감\n4) 차분하고 모던한 2가지 컬러 웨이\n\nPOINT 03(소재)\n1) CASHMERE/WOOL/ACRYLIC/NYLON 혼용 원사로 포근하고 부드러운 터치감\n2) 바디 전체를 12게이지 평직(Plain)베이스로 촘촘하게 짜내어 텍스처가 매끄러우며, 두께감이 적당해 부하지 않음",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "다양한 코디에 활용",
+          "description": "2) 너무 길지않은 레귤러한 기장감으로 다양한 하의와 매치 가능",
+          "evidence": "1) 바디라인에 깔끔하게 안착되는 단정하고 정돈된 레귤러 핏\n2) 너무 길지않은 레귤러한 기장감으로 다양한 하의와 매치 가능"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:37.328Z",
       "analyzedAt": null
     },
     {
@@ -1180,6 +1294,55 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "326930",
+      "rawName": "[예약판매] NEW [박현지] 브러시드 테리 풀오버",
+      "gender": "여성",
+      "sourceCategory": [
+        "WOMEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=45EFAC2748714624EC10ED2805C93DF1&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05326930.jpg",
+      "detailHash": "6cae51318b84c292db929ec24885c61b53a5419feb0f631582e3feef79bb7b6d",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"3177bfc90f2045424a97a0a15924c2c3-4\"",
+        "lastModified": "Fri, 30 Oct 2026 08:24:30 GMT"
+      },
+      "pageHash": "d106c50a17468acc45cabf982ef098714a423e05df80a23f0a8094cdf5dc54c5",
+      "pageText": "브러쉬드 테리 소재의 크루넥 스웻셔츠로, 적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감을 제공합니다. 더블 립 넥 디테일을 적용해 세탁 후에도 형태 변형을 최소화했으며, 솔리드와 그래픽을 함께 구성한 총 14가지 컬러로 다양한 스타일링이 가능합니다. “NEW YORK”을 테마로 클래식한 졸 프린트와 입체감 있는 플로킹, TWILL과 자수를 활용한 다양한 그래픽 기법이 특징입니다. 코튼 100%, 260g/㎡의 두께감 있는 원단을 사용하여 안정적인 실루엣을 유지하며 안쪽 기모 처리로 높은 보온성을 제공합니다.\n\nPOINT 01 (실루엣)\n브러쉬드 테리 크루넥 스웻셔츠\n적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감\n\nPOINT 02 (디테일)\n더블립 넥 디테일로 세탁 후에도 형태 변형 최소화\n솔리드와 그래픽를 함께 구성하여 총 14가지 컬러로 다양한 스타일링 활용 가능\n\nPOINT 03 (원단)\n코튼 100%, 260g/m2 중량의 두께감 있는 원단을 사용하여 흐트러짐 없이 안정적인 실루엣 유지\n안쪽에 기모 처리로 보온성 높임",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감",
+          "evidence": "브러쉬드 테리 크루넥 스웻셔츠\n적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감"
+        },
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "안쪽에 기모 처리로 보온성 높임",
+          "evidence": "코튼 100%, 260g/m2 중량의 두께감 있는 원단을 사용하여 흐트러짐 없이 안정적인 실루엣 유지\n안쪽에 기모 처리로 보온성 높임"
+        },
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "코튼 100%, 260g/㎡의 두께감 있는 원단을 사용하여 안정적인 실루엣을 유지하며 안쪽 기모 처리로 높은 보온성을 제공합니다."
+        },
+        {
+          "title": "세탁 후에도 깔끔하게",
+          "description": "세탁 후 변형 부담을 줄여 깔끔하게.",
+          "evidence": "세탁 후에도 형태 변형을 최소화"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:51.872Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "115541",
       "rawName": "스탠다드 슬림 데님 팬츠",
       "gender": "남성",
@@ -1243,6 +1406,54 @@
       "status": "image-pending",
       "visualReview": false,
       "observedAt": "2026-10-31T06:24:34.452Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "376916",
+      "rawName": "NEW [박현지] 플리스 보아 자켓",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=4664FE3778D485D303F5EC86577B8FDF&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05376916.jpg",
+      "detailHash": "ffd53905367f171a79753e8adf36d64c5d91f8702be01b7bfcdf9d4a5d1cded6",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"b44278ab2458880f143e66888647c88b\"",
+        "lastModified": "Wed, 09 Sep 2026 00:43:12 GMT"
+      },
+      "pageHash": "920ea7c2bef656fdd8a3356700c7e8f9dfa7ed88dde17403bbf947d36fd98443",
+      "pageText": "늦가을부터 겨울까지 포근하게 착용하기 좋은 플리스 보아 자켓입니다\n전체적으로 여유로운 오버핏 실루엣에 입체적인 패턴 설계를 적용해 과하게 부해 보이지 않으면서도 편안하게 착용할 수 있는 플리스 보아 자켓입니다. 깔끔한 크루넥 디자인으로 다양한 이너와 레이어드하기 좋으며, 전체 가장자리를 우븐 소재로 바인딩 처리해 형태를 안정적으로 잡아주면서 완성도 높은 디테일을 더했습니다. 프론트에는 YKK 지퍼를 적용해 실용성을 높였습니다. 촘촘하고 밀도감 있는 플리스 보아 소재를 사용해 포근하고 부드러운 터치감을 제공하며, 깔끔한 표면감으로 고급스러운 외관을 살렸습니다. 늦가을부터 겨울까지 티셔츠, 스웨트셔츠, 니트 등 다양한 아이템과 레이어드해 캐주얼하게 활용하기 좋은 데일리 아우터입니다.\n\nPOINT 01 (FIT)\n부해 보이지 않는 여유로운 오버핏\n전체적으로 여유로운 오버핏에 입체적인 패턴 설계를 적용해 플리스 특유의 볼륨감은 살리면서도 과하게 부해 보이지 않는 실루엣을 완성했습니다. 다양한 이너와 편안하게 레이어드할 수 있는 여유로운 핏으로 편안한 착용감을 제공합니다.\n\nPOINT 02 (DETAIL)\n레이어드하기 좋은 크루넥 디자인\n깔끔한 크루넥 디자인으로 티셔츠부터 스웨트셔츠, 니트 등 다양한 이너와 자연스럽게 레이어드할 수 있습니다.\n우븐 바인딩 & YKK 지퍼 디테일\n전체 가장자리를 우븐 소재로 바인딩 처리해 깔끔하고 완성도 높은 외관을 살렸으며, 프론트에는 YKK 지퍼를 적용해 실용적인 디테일을 더했습니다.\n\nPOINT 03 (FABRIC): POLYESTER 100%\n촘촘한 밀도감의 플리스 보아 소재\n촘촘하고 밀도감 있는 플리스 보아 소재를 사용해 포근하고 부드러운 터치감을 제공합니다. 균일하고 깔끔한 표면감으로 플리스 특유의 캐주얼한 분위기는 유지하면서 한층 고급스러운 외관을 완성했습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "밀도감 있는 플리스 보아 소재를 사용해 포근.",
+          "evidence": "촘촘하고 밀도감 있는 플리스 보아 소재를 사용해 포근하고 부드러운 터치감을 제공하며, 깔끔한 표면감으로 고급스러운 외관을 살렸습니다."
+        },
+        {
+          "title": "편안한 착용감",
+          "description": "부해 보이지 않는 여유로운 오버핏.",
+          "evidence": "부해 보이지 않는 여유로운 오버핏"
+        },
+        {
+          "title": "부드럽게 닿는 촉감",
+          "description": "부드러운 촉감이 느껴지는 원단.",
+          "evidence": "부드러운 터치감을 제공"
+        },
+        {
+          "title": "다양한 코디에 두루",
+          "description": "다양한 아이템과 매치하기 좋아요.",
+          "evidence": "다양한 아이템과 레이어드해 캐주얼하게 활용"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:33.828Z",
       "analyzedAt": null
     },
     {
@@ -1354,6 +1565,50 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:22:08.738Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "326933",
+      "rawName": "NEW [박현지] 브러시드 테리 후드 집업",
+      "gender": "여성",
+      "sourceCategory": [
+        "WOMEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=46EBE2A5E330A2AD2EA9F2ED77BBAC88&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05326933.jpg",
+      "detailHash": "b827919add576413398763b1ab9c360e03de2a26cc2e81439f112c3ffd34e9b6",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"f1aa33e93553b5f47f5fc2bd37c8f755\"",
+        "lastModified": "Mon, 26 Oct 2026 06:30:34 GMT"
+      },
+      "pageHash": "a33f076db1da3244f9bcb4deaea10a0b3ff3acbfd94553d93133b3cbb6d44e5a",
+      "pageText": "브러쉬드 테리 소재의 후드 집업으로, 적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감을 제공합니다. 넉넉한 사이즈의 후드로 편안한 착용감을 더했으며, 2가지 코어 컬러 구성과 클래식한 그래픽 조합으로 다양한 스타일링이 가능합니다. ‘NEW YORK’를 테마로 2도 졸 프린트 기법을 적용해 그래픽 포인트를 더했습니다. 코튼 100%, 260g/㎡의 두께감 있는 원단을 사용하여 안정적인 실루엣을 유지하며 안쪽 기모 처리로 높은 보온성을 제공합니다.\n\nPOINT 01 (실루엣)\n브러쉬드 테리 후드 집업\n적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감\n\nPOINT 02 (디테일)\n넉넉한 사이즈의 후드로 편안한 착용감\n2가지 코어 컬러 구성과 클래식한 그래픽 조합으로 다양한 스타일링 활용 가능\n\nPOINT 03 (원단)\n코튼 100%, 260g/m2 중량의 두께감 있는 원단을 사용하여 흐트러짐 없이 안정적인 실루엣 유지\n안쪽에 기모 처리로 보온성 높임",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감",
+          "evidence": "브러쉬드 테리 후드 집업\n적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감"
+        },
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "안쪽에 기모 처리로 보온성 높임",
+          "evidence": "코튼 100%, 260g/m2 중량의 두께감 있는 원단을 사용하여 흐트러짐 없이 안정적인 실루엣 유지\n안쪽에 기모 처리로 보온성 높임"
+        },
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "코튼 100%, 260g/㎡의 두께감 있는 원단을 사용하여 안정적인 실루엣을 유지하며 안쪽 기모 처리로 높은 보온성을 제공합니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:41.725Z",
       "analyzedAt": null
     },
     {

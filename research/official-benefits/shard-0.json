@@ -293,6 +293,33 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "516710",
+      "rawName": "NEW 지워머 레깅스 (에센셜)",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=0111AADE770ED6F7D136B455DE1D6C1F&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05516710.jpg",
+      "detailHash": "e46b3e4c4678dea5d0ef911a71bdd05b4a0e7251dc7646fe8a88ad394cbfbfb8",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"fa70c2ae00ca05e309a18d21222b438b\"",
+        "lastModified": "Thu, 15 Oct 2026 07:30:33 GMT"
+      },
+      "pageHash": "20513ff3511bc4e051236dbab064a3dcfb8a131c1a6f18b6efee2837367fd806",
+      "pageText": "지오다노만의 따뜻한 이너웨어, 지워머 스타일입니다.\n\n추운 겨울에 유용한 이너웨어로, \n코튼 폴리 스판 혼방 소재로 만들어져 착용감이 우수하며 보온성이 뛰어납니다.\n\n몸에 밀착되는 착용감으로 다른 옷 안에 이너로 착용하거나 단독으로 입을 때에도 편안한 활동성을 제공합니다.\n\n블랙 한 칼라로 구성되어 있으며, 한 겨울 내내 다양한 바지 이너로 슬림하고 쫀쫀하게 착용 가능합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:13.544Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "325509",
       "rawName": "멀티 스트라이프 긴팔 티셔츠",
       "gender": "",
@@ -608,6 +635,33 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:21:16.018Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "376923",
+      "rawName": "NEW [문가영] CLOUD PUFF 후드 덕다운 푸퍼",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=02C1396C8070994D7C96EDE3EA253A20&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05376923.jpg",
+      "detailHash": "1f592991fdbd05765b8c9d5c3ededfa9ea8f80cb8e6327e9fc5042212e2c93c4",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"9744a0bddb0ce26285cfe9c2c16c00ef\"",
+        "lastModified": "Thu, 15 Oct 2026 07:53:09 GMT"
+      },
+      "pageHash": "aacea112f6b52fb9b82bac1283acd2d35f1365c018ff1e72be02bd88e2874906",
+      "pageText": "[후드 덕다운 푸퍼]풍성한 볼륨감과 가벼운 착용감을 갖춘 하프 기장의 프리미엄 덕다운 푸퍼힙을 덮는 하프 기장과 풍성한 볼륨감이 돋보이는 후드 덕다운 푸퍼입니다. 클래식한 레귤러 핏을 기반으로 입체적인 패턴 설계를 적용해 두꺼운 이너와 함께 착용해도 편안하며, 헤비다운 특유의 볼륨감을 안정적인 실루엣으로 완성했습니다.몸판과 자연스럽게 연결되는 후드 디자인과 허리·밑단 스트링을 적용해 보온성과 실루엣 조절 기능을 높였으며, YKK 지퍼와 지퍼 덮개 디자인으로 프런트를 깔끔하게 정돈했습니다. 80:20 프리미엄 덕다운을 충전하고 별도의 다운백 없이 샌드위치 봉제 기법을 적용해 풍성한 볼륨감과 보온성은 유지하면서 불필요한 중량을 줄였습니다.\n\nPOINT 01 (FIT)\n힙을 덮는 하프 기장 & 안정적인 레귤러 핏\n\nPOINT 02 (DETAIL)\n일체형 후드 & 허리·밑단 스트링 디테일, YKK 지퍼 & 깔끔한 지퍼 덮개 디자인\n\nPOINT 03 (FABRIC)\n겉감: 20데니아 립스탑 나일론 / 충전재: 80:20 프리미엄 덕다운, 다운백을 생략한 경량 샌드위치 봉제 기법",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:20.915Z",
       "analyzedAt": null
     },
     {
@@ -1864,6 +1918,49 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "326925",
+      "rawName": "NEW 브러시드 하프넥 스트라이프 긴팔티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=089CC79F3FC59E16465DFD9829CFE6B9&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05326925.jpg",
+      "detailHash": "a6de0203cc4de1ca9b565548f6905874da833641f9fc011d1a241156e1005660",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"d7d3c1ff20b43c4b8958bd68c7cdfa8f\"",
+        "lastModified": "Mon, 19 Oct 2026 01:12:57 GMT"
+      },
+      "pageHash": "f2bc50f216d7c74b4fc19c2e404cac38f39a4769e78730c331844b80b7f912f4",
+      "pageText": "하프넥 브러쉬드 긴팔 티셔츠로, 넥이 살짝 올라오는 디자인과 몸에 자연스럽게 밀착되는 실루엣으로 편안함과 따뜻함을 더해 단독 착용은 물론 레이어드에도 활용하기 좋습니다. 살짝 올라오는 하프넥 디자인으로 아우터나 스웨터 안에 매치해 코디 포인트로 활용할 수 있으며, 베이지/블랙과 블랙/화이트의 코어 컬러 스트라이프 구성으로 다양한 코디가 가능합니다. 210g/㎡의 폴리 레이온 혼방 원단을 사용해 브러쉬 처리된 표면으로 따뜻하고 부드러운 착용감이 특징입니다.\n\nPOINT 01 (실루엣)\n넥이 살짝 올라오는 디자인의 하프넥 브러쉬드 긴팔 티셔츠\n몸에 자연스럽게 밀착되는 실루엣으로 편안함과 따뜻함을 더해 단독 착용은 물론 레이어드 용으로 적합\n\nPOINT 02 (디테일)\n- 살짝 올라오는 하프넥 디자인으로 아우터나 스웨터 안에 매치하여 코디에 포인트\n- 베이지/블랙, 블랙/화이트 코어 컬러의 스트라이프 조합으로 다양한 코디에 활용 가능\n\nPOINT 03 (원단)\n210g/㎡의 폴리 레이온 혼방 원단으로 브러쉬 처리된 표면으로 따뜻하고 부드러운 착용감이 특징",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "하프넥 브러쉬드 긴팔 티셔츠로, 넥이 살짝 올라오는 디자인과 몸에 자연스럽게 밀착되는 실루엣으로 편안함과 따뜻함을 더해 단독 착용은 물론 레이어드에도 활용하기 좋습니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "블랙/화이트 코어 컬러의 스트라이프 조합으로 다양한 코디에 활용 가능.",
+          "evidence": "- 베이지/블랙, 블랙/화이트 코어 컬러의 스트라이프 조합으로 다양한 코디에 활용 가능"
+        },
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "210g/㎡의 폴리 레이온 혼방 원단으로 브러쉬 처리된 표면으로 따뜻.",
+          "evidence": "210g/㎡의 폴리 레이온 혼방 원단으로 브러쉬 처리된 표면으로 따뜻하고 부드러운 착용감이 특징"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:27.816Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "115934",
       "rawName": "NEW 본딩 플리스 파라슈트 카고 팬츠",
       "gender": "남성",
@@ -1936,6 +2033,45 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:16:18.851Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "325510",
+      "rawName": "NEW 베이직 라운드넥 맨투맨",
+      "gender": "여성",
+      "sourceCategory": [
+        "WOMEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=093BB1EE4737204B960546791C26B5E1&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05325510.jpg",
+      "detailHash": "aa9703ab246972df51a57a37a6db16bfd5c43cdc09146a43304ba8392da8a08c",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"af2ad4650698c3fa7480c5ac1badc288\"",
+        "lastModified": "Mon, 29 Sep 2025 03:00:12 GMT"
+      },
+      "pageHash": "6492e44e99e8a0bea2f0f96316d7ac87b83e81235a278613b0bf1ad56ca5a864",
+      "pageText": "프렌치 테리 크루넥 스웻셔츠 입니다. \n\n베이직한 라운드 크루넥 라인에 쫀쫀한 시보리와 \n컴팩트하게 가공된 견고한 터치감의 365g/sqm(520g/yd) 언브러쉬드 테리 원단을 사용하여\n오랫동안 변형 없이 착용 가능합니다.\n\n\n‘Wellness club’ 라는 테마로 두꺼운 졸 프린트, 자수프린트 등 다양한 프린트 기법을 믹스하여 그래픽 포인트를 주었습니다. \n\n적당히 루즈한 실루엣으로 베이직하고 캐주얼 한 무드를 더욱 돋보이게 해줍니다. \n데님, 슬랙스 등 다양한 하의 아이템과 쉽게 매치 가능한 활용도 높은 아이템 입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "포인트 있게 연출",
+          "description": "자수프린트 등 다양한 프린트 기법을 믹스하여 그래픽 포인트를 주었습니다.",
+          "evidence": "‘Wellness club’ 라는 테마로 두꺼운 졸 프린트, 자수프린트 등 다양한 프린트 기법을 믹스하여 그래픽 포인트를 주었습니다."
+        },
+        {
+          "title": "다양한 코디에 두루",
+          "description": "다양한 아이템과 매치하기 좋아요.",
+          "evidence": "다양한 하의 아이템과 쉽게 매치 가능"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:54.930Z",
       "analyzedAt": null
     },
     {
@@ -2601,6 +2737,49 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "326921",
+      "rawName": "NEW [박현지] 웜 립 터틀넥 긴팔티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=0BA692DB522AD20878CBD2E6F0B77ED6&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05326921.jpg",
+      "detailHash": "2c15f4258acc32e430dd6508e14612a4faefe3018b661feb058692bd0a882a39",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"fd1a4e92dd5a1dbace815a22753f57fa\"",
+        "lastModified": "Wed, 07 Oct 2026 00:09:27 GMT"
+      },
+      "pageHash": "523914e1c9888266dc46ab2721ed028a7c59dcb87b5d912f10860c56477a4a0f",
+      "pageText": "립 소재의 웜 터틀넥 긴팔 티셔츠로, 몸에 자연스럽게 밀착되는 슬림한 실루엣으로 단독 착용은 물론 레이어드에도 활용하기 좋습니다. 적당한 폭의 터틀넥으로 부담스럽지 않은 착용감을 더했으며, 차분한 유색과 코어 컬러 구성으로 FW 시즌 다양한 스타일링이 가능합니다. 280g/㎡의 레이온 스판 립 원단을 사용해 소프트한 텍스처와 톡톡한 두께감이 특징입니다.\n\nPOINT 01 (실루엣)\n립 터틀넥 긴팔 티셔츠\n몸에 자연스럽게 밀착되는 슬림한 실루엣으로 단독 착용은 물론 레이어드용으로도 적합\n\nPOINT 02 (디테일)\n적당한 폭의 터틀넥으로 부담스럽지 않은 착용감\n차분한 유색과 코어 컬러의 구성으로 FW 시즌 다양한 코디에 활용 가능\n\nPOINT 03 (원단)\n280g/m2의 레이온 스판 립 원단으로 소프트한 텍스처와 톡톡한 두께감으로 보온성을 높임",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "슬림하게, 레이어드",
+          "description": "몸에 자연스럽게 밀착되는 슬림 실루엣.",
+          "evidence": "몸에 자연스럽게 밀착되는 슬림한 실루엣으로 단독 착용은 물론 레이어드에도 활용하기 좋습니다"
+        },
+        {
+          "title": "부담 적은 터틀넥",
+          "description": "적당한 폭으로 편안한 착용감.",
+          "evidence": "적당한 폭의 터틀넥으로 부담스럽지 않은 착용감을 더했으며"
+        },
+        {
+          "title": "톡톡하고, 부드럽게",
+          "description": "280g/㎡ 립 원단의 소프트한 두께감.",
+          "evidence": "280g/㎡의 레이온 스판 립 원단을 사용해 소프트한 텍스처와 톡톡한 두께감이 특징입니다"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:31.552Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "115930",
       "rawName": "[변우석] 플리스 코듀로이 와이드 밴딩 팬츠",
       "gender": "남성",
@@ -3059,6 +3238,88 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "376915",
+      "rawName": "NEW 플리스 보아 베스트",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=0D7691BC008C448F5F42E5B5A4D63788&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05376915.jpg",
+      "detailHash": "9e57b8a687c524f73a2725fb6c92f27765757d19e794e69aea8221640b18d81c",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"37a157a11ebac06e9bb2b9f2e6c6020d\"",
+        "lastModified": "Wed, 09 Sep 2026 00:43:14 GMT"
+      },
+      "pageHash": "99ed09fc44263f419132c67e0e6ed411cf9f9494e4195593bed74ae94b309877",
+      "pageText": "늦가을부터 겨울까지 포근하게 레이어드하기 좋은 플리스 보아 베스트\n전체적으로 여유로운 실루엣에 입체적인 패턴 설계를 적용해 과하게 부해 보이지 않으면서도 편안하게 착용할 수 있는 플리스 보아 베스트입니다. 깔끔한 브이넥 디자인으로 티셔츠부터 스웨트셔츠, 니트 등 다양한 이너와 레이어드하기 좋으며, 전체 가장자리를 우븐 소재로 바인딩 처리해 형태를 안정적으로 잡아주면서 완성도 높은 디테일을 더했습니다. 프론트에는 YKK 지퍼를 적용해 실용성을 높였습니다. 촘촘하고 밀도감 있는 플리스 보아 소재를 사용해 포근하고 부드러운 터치감을 제공하며, 균일하고 깔끔한 표면감으로 고급스러운 외관을 살렸습니다. 늦가을에는 가벼운 아우터로, 겨울에는 다양한 아우터와 함께 레이어드할 수 있어 시즌 활용도가 높은 아이템입니다.\n\nPOINT 01 (FIT)\n레이어드하기 좋은 여유로운 실루엣\n전체적으로 여유로운 핏에 입체적인 패턴 설계를 적용해 플리스 특유의 볼륨감은 살리면서도 과하게 부해 보이지 않는 깔끔한 실루엣을 완성했습니다. 다양한 이너와 편안하게 레이어드할 수 있도록 여유로운 핏으로 설계했습니다.\n\nPOINT 02 (DETAIL)\n깔끔한 브이넥 디자인\n심플한 브이넥 디자인으로 목선이 답답해 보이지 않으며, 티셔츠부터 스웨트셔츠, 셔츠, 니트 등 다양한 이너와 자연스럽게 레이어드할 수 있습니다.\n우븐 바인딩 & YKK 지퍼 디테일\n전체 가장자리를 우븐 소재로 바인딩 처리해 플리스 소재와 대비되는 깔끔한 디자인 포인트를 더했으며, 프론트에는 YKK 지퍼를 적용해 완성도와 실용성을 높였습니다.\n\nPOINT 03 (FABRIC) : POLYESTER 100%\n촘촘한 밀도감의 플리스 보아 소재\n촘촘하고 밀도감 있는 플리스 보아 소재를 사용해 포근하고 부드러운 터치감을 제공합니다. 균일하고 깔끔한 표면감으로 플리스 특유의 캐주얼한 분위기는 유지하면서 한층 고급스러운 외관을 완성했습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "밀도감 있는 플리스 보아 소재를 사용해 포근.",
+          "evidence": "촘촘하고 밀도감 있는 플리스 보아 소재를 사용해 포근하고 부드러운 터치감을 제공하며, 균일하고 깔끔한 표면감으로 고급스러운 외관을 살렸습니다."
+        },
+        {
+          "title": "편안한 착용감",
+          "description": "레이어드하기 좋은 여유로운 실루엣.",
+          "evidence": "레이어드하기 좋은 여유로운 실루엣"
+        },
+        {
+          "title": "부드럽게 닿는 촉감",
+          "description": "부드러운 촉감이 느껴지는 원단.",
+          "evidence": "부드러운 터치감을 제공"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:35.277Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "324920",
+      "rawName": "후리스 하프집업 맨투맨",
+      "gender": "여성",
+      "sourceCategory": [
+        "WOMEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=0DBACDD0FB2F6394763A58A7714E99AB&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2024/05324920.jpg",
+      "detailHash": "5ac691fb164cd30bf2db537e9aff3742dbc6ac1f5d62747c54f0c1799c195ab3",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"506f39f6c000c867d0fc99accd5df1c2\"",
+        "lastModified": "Tue, 05 Nov 2024 01:06:27 GMT"
+      },
+      "pageHash": "55a3add08fc45f1d45f7b5002f47f290a7380678f2a70a6e63e5bb2f2bf6d924",
+      "pageText": "겨울철 편안하고 따뜻하게 착용 가능한 폴라 플리스 하이넥 아노락 입니다. \n\n310g/sqm(433g/yd) 중량의 가벼운 미들 웨이트 양면 편직으로 보온성이 뛰어나며, 부드러운 착용감이 특징입니다.\n\n ‘LOVE MORE’ 라는 테마로 컬러 매칭 자수로 표현하여  고급스러운 \n디테일 포인트를 더하였습니다. \n\n여유있는 릴랙스 핏과 적당한 크롭 기장감은 트렌디 하면서 \n밑단에는 스트링이 있어 밑단 폭을 조절 할수 있어 다양한 연출과 활용도 높은 아이템입니다.  \n\nYkk의 비슬론 지퍼를 사용한 아노락 네크 형태로 집업하여 하이넥으로 입거나 오픈하여 카라형식으로도 연출이 가능합니다.\n\n*폴라 플리스 스트레이트 팬츠와 셋업이 가능한 스타일 입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "겨울철 편안하고 따뜻하게 착용 가능한 폴라 플리스 하이넥 아노락 입니다.",
+          "evidence": "겨울철 편안하고 따뜻하게 착용 가능한 폴라 플리스 하이넥 아노락 입니다."
+        },
+        {
+          "title": "편안한 착용감",
+          "description": "여유있는 릴랙스 핏과 적당한 크롭 기장감은 트렌디 하면서.",
+          "evidence": "여유있는 릴랙스 핏과 적당한 크롭 기장감은 트렌디 하면서"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:00.034Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "326547",
       "rawName": "시어 가디건",
       "gender": "여성",
@@ -3352,6 +3613,40 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:14:18.076Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "326927",
+      "rawName": "NEW 브러시드 니트 후드 슬림핏 하프집업",
+      "gender": "여성",
+      "sourceCategory": [
+        "WOMEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=0F03D84B33CEA196B45241A5EE6407C2&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05326927.jpg",
+      "detailHash": "c69f4023060bb7f71df060a3742b4280a5126152b243db25b4f8058b452f98e7",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"7b7292bc4a0edab0002ab7404c0e67c5\"",
+        "lastModified": "Wed, 07 Oct 2026 00:09:47 GMT"
+      },
+      "pageHash": "b4d55eb859d92f6542eee3859c06c27c877550394d4a9b78e7cfb2065d3e04e0",
+      "pageText": "브러쉬드 소재의 하프집 후드 풀오버로, 몸에 자연스럽게 밀착되는 슬림한 실루엣으로 편안한 착용감을 제공합니다. 앞판 이중 구조로 앞중심 지퍼 오픈 시 안쪽 배색이 드러나는 레이어드 디테일이 특징이며 넉넉한 사이즈의 후드와 둥근 헴라인으로 디자인 포인트를 더했습니다. 코어 컬러의 콤비 구성으로 세트인 하의와 함께 셋업 스타일링이 가능하며, 280g/㎡의 비스코스 혼방 코튼 원단을 사용해 소프트한 텍스처와 톡톡한 두께감으로 보온성을 높였습니다.\n\nPOINT 01 (실루엣)\n레이어드 디테일이 돋보이는 브러쉬드 하프집 후드 풀오버\n몸에 자연스럽게 밀착되는 슬림한 실루엣으로 편안한 착용감\n\nPOINT 02 (디테일)\n앞판 이중 구조로 앞중심 지퍼 오픈 시 안쪽 배색이 드러나는 레이어드 디테일\n넉넉한 사이즈의 후드로 편안한 착용감\n밑단의 둥근 헴라인으로 디자인 포인트\n코어 컬러의 콤비 구성으로 세트인 하의와 함께 셋업 스타일링 가능\n\nPOINT 03 (원단)\n280g/m2의 비스코스 혼방 코튼 원단으로 소프트한 텍스처와 톡톡한 두께감으로 보온성을 높임",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "몸에 자연스럽게 밀착되는 슬림한 실루엣으로 편안한 착용감을 제공합니다.",
+          "evidence": "브러쉬드 소재의 하프집 후드 풀오버로, 몸에 자연스럽게 밀착되는 슬림한 실루엣으로 편안한 착용감을 제공합니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:44.461Z",
       "analyzedAt": null
     },
     {

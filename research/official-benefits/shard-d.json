@@ -36,6 +36,40 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "324910",
+      "rawName": "그래픽 맨투맨",
+      "gender": "여성",
+      "sourceCategory": [
+        "WOMEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=D03A647090C575C440E602656BE07FC9&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2024/05324910.jpg",
+      "detailHash": "3f17eaade9daa540010782cd4db7849d7bc021e7334d531175ab799bbada62eb",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"6d3a064f708effcc588a4a57bffdfb24\"",
+        "lastModified": "Mon, 29 Sep 2025 01:30:17 GMT"
+      },
+      "pageHash": "7e527cd52b6f0684bc7d3ec77a983cda35394ee57b5207bbf7f3f45177b79c3d",
+      "pageText": "프렌치 테리 크루넥 스웻셔츠 입니다. \n\n베이직한 라운드 크루넥 라인에 컴팩트하게 가공된 견고한 터치감의 360g/gsm(553g/yd) \n언브러쉬드 테리 원단을 사용하여 오랫동안 변형 없이 착용 가능합니다.\n\n’GOOD ENERGY’ 와 ‘CLASSIQUE’ 라는 테마로 은은한 광이 매력적인 포일 프린트, 졸 프린트, 플로킹 프린트 기법을 사용하여 그래픽 포인트를 주었습니다. \n\n적당히 루즈한 실루엣으로 베이직하고 캐주얼한 무드를 더욱 돋보이게 해줍니다. \n데님, 슬랙스 등 다양한 하의 아이템과 쉽게 매치 가능한 활용도 높은 아이템 입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "다양한 코디에 두루",
+          "description": "다양한 아이템과 매치하기 좋아요.",
+          "evidence": "다양한 하의 아이템과 쉽게 매치 가능"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:59.924Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "346901",
       "rawName": "NEW 포플린 레귤러핏 긴팔 셔츠",
       "gender": "여성",
@@ -136,6 +170,34 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:19:02.660Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "325515",
+      "rawName": "NEW 오버핏 후드집업",
+      "gender": "여성",
+      "sourceCategory": [
+        "WOMEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=D0E3DC7E1EC208888973EF994B418797&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05325515.jpg",
+      "detailHash": "392c0be187e4270bd8dfa6dcda734e539813006be6b456f3cd2c0caa29e6524c",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"8355ab727839194effb9b3a479cc0d18\"",
+        "lastModified": "Thu, 06 Feb 2025 06:31:44 GMT"
+      },
+      "pageHash": "72cdf6b5087f660d23320c0d5afdb4aafc8c24717d9d6511f5c96c4d79f685ac",
+      "pageText": "세미 오버사이즈 프렌치 테리 후드 집업으로,\n캐주얼하고 편안하게 착용할 수 있는 아이템입니다.\n\n365g/sqm(520g/yd) 중량의 부드러운 테리 원단을 사용하여 가벼운 착용감과 편안함을 제공하여 \n따뜻하며 오랫동안 변형 없이 착용 가능합니다.\n\n‘Wellness club’ 라는 테마로 가슴 부분에 두꺼운 졸 프린트 기법을 적용해 고급스러운 디테일을 더했습니다.\n\n적당히 여유로운 오버사이즈 실루엣으로 YKK 2WAY 지퍼를 사용하여 다양한 스타일 연출이 가능한 활용도가 높으며 \n트렌디하면서도 캐주얼한 느낌을 연출합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:56.275Z",
       "analyzedAt": null
     },
     {
@@ -617,6 +679,50 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:24:04.732Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "325933",
+      "rawName": "브러시드 후드집업",
+      "gender": "여성",
+      "sourceCategory": [
+        "WOMEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=D2ABF2706533FAE06EC6AC298FE40E09&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05325933.jpg",
+      "detailHash": "7ac18c21271121889f25becf937dde4a57e5660aa27eedfade283d14ba9535ff",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"7cbd0b8bcf469f46287b4912a7665147\"",
+        "lastModified": "Thu, 16 Oct 2025 11:27:58 GMT"
+      },
+      "pageHash": "04ef50f02323936a8b1f0f87df208d0357f12eb63924ce56ae620b1d7dec2d55",
+      "pageText": "오버사이즈 브러시드 테리 후드 집업입니다.\n\n캐주얼하고 편안하게 착용할 수 있는 아이템으로, 250g/㎡ 중량의 부드러운 테리 원단을 사용했으며, 안쪽에는 브러시드 가공으로 기모 처리해 포근하고 따뜻한 착용감을 제공합니다. \n\n‘New York City’ 테마를 반영하여 가슴 부분에 자수와 포일 프린트 기법을 적용, 고급스러운 디테일을 더했습니다.\n\n적당히 여유로운 오버사이즈 실루엣으로 편안한 착용감을 제공하며, 트렌디한 스트리트 감성을 살려 다양한 하의와 쉽게 매치 가능합니다.  간절기부터 겨울까지 단독 또는 아우터 안에 레이어드해 활용할 수 있는 실용적인 데일리 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "캐주얼하고 편안하게 착용할 수 있는 아이템으로, 250g/㎡ 중량의 부드러운 테리 원단을 사용했으며, 안쪽에는 브러시드 가공으로 기모 처리해 포근하고 따뜻한 착용감을 제공합니다."
+        },
+        {
+          "title": "부드러운 착용감",
+          "description": "250g/㎡ 중량의 부드러운 테리 원단을 사용했습니다.",
+          "evidence": "캐주얼하고 편안하게 착용할 수 있는 아이템으로, 250g/㎡ 중량의 부드러운 테리 원단을 사용했으며, 안쪽에는 브러시드 가공으로 기모 처리해 포근하고 따뜻한 착용감을 제공합니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "트렌디한 스트리트 감성을 살려 다양한 하의와 쉽게 매치 가능합니다.",
+          "evidence": "적당히 여유로운 오버사이즈 실루엣으로 편안한 착용감을 제공하며, 트렌디한 스트리트 감성을 살려 다양한 하의와 쉽게 매치 가능합니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:51.231Z",
       "analyzedAt": null
     },
     {
@@ -1636,6 +1742,45 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "326910",
+      "rawName": "NEW [문가영] 프렌치 테리 맨투맨 (SLD/AW)",
+      "gender": "여성",
+      "sourceCategory": [
+        "WOMEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=D5CC68AF141A1D041FD7410F0EA02FE1&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05326910.jpg",
+      "detailHash": "dfd06f687fac4ca8f64bbf3db45cf88b1b26734cc0b812a961d64a77fd027dd6",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"1d0dd4fe1cd2e44c5c3c4f68b60faadf\"",
+        "lastModified": "Wed, 26 Aug 2026 08:05:01 GMT"
+      },
+      "pageHash": "c9c7ebdc003f5e1a791517ebba901c96082cc8f456e8e7bdaac39fa3defd1611",
+      "pageText": "프렌치 테리 소재의 크루넥 스웻셔츠로입니다. \n\n적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감을 제공합니다. \n더블 립 넥 디테일을 적용해 세탁 후에도 형태 변형을 최소화했으며, \n솔리드와 그래픽을 함께 구성한 총 9가지 컬러로 다양한 스타일링이 가능합니다. \n그래픽은 클래식한 졸프린트와 입체감 있는 플로킹 기법을 적용해 다채롭게 구성하였습니다. \n300g/㎡의 코튼 100% 원단을 사용하여 흐트러짐 없이 안정적인 실루엣을 유지할 수 있습니다.\n\nPOINT 1. 실루엣\n1) 프렌치 테리 크루넥 스웻셔츠\n2) 적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감\n\nPOINT 2. 디테일\n1) 더블립 넥 디테일로 세탁 후에도 형태 변형 최소화\n2) 솔리드와 그래픽를 함께 구성하여 총 9가지 컬러로 다양한 스타일링 활용 가능\n3) 그래픽은 클래식한 졸 프린트와, 입체감 있는 플로킹 기법 두가지 활용\n\nPOINT 3. 원단\n1) 코튼 100%\n2) 300g/m2 중량의 두께감 있는 원단을 사용하여 흐트러짐 없이 안정적인 실루엣 유지",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "2) 적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감.",
+          "evidence": "2) 적당히 여유 있는 루즈한 실루엣으로 캐주얼하면서도 편안한 착용감"
+        },
+        {
+          "title": "세탁 후에도 깔끔하게",
+          "description": "세탁 후 변형 부담을 줄여 깔끔하게.",
+          "evidence": "세탁 후에도 형태 변형을 최소화"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:53.059Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "045504",
       "rawName": "크리스피 포플린 셔츠",
       "gender": "",
@@ -2603,6 +2748,44 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "416975",
+      "rawName": "NEW 브러시드 니트 스트레이트 셋업 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=D9C06F7B735D6A2D0785E37369824480&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05416975.jpg",
+      "detailHash": "623f293d0cf5fde72becb0f74560fc4e6a10146879aaa5dfce93116b5f5efa70",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"3c3a9a91a2e36544d3fa88d62d78cb19\"",
+        "lastModified": "Wed, 07 Oct 2026 00:09:17 GMT"
+      },
+      "pageHash": "b434b31fd02f0194c418af8589e4eb4285336787a02db17bdba8a75494e80145",
+      "pageText": "브러쉬드 소재의 스트레이트 팬츠로, 깔끔하게 일자로 떨어지는 실루엣으로 캐주얼하면서도 편안한 스트레이트핏을 연출합니다. 허리 밴드와 스트링으로 체형에 맞게 사이즈 조절이 가능하며, 양옆 포켓을 더해 간단한 소지품을 보관할 수 있습니다. 코어 컬러 구성으로 세트인 상의와 함께 셋업 스타일링이 가능하며, 280g/㎡의 비스코스 혼방 코튼 원단을 사용해 소프트한 텍스처와 톡톡한 두께감으로 보온성을 높였습니다.\n\nPOINT 01 (실루엣)\n브러쉬드 스트레이트 팬츠\n깔끔하게 일자로 떨어지는 실루엣으로 캐주얼하면서도 편안한 스트레이트핏 연출\n\nPOINT 02 (디테일)\n허리의 밴드와 스트링으로 허리 사이즈 조절 용이\n간단한 소지품을 보관할 수 있는 옆포켓\n코어 컬러의 구성으로 세트인 상의와 함께 셋업 스타일링 가능\n\nPOINT 03 (원단)\n280g/m2의 비스코스 혼방 코튼 원단으로 소프트한 텍스처와 톡톡한 두께감으로 보온성을 높임",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "깔끔하게 일자로 떨어지는 실루엣으로 캐주얼하면서도 편안한 스트레이트핏 연출",
+          "evidence": "브러쉬드 스트레이트 팬츠\n깔끔하게 일자로 떨어지는 실루엣으로 캐주얼하면서도 편안한 스트레이트핏 연출"
+        },
+        {
+          "title": "원하는 핏으로 조절",
+          "description": "허리의 밴드와 스트링으로 허리 사이즈 조절 용이.",
+          "evidence": "허리의 밴드와 스트링으로 허리 사이즈 조절 용이"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:29.928Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "554916",
       "rawName": "홈웨어 후리스 스트레이트 팬츠",
       "gender": "여성",
@@ -2743,6 +2926,40 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:23:03.595Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "325514",
+      "rawName": "NEW 하프집업 맨투맨 (굿에너지)",
+      "gender": "여성",
+      "sourceCategory": [
+        "WOMEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=DB16E6AA171501BCCFA39EB059E278C2&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05325514.jpg",
+      "detailHash": "4b7abeeb44a6776190850b578186fd8b3fa65e7aaec86269c44c5459210a1f52",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"dee106f8a613a4db579b4eea936e6d42\"",
+        "lastModified": "Mon, 03 Feb 2025 07:29:15 GMT"
+      },
+      "pageHash": "171cbf90fc268b5997a05f18c8418c347a1452c28816cb3f044d386358ac3a9f",
+      "pageText": "실용적이고 스타일리시한 연출이 가능한 카라 하프 집업 테리 티셔츠입니다.\n\n365g/㎡(520g/yd) 중량의 부드러운 테리 원단을 사용하여 가볍고 편안한 착용감을 제공하며, 따뜻함을 유지하면서도 \n오랜 시간 변형 없이 착용할 수 있습니다.\n\n지오다노의 시그니처 그래픽 테마인 ‘GOOD ENERGY’를 자수 기법으로 표현해 세련된 그래픽 포인트를 더했습니다.\n\n밑단 양쪽 사이드에 스토퍼 디테일을 적용해 밑단 조절이 가능하며, 다양한 실루엣 연출이 가능합니다. 여유로운 릴랙스 핏과 적당한 크롭 기장은 트렌디하면서도 캐주얼한 무드를 완성합니다.\n\n또한, YKK 지퍼를 사용한 반 집업 디자인으로, 지퍼를 끝까지 올리면 단정하고 깔끔한 느낌을, 살짝 내리면 캐주얼하고 편안한 분위기를 연출할 수 있어 활용도가 높은 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "따뜻함을 유지하면서도 오랜 시간 변형 없이 착용할 수 있습니다.",
+          "evidence": "365g/㎡(520g/yd) 중량의 부드러운 테리 원단을 사용하여 가볍고 편안한 착용감을 제공하며, 따뜻함을 유지하면서도 오랜 시간 변형 없이 착용할 수 있습니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:56.443Z",
       "analyzedAt": null
     },
     {
@@ -3612,6 +3829,40 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:19:38.404Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "325516",
+      "rawName": "벨벳 후드 집업",
+      "gender": "여성",
+      "sourceCategory": [
+        "WOMEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=DFEF8B86EE1C1D91FC2A40E43E543595&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05325516.jpg",
+      "detailHash": "625c349dafd5b81b9e9c7ad0632192c5f98a6b20ea1c5290265673ea9b6bc22d",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"3a31bbe59d10c9669699dd8062265a2f\"",
+        "lastModified": "Fri, 19 Sep 2025 06:37:06 GMT"
+      },
+      "pageHash": "5e13a06b2978de0bfd635d86fd5ec128cea79bc1794cb654b2ee117878195ec8",
+      "pageText": "벨루어 후드 2WAY 집업입니다.\n\n290g/㎡(396g/yd²) 중량의 부드러운 폴리 코튼 벨루어 소재로 \n편안하면서도 은은한 광택이 멋스럽고, 포근한 착용감을 제공합니다.\n\n왼쪽 가슴 부분에 GRDN 자수를 더해 고급스러운 디테일 포인트를 주었습니다.\n\n크롭 기장에 적당히 여유 있는 실루엣으로 트렌디하면서도 캐주얼한 느낌을 줍니다. \nYKK 2WAY 지퍼를 사용하여 다양한 스타일 연출이 가능한 활용도 높은 아이템입니다.\n\n벨루어 부츠컷 또는 스트레이트 핏과 셋업으로도 착용 가능합니다",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "편안하면서도 은은한 광택이 멋스럽고, 포근한 착용감을 제공합니다.",
+          "evidence": "편안하면서도 은은한 광택이 멋스럽고, 포근한 착용감을 제공합니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:54.813Z",
       "analyzedAt": null
     },
     {
