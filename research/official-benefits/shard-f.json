@@ -876,8 +876,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-31T08:18:28.689Z",
-      "analyzedAt": "2026-10-31T08:19:25.109Z"
+      "observedAt": "2026-10-31T09:00:10.706Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
