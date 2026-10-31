@@ -10,7 +10,7 @@
  function open(){
   if(dialog.open||!source.children.length)return;
   viewport.replaceChildren();const frame=source.querySelector('iframe');
-  if(frame){const large=document.createElement('iframe');large.title='확대된 상세이미지 미리보기';large.className='large-detail-frame';large.allow='autoplay; fullscreen; picture-in-picture';large.src=frame.src;large.onload=()=>bindEscape(large);viewport.append(large);}
+  if(frame){const large=document.createElement('iframe');large.title='확대된 상세이미지 미리보기';large.className='large-detail-frame';large.allow='autoplay; fullscreen; picture-in-picture';large.src=frame.dataset.previewUrl||frame.src;large.onload=()=>{bindEscape(large);if(typeof applyTemplateHeadlinePreview==='function')applyTemplateHeadlinePreview();};viewport.append(large);}
   else for(const child of source.children){const clone=child.cloneNode(true);clone.removeAttribute('id');for(const image of [clone,...clone.querySelectorAll('img')])if(image.tagName==='IMG')image.loading='eager';viewport.append(clone);}
   dialog.showModal();close.focus();fit();observer=new ResizeObserver(fit);observer.observe(viewport);
  }

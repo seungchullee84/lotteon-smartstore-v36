@@ -1,8 +1,9 @@
 import {readFile,writeFile,mkdir,rename} from 'node:fs/promises';
 import path from 'node:path';
 import {channelCategoryPath} from './category.mjs';
+import {validateTemplateHeadline} from './smartstore-template-headline.mjs';
 
-const strings=['name','gender','material','country','washing','manufactured','keywords','smartstoreName'];
+const strings=['name','gender','material','country','washing','manufactured','keywords','smartstoreName','templateHeadline'];
 const categories=['commonMiddle','commonSmall','channelMiddle','channelSmall'];
 const allowed=new Set([...strings,...categories,'consumerPrice','colors','sizes']);
 export function validateProductEdits(record,expectedStyle=record?.style){
@@ -12,7 +13,7 @@ export function validateProductEdits(record,expectedStyle=record?.style){
  for(const [key,value] of Object.entries(record.fields)){
   if(!allowed.has(key)||typeof value!=='string'||value.length>2000)throw Error('저장할 수 없는 수정 항목입니다: '+key);
   if(key==='consumerPrice'&&value!==''&&(!Number.isSafeInteger(Number(value))||Number(value)<0||Number(value)>100000000))throw Error('소비자가 수정값을 확인해 주세요.');
-  fields[key]=value;
+  fields[key]=key==='templateHeadline'?validateTemplateHeadline(value):value;
  }
  return {style:record.style,fields};
 }

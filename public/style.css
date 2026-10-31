@@ -346,3 +346,5 @@ body[data-channel="smartstore"] #smartstoreStart{background:#087c42}body[data-ch
 body[data-channel="smartstore"] .website-category-toggle,body[data-channel="smartstore"] .website-category-toggle:not(:disabled):hover,body[data-channel="smartstore"] .website-category-toggle[aria-pressed="true"]{background:transparent;box-shadow:none;color:inherit}
 
 body[data-channel="smartstore"] .search :is(#smartstoreCombinePhotos,#smartstoreImportPhotos){background:#176740;color:#fff;border-color:#105332;font-weight:700;box-shadow:none}body[data-channel="smartstore"] .search :is(#smartstoreCombinePhotos,#smartstoreImportPhotos):not(:disabled):hover{background:#105332;color:#fff;border-color:#0b4328}
+
+.template-headline-editor{margin:16px 0;padding:16px;border:1px solid #cbd9cf;border-radius:12px;background:#f4f8f5}.template-headline-editor label{font-weight:700}.template-headline-editor textarea{width:100%;margin:10px 0;font-size:17px;line-height:1.6;resize:vertical}.template-headline-editor .note{margin:0;font-size:12px}

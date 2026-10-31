@@ -40,6 +40,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
 import {createProductEditStore} from './product-edits.mjs';
+import {validateTemplateHeadline} from './smartstore-template-headline.mjs';
 import {suggestMissingLotteCategory} from './lotte-category-suggest.mjs';
 import {searchProductTags,saveSelectedProductTags,selectedProductTagResearch,removeProductTag} from './smartstore-tag-selection.mjs';
 import {assertAdultProduct,collect,parseProductInput,buildKeywords,repairCategoryFields} from './product.mjs';
@@ -189,7 +190,7 @@ const server=http.createServer(async(req,res)=>{
       if(current.photoSelectionPending)return json(res,409,{error:'사진 선택·반영 후 템플릿을 표시합니다.'});
       const fields=JSON.parse(url.searchParams.get('fields')||'{}');
       fields.detailTemplate=resolveDetailTemplate(fields.detailTemplate??current.detailTemplate);
-      const edits={};for(const key of ['name','gender','material'])if(typeof fields[key]==='string'&&fields[key].length<500)edits[key]=fields[key];
+      const edits={};if(Object.hasOwn(fields,'templateHeadline'))edits.templateHeadline=validateTemplateHeadline(fields.templateHeadline);for(const key of ['name','gender','material'])if(typeof fields[key]==='string'&&fields[key].length<500)edits[key]=fields[key];
       for(const key of ['colors','sizes'])if(Array.isArray(fields[key])&&fields[key].length<=100&&fields[key].every(v=>typeof v==='string'&&v.length<100))edits[key]=fields[key];
       const p=await prepareSmartstoreDetail({...current,...edits,detailTemplate:fields.detailTemplate},state.folder);
       if(state.product!==current)return json(res,409,{error:'상품이 변경되었습니다.'});
@@ -212,6 +213,15 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='POST'){
       const b=await body(req);
       requireChannel(url.pathname.slice(5),b.channel);
+      if(url.pathname==='/api/smartstore-template-headline'){
+        if(state.busy||b.channel!=='smartstore'||!state.product||b.style!==state.product.style||b.sourceUrl!==state.product.sourceUrl)throw Error('현재 스마트스토어 상품과 작업 상태를 확인해 주세요.');
+        const current=state.product,folder=state.folder,title=validateTemplateHeadline(b.title);
+        await productEdits.save({style:current.style,fields:{templateHeadline:title}},current.style);
+        if(state.product!==current||state.folder!==folder)throw Error('상품이 변경되었습니다.');
+        current.templateHeadline=title;current.userEditedFields={...current.userEditedFields,templateHeadline:title};
+        await writeFile(path.join(folder,'product.json'),JSON.stringify(current,null,2));
+        return json(res,200,{ok:true,title});
+      }
       if(url.pathname==='/api/smartstore-point-selection'){
         if(state.busy||b.channel!=='smartstore'||!state.product||b.style!==state.product.style)throw Error('현재 스마트스토어 상품과 작업 상태를 확인해 주세요.');
         const product=state.product,folder=state.folder;const selection=await savePointSelection(product,folder,b,{dataRoot});if(state.product?.style!==product.style||state.folder!==folder)throw Error('상품이 변경됐습니다.');
@@ -440,7 +450,7 @@ const server=http.createServer(async(req,res)=>{
         if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 상세설명만 교체해 주세요.');
         if(!state.product||!state.folder)throw Error('먼저 현재 상품 정보와 상세 미리보기를 준비해 주세요.');
         if(b.product?.style!==state.product.style)throw Error('현재 상품의 품번을 다시 확인해 주세요.');
-        const edits={};for(const key of ['name','gender','material'])if(typeof b.product[key]==='string')edits[key]=b.product[key].slice(0,500);
+        const edits={};if(Object.hasOwn(b.product,'templateHeadline'))edits.templateHeadline=validateTemplateHeadline(b.product.templateHeadline);for(const key of ['name','gender','material'])if(typeof b.product[key]==='string')edits[key]=b.product[key].slice(0,500);
         for(const key of ['colors','sizes'])if(Array.isArray(b.product[key])&&b.product[key].length<=100&&b.product[key].every(v=>typeof v==='string'&&v.length<100))edits[key]=b.product[key];
         const product={...state.product,...edits,detailTemplate:resolveDetailTemplate(b.product.detailTemplate??state.product.detailTemplate)},folder=state.folder;smartBot.stopped=false;
         job('smartstore-detail-only',async()=>{
@@ -514,7 +524,7 @@ const server=http.createServer(async(req,res)=>{
         const current=state.product;
         if(b.channel==='smartstore'){
           if(b.product?.style!==current.style)throw Error('현재 상품을 다시 확인해 주세요.');
-          const edits={};for(const key of ['name','gender','material'])if(typeof b.product[key]==='string')edits[key]=b.product[key].slice(0,500);
+          const edits={};if(Object.hasOwn(b.product,'templateHeadline'))edits.templateHeadline=validateTemplateHeadline(b.product.templateHeadline);for(const key of ['name','gender','material'])if(typeof b.product[key]==='string')edits[key]=b.product[key].slice(0,500);
           for(const key of ['colors','sizes'])if(Array.isArray(b.product[key])&&b.product[key].length<=100&&b.product[key].every(v=>typeof v==='string'&&v.length<100))edits[key]=b.product[key];
           const p={...current,...edits,detailTemplate:resolveDetailTemplate(b.product.detailTemplate??current.detailTemplate)};const saveFolder=await imageDownloadFolder();
           const savedPath=path.join(saveFolder,p.style+'_템플릿'+p.detailTemplate+'_스마트스토어상세_'+Date.now()+'.png');
@@ -600,9 +610,9 @@ const server=http.createServer(async(req,res)=>{
       res.writeHead(200,{'Content-Type':'text/javascript; charset=utf-8','Cache-Control':'no-store'});
       return res.end(await readFile(path.join(root,'smartstore-title.mjs')));
     }
-    if(req.method==='GET'&&['/','/app.js','/website-daily.js','/detail-preview.js','/two-choice.js','/smartstore-photo-review.js','/smartstore-photo-review.css','/style.css'].includes(url.pathname)){
+    if(req.method==='GET'&&['/','/app.js','/smartstore-template-headline.js','/website-daily.js','/detail-preview.js','/two-choice.js','/smartstore-photo-review.js','/smartstore-photo-review.css','/style.css'].includes(url.pathname)){
       const name=url.pathname==='/'?'index.html':url.pathname.slice(1);
-      const types={'index.html':'text/html','app.js':'text/javascript','website-daily.js':'text/javascript','detail-preview.js':'text/javascript','two-choice.js':'text/javascript','smartstore-photo-review.js':'text/javascript','smartstore-photo-review.css':'text/css','style.css':'text/css'};
+      const types={'index.html':'text/html','app.js':'text/javascript','smartstore-template-headline.js':'text/javascript','website-daily.js':'text/javascript','detail-preview.js':'text/javascript','two-choice.js':'text/javascript','smartstore-photo-review.js':'text/javascript','smartstore-photo-review.css':'text/css','style.css':'text/css'};
       res.writeHead(200,{'Content-Type':types[name]+'; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'none'"});return res.end(await readFile(path.join(root,'public',name)));
     }
     json(res,404,{error:'없는 경로'});
