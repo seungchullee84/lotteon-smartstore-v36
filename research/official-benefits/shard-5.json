@@ -146,8 +146,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T00:25:25.216Z",
-      "analyzedAt": "2026-10-31T00:36:14.020Z"
+      "observedAt": "2026-10-31T00:56:59.400Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -855,8 +855,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-31T00:26:13.907Z",
-      "analyzedAt": "2026-10-31T00:36:14.640Z"
+      "observedAt": "2026-10-31T00:57:41.956Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
