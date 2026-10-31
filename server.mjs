@@ -178,11 +178,12 @@ const server=http.createServer(async(req,res)=>{
       return res.end(await readFile(path.join(state.folder,'smartstore-photo-'+url.pathname.split('/').at(-1)+'.jpg')));
     }
     if(req.method==='GET'&&url.pathname==='/api/smartstore-two-choice')return json(res,200,{packages:await listTwoChoicePackages(dataRoot)});
-    const twoChoiceFile=url.pathname.match(/^\/smartstore-two-choice\/([a-z0-9-]+)\/(preview\.html|overview\.png|brand\.mp4)$/);
+    const twoChoiceFile=url.pathname.match(/^\/smartstore-two-choice\/([a-z0-9-]+)\/(preview\.html|[a-zA-Z0-9_-]+\.png|brand\.mp4)$/);
     if(req.method==='GET'&&twoChoiceFile){
       const [,id,name]=twoChoiceFile,bundle=await readTwoChoicePackage(dataRoot,id);
+      if(!bundle.files[name])return json(res,404,{error:'없는 두 상품 상세 파일'});
       if(name==='brand.mp4')return await serveBrandVideo(req,res,dataRoot);
-      const bytes=await readFile(bundle.files[name]);res.writeHead(200,{'Content-Type':name.endsWith('.html')?'text/html; charset=utf-8':'image/png','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; img-src data:; media-src 'self'; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; frame-ancestors 'self'; base-uri 'none'"});return res.end(bytes);
+      const bytes=await readFile(bundle.files[name]);res.writeHead(200,{'Content-Type':name.endsWith('.html')?'text/html; charset=utf-8':'image/png','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; img-src 'self' data:; media-src 'self'; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; frame-ancestors 'self'; base-uri 'none'"});return res.end(bytes);
     }
     if(req.method==='GET'&&url.pathname==='/smartstore-detail-preview.html'){
       const current=state.product;if(!current||!state.folder)return json(res,400,{error:'먼저 상품을 수집해 주세요.'});

@@ -22,7 +22,7 @@ export async function listTwoChoicePackages(root){
 export async function installTwoChoicePackage(root,input){
  const id=idCheck(input.id),folder=folderFor(root,id);await mkdir(folder,{recursive:true});
  const files=[];for(const [name,source] of Object.entries(input.sources)){if(!basename(name))throw Error('보관 파일명을 확인해 주세요.');const bytes=await readFile(source);await writeFile(path.join(folder,name),bytes);files.push({name,sha256:hash(bytes),bytes:bytes.length});}
- const m={schema:1,id,choiceCount:2,label:input.label,products:input.products,template:input.template||'two-choice-v2',updatedAt:new Date().toISOString(),parts:input.parts,videoAfterIndex:input.videoAfterIndex,bannerIndex:input.bannerIndex,footerIndex:input.footerIndex,files};m.revision=hash(Buffer.from(JSON.stringify([m.products,m.parts,m.videoAfterIndex,m.bannerIndex,m.footerIndex,m.files])));assertManifest(m,id);
+ const m={schema:1,id,choiceCount:2,label:input.label,products:input.products,template:input.template||'two-choice-v2',includeVideo:input.includeVideo!==false,updatedAt:new Date().toISOString(),parts:input.parts,videoAfterIndex:input.videoAfterIndex,bannerIndex:input.bannerIndex,footerIndex:input.footerIndex,files};m.revision=hash(Buffer.from(JSON.stringify([m.products,m.parts,m.includeVideo,m.videoAfterIndex,m.bannerIndex,m.footerIndex,m.files])));assertManifest(m,id);
  await writeFile(path.join(folder,'manifest.json'),JSON.stringify(m,null,2));return summary(m);
 }
 export async function readTwoChoicePackage(root,id,revision){
@@ -34,14 +34,14 @@ export async function readTwoChoicePackage(root,id,revision){
  return {folder,manifest:m,files};
 }
 export async function twoChoiceUploadParts(root,id,revision){
- const bundle=await readTwoChoicePackage(root,id,revision),m=bundle.manifest,video=await requireBrandVideo(root);
- if(m.files.find(f=>f.name==='brand.mp4').sha256!==video.sha256)throw Error('저장된 두 상품 영상이 현재 공통 영상과 다릅니다.');
- return {...bundle,parts:{files:m.parts.map(name=>bundle.files[name]),includeVideo:true,dataRoot:root,videoAfterIndex:m.videoAfterIndex,hash:m.revision,bannerLink:{index:m.bannerIndex,file:bundle.files[m.parts[m.bannerIndex]],url:STORE_BANNER_URL},footerIndex:m.footerIndex}};
+ const bundle=await readTwoChoicePackage(root,id,revision),m=bundle.manifest,video=m.includeVideo===false?null:await requireBrandVideo(root);
+ if(video&&m.files.find(f=>f.name==='brand.mp4').sha256!==video.sha256)throw Error('저장된 두 상품 영상이 현재 공통 영상과 다릅니다.');
+ return {...bundle,parts:{files:m.parts.map(name=>bundle.files[name]),includeVideo:m.includeVideo!==false,dataRoot:root,videoAfterIndex:m.videoAfterIndex,hash:m.revision,bannerLink:{index:m.bannerIndex,file:bundle.files[m.parts[m.bannerIndex]],url:STORE_BANNER_URL},footerIndex:m.footerIndex}};
 }
 export async function saveTwoChoicePackage(root,id,revision,kind='parts'){
  if(!['parts','full'].includes(kind))throw Error('저장 종류를 확인해 주세요.');const b=await readTwoChoicePackage(root,id,revision);
  const folder=path.join(await imageDownloadFolder(),'두상품선택형',id);await mkdir(folder,{recursive:true});
- const names=kind==='full'?['full.png']:[...b.manifest.parts,'brand.mp4'];
+ const names=kind==='full'?['full.png']:[...b.manifest.parts,...(b.manifest.includeVideo===false?[]:['brand.mp4'])];
  for(const name of names)await copyFile(b.files[name],path.join(folder,name==='full.png'?'두상품선택형_전체상세.png':name));
  return {folder,count:names.length,kind,savedToMarketplace:false};
 }
