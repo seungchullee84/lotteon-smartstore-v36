@@ -121,10 +121,10 @@ test('편집기의 늦게 복원되는 마지막 브라운 구간과 추가 묶�
 test('색상 사진이나 소구점이 누락되면 완료 처리하지 않는다',()=>{
  const stage={candidates:[{colorHint:'12브라운'},{colorHint:'12브라운'}]};
  assert.throws(()=>assertImportedPhotoCoverage(stage,{smartstoreDetail:{colorImages:{'12브라운':['a']},sellingPoints:[{}]}}),/사진 반영 수/);
- assert.throws(()=>assertImportedPhotoCoverage(stage,{smartstoreDetail:{colorImages:{'12브라운':['a','b']},sellingPoints:[]}}),/소구점/);
+ assert.throws(()=>assertImportedPhotoCoverage(stage,{smartstoreDetail:{colorImages:{'12브라운':['a','b']},sellingPoints:[]}}),/구매 장점 2~4/);
  assert.doesNotThrow(()=>assertImportedPhotoCoverage(stage,{smartstoreDetail:{colorImages:{'12브라운':['a','b']},sellingPoints:[]}},undefined,{requireSellingPoints:false}));
  assert.throws(()=>assertImportedPhotoCoverage(stage,{smartstoreDetail:{colorImages:{'12브라운':['a']},sellingPoints:[]}},undefined,{requireSellingPoints:false}),/사진 반영 수/);
- assert.doesNotThrow(()=>assertImportedPhotoCoverage(stage,{smartstoreDetail:{colorImages:{'12브라운':['a','b']},sellingPoints:[{}]}}));
+ assert.throws(()=>assertImportedPhotoCoverage(stage,{smartstoreDetail:{colorImages:{'12브라운':['a','b']},sellingPoints:[{}]}}),/2~4/);assert.doesNotThrow(()=>assertImportedPhotoCoverage(stage,{smartstoreDetail:{colorImages:{'12브라운':['a','b']},sellingPoints:[{},{}]}}));
 });
 
 test('사진 가져오기 시작은 판매중을 먼저 누르고 500개, 없으면 300개를 선택한다',async()=>{
