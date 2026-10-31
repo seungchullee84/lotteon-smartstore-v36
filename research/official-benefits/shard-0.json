@@ -3388,8 +3388,8 @@
       "points": [],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T03:09:32.358Z",
-      "analyzedAt": "2026-10-31T03:14:58.806Z"
+      "observedAt": "2026-10-31T03:41:32.340Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
