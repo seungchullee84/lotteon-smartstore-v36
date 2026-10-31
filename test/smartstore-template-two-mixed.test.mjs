@@ -28,7 +28,7 @@ test('전체 공식 상세가 있으면 대표·추가 사진을 상세 앞뒤�
 });
 test('소구점 생략·근거 부족은 상품명으로 대체하고 다른 상품 제목을 재사용하지 않는다',()=>{
  assert.deepEqual(templateTwoHeadline({...product,rawName:'남성 울 코트'},[]),['남성 울 코트']);
- const $=load(buildSmartstoreDetail({...product,detailTemplate:2,smartstoreDetail:{...product.smartstoreDetail,omitSellingPoints:true}}).html);assert.equal($('[data-benefit-headline]').text(),'여성 웜 립 터틀넥');assert.equal($('[data-product-points]').length,0);
+ const $=load(buildSmartstoreDetail({...product,detailTemplate:2,smartstoreDetail:{...product.smartstoreDetail,omitSellingPoints:true}}).html);assert.equal($('[data-benefit-headline]').text(),'여성 웜 립 터틀넥');assert.equal($('[data-product-points]').length,0);assert.equal($('[data-intro-features]').length,0);
  assert.throws(()=>buildSmartstoreDetail({...product,detailTemplate:2,smartstoreDetail:{...product.smartstoreDetail,style:'654321'}}),/다른 품번/);
  const a=smartstoreDetailDocument({...product,detailTemplate:2},{includeVideo:false});assert(!a.html.includes('<video '));assert(a.html.includes('data-brand-video-heading'));
 });
@@ -36,3 +36,13 @@ test('소구점 생략·근거 부족은 상품명으로 대체하고 다른 상
 test('템플릿2 상단은 공식 로고 두 개와 성별만 유지하고 품번은 별도 STYLE NO에 표시한다',()=>{for(const [gender,label] of [['여성','WOMEN'],['남성','MEN']]){const $=load(buildSmartstoreDetail({...product,gender,detailTemplate:2}).html);assert.equal($('.ss2-header [data-giordano-logo] img').length,1);assert.equal($('.ss2-header [data-lotte-logo] img').length,1);assert.equal($('.ss2-meta').text(),label);assert(!$('.ss2-header').text().includes(product.style));assert($('[data-style-number]').text().includes(product.style));}});
 
 test('큰 강조 번호를 유지하고 옆 색상명의 중복 번호만 제외하며 사진 매칭용 원래 색상은 보존한다',()=>{const $=load(buildSmartstoreDetail({...product,detailTemplate:2}).html);const first=$('section[id^="smartstore-color-"]').first();assert.equal(first.find('.ss2-color-number').text(),'01');assert.equal(first.find('h2').text(),'화이트');assert.equal(first.attr('data-color-name'),'01화이트');assert.deepEqual(product.colors,['01화이트','02블랙','03그린']);});
+
+test('상단 특징은 같은 상품의 선택 장점에서 최대 세 개만 요약하고 자세한 설명을 보존한다',()=>{
+ const points=[{...product.smartstoreDetail.sellingPoints[0],shortTitle:'단독·레이어드'},{...product.smartstoreDetail.sellingPoints[1],shortTitle:'브러시드 <소재>'},{...product.smartstoreDetail.sellingPoints[0],title:'세 번째 장점'},{...product.smartstoreDetail.sellingPoints[1],title:'네 번째 장점'}];
+ const p={...product,detailTemplate:2,smartstoreDetail:{...product.smartstoreDetail,sellingPoints:points}},$=load(buildSmartstoreDetail(p).html);
+ assert.deepEqual($('[data-intro-features] li').toArray().map(n=>$(n).text()),['단독·레이어드','기모 <소재>','세 번째 장점']);
+ assert.equal($('[data-intro-features] li').eq(1).children().length,0,'문구는 HTML로 해석하지 않는다');
+ assert.equal($('[data-template-main-title]').next().attr('data-intro-features'),'');
+ assert.deepEqual($('[data-product-points] h3').toArray().map(n=>$(n).text()),points.map(p=>p.title));
+ assert.equal($('[data-product-points] p').first().text(),points[0].description);
+});
