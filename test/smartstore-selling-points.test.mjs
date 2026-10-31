@@ -97,6 +97,6 @@ test('모든 상품 소구점의 브러시드 표시는 기모로 통일하고 �
 });
 
  test('두 템플릿의 표시 설명은 저장된 원문을 바꾸지 않고 자연스러운 해요체로 통일한다',()=>{
- const cases=[['다양한 스타일링에 활용합니다.','다양한 스타일링에 활용해요.'],['세탁 후에도 볼륨감이 유지됩니다.','세탁 후에도 볼륨감이 유지돼요.'],['기모 가공으로 더한 보온성.','기모 가공으로 보온성을 더했어요.'],['적당한 폭으로 편안한 착용감.','적당한 폭으로 편안한 착용감이에요.'],['밑단 스트링으로 핏 조절.','밑단 스트링으로 핏을 조절할 수 있어요.'],['가볍고 따뜻하게 입기 좋아요.','가볍고 따뜻하게 입기 좋아요.']];
+ const cases=[['촉감이 부드럽습니다.','촉감이 부드러워요.'],['실루엣이 깔끔해 보입니다.','실루엣이 깔끔해 보여요.'],['찬바람이 줄어듭니다.','찬바람이 줄어들어요.'],['다양한 스타일링에 활용합니다.','다양한 스타일링에 활용해요.'],['세탁 후에도 볼륨감이 유지됩니다.','세탁 후에도 볼륨감이 유지돼요.'],['기모 가공으로 더한 보온성.','기모 가공으로 보온성을 더했어요.'],['적당한 폭으로 편안한 착용감.','적당한 폭으로 편안한 착용감이에요.'],['밑단 스트링으로 핏 조절.','밑단 스트링으로 핏을 조절할 수 있어요.'],['가볍고 따뜻하게 입기 좋아요.','가볍고 따뜻하게 입기 좋아요.']];
  for(const [original,expected] of cases){assert.equal(friendlyBenefitDescription(original),expected);assert.equal(friendlyBenefitDescription(expected),expected);const p={title:'장점',description:original,evidence:original};assert.equal(displaySellingPoints([p])[0].description,expected);assert.equal(p.description,original);assert.equal(displaySellingPoints([p])[0].evidence,original);}
  });
