@@ -9,8 +9,9 @@ globalThis.websiteDailySummary=function(website,now=new Date()){
  const day=dayKey(now),allowed=['공식 상세페이지 추가','공식 상세이미지 추가','공식 상세이미지 변경'];
  const lastHashBySource=new Map();
  const batches=(website?.batches||[]).filter(batch=>dayKey(batch.checkedAt)).slice().sort((a,b)=>Date.parse(a.checkedAt)-Date.parse(b.checkedAt)).map(batch=>({...batch,day:dayKey(batch.checkedAt),events:(batch.events||[]).flatMap(event=>{
-  if(!['new','changed'].includes(event.type))return [];
-  let changes=event.type==='new'?['새로 발견한 성인 상품']:(event.changes||[]).filter(change=>allowed.includes(change));
+  if(!['new','changed','discovered'].includes(event.type))return [];
+  if(event.type==='new'&&event.newProductVerified!==true)event={...event,type:'discovered'};
+  let changes=event.type==='discovered'?['수집 누락 보완 · 신상품 여부 미확인']:event.type==='new'?['공식 신상품 목록 신규 확인']:(event.changes||[]).filter(change=>allowed.includes(change));
   const source=event.sourceUrl,hash=/^[a-f0-9]{64}$/i.test(event.detailHash||'')?event.detailHash.toLowerCase():null;
   if(source&&hash){if(lastHashBySource.get(source)===hash)changes=changes.filter(change=>!['공식 상세이미지 추가','공식 상세이미지 변경'].includes(change));lastHashBySource.set(source,hash);}
   return changes.length?[{...event,changes,checkedAt:batch.checkedAt,day:dayKey(batch.checkedAt)}]:[];
@@ -26,8 +27,8 @@ globalThis.websiteDailySummary=function(website,now=new Date()){
  const midnight=Date.parse(day+'T00:00:00+09:00');
  const days=['오늘','어제','그제'].map((label,index)=>{
   const date=dayKey(midnight-index*86400000),events=uniqueEvents(batches.filter(batch=>batch.day===date));
-  return {day:date,label,events,newCount:events.filter(event=>event.type==='new').length,changedCount:events.filter(event=>event.type==='changed').length,hasCheck:batches.some(batch=>batch.day===date)};
+  return {day:date,label,events,newCount:events.filter(event=>event.type==='new').length,changedCount:events.filter(event=>event.type==='changed').length,discoveredCount:events.filter(event=>event.type==='discovered').length,hasCheck:batches.some(batch=>batch.day===date)};
  });
  const today=days[0];
- return {day,events:today.events,newCount:today.newCount,changedCount:today.changedCount,hasTodayCheck:today.hasCheck,days,history:days.slice(1).flatMap(record=>record.events.slice().reverse())};
+ return {day,events:today.events,newCount:today.newCount,changedCount:today.changedCount,discoveredCount:today.discoveredCount,hasTodayCheck:today.hasCheck,days,history:days.slice(1).flatMap(record=>record.events.slice().reverse())};
 };

@@ -2,7 +2,15 @@ import sharp from 'sharp';import test from 'node:test';import assert from 'node:
 import {websiteCheckDue,BENEFIT_CHECK_INTERVAL,MAX_OFFICIAL_DETAIL_BYTES,officialProductFingerprint,fetchOfficialDetailVersion,saveWebsiteCheck,changedOfficialProducts} from '../benefit-updates.mjs';
 import {sharedWebsiteState} from '../benefit-sharing.mjs';
 const id='a'.repeat(32),url='https://www.giordano.co.kr/shop/detail.php?pno='+id+'&ctype=1',hash='b'.repeat(64);
-const item=(extra={})=>({style:'375908',rawName:'여성 경량 패딩 자켓',sourceUrl:url,pageHash:'c'.repeat(64),detailHash:hash,detailImageVerified:true,...extra});
+const item=(extra={})=>({newProductVerified:true,style:'375908',rawName:'여성 경량 패딩 자켓',sourceUrl:url,pageHash:'c'.repeat(64),detailHash:hash,detailImageVerified:true,...extra});
+test('기준선에 없더라도 공식 신상품 확인 근거 없이는 신상품으로 알리지 않는다',()=>{
+ const [unverified]=changedOfficialProducts({},[item({newProductVerified:false})]);
+ assert.equal(unverified.type,'discovered');
+ const [verified]=changedOfficialProducts({},[item()]);assert.equal(verified.type,'new');
+ const shared=sharedWebsiteState({version:1,checkedAt:'2026-10-31T01:00:00Z',discoveryBaselineVersion:2,products:{},batches:[{id:'a'.repeat(20),checkedAt:'2026-10-31T01:00:00Z',events:[unverified,verified]}]});
+ assert.equal(shared.discoveryBaselineVersion,2);assert.deepEqual(shared.batches[0].events.map(e=>e.type),['discovered','new']);
+ assert.equal(shared.batches[0].events[1].newProductVerified,true);
+});
 test('상품정보만 바뀌면 제외하고 확인된 상세 추가만 변경으로 표시',()=>{
  assert.deepEqual(changedOfficialProducts({[id]:{pageHash:'c'.repeat(64),detailHash:hash}},[item({pageHash:'d'.repeat(64)})]),[]);
  assert.deepEqual(changedOfficialProducts({[id]:{pageHash:null,detailHash:null,detailPresent:false}},[item()])[0].changes,['공식 상세이미지 추가']);

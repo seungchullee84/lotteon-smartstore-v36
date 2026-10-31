@@ -21,7 +21,7 @@ export async function fetchOfficialDetailVersion(url,previous,request,{localImag
  return {bytes,detailHash:digest(bytes),detailValidators:{etag:response.headers?.etag||null,lastModified:response.headers?.['last-modified']||null}};
 }
 export function changedOfficialProducts(previous,records){
- const events=[];for(const r of records){const id=new URL(r.sourceUrl).searchParams.get('pno');const old=previous[id];if(!old){events.push({type:'new',style:r.style,name:r.rawName,sourceUrl:r.sourceUrl,pageHash:r.pageHash,detailHash:r.detailHash,changes:['새로 발견한 성인 상품']});continue;}
+ const events=[];for(const r of records){const id=new URL(r.sourceUrl).searchParams.get('pno');const old=previous[id];if(!old){events.push({type:r.newProductVerified===true?'new':'discovered',newProductVerified:r.newProductVerified===true,style:r.style,name:r.rawName,sourceUrl:r.sourceUrl,pageHash:r.pageHash,detailHash:r.detailHash,changes:[r.newProductVerified===true?'공식 신상품 목록 신규 확인':'기존·신규 미확인 상품 추가 발견']});continue;}
  const changes=[];
  if(r.detailImageVerified===true&&verifiedHash(r.detailHash)){
   if(old.detailPresent===false||!verifiedHash(old.detailHash)||old.detailImageVerified===false||(old.detailImageVerified!==true&&old.detailHash!==r.detailHash))changes.push('공식 상세이미지 추가');
@@ -40,6 +40,6 @@ export async function saveWebsiteCheck(catalogDir,records,{now=new Date().toISOS
  if(!previous){let queue=[];try{queue=JSON.parse(await readFile(path.join(catalogDir,'queue.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}for(const item of queue)if(/^[a-f0-9]{16,64}$/i.test(item.pno||''))baseline[item.pno]={pageHash:null,detailHash:null};}
  const products={...baseline};for(const r of records){const id=new URL(r.sourceUrl).searchParams.get('pno'),imageVerified=r.detailImageVerified===true&&verifiedHash(r.detailHash);products[id]={detailPresent:Object.hasOwn(r,'detailUrl')?!!r.detailUrl:baseline[id]?.detailPresent??null,pageHash:verifiedHash(r.pageHash)?r.pageHash:baseline[id]?.pageHash||null,detailHash:imageVerified?r.detailHash:baseline[id]?.detailHash||null,detailImageVerified:imageVerified?true:baseline[id]?.detailImageVerified??false};}
  const batch={id:digest(now).slice(0,20),checkedAt:now,events};
- const state={version:1,checkedAt:now,nextCheckAt:new Date(Date.parse(now)+BENEFIT_CHECK_INTERVAL).toISOString(),baselineAt:previous?.baselineAt||now,baselineReady:true,errors,products,batches:[...(previous?.batches||[]),batch].slice(-216)};
+ const state={version:1,checkedAt:now,nextCheckAt:new Date(Date.parse(now)+BENEFIT_CHECK_INTERVAL).toISOString(),baselineAt:previous?.baselineAt||now,baselineReady:true,discoveryBaselineVersion:2,errors,products,batches:[...(previous?.batches||[]),batch].slice(-216)};
  await writeFile(file+'.tmp',JSON.stringify(state,null,2));await rename(file+'.tmp',file);return state;
 }

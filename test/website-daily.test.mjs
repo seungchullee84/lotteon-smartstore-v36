@@ -2,8 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import '../public/website-daily.js';
 const summary=globalThis.websiteDailySummary;
-const event=(type,style,extra={})=>({type,style,name:'성인 상품 '+style,sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno='+style,changes:type==='new'?['새로 발견한 성인 상품']:['공식 상세이미지 변경'],...extra});
+const event=(type,style,extra={})=>({type,newProductVerified:type==='new',style,name:'성인 상품 '+style,sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno='+style,changes:type==='new'?['새로 발견한 성인 상품']:['공식 상세이미지 변경'],...extra});
 const batch=(checkedAt,events)=>({checkedAt,events});
+test('수집 보완과 검증 없는 과거 신상품은 알림 집계에서 제외하고 별도 표시한다',()=>{
+ const result=summary({batches:[batch('2026-10-31T01:00:00Z',[
+  event('new','026980',{newProductVerified:false}),
+  event('discovered','111111'),event('new','222222')
+ ])]},'2026-10-31T02:00:00Z');
+ assert.equal(result.newCount,1);assert.equal(result.discoveredCount,2);
+ assert.equal(result.events.find(e=>e.style==='026980').type,'discovered');
+});
 test('마지막 점검이 0건이어도 오늘 발견한 신상품·변경 상품을 누적한다',()=>{
  const result=summary({batches:[batch('2026-10-28T01:00:00Z',[event('new','216710')]),batch('2026-10-28T01:20:00Z',[event('new','216701'),event('changed','026993')]),batch('2026-10-28T01:40:00Z',[])]},'2026-10-28T02:00:00Z');
  assert.equal(result.newCount,2);assert.equal(result.changedCount,1);assert.equal(result.events.length,3);
