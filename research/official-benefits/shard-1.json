@@ -416,8 +416,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T01:39:06.627Z",
-      "analyzedAt": "2026-10-31T01:39:28.610Z"
+      "observedAt": "2026-10-31T02:10:49.345Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1099,8 +1099,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-31T01:39:07.925Z",
-      "analyzedAt": "2026-10-31T01:39:28.634Z"
+      "observedAt": "2026-10-31T02:10:50.771Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2996,7 +2996,7 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "0e76316163c04c4e1447356f8768569bddf024a2a75cae956c42c62bf553cfb9",
+      "pageHash": "4089247915a6a61b61c12dd6ef284fbe20b0ec2af0fac8646ce7cc9601d1fe28",
       "pageText": "따뜻하고 편안한 플리스 바머 자켓입니다.\n\n표면이 부드럽고 밀도가 높은 플리스 소재로 제작하였습니다. 바머 형태의 디자인으로 올 시즌 트렌드 아이템인 바머를 좀 더 특별하게 연출할 수 있습니다. \n\n자연스럽고 여유로운 오버실루엣으로 활동성이 좋고, 두꺼운 후드티나 맨투맨 등 캐주얼한 다양한 이너와 매치하여도 쉽게 코디할 수 있는 아이템입니다.",
       "imageText": "",
       "imageScanComplete": false,
@@ -3014,8 +3014,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-31T01:39:09.386Z",
-      "analyzedAt": "2026-10-31T01:39:28.660Z"
+      "observedAt": "2026-10-31T02:10:52.166Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3274,8 +3274,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-31T01:39:07.925Z",
-      "analyzedAt": "2026-10-31T01:39:28.643Z"
+      "observedAt": "2026-10-31T02:10:49.502Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
