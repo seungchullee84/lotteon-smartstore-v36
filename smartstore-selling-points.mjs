@@ -162,7 +162,7 @@ export function usableSellingPoints(points,source){
 // Normalize customer-facing benefit copy only; preserve official evidence verbatim.
 export function displaySellingPoints(points){
  const copy=value=>String(value||'').replace(/브러쉬드|브러시드|brushed/gi,'기모');
- return points.map(point=>({...point,title:copy(point.title),description:copy(point.description)}));
+ return points.map(point=>({...point,title:copy(point.title),description:copy(point.description),...(point.shortTitle?{shortTitle:copy(point.shortTitle)}:{})}));
 }
 export function officialSellingPoints(description,{limit=4}={}){
  const points=extractOfficialSellingPoints(description,limit);

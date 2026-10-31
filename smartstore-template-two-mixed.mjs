@@ -11,7 +11,7 @@ import {templateTwoFooter} from './smartstore-template-two-footer.mjs';
 import {templateTwoCss} from './smartstore-template-two-style.mjs';
 import {templateTwoSxoBody,templateTwoSxoCss} from './smartstore-template-two-sxo.mjs';
 export {mannequinWearingNote,productSellingPoints};
-export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-sxo-photo-pairs-20261101';
+export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-sxo-intro-features-20261101';
 export const TEMPLATE_ASSET_NAMES=['giordano-official.png','lotte-department-official.png','store.jpg','GowunDodum-Regular.ttf'];
 export const TEMPLATE_ASSET_BASE='https://raw.githubusercontent.com/seungchullee84/lotteon-smartstore-v36/main/public/smartstore-template/';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -47,7 +47,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  body+='<section data-official-detail class="ss2-official"><h2 class="ss2-section-title">공식 사진과 상품 정보</h2>'+officialSources.map(src=>'<figure>'+photo(src,'현재 상품의 공식 상세 및 상품정보')+'</figure>').join('')+'</section>';
  body+=`<section data-store-banner><a class="ss2-banner" href="${STORE_BANNER_URL}" target="_blank" rel="noopener" aria-label="지오다노 다른 상품 보기 · 롯데백화점 동탄점 스토어로 이동"><div class="ss2-banner-copy"><span class="ss2-banner-badge">지오다노 상품 더 보기</span><span class="ss2-banner-label">GIORDANO · 롯데백화점 동탄점</span><h2>지오다노의<br><strong>다른 상품도</strong><br>살펴보세요.</h2><span class="ss2-banner-action">다른 상품 보러 가기 <b aria-hidden="true">↗</b></span><p>이 배너를 누르면 스토어로 이동합니다.</p></div>${p.images.main?'<div class="ss2-banner-model">'+photo(p.images.main,'현재 상품의 지오다노 공식 상품사진')+'</div>':''}</a></section>`;
  body+=templateTwoFooter(common);
- body=templateTwoSxoBody(body,p,name);
+ body=templateTwoSxoBody(body,p,name,points);
  return {html:`<style>${templateTwoCss}\n${templateTwoSxoCss}</style><div data-smartstore-template="${SMARTSTORE_DETAIL_TEMPLATE}" data-template-theme="${theme.key}"${theme.needsGenderReview?' data-gender-review="required"':''} class="ss2" style="${vars}">${body}</div>`,sources:[...new Set(sources)],template:SMARTSTORE_DETAIL_TEMPLATE,points,brandIntro:null,theme:theme.key};
 }
 export function smartstoreDetailDocument(p,options={}){
