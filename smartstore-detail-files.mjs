@@ -224,7 +224,7 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
  const imageUrl=src=>{if(!data.has(src))throw Error('현재 상품에 연결되지 않은 상세 이미지: '+src);return data.get(src);};
  const fontUrl='data:font/ttf;base64,'+(await readFile(path.join(assetsRoot,'GowunDodum-Regular.ttf'))).toString('base64');
  const document=smartstoreDetailDocument(p,{imageUrl,fontUrl,includeVideo:false,includeNavigation:false});
- const cacheRoot=path.join(options.dataRoot||path.join(appRoot,'data'),'smartstore-render-cache','template-'+document.templateVariant);
+ const cacheRoot=options.renderCacheRoot||path.join(options.dataRoot||path.join(appRoot,'data'),'smartstore-render-cache','template-'+document.templateVariant);
  const cacheKey=await renderCacheKey(document.html);let height,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,photoRegions,renderCacheHit=false;
  let browser;const close=()=>browser?.close().catch(()=>{});signal?.addEventListener('abort',close,{once:true});
  const partial=output+'.partial';
@@ -242,8 +242,11 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
   bannerTop=await page.locator('[data-store-banner]').evaluate(n=>Math.floor(n.getBoundingClientRect().top+scrollY));
   footerTop=await page.locator('[data-store-footer]').evaluate(n=>Math.floor(n.getBoundingClientRect().top+scrollY));
   if(height>150000)throw Error('상세페이지가 너무 깁니다. 사진 개수와 원본 길이를 확인해 주세요.');
+  if(height<=30000){await page.screenshot({type:'png',fullPage:true,path:partial});check();}
+  else{
   const layers=[];for(let top=0;top<height;top+=4096){check();layers.push({input:await page.screenshot({type:'png',fullPage:true,clip:{x:0,y:top,width:860,height:Math.min(4096,height-top)}}),left:0,top});}
   await sharp({create:{width:860,height,channels:3,background:'#fff'},limitInputPixels:false}).composite(layers).png().toFile(partial);check();
+  }
   const {rename}=await import('node:fs/promises');await rename(partial,output);
   await cacheRenderedDetail(cacheRoot,p.style,cacheKey,output,height,{brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,photoRegions});
   }

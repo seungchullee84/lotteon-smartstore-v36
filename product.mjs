@@ -332,7 +332,10 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
   const abort=()=>{void browser.close().catch(()=>{});};
   signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted){await browser.close();throw Error('사용자가 중단했습니다.');}
   try {
-  const context=await browser.newContext();const page=await context.newPage();
+  const context=await browser.newContext();
+  // DOM supplies product data; validated originals are fetched separately below.
+  await context.route('**/*',route=>['image','media','font'].includes(route.request().resourceType())?route.abort():route.continue());
+  const page=await context.newPage();
   let url=input.url;
   if(!url&&options.sourceUrlHint){url=parseProductInput(options.sourceUrlHint).url;log('확인된 공식 상품 주소로 바로 연결 · 품번 재검증');}
   if(!url){
