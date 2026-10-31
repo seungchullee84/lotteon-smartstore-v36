@@ -1287,8 +1287,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-31T06:14:02.865Z",
-      "analyzedAt": "2026-10-31T06:28:18.005Z"
+      "observedAt": "2026-10-31T06:48:54.369Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
