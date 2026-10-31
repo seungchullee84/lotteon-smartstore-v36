@@ -1,11 +1,11 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,writeFile,rm} from 'node:fs/promises';import os from 'node:os';import path from 'node:path';import sharp from 'sharp';
-import {installTwoChoicePackage,listTwoChoicePackages,readTwoChoicePackage} from '../smartstore-two-choice-store.mjs';
+import {installTwoChoicePackage,listTwoChoicePackages,readTwoChoicePackage,twoChoiceUploadParts} from '../smartstore-two-choice-store.mjs';
 import {smartstoreMediaOrder} from '../smartstore-detail-upload.mjs';import {twoChoiceSellerStyle} from '../smartstore-detail-only.mjs';import {requireChannel} from '../channel-routing.mjs';
 test('보관 구성은 두 상품으로 분리 보관하고 변경 파일과 다른 버전·경로를 차단',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'two-choice-store-'));try{
   const png=path.join(root,'sample.png'),html=path.join(root,'sample.html'),video=path.join(root,'sample.mp4');await sharp({create:{width:860,height:20,channels:3,background:'#fff'}}).png().toFile(png);await writeFile(html,'<html>두 상품</html>');await writeFile(video,'test-video');
-  const input={id:'two-products',label:'선택1 / 선택2',products:[{style:'116522'},{style:'116926'}],sources:{'preview.html':html,'overview.png':png,'full.png':png,'brand.mp4':video,'first.png':png,'second.png':png},parts:['first.png','second.png'],videoAfterIndex:0,bannerIndex:0,footerIndex:1};
-  const saved=await installTwoChoicePackage(root,input);assert.equal((await listTwoChoicePackages(root)).length,1);assert.equal(saved.choiceCount,2);const b=await readTwoChoicePackage(root,saved.id,saved.revision);assert.equal(b.manifest.products[0].style,'116522');assert.equal(b.manifest.products[1].style,'116926');
+  const input={id:'two-products',label:'선택1 / 선택2',products:[{style:'116522'},{style:'116926'}],sources:{'preview.html':html,'overview.png':png,'full.png':png,'brand.mp4':video,'first.png':png,'second.png':png},includeVideo:false,parts:['first.png','second.png'],videoAfterIndex:0,bannerIndex:0,footerIndex:1};
+  const saved=await installTwoChoicePackage(root,input);assert.equal((await listTwoChoicePackages(root)).length,1);assert.equal(saved.choiceCount,2);const b=await readTwoChoicePackage(root,saved.id,saved.revision);assert.equal(b.manifest.products[0].style,'116522');assert.equal(b.manifest.products[1].style,'116926');assert.equal((await twoChoiceUploadParts(root,saved.id,saved.revision)).parts.includeVideo,false);
   await assert.rejects(readTwoChoicePackage(root,saved.id,'old-version'),/변경/);await assert.rejects(readTwoChoicePackage(root,'../outside'),/선택값/);
   await writeFile(b.files['first.png'],'changed');await assert.rejects(readTwoChoicePackage(root,saved.id),/변경/);
  }finally{await rm(root,{recursive:true,force:true});}
