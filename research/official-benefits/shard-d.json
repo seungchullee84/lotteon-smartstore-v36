@@ -357,8 +357,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-31T05:52:59.087Z",
-      "analyzedAt": "2026-10-31T05:53:35.956Z"
+      "observedAt": "2026-10-31T06:23:51.500Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -616,8 +616,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-31T05:53:11.906Z",
-      "analyzedAt": "2026-10-31T05:53:36.103Z"
+      "observedAt": "2026-10-31T06:24:04.732Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -708,8 +708,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-31T05:53:02.670Z",
-      "analyzedAt": "2026-10-31T05:53:36.020Z"
+      "observedAt": "2026-10-31T06:23:55.557Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1477,6 +1477,50 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "026510",
+      "rawName": "NEW [변우석] 에어리 테리 후드티",
+      "gender": "남성",
+      "sourceCategory": [
+        "MEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=D4E0860F7E26A6876351022072C079ED&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01026510.jpg",
+      "detailHash": "db165f61ecf3d85ff63d17ee5c58e11289d4d97622cdb1f346b50a91d37a429a",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"96ee6522a7d820900bf83d5b74058059\"",
+        "lastModified": "Tue, 03 Mar 2026 07:26:13 GMT"
+      },
+      "pageHash": "5d6f31b33e61dfbe9b7dddeddc31b6ad108d7b1874c4f6df7dd71510274cdc98",
+      "pageText": "안정적인 후드 디자인과 과하지 않은 숄더 라인, 적당한 여유의 바디 실루엣이 어우러져  레귤러 핏으로 편안하게 착용됩니다.\n\n어디에나 매치하기 좋은 적당한 기장감으로 다양한 스타일링에 활용 가능하며, 체형에 구애 없이 다양한 연령대가 쉽고 편안하게 입기 좋은 아이템입니다.\n\n전면 포켓 디테일을 더해 실용성을 높였고, 전체적인 아웃라인은 깔끔하게 유지되어 데일리 웨어로 활용도가 높습니다.\"\n\nCotton 57% / Polyester 43% 혼용의 290gsm 중량으로, 일반적인 후드티와 달리, 안쪽 면에 테리 루프사를 사용하지 않고 겉감과 유사한 터치의 소재를 한 번 더 적용한 이중 구조 원단으로 제작되었습니다.\n\n가볍고 소프트한 터치감의 조직으로 봄 시즌에도 쾌적한 착용감을 제공하며, 코튼의 내추럴한 감성과 폴리에스터의 형태 안정성을 동시에 갖춘 소재입니다. 일교차가 있는 봄철에도 부담 없이 매치하기 좋은 시즌 적합 원단입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "다양한 코디에 활용",
+          "description": "적당한 여유의 바디 실루엣이 어우러져 레귤러 핏으로 편안하게 착용됩니다.",
+          "evidence": "안정적인 후드 디자인과 과하지 않은 숄더 라인, 적당한 여유의 바디 실루엣이 어우러져 레귤러 핏으로 편안하게 착용됩니다."
+        },
+        {
+          "title": "부드럽게 닿는 촉감",
+          "description": "부드러운 촉감이 느껴지는 원단.",
+          "evidence": "소프트한 터치감의 조직으로 봄 시즌에도 쾌적한 착용감을 제공"
+        },
+        {
+          "title": "소지품을 간편하게",
+          "description": "편리한 포켓으로 간편하게 수납해요.",
+          "evidence": "포켓 디테일을 더해 실용성"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:31.140Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "452903",
       "rawName": "울 양말",
       "gender": "여성",
@@ -1621,8 +1665,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T05:52:45.637Z",
-      "analyzedAt": "2026-10-31T05:53:35.747Z"
+      "observedAt": "2026-10-31T06:23:41.517Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2410,6 +2454,34 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "026513",
+      "rawName": "NEW [변우석] 그래픽 맨투맨",
+      "gender": "남성",
+      "sourceCategory": [
+        "MEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=D8A6B69C1E76AEB1500DF754B7B86802&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01026513_.jpg",
+      "detailHash": "d49d2365c04a9d042a24c0882b57e2a3367c91590638e3d2bc3512baf936458f",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"d07916062170202d7de05accfbf63401\"",
+        "lastModified": "Thu, 19 Feb 2026 05:42:56 GMT"
+      },
+      "pageHash": "a7b167c69c6b67ea24a2dae98c9c440991d0a79e691785857232fb28a77ab6ed",
+      "pageText": "심플한 그래픽이 돋보이는 프렌치 테리 소재의 크루넥 풀오버 스타일입니다. \n\n어디에나 매치하기 좋은 적당한 기장감과 체형에 구애받지 않는 레귤러 핏으로 제안하여, \n모든 연령대가 쉽고 편안하게 착용할 수 있습니다.\n\n코튼 100%(320g/m²)의 촘촘하게 짜인 고밀도 프렌치 테리 원단을 사용해 탄탄하면서도 톡톡한 터치감을 제공하며, \n일상에서 편안한 활동성을 더했습니다.\n\n소매와 밑단에는 라이크라 원사가 포함된 립 원단을 적용해 우수한 텐션과 복원력을 갖췄으며, \n편안한 착용감을 느낄 수 있습니다. \n\n밑단이 과하게 조이지 않는 디자인으로, \n레이어드 티셔츠(01026501)와 함께 매치하면 더욱 스타일리시한 연출이 가능합니다.\n\nSOL PRINT와 GEL PRINT 기법으로 포인트를 더했으며, \n**‘GOOD ENERGY’**라는 테마를 통해 지오다노만의 긍정적인 메시지를 담아냈습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:31.648Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "414941",
       "rawName": "브러시드 부츠컷 데님",
       "gender": "",
@@ -2526,8 +2598,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-31T05:53:21.917Z",
-      "analyzedAt": "2026-10-31T05:53:36.203Z"
+      "observedAt": "2026-10-31T06:24:13.161Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2603,8 +2675,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T05:53:13.080Z",
-      "analyzedAt": "2026-10-31T05:53:36.107Z"
+      "observedAt": "2026-10-31T06:24:04.632Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3099,8 +3171,8 @@
       "points": [],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T05:52:48.754Z",
-      "analyzedAt": "2026-10-31T05:53:35.796Z"
+      "observedAt": "2026-10-31T06:23:43.919Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3479,6 +3551,40 @@
       "status": "image-pending",
       "visualReview": false,
       "observedAt": "2026-10-31T06:19:09.245Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "025925",
+      "rawName": "브러시드 하프집업 맨투맨",
+      "gender": "남성",
+      "sourceCategory": [
+        "MEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=DF9E078B8E81FCBB99278664413AAB89&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01025925.jpg",
+      "detailHash": "dfd451e2a1e83914b26a53a5f55220da61dce3de5ca7609bde12c1a1b2684c7d",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"77179f1d6c8c8b982e5490ce843543e3\"",
+        "lastModified": "Thu, 09 Oct 2025 23:59:03 GMT"
+      },
+      "pageHash": "123a9c2406e9a5b41d4af6601eef5db1a899ba727c9db8360a564b91c4224e58",
+      "pageText": "클래식한 실루엣을 기반으로 한 레귤러 핏 목넥 풀오버 입니다.\n\n바디 라인을 따라 적당히 여유롭게 떨어지며, 답답하지 않으면서도 단정한 착용감입니다. 드롭되지 않은 기본 숄더 라인과 스트레이트 핏으로 깔끔한 아웃핏을 연출할 수 있어 다양한 체형에 안정적으로 어울립니다.\n\n미니멀한 하프 집업 구조로 간결한 디자인을 유지하면서도 목선을 자연스럽게 감싸주는 기능성을 갖췄습니다.\n\n코튼 60%, 폴리에스터 40% 혼방의 브러시드 플리스 원단을 사용했습니다. 바디 원단은 250gsm으로 가볍지만 충분한 보온성이 우수하며, 안감 기모 가공으로 한층 더 부드럽고 따뜻한 착용감을 줍니다. 리브는 코튼·폴리에스터·스판덱스 혼방으로 제작되어 형태 복원력과 신축성이 우수하며, 세탁 후에도 안정적인 실루엣을 유지합니다.\n가볍고 따뜻한 소재 특성 덕분에 간절기부터 겨울철까지 폭넓게 착용할 수 있습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "바디 원단은 250gsm으로 가볍지만 충분한 보온성이 우수하며, 안감 기모 가공으로 한층 더 부드럽고 따뜻한 착용감을 줍니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:27.648Z",
       "analyzedAt": null
     },
     {

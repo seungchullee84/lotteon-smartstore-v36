@@ -554,6 +554,40 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "025519",
+      "rawName": "그래픽 자수 후드집업",
+      "gender": "남성",
+      "sourceCategory": [
+        "MEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=E3323CC8A51AE3F2329AA0997FCA6B6A&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01025519.jpg",
+      "detailHash": "3ce33c06f9116219fbad2cb039ed00a8190bdee9eb8d4cdff49475cf96cc4a05",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"adec3836ea350e53d925488d20bbc640\"",
+        "lastModified": "Mon, 10 Feb 2025 07:22:30 GMT"
+      },
+      "pageHash": "a6cff9c9a8dce5186116f7d6d933dc85c15809446e29b1881ba6723322ada909",
+      "pageText": "고 중량 프렌치 테리 소재의 그래픽 후드 집업 스타일입니다.\n\n어디에나 매치하기 좋은 기장감과 어떠한 체형에도 상관없이 잘 어울리는 REGULAR FIT으로 제안하였으며, \n모든 연령대가 편안하게 입을 수 있는 스타일입니다.\n\n가먼트 워싱 기법을 더하여 세탁 후 변형을 최소화 하고, 내구성을 향상시켜 탄탄하고 견고한 착용감을 유지할 수 있습니다.\n주요 부위에는 갈라 삼봉 스티치 작업을 하여 내부의 시접을 깨끗이 정리하고 내구성을 강화하였습니다.\n내구성과 품질이 우수한 YKK금속 지퍼를 사용하여 옷의 퀄리티를 높였습니다.\n\n지오다노를 의미하는 레터링 GRDN을 밀도가 촘촘하고 볼륨있는 자수로 작업하여 포인트를 주었습니다.\n01115554와 동일원단/동일 컬러로 진행하여 셋업으로 착용가능합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "세탁 후에도 깔끔하게",
+          "description": "세탁 후 변형 부담을 줄여 깔끔하게.",
+          "evidence": "세탁 후 변형을 최소화"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:34.751Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "114959",
       "rawName": "브러시드 카고 트레이닝 팬츠",
       "gender": "",
@@ -679,6 +713,40 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "025518",
+      "rawName": "그래픽 자수 후드티",
+      "gender": "남성",
+      "sourceCategory": [
+        "MEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=E3D28EE460FABF01D34584B8A37B1926&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01025518.jpg",
+      "detailHash": "aad846335e0416d209f9bb26484bcf10631382c8a4beeeb6bf0b1a130c8e85b8",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"26ce7de530be0a7dd7edd671bc9f496b\"",
+        "lastModified": "Mon, 10 Feb 2025 07:22:17 GMT"
+      },
+      "pageHash": "fd0f5216f954f53c78fdc804e3bc5d25724028093ac56080473a7988f2d680cf",
+      "pageText": "고 중량 프렌치 테리 소재의 그래픽 후드 풀오버 스타일입니다.\n\n어디에나 매치하기 좋은 기장감과 어떠한 체형에도 상관없이 잘 어울리는 REGULAR FIT으로 제안하였으며, \n모든 연령대가 편안하게 입을 수 있는 스타일입니다.\n\n프렌치 테리 원단 (420g/m2, 580G/YD)으로 COTTON100%의 촘촘히 짜여진 고밀도, 고중량 테리사용를 사용하여 \n탄탄하고 톡톡한 터치감과 편안한 활동성을 제공합니다.\n\n가먼트 워싱 기법을 더하여 세탁 후 변형을 최소화 하고, 내구성을 향상시켜 탄탄하고 견고한 착용감을 유지할 수 있습니다.\n주요 부위에는 갈라 삼봉 스티치 작업을 하여 내부의 시접을 깨끗이 정리하고 내구성을 강화하였습니다.\n\n지오다노를 의미하는 레터링 GRDN을 밀도가 촘촘하고 볼륨있는 자수로 작업하여 포인트를 주었습니다.\n01115554와 동일원단/동일 컬러로 진행하여 셋업으로 착용가능합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "세탁 후에도 깔끔하게",
+          "description": "세탁 후 변형 부담을 줄여 깔끔하게.",
+          "evidence": "세탁 후 변형을 최소화"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:36.370Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "376924",
       "rawName": "NEW CLOUD PUFF 후드 미드렝스 푸퍼",
       "gender": "여성",
@@ -751,8 +819,8 @@
       ],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-31T05:53:06.365Z",
-      "analyzedAt": "2026-10-31T05:53:36.040Z"
+      "observedAt": "2026-10-31T06:23:59.213Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1115,8 +1183,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-31T05:53:06.380Z",
-      "analyzedAt": "2026-10-31T05:53:36.041Z"
+      "observedAt": "2026-10-31T06:23:58.129Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -2017,6 +2085,40 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:16:29.345Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "024920",
+      "rawName": "베이직 맨투맨",
+      "gender": "남성",
+      "sourceCategory": [
+        "MEN",
+        "TOP",
+        "맨투맨/후드"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=E9B75B14547703D55745AE3122A565D9&ctype=1",
+      "detailUrl": null,
+      "detailHash": null,
+      "detailImageVerified": false,
+      "detailValidators": {
+        "etag": null,
+        "lastModified": null
+      },
+      "pageHash": "93b132917d5e844ea3932fb95ca511f7533b1268c3d913ba2b83ea434d80ccaf",
+      "pageText": "프렌치 테리 소재의 크루넥 풀오버 스타일입니다.\n\n어디에나 매치하기 좋은 기장감과 어떠한 체형에도 상관없이 잘 어울리는 REGULAR FIT으로 제안하였으며, \n모든 연령대가 쉽고 편안하게 입을 수 있는 스타일입니다.\n\n코튼100%(320G/M2)의 촘촘히 짜여진 고밀도 테리를 사용하여 \n탄탄하고 톡톡한 터치감과 편안한 활동성을 제공합니다.\n\n넥 라인과 소매단, 밑단에는 바디 원단과의 밸런스를 맞춰 신축성과 복원력이 좋은 립 원단을 사용하였습니다.\n또한, 밑단이 크게 조이지 않아 레이어드 티(01020940)와 함께 착용을 하면 멋스럽게 연출 가능합니다.\n\n또한, 01114950과 동일 동일 컬러로 제안하여 셋업으로 멋스럽게 연출 가능합니다;\n단품으로는 물론, 다양한 하의 및 아우터와 연출 가능하며, 합리적인 가격대로 부담 없이 즐길 수 있는 아이템입니다.\n\nBWG컬러는 물론 멀티 컬러로 구성하여 선택의 폭을 넓혔습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "탄탄한 착용감",
+          "description": "코튼100%(320G/M2)의 촘촘히 짜여진 고밀도 테리를 사용하여 탄탄.",
+          "evidence": "코튼100%(320G/M2)의 촘촘히 짜여진 고밀도 테리를 사용하여 탄탄하고 톡톡한 터치감과 편안한 활동성을 제공합니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:24:37.295Z",
       "analyzedAt": null
     },
     {

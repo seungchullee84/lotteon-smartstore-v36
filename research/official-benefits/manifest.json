@@ -1583,11 +1583,6 @@
       "categories": []
     },
     {
-      "pno": "21F48C9C53EBDEE82C20134BE0AA40FA",
-      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=21F48C9C53EBDEE82C20134BE0AA40FA&ctype=1",
-      "categories": []
-    },
-    {
       "pno": "221EC8E4332636E9AE863950EA21232F",
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=221EC8E4332636E9AE863950EA21232F&ctype=1",
       "categories": [
@@ -3318,11 +3313,6 @@
       ]
     },
     {
-      "pno": "46EBE2A5E330A2AD2EA9F2ED77BBAC88",
-      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=46EBE2A5E330A2AD2EA9F2ED77BBAC88&ctype=1",
-      "categories": []
-    },
-    {
       "pno": "472E2223B50FF5D95615DA8F7D802454",
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=472E2223B50FF5D95615DA8F7D802454&ctype=1",
       "categories": [
@@ -4198,11 +4188,6 @@
       "categories": [
         "남성 ALL"
       ]
-    },
-    {
-      "pno": "5D3DA6148DBD4703F74756E2B291E79B",
-      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=5D3DA6148DBD4703F74756E2B291E79B&ctype=1",
-      "categories": []
     },
     {
       "pno": "5D424E3B9F302A7C98B2CD7184D540DD",
@@ -5282,11 +5267,6 @@
     {
       "pno": "77A2B1EA07497F3975B1377D3A7A85CB",
       "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=77A2B1EA07497F3975B1377D3A7A85CB&ctype=1",
-      "categories": []
-    },
-    {
-      "pno": "77A8F59A55279DBF59729B855E02012F",
-      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=77A8F59A55279DBF59729B855E02012F&ctype=1",
       "categories": []
     },
     {
@@ -6458,11 +6438,6 @@
       "categories": [
         "여성 ALL"
       ]
-    },
-    {
-      "pno": "90B19F69CD5088A55CE2EC2AA89AE73D",
-      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=90B19F69CD5088A55CE2EC2AA89AE73D&ctype=1",
-      "categories": []
     },
     {
       "pno": "90E5638635C0CCDE2C9762349877EA64",
@@ -11913,12 +11888,12 @@
       ]
     }
   ],
-  "sourceComplete": 1427,
+  "sourceComplete": 1461,
   "imageComplete": 1362,
   "withThreeOrFour": 456,
   "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-31T06:23:40.132Z",
+  "updatedAt": "2026-10-31T06:24:37.667Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-31T05:53:25.242Z",
@@ -20602,7 +20577,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "superseded"
+            "status": "ready"
           }
         ]
       },
@@ -20950,7 +20925,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           }
         ]
       },
@@ -21515,7 +21490,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           }
         ]
       },
@@ -21918,7 +21893,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -22074,7 +22049,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -22319,7 +22294,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "new",
@@ -22430,7 +22405,7 @@
             "changes": [
               "새로 발견한 성인 상품"
             ],
-            "status": "superseded"
+            "status": "ready"
           }
         ]
       },
