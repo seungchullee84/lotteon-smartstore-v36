@@ -1114,15 +1114,15 @@
         "etag": null,
         "lastModified": null
       },
-      "pageHash": "b711d15988db315a3dc30b05cf19db4d7c9e43c5a3c4186313d0102eb7fcb9b3",
+      "pageHash": "ff41238fa3898f1636f64094f83b4d1f00a8f768c89e5a79a00289ebf634de77",
       "pageText": "트렌치 스타일의 비즈니스 다운 자켓 입니다.\n\n 여유있는 실루엣에 자연스럽게 떨어지는 숄더드롭 디테일이 돋보이는 스타일로, R.D.S 인증을 받은 프리미엄 다운을 솜털 80/ 깃털 20 비율로 충전재를 사용하여 가볍고 따뜻합니다. \n\n 앞 여밈의 플라켓이 찬 공기의 유입을 막아주어 체온을 유지시켜 주며, 안쪽의 지퍼와 히든 버튼으로 오픈/클로징이 가능합니다. 첫번째 노출 버튼과 사선 포켓 디테일을 추가하여 군더더기없이 미니멀하게 디자인 하였습니다. \n\n스마트한 착장 뿐만 아니라 캐주얼하게 연출하기 좋아 비즈니스 룩 외에도 다양한 스타일링이 가능한 아이템 입니다.",
       "imageText": "",
       "imageScanComplete": false,
       "points": [],
       "status": "image-pending",
       "visualReview": false,
-      "observedAt": "2026-10-31T04:49:53.452Z",
-      "analyzedAt": "2026-10-31T04:50:11.251Z"
+      "observedAt": "2026-10-31T05:21:19.300Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -1348,8 +1348,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T04:49:59.595Z",
-      "analyzedAt": "2026-10-31T04:50:11.278Z"
+      "observedAt": "2026-10-31T05:21:25.320Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -3315,8 +3315,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-31T04:49:42.019Z",
-      "analyzedAt": "2026-10-31T04:50:11.114Z"
+      "observedAt": "2026-10-31T05:21:07.296Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
