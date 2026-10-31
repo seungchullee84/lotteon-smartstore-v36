@@ -11915,7 +11915,7 @@
   ],
   "sourceComplete": 1794,
   "imageComplete": 1725,
-  "withThreeOrFour": 632,
+  "withThreeOrFour": 610,
   "phase": "complete",
   "startedAt": "2026-10-27T05:53:33.467Z",
   "updatedAt": "2026-10-31T16:18:58.955Z",
@@ -23659,7 +23659,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "needs-review"
           },
           {
             "type": "changed",
@@ -24451,7 +24451,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "needs-review"
           },
           {
             "type": "changed",
@@ -27564,7 +27564,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "needs-review"
           },
           {
             "type": "discovered",
@@ -28526,7 +28526,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "needs-review"
           },
           {
             "type": "discovered",
@@ -28812,7 +28812,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "needs-review"
           },
           {
             "type": "discovered",
@@ -29358,7 +29358,7 @@
             "changes": [
               "수집 누락 보완 · 신상품 여부 미확인"
             ],
-            "status": "ready"
+            "status": "needs-review"
           },
           {
             "type": "discovered",
