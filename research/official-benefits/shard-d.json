@@ -544,7 +544,7 @@
         "etag": "\"46f0f1a801776b60bde3f6ec1b355b78\"",
         "lastModified": "Wed, 23 Aug 2023 06:41:23 GMT"
       },
-      "pageHash": "ca0621649d19621dfea47b09d6c98af3b291a101be3e047dbd8af54901ff0837",
+      "pageHash": "9365621318f288a6dd5a4ec51823d27315523879af8ddb2118aa78c6e8fe2d7d",
       "pageText": "코튼 카펜터 팬츠입니다.\n힙 부터 허벅까지 여유감 있으며,\n밑단라인까지 와이드하게\n떨어지는 실루엣으로 트렌디 하면서도\n착용시 편안함과 활동성이 좋습니다.\n트윌조직의 코튼 소재를 사용 하였으며, \n전체적으로 가먼트 워싱을 가미하여\n네츄럴한 터치감을 느낄 수 있습니다.\n뒤쪽의 카펜터 디테일이 포인트로\n가을 시즌 다양한 상의들과 코디하여\n캐주얼한 연출이 가능 합니다",
       "imageText": "2 Ig\n= =)\n—                        =\n=      는 =\n[\nCotton Wide  Carpenter  Pants                        STYLE NO. 05413907\n유틸리티 무드에 와이드한 코튼 카펜터 팬츠입니다.\n힙부터 허벅지까지 여유 있으며, 밑단라인까지 와이드하게\n떨어지는 HEAT\n뒤쪽의 카펜터 디테일 포인트로 트렌디하면서도\n편안한 착용감을 자랑합니다.\n트윌조직의 코튼 소재를 사용하였으며, 전체적으로 가먼트\n워싱을 가미하여 내추럴한 터치감을 느낄 수 있습니다.\n가을 시즌 다양한 상의들과 코디하여 캐주얼하게 연출해보세요.\n",
       "imageScanComplete": true,
@@ -562,8 +562,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T08:13:26.126Z",
-      "analyzedAt": "2026-10-31T08:19:20.607Z"
+      "observedAt": "2026-10-31T08:53:47.399Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
@@ -667,8 +667,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T08:13:10.958Z",
-      "analyzedAt": "2026-10-31T08:19:20.394Z"
+      "observedAt": "2026-10-31T08:53:18.255Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
