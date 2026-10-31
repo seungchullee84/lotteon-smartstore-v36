@@ -1,3 +1,4 @@
+export function assignPhotoRolesByOrder(items){const counts=new Map();for(const item of items){if(!item.color||['care-label','excluded'].includes(item.role))continue;const index=counts.get(item.color)||0;item.role=index===0?'front':index===1?'side':'detail';item.roleDefaulted=true;counts.set(item.color,index+1);}return items;}
 import {readFile,writeFile,mkdir,stat,rename} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash,randomUUID} from 'node:crypto';
@@ -36,6 +37,7 @@ export async function photoReview(product,{dataRoot,officialFolder,...options}){
  const savedOrder=match?selection.items.map(item=>item.id):null;
  const appliedOrder=draft.manualPhotoOrder?.style===product.style&&draft.manualPhotoOrder?.sourceUrl===product.sourceUrl?draft.manualPhotoOrder.groups.flatMap(group=>group.hashes):[];
  if(savedOrder||appliedOrder.length){const ranks=new Map((savedOrder||appliedOrder).map((id,index)=>[id,index]));items.sort((a,b)=>(ranks.get(savedOrder?a.id:a.hash)??Infinity)-(ranks.get(savedOrder?b.id:b.hash)??Infinity));}
+ assignPhotoRolesByOrder(items);
  const result={mainId,style:product.style,sourceUrl:product.sourceUrl,colors:numberedPhotoColors(product.colors),colorChips:await photoReviewChips(product,officialFolder),revision,items,selectionSavedAt:match?selection.savedAt:null};inventory.review=result;return result;
 }
 export async function savePhotoReviewDraft(product,input,options){
@@ -44,6 +46,7 @@ export async function savePhotoReviewDraft(product,input,options){
  if(!Array.isArray(input.items)||input.items.length!==current.items.length)throw Error('사진 선택 목록을 다시 확인해 주세요.');
  const ids=new Set();for(const i of input.items){if(ids.has(i.id)||!current.items.some(p=>p.id===i.id)||(i.color!==''&&!current.colors.includes(i.color))||(i.role!==''&&!roles.has(i.role)))throw Error('사진 선택 값을 확인해 주세요.');ids.add(i.id);}
  if(input.mainId&&!current.items.some(p=>p.id===input.mainId))throw Error('대표사진 선택을 확인해 주세요.');
+ assignPhotoRolesByOrder(input.items);
  const file=selectionFile(options.dataRoot,product),temporary=file+'.'+randomUUID()+'.tmp',savedAt=new Date().toISOString();
  await mkdir(path.dirname(file),{recursive:true});await writeFile(temporary,JSON.stringify({style:product.style,sourceUrl:product.sourceUrl,revision:current.revision,savedAt,mainId:input.mainId||null,items:input.items.map(({id,color,role,colorOverride})=>({id,color,role,colorOverride:!!colorOverride}))},null,2));await rename(temporary,file);return {savedAt};
 }
@@ -61,6 +64,7 @@ export function validatePhotoReview(current,input){
  if(input.channel!=='smartstore'||input.style!==current.style||input.sourceUrl!==current.sourceUrl||input.revision!==current.revision)throw Error('상품 또는 사진 폴더가 변경됐습니다. 사진 목록을 다시 열어 주세요.');
  if(!Array.isArray(input.items)||input.items.length!==current.items.length)throw Error('모든 사진의 색상과 구도를 확인해 주세요.');
  const seen=new Set();for(const item of input.items){if(seen.has(item.id)||!current.items.some(p=>p.id===item.id)||!roles.has(item.role)||(!['care-label','excluded'].includes(item.role)&&!current.colors.includes(item.color)))throw Error('사진별 색상과 구도를 모두 선택해 주세요.');seen.add(item.id);}
+ assignPhotoRolesByOrder(input.items);
  const duplicates=new Map();for(const item of input.items){
   if(item.role==='excluded')continue;
   const photo=current.items.find(p=>p.id===item.id),selection=item.role+'|'+(item.role==='care-label'?'':item.color),previous=duplicates.get(photo.hash);

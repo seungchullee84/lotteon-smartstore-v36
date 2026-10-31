@@ -19,7 +19,7 @@ test('신규 원본 선택 저장·재열기·케어라벨 오판 수정 및 원
   let input={...current,channel:'smartstore',items:current.items.map((i,n)=>({...i,color:p.colors[n],role:n?'care-label':'front'}))};
   assert.throws(()=>validatePhotoReview(current,{...input,channel:'lotte'}));assert.throws(()=>validatePhotoReview(current,{...input,revision:'old'}));assert.throws(()=>validatePhotoReview(current,{...input,items:[input.items[0],input.items[0]]}));
   await savePhotoReview(p,input,options);let next=await photoReview(p,options);assert.equal(next.items[1].role,'care-label');assert((await readPhotoMappings(dataRoot,p)).every(i=>i.reviewed));
-  input={...next,channel:'smartstore',items:next.items.map((i,n)=>({...i,color:p.colors[n],role:n?'back':'front'}))};await savePhotoReview(p,input,options);next=await photoReview(p,options);assert.equal(next.items[1].role,'back');assert.equal(JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',p.style,'draft.json'))).careLabels.length,0);assert.deepEqual(await readFile(path.join(folder,'1.jpg')),a);
+  input={...next,channel:'smartstore',items:next.items.map((i,n)=>({...i,color:p.colors[n],role:n?'back':'front'}))};await savePhotoReview(p,input,options);next=await photoReview(p,options);assert.equal(next.items[1].role,'front');assert.equal(JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',p.style,'draft.json'))).careLabels.length,0);assert.deepEqual(await readFile(path.join(folder,'1.jpg')),a);
   input={...next,channel:'smartstore',items:next.items.map((i,n)=>({...i,color:p.colors[n],role:n?'excluded':'front'}))};await savePhotoReview(p,input,options);
   assert.equal((await findPhotos(p,options)).length,1);next=await photoReview(p,options);assert.equal(next.items.length,2);assert.equal(next.items[1].role,'excluded');assert.deepEqual(await readFile(path.join(folder,'b.jpg')),b);
   input={...next,channel:'smartstore',items:next.items.map((i,n)=>({...i,color:p.colors[n],role:n?'back':'front'}))};await savePhotoReview(p,input,options);assert.equal((await findPhotos(p,options)).length,2);
@@ -43,9 +43,9 @@ test('색상만 선택한 중간 상태도 저장·복원하며 템플릿용 확
  try{
   await writeFile(path.join(folder,'1.jpg'),await sharp({create:{width:80,height:120,channels:3,background:'black'}}).jpeg().toBuffer());
   const current=await photoReview(p,options),input={...current,channel:'smartstore',items:current.items.map(i=>({...i,color:'02그레이',role:''}))};await savePhotoReviewDraft(p,input,options);
-  const reopened=await photoReview(p,options);assert.equal(reopened.items[0].color,'02그레이');assert.equal(reopened.items[0].role,'detail');assert(reopened.selectionSavedAt);assert.equal((await readPhotoMappings(dataRoot,p)).length,0);
+  const reopened=await photoReview(p,options);assert.equal(reopened.items[0].color,'02그레이');assert.equal(reopened.items[0].role,'front');assert(reopened.selectionSavedAt);assert.equal((await readPhotoMappings(dataRoot,p)).length,0);
   await assert.rejects(savePhotoReviewDraft(p,{...input,channel:'lotte'},options));await assert.rejects(savePhotoReviewDraft(p,{...input,sourceUrl:p.sourceUrl+'other'},options));
-  await assert.rejects(savePhotoReview(p,input,options),/색상과 구도/);
+  await savePhotoReview(p,input,options);assert.equal((await photoReview(p,options)).items[0].role,'front');
   await writeFile(path.join(folder,'1.jpg'),await sharp({create:{width:80,height:120,channels:3,background:'white'}}).jpeg().toBuffer());const changed=await photoReview(p,options);assert.equal(changed.items[0].color,'');assert.equal(changed.selectionSavedAt,null);
  }finally{await rm(root,{recursive:true,force:true});}
 });
