@@ -200,6 +200,33 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "416503",
+      "rawName": "NEW 스트레이트 슬랙스",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=710C8330CDF354BD19901CB6829AC26D&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05416503.jpg",
+      "detailHash": "5f3dabf59589ccc69af1c5f9b169a4b4468d52102a48d341bb8f82fbb3507c2c",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"e5b4f07990dedd6c77c462686688935d\"",
+        "lastModified": "Fri, 23 Jan 2026 09:24:38 GMT"
+      },
+      "pageHash": "9ad7dfbc6feb26dcf7bc5c26c5763dc35cd142bf51c587750223efa1a04e8de3",
+      "pageText": "허벅지부터 밑단까지 곧게 떨어지는 단정하고 정돈된 스트레이트핏 슬랙스입니다.\n\n전체적으로 힙부터 밑단까지 여유감있게 떨어지는 실루엣으로 발목을 덮은 긴 기장의 멋스러운 일자 실루엣입니다.\n스마트한 무드의 TR혼방 소재를 사용 하였으며, 양방향 스트레치가 있어 착용시 매우 편안합니다.\n\n체형을 고려한 입체 패턴을 적용 하였으며 밑위가 너무 낮지 않아 좀 더 편안하며 트랜디하게 착용 가능하며,\n레직기선이 있어 착용시 다리라인이 길어 보이고 세련된 다리 라인을 연출해 줍니다.\n\n봄 시즌 다양한 상의와 포멀한 오피스 룩 부터 캐쥬얼한 룩까지 데일리하게 연출하기 좋은 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:13.400Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "375923",
       "rawName": "롱패딩 푸퍼",
       "gender": "",
@@ -435,6 +462,44 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:19:06.633Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "356935",
+      "rawName": "NEW [박현지] 립 레이어드 긴팔 니트 스웨터",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=71A4CAB78B272F2FAD5DA8A549B79BB9&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05356935.jpg",
+      "detailHash": "322091dd3835b814ab91c722a9034fe9d387dfccdef4a170e046c2df8b467ef2",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"06d70034449448e447363b3d5dff8541\"",
+        "lastModified": "Wed, 12 Aug 2026 00:53:24 GMT"
+      },
+      "pageHash": "b401adc23e1dc0873cb5ed554e5957a3d47c49cb06bf72c8b225b22eef22cc41",
+      "pageText": "14GG 크루넥 레이어드 풀오버입니다. \n\nPOINT 01 (핏/실루엣)\n1) 바디에 과하게 밀착되지 않는 레귤러 핏으로 편안하고 깔끔한 실루엣\n2) 너무 길지않은 레귤러한 기장감으로 다양한 하의와 매치 가능\n\nPOINT 02(디테일)\n1) 크루넥이 레이어드된 디자인으로 2개를 겹쳐입은 듯한 효과\n2) 2x2 전체 립 조직으로 슬림해 보이는 효과와 안정적인 착용감 제공\n3) 네크라인 끝에 튜블러 조직으로 깔끔하고 완성도 있는 마무리\n4) 차분하고 여성스러운 분위기의 3컬러로 제안\n\nPOINT 03(소재)\n1) POLY/ACRYLIC/NYLON/MER-WOOL 혼용 원사로 부드러운 터치감\n2) 더블 레이어드(2겹)로 더욱 따듯한 착용감",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "1) 바디에 과하게 밀착되지 않는 레귤러 핏으로 편안하고 깔끔한 실루엣.",
+          "evidence": "1) 바디에 과하게 밀착되지 않는 레귤러 핏으로 편안하고 깔끔한 실루엣"
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "2) 너무 길지않은 레귤러한 기장감으로 다양한 하의와 매치 가능.",
+          "evidence": "2) 너무 길지않은 레귤러한 기장감으로 다양한 하의와 매치 가능"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:50.837Z",
       "analyzedAt": null
     },
     {

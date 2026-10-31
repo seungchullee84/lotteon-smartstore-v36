@@ -184,6 +184,44 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "416910",
+      "rawName": "NEW 코튼 스트레이트 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=1158E49C9D855891590E08B879D3B0FB&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05416910.jpg",
+      "detailHash": "4af4700c30ea3362d09a1378f0f1744f537db88dbde4743267175a3baffad3f7",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"ee36573b07e8bb23dc1353f7d8279eed\"",
+        "lastModified": "Mon, 14 Sep 2026 07:25:10 GMT"
+      },
+      "pageHash": "4129b878e4419a4cf4f040b6d27a31a554643a88423f3389161e0e93af4863bf",
+      "pageText": "힙부터 허벅지까지 여유롭게 떨어지고 밑단까지 일자로 이어지는 깔끔한 스트레이트 핏의 코튼 치노 팬츠입니다. \n안정감 있는 패턴 설계를 적용해 클래식한 실루엣을 완성했으며, \n겉면에 은은한 피치 가공을 더한 코튼 100% 트윌 소재를 사용해 부드러운 터치감을 제공합니다. \n또한 전체적으로 가먼트 워싱을 적용하여 자연스러운 워시드 텍스처와 한층 편안한 착용감을 완성했습니다. \n베이직한 디자인으로 다양한 상의와 손쉽게 매치할 수 있으며, \n캐주얼룩은 물론 포멀한 스타일링까지 폭넓게 활용 가능합니다. \n벨트와 함께 연출하면 더욱 완성도 높은 스타일을 연출할 수 있는 활용도 높은 데일리 아이템입니다.\n\nPOINT 01\n힙부터 밑단까지 깔끔하게 떨어지는 스트레이트 핏\n안정감 있는 패턴 설계로 클래식한 실루엣 구현\n\nPOINT 02\nCOTTON 100% TWILL PEACH 20수 TWILL조직 \n\n가먼트 워싱을 적용해 부드러운 터치감 구현",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "다양한 코디에 활용",
+          "description": "캐주얼룩은 물론 포멀한 스타일링까지 폭넓게 활용 가능합니다.",
+          "evidence": "베이직한 디자인으로 다양한 상의와 손쉽게 매치할 수 있으며, 캐주얼룩은 물론 포멀한 스타일링까지 폭넓게 활용 가능합니다."
+        },
+        {
+          "title": "부드러운 착용감",
+          "description": "가먼트 워싱을 적용해 부드러운 터치감 구현.",
+          "evidence": "가먼트 워싱을 적용해 부드러운 터치감 구현"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:01.060Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "114915",
       "rawName": "테이퍼드 히든밴딩 브러시드 슬랙스",
       "gender": "",

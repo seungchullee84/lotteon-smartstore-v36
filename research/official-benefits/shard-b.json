@@ -686,6 +686,39 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "056921",
+      "rawName": "NEW [변우석] 울혼방 목넥 긴팔 하프 니트",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=B1F36D17756ABAAD703DE6EDDC383C4F&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01056921.jpg",
+      "detailHash": "0b53d5e6b0d4cc292a3ce1bc1c259183d99d53cb5312e6bc86ecc0d19a86d072",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"66220f67e32b2f01826f6fb5894220b9\"",
+        "lastModified": "Tue, 06 Oct 2026 03:01:31 GMT"
+      },
+      "pageHash": "63ae1de7a6e034fa12b261ff9e68b4663f9e46ff8ae600d7beab382cb2040194",
+      "pageText": "부드럽고 폭신한 터치에 하프 집업 디테일을 더한 스웨터\n\n포근하고 부드러운 터치의 7GG 울 혼방 소재를 사용하여 편안한 착용감을 제공합니다.\n깔끔한 하프넥에 지퍼 디테일을 더해 단독 착용부터 다양한 이너와의 레이어링까지 활용하기 좋은 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "포근한 울혼방 터치",
+          "description": "포근하고 부드러운 울혼방 소재로 편안하게.",
+          "evidence": "포근하고 부드러운 터치의 7GG 울 혼방 소재를 사용하여 편안한 착용감을 제공"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:35.693Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "326930",
       "rawName": "[예약판매] NEW [박현지] 브러시드 테리 풀오버",
       "gender": "여성",
@@ -1229,6 +1262,39 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "416531",
+      "rawName": "NEW 부츠컷 워싱 데님",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=B438B1AC41DB6EDB27575F604F0DBD61&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05416531.jpg",
+      "detailHash": "543197f06e17782299727dff8923df743fbb040ddb2d2cf242f1112db1c391ed",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"80ee36450d198a22b01b31c8af7564d7\"",
+        "lastModified": "Thu, 05 Feb 2026 06:42:12 GMT"
+      },
+      "pageHash": "0fe57fbf4a29a87c48f399464c6d57b76c9d58ad11b15a2669fbc590ce582b65",
+      "pageText": "플레어 핏 데님입니다.\n\n힙과 허벅지를 타이트하게 잡아주면서, 무릎부터 밑단까지 여유 있게 퍼지는 플레어 라인의 실루엣입니다.\n\n밀도 높은 코튼 스판 원단을 사용하였으며, 고퀄리티 스판사로 복원력과 텐션이 뛰어나 오랜 착용에도 형태감을 잘 유지해 편안하게 착용하실 수 있습니다.\n\n오랜 시간의 스톤 워싱 공정과 자연스러운 캣 브러쉬 작업을 통해 원단 본연의 질감을 잘 살려냈으며, \n워시드 블랙 한가지 컬러로 구성되어 각기 다른 매력을 연출할 수 있습니다.\n\n섬세한 소싱과 고급스러운 디테일을 더해 합리적인 가격과 높은 완성도를 자랑하는 제품으로,\n봄 시즌 셔츠, 니트, 가디건 등 다양한 상의와 손쉽게 매치하여 트렌디한 데일리룩을 연출할 수 있습니다.\n\n\n고객에게 아래 주의사항 안내 부탁드립니다. \n* 데님 제품의 경우 워싱 가공 특성 상 제품별 디테일의 편차가 있을 수 있습니다. \n* 데님 염료의 특성상 이염 및 물 빠짐이 있을 수 있습니다.\n* 반드시 미지근한 물에 뒤집어서 단독 세탁하시기 바랍니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "무릎부터 밑단까지 여유 있게 퍼지는 플레어 라인의 실루엣입니다.",
+          "evidence": "힙과 허벅지를 타이트하게 잡아주면서, 무릎부터 밑단까지 여유 있게 퍼지는 플레어 라인의 실루엣입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:18.949Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "325516",
       "rawName": "벨벳 후드 집업",
       "gender": "여성",
@@ -1673,6 +1739,54 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:17:05.183Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "326905",
+      "rawName": "NEW 립 헨리넥 긴팔티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=B7BAA35BEF6BE87191B9E856696BCD78&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05326905.jpg",
+      "detailHash": "21485015d8659eac0ee20241c13c685ee1559dbd8c437a1ba766d168a692ab9b",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"1b4fc51250e73e6fa8f19f18f8e3c677\"",
+        "lastModified": "Thu, 13 Aug 2026 00:11:56 GMT"
+      },
+      "pageHash": "5696fbdaab828d8443f98ef0e42f5a1445ef3ade9d3cbbd96e18cacd93b76af9",
+      "pageText": "립 헨리넥 긴팔 티셔츠로, 적당히 파인 헨리넥과 몸에 자연스럽게 밀착되는 실루엣이 편안한 착용감을 제공합니다. \n바디와 동일한 원단을 사용한 바인딩 넥 디테일을 적용해 세탁 후에도 형태 변형을 최소화했으며, \n베이직한 컬러 구성으로 다양한 스타일링이 가능합니다. \n2×2 립 조직의 코튼 폴리 스판 원단을 사용해 부드러운 터치감을 제공하며, \n230g/㎡의 적당한 두께감으로 사계절 내내 활용하기 좋습니다.\n\nPOINT 1. 실루엣\n1) 립 헨리넥 긴팔 티셔츠\n2) 적당히 파진 넥과 몸에 자연스럽게 밀착되는 실루엣으로 편안함 착용감\n\nPOINT 2. 디테일\n1) 바디 동일 원단의 바인딩 넥 디테일로 세탁 후에도 형태 변형 최소화\n2) 베이직한 컬러 구성으로 다양한 코디에 활용 가능\n\nPOINT 3. 원단\n1) 2X2 립 조직의 코튼 폴리 스판 원단으로 부드러운 터치감 제공\n2) 230g/m2의 적당한 두께감으로 사계절 활용 가능\n\n[혼용율]\t면 57% 폴리에스터 38% 폴리우레탄 5% \t\t\t\n[제조년월]\t202607\t\t\t\n[제조국]\t베트남 \t\t\t\n[세탁방법]\t세탁기로약하게세탁,염소표백금지,80-120도천대고다림질,약하게짜기,건조기금지",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "2) 적당히 파진 넥과 몸에 자연스럽게 밀착되는 실루엣으로 편안함 착용감.",
+          "evidence": "2) 적당히 파진 넥과 몸에 자연스럽게 밀착되는 실루엣으로 편안함 착용감"
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "2) 베이직한 컬러 구성으로 다양한 코디에 활용 가능.",
+          "evidence": "2) 베이직한 컬러 구성으로 다양한 코디에 활용 가능"
+        },
+        {
+          "title": "부드러운 착용감",
+          "description": "1) 2X2 립 조직의 코튼 폴리 스판 원단으로 부드러운 터치감 제공.",
+          "evidence": "1) 2X2 립 조직의 코튼 폴리 스판 원단으로 부드러운 터치감 제공"
+        },
+        {
+          "title": "세탁 후에도 깔끔하게",
+          "description": "세탁 후 변형 부담을 줄여 깔끔하게.",
+          "evidence": "세탁 후에도 형태 변형을 최소화"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:56.196Z",
       "analyzedAt": null
     },
     {
@@ -2392,6 +2506,39 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "326906",
+      "rawName": "NEW [문가영] 레이어드 배색 헨리넥 긴팔티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=BA4B7EE018C64F0139F37618ABFAF498&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05326906.jpg",
+      "detailHash": "8287f64644fd1f0077970c84ff78714e13fdb4b77e0f8031fc3861b363c7e7a1",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"a8f3c10dbcf121aaae20d68931070470\"",
+        "lastModified": "Fri, 04 Sep 2026 06:05:35 GMT"
+      },
+      "pageHash": "995917511cfba3ff02a9fdc40fa46298518527660d5a502e992811c8401aa48a",
+      "pageText": "레이어드 디테일이 돋보이는 헨리넥 긴팔 티셔츠로, 몸에 자연스럽게 밀착되는 적당히 슬림한 실루엣을 연출합니다. \n레이어드 스타일을 구현하기 위해 몸판을 두 장으로 겹쳐 설계해 \n이너를 별도로 착용하지 않아도 감각적인 스타일링이 가능하며, \n차분한 컬러 구성으로 가을 시즌 다양한 코디에 활용하기 좋습니다. \n190g/㎡의 텐셀·레이온 혼방 원단을 사용해 부드럽고 실키한 텍스처를 구현했으며, 편안한 착용감을 제공합니다.\n\nPOINT 1. 실루엣\n1) 레이어드 디테일의 헨리넥 긴팔 티셔츠\n2) 몸에 자연스럽게 밀착되는 적당히 슬림한 실루엣\n\nPOINT 2. 디테일\n1) 레이어드 스타일을 구현하기 위해 몸판을 두 장으로 겹쳐 설계하여, 이너를 따로 챙겨 입는 번거로움 없이 \n감각적인 스타일 연출\n2) 차분한 컬러 구성으로 가을 다양한 코디에 활용 가능\n\nPOINT 3. 원단\n1) 190g/m2의 텐셀 레이온 혼방 원단으로 소프트하면서 실키한 텍스처가 특징\n\n[혼용율]\t레이온 70% 폴리우레탄 30%\t\t\t\n[제조년월]\t202606\t\t\t\n[제조국]\t베트남\t\t\t\n[세탁방법]\t30도중성손세탁,염소표백금지,80-120도천대고다림질,약하게짜기,건조기금지",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "다양한 코디에 활용",
+          "description": "차분한 컬러 구성으로 가을 시즌 다양한 코디에 활용하기 좋습니다.",
+          "evidence": "레이어드 스타일을 구현하기 위해 몸판을 두 장으로 겹쳐 설계해 이너를 별도로 착용하지 않아도 감각적인 스타일링이 가능하며, 차분한 컬러 구성으로 가을 시즌 다양한 코디에 활용하기 좋습니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:05.557Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "473501",
       "rawName": "심리스 브리프(1팩에 2장)",
       "gender": "여성",
@@ -3047,6 +3194,39 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "416956",
+      "rawName": "NEW 스트링 스트레이트 백밴딩 슬랙스",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=BD2D7D005ADACEEC3D2A7AD457DF85B5&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05416956.jpg",
+      "detailHash": "e591e94064bda36ae07f8681fe019e0dfe44b2ace2299fe1a3e5c948eeb40b95",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"c11b8f9170be708075b712f2225abb3f\"",
+        "lastModified": "Wed, 19 Aug 2026 00:14:21 GMT"
+      },
+      "pageHash": "f30031600c62e3fe67ac7d464ee648238ce595e03e7dc240d0cb9a591e537db4",
+      "pageText": "[스트링 스트레이트 슬랙스]\n\n편안한 착용감과 세련된 스타일을 동시에 갖춘 스트링 스트레이트 핏 슬랙스입니다. \n힙부터 밑단까지 자연스럽게 떨어지는 실루엣으로 여유로운 착용감을 제공하며, 허리 뒤쪽 하프밴드와 앞여밈 스트링 디테일을 적용해 허리 사이즈를 편안하게 조절할 수 있습니다. 여유로운 실루엣과 롱한 레그라인이 어우러져 다리가 더욱 길어 보이는 효과를 연출하며, 스마트한 무드의 TR 혼방 스트레치 소재를 사용해 활동성이 뛰어나고 편안한 착용감을 제공합니다. \n스트라이프 패턴을 적용한 2가지 컬러로 구성되어 차분하면서도 세련된 분위기를 연출하며, 포멀한 오피스룩부터 캐주얼한 데일리룩까지 다양한 스타일링이 가능한 활용도 높은 아이템입니다.\n\nPOINT 01\n여유로운 스트레이트 실루엣\n \nPOINT 02\n스트링 & 하프밴드 디테일\n\nPOINT 03\nPOLYESTER/VISCOSE/PU (66/28/6) 225GR/SQM",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "여유로운 스트레이트 실루엣.",
+          "evidence": "여유로운 스트레이트 실루엣"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:47.007Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "025952",
       "rawName": "브러시드 인터락 터틀넥 긴팔티",
       "gender": "남성",
@@ -3523,6 +3703,33 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "435503",
+      "rawName": "NEW 여성 스퀘어 버클 가죽 벨트 (14mm)",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=BE32448AB20F5D740508678D397CFA9B&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05435503.jpg",
+      "detailHash": "970cf468c6245d868f2c87acd8075e6c5af06c88e42a1d54ea22cd2913eb6e1b",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"accf93efec157512c7b77c52dabecb54\"",
+        "lastModified": "Fri, 27 Mar 2026 00:50:37 GMT"
+      },
+      "pageHash": "6ab71641aca5e891faefdcbc1944f656eb81d344d7bf4fb366ba50fd36a14412",
+      "pageText": "베이직하면서도 클래식한 디자인의 스퀘어 버클 가죽 벨트 입니다. \n\n14mm 폭의 슬림한 가죽 스트랩으로 제작되어, 페미닌한 무드를 연출할 수 있는 아이템입니다.\n유연하고 부드러운 가죽 소재를 사용해 편안한 착용감을 제공하며, \n6개의 홀로 사이즈 조절이 용이합니다.\n\nS와 M 두 가지 사이즈로 구성되었으며, \n스퀘어 버클 디테일이 더해져 데님부터 다양한 스커트까지 어떤 하의와도 멋스럽게 매치할 수 있습니다. \n스타일에 세련된 포인트를 더해줄 머스트 해브 아이템 입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:34.247Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "326510",
       "rawName": "NEW 테리 워싱 맨투맨",
       "gender": "여성",
@@ -3715,6 +3922,44 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:14:00.082Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "376902",
+      "rawName": "NEW 레더 레귤러핏 자켓",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=BEC27F26B2209B430378549DFCDEB3D3&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05376902.jpg",
+      "detailHash": "60835ece48390c8377edda5d4e561a669da7f3c4ac97777a54125808f6857168",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"10782902f888c7711561761812c1c21c\"",
+        "lastModified": "Thu, 27 Aug 2026 00:08:33 GMT"
+      },
+      "pageHash": "b61f0c013371c3d168b6cedf3c95d51625f04f763fff2ac59b15afd50b75f728",
+      "pageText": "[클래식 신세틱 레더자켓]\n\n클래식한 디자인과 미니멀한 실루엣이 돋보이는 레더 숏 자켓\n클래식한 베이직 핏에 카라 디자인을 적용한 미니멀한 신세틱 레더 숏 자켓입니다. 군더더기 없이 깔끔하게 떨어지는 실루엣과 입체적인 패턴 설계로 편안한 착용감과 안정적인 핏을 완성했습니다. 부드러운 터치감과 은은한 광택, 자연스러운 링클 텍스처가 돋보이는 인조 가죽 소재를 사용해 클래식하면서도 세련된 무드를 연출합니다. 심플한 디자인으로 데님이나 코튼 팬츠와 매치한 캐주얼룩은 물론 슬랙스, 스커트 등 다양한 하의와 믹스 매치하기 좋아 데일리부터 세련된 스타일링까지 폭넓게 활용할 수 있는 아이템입니다.\n\nPOINT 01 (FIT)\n클래식한 베이직 핏 & 숏 실루엣\n전체적으로 깔끔하게 떨어지는 베이직 핏에 경쾌한 숏 기장을 적용해 클래식하면서도 세련된 실루엣을 완성했습니다. 입체적인 패턴 설계로 안정적인 핏과 편안한 착용감을 제공합니다.\n\nPOINT 02 (DETAIL)\n미니멀한 카라 디자인\n군더더기 없는 깔끔한 카라 디자인과 심플한 디테일을 적용해 신세틱 레더 소재 특유의 질감과 실루엣이 돋보이도록 완성했습니다.\n다양한 믹스매치 스타일링\n데님이나 코튼 팬츠와 함께 캐주얼하게 연출하거나 슬랙스, 스커트와 매치해 보다 세련된 스타일로 연출하는 등 다양한 하의와 손쉽게 믹스매치할 수 있습니다.\n\nPOINT 03 (FABRIC)\n은은한 광택과 자연스러운 링클감의 인조 가죽 소재\n부드러운 터치감과 은은한 광택, 자연스러운 링클 텍스처가 돋보이는 신세틱 레더 소재를 사용해 리얼 가죽을 연상시키는 고급스러운 외관과 세련된 무드를 완성했습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "입체적인 패턴 설계로 안정적인 핏과 편안한 착용감을 제공합니다.",
+          "evidence": "입체적인 패턴 설계로 안정적인 핏과 편안한 착용감을 제공합니다."
+        },
+        {
+          "title": "다양한 코디에 두루",
+          "description": "다양한 아이템과 매치하기 좋아요.",
+          "evidence": "다양한 하의와 믹스 매치하기 좋"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:48.990Z",
       "analyzedAt": null
     },
     {
@@ -4023,6 +4268,44 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:21:07.501Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "326510",
+      "rawName": "NEW 테리 워싱 맨투맨",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=BFB23CE27AAB0745C53BB6B05C912C38&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05326510.jpg",
+      "detailHash": "57f04eec68bc09944219be11aaa26f264d8e791fe47aa45a89ea5fe74d11be5e",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"6b27930aebc6a11b9c6896a955659df6\"",
+        "lastModified": "Thu, 27 Aug 2026 02:12:29 GMT"
+      },
+      "pageHash": "79855e9bc3e4df49470a7684f7137bf0ecbaa58382761d4169e1b960a07144ab",
+      "pageText": "피그먼트 다잉 맨투맨\n\n베이직한 라운드 크루넥 라인에 쫀쫀한 시보리를 적용하고, 컴팩트하게 가공된 견고한 터치감의 340g/sqm(584g/yd) 언브러쉬드 \n프렌치 테리 원단을 사용하여 오랫동안 형태 변형 없이 착용 가능한 스웻셔츠입니다.\n\n피그먼트 다잉(Pigment Dyeing) 공법을 적용해 빈티지하면서도 자연스러운 컬러감을 구현하였으며, 워싱 과정을 거쳐 \n부드러운 터치감과 깊이 있는 색감을 느낄 수 있습니다.\n착용과 세탁을 반복할수록 은은하게 에이징되는 컬러가 멋스러움을 더해줍니다.\n\n‘good energy’라는 시그니쳐 그래픽으로 포인트를 더했으며, 피그먼트 다잉 특유의 컬러감과 어우러져 \n더욱 감도 높은 분위기를 연출합니다.\n\n적당히 루즈한 실루엣으로 베이직하면서도 캐주얼한 무드를 강조해주며, 데님, 슬랙스 등 다양한 하의 아이템과 손쉽게 \n매치 가능한 활용도 높은 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드러운 착용감",
+          "description": "워싱 과정을 거쳐 부드러운 터치감과 깊이 있는 색감을 느낄 수 있습니다.",
+          "evidence": "피그먼트 다잉(Pigment Dyeing) 공법을 적용해 빈티지하면서도 자연스러운 컬러감을 구현하였으며, 워싱 과정을 거쳐 부드러운 터치감과 깊이 있는 색감을 느낄 수 있습니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "매치 가능한 활용도 높은 아이템입니다.",
+          "evidence": "매치 가능한 활용도 높은 아이템입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:17.434Z",
       "analyzedAt": null
     },
     {

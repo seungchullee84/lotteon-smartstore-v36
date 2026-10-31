@@ -51,6 +51,33 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "416901",
+      "rawName": "NEW 코튼 스트링 배럴 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=201606E964C44EAE2319FF7023A7C758&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05416901.jpg",
+      "detailHash": "4c5fcdc6a576be169f55d9383766698a3b99470a8f1ff844e1e0032450a9c916",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"8ac2ed4d432e5a90055e0e2a540a3f72\"",
+        "lastModified": "Tue, 14 Jul 2026 01:37:26 GMT"
+      },
+      "pageHash": "8581715ff38f6d55db12d995e9361bca9bd20b982d8dee0b30e95c770003f822",
+      "pageText": "허리 여밈과 스트링 디테일을 더한 풀온 스타일의 팬츠로 허벅지부터 무릎 라인까지 볼륨감을 살린 커브 실루엣의 배럴핏 \n코튼 팬츠입니다.\n밑단으로 갈수록 자연스럽게 좁아지는 구조로 유틸리티 무드를 더한 디자인입니다.\n입체적인 패턴 설계를 통해 트렌디한 실루엣을 완성했으며 움직임에 따라 자연스럽게 살아나는 라인이 \n세련된 인상을 연출합니다.\n다양한 아이템들과 함께 캐주얼한 무드로 스타일링이 가능합니다.\n \nPOINT 01\n허벅지부터 무릎까지 볼륨감 있는 배럴핏 실루엣 \n밑단으로 갈수록 좁아지는 커브 라인 \n\nPOINT 02\n허리 여밈과 스트링 디테일 적용 \nE밴드가 있는 풀밴딩 스타일\n\nPOINT 03\nCTN 70% NYLON 30%  C32S*N100D TWILL조직 \n구김이 적고 관리가 용이한 소재",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:00.441Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "585903",
       "rawName": "울100 배색 머플러 (공용)",
       "gender": "여성",
@@ -338,6 +365,39 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:17:47.186Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "416952",
+      "rawName": "NEW 부츠컷 슬랙스",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=20E9E57C49D8D010342FF5E2000115EF&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05416952.jpg",
+      "detailHash": "a800bc20f580b3028d01e994573fe8261b4209a254a6844561507895b47b9ae5",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"2180f00532e0835ef1836b93f23c83f7\"",
+        "lastModified": "Tue, 18 Aug 2026 09:24:55 GMT"
+      },
+      "pageHash": "7a456be456d8e71fcfe5d0007a79acd41bbe0865c49caa77893ed360e89194d4",
+      "pageText": "플레어 슬렉스\n플레어핏 슬렉스 입니다. \n힙부터 허벅까지 슬림하게 떨어지면서 무릎선을 기점으로 밑단까지 여유있게 풀어지는 플레어 핏 입니다. \n발목을 덮는 기장으로 다리라인을 세련되고 날씬하게 연출 해줍니다\n250GSM 중량의 프리미엄 TR혼방 소재를 사용 하였으며, 양방향 스트레치가 있어 착용시 매우 편안합니다. \n체형을 고려한 입체 패턴을 적용 하였으며, 안정감 있는 밑위 패턴으로 착용시 더욱더 편안함을 느낄 수 있습니다. \n가을 시즌 다양한 상의 아이템들과 연출하기 좋은 데일리 아이템입니다.\n\nPOINT 01 (실루엣)\n 무릎 아래부터 자연스럽게 퍼지는 플레어핏 \n 발목을 덮는 기장\n\nPOINT 02 (디테일)\n 체형을 고려한 입체 패턴 적용 \n 미드 라이즈로 안정감 있는 착용감 \n 레직기 디테일 \n\nPOINT 03 (소재)\n POLYESTER/RAYON/PU (67/29/4) 250-260GR/SQM\n 양방향 스트레치",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "포인트 있게 연출",
+          "description": "발목을 덮는 기장으로 다리라인을 세련되고 날씬하게 연출 해줍니다.",
+          "evidence": "발목을 덮는 기장으로 다리라인을 세련되고 날씬하게 연출 해줍니다"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:49.053Z",
       "analyzedAt": null
     },
     {
@@ -1142,6 +1202,39 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "356509",
+      "rawName": "NEW 스트라이프 가디건",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=25F6AB48F6E60B601DEB89E52ECABE18&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05356509.jpg",
+      "detailHash": "416fb1d07d38418306dcadd3ba7224512f39b847b1b580854f50b2ddc76b5102",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"4520708ddec91b632759b47b961d5cd9\"",
+        "lastModified": "Fri, 27 Feb 2026 02:36:47 GMT"
+      },
+      "pageHash": "4ca206e6ec2bd80b83a3dd3d639f3f8c6da443c67d9f9ea258e1000d8b034b1f",
+      "pageText": "클래식한 스트라이프 패턴에 가볍고 부드러운 착용감을 더한 크루넥 스트라이프 가디건입니다.\n\n단독 착용은 물론, 자켓 안 이너로 활용하면 레이어드 포인트를 줄 수 있습니다.\n단정한 디자인에 캐주얼한 스트라이프 패턴을 더해 데일리로 부담 없이 즐기기 좋은 아이템입니다.\n\n비스코스와 나일론 혼방 소재로 톡톡하고 부드러운 터치감과 적당한 두께감으로 사계절 내내 활용도 높을 제품입니다.\n\n에센셜한 아이보리와 블랙 조합의 스트라이프 2컬러 구성으로 \n데님과 매치 시 캐주얼하게, 슬랙스나 자켓과 매치 시 차분하고 세련된 무드로 연출 가능합니다. \n\n데일리웨어로 활용하기 좋은 베이직 디자인에 스트라이프 포인트를 더해 시즌리스 아이템으로 제안합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "다양한 코디에 활용",
+          "description": "자켓 안 이너로 활용하면 레이어드 포인트를 줄 수 있습니다.",
+          "evidence": "단독 착용은 물론, 자켓 안 이너로 활용하면 레이어드 포인트를 줄 수 있습니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:13.864Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "054505",
       "rawName": "하프밀란 폴로 니트",
       "gender": "",
@@ -1585,6 +1678,33 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "375947",
+      "rawName": "NEW 스웨이드 자켓",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=27A748F0719A13FD7B06E3B9E9091044&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05375947.jpg",
+      "detailHash": "32f7e6db209ab82d82d5398e29ce0e3d301faa6a441e64e038a1f9bb8c2e85d4",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"ff932951ca63302ca16fc99bd18c6f17\"",
+        "lastModified": "Wed, 10 Sep 2025 23:31:55 GMT"
+      },
+      "pageHash": "d951d45cee4cc55ed40c4a6b867839585c08d989287b9bf74e003f32949887f7",
+      "pageText": "클래식한 무드의 스웨이드 자켓입니다.\n힙을 덮는 기장감에 테일러드 카라와 투 버튼으로 완성된 클래식 블레이저 스타일이며, \n앞쪽 요크선 디테일을 더해 한층 캐주얼한 분위기로 가볍고 편안하게 착용 가능해 \n일상에서도 부담 없이 즐길 수 있습니다.\n\n두께감과 자연스러운 표면감을 재현한 신세틱 스웨이드 소재를 사용했으며, 레트로 감성과 캐주얼한 매력을 더욱 높였습니다.\n\n가을의 계절감과 잘 어울리는 딥 브라운 컬러로, 캐주얼 룩은 물론 포멀한 스타일링에도 자연스럽게 매치되는 트렌디한 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:29.812Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "376918",
       "rawName": "NEW [박현지] 울캐시 발마칸 코트",
       "gender": "",
@@ -1936,6 +2056,44 @@
       "status": "image-pending",
       "visualReview": false,
       "observedAt": "2026-10-31T06:25:37.335Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "415931",
+      "rawName": "NEW 부츠컷 데님",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=291ED47D1E06F6E94CFFE9ABB89BAD59&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05415931.jpg",
+      "detailHash": "db61785537ea29aceafb8ac77f5c95de82d79fb396cc20b7269f368d6c45f2c8",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"ba21f651f1f4b56c58cbbc36fc8c0564\"",
+        "lastModified": "Fri, 28 Aug 2026 00:34:32 GMT"
+      },
+      "pageHash": "4f19200720a1abb9f32a3f1780cb058036dd7ebb8e8bb463717e7dc5540f3fca",
+      "pageText": "플레어 핏 데님입니다.\n\n힙과 허벅지를 타이트하게 잡아주면서, 무릎부터 밑단까지 여유 있게 퍼지는 플레어 라인의 실루엣입니다.\n\n밀도 높은 코튼 스판 원단을 사용하였으며, \n고퀄리티 스판사로 복원력과 텐션이 뛰어나 오랜 착용에도 형태감을 잘 유지해 \n편안하게 착용하실 수 있습니다.\n\n워시드 미디엄 블루, 워시드 그레이와 생지 본연의 매력을 살린 린스, \n세가지 컬러로 구성되어 각기 다른 매력을 연출할 수 있습니다.\n\n가을 시즌에는 셔츠, 니트, 가디건 등 다양한 상의와 손쉽게 매치하여 \n트렌디한 데일리룩을 연출할 수 있습니다.\n\n**청바지 제품의 경우 워싱 가공 특성상 제품 별 디테일의 편차가 있을 수 있습니다. \n**청바지 염료의 특성상 이염 및 물빠짐이 불가피하므로 반드시 미지근한 물에 뒤집어서 단독 세탁하시기 바랍니다.\n**데님 원단 특성 상 컬러 별로 상세 스펙 차이가 있을 수 있습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "무릎부터 밑단까지 여유 있게 퍼지는 플레어 라인의 실루엣입니다.",
+          "evidence": "힙과 허벅지를 타이트하게 잡아주면서, 무릎부터 밑단까지 여유 있게 퍼지는 플레어 라인의 실루엣입니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "가을 시즌에는 셔츠, 니트, 가디건 등 다양한 상의와 손쉽게 매치하여.",
+          "evidence": "가을 시즌에는 셔츠, 니트, 가디건 등 다양한 상의와 손쉽게 매치하여"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:30.644Z",
       "analyzedAt": null
     },
     {

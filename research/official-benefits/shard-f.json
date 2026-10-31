@@ -294,6 +294,44 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "326502",
+      "rawName": "NEW 코튼 인터락 긴팔티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=F14C1CAB6EF43C806DC4D2A28D66D307&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05326502.jpg",
+      "detailHash": "08bc5b1c7b2705af56845a291ecdf4792311744c9c4c380c23d89eb1d0d69b44",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"c94c9fd40872a7563cfbe2d23ce399f1\"",
+        "lastModified": "Mon, 09 Feb 2026 08:08:01 GMT"
+      },
+      "pageHash": "0e0dac2eda786e36421e9458223a76632fb9e0b0d97a4dd5659fa882c406e3dd",
+      "pageText": "인터록(이중직코튼) 긴팔 티셔츠\n\n톡톡한 터치감이 특징인 인터록 긴팔 티셔츠 입니다. \n\n*인터록 원단은 편직된 두 겹 구조의 원단으로, 부드럽고 신축성이 뛰어나며 내구성이 우수합니다. 표면이 매끄럽고 보온성이 \n좋은 것이 특징 입니다. \n\n230gsm 중량의 코튼 100% *인터록 원단으로 일반 싱글 저지 원단 보다 두껍고 밀도가 높아 세탁시에도 흐트러짐 없이 형태를 \n잘 유지하여 오랫동안 입으실 수 있습니다. \n\n이너웨어 또는 단품으로 착용 가능하며, 단정한 넥 라인과 베이직 핏으로 깔끔하고 스마트한 느낌을 선사합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "쌀쌀할 때도 따뜻하게",
+          "description": "표면이 매끄럽고 보온성이 좋은 것이 특징 입니다.",
+          "evidence": "표면이 매끄럽고 보온성이 좋은 것이 특징 입니다."
+        },
+        {
+          "title": "움직일 때도 유연하게",
+          "description": "뛰어난 신축성으로 편안하게 움직여요.",
+          "evidence": "신축성이 뛰어나"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:19.687Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "554917",
       "rawName": "홈웨어 후리스 스냅 버튼 가디건",
       "gender": "",
@@ -1391,6 +1429,33 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "416501",
+      "rawName": "NEW 슬림핏 슬랙스",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=F613E5A6990636281190112357C4A0B7&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05416501.jpg",
+      "detailHash": "6b1d0f585568753d98f00c101e66e342808a78223ebab8dd2930d29dcabab7d5",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"d2210508d9c7e50995d825e71b2be43c\"",
+        "lastModified": "Tue, 01 Sep 2026 01:31:28 GMT"
+      },
+      "pageHash": "62844310196c8cd8a645081072a640d91a0b5dc8bed1a1d7702869c07fcb6f26",
+      "pageText": "신축성과 복원력이 좋은 소재로 다리 라인을 따라 매끈하게 떨어지는 베이직 슬림 핏 슬랙스입니다. \n\n허벅지부터 밑단 라인까지 슬림하게 떨어지는 실루엣으로 발목을 덮은 기장의 베이직한 슬랙스입니다.\n250GSM 중량의 프리미엄 TR혼방 소재를 사용하였으며, 양방향 스트레치가 있어 착용시 매우 편안합니다.\n\n체형을 고려한 입체 패턴을 적용하였으며 레직기선이 있어 착용시 다리라인이 길어보이고 세련된 다리라인을 연출해 줍니다.\n\n클래식한 컬러들로 구성되어 있어 포멀한 오피스 룩부터 캐주얼한 룩까지 다양하게 연출하기 좋습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:15.627Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "326904",
       "rawName": "NEW [문가영] 립 크루넥 긴팔티(SLD/STR)",
       "gender": "여성",
@@ -1691,6 +1756,49 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "346912",
+      "rawName": "NEW 코듀로이 셔츠 타입 자켓",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=F7B3D82F2E58B00C0E3DDAE174491212&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05346912.jpg",
+      "detailHash": "3181dac6409a6a0768e549bc6c1927a4ee97a473d8bdde226db39910dd5807c6",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"bcfafba9ab2939995d1e22cfc94c26c1\"",
+        "lastModified": "Mon, 14 Sep 2026 07:01:09 GMT"
+      },
+      "pageHash": "bea0620cfdc6d9f56b6f72c7b9b2fb4be8e68f3737276e2554f42e2568e63dc0",
+      "pageText": "[코듀로이 셔켓]\n\n전체적으로 여유로운 오버핏 실루엣을 적용해 편안하면서도 멋스러운 핏을 연출하는 코듀로이 셔켓입니다. \n프론트 단추 여밈으로 깔끔하게 마무리했으며, 셔츠와 아우터의 장점을 결합한 디자인으로 단독 착용은 물론 다양한 이너와 함께 레이어드하기 좋습니다. 코튼 100% 코듀로이 소재에 루즈 피니싱과 가먼트 워싱을 적용해 원단의 뻣뻣함을 줄이고 자연스럽고 부드러운 터치감을 완성했습니다. 셔츠보다 여유롭고 일반적인 아우터보다 가볍게 착용할 수 있어 간절기 시즌 다양한 스타일링에 활용하기 좋은 아이템입니다.\n\nPOINT 01 (FIT)\n아우터로 활용하기 좋은 여유로운 오버핏\n전체적으로 여유로운 오버핏 실루엣으로 다양한 이너와 편안하게 레이어링할 수 있습니다. 셔츠보다 여유롭고 아우터보다 가볍게 착용할 수 있는 실루엣으로 간절기 시즌 활용도를 높였습니다.\n\nPOINT 02 (DETAIL)\n셔츠와 아우터의 장점을 결합한 셔켓 디자인\n아시밴드를 제거한 셔츠 재킷형 디자인으로 캐주얼하고 편안한 무드를 연출합니다. 한쪽 가슴에 사각 포켓을 적용해 실용적인 포인트를 더했으며, 깔끔한 밑단과 소매 견보루 디테일로 셔츠 특유의 완성도 높은 디자인을 살렸습니다.\n\nPOINT 03 (FABRIC)\n부드러운 터치의 코튼 100% 코듀로이 소재\n40수 코튼 100% 8W 코듀로이 원단을 사용해 포근한 터치감과 입체적인 골 조직감을 살렸습니다. 루즈 피니싱과 가먼트 워싱을 적용해 원단의 뻣뻣한 느낌을 줄이고, 자연스럽게 길들여진 듯한 부드러운 착용감과 내추럴한 외관을 완성했습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "포인트 있게 연출",
+          "description": "한쪽 가슴에 사각 포켓을 적용해 실용적인 포인트를 더했습니다.",
+          "evidence": "한쪽 가슴에 사각 포켓을 적용해 실용적인 포인트를 더했으며, 깔끔한 밑단과 소매 견보루 디테일로 셔츠 특유의 완성도 높은 디자인을 살렸습니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "아우터로 활용하기 좋은 여유로운 오버핏.",
+          "evidence": "아우터로 활용하기 좋은 여유로운 오버핏"
+        },
+        {
+          "title": "부드러운 착용감",
+          "description": "부드러운 터치의 코튼 100% 코듀로이 소재.",
+          "evidence": "부드러운 터치의 코튼 100% 코듀로이 소재"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:43.239Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "014504",
       "rawName": "폰테 폴로 반팔티",
       "gender": "",
@@ -1893,6 +2001,39 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:15:03.140Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "345901",
+      "rawName": "NEW 포플린 긴팔 셔츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=F96D05093A55FECFAA836F1E7C94C721&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05345901.jpg",
+      "detailHash": "b3901ae778b644903dcdccc484dfb00c60e4b896f25d3ee9b0d5160640818b64",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"63e7b5fecd94c236de544224bf0df8ff\"",
+        "lastModified": "Thu, 27 Aug 2026 01:57:13 GMT"
+      },
+      "pageHash": "360dc64af105e801be271b7d2071dccab8d992e5d195c84293663eacf940a9db",
+      "pageText": "60수 소재의 포플린 베이직 셔츠입니다.\n\n코튼 100% 소재로 착용감이 편안하며, 포플린 셔츠 특유의 산뜻한 착용감을 선사해줍니다.\n\n가먼트 워싱과 Softner가공을 더하여 부드러운 터치감이 특징이며,\n소재의 내구성을 높여 세탁 시 옷의 변형을 최소화 시켰습니다.\n\n버건디와 브라운 계열의 난색과 블루 화이트 네이비의 코어 컬러 조합으로\n산뜻하면서도 무드 있는 가을 컬러로 구성하였습니다.\n\n또한, 브라운과 자주빛의 잔잔한 체크 패턴의 구성으로\n한층 업데이트 된 트렌디한 무드를 느낄 수 있습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드럽게 닿는 촉감",
+          "description": "부드러운 촉감이 느껴지는 원단.",
+          "evidence": "부드러운 터치감이 특징"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:34.387Z",
       "analyzedAt": null
     },
     {
@@ -2623,6 +2764,39 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:24:00.582Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "416954",
+      "rawName": "NEW [문가영] 와이드 투턱 슬랙스",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=FD0FF26F355C8A0663E4644854198F71&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05416954.jpg",
+      "detailHash": "bb099429f259eee34c0d36f87c7604d8d302e96a780a21caa27e2ef75959bce6",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"fe909eb67bf41b1da7f056654531395f\"",
+        "lastModified": "Wed, 16 Sep 2026 00:45:21 GMT"
+      },
+      "pageHash": "c3170c3f125bf1030d13e278f37f72a0800cb8054031f54e0952108f91a7172f",
+      "pageText": "플리츠 와이드 핏 \n 턱 디테일로 볼륨감을 살린 플리츠 와이드 스타일로 힙부터 밑단까지 여유 있게 떨어지는 실루엣입니다.\n체형을 고려한 입체 패턴을 적용했으며 하이 라이즈 디자인으로 착용 시 다리가 길어 보이고 발등까지 내려오는 기장으로 멋스러운 실루엣을 연출합니다.\n250GSM 중량의 프리미엄 TR혼방 소재를 사용 하였으며, 양방향 스트레치가 있어 착용시 매우 편안합니다. \n체형을 고려한 입체 패턴을 적용 하였으며, 안정감 있는 밑위 패턴으로 착용시 더욱더 편안함을 느낄 수 있습니다. \n가을 시즌 다양한 상의와 매치해 포멀한 오피스 룩부터 캐주얼한 스타일링까지 데일리하게 연출하기 좋은 아이템입니다.\n\nPOINT 01 (실루엣)\n턱 디테일로 볼륨감을 살린 플리츠 와이드 핏 \n힙부터 밑단까지 여유 있게 떨어지는 와이드 실루엣 \n발등까지 내려오는 기장\n하이 라이즈 디자인 \n\nPOINT 02 (디테일)\n체형을 고려한 입체 패턴 적용 \n안정감 있는 하이 라이즈 설계 \n화이트 컬러 안감 적용으로 비침 최소화 \n\nPOINT 03 (소재)\n POLYESTER/RAYON/PU (67/29/4) 250-260GR/SQM\n 양방향 스트레치\n 텍스처가 돋보이는 표면감 (#01 Sand, #02Charcoal Herringbone)",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "여유로운 와이드핏",
+          "description": "넉넉하게 떨어지는 와이드 실루엣.",
+          "evidence": "플리츠 와이드 핏 턱 디테일로 볼륨감을 살린 플리츠 와이드 스타일로 힙부터 밑단까지 여유 있게 떨어지는 실루엣입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:48.590Z",
       "analyzedAt": null
     },
     {
@@ -3510,6 +3684,33 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:23:33.111Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "415915",
+      "rawName": "NEW 브러시드 슬림 슬랙스",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=FF75A2C72266AEDF8C0ED865E181B5A7&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05415915.jpg",
+      "detailHash": "1bc1b16d861ce825751485bd9771364a5eba5406c0f112dc298f7ff6e619e677",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"8c23d0a587c2319e0e175027b6974cba\"",
+        "lastModified": "Wed, 29 Oct 2025 02:09:47 GMT"
+      },
+      "pageHash": "34134f74780db0794c5ce7f66f918ede755c7fbf89b4dadd914ac3bdfd788557",
+      "pageText": "브러시드 슬림핏 슬랙스 입니다.\n\n허벅부터 밑단라인까지 슬림하게 떨어지는 깔끔한 라인에 체형을 고려한 입체 패턴 설계로 안정적인 핏을 구현했으며, \n안쪽에 기모(Brushed) 처리가 되어있는 TR 혼방 브러쉬드 원단을 사용하여 보온성이 탁월하며, 부드러운 착용감을 제공합니다.\n원단이 트윌 조직으로 짜여져 있어 밀도가 높고, 우수한 스트레치성으로 활동성을 극대화했습니다. \n\n밑위가 너무 낮지 않아 한층 편안하면서도\n레직기선 디테일이 더해져 다리 라인이 길고 곧아 보이는 효과를 주어 한층 세련된 실루엣을 완성합니다.\n\n구김이 적고 관리가 용이하여 일상과 오피스룩 모두에 적합하며,\n겨울시즌 다양한 상의와 함께 연출하기 좋은 베이직 에센셜 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:21.163Z",
       "analyzedAt": null
     },
     {

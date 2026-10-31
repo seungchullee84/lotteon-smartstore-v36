@@ -895,6 +895,33 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "076911",
+      "rawName": "NEW CLOUD LIGHT G-MOTION 후드 심리스 경량 패딩",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=A418E120EBF7850CDCC4659638435B15&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076911.jpg",
+      "detailHash": "2335fb2b1b6ccd126b909f1a1bbf6c84464e88ac21313c40a89c678c2156185f",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"e30bd98d9f2ad2e7893080566f39af6c\"",
+        "lastModified": "Wed, 07 Oct 2026 02:40:09 GMT"
+      },
+      "pageHash": "65b562bae5d8faea5cb7d96de7031ccaa6b914bbf048fb3ffb2c018d13f7fd76",
+      "pageText": "핫멜트 기법을 적용하여 외부 찬바람 유입을 차단하고 보온성을 극대화한\n액티브 후드 경량 패딩입니다. \n아웃도어 환경 및 액티브 퍼포먼스에 최적화된 입체 패턴과 우수한 신체 밀착력을 제공하며, 도심 속 일상부터 아웃도어까지 활용 가능한 아우터입니다.\n\n핫멜트 기법을 적용하여 외부 찬바람 유입을 차단하고 보온성을 극대화한 액티브 후드 경량 패딩입니다. \n아웃도어 환경 및 액티브 퍼포먼스에 최적화된 입체 패턴과 우수한 신체 밀착력을 제공하며, 도심 속 일상부터 아웃도어까지 활용 가능한 아우터입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:36.352Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "374520",
       "rawName": "하이글로시 코팅 오버핏 자켓",
       "gender": "",
@@ -925,6 +952,39 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:22:43.103Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "345902",
+      "rawName": "NEW 옥스포드 긴팔 셔츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=A434CA3DECEFBF659964EABCD73540DC&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05345902.jpg",
+      "detailHash": "4ef3cc761de2c2484e5632fa45826ead67481bb54b49244ccb8f4292271ca739",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"b2574af799f4107e024db1674ea37b0e\"",
+        "lastModified": "Tue, 18 Aug 2026 08:09:51 GMT"
+      },
+      "pageHash": "2b7d6e0740daa0bdf1d286663b6dcd2e05cad4a707a187789090101ac7fa34fc",
+      "pageText": "여성 옥스포드 클래식 셔츠입니다.\n\n40수 코튼/폴리 소재로 가볍고 부드러우며,\n가먼트 워싱 기법에 특수 Coolest 워싱 기법이 더해져 쾌적한 착용감을 선사해줍니다.\n\n클래식한 블루 무드와\n간절기 시즌과 어울리는 톤다운 된 와인 컬러 조합으로 구성하였습니다.\n\n클래식 스트라이프 패턴이 옥스포드 셔츠 특유의 색감과 어우러져 포인트가 되어집니다.\n\n클래식한 기본 핏으로 다양한 룩에 가볍게 코디하기 좋은 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "다양한 코디에 활용",
+          "description": "클래식한 기본 핏으로 다양한 룩에 가볍게 코디하기 좋은 아이템입니다.",
+          "evidence": "클래식한 기본 핏으로 다양한 룩에 가볍게 코디하기 좋은 아이템입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:32.799Z",
       "analyzedAt": null
     },
     {
@@ -1623,6 +1683,49 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:23:28.967Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "356932",
+      "rawName": "NEW 메리노울 혼방 크루넥 긴팔 니트 스웨터",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=A719A252795C8716EFBBEADA3E9EC1AB&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05356932.jpg",
+      "detailHash": "5e7e087e29036ec5dec9a69f848ca8d0fa68d4596ccab37b6ccefc5b0013bbe0",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"c486d249d9c30772d0d191f2bd30df79\"",
+        "lastModified": "Wed, 07 Oct 2026 08:07:14 GMT"
+      },
+      "pageHash": "d74613d21529f651678d3904d54dadcf448bc62274a039a00fce26811c27ced9",
+      "pageText": "간절기 시즌에 활용도 높은 14GG 플레인 조직의 크루넥 니트입니다. \n\nPOINT 01 (핏/실루엣)\n바디에 과하게 밀착되지 않는 레귤러 핏으로 편안하고 깔끔한 실루엣\n클래식한 크루넥 디자인으로 단정하고 세련된 무드 연출\n적당한 기장감으로 팬츠, 스커트와 균형감있게 스타일링 가능\n\nPOINT 02(디테일)\n넥은 1x1 더블 립, 소매와 밑단은 1x1 립 마감으로 안정감 있는 핏 유지\n심플한 플레인 조직으로 다양한 스타일에 매치하기 용이\n\nPOINT 03(소재)\nACRYLIC / MERINO WOOL / NYLON 혼용 원사로 고급스럽고 부드러운 터치감\n메리노울 30% 함유로 일반 울 대비 한층 더 고급스러운 퀄리티로 제안\n14게이지로 간절기 시즌에 적합한 두께감\nPVA 수용성 원사를 사용해 한층 더 가볍고 유연한 착용감 구현",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "다양한 코디에 활용",
+          "description": "심플한 플레인 조직으로 다양한 스타일에 매치하기 용이",
+          "evidence": "넥은 1x1 더블 립, 소매와 밑단은 1x1 립 마감으로 안정감 있는 핏 유지\n심플한 플레인 조직으로 다양한 스타일에 매치하기 용이"
+        },
+        {
+          "title": "편안한 착용감",
+          "description": "바디에 과하게 밀착되지 않는 레귤러 핏으로 편안하고 깔끔한 실루엣.",
+          "evidence": "바디에 과하게 밀착되지 않는 레귤러 핏으로 편안하고 깔끔한 실루엣"
+        },
+        {
+          "title": "포인트 있게 연출",
+          "description": "클래식한 크루넥 디자인으로 단정하고 세련된 무드 연출.",
+          "evidence": "클래식한 크루넥 디자인으로 단정하고 세련된 무드 연출"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:04.230Z",
       "analyzedAt": null
     },
     {
@@ -2530,6 +2633,39 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "356931",
+      "rawName": "NEW 메리노울 크루넥 긴팔 가디건",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=AAC9F65939DF16AA580993C3C6AB4468&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05356931.jpg",
+      "detailHash": "39419df867ab46dceec76c1e16b8b3284c4f6e3804bbf6a52aaedf4229c2afd0",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"7c89d5da19280b8a1015e7e7bce90afe\"",
+        "lastModified": "Fri, 07 Aug 2026 00:34:44 GMT"
+      },
+      "pageHash": "139579ffdf183c9e064e5cd7a1297b8c4f883f2d6776bda9a8a4bd9098cb1beb",
+      "pageText": "가을 시즌에 활용도 높은 14GG 플레인 조직의 크루넥 가디건입니다. \n메리노울 30% 함유로 한층 더 부드럽고 고급스러운 터치감을 완성한 간절기 필수 클래식 가디건입니다.\n\nPOINT 01 (핏/실루엣)\n바디에 과하게 밀착되지 않는 레귤러 핏으로 편안하고 깔끔한 실루엣\n적당한 기장감으로 팬츠, 스커트 등 다양한 하의와 매칭 가능\n\nPOINT 02(디테일)\n변형 립(Variegated Rib) 조직으로 입체감 있는 텍스처와 고급스러운 무드 강조\n넥은 1x1 더블 립, 소매와 밑단은 1x1 립 마감으로 안정감 있는 핏 유지\n전면 버튼 디테일로 다양한 오픈/클로징 연출 가능\n\nPOINT 03(소재)\nACRYLIC / MERINO WOOL / NYLON 혼용 원사로 고급스럽고 부드러운 터치감\n메리노울 30% 함유로 일반 울 대비 한층 더 고급스러운 퀄리티로 제안\n14게이지로 간절기 시즌에 적합한 두께감\nPVA 수용성 원사를 사용해 한층 더 가볍고 유연한 착용감 구현",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "바디에 과하게 밀착되지 않는 레귤러 핏으로 편안하고 깔끔한 실루엣.",
+          "evidence": "바디에 과하게 밀착되지 않는 레귤러 핏으로 편안하고 깔끔한 실루엣"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:04.378Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "345906",
       "rawName": "NEW 데님 셔츠",
       "gender": "여성",
@@ -2989,6 +3125,33 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "346502",
+      "rawName": "NEW 옥스포드 클래식 셔츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=AC55A25F041641D0BA10B559AD5A78D0&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05346502.jpg",
+      "detailHash": "a6bc8507461f28ece0b0e5291e4e351dbbb0cad64bfd0bff2ab856bff6c9d1fc",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"0a7a760680f32b2aae5b2040943378ff\"",
+        "lastModified": "Fri, 13 Mar 2026 07:14:10 GMT"
+      },
+      "pageHash": "c2d0aebe2e78e96eda5690cc957985b20886df8e4f3e37e46febbd762298d22d",
+      "pageText": "옥스포드 클래식 셔츠입니다.\n\n베이직한 핏으로 깔끔하게 떨어지는 정돈된 실루엣을 연출합니다.\n\n40수 코튼 폴리에스터 혼방 소재로 가볍고 부드러우며, 가먼트 워싱 기법에 Coolest 워싱 기법이 더해져 \n쾌적한 착용감을 선사해줍니다.\n\n26SS 시즌 무드에 맞춰 깨끗한 뉴트럴 컬러와 클래식한 블루 톤 구성으로 다양한 스타일에 자연스럽게 어우러집니다.\n\n또한 클래식 스트라이프 패턴이 옥스포드 셔츠 특유의 색감과 어우러져 포인트가 됩니다.\n\n데님, 슬랙스, 코튼 팬츠 등 다양한 하의와 손쉽게 매치할 수 있어 데일리부터 캐주얼한 무드까지 \n폭넓은 스타일링이 가능합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:20.831Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "056910",
       "rawName": "NEW 울혼방 크루넥 긴팔 니트",
       "gender": "남성",
@@ -3414,6 +3577,60 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:18:36.528Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "346906",
+      "rawName": "NEW 웨스턴 데님 긴팔 셔츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=AE1B7B5F59D06769C8445EE3E4389B73&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05346906.jpg",
+      "detailHash": "d44f3702de546b1888f51d13595f3b292d4d1fd0c567bc4f3e7956483443566f",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"7de4211aecd88a6e9985d339aac940ed\"",
+        "lastModified": "Thu, 17 Sep 2026 01:32:10 GMT"
+      },
+      "pageHash": "a1daa6e53a6e48705a2ad8e30738b9284326ae7f9130e5cac6f66e1a54113147",
+      "pageText": "웨스턴 스타일의 클래식한 무드가 돋보이는 프리미엄 코튼 데님 셔츠입니다. \n자연스러운 워싱 디테일과 특유의 요크 라인이 포인트가 되어 단독 착용만으로도 세련되고 트렌디한 분위기를 연출할 수 있는 소장 가치 높은 아이템입니다.\n\nPOINT 01 (핏/실루엣)\n깔끔한 스탠다드 핏: 몸의 라인을 과하지 않게 잡아주며 단정하면서도 쿨한 실루엣 완성\n내추럴한 밑단 라인: 밑단이 부드러운 곡선형(라운드)으로 커브드 처리되어 하의 밖으로 꺼내 입어도 자연스러운 드레이프 형성\n\nPOINT 02(디테일)\n웨스턴 요크 & 플랩 포켓: 어깨 라인의 웨스턴 스타일 요크스티치와 가슴 전면의 듀얼 플랩 포켓 디테일이 정통 웨스턴 셔츠의 오리지널티 감성 선사\n빈티지 워싱 이펙트: 바디 전면에 은은하게 들어간 내추럴 바이오스톤 워싱 가공으로 고급스러운 블루 톤 구현\n은은한 진주 가시스냅 : 고급스러운 진주 스냅으로 적용하여, 오픈 클로징이 간편할 뿐만 아니라 유니크하고 페미닌한 포인트 부여\n\nPOINT 03(소재)\nCOTTON 100%, 6~7oz 두께감의 원단을 사용\n워싱 가공을 더해 데님 특유의 뻣뻣함을 줄이고 빈티지한 멋을 더함",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:25:53.139Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "416502",
+      "rawName": "NEW 부츠컷 슬랙스",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=AE27D21943468124221937D59167FFF8&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/05416502.jpg",
+      "detailHash": "4a15253f761ba379c0542ea95d208ed51ac515ece90a059ed8451d7840d8d99c",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"c756ea2812d1ec374657a90e7a1938a2\"",
+        "lastModified": "Fri, 23 Jan 2026 09:24:43 GMT"
+      },
+      "pageHash": "bf9b2f5a8a097b204a9eb1f9b38f110591444e5dd81f481a1b1ef86c13846894",
+      "pageText": "힙부터 허벅지는 슬림하고, 무릎 아래부터 자연스럽게 퍼지는 플레어핏 슬랙스입니다.\n발목을 덮는 기장과 슬랙스 특유의 드레이프감으로 레그라인을 길고 세련되게  연출해줍니다.\n\n250GSM 중량의 프리미엄 TR혼방 소재를 사용하였으며, 양방향 스트레치가 있어 착용시 매우 편안합니다.\n\n체형을 고려한 입체 패턴을 적용하였으며 안정감 있는 밑위 패턴으로 착용시 더욱 더 편안함을 느낄 수 있습니다.\n\n봄 시즌 다양한 상의 아이템들과 연출하기 좋은 데일리 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:15.314Z",
       "analyzedAt": null
     },
     {
