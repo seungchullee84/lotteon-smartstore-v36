@@ -1,3 +1,8 @@
+function syncTemplateHeadlineInput(){
+ const input=document.getElementById('templateHeadline');if(!input||!product)return;
+ const key='templateHeadline'+(product.detailTemplate===2?2:1),fields=editedValuesFor(product);
+ input.value=fields[key]??product[key]??fields.templateHeadline??product.templateHeadline??'';
+}
 function applyTemplateHeadlinePreview(){
  const input=document.getElementById('templateHeadline');if(!input||!product)return;
  for(const frame of document.querySelectorAll('#detailPreview iframe,#largeDetailPreview iframe')){
@@ -32,8 +37,11 @@ function applyTemplateHeadlinePreview(){
  }
  function changed(event){
   if(!product)return;
+  const detailTemplate=product.detailTemplate===2?2:1,key='templateHeadline'+detailTemplate,other='templateHeadline'+(detailTemplate===1?2:1);
+  product[other]=editedValuesFor(product)[other]??product[other]??product.templateHeadline??'';
+  rememberProductField(other,product[other]);rememberProductField(key,input.value);product[key]=input.value;
   rememberProductField('templateHeadline',input.value);product.templateHeadline=input.value;
-  pending={style:product.style,sourceUrl:product.sourceUrl,title:input.value};
+  pending={style:product.style,sourceUrl:product.sourceUrl,title:input.value,detailTemplate};
   applyTemplateHeadlinePreview();status.textContent=(input.value.trim()?'직접 입력한 제목 반영':'자동 제목 반영')+' · 저장 중…';
   if(!editing&&!event?.isComposing)schedule();
  }
@@ -44,8 +52,8 @@ function applyTemplateHeadlinePreview(){
  const previousPopulate=populate;
  populate=function(p){
   if(pending&&pending.style!==p.style)save();
-  previousPopulate(p);status.textContent=(input.value.trim()?'직접 입력한 제목':'자동 제목')+' · 품번 '+p.style;
+  previousPopulate(p);syncTemplateHeadlineInput();status.textContent=(input.value.trim()?'직접 입력한 제목':'자동 제목')+' · 품번 '+p.style;
   applyTemplateHeadlinePreview();
  };
- if(product){input.value=editedValuesFor(product).templateHeadline??product.templateHeadline??'';applyTemplateHeadlinePreview();}
+ if(product){syncTemplateHeadlineInput();applyTemplateHeadlinePreview();}
 })();
