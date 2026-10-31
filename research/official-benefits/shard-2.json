@@ -3853,8 +3853,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T08:05:13.008Z",
-      "analyzedAt": "2026-10-31T08:19:13.339Z"
+      "observedAt": "2026-10-31T08:42:24.315Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
