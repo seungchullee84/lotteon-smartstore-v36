@@ -232,7 +232,7 @@ export class LotteAutomation extends BrowserAutomation {
   }
   async activateGridEditor(grid,row,column,kind){
     const cell=await this.optionCell(grid,row,column);
-    if(grid==='grd_OptnDtlNew')await this.revealOptionCell(grid,cell);
+    if(grid==='grd_OptnDtlNew'||grid==='grd_OptnDtl')await this.revealOptionCell(grid,cell);
     const editor=this.locator(grid+(kind==='combo'?'_controlcombo_comboedit_input':'_controledit_input'));
     const matches=async()=>{if(!await editor.count())return false;const e=await editor.boundingBox(),c=await cell.boundingBox();return !!e&&!!c&&Math.abs(e.y-c.y)<10&&e.x+e.width/2>=c.x&&e.x+e.width/2<=c.x+c.width;};
     if(await matches())return editor;
@@ -274,12 +274,19 @@ export class LotteAutomation extends BrowserAutomation {
   }
   async optionCell(grid,row,col){
     const cells=this.page.locator(`[id$="${grid}_body_gridrow_${row}_cell_${row}_${col}"]`);
-    const index=await cells.evaluateAll(es=>es.findIndex(e=>{
+    const findVisible=()=>cells.evaluateAll(es=>es.findIndex(e=>{
       const r=e.getBoundingClientRect(),prefix=e.id.split('_body_gridrow_')[0];
       const body=e.ownerDocument.getElementById(prefix+'_body')?.getBoundingClientRect();
       const head=e.ownerDocument.getElementById(prefix+'_head')?.getBoundingClientRect();
       return r.width>0&&r.height>0&&(!body||(r.y+r.height/2>Math.max(body.top,head?.bottom||0)&&r.y+r.height/2<body.bottom));
     }));
+    let index=await findVisible();
+    if(index<0&&grid==='grd_OptnDtl'){
+      const candidates=await cells.evaluateAll(es=>es.map((e,index)=>({index,r:e.getBoundingClientRect()})).filter(({r})=>r.width>0&&r.height>0).map(({index})=>index));
+      // Only scroll a unique rendered row. Recycled duplicate IDs must never
+      // redirect an edit to a different option.
+      if(candidates.length===1){await this.revealOptionCell(grid,cells.nth(candidates[0]));index=await findVisible();}
+    }
     if(index<0)throw Error('표 안에 표시된 옵션 행을 찾지 못했습니다: '+grid+' / '+row+' / '+col);
     return cells.nth(index);
   }
