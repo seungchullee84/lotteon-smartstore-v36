@@ -930,8 +930,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-10-31T03:04:05.816Z",
-      "analyzedAt": "2026-10-31T03:14:54.632Z"
+      "observedAt": "2026-10-31T03:35:43.043Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
