@@ -131,14 +131,16 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='GET'&&url.pathname==='/api/browser-login-status')return json(res,200,await browserLoginFor(url.searchParams.get('channel')||'lotte').status());
     if(req.method==='GET'&&url.pathname==='/api/naver-status')return json(res,200,{configured:!!(naverCredentials.clientId&&naverCredentials.clientSecret),...naverVerification,researchConfigured:state.product?researchForProduct(state.product).configured:false,lastAttempt:naverLastAttempt});
     if(req.method==='GET'&&url.pathname==='/api/state'){
-      const versions={};
-      for(const key of ['main','extra1','extra2'])versions[key]=state.folder?(await backgroundImageStatus(state.folder,key)).version||null:null;
-      let colorChipStatus=null;
-      if(state.folder)try{colorChipStatus=JSON.parse(await readFile(path.join(state.folder,'colorchip-status.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
-      if(colorChipStatus)versions.main=(versions.main||'original')+':'+colorChipStatus.hash;
-      const selected=state.folder?await backgroundSelection(state.folder):'main';
       const includeSmartstore=url.searchParams.get('channel')!=='lotte';
-      const listing=includeSmartstore&&state.product&&!state.product.photoSelectionPending?await listingPreview(state.product,{dataRoot}):null;
+      const folder=state.folder,product=state.product;
+      const [imageStates,colorChipStatus,selected,listing]=await Promise.all([
+        Promise.all(['main','extra1','extra2'].map(async key=>[key,folder?(await backgroundImageStatus(folder,key)).version||null:null])),
+        folder?readFile(path.join(folder,'colorchip-status.json'),'utf8').then(JSON.parse).catch(e=>{if(e.code!=='ENOENT')throw e;return null;}):null,
+        folder?backgroundSelection(folder):'main',
+        includeSmartstore&&product&&!product.photoSelectionPending?listingPreview(product,{dataRoot}):null
+      ]);
+      const versions=Object.fromEntries(imageStates);
+      if(colorChipStatus)versions.main=(versions.main||'original')+':'+colorChipStatus.hash;
       return json(res,200,{...state,folder:undefined,capabilities:{manualTags:true,photoAnalysisSettings:true},tagResearch:includeSmartstore&&state.product?selectedProductTagResearch(state.product,{dataRoot}):null,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,photoReview:listing.photoReview,detailRevision:listing.detailRevision,mainColor:listing.main.color||'품번 폴더 사진',extraColors:listing.extras.map(p=>p.color||'제공한 상품사진'),extraRoles:listing.extras.map(p=>p.role),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state,benefitResearch:benefitResearchView(benefitResearch.state)});
     }
     if(req.method==='GET'&&url.pathname==='/api/smartstore-point-picker'){
