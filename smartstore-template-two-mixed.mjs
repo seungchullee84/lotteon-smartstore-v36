@@ -11,7 +11,7 @@ import {templateTwoFooter} from './smartstore-template-two-footer.mjs';
 import {templateTwoCss} from './smartstore-template-two-style.mjs';
 import {templateTwoSxoBody,templateTwoSxoCss} from './smartstore-template-two-sxo.mjs';
 export {mannequinWearingNote,productSellingPoints};
-export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-sxo-photo-benefits-20261101';
+export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-sxo-photo-pairs-20261101';
 export const TEMPLATE_ASSET_NAMES=['giordano-official.png','lotte-department-official.png','store.jpg','GowunDodum-Regular.ttf'];
 export const TEMPLATE_ASSET_BASE='https://raw.githubusercontent.com/seungchullee84/lotteon-smartstore-v36/main/public/smartstore-template/';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

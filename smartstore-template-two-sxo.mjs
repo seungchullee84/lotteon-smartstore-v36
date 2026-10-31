@@ -46,10 +46,11 @@ export const templateTwoSxoCss=`
 .ss2-palette-name{font-size:20px;line-height:1.7;padding-top:12px;border:0}
 .ss2-photo-heading{text-align:center;margin:0;padding:32px 24px;font-size:26px}
 .ss2-color{padding:36px 12px}
-.ss2-color-photos,.ss2-color-photos[data-count-many]{grid-template-columns:1fr 1fr;gap:8px}
-.ss2-color-photos figure:first-child{grid-column:1/-1}
+.ss2-color-photos,.ss2-color-photos[data-count-many]{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ss2-color-photos figure{min-width:0}
+.ss2-color-photos figure:first-child,.ss2-color-photos figure:nth-child(3){grid-column:auto}
 .ss2-color-photos figure:nth-child(2){margin:0}
-.ss2-color-photos figure:nth-child(3){grid-column:auto}
+.ss2-color-photos figure:only-child{grid-column:1/-1}
 .ss2-material{margin:0;padding:36px 48px;text-align:center;border:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--alternate)}
 .ss2-material p{font-size:22px}
 .ss2-material [data-size-comparison-note]{font-size:18px;margin-top:16px}
