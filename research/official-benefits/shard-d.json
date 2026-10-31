@@ -4157,8 +4157,8 @@
       ],
       "status": "automatic-source-reviewed",
       "visualReview": false,
-      "observedAt": "2026-10-31T08:03:01.791Z",
-      "analyzedAt": "2026-10-31T08:19:11.220Z"
+      "observedAt": "2026-10-31T08:39:39.662Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
