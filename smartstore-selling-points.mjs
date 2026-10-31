@@ -8,9 +8,9 @@ function cleanSource(text){
  const fits=value.match(/(?:슬림|레귤러|레글러|루즈|와이드|오버)\s*핏/g)||[];
  const unknownAcronym=(value.match(/\b[A-Z]{2,5}\b/g)||[]).some(word=>!['FIT','REGULAR','RELAXED','SLIM','WIDE','OVER','SPAN','POLY','GG','GSM','SQM','YD','RIB','NECK','CREW','FRENCH','TERRY','PTT','YKK','CVC','HEAT','COOL','WARM','DRY','WOOL','MODAL','NYLON','RAYON','DENIM','LINEN','SILK','LYCRA','NYC','UPF','SPF','UV'].includes(word));
  const brokenNumber=/[가-힣]\s+\d+(?:\s+\d+)+\s+[가-힣]|[가-힣]\s+\d{2,}\s+[가-힣]/.test(value);
- return !brokenNumber&&!unknownAcronym&&!/[\uFFFD\[\]{}=|\\]/.test(value)&&!/[A-Za-z][A-Za-z0-9]*\]/.test(value)&&new Set(fits.map(s=>s.replace(/\s/g,''))).size<2;
+ return !brokenNumber&&!/^\s*(?:유지하며|더하며|살리며|제공하며|높이며)\s*[,，]/.test(value)&&!unknownAcronym&&!/[\uFFFD\[\]{}=|\\]/.test(value)&&!/[A-Za-z][A-Za-z0-9]*\]/.test(value)&&new Set(fits.map(s=>s.replace(/\s/g,''))).size<2;
 }
-function completeCopy(text){const value=String(text).replace(/[.!?]+$/,'').trim();return !/[,，;:]$/.test(value)&&!/(?:부터|으로|위한|통해|이며|으며|하며|하고|하지만|더해진|경량|로|며|좋|했|였|렸|췄|줬|뒀|웠|었|았|있|없|한|된|되는|있는|없는|하는|좋은|위해|살린|높인)$/.test(value);}
+function completeCopy(text){const value=String(text).replace(/[.!?]+$/,'').trim();return !/[,，;:]$/.test(value)&&!/(?:부터|으로|위한|통해|이며|으며|하며|하고|하지만|더해진|경량|로|며|좋|했|였|렸|췄|줬|뒀|웠|었|았|있|없|한|된|되는|있는|없는|하는|좋은|위해|살린|높인|할|될|을|를|수|및|거나)$/.test(value);}
 function finishSourceClause(text){
  // Splitting "강화했으며" leaves "강화했". Finish only the past-tense
  // ending; the claim and its full original evidence remain unchanged.
@@ -182,7 +182,7 @@ export function assertRequiredSellingPoints(detail){
 const hasFinalConsonant=text=>{const c=text.charCodeAt(text.length-1);return c>=0xac00&&c<=0xd7a3&&(c-0xac00)%28!==0;};
 export function friendlyBenefitDescription(value){
  const sentence=part=>{
-  let text=part.trim().replace(/[.!?]+$/,'');if(!text)return '';
+  let text=part.trim().replace(/[.!?]+$/,'');if(!text||!completeCopy(text)||!cleanSource(text))return '';
   if(/요$/.test(text))return text+'.';
   for(const [ending,replacement] of [
    [/하였습니다$/,'했어요'],[/되었습니다$/,'됐어요'],[/합니다$/,'해요'],[/됩니다$/,'돼요'],[/했습니다$/,'했어요'],[/됐습니다$/,'됐어요'],
@@ -198,13 +198,14 @@ export function friendlyBenefitDescription(value){
   if(/가능$/.test(text))return text+'해요.';
   const action=text.match(/^(.+?)\s*(제공|유지|조절|연출|구현|확보|완성|강화)$/);
   if(action){const [,subject,verb]=action,object=/(?:으로|로|을|를|게)$/.test(subject)?subject:subject+(hasFinalConsonant(subject)?'을':'를');return object+' '+({제공:'제공해요',유지:'유지해요',조절:'조절할 수 있어요',연출:'연출할 수 있어요',구현:'구현했어요',확보:'확보했어요',완성:'완성해요',강화:'강화했어요'}[verb])+'.';}
+  if(/(?:습니다|니다)$/.test(text))return '';
   return text+(hasFinalConsonant(text)?'이에요.':'예요.');
  };
  return String(value||'').split(/(?<=[.!?])\s+/).map(sentence).filter(Boolean).join(' ');
 }
 export function displaySellingPoints(points,{tone=true}={}){
  const copy=value=>String(value||'').replace(/브러쉬드|브러시드|brushed/gi,'기모');
- return points.map(point=>({...point,title:copy(point.title),description:tone?friendlyBenefitDescription(copy(point.description)):copy(point.description),...(point.shortTitle?{shortTitle:copy(point.shortTitle)}:{})}));
+ return points.filter(point=>completeCopy(point.description)&&cleanSource(point.description)&&(!point.evidence||cleanSource(point.evidence))).map(point=>({...point,title:copy(point.title),description:tone?friendlyBenefitDescription(copy(point.description)):copy(point.description),...(point.shortTitle?{shortTitle:copy(point.shortTitle)}:{})})).filter(point=>point.description);
 }
 export function officialSellingPoints(description,{limit=4}={}){
  const points=extractOfficialSellingPoints(description,limit);
