@@ -3,6 +3,33 @@
   "records": [
     {
       "rule": "adult-official-benefits-1",
+      "style": "075504",
+      "rawName": "NEW [변우석] 페이크레더 자켓",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=D023FD896A8FFAAD5AF29CC2CCA88E6D&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01075504.jpg",
+      "detailHash": "8e3ff39347fdca69f25ca67680fa736b7ff23f7e21b46d805600412e9553e039",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"f23cd66377e1974a0950a7ac7248d077\"",
+        "lastModified": "Tue, 15 Apr 2025 05:00:03 GMT"
+      },
+      "pageHash": "9319451ca76094bd34ff08d1e870fc051e7dadd4a69c36427e54095d302e852a",
+      "pageText": "가죽의 질감을 그대로 재현한 페이크 레더 소재를 사용한 페이크레더 자켓입니다.\n자연스럽고 은은한 광택과 매끄러운 질감을 보여주며 적당한 두께감으로 탄성이 좋고 가먼트 워싱을 통해 유연하고 편안한 착용감을 선사합니다.\n\n셔츠 칼라의 간편한 집업 디자인으로 가볍게 무난한 룩을 연출하기 좋습니다.\n베이직한 포켓 디자인의 메탈 부자재를 사용하여 고급스러운 외관을 보여줍니다.\n앞여밈 지퍼와 소매 지퍼로 ykk 니켈 샤이니를 사용하였으며 소매의 지퍼 오프닝으로 커프스 너비를 조절할 수 있으며 사이드 밑단의 버클로 밑단 둘레를 조절하여 원하는 실루엣을 연출할 수 있습니다.\n가먼트 워싱을 통해 워싱 특유의 자연스러운 주름과 컬러를 보여주며 심부분에 핸드 워싱 기법을 적용하여 페이드 효과를 더했습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:13.669Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "415963",
       "rawName": "후리스 루즈핏 팬츠(2way)",
       "gender": "여성",
@@ -712,6 +739,44 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:24:04.732Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "045902",
+      "rawName": "NEW [변우석] 옥스포드 셔츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=D28693515536F22B9E02A7660208A7D8&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01045902.jpg",
+      "detailHash": "f14e12a31eafd4b899d8b96334507e8b9d5c9573b37cdb91c15900cfd36b4268",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"0b5af26d76245486c49781fd4711b2b0\"",
+        "lastModified": "Tue, 11 Aug 2026 08:30:12 GMT"
+      },
+      "pageHash": "babe08bedc980e431c6524decdb20ebd71b1bc936446fe8919a073bad70d1cfe",
+      "pageText": "적당한 여유를 지닌 레귤러 핏으로, 단정하고 균형 잡힌 실루엣이 특징입니다. \n어깨와 품이 과하지 않게 설계되어 깔끔한 인상을 주며, 체형에 구애 없이 자연스럽게 떨어져 데일리 셔츠로 손색없는 핏을 구현합니다.\n\n40수를 사용한 옥스포드 조직의 코튼 원단으로, 견고한 내구성과 촘촘한 밀도감이 특징입니다. \n머서라이징 가공을 통해 은은한 광택과 매끈한 터치감을 더했으며, 가먼트 워싱으로 한층 부드럽고 자연스러운 착용감을 제공합니다.\n최종 단계에서는 스팀 프레싱 처리로 형태감을 안정화해, 세탁 후에도 셔츠 본연의 실루엣이 무너지지 않도록 유지합니다.\n\n클래식 셔츠의 전형을 따르면서도 버튼다운 칼라와 가슴 오각 포켓 디테일로 실용성을 더했습니다. \n\n총 17가지 컬러로 구성되어 솔리드와 스트라이프가 균형 있게 배치된 다채로운 라인업입니다. \n무채색 계열의 뉴트럴 톤부터, 가을에 어울리는 시즌 컬러, 클래식한 스트라이프 패턴까지 폭넓은 선택지를 제공하여 시즌과 스타일에 따라 다양하게 연출이 가능합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드러운 착용감",
+          "description": "가먼트 워싱으로 한층 부드럽고 자연스러운 착용감을 제공합니다.",
+          "evidence": "머서라이징 가공을 통해 은은한 광택과 매끈한 터치감을 더했으며, 가먼트 워싱으로 한층 부드럽고 자연스러운 착용감을 제공합니다."
+        },
+        {
+          "title": "소지품을 간편하게",
+          "description": "편리한 포켓으로 간편하게 수납해요.",
+          "evidence": "포켓 디테일로 실용성"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:42.360Z",
       "analyzedAt": null
     },
     {
@@ -1587,6 +1652,39 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:19:37.006Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "025512",
+      "rawName": "NEW 프렌치 테리 베이직 후드티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=D47124FD1739C9441690362C9154DA7A&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01025512.jpg",
+      "detailHash": "aa518057b9035518fe1656eb1b3580f0f3b1c0c2f5d2a8fd795dc0d9224ed7e5",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"a47af67484da1d60b3d3cb9516a63583\"",
+        "lastModified": "Fri, 07 Feb 2025 01:00:55 GMT"
+      },
+      "pageHash": "b97b3bf8d0f64509e8642f4e9c40c4acbe6210f9d1cc0607ef7a8e092c15b720",
+      "pageText": "합리적인 가격대로 제안하는 프렌치 테리 소재의 후드 풀오버 스타일입니다.\n\n어디에나 매치하기 좋은 기장감과 어떠한 체형에도 상관없이 잘 어울리는 REGULAR FIT으로 제안하였으며, \n모든 연령대가 쉽고 편안하게 입을 수 있는 스타일입니다.\n\n코튼100%(320G/M2)의 촘촘히 짜여진 고밀도 테리를 사용하여 \n탄탄하고 톡톡한 터치감과 편안한 활동성을 제공합니다.\n\n주요 부위에는 갈라 삼봉 스티치 작업을 하여 내부의 시접을 깨끗이 정리하고 내구성을 강화하였다.\n소매와 밑단에는 라이크라 원사가 포함되어 있는 립 원단을 사용하여 텐션과 복원력이 좋아 편안하게 착용가능합니다.\n또한, 밑단이 크게 조이지 않아 레이어드 티(01020940)와 함께 착용을 하면 멋스럽게 연출 가능합니다.\n\n단품으로는 물론, 다양한 하의 및 아우터와 연출 가능하며, 합리적인 가격대로 부담 없이 즐길 수 있는 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "탄탄한 착용감",
+          "description": "코튼100%(320G/M2)의 촘촘히 짜여진 고밀도 테리를 사용하여 탄탄.",
+          "evidence": "코튼100%(320G/M2)의 촘촘히 짜여진 고밀도 테리를 사용하여 탄탄하고 톡톡한 터치감과 편안한 활동성을 제공합니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:18.671Z",
       "analyzedAt": null
     },
     {
@@ -2965,6 +3063,39 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "045905",
+      "rawName": "NEW 웨스턴 데님 셔츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=D9349243ED0BB2F97CC19C54214E486F&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01045905.jpg",
+      "detailHash": "47452b99f3447751bf4f46c851a6fb1e4a11052b8f384aa83b4c04da397a2a66",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"8c25dc1cfcc8935393c83371544c8506\"",
+        "lastModified": "Wed, 06 Aug 2025 04:53:16 GMT"
+      },
+      "pageHash": "7f21fd8de091710a1267cd91fa7e62ef2215518bdb15b8d749b9567cba450007",
+      "pageText": "전체적으로 균형감 있게 떨어지는 레귤러 핏으로, 웨스턴 셔츠 특유의 구조적인 실루엣을 안정감 있게 담아냈습니다. \n어깨와 몸통에 과한 여유 없이 깔끔하게 설계되어, 데님 셔츠 특유의 탄탄한 분위기를 살리면서도 다양한 체형에 부담 없이 착용 가능한 핏입니다.\n\n6.5온스의 코튼 100% 데님 원단을 사용하여 적당한 두께감과 함께 내구성이 뛰어난 텍스처를 제공합니다. 탄탄한 밀도와 부드러운 터치감이 균형을 이루는 소재입니다.\n\n웨스턴 셔츠 특유의 절개선과 스냅 버튼 디테일이 특징입니다. \n전면에는 오각형 플랩 포켓이 양쪽에 배치되어 실용성과 스타일을 동시에 갖추었으며, 단추는 일반 폴리 버튼이 아닌 스냅 여밈으로 마감해 보다 직관적이고 견고한 착용감을 제공합니다. \n전반적으로 클래식 웨스턴 무드를 현대적으로 재해석한 디자인입니다.\n\n클래식 데님 컬러를 중심으로, 블루와 블랙의 두 가지 톤으로 전개됩니다.\n\n**데님 제품의 경우 워싱 가공 특성상 제품 별 디테일의 편차가 있을 수 있습니다. \n**데님 염료의 특성상 이염 및 물빠짐이 불가피하므로 반드시 미지근한 물에 뒤집어서 단독 세탁하시기 바랍니다.\n**데님 원단 특성 상 컬러 별로 상세 스펙 차이가 있을 수 있습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드러운 착용감",
+          "description": "탄탄한 밀도와 부드러운 터치감이 균형을 이루는 소재입니다.",
+          "evidence": "탄탄한 밀도와 부드러운 터치감이 균형을 이루는 소재입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:35.170Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "116955",
       "rawName": "NEW 브러시드 테리 스트레이트 스웻 팬츠",
       "gender": "남성",
@@ -3191,6 +3322,33 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:23:03.595Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "045507",
+      "rawName": "NEW 샴브레이 셔츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=DAF2CD702F488805E6B3AFB80904A463&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01045507.jpg",
+      "detailHash": "27de82e24264ca964d2b90fc9105aacedb615173e2fd32ff54eb77b32f42ac9e",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"3f94207a0e6d0994d37dc9d7daaab3cc\"",
+        "lastModified": "Tue, 11 Feb 2025 08:11:01 GMT"
+      },
+      "pageHash": "d6705e05c080a4769f735ca2fc170869b161550b83f0693e39ffc5892b748cc9",
+      "pageText": "클래식한 레귤러 핏으로 어떤 스타일에도 부담없이 착용 가능한 스타일 입니다.\n단정하면서도 클래식한 룩으로 연출 할 수 있는 스탠다드한 핏 입니다.\n\n20수의 부드러운 터치감과 드레시한 무드의 샴브레이 소재 특성이 돋보이는 셔츠입니다. \n2가지 색의 실이 교차되어 있는 매력적인 투톤 원단입니다. \n데님느낌으로 캐주얼 하면서도 클래식한 연출이 가능합니다.  \n\n어디에나 매칭하기 쉬운 블루 컬러입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:23.453Z",
       "analyzedAt": null
     },
     {

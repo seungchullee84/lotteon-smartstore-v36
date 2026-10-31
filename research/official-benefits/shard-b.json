@@ -173,6 +173,44 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "345501",
+      "rawName": "NEW 베이직 포플린 셔츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=B079D4EAA47388A928F09EDE6AA04B6B&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05345501.jpg",
+      "detailHash": "b0f98eb2311ab5016a75f6c558a526db0f96a56ccbdb349adac23317afc7d43d",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"07ed79778ad628faf641b215c3c16852\"",
+        "lastModified": "Mon, 29 Sep 2025 03:05:48 GMT"
+      },
+      "pageHash": "90de9798b56a30a2e4b19587c50afb16d712016aa88aa2990b769a1ee25191ed",
+      "pageText": "코튼 100% 소재의 포플린 베이직 셔츠입니다.\n\n부드럽고 터치감이 좋은 코튼 100% 소재로 착용감이 편안하며,\n자연스러운 워싱 기법을 통하여 포플린 셔츠 특유의 산뜻한 착용감을 선사해주며,\n머서라이징 가공을 더해 더욱 부드러운 촉감을 느낄 수 있습니다.\n\n착용시 살짝 여유 있는 스탠다드 핏으로 다양한 아이템과 이지하게 매치할 수 있으며, \n깔끔한 아웃핏을 연출해줍니다.\n\n봄과 어울리는 산뜻한 핑크, 옐로우, 그린 컬러와 \n클래식한 블루 무드로 구성되어 트렌디한 느낌을 줍니다. \n솔리드 컬러와 다양한 패턴으로 선택의 폭이 넓어, \n다양한 상의와 레이어드하기 좋은 활용도 높은 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드러운 착용감",
+          "description": "머서라이징 가공을 더해 더욱 부드러운 촉감을 느낄 수 있습니다.",
+          "evidence": "부드럽고 터치감이 좋은 코튼 100% 소재로 착용감이 편안하며, 자연스러운 워싱 기법을 통하여 포플린 셔츠 특유의 산뜻한 착용감을 선사해주며, 머서라이징 가공을 더해 더욱 부드러운 촉감을 느낄 수 있습니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "다양한 상의와 레이어드하기 좋은 활용도 높은 아이템입니다.",
+          "evidence": "솔리드 컬러와 다양한 패턴으로 선택의 폭이 넓어, 다양한 상의와 레이어드하기 좋은 활용도 높은 아이템입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:50.491Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "326504",
       "rawName": "골지 슬림핏 긴팔 티셔츠",
       "gender": "",
@@ -916,6 +954,39 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "056911",
+      "rawName": "NEW 울혼방 크루넥 긴팔 니트 가디건",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=B296E6D9D7ADDA8CF60B6EA46C6739E8&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01056911.jpg",
+      "detailHash": "e2dfb04201db779e3126fa1585bafda711765173630e63fc612b5df9aaec9de9",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"f53edc6270d99eefc96076c09827dd23\"",
+        "lastModified": "Fri, 18 Sep 2026 07:38:08 GMT"
+      },
+      "pageHash": "2b4e23c8102552abaced171fe070a5895f36590fcf158a9ea6d393452fd3b8c0",
+      "pageText": "부드러운 터치감의 편안한 실루엣의 크루넥 스웨터\n\n부드러운 터치의 7GG 울 혼방 소재를 사용하여 적당한 두께감과 편안한 착용감을 제공합니다.\n미니멀한 크루넥 디자인과 버튼 여밈으로 다양한 이너와 활용하기 좋은 아이템입니다.\n\n*제품의 형태와 컬러를 오래 유지하기 위해 드라이클리닝을 권장하지 않습니다.\n케어라벨에 표기된 세탁 방법에 따라 관리해 주세요.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드러운 착용감",
+          "description": "부드러운 터치감의 편안한 실루엣의 크루넥 스웨터.",
+          "evidence": "부드러운 터치감의 편안한 실루엣의 크루넥 스웨터"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:02.929Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "354916",
       "rawName": "울 터틀넥 니트",
       "gender": "",
@@ -940,6 +1011,39 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:21:42.034Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "076901",
+      "rawName": "NEW [변우석] 코튼 트윌 풀집 자켓",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=B3119804F38716C3D8AE5F5146FD7175&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076901.jpg",
+      "detailHash": "fac0fda78bcef2e27787d87de917f37767217c0ae5fd0bda04d63e61eb25c886",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"87f70633765bd2ad7073c6761920f054\"",
+        "lastModified": "Wed, 05 Aug 2026 06:04:49 GMT"
+      },
+      "pageHash": "1a407badcabb18bd64c59e8044d039cd0014c9d3846a23f08e2975febc5e30f2",
+      "pageText": "레귤러 핏의 코튼 집업 재킷입니다. \n여유 있는 실루엣과 적당한 기장감으로 다양한 이너와 함께 편안하게 착용할 수 있도록 제작되었습니다.\n고밀도 코튼 트윌 원단과 홑겹 사양으로 가볍고 쾌적한 착용감을 제공하며,\n가먼트 워싱을 더해 자연스러운 컬러감과 부드러운 터치감을 완성했습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드러운 착용감",
+          "description": "가먼트 워싱을 더해 자연스러운 컬러감과 부드러운 터치감을 완성했습니다.",
+          "evidence": "고밀도 코튼 트윌 원단과 홑겹 사양으로 가볍고 쾌적한 착용감을 제공하며, 가먼트 워싱을 더해 자연스러운 컬러감과 부드러운 터치감을 완성했습니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:45.638Z",
       "analyzedAt": null
     },
     {
@@ -1531,6 +1635,49 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:19:02.129Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "026958",
+      "rawName": "NEW [변우석] 프렌치 테리 맨투맨",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=B5352654974588EB1C4414B5105F199D&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01026958.jpg",
+      "detailHash": "471231f8ac78571f14f43a21c5357044e0ea734aae2171f5cef8c0873c227427",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"008bde1d9fb2034eaa18131d6d95fbf9\"",
+        "lastModified": "Mon, 28 Sep 2026 07:14:46 GMT"
+      },
+      "pageHash": "cccfef1a327f3d03d15ef1adc4c37c70a0b859c75d488835c2780365b793af50",
+      "pageText": "베이직한 디자인과 편안한 착용감을 갖춘 솔리드 컬러 스웨트셔츠\n\n베이직한 크루넥 디자인과 자연스럽게 떨어지는 레귤러 핏으로 다양한 스타일링이 가능한 데일리 스웨트셔츠입니다. \n적당한 여유의 실루엣과 안정적인 기장감으로 편안한 착용감을 제공하며, \nCVC 프렌치 테리 소재를 사용해 부드러운 터치감과 우수한 내구성을 갖추었습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드럽게 닿는 촉감",
+          "description": "부드러운 촉감이 느껴지는 원단.",
+          "evidence": "부드러운 터치감과 우수한 내구성을 갖추"
+        },
+        {
+          "title": "오래 입기 좋은 내구성",
+          "description": "우수한 내구성을 갖췄어요.",
+          "evidence": "우수한 내구성"
+        },
+        {
+          "title": "여유롭게 편안한 착용감",
+          "description": "여유 있는 실루엣으로 편안하게 입어요.",
+          "evidence": "여유의 실루엣과 안정적인 기장감으로 편안한 착용감"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:40.038Z",
       "analyzedAt": null
     },
     {
@@ -3703,6 +3850,33 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "115914",
+      "rawName": "NEW [변우석] 세미와이드 슬랙스",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=BE2F99ECF3C73CC831A5C78EF2226FFD&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01115914.jpg",
+      "detailHash": "c5d96fc006d5608297a1b67249d472ef8635af6caa63cfaeddaed411f05c7b13",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"dc637c9ce0c0d8d1c99bac48d5d078ae\"",
+        "lastModified": "Fri, 05 Sep 2025 04:31:58 GMT"
+      },
+      "pageHash": "30636e537dc0b7a294ebe678b8878d1c4239db7696dbf2f91fa01738dfe83d3c",
+      "pageText": "세미 와이드핏 슬랙스입니다.\n\n허벅지와 밑위에 여유를 주어 편안한 착용감을 제공하며, 과하지 않은 일자로 자연스럽게 떨어지는 실루엣으로 단정하면서도 트렌디한 무드를 완성합니다.\n여유로우면서도 부담 없는 볼륨감으로, 일상적인 활동은 물론 다양한 스타일링에도 부담 없이 활용할 수 있습니다\n\n폴리에스터·레이온·폴리우레탄 혼방 소재로 제작되어 신축성과 복원력이 뛰어납니다.\n유연한 스트레치감으로 장시간 착용에도 편안함을 유지하며, 부드러운 터치감과 우수한 구김 방지로 관리가 용이합니다.\n\n내구성이 뛰어난 YKK® 지퍼를 사용해 완성도를 높였습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:29.661Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "435503",
       "rawName": "NEW 여성 스퀘어 버클 가죽 벨트 (14mm)",
       "gender": "",
@@ -4344,6 +4518,33 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:18:26.463Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "116914",
+      "rawName": "NEW [변우석] 스트레이트 슬랙스",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=BFF14D57C3EC1EA965C27EE66F95CE58&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01116914.jpg",
+      "detailHash": "2b2664b21e5e4bb66e1b716796318919a5385fa29180b90939e3390e681e214b",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"22c04479fee6427e0babc1297dee263b\"",
+        "lastModified": "Mon, 31 Aug 2026 08:49:19 GMT"
+      },
+      "pageHash": "4827cb0bbb0313bedccd42a8eb07eb4f5d75d61fa7f537542be99da2c189b03a",
+      "pageText": "스트레이트핏 슬랙스입니다. \n\n허벅지와 밑위에 여유를 주어 편안한 착용감을 제공하며, \n과하지 않은 일자로 자연스럽게 떨어지는 실루엣으로 단정하면서도 트렌디한 무드를 완성합니다.\n\n폴리에스터·레이온·폴리우레탄 혼방 소재로 제작되어 \n신축성과 복원력이 뛰어나며, 유연한 스트레치감과 우수한 구김 방지로 관리가 용이합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:04.990Z",
       "analyzedAt": null
     }
   ]

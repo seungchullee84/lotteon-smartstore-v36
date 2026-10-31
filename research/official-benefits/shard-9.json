@@ -319,6 +319,39 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "056902",
+      "rawName": "NEW [변우석] 울혼방 브이넥 긴팔 니트",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=913F570D2A40A12E9D1A7A8B5970C311&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01056902.jpg",
+      "detailHash": "4d57bd2353691fac098461e9c1c33676d8904f35cb1e4573dd63a6d12a6007c0",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"1b71ed8f2053ced82b567b4cd9c930dd\"",
+        "lastModified": "Wed, 23 Sep 2026 05:00:25 GMT"
+      },
+      "pageHash": "69662f8180d33c84fdcc6ebb61d0bc87cc0b8e2404e3d8d2d2e1b8df14027d0e",
+      "pageText": "가볍고 세련된 스타일링이 가능한 V넥 스웨터\n\n얇은 12GG 하이게이지 조직으로 편직되어 부드럽고 가벼운 착용감을 제공합니다.\n단독 착용은 물론 셔츠와의 레이어링에도 활용하기 좋은 베이직한 스웨터 아이템입니다.\n\t\t\n혼용율\t폴리에스터 30% 아크릴 30% 나일론 25% 모 15%\t\t\t\n제조년월\t202607\t\t\t\n제조국\t중국\t\t\t\n세탁방법\t30도중성세제로손세탁,염소표백금지,80-120도천대고다림질,뉘어서그늘건조,드라이클리닝가능",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "가볍게 입기 좋게",
+          "description": "가볍고 세련된 스타일링이 가능한 V넥 스웨터.",
+          "evidence": "가볍고 세련된 스타일링이 가능한 V넥 스웨터"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:07.959Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "075501",
       "rawName": "트렌치 코트",
       "gender": "",
@@ -1361,6 +1394,33 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:22:44.401Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "115551",
+      "rawName": "NEW 프렌치 테리 조거 스웻 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=9482FA543EF013BD857CBB1EFBD45BB0&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01115551.jpg",
+      "detailHash": "0833648015574e4b78aeb7e1ceea8ecd3441933d59e03a59977243aa71b673d6",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"c7036f995b2137b7ebf448ee550f8117\"",
+        "lastModified": "Mon, 03 Feb 2025 07:04:40 GMT"
+      },
+      "pageHash": "d88f24620da17e6a690f2d01e5dcf1dfb612cd46b5ce1f47a981f0abcbb29d24",
+      "pageText": "프렌치 테리 소재의 조거 테리 팬츠입니다.\n\n코튼 100%(340G/M2)의 촘촘히 짜여진 고밀도 프렌치 테리 원단(400g/m2)을 사용하여 탄탄하고 톡톡한 터치감과 편안한 활동성을 제공합니다.\n\n밑단에 엘라스틱 밴드가 내장되어 캐주얼 하면서도 편안하게 착용할 수 있는 제품입니다. \n\n01025510 일부 컬러와 동일 컬러를 사용하여 상하의 셋업 착장이 가능한 제품입니다. \n\n활용도 높은 기본 컬러 위주로 구성하였습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:33.859Z",
       "analyzedAt": null
     },
     {
@@ -2412,6 +2472,33 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "076910",
+      "rawName": "NEW CLOUD LIGHT G-MOTION 목넥 심리스 경량 패딩",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=9996DF84828F917B2042D2DD6B7475B2&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076910.jpg",
+      "detailHash": "b8219ffc8fd9cdd6e0dd0d3d6f8c217cae6dbb4fbeb2d648d1f8d6d6d0c5e2c0",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"d266f571297370fa8537d6c7e27d1521\"",
+        "lastModified": "Mon, 21 Sep 2026 05:36:27 GMT"
+      },
+      "pageHash": "91725929b02b87b62b80c765dcecbc4a6be7d059545798a700571fd8e1e6d67b",
+      "pageText": "핫멜트 기법을 적용하여 외부 찬바람 유입을 차단하고 보온성을 극대화한 액티브 스탠드 넥 경량 패딩입니다. \n목을 감싸는 안정적인 스탠드 넥 디자인으로 방풍 효과를 높였으며, 아웃도어 환경 및 액티브 퍼포먼스에 최적화된 입체 패턴과 우수한 신체 밀착력을 제공합니다. 도심 속 일상부터 아웃도어까지 폭넓게 활용 가능한 아우터입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:37.750Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "375912",
       "rawName": "NEW CLOUD LIGHT 경량 베스트",
       "gender": "",
@@ -2489,6 +2576,39 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:14:07.871Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "025514",
+      "rawName": "NEW 테리 후드집업",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=9A0D9A027B7F85B50321B98C56986CC3&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01025514.jpg",
+      "detailHash": "67a8c99f1d078a146e0ecaadd32199f9236651b1b64d86c419124869fe1b2069",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"adba744335980df33fb15ba1cea45963\"",
+        "lastModified": "Fri, 07 Feb 2025 01:01:09 GMT"
+      },
+      "pageHash": "8dfd8d09070dd88952eaa925f29527f5af024746a5ed81b3a91881bee9a8157e",
+      "pageText": "프렌치 테리 소재의 후드 집업 스타일입니다.\n\n어디에나 매치하기 좋은 기장감과 어떠한 체형에도 상관없이 잘 어울리는 REGULAR FIT으로 제안하였으며, \n모든 연령대가 쉽고 편안하게 입을 수 있는 스타일입니다.\n\n코튼100%(340G/M2)의 촘촘히 짜여진 고밀도 테리를 사용하여 \n탄탄하고 톡톡한 터치감과 편안한 활동성을 제공합니다.\n\n주요 부위에는 갈라 삼봉 스티치 작업을 하여 내부의 시접을 깨끗이 정리하고 내구성을 강화하였다.\n내구성과 품질이 우수한 YKK금속 지퍼를 사용하여 옷의 퀄리티를 높였습니다.\n\n소매와 밑단에는 라이크라 원사가 포함되어 있는 립 원단을 사용하여 텐션과 복원력이 좋아 편안하게 착용가능합니다.\n단품으로는 물론, 다양한 하의 및 아우터와 연출 가능하며, 합리적인 가격대로 부담 없이 즐길 수 있는 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "탄탄한 착용감",
+          "description": "코튼100%(340G/M2)의 촘촘히 짜여진 고밀도 테리를 사용하여 탄탄.",
+          "evidence": "코튼100%(340G/M2)의 촘촘히 짜여진 고밀도 테리를 사용하여 탄탄하고 톡톡한 터치감과 편안한 활동성을 제공합니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:18.814Z",
       "analyzedAt": null
     },
     {
@@ -3063,6 +3183,39 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "025922",
+      "rawName": "NEW [변우석] 브러시드 테리 베이직 후드티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=9C1BBE723B4584200C632ACED1243BB1&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01025922.jpg",
+      "detailHash": "3d2ea99028fe8cff687ea4625e039d7120d63e8aa4f1702115f62be8f714a095",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"12a0f0558308d55c00fe75559c4131f2\"",
+        "lastModified": "Thu, 09 Oct 2025 23:59:11 GMT"
+      },
+      "pageHash": "4ef412dde07cb7b2587e15b10c3498763a16280caafab53e0f4865485aab2653",
+      "pageText": "전체적으로 단정하게 떨어지는 레귤러 핏의 후드 풀오버 입니다.\n\n과도하게 크거나 슬림하지 않은 균형 잡힌 실루엣으로 체형에 구애받지 않고 자연스러운 착용감이 특징이며, 일상에서 데일리 웨어로 활용하기 좋은 안정적인 핏이 특징입니다.\n\n코튼 60%, 폴리에스터 40% 혼방의 브러시드 플리스 원단을 사용했습니다. 바디 원단은 250gsm으로 가볍지만 충분한 보온성이 우수하며, 안감 기모 가공으로 한층 더 부드럽고 따뜻한 착용감을 줍니다. 리브는 코튼·폴리에스터·스판덱스 혼방으로 제작되어 형태 복원력과 신축성이 우수하며, 세탁 후에도 안정적인 실루엣을 유지합니다. 가볍고 따뜻한 소재 특성 덕분에 간절기부터 겨울철까지 폭넓게 착용할 수 있습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "바디 원단은 250gsm으로 가볍지만 충분한 보온성이 우수하며, 안감 기모 가공으로 한층 더 부드럽고 따뜻한 착용감을 줍니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:40.061Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "352919",
       "rawName": "꽈배기 폴로 니트",
       "gender": "",
@@ -3391,6 +3544,44 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "055502",
+      "rawName": "NEW 더블 크루넥 니트",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=9DFA90B47FB5223AD397E9BA918A6301&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01055502.jpg",
+      "detailHash": "4759728389c1376bf0c696f5e0593197368a3d7868da2c24d9c98415daeb7cf9",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"9224990ecb62fc4541cca90f500570e1\"",
+        "lastModified": "Mon, 06 Jan 2025 01:28:02 GMT"
+      },
+      "pageHash": "80adbf393274f541cee833799c41b4991fd5d59fb148447994538d6c830221e4",
+      "pageText": "탄탄하면서 유연한 12gg 더블니트 조직의 크루넥 스웨터입니다\n\n맨살에 입어도 될만큼의 부드러운 촉감이 인상적이며 더블니트 조직으로 짜여져 실루엣이 무너지지 않고 \n형태감을 잘 살려줍니다. 섬세하게 제직된 코튼원사와 탄탄한 외관을 위한 폴리 원사를 블렌딩하였습니다.\n\n적당히 여유감 있는 레귤러 핏으로 제작되었고, 소매와 밑단 부분 스판사를 넣은 립조직으로 마감하였습니다. \n목에 잘 맞는 네크라인과 립 폭으로 제작되었습니다.\n\n베이직한 컬러부터 포인트를 줄 수 있는 컬러들로 구성되어 어디에나 활용하기 좋은 아이텝입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "탄탄한 착용감",
+          "description": "탄탄하면서 유연한 12gg 더블니트 조직의 크루넥 스웨터입니다.",
+          "evidence": "탄탄하면서 유연한 12gg 더블니트 조직의 크루넥 스웨터입니다"
+        },
+        {
+          "title": "편안한 착용감",
+          "description": "적당히 여유감 있는 레귤러 핏으로 제작되었고.",
+          "evidence": "적당히 여유감 있는 레귤러 핏으로 제작되었고, 소매와 밑단 부분 스판사를 넣은 립조직으로 마감하였습니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:37.515Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "056903",
       "rawName": "NEW 울혼방 브이넥 긴팔 니트 가디건",
       "gender": "남성",
@@ -3565,6 +3756,44 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "045503",
+      "rawName": "NEW 오버사이즈 옥스포드 셔츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=9F58BC22E280CC2C635AA20752D210BE&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01045503.jpg",
+      "detailHash": "f25ccf5ec43f066a07cefe30dfd0f9a6ccb529dcdd4af12cf87bbb2980ce7c2a",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"00c6ebcfcf8db54562fe790d60096284\"",
+        "lastModified": "Thu, 23 Jan 2025 07:05:30 GMT"
+      },
+      "pageHash": "1fbb996a12ab6a74be5488aa998b95c792a191b4e6345c7024e99c7e611034b4",
+      "pageText": "릴렉스 핏으로 체형에 구애받지 않고 편하게 착용 가능하며, 트랜디한 착장에 연출이 용이합니다.\n단품은 물론, 가볍게 걸쳐 입기 좋은 스타일 입니다.\n\n경사40X위사25수 합사를 사용한 탄탄한 밀도의 프리미엄 코튼100% 옥스포드 셔츠 입니다. \n착용 시 도톰하고 탄탄함을 느낄 수 있는 원단으로 제작 되었습니다.\n\n적당한 두께감으로 단품은 물론 다양한 이너 및 탑과 레이어드하여 다양하게 연출하기 좋은 실용도 높은 아이템 입니다.\n\n어디에나 쉽게 코디 가능한 클래식한 컬러 무드로 구성했습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "탄탄한 착용감",
+          "description": "착용 시 도톰하고 탄탄함을 느낄 수 있는 원단으로 제작 되었습니다.",
+          "evidence": "착용 시 도톰하고 탄탄함을 느낄 수 있는 원단으로 제작 되었습니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "어디에나 쉽게 코디 가능한 클래식한 컬러 무드로 구성했습니다.",
+          "evidence": "어디에나 쉽게 코디 가능한 클래식한 컬러 무드로 구성했습니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:23.264Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "354922",
       "rawName": "헤어리 루즈핏 니트",
       "gender": "",
@@ -3634,6 +3863,33 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:20:43.686Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "116512",
+      "rawName": "NEW 트리코트 테이퍼드 슬랙스",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=9FC9E31380B5879B1DA60FF086FE9A77&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01116512.jpg",
+      "detailHash": "f6dc0468abe80f4ea0f1b375300b5c02f3f4f893db89706dce6a523e7288a01f",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"6a9dc1a1f561429a4cfe45bfc624990e\"",
+        "lastModified": "Tue, 21 Apr 2026 23:54:36 GMT"
+      },
+      "pageHash": "c5b34c3260a3fe9e37146a788cfe26ee809c9500cdf77344604cc779912893d6",
+      "pageText": "허리부터 힙까지는 편안하게 감싸고, 발목으로 갈수록 자연스럽게 좁아지는 테이퍼드 실루엣입니다.\n데일리부터 세미 포멀까지 폭넓게 활용 가능한 핏입니다.\n\n폴리 100% 4WAY 스트레치 원단을 사용해 가볍고 유연한 착용감을 제공합니다.\n구김이 적고 형태 회복이 뛰어나 장시간 착용에도 깔끔한 외관을 유지하며, 세탁과 관리가 용이한 이지케어 소재입니다.\n활동량이 많은 일상 환경에서도 편안함과 실용성을 모두 만족시키는 원단입니다.\n\n측면 사이드 심에 콘솔 지퍼를 적용하여 깔끔한 디자인을 유지하면서도\n간편한 수납이 가능한 실용성을 더했습니다.\n\n블랙과 차콜은 도시적이고 미니멀한 무드를 강조하며, \n스톤과 카키는 부드럽고 내추럴한 톤으로 스타일링에 여유를 더합니다.\n전체 컬러 구성은 과하지 않은 뉴트럴 톤 중심으로 구성되어 다양한 상의와 안정적으로 매치됩니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:25.736Z",
       "analyzedAt": null
     },
     {

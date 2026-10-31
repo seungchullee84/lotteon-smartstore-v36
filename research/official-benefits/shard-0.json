@@ -501,6 +501,82 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "116920",
+      "rawName": "NEW [변우석] 와이드 밴딩 치노 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=023CD4DCC346F9CF19B02F16A2989F8F&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01116920.jpg",
+      "detailHash": "ec87bebc6457d5d40216e6911dbf647a8cf06cf4f53ebc7dffaf4ff1e230596b",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"cd6c9de71b3ade7578f8ea9d53396367\"",
+        "lastModified": "Thu, 06 Aug 2026 01:14:27 GMT"
+      },
+      "pageHash": "944c4d50d5509f5058c2154214fdce5bcd1d384d32afbfa92ad7351109d05acf",
+      "pageText": "여유로운 실루엣의 코튼 트윌 밴딩 와이드 치노팬츠입니다. \n\n부드러운 터치감에 조직감이 느껴지는 탄탄한 100% 코튼 트윌 원단을 사용하여 \n와이드한 실루엣의 형태감을 구현했습니다. \n\n허리 전체 밴딩 디테일로 편안한 착용감을 제공하며, \n어디나 쉽게 코디되는 클래식한 컬러 무드로 다양한 캐주얼 스타일에 손쉽게 활용할 수 있는 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "여유로운 실루엣의 코튼 트윌 밴딩 와이드 치노팬츠입니다.",
+          "evidence": "여유로운 실루엣의 코튼 트윌 밴딩 와이드 치노팬츠입니다."
+        },
+        {
+          "title": "부드럽게 닿는 촉감",
+          "description": "부드러운 촉감이 느껴지는 원단.",
+          "evidence": "부드러운 터치감에 조직감이 느껴"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:06.530Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "115946",
+      "rawName": "NEW 슬림 브러시드 데님 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=025563318505FA2A20BBC559739587D7&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01115946.jpg",
+      "detailHash": "78bd6822d91b9b27ab116276d4e6f75b52e7d3d3af089ddd33a340d580f0ec4a",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"750f118cc805848fa6324aa36865038f\"",
+        "lastModified": "Wed, 22 Oct 2025 01:25:24 GMT"
+      },
+      "pageHash": "ef5afc768f1c429c4d7a9d5a1a2dc28198a4e321731aaec07f230f8a4d1d20ed",
+      "pageText": "스탠다드 슬림핏 데님 팬츠입니다.\n힙부터 밑단까지 몸에 잘 맞게 떨어지는 스탠다드 슬림핏으로, 밸런스 있는 밑위 길이와 신축성 있는 소재로 움직임에 따라 편안함을 더합니다.\n\n12.5~13.3oz 중량의 스탠다드 슬림핏 데님 팬츠입니다. \n탄탄한 코튼 스판 원단 안쪽에 기모 브러시 가공(Brushed)을 더해 부드러운 터치감과 보온성을 높였습니다.\n\n뻣뻣하지 않고 유연하며, 스판이 함유되어 있어 편안한 착용감과 뛰어난 복원력을 제공합니다.\n자연스러운 워싱과 핸드 브러시 디테일로 데님 본연의 질감과 깊은 컬러감을 표현했습니다.\n데님의 오리지널한 워싱 무드가 돋보이는 워싱 컬러로 베이직하고 클래식한 데님 컬러로 구성 하였습니다.\n\n움직임이 부드럽고 내구성이 뛰어난 YKK 프리미엄 지퍼를 사용했습니다.\n\n**데님 제품의 경우 워싱 가공 특성상 제품 별 디테일의 편차가 있을 수 있습니다.\n**데님 염료의 특성상 이염 및 물빠짐이 불가피하므로 반드시 미지근한 물에 뒤집어서 단독 세탁하시기 바랍니다.\n**데님 원단 특성 상 컬러 별로 상세 스펙 차이가 있을 수 있습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드럽고, 따뜻하게",
+          "description": "기모 가공으로 더한 보온성.",
+          "evidence": "탄탄한 코튼 스판 원단 안쪽에 기모 브러시 가공(Brushed)을 더해 부드러운 터치감과 보온성을 높였습니다."
+        },
+        {
+          "title": "움직임은 편안하게",
+          "description": "움직임이 부드럽고 내구성이 뛰어난 YKK 프리미엄 지퍼를 사용했습니다.",
+          "evidence": "움직임이 부드럽고 내구성이 뛰어난 YKK 프리미엄 지퍼를 사용했습니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:54.024Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "054514",
       "rawName": "폴로넥 니트",
       "gender": "",
@@ -912,6 +988,49 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:20:57.536Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "045911",
+      "rawName": "NEW 포플린 체크 셔츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=036693FE730FE6E807F07830BC20994F&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01045911.jpg",
+      "detailHash": "3d034c7e66ab6d2a86ea48bfebb6ef71dfa7d69080094dc4604dd5d40de10cf3",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"f77a3bab3446db57ee25ef8fbe0d3cbc\"",
+        "lastModified": "Wed, 23 Jul 2025 07:16:54 GMT"
+      },
+      "pageHash": "c229df4524d00b05b36ea92eebbc55d711ecccfa7eb500aea60e5a34bff14e41",
+      "pageText": "여유로운 실루엣의 릴렉스 핏으로, 체형에 구애받지 않고 자연스럽게 흐르는 착용감을 제공합니다.\n전체적으로 편안한 무드가 느껴지며, 단독은 물론, 이너 또는 아우터 레이어드용으로도 유연하게 활용 가능합니다.\n\n고밀도로 짜인 40수 코튼 포플린 소재를 사용해, 적당한 두께의 탄탄한 조직감을 유지합니다. \n소재 표면에는 **Loose Finishing 가공을 더해 자연스럽고 드라이한 텍스처가 특징이며, 경직되지 않은 흐름으로 릴렉스 핏 특유의 실루엣을 보다 유연하게 표현합니다. \n가먼트 워싱을 통해 세탁 후에도 깔끔한 실루엣을 유지할 수 있도록 형태 안정성까지 갖춰 일상 속 활용도와 완성도를 모두 고려한 소재입니다.\n\n전체적으로 체크 패턴의 선이 뚜렷하게 보이기보다 부드럽게 스며들듯 번져 나가는 옴브레 특유의 텍스처가 돋보이며, 은은하게 번지는 톤이 따뜻하고 클래식한 무드를 강조합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "여유로운 릴렉스핏",
+          "description": "여유 있게 떨어지는 릴렉스 실루엣.",
+          "evidence": "여유로운 실루엣의 릴렉스 핏으로, 체형에 구애받지 않고 자연스럽게 흐르는 착용감을 제공합니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "이너 또는 아우터 레이어드용으로도 유연하게 활용 가능합니다.",
+          "evidence": "전체적으로 편안한 무드가 느껴지며, 단독은 물론, 이너 또는 아우터 레이어드용으로도 유연하게 활용 가능합니다."
+        },
+        {
+          "title": "탄탄한 착용감",
+          "description": "적당한 두께의 탄탄한 조직감을 유지합니다.",
+          "evidence": "고밀도로 짜인 40수 코튼 포플린 소재를 사용해, 적당한 두께의 탄탄한 조직감을 유지합니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:35.394Z",
       "analyzedAt": null
     },
     {
@@ -1423,6 +1542,44 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:14:52.060Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "116921",
+      "rawName": "NEW 스트레이트 치노 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=04F76DBD072826D04F79CC9D81DF7434&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01116921.jpg",
+      "detailHash": "60dae7cece6f8e20e3da41b626f06d981fc8b9c763d2f1c22d01bac37f065a05",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"41ff16b6094e34e979cb2fca1354d0ae\"",
+        "lastModified": "Fri, 04 Sep 2026 06:00:14 GMT"
+      },
+      "pageHash": "ce4a89ca887d86540e01f8109eccb7a07635eb666f04b29b9cc34f4455e5d9c9",
+      "pageText": "미드웨이트 코튼 혼방 스판 스트레이트 팬츠\n\n미드웨이트의 탄탄한 두께감의 스트레이트 핏 팬츠입니다. \n84% COTTON, 13% POLY, 3% LYCRA 혼용 원단으로 구김이 덜하며 \n우수한 스판성을 더해 활동성이 뛰어납니다. \n\n적당히 여유 있게 떨어지는 실루엣으로 자연스러운 핏을 연출하며, \n가먼트 워싱을 통해 부드러운 터치와 안정된 착용감을 완성했습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "탄탄한 착용감",
+          "description": "미드웨이트의 탄탄한 두께감의 스트레이트 핏 팬츠입니다.",
+          "evidence": "미드웨이트의 탄탄한 두께감의 스트레이트 핏 팬츠입니다."
+        },
+        {
+          "title": "부드러운 착용감",
+          "description": "가먼트 워싱을 통해 부드러운 터치와 안정된 착용감을 완성했습니다.",
+          "evidence": "적당히 여유 있게 떨어지는 실루엣으로 자연스러운 핏을 연출하며, 가먼트 워싱을 통해 부드러운 터치와 안정된 착용감을 완성했습니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:41.112Z",
       "analyzedAt": null
     },
     {
@@ -3348,6 +3505,71 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:16:13.771Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "116944",
+      "rawName": "NEW [변우석] 와이드 데님 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=0CE42CC7D12D23FAB9179F835305A41A&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01116944.jpg",
+      "detailHash": "ecdc116ce37059ec1a19838555209e0be80329f2bb8d16dfacbea95ca7f6d143",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"dd0e2aae91f3e7be1bb8f9427944b1b9\"",
+        "lastModified": "Tue, 13 Oct 2026 01:38:55 GMT"
+      },
+      "pageHash": "314d32366eb142cad19e58021f7ca461cc7f8f64cb8ee23f398e584213639dd0",
+      "pageText": "스탠다드 와이드핏 데님 팬츠(미드웨이트)\n\n미드웨이트 와이드 핏 데님 팬츠입니다. 전반적으로 여유롭게 떨어지는 실루엣으로 \n트렌디한 아웃핏을 연출하며,\n코튼 100% 베이스의 탄탄한 원단을 사용해 안정적인 착용감을 제공합니다.\n\n적당한 중량감의 미드웨이트 데님으로 계절에 구애받지 않고 편안하게 착용할 수 있으며,\n핸드 브러쉬 워싱 가공을 통해 자연스러운 데님 컬러와 오리지널한 무드를 구현했습니다.\n\n일상에서 편안하면서도 스타일리시하게 활용할 수 있는 아이템입니다.\n\n혼용율\t면 100%\t\t\t\n제조년월\t2026.07\t\t\t\n제조국\t베트남\t\t\t\n세탁방법\t30도중성세제로손세탁,염소표백금지,80~120도천대고다림질,약하게짜기,건조기사용금지",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:08.715Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "076504",
+      "rawName": "NEW [변우석] 코튼 데님 스냅 셔켓",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=0CE97420DB87A2C36DF3D16128D0A373&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076504.jpg",
+      "detailHash": "5e8234f711af948dabbdb98eea5e962b4b0e95a8aca42933c1f1a9f55ce06c27",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"c018f63c4809cbefb9d16c2565fd82e7\"",
+        "lastModified": "Fri, 18 Sep 2026 02:36:07 GMT"
+      },
+      "pageHash": "bc551ea1123c1d6fbb114b70783fded9d41c4af0db50654910d8303dac68c61b",
+      "pageText": "셔츠 칼라 디자인의 데님 셔츠입니다.\n봄·가을 시즌에 아우터로 활용하기 적당한 두께감을 갖췄습니다.\n\n앞여밈에는 히든 플라이를 적용해 깔끔한 외관을 유지했으며,\n소매 커프스에는 스냅 여밈을 더해 간편하게 여닫을 수 있습니다.\n체스트 포켓을 적용해 기본적인 수납이 가능합니다.\n\n적당한 기장과 여유 있는 실루엣으로 다양한 이너와 자연스럽게 매치할 수 있으며,\n데일리 착장에 부담 없이 활용할 수 있습니다.\n\n코튼100%의 스판이 포함되지 않은 탄탄한 소재감의 13oz 적당히 두께감 있는 원단으로 제작되어, \n한여름을 제외한 사계절 내내 활용하기 좋습니다.\n핸드 브러시 가공을 적용하여 프리미엄 데님 고유의 자연스러운 페이드가 돋보이며 깊이감 있는 워싱 컬러를 보여줍니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "소매 커프스에는 스냅 여밈을 더해 간편하게 여닫을 수 있습니다.",
+          "evidence": "앞여밈에는 히든 플라이를 적용해 깔끔한 외관을 유지했으며, 소매 커프스에는 스냅 여밈을 더해 간편하게 여닫을 수 있습니다."
+        },
+        {
+          "title": "소지품을 간편하게",
+          "description": "체스트 포켓을 적용해 기본적인 수납이 가능합니다.",
+          "evidence": "체스트 포켓을 적용해 기본적인 수납이 가능합니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:28.740Z",
       "analyzedAt": null
     },
     {

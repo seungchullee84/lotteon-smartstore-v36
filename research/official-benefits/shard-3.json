@@ -285,6 +285,44 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "024900",
+      "rawName": "NEW 슬릿 레이어드 반팔티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=31D9600494D90F16A91063648AB3F4D3&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2024/01024900.jpg",
+      "detailHash": "17260170541d2ae6511084152793638d6ac7c49b0faf38e12901a71ab87029c7",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"b7f2dd4a03d611d2dc33ba65b640663b\"",
+        "lastModified": "Mon, 21 Oct 2024 07:12:34 GMT"
+      },
+      "pageHash": "9550166e5dc3223fc6dbf104ecc08a40b20439e27467c00d663d8c69969a9c52",
+      "pageText": "여유있는 기장감으로 디자인하여, 크루넥 티셔츠나 테리 크루넥 및 후드 안에 레이어드하여 착용 가능한 레이어드티 입니다.\n\n넉넉한 길이와 베이직한 디자인으로, 이너용/레이어드용으로 계절에 상관 없이 활용도 높은 아이템입니다. 과하지 않은 드랍 숄더와 여유있는 바디 실루엣으로 체형에 크게 구애 받지 않고 편안하게 착용 가능합니다.\n\n20수 원사를 사용한 100% 코튼 원단으로 촘촘한 밀도감과 탄탄한 두께감으로 착장 시 툭 떨어지는 실루엣이 특징입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "여유있는 기장감으로 디자인하여.",
+          "evidence": "여유있는 기장감으로 디자인하여, 크루넥 티셔츠나 테리 크루넥 및 후드 안에 레이어드하여 착용 가능한 레이어드티 입니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "이너용/레이어드용으로 계절에 상관 없이 활용도 높은 아이템입니다.",
+          "evidence": "넉넉한 길이와 베이직한 디자인으로, 이너용/레이어드용으로 계절에 상관 없이 활용도 높은 아이템입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:18.455Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "374516",
       "rawName": "크롭 데님 자켓",
       "gender": "",
@@ -1098,6 +1136,33 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "415532",
+      "rawName": "NEW 슬림 스트레이트 데님",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=35202A423F39FF6AE267CC54FC5CB9A7&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05415532.jpg",
+      "detailHash": "e762fa3286b47cbf16792e51a35d1d27e03a30badd651a777778fe3e758c48ff",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"cf1b08bfdf75bc25ad0142b875823d63\"",
+        "lastModified": "Thu, 20 Feb 2025 08:17:31 GMT"
+      },
+      "pageHash": "1efd758ab09d5d9b958c49492cd7acee8d87b6ec40b60a48bb9d7b5af76a0040",
+      "pageText": "슬림 스트레이트 핏 데님입니다.\n\n힙과 허벅지를 타이트하게 잡아주면서 무릎부터 밑단까지 슬림하게 일자로 떨어지는 실루엣 입니다.\n\n\n밀도 높은 코튼 스판 원단을 사용 하였으며, \n특히 슬림 스트레이트핏 데님의 경우 고퀄리티 스판사인 라이크라를 사용하여 복원력과 텐션이 좋아\n오랜 착용에도 형태감을 잘 유지하며 편안한 착용이 가능합니다.\n\n\n봄 시즌 상의 아이템들과 캐주얼하게 연출 할 수 있는 아이템입니다.\n\n\n* 안내 드립니다. *\n\n데님 제품의 경우 워싱 가공 특성 상 제품별 디테일의 편차가 있을 수 있습니다.\n데님 염료의 특성상 이염 및 물빠짐이 불가피할 수 있습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:49.959Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "070925",
       "rawName": "덕다운 트렌치 다운 자켓",
       "gender": "",
@@ -1230,6 +1295,44 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:18:51.270Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "045502",
+      "rawName": "NEW 포플린 셔츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=35B1156204AE0F5A69AC4D377435EFD7&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01045502.jpg",
+      "detailHash": "7c38d6b5695a4020723cb7ca3a3bd1d423f4341439e7559640f6cff4085cf430",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"10c4ea3d2752531fc48b37c5b77bfab2\"",
+        "lastModified": "Tue, 11 Feb 2025 08:10:48 GMT"
+      },
+      "pageHash": "00e1485b7fc8e6b3b8948044919d975dd37188cf4dfead867ac76ce172513ff9",
+      "pageText": "클래식한 레귤러 핏에 베이직한 체스트 포켓의 심플한 디자인으로, 어떤 스타일에도 부담없이 착용 가능한 스타일 입니다.\n단정하면서도 클래식한 룩으로 연출 할 수 있는 스탠다드한 핏 입니다.\n\n화이트 컬러 80수2합/ 나머지 유색 컬러 50수로 제작된 프리미엄 고밀도 코튼100 셔츠입니다.\n\n촘촘한 조직감으로 부드러우면서도 탄탄한 조직감이 돋보이고, 내츄럴 하면서도 매끄러운 터치감을 느낄 수 있습니다.\n \n적당한 두께감으로 간절기 시즌 단품은 물론 다양한 이너 및 탑과 레이어드하여 연출하기 좋은 실용도 높은 아이템 입니다.\n\n어디에나 쉽게 코디되어지는 클래식한 컬러 무드로 구성되었습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드러운 착용감",
+          "description": "촘촘한 조직감으로 부드러우면서도 탄탄한 조직감이 돋보이고.",
+          "evidence": "촘촘한 조직감으로 부드러우면서도 탄탄한 조직감이 돋보이고, 내츄럴 하면서도 매끄러운 터치감을 느낄 수 있습니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "어디에나 쉽게 코디되어지는 클래식한 컬러 무드로 구성되었습니다.",
+          "evidence": "어디에나 쉽게 코디되어지는 클래식한 컬러 무드로 구성되었습니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:21.742Z",
       "analyzedAt": null
     },
     {
@@ -1939,6 +2042,39 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "026956",
+      "rawName": "NEW [변우석] 헤비코튼 헨리넥 긴팔티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=39F7D80157C0DDA8C39201D38D8BA300&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01026956.jpg",
+      "detailHash": "6237bf34545886c61488bb2a0f7a6b38a665ad50e526724f118fe0dfc86f83de",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"d59811f227e3bf2e3fec635fc6da23e4\"",
+        "lastModified": "Thu, 06 Aug 2026 05:24:44 GMT"
+      },
+      "pageHash": "d6613b526e183dff3289bdf607c47aeefe4038884f91c8e00e8fcf1328c6b803",
+      "pageText": "퍼펙트 헤비웨이트 코튼 헨리넥 긴팔 티셔츠\n\n자연스럽게 떨어지는 어깨선과 레귤러 핏으로 \n체형에 구애받지 않고 편안하게 착용할 수 있는 퍼펙트 헤비웨이트 코튼 헨리넥 긴팔 티셔츠입니다.\n헨리넥 버튼 디테일을 적용해 간편하게 오픈 및 클로징이 가능하며, 버튼 여밈에 따라 다양한 스타일링을 연출할 수 있습니다.\n허리선을 살짝 덮는 안정적인 기장감으로 다양한 하의와 손쉽게 매치할 수 있습니다.\n14수 싱글 코튼 100% 저지 원단(240g/㎡)을 사용해 밀도감 있는 탄탄한 조직감을 구현했으며,\n비침이 거의 없어 단독으로도 부담 없이 착용할 수 있습니다.\n과하지 않은 여유감의 실루엣으로 데일리웨어는 물론 다양한 스타일링에 활용하기 좋은 베이직 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "자연스러운 레귤러핏",
+          "description": "자연스러운 어깨선과 편안한 착용감.",
+          "evidence": "자연스럽게 떨어지는 어깨선과 레귤러 핏으로 체형에 구애받지 않고 편안하게 착용할 수 있는 퍼펙트 헤비웨이트 코튼 헨리넥 긴팔 티셔츠입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:45.008Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "355912",
       "rawName": "NEW 캐시미어 블렌디드 니트 스웨터",
       "gender": "",
@@ -1968,6 +2104,39 @@
       "status": "image-pending",
       "visualReview": false,
       "observedAt": "2026-10-31T06:26:30.463Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "076913",
+      "rawName": "NEW [변우석] 울 폴로 풀 집 자켓",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=3A7677CD86C61092A7ABA73F544F82B2&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076913.jpg",
+      "detailHash": "2abb4f6b2960836f3af1f71c66a750596afdd96eb76d522cab840547ea43fb91",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"9bfb357fe32143d43f44aac9bd9ac87a\"",
+        "lastModified": "Mon, 21 Sep 2026 05:36:20 GMT"
+      },
+      "pageHash": "9f3e4b38e2138e64db8fa19fd8cc4f128142d2b428cba3b091e0a5d4b7fd606e",
+      "pageText": "균형 잡힌 실루엣과 기장감으로 다양한 옷들과 손쉽게 매치할 수 있으며\n부드러운 터치감의 울·캐시미어 혼방 소재를 사용하여 \n가벼우면서도 뛰어난 보온성을 갖추었으며, \n일상부터 격식있는 자리까지 폭넓게 활용하기 좋습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드러운 착용감",
+          "description": "부드러운 터치감의 울·캐시미어 혼방 소재를 사용하여.",
+          "evidence": "부드러운 터치감의 울·캐시미어 혼방 소재를 사용하여"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:15.892Z",
       "analyzedAt": null
     },
     {
@@ -2155,6 +2324,44 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:18:25.774Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "026503",
+      "rawName": "NEW 헤비코튼 긴팔티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=3AF233BE048B8F7E8F2774609F9634B4&ctype=1",
+      "detailUrl": null,
+      "detailHash": null,
+      "detailImageVerified": false,
+      "detailValidators": {
+        "etag": null,
+        "lastModified": null
+      },
+      "pageHash": "3b95201c675e0eb496e154ee9e8cf825cf9c6c78e416260239860960d99abe90",
+      "pageText": "어떤 체형에도 안정적으로 어울리는 REGULAR FIT의 헤비웨이트 티셔츠입니다.\n\n과하지 않은 여유감의 실루엣으로 데일리하게 매치하기 좋으며, 모든 연령대가 부담 없이 착용할 수 있는 기본 아이템입니다.\n넥라인에는 바인딩 넥 디테일을 적용해 형태 안정성을 높였으며, 반복 착용 후에도 늘어짐이 적어 탄탄한 핏을 유지합니다.\n베이직한 실루엣으로 다양한 스타일에 자연스럽게 어울립니다.\n\n100% COTTON 소재의 240 GSM 헤비웨이트 원단을 사용하여 탄탄하고 안정적인 착용감이 특징입니다.\n\n솔리드 컬러와 스트라이프 컬러로 구성해 선택의 폭을 넓혔으며,\n두께감 있는 원단으로 비침이 적고 안정적인 실루엣 연출이 가능합니다.\n\n코튼 특유의 내추럴한 터치감과 우수한 내구성으로 오래도록 편안하게 착용할 수 있습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "오래 입기 좋은 내구성",
+          "description": "우수한 내구성을 갖췄어요.",
+          "evidence": "우수한 내구성"
+        },
+        {
+          "title": "여유롭게 편안한 착용감",
+          "description": "여유 있는 실루엣으로 편안하게 입어요.",
+          "evidence": "여유감의 실루엣으로 데일리하게 매치하기 좋으며, 모든 연령대가 부담 없이 착용"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:20.006Z",
       "analyzedAt": null
     },
     {
@@ -2604,6 +2811,44 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "056930",
+      "rawName": "NEW [변우석] 메리노울 크루넥 니트",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=3C33796031EC359950A01E5C2C5347AD&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01056930.jpg",
+      "detailHash": "10ef4d649ee86327f7d47e94ec80cbe460c62c7977840d25b609fc74586fbc4e",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"35b3dd004327d318c0bc45c9d5e753a1\"",
+        "lastModified": "Tue, 13 Oct 2026 05:03:48 GMT"
+      },
+      "pageHash": "c86a0ca393956ffcf64587b9e813ba59e93275fc6822a0345ecf6784b6bff693",
+      "pageText": "부드럽고 고급스러운 엑스트라 파인 메리노 울 크루넥 스웨터\n\n100% 엑스트라 파인 메리노 울을 사용하여 부드러운 터치와 포근한 착용감을 제공하는 7GG 크루넥 스웨터입니다. 베이직한 디자인과 폭넓은 컬러 구성으로 단독 착용부터 다양한 레이어링까지 활용하기 좋은 아이템입니다.\n\n*배송 안내\n#11 컬러 M 사이즈 : 11월 말 출고 \n이외 컬러 : 정상 출고",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드러운 메리노울",
+          "description": "메리노울의 부드러운 촉감.",
+          "evidence": "100% 엑스트라 파인 메리노 울을 사용하여 부드러운 터치와 포근한 착용감을 제공하는 7GG 크루넥 스웨터입니다."
+        },
+        {
+          "title": "부드러운 착용감",
+          "description": "부드럽고 고급스러운 엑스트라 파인 메리노 울 크루넥 스웨터.",
+          "evidence": "부드럽고 고급스러운 엑스트라 파인 메리노 울 크루넥 스웨터"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:55.066Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "074121",
       "rawName": "G-MOTION 에어 더블니트 집업 자켓",
       "gender": "남성",
@@ -3009,6 +3254,39 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:20:23.855Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "115904",
+      "rawName": "NEW 와이드 캐시터치 밴딩 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=3D7F42E2A86076A1EDECA66F1B366592&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01115904.jpg",
+      "detailHash": "5d2ab68a0348114672009870d632f2bf305c6e6e73679b9f463f6a4905c90f45",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"09dc5fc3c70cda1697500491f3402f34\"",
+        "lastModified": "Tue, 23 Sep 2025 08:17:01 GMT"
+      },
+      "pageHash": "31912c5fa69c3985b65eebb68ca556d76ba5526b56f4398048f1a73236d8e0f1",
+      "pageText": "밴딩 웨이스트로 허리에 안정감 있게 착용되며, 밑단까지 스트레이트하게 떨어지는 세련된 와이드핏 실루엣입니다. 캐시미어 터치 특유의 고급스러운 질감과 밀도 높고 소프트한 원단이 몸을 따라 여유 있게 떨어져 안정적인 실루엣을 완성합니다.\n\n프리미엄 가공을 통해 소프트하면서 고급스러운 캐시미어 터치감을 구현했습니다.\n사방 스트레치 원단(CASH FEEL POWER STRETCH)으로 활동성이 뛰어나며, 장시간 착용에도 편안함을 제공합니다. 가을부터 겨울, 간절기까지 착용하기 좋은 슬랙스로, 보온성과 경량성을 동시에 갖추어 편안하게 착용할 수 있습니다.\n\n멜란지 염색으로 울라이크 컬러를 재현하여, 한층 더 고급스러운 컬러감을 느낄 수 있습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "여유로운 와이드핏",
+          "description": "넉넉하게 떨어지는 와이드 실루엣.",
+          "evidence": "밴딩 웨이스트로 허리에 안정감 있게 착용되며, 밑단까지 스트레이트하게 떨어지는 세련된 와이드핏 실루엣입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:33.630Z",
       "analyzedAt": null
     },
     {
@@ -3632,6 +3910,39 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:23:58.005Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "076904",
+      "rawName": "NEW 페이크 레더 루즈핏 자켓",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=3EE41C5384D0A6296E8AC0815ADF809C&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076904.jpg",
+      "detailHash": "42cbf7661ca3226fd0271c32a91486bfc8b80c9e747097475f38f82010a2bf1f",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"dfe1c491183c81e23f81612eb41438d0\"",
+        "lastModified": "Tue, 25 Aug 2026 04:53:05 GMT"
+      },
+      "pageHash": "0920f9e05b89cdfdc1a8548d9b8079bc55b020f87f125a0c30a3fd243740f21e",
+      "pageText": "워시드 페이크 레더 싱글 자켓\n\n가죽의 질감을 그대로 재현한 페이크 레더 소재를 사용하여 \n자연스럽고 은은한 광택과 매끄러운 질감을 보여주며, \n적당한 두께감으로 탄성이 좋고 가먼트 워싱을 통해 유연하고 편안한 착용감을 선사합니다. \n\n셔츠 카라와 적당한 기장감의 간편한 집업 디자인으로 \n클래식과 캐주얼 모두 폭넓게 코디 연출할 수 있는 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "다양한 코디에 활용",
+          "description": "클래식과 캐주얼 모두 폭넓게 코디 연출할 수 있는 아이템입니다.",
+          "evidence": "클래식과 캐주얼 모두 폭넓게 코디 연출할 수 있는 아이템입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:04.800Z",
       "analyzedAt": null
     },
     {

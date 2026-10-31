@@ -1205,6 +1205,39 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "205501",
+      "rawName": "[변우석] 뉴욕 코튼 볼캡 (남녀공용)",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=C3CFA904315AC27960C193BD638ECD99&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01205501.jpg",
+      "detailHash": "05cfb9179bd68bc9bc272b11bf500f5db477216104ea5ce5c4890c8a5916a316",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"95c235ee2d2ba6943185430e685699ad\"",
+        "lastModified": "Thu, 17 Jul 2025 05:21:56 GMT"
+      },
+      "pageHash": "d06cfdbbfb1134102dc6264aa18cc6b6b15c2269a24799795f61409ea4180c11",
+      "pageText": "클래식한 볼캡 실루엣으로, 누구에게나 무난하게 어울리는 스탠다드 핏입니다. \n\n둥글게 떨어지는 크라운과 적당한 깊이감은 안정적인 착용감을 제공하며, \n후면의 버클을 통해 사이즈 조절이 가능해 남녀 모두에게 편안한 착용감을 줍니다.\n\n고밀도 코튼 트윌 소재를 사용하여 탄탄하고 형태감 있는 핏을 유지합니다. \n가벼운 두께감에 적절한 구조감을 더해 계절에 구애받지 않고 착용할 수 있으며, \n땀 흡수력과 통기성 모두 우수하여 일상은 물론 야외 활동에서도 쾌적함을 유지합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "탄탄한 착용감",
+          "description": "고밀도 코튼 트윌 소재를 사용하여 탄탄하고 형태감 있는 핏을 유지합니다.",
+          "evidence": "고밀도 코튼 트윌 소재를 사용하여 탄탄하고 형태감 있는 핏을 유지합니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:06.675Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "074909",
       "rawName": "울 포켓 자켓",
       "gender": "",
@@ -1758,6 +1791,49 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:13:54.886Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "026953",
+      "rawName": "NEW 폰테 크루넥 긴팔티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=C5CDD41A41124F9F3FB405FBF17389C5&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01026953.jpg",
+      "detailHash": "1b0fe89d79cd2ae21083f7a656833bbd0cc99e0906849209197c1f2b83d4ea21",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"5f724844d7485e3bfe1d29a0a406cca3\"",
+        "lastModified": "Thu, 20 Aug 2026 01:51:15 GMT"
+      },
+      "pageHash": "4249a84be348be62d4fbbe58ac80f9929be7544fade5938ad4f150c69384e5cd",
+      "pageText": "코튼 폰테 크루넥 긴팔 티셔츠 입니다. \n\n베이직한 라운드넥의 긴팔 디자인에 어깨선이 자연스럽게 떨어지는 레귤러 핏과 여유로운 실루엣으로\n체형에 구애받지 않고 편안하게 착용할 수 있습니다. 허리선을 살짝 덮는 안정적인 기장감으로 단독 착용은 물론 \n다양한 스타일링이 가능하며, 활용도가 높은 아이템입니다.\n밀도 높은 더블 니트(Ponte Roma) 조직으로 탄탄한 조직감과 우수한 형태 안정성을 갖춘 소재입니다.\n일반 싱글 저지보다 밀도가 높고 두께감이 있어 안정적인 실루엣을 유지하며 비침이 적고 고급스러운 외관이 특징입니다. \n또한 가먼트 워시 가공을 통해 자연스러운 표면감과 부드러운 터치감을 더하고, 세탁 후에도 수축을 최소화했습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "워싱으로, 안정감 있게",
+          "description": "가먼트 워싱으로 수축을 최소화.",
+          "evidence": "또한 가먼트 워시 가공을 통해 자연스러운 표면감과 부드러운 터치감을 더하고, 세탁 후에도 수축을 최소화했습니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "다양한 스타일링이 가능하며, 활용도가 높은 아이템입니다.",
+          "evidence": "다양한 스타일링이 가능하며, 활용도가 높은 아이템입니다."
+        },
+        {
+          "title": "여유롭게 편안한 착용감",
+          "description": "여유 있는 실루엣으로 편안하게 입어요.",
+          "evidence": "여유로운 실루엣으로 체형에 구애받지 않고 편안하게 착용"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:57.148Z",
       "analyzedAt": null
     },
     {
@@ -2704,6 +2780,49 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "116952",
+      "rawName": "NEW 프렌치 테리 와이드 스웻 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=C852B70A66114428A46BCAE776C12F26&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01116952.jpg",
+      "detailHash": "615891bce331fe05e1b5e36566294dc0602bd1b22980fe84f5bcfd948e45be93",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"32d91ec3ce2bf8a9cf9551fa2eb528fb\"",
+        "lastModified": "Tue, 25 Aug 2026 04:52:57 GMT"
+      },
+      "pageHash": "a60156544b9b3b4a8a67b9a7eb79b2e5b7fccd164abe2b73019b414d299fae36",
+      "pageText": "테리 와이드 팬츠 입니다.\n\n부드럽고 탄탄한 CVC FRENCH TERRY(60% COTTON, 40% POLYESTER), 300GSM 원단을 사용해 편안한 착용감과 트렌디한 실루엣의 와이드 핏 테리 팬츠입니다.\n\n허벅지부터 밑단까지 일자로 툭 떨어지는 와이드한 실루엣으로 \n과하지 않은 여유로운 핏감 덕분에 스트릿하고 트렌디한 무드를 주며 \n밴딩과 스트링을 적용해 편안하게 착용할 수 있습니다. \n\n후면 포켓을 더해 작은 소지품 수납 등 실용성을 높였으며, \n스웨트셔츠, 후디, 니트 등 다양한 상의와 매치하여 스타일리시한 데일리 룩을 완성할 수 있습니다",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "여유로운 와이드핏",
+          "description": "넉넉하게 떨어지는 와이드 실루엣.",
+          "evidence": "부드럽고 탄탄한 CVC FRENCH TERRY(60% COTTON, 40% POLYESTER), 300GSM 원단을 사용해 편안한 착용감과 트렌디한 실루엣의 와이드 핏 테리 팬츠입니다."
+        },
+        {
+          "title": "소지품을 간편하게",
+          "description": "후면 포켓을 더해 작은 소지품 수납 등 실용성을 높였습니다.",
+          "evidence": "후면 포켓을 더해 작은 소지품 수납 등 실용성을 높였으며, 스웨트셔츠, 후디, 니트 등 다양한 상의와 매치하여 스타일리시한 데일리 룩을 완성할 수 있습니다"
+        },
+        {
+          "title": "편안한 착용감",
+          "description": "밴딩과 스트링을 적용해 편안하게 착용할 수 있습니다.",
+          "evidence": "밴딩과 스트링을 적용해 편안하게 착용할 수 있습니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:17.413Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "114033",
       "rawName": "G-MOTION 퀵드라잉 테이퍼드 조거 팬츠",
       "gender": "남성",
@@ -3577,6 +3696,66 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "116543",
+      "rawName": "NEW [변우석] 스트레이트 데님 팬츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=CBB72E7327C9C3541A9F7827FE4EB174&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01116543.jpg",
+      "detailHash": "26ca7802122ac882fd666794646a21d577b4f49b38c6733baf8893d5b70d1645",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"62ab7925526498058c823f5eee7c1b30\"",
+        "lastModified": "Thu, 29 Jan 2026 04:45:39 GMT"
+      },
+      "pageHash": "a59a268529143d69a89610f98ef9dea2bd525f46e5a92a76d58afd3fc865e5f3",
+      "pageText": "코튼100% 소재의 스트레이트 핏 데님 팬츠입니다.\n\n스판이 포함되지 않은 탄탄한 소재감의 기본 데님으로, 13oz 의 적당히 두께감 있는 원단으로 제작되어, 한여름을 제외한 사계절 내내 활용하기 좋은 스타일 입니다.\n\n데님의 오리지널한 워싱 무드 연출을 위한 전반적으로 핸드 브러쉬 가공을 적용하여 자연스러운 데님 컬러가 돋보입니다.\n움직임이 부드럽고 견고한 프리미엄 지퍼인 YKK 지퍼를 사용 하였습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:27.007Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "026972",
+      "rawName": "NEW G-MOTION 와플 텍스처 소로나 긴팔티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=CBE2F712CDCA1B69CF6B100CB7668F4E&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01026972.jpg",
+      "detailHash": "8088ef503eb7e526c21410dbab8306d3999a789dc210f63f34c4ca1ee7370ca3",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"82f6c8e680ba2f40606acebced645b9c\"",
+        "lastModified": "Tue, 25 Aug 2026 04:53:12 GMT"
+      },
+      "pageHash": "6fe99f501c1586386268d0141f54ffc580b7582e7937222ff1b8616028e2714d",
+      "pageText": "가볍고 쾌적한 착용감을 갖춘 Sorona® 와플 크루넥 긴팔 티셔츠\n\n베이직한 라운드넥 디자인과 자연스럽게 떨어지는 레귤러 핏으로 \n다양한 스타일링이 가능한 데일리 긴팔 티셔츠입니다. \n\nSorona® 100% 폴리에스터 와플 소재를 사용해 부드러운 터치감과 우수한 신축성, \n뛰어난 형태 안정성을 갖추었으며, \n입체적인 와플 조직이 쾌적한 착용감을 제공해 단독 착용 등 활용도가 높습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "부드럽게 닿는 촉감",
+          "description": "부드러운 촉감이 느껴지는 원단.",
+          "evidence": "부드러운 터치감과 우수한 신축성, 뛰어난 형태 안정성을 갖추"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:59.747Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "415918",
       "rawName": "브러시드 와이드 슬랙스",
       "gender": "여성",
@@ -3681,6 +3860,54 @@
       "status": "needs-review",
       "visualReview": false,
       "observedAt": "2026-10-31T06:18:29.781Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "026952",
+      "rawName": "NEW [변우석] 퍼펙트 크루넥 긴팔티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=CC92817308773208504DF057577DE638&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01026952.jpg",
+      "detailHash": "3df4418578191d594705f94352e270dfa42e265f83ff4fcfa8af49d23ea327dc",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"dba11ec815e31a924258b4580962c946\"",
+        "lastModified": "Tue, 28 Jul 2026 05:52:39 GMT"
+      },
+      "pageHash": "02a6752fb611b4c0f54fa66db13695b645e492b797cd9b4a9561286541e068c4",
+      "pageText": "퍼펙트 긴팔티입니다.\n\n베이직한 라운드넥 디자인과 자연스럽게 떨어지는 어깨선의 레귤러 핏으로,\n체형에 구애받지 않고 편안하게 착용할 수 있는 긴팔 티셔츠입니다.\n허리선을 살짝 덮는 안정적인 기장으로 다양한 하의와 손쉽게 매치할 수 있으며,\n가을 시즌 컬러를 적용한 솔리드 디자인으로 활용도를 높였습니다.\n\n100% 20수 컴팩트 코튼(205gsm) 싱글 저지 원단을 사용해 \n부드러우면서도 탄탄한 착용감을 제공하며,\n가먼트 워시 가공을 적용해 세탁 후 수축을 최소화했습니다.\n\n과하지 않은 여유감의 실루엣으로 데일리웨어는 물론 \n다양한 스타일링에 활용하기 좋은 베이직 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "자연스러운 레귤러핏",
+          "description": "자연스러운 어깨선과 편안한 착용감.",
+          "evidence": "베이직한 라운드넥 디자인과 자연스럽게 떨어지는 어깨선의 레귤러 핏으로, 체형에 구애받지 않고 편안하게 착용할 수 있는 긴팔 티셔츠입니다."
+        },
+        {
+          "title": "부드럽고, 탄탄하게",
+          "description": "컴팩트 코튼 싱글 저지의 탄탄한 착용감.",
+          "evidence": "100% 20수 컴팩트 코튼(205gsm) 싱글 저지 원단을 사용해 부드러우면서도 탄탄한 착용감을 제공하며, 가먼트 워시 가공을 적용해 세탁 후 수축을 최소화했습니다."
+        },
+        {
+          "title": "워싱으로, 안정감 있게",
+          "description": "가먼트 워싱으로 수축을 최소화.",
+          "evidence": "100% 20수 컴팩트 코튼(205gsm) 싱글 저지 원단을 사용해 부드러우면서도 탄탄한 착용감을 제공하며, 가먼트 워시 가공을 적용해 세탁 후 수축을 최소화했습니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "다양한 스타일링에 활용하기 좋은 베이직 아이템입니다.",
+          "evidence": "다양한 스타일링에 활용하기 좋은 베이직 아이템입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:39.409Z",
       "analyzedAt": null
     },
     {
@@ -4212,6 +4439,44 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:23:34.598Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "075915",
+      "rawName": "NEW [변우석] CLOUD LIGHT 경량 패딩 베스트",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=CE331FE930C58DC7D35AAB970DD59BB4&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01075915.jpg",
+      "detailHash": "9772cb09387104378235b868991fae5d5b15bf5b63695f4048595fc72c5545cf",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"ad191e10590eeffa464752548464e7a9\"",
+        "lastModified": "Fri, 19 Sep 2025 04:54:52 GMT"
+      },
+      "pageHash": "d40dd361456caa01afe74c893d9f7c37fb17789c67af909dc665c694af8c8c3e",
+      "pageText": "레귤러 핏의 가볍고 보온성이 뛰어난 라운드넥 경량 베스트입니다.\n\n과하지 않은 적당한 볼륨감으로 아우터로는 물론 이너웨어로 레이어드에 활용하기 좋은 아이템입니다.\n\n고밀도 경량 원단을 사용하여 가볍고 내구성이 뛰어나 쾌적한 착용감을 제공합니다. \n소프트한 터치감과 함께 자연스러운 볼륨감을 살려 세련된 실루엣을 완성합니다.\n\n충전재는 태평양사의 SynCloud® Sorona 프리미엄 충전재를 사용하였으며, 천연 다운에 준하는 보온성과 복원력을 발휘합니다. 세탁 후에도 볼륨감이 유지되며, 습기에 강하고 알레르기 걱정이 없어 일상과 아웃도어 모두에서 안심하고 착용할 수 있습니다.\n[SynCloud® Platinum 태그와 Sorona® 태그가 함께 제공됩니다.]\n\n간절기 시즌에는 단독으로, 겨울철에는 아우터 안에 레이어드해 보온성을 높일 수 있는 활용도 높은 아이템입니다. 넥 안쪽에는 스냅과 고리 디테일을 더해 필요에 따라 V넥으로 변형할 수 있어 스타일링에 유연함을 제공합니다.\n\n다이아몬드 퀼팅 패턴과 톤온톤의 스냅 디테일이 세련된 무드를 더했으며, 고밀도 원단과 프리미엄 충전재를 사용해 가볍지만 따뜻한 착용감을 선사합니다. 경량화를 위한 다운백 구조와 샌드 퀼팅 기법으로 볼륨감과 보온성을 극대화하였고, 데일리부터 오피스까지 아우르는 다양한 라이프스타일 전반에 자연스럽게 어울리는 디자인입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "가볍게, 부담 없이",
+          "description": "가벼운 원단의 경량 디자인.",
+          "evidence": "레귤러 핏의 가볍고 보온성이 뛰어난 라운드넥 경량 베스트입니다."
+        },
+        {
+          "title": "포인트 있게 연출",
+          "description": "다이아몬드 퀼팅 패턴과 톤온톤의 스냅 디테일이 세련된 무드를 더했습니다.",
+          "evidence": "다이아몬드 퀼팅 패턴과 톤온톤의 스냅 디테일이 세련된 무드를 더했으며, 고밀도 원단과 프리미엄 충전재를 사용해 가볍지만 따뜻한 착용감을 선사합니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:27.718Z",
       "analyzedAt": null
     },
     {

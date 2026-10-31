@@ -662,6 +662,49 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "026973",
+      "rawName": "NEW G-MOTION 와플 텍스처 하프집업 긴팔티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=2367747E6C517988A17BDF152520182C&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01026973.jpg",
+      "detailHash": "7e2de53278767e3667af77ea00a95e588a241691ea51797f15f4304e12fa6566",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"f3df3e1e1eb5312bdf8d13596950eec0\"",
+        "lastModified": "Tue, 25 Aug 2026 04:53:16 GMT"
+      },
+      "pageHash": "2ad7811978c5c37506505420340292ac2d088f8de12380efdfc3bcfb5535ba50",
+      "pageText": "활용도 높은 하프넥 디자인의 Sorona® 와플 집업 긴팔 티셔츠\n\n베이직한 하프넥 집업 디자인과 자연스럽게 떨어지는 레귤러 핏으로 \n다양한 스타일링이 가능한 데일리 긴팔 티셔츠입니다.\n\nSorona® 100% 폴리에스터 와플 소재를 사용해 부드러운 터치감과 우수한 신축성, \n뛰어난 형태 안정성을 갖추었으며, 입체적인 와플 조직이 쾌적한 착용감을 제공합니다. \n\n하프 집업 디테일로 단독 착용은 물론 다양한 레이어드 스타일링에도 활용하기 좋은 아이템입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "다양한 코디에 활용",
+          "description": "활용도 높은 하프넥 디자인의 Sorona® 와플 집업 긴팔 티셔츠.",
+          "evidence": "활용도 높은 하프넥 디자인의 Sorona® 와플 집업 긴팔 티셔츠"
+        },
+        {
+          "title": "쾌적하게 입기 좋게",
+          "description": "입체적인 와플 조직이 쾌적한 착용감을 제공합니다.",
+          "evidence": "Sorona® 100% 폴리에스터 와플 소재를 사용해 부드러운 터치감과 우수한 신축성, 뛰어난 형태 안정성을 갖추었으며, 입체적인 와플 조직이 쾌적한 착용감을 제공합니다."
+        },
+        {
+          "title": "부드럽게 닿는 촉감",
+          "description": "부드러운 촉감이 느껴지는 원단.",
+          "evidence": "부드러운 터치감과 우수한 신축성, 뛰어난 형태 안정성을 갖추"
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:59.299Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "376911",
       "rawName": "NEW [박현지] CLOUD LIGHT 후드 패딩 자켓",
       "gender": "여성",
@@ -1617,6 +1660,33 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "325515",
+      "rawName": "NEW 오버핏 후드집업",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=279B1A8E6981DA17590A5932031A0D6A&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05325515.jpg",
+      "detailHash": "392c0be187e4270bd8dfa6dcda734e539813006be6b456f3cd2c0caa29e6524c",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"8355ab727839194effb9b3a479cc0d18\"",
+        "lastModified": "Thu, 06 Feb 2025 06:31:44 GMT"
+      },
+      "pageHash": "c4c4e7cecda046e5b8313af2d8ac2562942115dd2efdead946cca60a01cf48db",
+      "pageText": "세미 오버사이즈 프렌치 테리 후드 집업으로,\n캐주얼하고 편안하게 착용할 수 있는 아이템입니다.\n\n365g/sqm(520g/yd) 중량의 부드러운 테리 원단을 사용하여 가벼운 착용감과 편안함을 제공하여 \n따뜻하며 오랫동안 변형 없이 착용 가능합니다.\n\n‘Wellness club’ 라는 테마로 가슴 부분에 두꺼운 졸 프린트 기법을 적용해 고급스러운 디테일을 더했습니다.\n\n적당히 여유로운 오버사이즈 실루엣으로 YKK 2WAY 지퍼를 사용하여 다양한 스타일 연출이 가능한 활용도가 높으며 \n트렌디하면서도 캐주얼한 느낌을 연출합니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:48.383Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "326918",
       "rawName": "NEW 퍼펙트 크루넥 반팔티",
       "gender": "여성",
@@ -1701,6 +1771,44 @@
       "status": "image-pending",
       "visualReview": false,
       "observedAt": "2026-10-31T06:26:29.812Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "046507",
+      "rawName": "NEW 데님 셔츠",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=27C36B253951C1613E61EB9A7A91AD54&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01046507_.jpg",
+      "detailHash": "7f55ca5ecd7072ea338a638cdddb72a95e5eed36ba157e0355e2a03c097456da",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"bab2b0168223cab0a34eeca163fc49f4\"",
+        "lastModified": "Tue, 03 Feb 2026 08:59:14 GMT"
+      },
+      "pageHash": "29359da5bcc515b39424dda606e579b37491a1b6e64f7f0358cc32de4c93fbd9",
+      "pageText": "균형감 있게 떨어지는 레귤러 핏으로, 과하지 않은 여유와 단정한 실루엣을 동시에 갖춘 구조입니다. \n어깨선과 몸판이 과한 여유 없이 설계되어 단독 착용 시 깔끔한 인상을 줍니다. \n데님 특유의 질감이 부담 없이 어우러지는 안정적인 실루엣이 특징입니다.\n\n100% 코튼으로 짜인 6.5온스 데님 원단을 사용하여 탄탄하면서도 유연한 착용감을 제공합니다. \n적당한 두께로 간절기 셔츠로서의 활용도를 고려한 적당한 밀도감이 특징입니다. \n시간이 지날수록 자연스럽게 에이징되는 데님의 매력을 느낄 수 있으며, \n단독은 물론, 이너 또는 아우터 레이어드용으로도 유연하게 활용 가능합니다.\n\n전면 포켓 없이 미니멀하게 디자인되어 실루엣이 더욱 정제된 인상을 줍니다. \n버튼다운 칼라 디테일이 캐주얼한 데님 소재와 만나 셔츠 특유의 단정함을 유지하면서도, \n일상 속에서 자연스럽고 편안한 스타일링을 연출할 수 있게 해줍니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "편안한 착용감",
+          "description": "과하지 않은 여유와 단정한 실루엣을 동시에 갖춘 구조입니다.",
+          "evidence": "균형감 있게 떨어지는 레귤러 핏으로, 과하지 않은 여유와 단정한 실루엣을 동시에 갖춘 구조입니다."
+        },
+        {
+          "title": "다양한 코디에 활용",
+          "description": "이너 또는 아우터 레이어드용으로도 유연하게 활용 가능합니다.",
+          "evidence": "시간이 지날수록 자연스럽게 에이징되는 데님의 매력을 느낄 수 있으며, 단독은 물론, 이너 또는 아우터 레이어드용으로도 유연하게 활용 가능합니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:36.054Z",
       "analyzedAt": null
     },
     {
@@ -3550,6 +3658,33 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:13:57.378Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "025911",
+      "rawName": "NEW 스트라이프 긴팔티",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=2DB788D5CBEFF4BD2F99A543CFB594B0&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/01025911.jpg",
+      "detailHash": "d34b07fe050618657450834b42ff3d2ec7a288124f2b4767e0b84a897dcc6fd1",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"3aa6eb027794f84caa976914c9827026\"",
+        "lastModified": "Wed, 27 Aug 2025 05:06:10 GMT"
+      },
+      "pageHash": "ba9c862c190e3c2d632886becedd865b609ee41d16a535a971cf6f31bfe5b1f8",
+      "pageText": "바디는 기본 퍼펙트티와 같은 20수 코튼 싱글 저지(220GSM)를 사용해 가볍고 부드러운 착용감을 제공합니다. \n\n네크라인에는 립 중량 300GSM 의 코튼 100% 소재를 적용해 형태 안정성과 내구성을 강화했습니다. 통기성과 흡습성이 우수해 시즌 내내 쾌적함을 유지하며, 데일리 웨어에 적합한 안정적인 퀄리티를 갖추고 있습니다.\n\n스탠다드 핏 롱슬리브 티셔츠로, 체형에 구애 없이 편안하게 착용할 수 있습니다. \n어깨선이 자연스럽게 드롭되어 부드러운 라인을 형성하며, 단품 또는 이너웨어로도 활용도가 높습니다. \n캐주얼한 무드와 단정한 분위기를 동시에 연출할 수 있는 핏입니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:27:20.080Z",
       "analyzedAt": null
     },
     {

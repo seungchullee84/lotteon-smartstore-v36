@@ -1907,6 +1907,39 @@
     },
     {
       "rule": "adult-official-benefits-1",
+      "style": "415535",
+      "rawName": "NEW 루즈핏 와이드 데님",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "여성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=6703DF89B11E3461BCF97B1E597815B7&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2025/05415535.jpg",
+      "detailHash": "0c19791a8d37b4c8120c96d047db783000de4e95803a34f4593655bdb57d3c5d",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"050276c165dea3ce8d2e30b97aa35e31\"",
+        "lastModified": "Mon, 29 Sep 2025 03:28:48 GMT"
+      },
+      "pageHash": "a2133ba902591405d75fe8a49d61a24f9f729b22d00c83e5958e5d64e6b354f6",
+      "pageText": "여성 루즈핏 와이드 핏 데님입니다.\n\n힙에서 허벅지 밑단까지  전체적으로 여유있게 떨어지는 맥시한 와이드 핏의 데님 실루엣입니다.\n\n로우 라이즈 보다는 조금 더 편안하게 착용 가능한 미드 라이즈 데님으로\n발등까지 오는 긴 기장의 실루엣이 멋스러운 연출을 도와줍니다.\n\n* 데님 제품의 경우 워싱 가공 특성 상 제품별 디테일의 편차가 있을 수 있습니다. \n* 데님 염료의 특성상 이염 및 물빠짐이 불가피할 수 있습니다.\n* 데님 특성 상, 컬러별로 디스트로이드 마감 혹은 디테일 처리가 상이할 수 있습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [
+        {
+          "title": "여유로운 와이드핏",
+          "description": "넉넉하게 떨어지는 와이드 실루엣.",
+          "evidence": "힙에서 허벅지 밑단까지 전체적으로 여유있게 떨어지는 맥시한 와이드 핏의 데님 실루엣입니다."
+        }
+      ],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:48.601Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
       "style": "114956",
       "rawName": "브러시드 조거 팬츠",
       "gender": "",
@@ -2852,6 +2885,33 @@
       "status": "automatic-source-reviewed",
       "visualReview": false,
       "observedAt": "2026-10-31T06:14:00.713Z",
+      "analyzedAt": null
+    },
+    {
+      "rule": "adult-official-benefits-1",
+      "style": "076921",
+      "rawName": "NEW [변우석] CLOUD LIGHT 후드 경량 패딩 (중경량)",
+      "gender": "",
+      "sourceCategory": [
+        "신상품",
+        "남성"
+      ],
+      "sourceUrl": "https://www.giordano.co.kr/shop/detail.php?pno=6C066CBA38C8CB025DDC7C0DC454F495&ctype=1",
+      "detailUrl": "https://www.giordano.co.kr/_gio_on/2026/01076921_.jpg",
+      "detailHash": "d0ee917d20fe2fba2d474e68a0dfbe0b82fd811b946cb49e58af8c61d519a540",
+      "detailImageVerified": true,
+      "detailValidators": {
+        "etag": "\"a5ab933adc519d344d67d915bc667864\"",
+        "lastModified": "Mon, 12 Oct 2026 01:28:39 GMT"
+      },
+      "pageHash": "61394be20c41542db16536aff6f02af203d26d83415a0f26cf83f4277e4719d8",
+      "pageText": "일체형 후드 구조로 보온성과 높은 실용성을 갖춘 인슐레이션 경량 자켓입니다. \n고밀도 립스탑 나일론 100% 원단과 ECLoft® Fluff 프리미엄 충전재를 사용하여 \n가볍고 따뜻한 착용감을 제공하며, 세심한 다운백 구조와 샌드 퀼팅 기법으로 \n보온성과 볼륨감을 강화하여 일상부터 액티브 활동까지 다양한 환경에서 착용할 수 있습니다.",
+      "imageText": "",
+      "imageScanComplete": false,
+      "points": [],
+      "status": "image-pending",
+      "visualReview": false,
+      "observedAt": "2026-10-31T06:26:55.400Z",
       "analyzedAt": null
     },
     {
