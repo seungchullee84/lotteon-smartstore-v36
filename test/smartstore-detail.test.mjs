@@ -69,7 +69,7 @@ test('공통 템플릿 파일만 동기화하고 마네킨 컷과 상품 초안�
  for(const file of ['public/smartstore-template/product.jpg','data/smartstore-details/375908/draft.json','data/375908/smartstore-photo-test.jpg'])assert.equal(publishable(file),false,file);
 });
 test('다른 품번·색상·외부 경로는 차단하고 사진 매핑과 상품별 소구점으로 저장',async()=>{
- const reviewedProduct={...product,officialDescription:'가벼운 원단의 경량 패딩입니다.'};
+ const reviewedProduct={...product,officialDescription:'가벼운 원단의 경량 패딩입니다. 밑단 스트링으로 핏 조절이 가능합니다.'};
  const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-template-'));const folder=path.join(root,'product'),dataRoot=path.join(root,'data'),draftRoot=path.join(dataRoot,'smartstore-details',product.style);
  try{
   await mkdir(folder,{recursive:true});await mkdir(draftRoot,{recursive:true});await prepareVideo(dataRoot);
