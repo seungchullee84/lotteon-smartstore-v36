@@ -10056,9 +10056,9 @@
   "sourceComplete": 1427,
   "imageComplete": 1362,
   "withThreeOrFour": 456,
-  "phase": "discover",
+  "phase": "sources",
   "startedAt": "2026-10-27T05:53:33.467Z",
-  "updatedAt": "2026-10-31T01:39:28.774Z",
+  "updatedAt": "2026-10-31T02:00:51.328Z",
   "websiteCheck": {
     "version": 1,
     "checkedAt": "2026-10-31T01:39:17.058Z",
@@ -18862,7 +18862,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -18874,7 +18874,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -18898,7 +18898,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -19427,7 +19427,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -19439,7 +19439,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "ready"
+            "status": "superseded"
           },
           {
             "type": "changed",
@@ -19463,7 +19463,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
@@ -19673,7 +19673,7 @@
             "changes": [
               "공식 상세이미지 변경"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "new",
@@ -20070,7 +20070,7 @@
             "changes": [
               "공식 상세이미지 추가"
             ],
-            "status": "superseded"
+            "status": "ready"
           },
           {
             "type": "changed",
