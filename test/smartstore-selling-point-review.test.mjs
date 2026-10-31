@@ -1,5 +1,17 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,writeFile,mkdir} from 'node:fs/promises';import {createHash} from 'node:crypto';import path from 'node:path';import os from 'node:os';import {reviewSellingPoints,saveOfficialImagePointReview,officialPointSource} from '../smartstore-selling-point-review.mjs';
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,writeFile,mkdir} from 'node:fs/promises';import {createHash} from 'node:crypto';import path from 'node:path';import os from 'node:os';import {reviewSellingPoints,saveOfficialImagePointReview,officialPointSource} from '../smartstore-selling-point-review.mjs';import {assertRequiredSellingPoints} from '../smartstore-selling-points.mjs';
 const product={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=test',name:'공식 의류'};
+
+test('과거 한 개 선택도 현재 공식 원문의 서로 다른 구매 이유를 찾아 2~4개로 구성한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'single-point-recovery-'));try{
+  const text='부드러운 원단으로 편안한 착용감을 제공합니다. 밑단 스트링으로 핏 조절이 가능합니다. 옆면 포켓으로 수납성을 높였습니다.';
+  const first={title:'부드러운 착용감',description:'부드러운 원단으로 편안한 착용감.',evidence:'부드러운 원단으로 편안한 착용감을 제공합니다.'};
+  const dir=path.join(root,'smartstore-details',product.style);await mkdir(dir,{recursive:true});
+  await writeFile(path.join(dir,'selling-point-selection.json'),JSON.stringify({...product,detailHash:null,textHash:createHash('sha256').update(text).digest('hex'),points:[first]}));
+  const r=await reviewSellingPoints(product,text,{dataRoot:root});assert.equal(r.status,'ready');assert.equal(r.points.length,3);assert.deepEqual(r.points[0],first);assert(r.points.every(p=>text.includes(p.evidence)));
+  assert.doesNotThrow(()=>assertRequiredSellingPoints({sellingPoints:r.points}));
+  for(const count of [0,1,5])assert.throws(()=>assertRequiredSellingPoints({sellingPoints:Array.from({length:count},()=>first)}),/2~4/);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
 test('시각 확인한 소구점이 부족하면 현재 공식 원문의 다른 장점으로 보완한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'benefit-supplement-'));try{
  await writeFile(path.join(root,'detail.jpg'),'official-image');
