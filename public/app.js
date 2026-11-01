@@ -236,7 +236,7 @@ if($('info').src&&$('info').complete&&!$('info').naturalWidth)$('infoImageError'
 
 async function saveSelectedImage(key,button){
  if(button.disabled)return;button.disabled=true;
- try{await post('save-main-image',{image:key,channel:document.body.dataset.channel});announce('선택한 이미지 1장을 바탕화면의 이미지다운 폴더에 저장했습니다.','success');}
+ try{await post('save-main-image',{image:key,channel:document.body.dataset.channel});announce('선택한 이미지 1장을 바탕화면의 이미지저장 폴더에 저장했습니다.','success');}
  catch(e){announce(e.message,'failed');}finally{button.disabled=false;}
 }
 $('downloadMain1500').onclick=()=>saveSelectedImage('main',$('downloadMain1500'));
@@ -244,7 +244,7 @@ $('saveExtra1').onclick=()=>saveSelectedImage('extra1',$('saveExtra1'));
 $('saveExtra2').onclick=()=>saveSelectedImage('extra2',$('saveExtra2'));
 $('saveDetailImages').onclick=async()=>{
  const button=$('saveDetailImages');if(button.disabled)return;button.disabled=true;
- try{const smart=document.body.dataset.channel==='smartstore';await post('save-detail-images',smart?{channel:'smartstore',product:smartstoreDetailFields()}:{});announce(smart?'스마트스토어 템플릿 상세이미지·HTML·영상 코드를 바탕화면 이미지다운에 저장했습니다.':'상세이미지를 긴 사진 한 장으로 바탕화면의 이미지다운 폴더에 저장했습니다.','success');}
+ try{const smart=document.body.dataset.channel==='smartstore';await post('save-detail-images',smart?{channel:'smartstore',product:smartstoreDetailFields()}:{});announce(smart?'스마트스토어 템플릿 상세이미지·HTML·영상 코드를 바탕화면 이미지저장에 저장했습니다.':'상세이미지를 긴 사진 한 장으로 바탕화면의 이미지저장 폴더에 저장했습니다.','success');}
  catch(e){announce(e.message,'failed');}finally{button.disabled=false;}
 };
 

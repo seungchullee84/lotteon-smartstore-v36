@@ -531,7 +531,7 @@ const server=http.createServer(async(req,res)=>{
           if(b.product?.style!==current.style)throw Error('현재 상품을 다시 확인해 주세요.');
           const edits={};if(Object.hasOwn(b.product,'templateHeadline'))edits['templateHeadline'+resolveDetailTemplate(b.product.detailTemplate??state.product.detailTemplate)]=validateTemplateHeadline(b.product.templateHeadline);for(const key of ['name','gender','material'])if(typeof b.product[key]==='string')edits[key]=b.product[key].slice(0,500);
           for(const key of ['colors','sizes'])if(Array.isArray(b.product[key])&&b.product[key].length<=100&&b.product[key].every(v=>typeof v==='string'&&v.length<100))edits[key]=b.product[key];
-          const p={...current,...edits,detailTemplate:resolveDetailTemplate(b.product.detailTemplate??current.detailTemplate)};const saveFolder=await imageDownloadFolder();
+          const p={...current,...edits,detailTemplate:resolveDetailTemplate(b.product.detailTemplate??current.detailTemplate)};const saveFolder=await imageDownloadFolder({manual:true});
           const savedPath=path.join(saveFolder,p.style+'_템플릿'+p.detailTemplate+'_스마트스토어상세_'+Date.now()+'.png');
           const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase='smartstore-detail';state.error=null;
           try{
@@ -542,7 +542,7 @@ const server=http.createServer(async(req,res)=>{
           finally{state.busy=false;activeAbort=null;}
         }
         const p=current;
-        const saveFolder=await imageDownloadFolder();
+        const saveFolder=await imageDownloadFolder({manual:true});
         const filename=String(p.style).replace(/[^a-zA-Z0-9_-]/g,'')+'_상세전체_'+Date.now()+'.png';
         const savedPath=path.join(saveFolder,filename);
         const dimensions=await saveLongDetailImage(p,state.folder,savedPath);
@@ -556,7 +556,7 @@ const server=http.createServer(async(req,res)=>{
       if(url.pathname==='/api/save-main-image'){
         if(state.busy)return json(res,409,{error:'작업이 끝난 뒤 대표이미지를 저장해 주세요.'});
         if(!state.product||!state.folder)return json(res,400,{error:'먼저 상품 정보를 수집해 주세요.'});
-        const saveFolder=await imageDownloadFolder();
+        const saveFolder=await imageDownloadFolder({manual:true});
         const key=b.image||'main';
         if(b.channel==='smartstore'){
           const files=await prepareListingImages(state.product,state.folder,{dataRoot});
