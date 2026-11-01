@@ -219,6 +219,8 @@ export function matchColor(raw, choices) {
   ];
   const norm=s=>baseColor(s).toUpperCase().replace(/[()（）_-]/g,'');
   const base=norm(raw);
+  // User-approved LotteON mapping, including the official seasonal suffix.
+  if(/^(살몬|SALMON)(?:AW|FW|SS)?$/.test(base))return choices.find(c=>norm(c)==='살구')||null;
   // User-confirmed LotteON integrated color; do not substitute purple/pink.
   if(/^(라즈베리|RASPBERRY)$/.test(base))return choices.find(c=>norm(c)==='루비')||null;
   if(/^(린스|RINSE)$/.test(base))return choices.find(c=>norm(c)==='블루')||null;

@@ -105,3 +105,8 @@ test('수집 결과의 자동 상품명도 중복 없이 키워드 생성으로 
 });
 
 test('벨트는 페이지에 명시된 _info 원본을 기존 placeholder보다 우선한다',()=>{const p=parseProduct('<title>리버서블 벨트</title><img src="/_data/attach/belt.jpg"><img src="/_gio_on/2021/01134600info.jpg"><img src="/_gio_on/2021/01134600_info.jpg">','https://www.giordano.co.kr/shop/detail.php?pno=example','134600');assert.equal(p.images.info,'https://www.giordano.co.kr/_gio_on/2021/01134600_info.jpg');assert.equal(p.images.detail,undefined);});
+
+test('롯데ON 살몬은 계절 표기·번호와 무관하게 사용자 지정 살구만 선택',()=>{
+ for(const raw of ['살몬','03살몬(AW)','03 살몬（AW）','SALMON','03SALMON(FW)'])assert.equal(matchColor(raw,['핑크','피치','살구','코랄']),'살구');
+ assert.equal(matchColor('03살몬(AW)',['핑크','피치','코랄']),null);
+});
