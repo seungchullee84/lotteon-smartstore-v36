@@ -1,7 +1,7 @@
 import {load} from 'cheerio';
 import {readFile,mkdir,writeFile,rename} from 'node:fs/promises';
 import path from 'node:path';
-export const NEW_LIST_INTERVAL=30*60*1000;
+export const NEW_LIST_INTERVAL=20*60*1000;
 const listing='https://www.giordano.co.kr/shop/big_section.php?cno1=2375';
 export function parseNewListing(html){
  const $=load(html);if(/Request Rejected|Access Denied/i.test($('title').text()))throw Error('공식몰 목록 접근 제한');
@@ -28,7 +28,7 @@ export async function checkNewListing({file,fetchImpl=fetch,now=new Date().toISO
  }
  let old;try{old=JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  const seen=new Set(old?.seenIds||[]);const events=old?[...products.values()].filter(p=>!seen.has(p.id)).map(p=>({...p,type:'new',firstCheckedAt:now})):[];
- const state={mode:'new-list-only',intervalMinutes:30,checkedAt:now,nextCheckAt:new Date(Date.parse(now)+NEW_LIST_INTERVAL).toISOString(),baselineAt:old?.baselineAt||now,seenIds:[...new Set([...seen,...products.keys()])],batches:[...(old?.batches||[]),{checkedAt:now,events}].slice(-100),errors:0,metrics:{requests,bytes}};
+ const state={mode:'new-list-only',intervalMinutes:20,checkedAt:now,nextCheckAt:new Date(Date.parse(now)+NEW_LIST_INTERVAL).toISOString(),baselineAt:old?.baselineAt||now,seenIds:[...new Set([...seen,...products.keys()])],batches:[...(old?.batches||[]),{checkedAt:now,events}].slice(-100),errors:0,metrics:{requests,bytes}};
  await mkdir(path.dirname(file),{recursive:true});await writeFile(file+'.tmp',JSON.stringify(state));await rename(file+'.tmp',file);return state;
 }
 export function startNewListingMonitor(root){
@@ -37,7 +37,7 @@ export function startNewListingMonitor(root){
  async function tick(){if(stopped||busy)return;busy=true;try{
   if(!state.website)try{state.website=JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
   if(!state.website||Date.now()>=Date.parse(state.website.nextCheckAt))state.website=await checkNewListing({file});
-  state.message='홈페이지 신상품 목록 30분 간격 확인 · 소구점은 품번별 요청 시 조사';
+  state.message='홈페이지 신상품 목록 20분 간격 확인 · 소구점은 품번별 요청 시 조사';
  }catch(e){state.message='홈페이지 신상품 확인 지연 · '+e.message;}finally{busy=false;if(!stopped){timer=setTimeout(tick,state.website&&Date.parse(state.website.nextCheckAt)>Date.now()?Math.min(NEW_LIST_INTERVAL,Date.parse(state.website.nextCheckAt)-Date.now()):NEW_LIST_INTERVAL);timer.unref();}}}
  const ready=tick();return {state,ready,async refresh(){return state;},stop(){stopped=true;clearTimeout(timer);}};
 }
