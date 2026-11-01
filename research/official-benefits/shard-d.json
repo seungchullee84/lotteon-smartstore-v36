@@ -1159,8 +1159,8 @@
       ],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-11-01T01:27:59.567Z",
-      "analyzedAt": "2026-11-01T01:39:25.631Z"
+      "observedAt": "2026-11-01T02:06:18.984Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
