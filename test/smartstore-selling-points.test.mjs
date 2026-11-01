@@ -105,3 +105,11 @@ test('모든 상품 소구점의 브러시드 표시는 기모로 통일하고 �
  const description='유지하며,단독 착용은 물론 아우터 안 이너 레이어드로도 활용할.';
  assert.equal(friendlyBenefitDescription(description),'');assert.equal(displaySellingPoints([{title:'다양한 코디에 활용',description,evidence:description}]).length,0);
  });
+
+test('공식 근거의 깃털 빠짐 최소화와 고급스러움도 구매 장점으로 인정',()=>{
+ const points=[{title:'털 빠짐 부담을 덜어줘요',description:'이중 다운백으로 깃털 빠짐을 최소화했어요.',evidence:'이중 다운백으로 깃털 빠짐을 최소화했습니다.'},{title:'은은한 광택으로 멋스럽게',description:'은은한 광택으로 고급스러운 분위기를 더해요.',evidence:'은은한 광택으로 고급스러움을 느낄 수 있습니다.'}];assert(usableSellingPoints(points,points.map(p=>p.evidence).join(' ')));assert(!usableSellingPoints(points,'일반 자켓입니다.'));
+});
+test('공식 원문에서 차가운 공기 차단을 확인한 경우만 방풍 장점 허용',()=>{
+ const p={title:'찬바람이 들어올 틈을 줄여요',description:'하이넥과 밴드가 차가운 공기를 막아줘요.',evidence:'하이넥과 밴드로 차가운 공기를 효과적으로 차단합니다.'};
+ assert(usableSellingPoints([p],p.evidence));assert(!usableSellingPoints([p],'하이넥 디자인입니다.'));
+});
