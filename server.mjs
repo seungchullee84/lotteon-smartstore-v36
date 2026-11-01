@@ -1,3 +1,4 @@
+import {reusableSmartstoreCollection} from './smartstore-resume-collection.mjs';
 import {smartstorePreparationStatus} from './smartstore-preparation-status.mjs';
 import {pointPicker,savePointSelection} from './smartstore-point-picker.mjs';
 import {prefillPhotoColors} from './smartstore-photo-color-draft.mjs';
@@ -367,14 +368,16 @@ const server=http.createServer(async(req,res)=>{
         parseProductInput(b.style);
         const detailTemplate=resolveDetailTemplate(b.detailTemplate??state.product?.detailTemplate);
         if(b.edits)await productEdits.save(b.edits,state.product?.style);
-        const selectedTitle=b.selectedTitle;const input=b.style,key=backgroundApiKey;const previous=state.product;const parsedInput=parseProductInput(input);const sourceUrlHint=previous&&(parsedInput.style===previous.style||parsedInput.url===previous.sourceUrl)?previous.sourceUrl:null;smartBot.stopped=false;bot.stopped=false;
+        const selectedTitle=b.selectedTitle;const input=b.style,key=backgroundApiKey;const previous=state.product,previousFolder=state.folder;const parsedInput=parseProductInput(input);const sourceUrlHint=previous&&(parsedInput.style===previous.style||parsedInput.url===previous.sourceUrl)?previous.sourceUrl:null;smartBot.stopped=false;bot.stopped=false;
         job('smartstore-auto',async()=>{
           const signal=activeAbort.signal;
           const result=await runSmartstoreAuto({input,apiKey:key,signal,log,step:name=>{state.autoStep=name;},
             preflight:p=>smartBot.preflight(p),
             collect:async value=>{
-              const folder=path.join(dataRoot,'smartstore-auto-'+Date.now());
-              let product=await collect(value,folder,log,()=>signal.aborted,signal,{saveSmartstoreSource:true,sourceUrlHint,noticeCacheRoot:path.join(dataRoot,'smartstore-notice-cache'),prepareMain:false});
+              const reused=await reusableSmartstoreCollection(parsedInput,previous,previousFolder,{dataRoot});
+              const folder=reused?.folder||path.join(dataRoot,'smartstore-auto-'+Date.now());
+              if(reused)log('현재 수집 자료 이어서 사용 · 공식몰 중복 수집 생략');
+              let product=reused?.product||await collect(value,folder,log,()=>signal.aborted,signal,{saveSmartstoreSource:true,sourceUrlHint,noticeCacheRoot:path.join(dataRoot,'smartstore-notice-cache'),prepareMain:false});
               product.keywords=buildKeywords(product);
               product=await productEdits.apply(product);product.detailTemplate=detailTemplate;
               if(selectedTitle){Object.assign(product,applySelectedSmartstoreTitle(product,selectedTitle));log('현재 전용 상품명 그대로 사용 · 자동 재작성 없음');}
