@@ -11,7 +11,7 @@ export function parseNewListing(html){
   const box=a.closest('.box');const name=box.find('.name,.prd_name,.prdname,.product_name').first().text().trim()||a.text().trim()||box.find('.info').text().replace(/\s+/g,' ').trim();
   const text=name||box.text().replace(/\s+/g,' ').trim();if(/JUNIOR|KIDS|BOYS|GIRLS|주니어|키즈|아동|여아|남아/i.test(text))continue;
   const style=text.match(/(?:^|\D)(\d{6})(?!\d)/)?.[1]||box.find('img[src*="colorchip_auto"]').first().attr('src')?.match(/colorchip_auto\/(?:\d{2})(\d{6})\d{2}\./)?.[1]||'확인 필요';
-  products.set(id.toLowerCase(),{id:id.toLowerCase(),style,name:name||'공식 신상품 목록 상품',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno='+id,changes:[],status:'needs-review'});
+  products.set(id.toLowerCase(),{id:id.toLowerCase(),style,name:name||'공식 신상품 목록 상품',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno='+id,changes:[],status:'on-demand'});
  }
  const pages=Number($('.more_count .total').first().text())||1;if(pages<1||pages>32)throw Error('신상품 목록 페이지 범위 확인 필요');
  return {products:[...products.values()],pages};
@@ -38,6 +38,6 @@ export function startNewListingMonitor(root){
   if(!state.website)try{state.website=JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
   if(!state.website||Date.now()>=Date.parse(state.website.nextCheckAt))state.website=await checkNewListing({file});
   state.message='홈페이지 신상품 목록 30분 간격 확인 · 소구점은 품번별 요청 시 조사';
- }catch(e){state.message='홈페이지 신상품 확인 지연 · '+e.message;}finally{busy=false;if(!stopped){timer=setTimeout(tick,NEW_LIST_INTERVAL);timer.unref();}}}
+ }catch(e){state.message='홈페이지 신상품 확인 지연 · '+e.message;}finally{busy=false;if(!stopped){timer=setTimeout(tick,state.website&&Date.parse(state.website.nextCheckAt)>Date.now()?Math.min(NEW_LIST_INTERVAL,Date.parse(state.website.nextCheckAt)-Date.now()):NEW_LIST_INTERVAL);timer.unref();}}}
  const ready=tick();return {state,ready,async refresh(){return state;},stop(){stopped=true;clearTimeout(timer);}};
 }

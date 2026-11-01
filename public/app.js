@@ -25,7 +25,7 @@ function renderWebsiteUpdates(website,onDemand=false){
   const label=document.createElement('span');label.className='website-product-label';label.textContent=(event.type==='new'?'신상품':event.type==='discovered'?'기존·미확인':'상세 변경')+' · 품번 '+event.style;
   const link=document.createElement('a');link.className='website-product-link';link.textContent=event.name+' ↗';link.href=event.sourceUrl;link.target='_blank';link.rel='noopener noreferrer';link.title='공식 상품페이지 열기';
   const reason=document.createElement('div');reason.className='website-product-reason';reason.textContent=event.type==='new'?'공식 신상품 목록에서 기준선 이후 신규 확인 · 사이트 출시일과 확인시각은 다릅니다.':event.type==='discovered'?'수집 보완으로 발견 · 신상품 근거 미확인 · 신상품 알림 제외':event.changes.join(' · ');
-  const status=document.createElement('div');status.className='website-product-status';status.textContent='확인 '+time(event.firstCheckedAt||checkedAt)+(event.firstCheckedAt&&event.firstCheckedAt!==checkedAt?' · 최근 '+time(checkedAt):'')+' · '+({ready:'소구점 분석 완료',analyzing:'소구점 분석 중','needs-review':'소구점 추가 확인 필요',superseded:'이후 확인 기록 있음'}[event.status]||'소구점 확인 중');
+  const status=document.createElement('div');status.className='website-product-status';status.textContent='확인 '+time(event.firstCheckedAt||checkedAt)+(event.firstCheckedAt&&event.firstCheckedAt!==checkedAt?' · 최근 '+time(checkedAt):'')+' · '+({'on-demand':'품번 요청 시 소구점 조사',ready:'소구점 분석 완료',analyzing:'소구점 분석 중','needs-review':'소구점 추가 확인 필요',superseded:'이후 확인 기록 있음'}[event.status]||'소구점 확인 중');
   card.append(label,link,reason,status);parent.append(card);
  }
  function addDayGroups(parent,dayRecord){
