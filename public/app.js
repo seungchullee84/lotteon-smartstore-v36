@@ -17,7 +17,7 @@ function renderWebsiteUpdates(website,onDemand=false){
  for(const [type,label,count] of [['new','신상품',daily.newCount],['changed','변경',daily.changedCount],['discovered','기존·미확인',daily.discoveredCount]]){
   const button=document.createElement('button');button.type='button';button.id=type==='new'?'websiteNewToggle':'websiteChangedToggle';button.className='website-category-toggle';button.setAttribute('aria-pressed',String(websiteSelection===type));button.textContent=label+' '+count+'건';button.onclick=()=>{websiteSelection=websiteSelection===type?null:type;delete list.dataset.stamp;renderWebsiteUpdates(website);};summary.append(button,document.createTextNode(' '));
  }
- summary.append(document.createTextNode(' · 마지막 확인 '+time(website.checkedAt)+' (한국 시간) · 20분 간격'));list.hidden=!websiteSelection;
+ summary.append(document.createTextNode(' · 마지막 확인 '+time(website.checkedAt)+' (한국 시간) · '+(website.intervalMinutes||20)+'분 간격'));list.hidden=!websiteSelection;
  list.replaceChildren();
  const heading=document.createElement('p');heading.className='website-current-heading';heading.textContent='오늘 누적 · '+daily.day.replaceAll('-','.')+' · 같은 상품 중복 제외';list.append(heading);
  function addProduct(parent,event,checkedAt){
