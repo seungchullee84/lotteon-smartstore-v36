@@ -4541,8 +4541,8 @@
       "points": [],
       "status": "needs-review",
       "visualReview": false,
-      "observedAt": "2026-11-01T04:37:32.180Z",
-      "analyzedAt": "2026-11-01T04:48:51.470Z"
+      "observedAt": "2026-11-01T05:24:54.935Z",
+      "analyzedAt": null
     },
     {
       "rule": "adult-official-benefits-1",
