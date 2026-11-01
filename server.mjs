@@ -54,7 +54,7 @@ const root=path.dirname(fileURLToPath(import.meta.url));
 const releases=createReleaseTracker(root);await releases.get();
 const githubSync=process.env.REGISTER_PORTABLE==='1'?{state:{status:'portable',message:'배포 실행판'},stop(){}}:startGithubSync(root,{beforeSync:()=>releases.get()});
 const dataRoot=path.join(root,'data');await mkdir(dataRoot,{recursive:true});
-const benefitResearch=startBenefitResearch(root);
+const benefitResearch=startBenefitResearch(root,{autoRun:false});
 const productEdits=createProductEditStore(dataRoot);
 const browserLogins={lotte:createBrowserLoginStore(dataRoot),smartstore:createBrowserLoginStore(dataRoot,{channel:'smartstore'})};
 function browserLoginFor(channel='lotte'){if(!Object.hasOwn(browserLogins,channel))throw Error('자동 로그인 판매채널을 확인해 주세요.');return browserLogins[channel];}

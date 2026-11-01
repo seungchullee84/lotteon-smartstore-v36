@@ -35,7 +35,11 @@ export async function startBenefitWorker(root,storage,{spawnImpl=spawn,alive=wor
   await handle.writeFile(JSON.stringify({pid:child.pid,startedAt:new Date().toISOString()}));child.unref();return {running:true,pid:child.pid,reused:false};
  }catch(error){await unlink(lock).catch(()=>{});throw error;}finally{await handle.close();}
 }
-export function startBenefitResearch(root,{interval=60000,autoRun=process.env.REGISTER_BENEFIT_AUTORUN!=='0'}={}){
+export function startBenefitResearch(root,{interval=60000,autoRun=false}={}){
+ if(!autoRun){
+  const state={status:'on-demand',message:'자동 조사 꺼짐 · 품번 수집 시 해당 상품만 조사',imageComplete:0,total:0};
+  return {state,ready:Promise.resolve(),async refresh(){return state;},stop(){}};
+ }
  const state={status:'initializing',message:'공유 소구점 자료 확인 중',imageComplete:0,total:0};let busy=false,stopped=false,attempted=false,storage;
  async function tick(){if(busy||stopped)return;busy=true;
   try{
