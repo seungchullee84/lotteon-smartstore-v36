@@ -13,3 +13,13 @@ test('unchanged photos reuse bytes; same-size replacements and deletion are dete
   await rm(file);await assert.rejects(readPhotoBytes(file),{code:'ENOENT'});
  }finally{await rm(dir,{recursive:true,force:true});}
 });
+test('concurrent reads of one large photo do not double-count or exhaust cache entries',async()=>{
+ const dir=await mkdtemp('D:/photo-cache-concurrent-');const file=path.join(dir,'large.jpg');
+ try{
+  await writeFile(file,Buffer.alloc(8*1024*1024,7));
+  const results=await Promise.allSettled(Array.from({length:8},()=>readPhotoBytes(file)));
+  for(const result of results){assert.equal(result.status,'fulfilled',result.reason?.stack);assert.equal(result.value.length,8*1024*1024);}
+  for(let i=0;i<5;i++){const next=path.join(dir,`other-${i}.jpg`);await writeFile(next,Buffer.alloc(12*1024*1024,i));assert.equal((await readPhotoBytes(next))[0],i);}
+  assert.equal((await readPhotoBytes(file))[0],7);
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
