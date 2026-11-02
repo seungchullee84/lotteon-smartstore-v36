@@ -16,7 +16,7 @@ export function parseNewListing(html){
  const pages=Number($('.more_count .total').first().text())||1;if(pages<1||pages>32)throw Error('신상품 목록 페이지 범위 확인 필요');
  return {products:[...products.values()],pages};
 }
-export async function checkNewListing({file,fetchImpl=fetch,now=new Date().toISOString()}){
+export async function checkNewListing({file,fetchImpl=fetch,now=new Date().toISOString(),transport='http'}){
  let bytes=0,requests=0;const read=async url=>{
   requests++;const r=await fetchImpl(url,{headers:{'User-Agent':'Mozilla/5.0'},signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('공식몰 목록 응답 '+r.status);
   const chunks=[];let size=0;for await(const chunk of r.body){size+=chunk.length;bytes+=chunk.length;if(size>1024*1024||bytes>8*1024*1024)throw Error('목록 응답 용량 제한');chunks.push(chunk);}return Buffer.concat(chunks).toString('utf8');
@@ -28,16 +28,40 @@ export async function checkNewListing({file,fetchImpl=fetch,now=new Date().toISO
  }
  let old;try{old=JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  const seen=new Set(old?.seenIds||[]);const events=old?[...products.values()].filter(p=>!seen.has(p.id)).map(p=>({...p,type:'new',firstCheckedAt:now})):[];
- const state={mode:'new-list-only',intervalMinutes:25,checkedAt:now,nextCheckAt:new Date(Date.parse(now)+NEW_LIST_INTERVAL).toISOString(),baselineAt:old?.baselineAt||now,seenIds:[...new Set([...seen,...products.keys()])],batches:[...(old?.batches||[]),{checkedAt:now,events}].slice(-100),errors:0,metrics:{requests,bytes}};
+ const state={mode:'new-list-only',intervalMinutes:25,checkedAt:now,nextCheckAt:new Date(Date.parse(now)+NEW_LIST_INTERVAL).toISOString(),baselineAt:old?.baselineAt||now,seenIds:[...new Set([...seen,...products.keys()])],batches:[...(old?.batches||[]),{checkedAt:now,events}].slice(-100),errors:0,metrics:{requests,bytes,transport}};
  await mkdir(path.dirname(file),{recursive:true});await writeFile(file+'.tmp',JSON.stringify(state));await rename(file+'.tmp',file);return state;
 }
-export function startNewListingMonitor(root){
+export function retryDelay(failures){return Math.min(NEW_LIST_INTERVAL,5*60*1000*2**Math.max(0,failures-1));}
+export async function checkNewListingWithRecovery(options){
+ try{return await checkNewListing(options);}catch(error){
+  if(!/공식몰 목록|fetch failed|timeout|aborted/i.test(error.message))throw error;
+  const {chromium}=await import('playwright');
+  const browser=await chromium.launch({headless:true});
+  try{
+   const page=await browser.newPage();
+   const fetchImpl=async url=>{
+    const response=await page.goto(String(url),{waitUntil:'domcontentloaded',timeout:30000});
+    if(!response)throw Error('공식몰 브라우저 응답 없음');
+    const body=await response.body();
+    return {ok:response.ok(),status:response.status(),body:[body]};
+   };
+   return await checkNewListing({...options,fetchImpl,transport:'browser'});
+  }finally{await browser.close();}
+ }
+}
+export function startNewListingMonitor(root,{check=checkNewListingWithRecovery,clock=()=>Date.now()}={}){
  const state={status:'website-only',message:'홈페이지 신상품 목록 확인 · 소구점은 품번별 요청 시 조사',imageComplete:0,total:0};let stopped=false,busy=false,timer;
  const file=path.join(root,'data','official-benefit-catalog','new-list-check.json');
- async function tick(){if(stopped||busy)return;busy=true;try{
+ let pending=null;
+ async function run(force=false){if(stopped)return state;if(pending)return pending;pending=(async()=>{busy=true;try{
   if(!state.website)try{state.website=JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
-  if(!state.website||Date.now()>=Date.parse(state.website.nextCheckAt))state.website=await checkNewListing({file});
+  if(force||state.lastError||!state.website||clock()>=Date.parse(state.website.nextCheckAt)){
+   state.lastAttemptAt=new Date(clock()).toISOString();
+   state.website=await check({file});state.consecutiveErrors=0;state.lastError=null;
+  }
+  state.nextAttemptAt=state.website.nextCheckAt;
   state.message='홈페이지 신상품 목록 25분 간격 확인 · 소구점은 품번별 요청 시 조사';
- }catch(e){state.message='홈페이지 신상품 확인 지연 · '+e.message;}finally{busy=false;if(!stopped){timer=setTimeout(tick,state.website&&Date.parse(state.website.nextCheckAt)>Date.now()?Math.min(NEW_LIST_INTERVAL,Date.parse(state.website.nextCheckAt)-Date.now()):NEW_LIST_INTERVAL);timer.unref();}}}
- const ready=tick();return {state,ready,async refresh(){return state;},stop(){stopped=true;clearTimeout(timer);}};
+ }catch(e){state.consecutiveErrors=(state.consecutiveErrors||0)+1;state.lastError=e.message;state.nextAttemptAt=new Date(clock()+retryDelay(state.consecutiveErrors)).toISOString();const time=new Date(state.nextAttemptAt).toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit'});state.message='홈페이지 신상품 확인 지연 · '+e.message+' · '+time+' 재확인 예정';}finally{busy=false;}
+ return state;})();try{return await pending;}finally{pending=null;clearTimeout(timer);if(!stopped){timer=setTimeout(()=>run(),Math.min(NEW_LIST_INTERVAL,Math.max(1000,Date.parse(state.nextAttemptAt)-clock()))||NEW_LIST_INTERVAL);timer.unref();}}}
+ const ready=run();return {state,ready,async refresh(){clearTimeout(timer);return run(true);},stop(){stopped=true;clearTimeout(timer);}};
 }
