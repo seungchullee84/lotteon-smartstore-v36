@@ -84,7 +84,7 @@ async function post(endpoint,data={}){
  try{const r=await fetch('/api/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:AbortSignal.timeout(['smartstore-optimize-title','smartstore-open','open'].includes(endpoint)?60000:45000)});const b=await r.json();if(!r.ok)throw Error(b.error);return b;}
  catch(e){if(e.name==='TimeoutError')throw Error('서버 응답 시간이 초과됐습니다. 진행 기록에서 작업 상태를 확인해 주세요.');if(e instanceof TypeError)throw Error('등록기 서버와 연결되지 않았습니다. 잠시 후 새로고침해 주세요.');throw e;}
 }
-let requestLock=false,serverBusy=false,serverPhase='idle',smartstoreStarting=false,smartstoreDetailStarting=false;
+let requestLock=false,serverBusy=false,serverPhase='idle',smartstoreStarting=false,smartstoreDetailStarting=false,smartstoreRequestAt=0;
 const buttonLabels={open:'1. 크롬 로그인 창 열기',collect:'2. 공식몰 정보 수집',run:'3. 검토한 내용으로 입력 시작'};
 const busyLabels={open:'크롬 연결 중…',collect:'공식몰 정보 수집 중…',run:'상품 입력 시작 중…'};
 const feedback=document.createElement('div');feedback.id='clickFeedback';feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');document.body.append(feedback);
@@ -98,12 +98,24 @@ function detailMotionContent(text,kind){
  const message=document.createElement('span');message.className='detail-motion-message';message.textContent=text;
  row.append(scene,message);return row;
 }
+function uploadMotionContent(){
+ const row=document.createElement('span');row.className='upload-motion';
+ const scene=document.createElement('span');scene.className='upload-motion-scene';scene.setAttribute('aria-hidden','true');
+ const rocket=document.createElement('span');rocket.className='upload-motion-rocket';rocket.textContent='🚀';scene.append(rocket);
+ const body=document.createElement('span');body.className='upload-motion-body';
+ const title=document.createElement('strong');title.textContent='작업 중';
+ const clock=document.createElement('span');clock.className='upload-motion-clock';clock.textContent='전체 0초';clock.setAttribute('role','timer');clock.setAttribute('aria-live','off');
+ const stage=document.createElement('span');stage.className='upload-motion-stage';stage.textContent='시작 준비 중…';
+ body.append(title,clock,stage);row.append(scene,body);return row;
+}
 function announce(text,kind='working'){
  feedbackJob=null;clearTimeout(feedbackTimer);feedback.replaceChildren();
  if(/상세설명.*교체/.test(text)&&['working','success'].includes(kind)){
   feedback.append(detailMotionContent(kind==='working'?'상세설명 교체 중 · 새 옷으로 갈아입는 중이에요…':text,kind));
+ }else if(kind==='working'&&/시작 요청 접수|자동 작업 시작|스마트스토어 자동 작업/.test(text)){
+  feedback.append(uploadMotionContent());
  }else feedback.textContent=text;
- feedback.className='visible '+kind;
+ feedback.className='visible '+kind+(feedback.querySelector('.upload-motion')?' upload-working':'');
  if(kind!=='working')feedbackTimer=setTimeout(()=>feedback.className='',4500);
 }
 function syncFeedbackWithState(state){
@@ -590,13 +602,18 @@ function selectRegistrationChannel(channel){
 }
 $('channelLotte').onclick=()=>selectRegistrationChannel('lotte');
 $('channelSmartstore').onclick=()=>selectRegistrationChannel('smartstore');
+// Give the busy indicator a frame before preparing the request payload.
+function paintSmartstoreStart(){return new Promise(resolve=>{
+ let frame,done=false;const finish=()=>{if(done)return;done=true;clearTimeout(fallback);cancelAnimationFrame(frame);resolve();};
+ const fallback=setTimeout(finish,100);frame=requestAnimationFrame(()=>{frame=requestAnimationFrame(finish);});
+});}
 $('smartstoreStart').onclick=async()=>{
  if(requestLock||serverBusy)return;
  const style=$('style').value.trim()||product?.style;
  if(!style){$('error').textContent='품번 또는 공식몰 상품 URL을 먼저 입력해 주세요.';return;}
- document.dispatchEvent(new CustomEvent('smartstore-auto-request',{detail:{status:'starting'}}));
+ smartstoreRequestAt=Date.now();document.dispatchEvent(new CustomEvent('smartstore-auto-request',{detail:{status:'starting'}}));
  requestLock=true;smartstoreStarting=true;$('error').textContent='';$('smartstoreStart').disabled=true;syncButtons();announce('시작 요청 접수 중 · 수정/복사등록 화면을 확인합니다.');
- try{await flushManualTagSelection();await post('smartstore-auto',{style,detailTemplate:product?.detailTemplate===2?2:1,selectedTitle:product?{style:product.style,title:$('smartstoreName').value}:undefined,edits:currentProductEdits(),selectedTags:currentManualTags()});serverBusy=true;serverPhase='smartstore-auto';announce('자동 작업 시작 · 선택한 수정/복사등록 화면에 업로드합니다.');}catch(e){document.dispatchEvent(new CustomEvent('smartstore-auto-request',{detail:{status:'failed',error:e.message}}));$('error').textContent=e.message;announce('처리하지 못했습니다: '+e.message,'failed');}finally{requestLock=false;smartstoreStarting=false;syncButtons();}
+ try{await paintSmartstoreStart();await flushManualTagSelection();await post('smartstore-auto',{style,detailTemplate:product?.detailTemplate===2?2:1,selectedTitle:product?{style:product.style,title:$('smartstoreName').value}:undefined,edits:currentProductEdits(),selectedTags:currentManualTags()});serverBusy=true;serverPhase='smartstore-auto';announce('자동 작업 시작 · 선택한 수정/복사등록 화면에 업로드합니다.');void refresh();}catch(e){smartstoreRequestAt=0;document.dispatchEvent(new CustomEvent('smartstore-auto-request',{detail:{status:'failed',error:e.message}}));$('error').textContent=e.message;announce('처리하지 못했습니다: '+e.message,'failed');}finally{requestLock=false;smartstoreStarting=false;syncButtons();}
 };
 $('smartstoreDetailOnly').onclick=async()=>{
  if(requestLock||serverBusy)return;
