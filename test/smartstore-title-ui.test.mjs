@@ -35,7 +35,7 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
      return respond(res,await optimize(body.product,{clientId:'fake-id',clientSecret:'fake-secret'}));
     }
    }
-   const files={'/':'public/index.html','/app.js':'public/app.js','/style.css':'public/style.css','/smartstore-workflow.js':'public/smartstore-workflow.js','/smartstore-workflow.css':'public/smartstore-workflow.css','/smartstore-title.mjs':'smartstore-title.mjs'};
+   const files={'/':'public/index.html','/app.js':'public/app.js','/style.css':'public/style.css','/smartstore-title.mjs':'smartstore-title.mjs'};
    if(files[url.pathname]){res.setHeader('Content-Type',url.pathname==='/'?'text/html':url.pathname.endsWith('.css')?'text/css':'text/javascript');return res.end(await readFile(new URL('../'+files[url.pathname],import.meta.url)));}
    if(url.pathname.startsWith('/image/')||url.pathname==='/giordano-official-logo.png'){res.setHeader('Content-Type','image/png');return res.end(await readFile(new URL('../public/giordano-official-logo.png',import.meta.url)));}
    res.writeHead(404);res.end();
