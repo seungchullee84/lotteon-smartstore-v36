@@ -32,7 +32,7 @@ body[data-channel="smartstore"] #smartstorePhotoStep .extra-previews{grid-templa
 body[data-channel="smartstore"] #smartstorePhotoStep .extra-previews img{max-height:220px;object-fit:contain}
 body[data-channel="smartstore"] #smartstorePhotoStep #photoImportReview{grid-column:1/-1}
 body[data-channel="smartstore"] #smartstoreSellerStep .workflow-seller-actions{gap:10px;flex-wrap:wrap}
-body[data-channel="smartstore"] #smartstoreSellerStep #smartstoreOpen{background:#176740;color:white;font-weight:700;padding:12px 20px;min-height:50px}
+body[data-channel="smartstore"] #smartstoreSellerStep #smartstoreOpen{background:#087c42;color:white;font-weight:700;padding:12px 20px;min-height:50px}
 body[data-channel="smartstore"] .registration-footer{margin:0;padding:24px 26px}
 #smartstoreUploadStep{scroll-margin-top:18px;margin:0 0 16px}
 body[data-channel="smartstore"] #smartstoreStart{font-size:16px;min-height:52px}
