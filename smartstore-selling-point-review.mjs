@@ -43,7 +43,7 @@ export async function reviewSellingPoints(product,source,{dataRoot,detailHash=nu
  const identity={version:14,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
  const root=path.join(dataRoot,'smartstore-details',product.style),file=path.join(root,'selling-point-review.json');
  const finish=async(record,text=source)=>{
-  const points=record.points?.length>=2?record.points.slice(0,4):completeSellingPoints(record.points,text);
+  const points=record.points?.length>=3?record.points.slice(0,4):completeSellingPoints(record.points,text);
   const ready=usableSellingPoints(points,text)&&points.length>=2&&points.length<=4;
   const result={...record,points,omitted:false,status:ready?'ready':'needs-review',message:ready?'공식 근거 구매 장점 '+points.length+'개 적용':'공식 상품 설명·상세이미지에서 서로 다른 구매 장점 2~4개 확인 필요'};
   await mkdir(root,{recursive:true});await writeFile(file,JSON.stringify(result,null,2));return result;
@@ -59,6 +59,6 @@ export async function reviewSellingPoints(product,source,{dataRoot,detailHash=nu
   return finish({...identity,method:'visual-official-detail',points,reviewedAt:imageReview.reviewedAt},text);
  }
  let cached;try{cached=JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
- if(Object.entries(identity).every(([key,value])=>cached?.[key]===value)&&cached.points?.length>=2&&usableSellingPoints(cached.points,source))return finish(cached);
+ if(Object.entries(identity).every(([key,value])=>cached?.[key]===value)&&usableSellingPoints(cached.points,source))return finish(cached);
  return finish({...identity,points:completeSellingPoints([],source),reviewedAt:new Date().toISOString()});
 }
