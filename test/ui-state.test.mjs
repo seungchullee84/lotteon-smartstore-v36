@@ -2,6 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {benefitResearchView} from '../ui-state.mjs';
 import '../public/website-daily.js';
+test('동일 공식 상품의 실제 저장 상태만 오늘 누적에 연결한다',()=>{
+ const event={type:'new',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=ABC'},item={sourceUrl:event.sourceUrl,status:'complete',folder:'C:/research/ABC',finishedAt:'2026-11-03T13:00:00Z',pointCount:3};
+ assert.match(folderResearchStatus(event,{items:[item]}).label,/폴더 저장 완료/);
+ assert.equal(folderResearchStatus(event,{items:[item]}).folder,item.folder);
+ for(const status of ['queued','running','failed']){const result=folderResearchStatus(event,{items:[{...item,status}]});assert.equal(result.folder,null);assert.doesNotMatch(result.label,/저장 완료/);}
+ assert.match(folderResearchStatus(event,{items:[{...item,status:'needs-review',pointCount:2}]}).label,/추가 확인 필요/);
+ assert.equal(folderResearchStatus({...event,sourceUrl:event.sourceUrl+'different'},{items:[item]}).folder,undefined);
+});
 test('신상품 누적과 폴더 조사 대기는 별도로 표시한다',()=>{
  const input={message:'홈페이지 신상품 목록 25분 간격 확인 · 소구점은 품번별 요청 시 조사',website:{batches:[]},folderResearch:{message:'신상품 폴더 조사 대기 · D드라이브 연결 필요'}};
  const view=benefitResearchView(input);assert.match(view.message,/D드라이브 연결 필요/);assert.doesNotMatch(view.message,/품번별 요청/);assert.deepEqual(view.website.batches,[]);

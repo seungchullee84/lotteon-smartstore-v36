@@ -56,13 +56,13 @@ export function startNewProductResearch(root,{isBusy=()=>false,sample=systemSamp
    const q=appendNewProducts(await json(file,{enabledAt:new Date(clock()).toISOString(),items:[]}),website);
    for(const item of q.items)if(item.status==='running')item.status='queued';
    await persist(q);
-   const update=()=>{state.queued=q.items.filter(x=>['queued','running'].includes(x.status)).length;state.completed=q.items.filter(x=>x.status==='complete').length;state.needsReview=q.items.filter(x=>['needs-review','failed'].includes(x.status)).length;};update();
+   const update=()=>{state.enabledAt=q.enabledAt;state.items=q.items.map(({id,style,name,sourceUrl,status,folder,finishedAt,startedAt,discoveredAt,pointCount,lastError,retryAt})=>({id,style,name,sourceUrl,status,folder,finishedAt,startedAt,discoveredAt,pointCount,lastError,retryAt}));state.queued=q.items.filter(x=>['queued','running'].includes(x.status)).length;state.completed=q.items.filter(x=>x.status==='complete').length;state.needsReview=q.items.filter(x=>['needs-review','failed'].includes(x.status)).length;};update();
    try{storage??=await newProductStorage();await storageReady();state.storage=storage;}catch{state.status='waiting-storage';state.message='신상품 폴더 조사 대기 · 저장 폴더 연결 확인 필요';return;}
    if(stopped)return;
    const reason=resourcePause(sample(),isBusy());if(reason){state.status='waiting';state.message='신상품 폴더 조사 대기 · '+reason;return;}
    const item=(!q.nextWorkAt||Date.parse(q.nextWorkAt)<=clock())&&q.items.find(x=>x.status==='queued'&&(!x.retryAt||Date.parse(x.retryAt)<=clock()));
    if(!item){state.status='idle';state.message=`신상품 폴더 자동 조사 · 대기 ${state.queued} · 완료 ${state.completed} · 확인 필요 ${state.needsReview}`;return;}
-   await mkdir(storage,{recursive:true});item.status='running';item.startedAt=new Date(clock()).toISOString();await persist(q);
+   await mkdir(storage,{recursive:true});item.status='running';item.startedAt=new Date(clock()).toISOString();await persist(q);update();
    state.status='running';state.message='신상품 폴더 조사 중 · '+(item.style||item.name);controller=new AbortController();
    let peakCpu=0,minFree=Infinity,highSamples=0;
    const guard=setInterval(()=>{const m=sample();peakCpu=Math.max(peakCpu,m.cpuPercent);minFree=Math.min(minFree,m.freeBytes);const why=resourcePause(m,isBusy());highSamples=why==='CPU 사용량 높음'?highSamples+1:0;if(why&&(why!=='CPU 사용량 높음'||highSamples>=3))controller?.abort(Error(why));},2000);guard.unref();

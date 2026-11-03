@@ -351,3 +351,4 @@ body[data-channel="smartstore"] .search :is(#smartstoreCombinePhotos,#smartstore
 
 /* Keep homepage totals readable above shared button hover styles. */
 body #websiteUpdateSummary .website-category-toggle:not(:disabled):is(:hover,:focus-visible),body #websiteUpdateSummary .website-category-toggle[aria-pressed="true"]{background:#eee7d9;color:#182d28;box-shadow:none;text-decoration:underline;text-underline-offset:4px;border-radius:4px}
+.website-product-folder{font-size:12px;line-height:1.6;overflow-wrap:anywhere;color:#40584b;margin-top:6px}

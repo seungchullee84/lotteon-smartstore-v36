@@ -1,5 +1,17 @@
 // Shared by the live view and regression tests. Each day's counts are products,
 // not the number of scans or OCR completions.
+globalThis.folderResearchStatus=function(event,research){
+ const id=url=>{try{return new URL(url).searchParams.get('pno')?.toLowerCase();}catch{return null;}};
+ const key=id(event.sourceUrl);if(!key)return null;
+ const item=research?.items?.find(value=>id(value.sourceUrl)===key);
+ if(!item){
+  if(event.type!=='new')return null;
+  return {label:research?.enabledAt&&Date.parse(event.firstCheckedAt||event.checkedAt)<Date.parse(research.enabledAt)?'자동 수집 시작 전 발견':'수집 대기'};
+ }
+ const labels={queued:'수집 대기',running:'수집 중',complete:'폴더 저장 완료','needs-review':'자료 저장 · 소구점 추가 확인 필요',failed:'수집 실패 · 확인 필요'};
+ const saved=['complete','needs-review'].includes(item.status)&&!!item.folder;
+ return {label:(labels[item.status]||'상태 확인 중')+(saved&&Number.isInteger(item.pointCount)?' · 소구점 '+item.pointCount+'개':''),folder:saved?item.folder:null,finishedAt:saved?item.finishedAt:null,error:['failed','queued'].includes(item.status)?item.lastError:null};
+};
 globalThis.websiteDailySummary=function(website,now=new Date()){
  const dayKey=value=>{
   const date=new Date(value);if(!Number.isFinite(date.getTime()))return null;

@@ -27,7 +27,7 @@ export async function checkNewListing({file,fetchImpl=fetch,now=new Date().toISO
   const response=JSON.parse(await read(u));if(typeof response.content!=='string')throw Error('더보기 목록 응답 확인 필요');for(const p of parseNewListing(response.content).products)products.set(p.id,p);
  }
  let old;try{old=JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
- const seen=new Set(old?.seenIds||[]);const events=old?[...products.values()].filter(p=>!seen.has(p.id)).map(p=>({...p,type:'new',firstCheckedAt:now})):[];
+ const seen=new Set(old?.seenIds||[]);const events=old?[...products.values()].filter(p=>!seen.has(p.id)).map(p=>({...p,type:'new',newProductVerified:true,firstCheckedAt:now})):[];
  const state={mode:'new-list-only',intervalMinutes:25,checkedAt:now,nextCheckAt:new Date(Date.parse(now)+NEW_LIST_INTERVAL).toISOString(),baselineAt:old?.baselineAt||now,seenIds:[...new Set([...seen,...products.keys()])],batches:[...(old?.batches||[]),{checkedAt:now,events}].slice(-100),errors:0,metrics:{requests,bytes,transport}};
  await mkdir(path.dirname(file),{recursive:true});await writeFile(file+'.tmp',JSON.stringify(state));await rename(file+'.tmp',file);return state;
 }
