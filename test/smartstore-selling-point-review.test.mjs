@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,writeFile,mkdir} from 'node:fs/promises';import {createHash} from 'node:crypto';import path from 'node:path';import os from 'node:os';import {reviewSellingPoints,saveOfficialImagePointReview,officialPointSource} from '../smartstore-selling-point-review.mjs';import {assertRequiredSellingPoints} from '../smartstore-selling-points.mjs';
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,readFile,writeFile,mkdir,cp} from 'node:fs/promises';import {createHash} from 'node:crypto';import path from 'node:path';import os from 'node:os';import {reviewSellingPoints,saveOfficialImagePointReview,officialPointSource} from '../smartstore-selling-point-review.mjs';import {assertRequiredSellingPoints} from '../smartstore-selling-points.mjs';
 const product={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=test',name:'공식 의류'};
 
 test('남성 등록에서 바뀐 공식 원본은 분석해 바탕화면에 저장하고 복사본에서도 재사용한다',async()=>{
@@ -20,7 +20,9 @@ test('남성 등록에서 바뀐 공식 원본은 분석해 바탕화면에 저�
    assert.equal(record.imageText,imageText);
    assert.equal(record.visualReview,false);
    assert(record.points.length>0);
-   const reused=await officialPointSource(p,root,pageText,{...options,dataRoot:path.join(root,'other-pc'),recognize:()=>assert.fail('저장된 원본 OCR 재사용')});
+   const copiedDesktop=path.join(root,'copied-desktop');
+   await cp(desktop,copiedDesktop,{recursive:true});
+   const reused=await officialPointSource(p,root,pageText,{...options,desktop:copiedDesktop,dataRoot:path.join(root,'other-pc'),recognize:()=>assert.fail('저장된 원본 OCR 재사용')});
    assert.equal(reused.method,'official-catalog-image-cache');
   }
   const changedText='허리 스트링으로 둘레를 조절할 수 있습니다.';
