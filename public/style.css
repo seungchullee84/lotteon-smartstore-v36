@@ -421,3 +421,26 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
 .upload-progress-clock{font-variant-numeric:tabular-nums;font-size:14px;white-space:nowrap}
 .upload-progress-message{margin:8px 0 0;font-size:14px;line-height:1.6;overflow-wrap:anywhere}
 #smartstoreUploadProgress[data-status="error"],#smartstoreUploadProgress[data-status="stopped"]{background:#fff7ed;border-color:#e3b883;color:#774219}
+/* A visible, indeterminate activity signal from the first click to the real result. */
+body[data-channel="smartstore"] #smartstoreStart.working{opacity:1;padding-left:46px;overflow:hidden;background:#076b3c;cursor:progress}
+#smartstoreStart.working:before{left:20px;width:16px;height:16px;top:calc(50% - 10px);border-width:3px}
+#smartstoreStart.working:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 20%,#ffffff24 45%,transparent 70%);transform:translateX(-100%);animation:uploadSweep 2s ease-in-out infinite}
+#clickFeedback.upload-working{width:420px;max-width:calc(100vw - 32px);padding:22px 26px;text-align:left;background:#192824;border-color:#75dfaa66;box-shadow:0 12px 36px #122b3a38;overflow:hidden}
+#clickFeedback.upload-working:after{content:'';position:absolute;left:0;bottom:0;width:42%;height:3px;background:linear-gradient(90deg,transparent,#81efb5,transparent);animation:uploadActivity 1.8s ease-in-out infinite}
+.upload-motion{display:flex;align-items:center;gap:22px}
+.upload-motion-scene{position:relative;width:64px;height:64px;flex:none;display:grid;place-items:center}
+.upload-motion-scene:before,.upload-motion-scene:after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid #81efb52b;border-top-color:#81efb5;border-right-color:#81efb5;animation:buttonSpin 1.6s linear infinite}
+.upload-motion-scene:after{inset:7px;border-color:#ffffff0f;border-bottom-color:#ffffff88;animation-direction:reverse;animation-duration:2.4s}
+.upload-motion-rocket{font-size:31px;line-height:1;animation:detailRocketCruise 1.25s ease-in-out infinite}
+.upload-motion-body{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:16px;row-gap:3px;min-width:0}
+.upload-motion-body>strong{font-size:24px;letter-spacing:-.5px;color:white}
+.upload-motion-clock{font-size:14px;font-weight:500;color:#9cebc0;font-variant-numeric:tabular-nums;white-space:nowrap}
+.upload-motion-stage{grid-column:1/-1;font-size:14px;font-weight:500;line-height:1.6;color:#dce9e2;overflow-wrap:anywhere}
+#smartstoreUploadProgress[data-status="running"]{border:2px solid #20965b;background:#edf9f2}
+.upload-progress-activity{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:#07643a}
+.upload-progress-activity:before{content:'';width:8px;height:8px;background:#15985a;border-radius:50%;animation:uploadPulse 1.4s ease-in-out infinite}
+@keyframes uploadSweep{to{transform:translateX(100%)}}
+@keyframes uploadActivity{0%{transform:translateX(-100%)}100%{transform:translateX(340%)}}
+@keyframes uploadPulse{50%{box-shadow:0 0 0 5px #15985a22}}
+@media(max-width:420px){#clickFeedback.upload-working{padding:18px}.upload-motion{gap:14px}.upload-motion-scene{width:52px;height:52px}.upload-motion-body{column-gap:10px}.upload-motion-body>strong{font-size:22px}}
+@media(prefers-reduced-motion:reduce){#smartstoreStart.working:after,#clickFeedback.upload-working:after{animation:none;display:none}.upload-motion *,.upload-motion-scene:before,.upload-motion-scene:after,.upload-progress-activity:before{animation:none!important}}
