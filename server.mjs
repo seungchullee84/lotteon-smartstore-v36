@@ -14,6 +14,7 @@ import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
 import {resolveDetailTemplate} from './smartstore-template-choice.mjs';
 import {serveBrandVideo,WOMEN_VIDEO_HASH} from './smartstore-brand-video.mjs';
 import {runSmartstoreAuto} from './smartstore-auto.mjs';
+import {startSmartstoreProgress,advanceSmartstoreProgress,finishSmartstoreProgress} from './smartstore-job-progress.mjs';
 import {runSmartstoreDetailOnly} from './smartstore-detail-only.mjs';
 import {prepareSmartstoreAuto} from './smartstore-auto-prepare.mjs';
 import {prepareSmartstoreWithColorRecovery,importSmartstoreColorPhotos} from './smartstore-color-recovery.mjs';
@@ -93,7 +94,7 @@ if(state.product&&state.folder){
   catch(e){if(e.code!=='ENOENT')throw e;}
 }
 let extraImageEdits=Promise.resolve();
-function log(message){state.logs.push({time:new Date().toLocaleTimeString('ko-KR'),message});state.logs=state.logs.slice(-300);console.log(message);}
+function log(message){if(state.phase==='smartstore-auto'&&state.autoProgress?.status==='running')state.autoProgress.message=message;state.logs.push({time:new Date().toLocaleTimeString('ko-KR'),message});state.logs=state.logs.slice(-300);console.log(message);}
 const bot=new LotteAutomation(dataRoot,log);bot.onPause=message=>{state.paused=message;};
 const smartBot=new SmartstoreAutomation(dataRoot,log);
 function colorRecoveryOptions(signal,apiKey){return {dataRoot,signal,apiKey,log,
@@ -123,7 +124,7 @@ function startPhotoColorDraft(product,folder){
   state.photoPreparation={style:product.style,status:'selecting',message:state.photoColorDraft.message+' 구도 확인 후 반영하면 템플릿을 만듭니다.'};log(state.photoColorDraft.message);
  }).catch(e=>{if(current()&&!controller.signal.aborted){state.photoColorDraft={style:product.style,status:'needs-review',message:'색상 자동 추정 확인 필요: '+e.message};state.photoPreparation={style:product.style,status:'selecting',message:state.photoColorDraft.message};log(state.photoColorDraft.message);}});
 }
-function job(phase,fn){if(state.busy)throw Error('진행 중인 작업이 있습니다.');newProductResearch.pause();const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase=phase;state.error=null;state.completedJob=null;Promise.resolve().then(fn).then(()=>{state.phase=controller.signal.aborted?'stopped':'done';if(!controller.signal.aborted){state.completedJob=phase;if(phase==='smartstore-detail-only')log('상세설명 교체 완료 · 편집기에서 확인해 주세요. 상품 저장·등록은 하지 않았습니다.');}}).catch(e=>{state.error=controller.signal.aborted?null:e.message;if(state.photoPreparation?.status==='preparing')state.photoPreparation={...state.photoPreparation,status:controller.signal.aborted?'stopped':'needs-review',message:controller.signal.aborted?'사진 준비를 중단했습니다.':e.message};if(['PHOTO_ANALYSIS_REQUIRED','PHOTO_FOLDER_EMPTY'].includes(e.code)&&!controller.signal.aborted)state.photoPreparation={style:state.product?.style,status:e.code==='PHOTO_ANALYSIS_REQUIRED'?'needs-analysis':'missing',photoCount:e.photoCount||0,unknownCount:e.unknownCount||0,message:e.message};if(e.code==='DETAIL_SOURCE_MISSING'&&!controller.signal.aborted)state.detailFallbackRequest={input:state.collectionInput};state.phase=controller.signal.aborted?'stopped':'error';log(controller.signal.aborted?'작업을 중단했습니다.':e.message);}).finally(()=>{state.busy=false;state.paused=null;activeAbort=null;});}
+function job(phase,fn){if(state.busy)throw Error('진행 중인 작업이 있습니다.');newProductResearch.pause();const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase=phase;state.error=null;state.completedJob=null;if(phase==='smartstore-auto'){state.autoStep='collect';state.autoProgress=startSmartstoreProgress();}Promise.resolve().then(fn).then(()=>{state.phase=controller.signal.aborted?'stopped':'done';if(!controller.signal.aborted){state.completedJob=phase;if(phase==='smartstore-detail-only')log('상세설명 교체 완료 · 편집기에서 확인해 주세요. 상품 저장·등록은 하지 않았습니다.');}}).catch(e=>{state.error=controller.signal.aborted?null:e.message;if(state.photoPreparation?.status==='preparing')state.photoPreparation={...state.photoPreparation,status:controller.signal.aborted?'stopped':'needs-review',message:controller.signal.aborted?'사진 준비를 중단했습니다.':e.message};if(['PHOTO_ANALYSIS_REQUIRED','PHOTO_FOLDER_EMPTY'].includes(e.code)&&!controller.signal.aborted)state.photoPreparation={style:state.product?.style,status:e.code==='PHOTO_ANALYSIS_REQUIRED'?'needs-analysis':'missing',photoCount:e.photoCount||0,unknownCount:e.unknownCount||0,message:e.message};if(e.code==='DETAIL_SOURCE_MISSING'&&!controller.signal.aborted)state.detailFallbackRequest={input:state.collectionInput};state.phase=controller.signal.aborted?'stopped':'error';log(controller.signal.aborted?'작업을 중단했습니다.':e.message);}).finally(()=>{if(phase==='smartstore-auto')finishSmartstoreProgress(state.autoProgress,state.phase,state.error);state.busy=false;state.paused=null;activeAbort=null;});}
 const server=http.createServer(async(req,res)=>{
   try{
     const url=new URL(req.url,'http://localhost');
@@ -376,7 +377,7 @@ const server=http.createServer(async(req,res)=>{
         const selectedTitle=b.selectedTitle;const input=b.style,key=backgroundApiKey;const previous=state.product,previousFolder=state.folder;const parsedInput=parseProductInput(input);const sourceUrlHint=previous&&(parsedInput.style===previous.style||parsedInput.url===previous.sourceUrl)?previous.sourceUrl:null;smartBot.stopped=false;bot.stopped=false;
         job('smartstore-auto',async()=>{
           const signal=activeAbort.signal;
-          const result=await runSmartstoreAuto({input,apiKey:key,signal,log,step:name=>{state.autoStep=name;},
+          const result=await runSmartstoreAuto({input,apiKey:key,signal,log,step:name=>{state.autoStep=name;advanceSmartstoreProgress(state.autoProgress,name);},
             preflight:p=>smartBot.preflight(p),
             collect:async value=>{
               const reused=previous?.gender==='남성'?null:await reusableSmartstoreCollection(parsedInput,previous,previousFolder,{dataRoot});
@@ -400,11 +401,11 @@ const server=http.createServer(async(req,res)=>{
             includeMain:false,
             render:async(p,folder)=>{
               const output=path.join(folder,p.style+'_스마트스토어자동상세_'+Date.now()+'.png');
-              const detail=await saveSmartstoreDetail(p,folder,output,{signal,log});return {...detail,path:output};
+              const detail=await saveSmartstoreDetail(p,folder,output,{signal,log,uploadOnly:true});return {...detail,path:output};
             },
             upload:async(p,folder,{main,detail})=>{
               const selected=await prepareListingImages(p,folder,{dataRoot});
-              const detailParts=await smartstoreUploadParts(detail.path,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{includeVideo:detail.includeVideo,dataRoot,videoOptions:detail.videoOptions,brandIntroHeight:detail.brandIntroHeight,videoAfterTop:detail.videoAfterTop,footerTop:detail.footerTop,bannerTop:detail.bannerTop,officialTop:detail.officialTop});
+              const detailParts=await smartstoreUploadParts(detail.path,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{includeVideo:detail.includeVideo,dataRoot,partsCacheRoot:path.join(dataRoot,'smartstore-upload-cache'),log,videoOptions:detail.videoOptions,brandIntroHeight:detail.brandIntroHeight,videoAfterTop:detail.videoAfterTop,footerTop:detail.footerTop,bannerTop:detail.bannerTop,officialTop:detail.officialTop});
               const careLabels=await prepareCareLabelImages(p,folder,{dataRoot});
               return smartBot.uploadPrepared(p,folder,{main:selected.main,extras:selected.extras,detailParts,careLabels});
             }
@@ -472,7 +473,7 @@ const server=http.createServer(async(req,res)=>{
               const detail=await saveSmartstoreDetail(p,folder,output,{signal,log,dataRoot,uploadOnly:true});
               log('상세이미지 제작 완료 · '+((Date.now()-started)/1000).toFixed(1)+'초'+(detail.renderCacheHit?' · 기존 이미지 재사용':''));
               const partsStarted=Date.now();
-              const parts=await smartstoreUploadParts(output,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{includeVideo:detail.includeVideo,dataRoot,videoOptions:detail.videoOptions,brandIntroHeight:detail.brandIntroHeight,videoAfterTop:detail.videoAfterTop,footerTop:detail.footerTop,bannerTop:detail.bannerTop,officialTop:detail.officialTop});
+              const parts=await smartstoreUploadParts(output,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{includeVideo:detail.includeVideo,dataRoot,partsCacheRoot:path.join(dataRoot,'smartstore-upload-cache'),log,videoOptions:detail.videoOptions,brandIntroHeight:detail.brandIntroHeight,videoAfterTop:detail.videoAfterTop,footerTop:detail.footerTop,bannerTop:detail.bannerTop,officialTop:detail.officialTop});
               log('첨부 이미지 준비 완료 · '+((Date.now()-partsStarted)/1000).toFixed(1)+'초');
               return parts;
             },
@@ -620,9 +621,9 @@ const server=http.createServer(async(req,res)=>{
       res.writeHead(200,{'Content-Type':'text/javascript; charset=utf-8','Cache-Control':'no-store'});
       return res.end(await readFile(path.join(root,'smartstore-title.mjs')));
     }
-    if(req.method==='GET'&&['/','/app.js','/smartstore-template-headline.js','/website-daily.js','/detail-preview.js','/two-choice.js','/smartstore-photo-review.js','/smartstore-photo-review.css','/style.css'].includes(url.pathname)){
+    if(req.method==='GET'&&['/','/app.js','/smartstore-progress.js','/smartstore-template-headline.js','/website-daily.js','/detail-preview.js','/two-choice.js','/smartstore-photo-review.js','/smartstore-photo-review.css','/style.css'].includes(url.pathname)){
       const name=url.pathname==='/'?'index.html':url.pathname.slice(1);
-      const types={'index.html':'text/html','app.js':'text/javascript','smartstore-template-headline.js':'text/javascript','website-daily.js':'text/javascript','detail-preview.js':'text/javascript','two-choice.js':'text/javascript','smartstore-photo-review.js':'text/javascript','smartstore-photo-review.css':'text/css','style.css':'text/css'};
+      const types={'index.html':'text/html','app.js':'text/javascript','smartstore-progress.js':'text/javascript','smartstore-template-headline.js':'text/javascript','website-daily.js':'text/javascript','detail-preview.js':'text/javascript','two-choice.js':'text/javascript','smartstore-photo-review.js':'text/javascript','smartstore-photo-review.css':'text/css','style.css':'text/css'};
       res.writeHead(200,{'Content-Type':types[name]+'; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'none'"});return res.end(await readFile(path.join(root,'public',name)));
     }
     json(res,404,{error:'없는 경로'});

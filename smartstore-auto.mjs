@@ -12,7 +12,7 @@ export async function runSmartstoreAuto({input,apiKey,signal,log=()=>{},step=()=
  if(prepared.smartstoreDetail?.pendingPhotoCount){const error=Error('폴더 사진은 미리보기에 유지했습니다. 품번 폴더 사진 연결에서 '+prepared.smartstoreDetail.pendingPhotoCount+'장을 연결한 뒤 다시 시작해 주세요.');error.code='PHOTO_MATCH_REQUIRED';throw error;}
  await stage('connect',`3/${count} 스마트스토어 로그인·수정/복사등록 화면 확인`,()=>preflight(prepared));
  const main=includeMain?await stage('compose','4/6 대표사진 배경 합성 · 1500×1500 · 공식 색상칩 적용',()=>synthesize(prepared,folder)):undefined;
- const detail=await stage('detail',`${count-1}/${count} 확정 템플릿 상세페이지 제작·바탕화면 저장`,()=>render(prepared,folder));
+ const detail=await stage('detail',`${count-1}/${count} 업로드용 상세이미지 준비`,()=>render(prepared,folder));
  const result=await stage('upload',`${count}/${count} 스마트스토어 상품정보·추가사진·상세페이지 업로드`,()=>upload(prepared,folder,{main,detail}));
  if(result?.detailUploaded!==true&&!(result?.editorPrepared===true&&result.editorApplied===false))throw Error('상세페이지 업로드 확인이 끝나지 않았습니다. 판매자센터 화면을 확인해 주세요.');
  log(result.editorPrepared?'상세설명 편집기 준비 완료 · 등록 버튼을 누르지 않고 대기합니다.':'자동 업로드 완료 · 상품 저장 안 함');
