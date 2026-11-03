@@ -122,7 +122,7 @@ function startPhotoColorDraft(product,folder){
   state.photoPreparation={style:product.style,status:'selecting',message:state.photoColorDraft.message+' 구도 확인 후 반영하면 템플릿을 만듭니다.'};log(state.photoColorDraft.message);
  }).catch(e=>{if(current()&&!controller.signal.aborted){state.photoColorDraft={style:product.style,status:'needs-review',message:'색상 자동 추정 확인 필요: '+e.message};state.photoPreparation={style:product.style,status:'selecting',message:state.photoColorDraft.message};log(state.photoColorDraft.message);}});
 }
-function job(phase,fn){if(state.busy)throw Error('진행 중인 작업이 있습니다.');const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase=phase;state.error=null;state.completedJob=null;Promise.resolve().then(fn).then(()=>{state.phase=controller.signal.aborted?'stopped':'done';if(!controller.signal.aborted){state.completedJob=phase;if(phase==='smartstore-detail-only')log('상세설명 교체 완료 · 편집기에서 확인해 주세요. 상품 저장·등록은 하지 않았습니다.');}}).catch(e=>{state.error=controller.signal.aborted?null:e.message;if(state.photoPreparation?.status==='preparing')state.photoPreparation={...state.photoPreparation,status:controller.signal.aborted?'stopped':'needs-review',message:controller.signal.aborted?'사진 준비를 중단했습니다.':e.message};if(['PHOTO_ANALYSIS_REQUIRED','PHOTO_FOLDER_EMPTY'].includes(e.code)&&!controller.signal.aborted)state.photoPreparation={style:state.product?.style,status:e.code==='PHOTO_ANALYSIS_REQUIRED'?'needs-analysis':'missing',photoCount:e.photoCount||0,unknownCount:e.unknownCount||0,message:e.message};if(e.code==='DETAIL_SOURCE_MISSING'&&!controller.signal.aborted)state.detailFallbackRequest={input:state.collectionInput};state.phase=controller.signal.aborted?'stopped':'error';log(controller.signal.aborted?'작업을 중단했습니다.':e.message);}).finally(()=>{state.busy=false;state.paused=null;activeAbort=null;});}
+function job(phase,fn){if(state.busy)throw Error('진행 중인 작업이 있습니다.');newProductResearch.pause();const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase=phase;state.error=null;state.completedJob=null;Promise.resolve().then(fn).then(()=>{state.phase=controller.signal.aborted?'stopped':'done';if(!controller.signal.aborted){state.completedJob=phase;if(phase==='smartstore-detail-only')log('상세설명 교체 완료 · 편집기에서 확인해 주세요. 상품 저장·등록은 하지 않았습니다.');}}).catch(e=>{state.error=controller.signal.aborted?null:e.message;if(state.photoPreparation?.status==='preparing')state.photoPreparation={...state.photoPreparation,status:controller.signal.aborted?'stopped':'needs-review',message:controller.signal.aborted?'사진 준비를 중단했습니다.':e.message};if(['PHOTO_ANALYSIS_REQUIRED','PHOTO_FOLDER_EMPTY'].includes(e.code)&&!controller.signal.aborted)state.photoPreparation={style:state.product?.style,status:e.code==='PHOTO_ANALYSIS_REQUIRED'?'needs-analysis':'missing',photoCount:e.photoCount||0,unknownCount:e.unknownCount||0,message:e.message};if(e.code==='DETAIL_SOURCE_MISSING'&&!controller.signal.aborted)state.detailFallbackRequest={input:state.collectionInput};state.phase=controller.signal.aborted?'stopped':'error';log(controller.signal.aborted?'작업을 중단했습니다.':e.message);}).finally(()=>{state.busy=false;state.paused=null;activeAbort=null;});}
 const server=http.createServer(async(req,res)=>{
   try{
     const url=new URL(req.url,'http://localhost');
@@ -536,7 +536,7 @@ const server=http.createServer(async(req,res)=>{
           for(const key of ['colors','sizes'])if(Array.isArray(b.product[key])&&b.product[key].length<=100&&b.product[key].every(v=>typeof v==='string'&&v.length<100))edits[key]=b.product[key];
           const p={...current,...edits,detailTemplate:resolveDetailTemplate(b.product.detailTemplate??current.detailTemplate)};const saveFolder=await imageDownloadFolder({manual:true});
           const savedPath=path.join(saveFolder,p.style+'_템플릿'+p.detailTemplate+'_스마트스토어상세_'+Date.now()+'.png');
-          const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase='smartstore-detail';state.error=null;
+          newProductResearch.pause();const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase='smartstore-detail';state.error=null;
           try{
             const dimensions=await saveSmartstoreDetail(p,state.folder,savedPath,{signal:controller.signal});
             state.phase='done';log('스마트스토어 확정 템플릿 상세페이지 저장 완료 · 품번 '+p.style);
@@ -576,6 +576,7 @@ const server=http.createServer(async(req,res)=>{
       if(url.pathname==='/api/shutdown'){
         if(state.busy)return json(res,409,{error:'작업 중에는 종료할 수 없습니다. 중단 후 작업이 멈추면 다시 눌러 주세요.'});
         if(state.folder&&state.product)await writeFile(path.join(state.folder,'shutdown-draft.json'),JSON.stringify({product:state.product,form:b.form||null,savedAt:new Date().toISOString()},null,2));
+        newProductResearch.stop();benefitResearch.stop();
         res.once('finish',()=>{server.close(()=>process.exit(0));setTimeout(()=>process.exit(0),1500).unref();});
         return json(res,200,{ok:true});
       }
