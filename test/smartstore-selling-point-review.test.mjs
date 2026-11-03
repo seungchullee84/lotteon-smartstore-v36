@@ -1,6 +1,37 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,writeFile,mkdir} from 'node:fs/promises';import {createHash} from 'node:crypto';import path from 'node:path';import os from 'node:os';import {reviewSellingPoints,saveOfficialImagePointReview,officialPointSource} from '../smartstore-selling-point-review.mjs';import {assertRequiredSellingPoints} from '../smartstore-selling-points.mjs';
 const product={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=test',name:'공식 의류'};
 
+test('남성 등록에서 바뀐 공식 원본은 분석해 바탕화면에 저장하고 복사본에서도 재사용한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'men-registration-benefits-'));
+ try{
+  const desktop=path.join(root,'desktop');
+  const id='a'.repeat(32);
+  const p={...product,gender:'남성',sourceUrl:product.sourceUrl.replace('test',id),images:{detail:'https://www.giordano.co.kr/detail.jpg'}};
+  const imageText='부드러운 원단으로 편안한 착용감을 제공합니다.';
+  let calls=0;
+  const options={dataRoot:path.join(root,'local'),desktop,recognize:async()=>{calls++;return imageText;}};
+  const pageText='옆면 포켓으로 수납성을 높였습니다.';
+  for(const content of ['first official image','updated official image']){
+   await writeFile(path.join(root,'detail.jpg'),content);
+   const source=await officialPointSource(p,root,pageText,options);
+   const record=JSON.parse(await readFile(path.join(desktop,'남성용','registration',id,source.detailHash+'.json'),'utf8'));
+   assert.equal(record.detailHash,createHash('sha256').update(content).digest('hex'));
+   assert.equal(record.pageText,pageText);
+   assert.equal(record.imageText,imageText);
+   assert.equal(record.visualReview,false);
+   assert(record.points.length>0);
+   const reused=await officialPointSource(p,root,pageText,{...options,dataRoot:path.join(root,'other-pc'),recognize:()=>assert.fail('저장된 원본 OCR 재사용')});
+   assert.equal(reused.method,'official-catalog-image-cache');
+  }
+  const changedText='허리 스트링으로 둘레를 조절할 수 있습니다.';
+  const updated=await officialPointSource(p,root,changedText,options);
+  const record=JSON.parse(await readFile(path.join(desktop,'남성용','registration',id,updated.detailHash+'.json'),'utf8'));
+  assert.equal(record.pageText,changedText);
+  assert(!record.points.some(point=>point.evidence.includes(pageText)));
+  assert.equal(calls,2);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
+
 test('과거 한 개 선택도 현재 공식 원문의 서로 다른 구매 이유를 찾아 2~4개로 구성한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'single-point-recovery-'));try{
   const text='부드러운 원단으로 편안한 착용감을 제공합니다. 밑단 스트링으로 핏 조절이 가능합니다. 옆면 포켓으로 수납성을 높였습니다.';

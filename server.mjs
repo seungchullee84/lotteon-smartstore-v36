@@ -375,7 +375,7 @@ const server=http.createServer(async(req,res)=>{
           const result=await runSmartstoreAuto({input,apiKey:key,signal,log,step:name=>{state.autoStep=name;},
             preflight:p=>smartBot.preflight(p),
             collect:async value=>{
-              const reused=await reusableSmartstoreCollection(parsedInput,previous,previousFolder,{dataRoot});
+              const reused=previous?.gender==='남성'?null:await reusableSmartstoreCollection(parsedInput,previous,previousFolder,{dataRoot});
               const folder=reused?.folder||path.join(dataRoot,'smartstore-auto-'+Date.now());
               if(reused)log('현재 수집 자료 이어서 사용 · 공식몰 중복 수집 생략');
               let product=reused?.product||await collect(value,folder,log,()=>signal.aborted,signal,{saveSmartstoreSource:true,sourceUrlHint,noticeCacheRoot:path.join(dataRoot,'smartstore-notice-cache'),prepareMain:false});
