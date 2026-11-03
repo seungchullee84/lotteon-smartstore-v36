@@ -891,7 +891,7 @@ if($('smartstoreCombinePhotos'))$('smartstoreCombinePhotos').onclick=async()=>{
  const originalReviewChildren=[...review.children].filter(node=>node!==footer);
  const collectionTitle=el('collectionCard').querySelector('h2');
  const collectionNote=el('collectionCard').querySelector(':scope > p');
- const reviewTitle=review.querySelector('h2');
+ const reviewTitle=review.querySelector('h2'),progressTitle=el('progressCard').querySelector('h2');
  const originalText={collectionTitle:collectionTitle.textContent,collectionNote:collectionNote.textContent,reviewTitle:reviewTitle.textContent,login:el('smartstoreOpen').textContent};
  const steps=[['collectionCard','상품 수집'],['smartstorePhotoStep','사진 확인'],['smartstoreReviewStep','등록 내용 검토'],['smartstoreSellerStep','판매자 화면 준비'],['smartstoreUploadStep','입력·업로드']];
  const nav=document.createElement('nav');nav.id='smartstoreWorkflow';nav.dataset.channelOnly='smartstore';nav.setAttribute('aria-label','신규 상품 준비 순서');
@@ -945,15 +945,18 @@ if($('smartstoreCombinePhotos'))$('smartstoreCombinePhotos').onclick=async()=>{
    for(const id of ['smartstoreImportPhotos','smartstoreCombinePhotos','smartstoreDetailOnly','detailOnlyCompletion','smartstoreAutoTags'])move(el(id),extraActions);
    move(el('twoChoicePanel'),extras);
    collectionTitle.textContent='상품 수집';collectionNote.textContent='품번을 입력해 공식몰 상품정보와 이미지를 가져오세요.';
-   reviewTitle.textContent='등록 내용 검토';reviewTitle.dataset.step='03';
+   reviewTitle.textContent='등록 내용 검토';reviewTitle.dataset.step='03';progressTitle.removeAttribute('data-step');
    el('smartstoreOpen').textContent='스마트스토어 로그인 창 열기';
   }else{
+   // A completion message can be created by polling after the controls were moved.
+   const completion=el('detailOnlyCompletion');
    // Restore from the innermost moves first, including the exact Lotte layout.
    for(const {node,marker} of placeholders.reverse()){marker.replaceWith(node);}
    placeholders.length=0;
+   if(completion)el('smartstoreDetailOnly').after(completion);
    for(const node of [photo,reviewStep,seller,uploadTitle,uploadWaiting,extras])node.remove();
    collectionTitle.textContent=originalText.collectionTitle;collectionNote.textContent=originalText.collectionNote;
-   reviewTitle.textContent=originalText.reviewTitle;reviewTitle.dataset.step='02';el('smartstoreOpen').textContent=originalText.login;
+   reviewTitle.textContent=originalText.reviewTitle;reviewTitle.dataset.step='02';progressTitle.dataset.step='03';el('smartstoreOpen').textContent=originalText.login;
    review.hidden=reviewWasHidden;
   }
  }
