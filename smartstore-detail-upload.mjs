@@ -100,6 +100,9 @@ export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=t
   const record=cached?.files?.[index];
   if(record?.name===path.basename(file))try{const stored=await readFile(file);if(createHash('sha256').update(stored).digest('hex')===record.sha256){bytes=stored;reused=true;}}catch{}
   bytes||=await sharp(png,{limitInputPixels:false}).extract({left:0,top,width:860,height}).png({compressionLevel:6}).toBuffer();
+  // Retry oversized sections with lossless filtering before rejecting them.
+  // Keep every pixel, the 860px width, tables and semantic section boundaries.
+  if(bytes.length>19000000){bytes=await sharp(bytes,{limitInputPixels:false}).png({compressionLevel:9,adaptiveFiltering:true}).toBuffer();reused=false;}
   records.push({name:path.basename(file),sha256:createHash('sha256').update(bytes).digest('hex')});
   if(bytes.length>19000000)throw Error('상세 구간 한 장의 업로드 용량을 초과했습니다. 원본과 표를 유지하기 위해 중간 분할하지 않았습니다.');
   if(!reused)await writeFile(file,bytes);parts.push(file);
