@@ -34,13 +34,18 @@ test('남성 등록에서 바뀐 공식 원본은 분석해 바탕화면에 저�
  }finally{await rm(root,{recursive:true,force:true});}
 });
 
-test('과거 한 개 선택도 현재 공식 원문의 서로 다른 구매 이유를 찾아 2~4개로 구성한다',async()=>{
+test('과거 한두 개 선택은 현재 공식 원문의 다른 구매 이유로 세 번째 장점을 보완한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'single-point-recovery-'));try{
   const text='부드러운 원단으로 편안한 착용감을 제공합니다. 밑단 스트링으로 핏 조절이 가능합니다. 옆면 포켓으로 수납성을 높였습니다.';
   const first={title:'부드러운 착용감',description:'부드러운 원단으로 편안한 착용감.',evidence:'부드러운 원단으로 편안한 착용감을 제공합니다.'};
   const dir=path.join(root,'smartstore-details',product.style);await mkdir(dir,{recursive:true});
-  await writeFile(path.join(dir,'selling-point-selection.json'),JSON.stringify({...product,detailHash:null,textHash:createHash('sha256').update(text).digest('hex'),points:[first]}));
-  const r=await reviewSellingPoints(product,text,{dataRoot:root});assert.equal(r.status,'ready');assert.equal(r.points.length,3);assert.deepEqual(r.points[0],first);assert(r.points.every(p=>text.includes(p.evidence)));
+  const second={title:'원하는 핏으로 조절',description:'밑단 스트링으로 핏 조절이 가능해요.',evidence:'밑단 스트링으로 핏 조절이 가능합니다.'};
+  let r;
+  for(const points of [[first],[first,second]]){
+   await writeFile(path.join(dir,'selling-point-selection.json'),JSON.stringify({...product,detailHash:null,textHash:createHash('sha256').update(text).digest('hex'),points}));
+   r=await reviewSellingPoints(product,text,{dataRoot:root});
+   assert.equal(r.status,'ready');assert.equal(r.points.length,3);assert.deepEqual(r.points.slice(0,points.length),points);assert(r.points.every(p=>text.includes(p.evidence)));
+  }
   assert.doesNotThrow(()=>assertRequiredSellingPoints({sellingPoints:r.points}));
   for(const count of [0,1,5])assert.throws(()=>assertRequiredSellingPoints({sellingPoints:Array.from({length:count},()=>first)}),/2~4/);
  }finally{await rm(root,{recursive:true,force:true});}
