@@ -352,3 +352,105 @@ body[data-channel="smartstore"] .search :is(#smartstoreCombinePhotos,#smartstore
 /* Keep homepage totals readable above shared button hover styles. */
 body #websiteUpdateSummary .website-category-toggle:not(:disabled):is(:hover,:focus-visible),body #websiteUpdateSummary .website-category-toggle[aria-pressed="true"]{background:#eee7d9;color:#182d28;box-shadow:none;text-decoration:underline;text-underline-offset:4px;border-radius:4px}
 .website-product-folder{font-size:12px;line-height:1.6;overflow-wrap:anywhere;color:#40584b;margin-top:6px}
+
+/* An optional compact workspace. The classic theme remains available in the toolbar. */
+.view-mode-control{display:inline-flex;gap:3px;padding:3px;border:1px solid #dce1e7;border-radius:8px;background:#fff}
+body .view-mode-control button{min-height:30px;padding:5px 12px;border:0;border-radius:5px;background:transparent;color:#667085;font-size:12px;box-shadow:none}
+body .view-mode-control button[aria-pressed="true"]{background:#253247;color:#fff}
+body .view-mode-control button:not(:disabled):hover{background:#e9edf3;color:#253247;box-shadow:none}
+body[data-view="minimal"]{
+ --accent:#253247;--line:#e1e5eb;--muted:#667085;
+ background:#f7f8fa;color:#202939;
+}
+body[data-view="minimal"] :is(header,main){max-width:1240px;padding-left:28px;padding-right:28px}
+body[data-view="minimal"] header{padding-top:18px;padding-bottom:18px;border:0;margin-bottom:0}
+body[data-view="minimal"] header>.bar{gap:8px;margin-bottom:18px}
+body[data-view="minimal"] header .tag{flex:1;font-size:10px;letter-spacing:1px;color:#667085}
+body[data-view="minimal"] header .tag:before{background:#253247;width:5px;height:5px}
+body[data-view="minimal"] header :is(.lotte-department-logo,.naver-title-logo){display:none}
+body[data-view="minimal"] header h1{border:0;padding:0;margin:0;font-size:26px;font-weight:700;line-height:1.4;color:#202939;letter-spacing:-1px}
+body[data-view="minimal"] header .workspace-subtitle{display:none}
+body[data-view="minimal"] .header-details{margin-top:8px;display:block}
+body[data-view="minimal"] .minimal-fold{font-size:12px;color:#667085;margin:0}
+body[data-view="minimal"] .minimal-fold>summary{width:fit-content;line-height:1.8;cursor:pointer}
+body[data-view="minimal"] .minimal-fold[open]>summary{margin-bottom:10px}
+body[data-view="minimal"] header .release-info{justify-content:flex-start;margin:0;padding:12px;background:white;border:1px solid var(--line);border-radius:8px;font-size:11px}
+body[data-view="minimal"] #releaseVersion{background:#eef1f5;color:#344054;border:1px solid var(--line)}
+body[data-view="minimal"] :is(#refreshPage,#shutdownApp){min-height:36px;padding:7px 12px;font-size:12px;font-weight:500;border:1px solid var(--line);background:#fff;color:#475467;box-shadow:none}
+body[data-view="minimal"] .website-updates{max-width:1184px;margin:0 auto 16px;padding:10px 16px;background:#fff;border:1px solid var(--line);border-radius:10px;color:#667085;font-size:12px}
+body[data-view="minimal"] #websiteUpdateSummary{font-size:12px;line-height:24px}
+body[data-view="minimal"] #websiteUpdateSummary .website-category-toggle{padding:2px 6px;min-height:28px;color:#344054}
+body[data-view="minimal"] .channel-switcher{max-width:1184px;margin:0 auto;padding:12px 16px;background:#fff;border:1px solid var(--line);border-radius:10px}
+body[data-view="minimal"] .channel-buttons{gap:6px;max-width:460px}
+body[data-view="minimal"] .channel-button{min-height:40px;padding:8px 18px;font-size:14px;border-radius:7px;border:1px solid var(--line);box-shadow:none}
+body[data-view="minimal"] .channel-button[aria-pressed="false"]{background:#f8f9fb;color:#667085;border-color:var(--line)}
+body[data-view="minimal"] .channel-lotte[aria-pressed="true"]{background:#fff1f3;color:#c51635;border-color:#ecc4cc}
+body[data-view="minimal"] .channel-smartstore[aria-pressed="true"]{background:#edf8f1;color:#087c42;border-color:#acd4bb}
+body[data-view="minimal"] .naver-mark{width:20px;height:20px;flex-basis:20px;font-size:16px;border-radius:4px}
+body[data-view="minimal"] .naver-connection{margin-top:10px;gap:16px}
+body[data-view="minimal"] :is(#naverConnectionStatus,#naverConnectionMenu summary){font-size:12px}
+body[data-view="minimal"] #naverConnectionMenu{margin-top:0}
+body[data-view="minimal"] main{display:flex;flex-direction:column;gap:16px;padding-top:16px;padding-bottom:32px}
+body[data-view="minimal"] .card{width:100%;padding:22px;margin:0;border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:none}
+body[data-view="minimal"] #collectionCard{order:1;position:static;min-height:0;border-left:1px solid var(--line);padding:22px}
+body[data-view="minimal"] #twoChoicePanel{order:2}
+body[data-view="minimal"] #review{order:3;padding:22px}
+body[data-view="minimal"] #progressCard{order:4;background:#fff}
+body[data-view="minimal"] :is(h2,h3){color:#202939}
+body[data-view="minimal"] #collectionCard h2,body[data-view="minimal"] h2{font-size:16px;gap:9px;line-height:1.5}
+body[data-view="minimal"] h2[data-step]:before{width:24px;height:24px;border-radius:6px;background:#eef1f5;color:#475467;font-size:10px}
+body[data-view="minimal"] #collectionCard>p:first-of-type{margin:8px 0 16px;font-size:12px;color:#667085;line-height:1.7}
+body[data-view="minimal"] .collection-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+body[data-view="minimal"] .collection-tools .search{order:-1;display:flex;flex-direction:row;flex-wrap:wrap;gap:10px;flex-basis:100%;margin:0 0 4px}
+body[data-view="minimal"] .search #style{flex:1 1 260px;min-height:50px;font-size:16px;padding:12px 16px;border:1px solid #c5cdd9;background:#fff;color:#202939;border-radius:8px}
+body[data-view="minimal"] .search #collect{flex:0 0 auto;padding:12px 22px;min-height:50px;border:1px solid #253247;border-radius:8px;font-size:14px}
+body[data-view="minimal"] :is(#collect,#smartstoreOpen,#open,#run,#smartstoreStart){background:#253247;color:#fff;font-weight:650;box-shadow:none}
+body[data-view="minimal"] :is(#collect,#smartstoreOpen,#open,#run,#smartstoreStart):not(:disabled):hover{background:#36465f;box-shadow:none}
+body[data-view="minimal"] .collection-tools :is(#open,#smartstoreOpen,#browserLoginSettings){width:auto;min-height:36px;padding:7px 12px;border-radius:7px;font-size:12px}
+body[data-view="minimal"] #smartstoreImportPhotos{flex-basis:100%;width:fit-content;min-height:36px;padding:7px 12px;text-align:left;font-size:12px}
+body[data-view="minimal"] :is(.secondary,.image-workbench button,.extra-previews button){background:#fff;color:#475467;border-color:#d3d9e2;box-shadow:none}
+body[data-view="minimal"] .secondary:not(:disabled):hover{background:#f0f3f7;color:#202939;box-shadow:none}
+body[data-view="minimal"] :is(input,select,textarea,#form input,#form select,#form textarea){border-color:#cdd4df;background:#fff;color:#202939;border-radius:7px;font-weight:500}
+body[data-view="minimal"] :is(input,select,textarea):focus{border-color:#617a9e;box-shadow:0 0 0 3px #617a9e18}
+body[data-view="minimal"] :is(p,label){color:#667085}
+body[data-view="minimal"] :is(.note,.fixed,.product-summary,.template-headline-editor,.smartstore-title-panel){background:#f8f9fb;border-color:var(--line);color:#475467;border-radius:8px}
+body[data-view="minimal"] .product-summary{border-left:3px solid #253247}
+body[data-view="minimal"] #form>h3{color:#344054;border-bottom:1px solid var(--line)}
+body[data-view="minimal"] aside{background:#fafbfc;border:1px solid var(--line);border-radius:8px;padding:18px}
+body[data-view="minimal"] :is(.detail-preview-scroll,.notice-original-scroll){border:1px solid #d3d9e2;scrollbar-color:#a8b4c5 #f8f9fb;border-radius:6px}
+body[data-view="minimal"] .registration-footer{background:#f8f9fb;border:1px solid var(--line);border-radius:8px;padding:18px}
+body[data-view="minimal"] .registration-footer .fixed{border-color:var(--line);color:#667085}
+body[data-view="minimal"] :is(#run,#smartstoreStart){width:100%;border-radius:8px}
+body[data-view="minimal"] #logs{background:#f8f9fb;border:1px solid var(--line);color:#475467;margin:10px 0 0}
+body[data-view="minimal"] #progressDetails{margin-top:14px}
+body[data-view="minimal"] #status{background:#edf2f7;color:#344054}
+body[data-view="minimal"] #progressCard>.bar button{min-height:34px;padding:6px 11px;font-size:12px}
+body[data-view="minimal"] #progressCard>p:last-child{font-size:11px;margin-bottom:0}
+body[data-view="minimal"] .workspace-moment:not([data-state="collecting"]):not([data-state="complete"]):not([data-state="error"]){display:none}
+body[data-view="minimal"] .workspace-moment{max-width:300px;margin:16px 0;background:#f8f9fb;border-color:var(--line)}
+body[data-view="minimal"] .giordano-signature{flex-direction:row;justify-content:flex-end;flex-wrap:wrap;gap:16px;margin:16px 0 0;padding:12px 0 0;border-top:1px solid #edf0f4}
+body[data-view="minimal"] .giordano-signature .giordano-official-logo{width:116px;max-width:40%}
+body[data-view="minimal"] .maker-credit{gap:8px;margin:0}
+body[data-view="minimal"] .lsc-mark{font-size:12px;border:0;padding:0}
+body[data-view="minimal"] .maker-credit time{font-size:10px;color:#667085}
+body[data-view="minimal"] button:focus-visible{outline:3px solid #91a7c6;outline-offset:3px}
+@media(min-width:1150px){
+ body[data-view="minimal"] .columns{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+}
+@media(max-width:1240px){
+ body[data-view="minimal"] :is(.channel-switcher,.website-updates){margin-left:28px;margin-right:28px}
+}
+@media(max-width:650px){
+ body[data-view="minimal"] :is(header,main){padding-left:16px;padding-right:16px}
+ body[data-view="minimal"] :is(.channel-switcher,.website-updates){margin-left:16px;margin-right:16px}
+ body[data-view="minimal"] header .tag{flex-basis:100%;margin-bottom:4px}
+ body[data-view="minimal"] header>.bar #refreshPage{margin-left:auto}
+ body[data-view="minimal"] header h1{font-size:23px}
+ body[data-view="minimal"] :is(.card,#collectionCard,#review){padding:16px}
+ body[data-view="minimal"] .search #style{flex-basis:100%;min-width:0}
+ body[data-view="minimal"] .search #collect{width:100%}
+ body[data-view="minimal"] .channel-buttons{max-width:none}
+ body[data-view="minimal"] .channel-button{padding:8px;font-size:13px}
+ body[data-view="minimal"] .giordano-signature{justify-content:center}
+ body[data-view="minimal"] #progressCard>.bar{gap:8px}
+}
