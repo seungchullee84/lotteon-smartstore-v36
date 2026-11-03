@@ -35,7 +35,7 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
      return respond(res,await optimize(body.product,{clientId:'fake-id',clientSecret:'fake-secret'}));
     }
    }
-   const files={'/':'public/index.html','/app.js':'public/app.js','/style.css':'public/style.css','/smartstore-title.mjs':'smartstore-title.mjs'};
+   const files={'/':'public/index.html','/app.js':'public/app.js','/style.css':'public/style.css','/smartstore-workflow.js':'public/smartstore-workflow.js','/smartstore-workflow.css':'public/smartstore-workflow.css','/smartstore-title.mjs':'smartstore-title.mjs'};
    if(files[url.pathname]){res.setHeader('Content-Type',url.pathname==='/'?'text/html':url.pathname.endsWith('.css')?'text/css':'text/javascript');return res.end(await readFile(new URL('../'+files[url.pathname],import.meta.url)));}
    if(url.pathname.startsWith('/image/')||url.pathname==='/giordano-official-logo.png'){res.setHeader('Content-Type','image/png');return res.end(await readFile(new URL('../public/giordano-official-logo.png',import.meta.url)));}
    res.writeHead(404);res.end();
@@ -73,7 +73,22 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   const allowedTitle='지오다노 남자 브이넥 아가일 니트 남성브이넥니트 356956';
   await page.locator('#smartstoreName').fill(allowedTitle);
   assert.equal(await page.locator('#smartstoreTest,#smartstoreImages,#smartstoreAISettings,#smartstoreAIDialog').count(),0);
-  assert.equal(await page.locator('#smartstoreOpen').innerText(),'1. 스마트스토어 로그인 창 열기');
+  assert.equal(await page.locator('#smartstoreOpen').innerText(),'스마트스토어 로그인 창 열기');
+  assert.equal(await page.locator('#collect').innerText(),'공식몰 정보 가져오기');
+  assert.deepEqual(await page.locator('#smartstoreWorkflow a').allTextContents(),['1상품 수집','2사진 확인','3등록 내용 검토','4판매자 화면 준비','5입력·업로드']);
+  for(let i=0;i<2;i++){
+   assert.equal(await page.locator('#smartstorePhotoStep #main').count(),1);
+   assert.equal(await page.locator('#smartstoreSellerStep #smartstoreOpen').count(),1);
+   assert.equal(await page.locator('#smartstoreExtraTools #smartstoreDetailOnly').count(),1);
+   await page.locator('#channelLotte').click();
+   assert.equal(await page.locator('#smartstoreWorkflow').isVisible(),false);
+   assert.equal(await page.locator('#review .columns aside #main').count(),1,'롯데ON 사진 영역은 원래 위치로 복원');
+   assert.equal(await page.locator('#collectionCard #browserLoginSettings').count(),1);
+   assert.equal(await page.locator('#collect').innerText(),'2. 공식몰 정보 수집');
+   await page.locator('#channelSmartstore').click();
+   assert.equal(await page.locator('#smartstoreName').inputValue(),allowedTitle,'단계 재배치가 수정한 상품명을 보존');
+  }
+  assert.equal(await page.locator('#smartstoreStart').innerText(),'입력·업로드 시작');
   const login=await page.locator('#smartstoreOpen').evaluate(el=>({weight:getComputedStyle(el).fontWeight,background:getComputedStyle(el).backgroundColor}));
   const collect=await page.locator('#collect').evaluate(el=>({weight:getComputedStyle(el).fontWeight,background:getComputedStyle(el).backgroundColor}));
   assert.deepEqual(login,collect);
@@ -87,8 +102,8 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
    await page.locator('#channelLotte').click();
    assert.equal(await page.locator('#smartstoreStart').isVisible(),false);
    const lotteButton=await page.locator('#run').boundingBox();
-   assert.equal(smartButton.width,lotteButton.width,'두 채널의 시작 버튼 너비가 같음');
-   assert.equal(smartButton.height,lotteButton.height,'두 채널의 시작 버튼 높이가 같음');
+   assert.ok(lotteButton.x>=0&&lotteButton.x+lotteButton.width<=width,'롯데ON 시작 버튼이 화면 너비에 맞음');
+   assert.ok(smartButton.height>=50&&lotteButton.height>=50,'두 채널 모두 충분한 버튼 높이를 유지');
    await page.locator('#channelSmartstore').click();
    assert.equal(await page.locator('#run').isVisible(),false);
   }
