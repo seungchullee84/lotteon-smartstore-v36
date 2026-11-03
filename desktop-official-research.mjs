@@ -12,7 +12,7 @@ export async function desktopOfficialUrl(style, desktop, backgroundRoot) {
     path.join(desktop, '여성용', '02-여성상품-상세-소구점후보.json')
   ];
   const sources = new Map();
-  const prepared=await readFile(path.join(backgroundRoot??await newProductStorage(),'products',style+'.json'),'utf8').then(JSON.parse).catch(()=>null);
+  const prepared=await readFile(path.join(backgroundRoot??await newProductStorage(desktop),'products',style+'.json'),'utf8').then(JSON.parse).catch(()=>null);
   for (const file of files) {
     const catalog = await readFile(file, 'utf8').then(value => JSON.parse(value.replace(/^\uFEFF/, ''))).catch(() => null);
     if (!Array.isArray(catalog?.products)) continue;

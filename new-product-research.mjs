@@ -4,9 +4,9 @@ import os from 'node:os';
 import {fork} from 'node:child_process';
 import {atomicWrite} from './atomic-file.mjs';
 import {desktopDirectory} from './desktop-downloads.mjs';
-export async function newProductStorage(){
+export async function newProductStorage(desktop){
  if(process.platform==='win32')try{await access('D:/');return 'D:/KC334/Desktop/지오다노소구점자료/auto-new-products';}catch{}
- return path.join(await desktopDirectory(),'지오다노소구점자료','auto-new-products');
+ return path.join(desktop??await desktopDirectory(),'지오다노소구점자료','auto-new-products');
 }
 const json=async(file,fallback)=>{try{return JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code==='ENOENT')return fallback;throw e;}};
 export function appendNewProducts(queue,website){

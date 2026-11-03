@@ -16,7 +16,7 @@ export async function catalogImageSource(product,detailHash,{dataRoot=path.join(
  desktop??=await desktopDirectory().catch(()=>null);
  const local=path.join(dataRoot,'official-benefit-catalog');
  const folders=product.gender==='여성'?['여성용','남성용']:['남성용','여성용'];
- backgroundRoot??=await newProductStorage();
+ backgroundRoot??=await newProductStorage(desktop);
  for(const directory of desktop?[...folders.map(name=>path.join(desktop,name)),local,backgroundRoot]:[local,backgroundRoot]){
  const files=[...(id&&/^[a-f0-9]{16,64}$/i.test(id)?[
   ...(/^[a-f0-9]{64}$/i.test(detailHash)?[path.join(directory,'registration',id,detailHash+'.json')]:[]),
