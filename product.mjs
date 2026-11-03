@@ -1,3 +1,4 @@
+import {desktopOfficialUrl} from './desktop-official-research.mjs';
 import {resolveCatalogCategory} from './category-catalog.mjs';
 import {isMensUnderwear,MENS_UNDERWEAR_CATEGORY,brushedTrainingCategory} from './category.mjs';
 import {officialColorChips,collectColorChips} from './color-chips.mjs';
@@ -339,7 +340,25 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
   await context.route('**/*',route=>['image','media','font'].includes(route.request().resourceType())?route.abort():route.continue());
   const page=await context.newPage();
   let url=input.url;
-  if(!url&&options.sourceUrlHint){url=parseProductInput(options.sourceUrlHint).url;log('확인된 공식 상품 주소로 바로 연결 · 품번 재검증');}
+  if(!url){
+    const researchUrl=await desktopOfficialUrl(style);
+    if(researchUrl){
+      try{
+        const response=await page.goto(researchUrl,{waitUntil:'domcontentloaded',timeout:12000});
+        const html=await page.content();
+        if(response?.ok()&&new URL(page.url()).origin===OFFICIAL&&styleFromDetail(html)===style){
+          assertAdultProductPage(html,page.url());
+          url=page.url();
+          log('바탕화면 공식몰 조사자료의 주소 확인 · 현재 품번 일치');
+        }
+      }catch{signal?.throwIfAborted();}
+      if(!url)log('조사자료의 공식 주소를 확인하지 못해 품번으로 다시 검색합니다.');
+    }
+    if(!url&&options.sourceUrlHint&&options.sourceUrlHint!==researchUrl){
+      url=parseProductInput(options.sourceUrlHint).url;
+      log('확인된 공식 상품 주소로 바로 연결 · 품번 재검증');
+    }
+  }
   if(!url){
   await page.goto(searchUrl,{waitUntil:'domcontentloaded'});
   await page.locator('a[href*="detail.php?pno="]').first().waitFor({timeout:20000}).catch(()=>{});
@@ -351,7 +370,7 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
     return response.ok()?await response.text():null;
   },()=>signal?.aborted||cancelled());
   }
-  await page.goto(url,{waitUntil:'domcontentloaded'});
+  if(page.url()!==url)await page.goto(url,{waitUntil:'domcontentloaded'});
   if(new URL(page.url()).origin!==OFFICIAL)throw Error('공식몰 이외 페이지로 이동했습니다.');
   if(!style){await page.waitForLoadState('load');style=styleFromDetail(await page.content());log('URL에서 확인한 품번: '+style);}
   validateStyle(style);
