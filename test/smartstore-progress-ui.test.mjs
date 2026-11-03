@@ -17,6 +17,8 @@ test('5번 진행 표시는 즉시 시작하고 재진입 시 복원되며 실�
    assert.match(await box.innerText(),new RegExp(({error:'확인 필요',stopped:'중단됨',done:'편집기 준비 완료'})[status]));
    assert.match(await box.innerText(),/전체 20초/);assert.equal(await box.getAttribute('aria-busy'),'false');
   }
+  await page.evaluate(()=>{window.clock=130000;document.dispatchEvent(new CustomEvent('smartstore-auto-request',{detail:{status:'starting'}}));document.dispatchEvent(new CustomEvent('smartstore-auto-request',{detail:{status:'failed',error:'요청 실패'}}));document.dispatchEvent(new CustomEvent('register-state',{detail:{autoProgress:{id:'new',startedAt:100100,finishedAt:120100,status:'done'}}}));});
+  assert.match(await box.innerText(),/확인 필요.*요청 실패/s,'a previous success must not overwrite a rejected new request');
   // Freshly loading the component restores server timing instead of resetting it.
   await page.reload();await page.setContent('<div class="register-actions"><button id="smartstoreStart">시작</button></div>');
   await page.addScriptTag({content:await readFile(new URL('../public/smartstore-progress.js',import.meta.url),'utf8')});

@@ -8,7 +8,7 @@
  heading.append(stage,clock);panel.append(heading,message);button.closest('.register-actions').after(panel);
  const labels={request:'시작 요청 중',collect:'공식 정보 확인',prepare:'사진·색상 확인',connect:'판매자 화면 확인',compose:'사진 합성',detail:'상세이미지 준비',upload:'상품정보 입력·사진 업로드'};
  const duration=ms=>{const seconds=Math.max(0,Math.floor(ms/1000));return seconds>=60?Math.floor(seconds/60)+'분 '+String(seconds%60).padStart(2,'0')+'초':seconds+'초';};
- let progress=null,pending=false,previousId=null,timer=null;
+ let progress=null,pending=false,previousId=null,requestAt=0,timer=null;
  function paint(){
   if(!progress)return;
   panel.hidden=false;panel.dataset.status=progress.status;
@@ -22,14 +22,14 @@
  function update(next){progress={...next};paint();if(progress.status==='running'&&!timer)timer=setInterval(paint,1000);}
  document.addEventListener('smartstore-auto-request',event=>{
   if(event.detail.status==='starting'){
-   previousId=progress?.id;pending=true;const now=Date.now();
+   previousId=progress?.id;pending=true;const now=Date.now();requestAt=now;
    update({startedAt:now,stepStartedAt:now,step:'request',status:'running',message:'요청을 접수하고 있습니다.'});
   }else if(pending){pending=false;update({...progress,status:'error',finishedAt:Date.now(),message:event.detail.error});}
  });
  document.addEventListener('register-state',event=>{
   const next=event.detail.autoProgress;if(!next)return;
   // A poll already in flight can still contain the previous run's result.
-  if(pending&&(next.id===previousId||next.startedAt<progress.startedAt))return;
+  if(next.startedAt<requestAt||pending&&next.id===previousId)return;
   pending=false;update(next);
  });
 })();
