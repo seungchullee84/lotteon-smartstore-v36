@@ -897,7 +897,7 @@ if($('smartstoreCombinePhotos'))$('smartstoreCombinePhotos').onclick=async()=>{
  const nav=document.createElement('nav');nav.id='smartstoreWorkflow';nav.dataset.channelOnly='smartstore';nav.setAttribute('aria-label','신규 상품 준비 순서');
  const heading=document.createElement('strong');heading.textContent='신규 상품 준비';
  const list=document.createElement('ol');
- steps.forEach(([id,label],index)=>{const li=document.createElement('li'),link=document.createElement('a'),number=document.createElement('span');link.href='#'+id;number.textContent=String(index+1);link.append(number,document.createTextNode(label));li.append(link);list.append(li);});
+ steps.forEach(([id,label],index)=>{const li=document.createElement('li'),link=document.createElement('a'),number=document.createElement('span');link.href='#'+id;number.textContent=String(index+1);link.append(number,document.createTextNode(label));link.addEventListener('click',event=>{event.preventDefault();el(id)?.scrollIntoView({block:'start',behavior:'auto'});});li.append(link);list.append(li);});
  const help=document.createElement('p');help.textContent='1번부터 차례로 확인하세요. 단계 이름을 누르면 해당 위치로 이동합니다.';
  nav.append(heading,list,help);main.prepend(nav);
  const section=(id,step,title,note)=>{

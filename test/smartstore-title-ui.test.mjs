@@ -89,6 +89,11 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
    assert.equal(await page.locator('#smartstoreName').inputValue(),allowedTitle,'단계 재배치가 수정한 상품명을 보존');
   }
   assert.equal(await page.locator('#smartstoreStart').innerText(),'입력·업로드 시작');
+  const locationBefore=page.url();
+  await page.getByRole('link',{name:'4 판매자 화면 준비'}).click();
+  assert.equal(page.url(),locationBefore,'단계 이동은 페이지를 다시 열지 않음');
+  const sellerStep=await page.locator('#smartstoreSellerStep').boundingBox();
+  assert.ok(sellerStep.y>=0&&sellerStep.y<25,'해당 단계가 실제 화면 상단에 표시');
   const login=await page.locator('#smartstoreOpen').evaluate(el=>({weight:getComputedStyle(el).fontWeight,background:getComputedStyle(el).backgroundColor}));
   const collect=await page.locator('#collect').evaluate(el=>({weight:getComputedStyle(el).fontWeight,background:getComputedStyle(el).backgroundColor}));
   assert.deepEqual(login,collect);
