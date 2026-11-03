@@ -1,4 +1,5 @@
 import {startNewListingMonitor} from './homepage-new-list.mjs';
+import {startNewProductResearch} from './new-product-research.mjs';
 import {reusableSmartstoreCollection} from './smartstore-resume-collection.mjs';
 import {smartstorePreparationStatus} from './smartstore-preparation-status.mjs';
 import {pointPicker,savePointSelection} from './smartstore-point-picker.mjs';
@@ -55,7 +56,6 @@ const root=path.dirname(fileURLToPath(import.meta.url));
 const releases=createReleaseTracker(root);await releases.get();
 const githubSync=process.env.REGISTER_PORTABLE==='1'?{state:{status:'portable',message:'배포 실행판'},stop(){}}:startGithubSync(root,{beforeSync:()=>releases.get()});
 const dataRoot=path.join(root,'data');await mkdir(dataRoot,{recursive:true});
-const benefitResearch=startNewListingMonitor(root);
 const productEdits=createProductEditStore(dataRoot);
 const browserLogins={lotte:createBrowserLoginStore(dataRoot),smartstore:createBrowserLoginStore(dataRoot,{channel:'smartstore'})};
 function browserLoginFor(channel='lotte'){if(!Object.hasOwn(browserLogins,channel))throw Error('자동 로그인 판매채널을 확인해 주세요.');return browserLogins[channel];}
@@ -81,6 +81,9 @@ const token=desktopSession?.token||randomBytes(24).toString('hex');
 let backgroundApiKey=await loadSmartstoreAIKey(dataRoot);
 const protectedBranding=brandingLock(dataRoot);
 const state={busy:false,phase:'idle',logs:[],product:null,folder:null,error:null,paused:null,revision:Date.now(),collectionInput:null,detailFallbackRequest:null,photoPreparation:null};
+const newProductResearch=startNewProductResearch(root,{isBusy:()=>state.busy||state.photoPreparation?.status==='preparing'});
+const benefitResearch=startNewListingMonitor(root,{onSnapshot:website=>{void newProductResearch.observe(website);}});
+benefitResearch.state.folderResearch=newProductResearch.state;
 if(process.env.REGISTER_RESTORE){const restored=path.resolve(process.env.REGISTER_RESTORE);if(restored.startsWith(dataRoot+path.sep)){state.product=JSON.parse(await readFile(restored,'utf8'));repairCategoryFields(state.product);if(state.product.categoryMatch){state.product.fieldStatus||={};state.product.fieldStatus.category=state.product.categoryMatch.status;}state.product.keywords=buildKeywords(state.product);state.folder=path.dirname(restored);state.phase='done';state.revision++;}}
 if(state.product){try{assertAdultProduct(state.product);}catch(error){if(error.code!=='JUNIOR_PRODUCT')throw error;state.product=null;state.folder=null;state.phase='error';state.error=error.message;state.revision++;}}
 if(state.product){state.product=await productEdits.apply(state.product);await applyExtraExclusions(state.folder,state.product);}

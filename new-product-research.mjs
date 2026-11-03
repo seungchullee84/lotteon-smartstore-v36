@@ -55,7 +55,7 @@ export function startNewProductResearch(root,{isBusy=()=>false,sample=systemSamp
    const update=()=>{state.queued=q.items.filter(x=>['queued','running'].includes(x.status)).length;state.completed=q.items.filter(x=>x.status==='complete').length;state.needsReview=q.items.filter(x=>['needs-review','failed'].includes(x.status)).length;};update();
    try{await storageReady();}catch{state.status='waiting-storage';state.message='신상품 폴더 조사 대기 · D드라이브 연결 필요';return;}
    const reason=resourcePause(sample(),isBusy());if(reason){state.status='waiting';state.message='신상품 폴더 조사 대기 · '+reason;return;}
-   const item=q.items.find(x=>x.status==='queued'&&(!x.retryAt||Date.parse(x.retryAt)<=clock()));
+   const item=(!q.nextWorkAt||Date.parse(q.nextWorkAt)<=clock())&&q.items.find(x=>x.status==='queued'&&(!x.retryAt||Date.parse(x.retryAt)<=clock()));
    if(!item){state.status='idle';state.message=`신상품 폴더 자동 조사 · 대기 ${state.queued} · 완료 ${state.completed} · 확인 필요 ${state.needsReview}`;return;}
    await mkdir(storage,{recursive:true});item.status='running';item.startedAt=new Date(clock()).toISOString();await persist(q);
    state.status='running';state.message='신상품 폴더 조사 중 · '+(item.style||item.name);controller=new AbortController();

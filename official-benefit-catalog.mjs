@@ -1,4 +1,5 @@
 import {desktopDirectory} from './desktop-downloads.mjs';
+import {NEW_PRODUCT_STORAGE} from './new-product-research.mjs';
 import {officialProductFingerprint,fetchOfficialDetailVersion,MAX_OFFICIAL_DETAIL_BYTES} from './benefit-updates.mjs';
 import {readFile,writeFile,mkdir,readdir} from 'node:fs/promises';
 import {atomicWrite} from './atomic-file.mjs';
@@ -15,7 +16,7 @@ export async function catalogImageSource(product,detailHash,{dataRoot=path.join(
  desktop??=await desktopDirectory().catch(()=>null);
  const local=path.join(dataRoot,'official-benefit-catalog');
  const folders=product.gender==='여성'?['여성용','남성용']:['남성용','여성용'];
- for(const directory of desktop?[...folders.map(name=>path.join(desktop,name)),local]:[local]){
+ for(const directory of desktop?[...folders.map(name=>path.join(desktop,name)),local,NEW_PRODUCT_STORAGE]:[local,NEW_PRODUCT_STORAGE]){
  const files=[...(id&&/^[a-f0-9]{16,64}$/i.test(id)?[
   ...(/^[a-f0-9]{64}$/i.test(detailHash)?[path.join(directory,'registration',id,detailHash+'.json')]:[]),
   path.join(directory,'by-source',id+'.json')

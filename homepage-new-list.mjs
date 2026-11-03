@@ -49,7 +49,7 @@ export async function checkNewListingWithRecovery(options){
   }finally{await browser.close();}
  }
 }
-export function startNewListingMonitor(root,{check=checkNewListingWithRecovery,clock=()=>Date.now()}={}){
+export function startNewListingMonitor(root,{check=checkNewListingWithRecovery,clock=()=>Date.now(),onSnapshot=()=>{}}={}){
  const state={status:'website-only',message:'홈페이지 신상품 목록 확인 · 소구점은 품번별 요청 시 조사',imageComplete:0,total:0};let stopped=false,busy=false,timer;
  const file=path.join(root,'data','official-benefit-catalog','new-list-check.json');
  let pending=null;
@@ -60,6 +60,7 @@ export function startNewListingMonitor(root,{check=checkNewListingWithRecovery,c
    state.website=await check({file});state.consecutiveErrors=0;state.lastError=null;
   }
   state.nextAttemptAt=state.website.nextCheckAt;
+  onSnapshot(state.website);
   state.message='홈페이지 신상품 목록 25분 간격 확인 · 소구점은 품번별 요청 시 조사';
  }catch(e){state.consecutiveErrors=(state.consecutiveErrors||0)+1;state.lastError=e.message;state.nextAttemptAt=new Date(clock()+retryDelay(state.consecutiveErrors)).toISOString();const time=new Date(state.nextAttemptAt).toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit'});state.message='홈페이지 신상품 확인 지연 · '+e.message+' · '+time+' 재확인 예정';}finally{busy=false;}
  return state;})();try{return await pending;}finally{pending=null;clearTimeout(timer);if(!stopped){timer=setTimeout(()=>run(),Math.min(NEW_LIST_INTERVAL,Math.max(1000,Date.parse(state.nextAttemptAt)-clock()))||NEW_LIST_INTERVAL);timer.unref();}}}
