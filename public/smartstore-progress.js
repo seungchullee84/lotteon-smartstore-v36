@@ -29,7 +29,7 @@
  document.addEventListener('register-state',event=>{
   const next=event.detail.autoProgress;if(!next)return;
   // A poll already in flight can still contain the previous run's result.
-  if(pending&&next.id===previousId)return;
+  if(pending&&(next.id===previousId||next.startedAt<progress.startedAt))return;
   pending=false;update(next);
  });
 })();

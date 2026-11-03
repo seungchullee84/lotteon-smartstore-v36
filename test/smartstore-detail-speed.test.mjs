@@ -3,6 +3,21 @@ test('이미 열린 같은 상품 편집기는 새 popup 이벤트를 기다리�
  let focused=0;const page={url:()=> 'https://sell.smartstore.naver.com/#/products/edit/123',isClosed:()=>false,locator:()=>assert.fail('다시 열기 금지')};const editor={url:()=> 'https://sell.smartstore.naver.com/#/editor',isClosed:()=>false,opener:async()=>null,bringToFront:async()=>focused++};page.context=()=>({pages:()=>[page,editor]});assert.equal(await openSmartstoreEditor(page),editor);assert.equal(focused,1);
  const other={...page,url:()=> 'https://sell.smartstore.naver.com/#/products/edit/456'};page.context=()=>({pages:()=>[page,editor,other]});await assert.rejects(openSmartstoreEditor(page),/불명확/);
 });
+test('실행 폴더가 달라도 원본과 분할 위치가 같은 이미지만 공통 캐시에서 재사용한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'detail-shared-cache-'));try{
+  const png=path.join(root,'detail.png');await sharp({create:{width:860,height:1200,channels:3,background:'#abc'}}).png().toFile(png);
+  const options={includeVideo:false,videoAfterTop:200,officialTop:400,bannerTop:800,footerTop:1000,partsCacheRoot:path.join(root,'shared')};
+  const first=await smartstoreUploadParts(png,path.join(root,'run-1'),null,options);
+  assert.equal(first.reusedCount,0);const original=await readFile(first.files[0]);
+  const second=await smartstoreUploadParts(png,path.join(root,'run-2'),null,options);
+  assert.equal(second.reusedCount,second.files.length);assert.deepEqual(second.files,first.files);
+  await writeFile(first.files[0],'broken');const repaired=await smartstoreUploadParts(png,path.join(root,'run-3'),null,options);
+  assert.equal(repaired.reusedCount,first.files.length-1);assert.deepEqual(await readFile(repaired.files[0]),original);
+  const moved=await smartstoreUploadParts(png,root,null,{...options,officialTop:500});assert.equal(moved.reusedCount,0);assert.notEqual(moved.hash,first.hash);
+  await sharp({create:{width:860,height:1200,channels:3,background:'#def'}}).png().toFile(png);
+  const changed=await smartstoreUploadParts(png,root,null,options);assert.equal(changed.reusedCount,0);assert.notEqual(changed.hash,first.hash);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
 test('같은 상세 분할 파일은 검증 후 재사용하고 손상 파일은 복구한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'detail-speed-'));try{
  const png=path.join(root,'detail.png'),brand=path.join(root,'brand.png');await sharp({create:{width:860,height:1200,channels:3,background:'#eee'}}).png().toFile(png);await sharp({create:{width:860,height:100,channels:3,background:'#fff'}}).png().toFile(brand);
