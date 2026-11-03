@@ -36,7 +36,12 @@ export async function savePointSelection(product,folder,input,options){
  if(input.channel!=='smartstore'||input.style!==product.style||input.revision!==current.revision)throw Error('상품 또는 소구점 원문이 변경됐습니다. 후보를 다시 열어 주세요.');
  const ids=input.selectedIds;if(!Array.isArray(ids)||ids.length<2||ids.length>4||new Set(ids).size!==ids.length||ids.some(id=>!current.candidates.some(p=>p.id===id)))throw Error('공식 근거 후보에서 서로 다른 구매 장점 2~4개를 선택해 주세요.');
  const chosen=ids.map(id=>{const {id:_,...point}=current.candidates.find(p=>p.id===id);return point;});
- const points=chosen.length>=3?chosen:[...chosen,...current.candidates.filter(p=>!ids.includes(p.id)&&!chosen.some(q=>q.evidence===p.evidence||q.title===p.title)).slice(0,1).map(({id,...point})=>point)];
+ const points=[...chosen];
+ if(points.length===2){
+  const covered=new Set(points.flatMap(topics));
+  const extra=current.candidates.find(p=>!ids.includes(p.id)&&!points.some(q=>q.evidence===p.evidence||q.title===p.title)&&topics(p).some(topic=>!covered.has(topic)));
+  if(extra){const {id:_,...point}=extra;points.push(point);}
+ }
  const root=path.join(options.dataRoot,'smartstore-details',product.style),file=path.join(root,'selling-point-selection.json'),temporary=file+'.'+randomUUID()+'.tmp';await mkdir(root,{recursive:true});
  const record={style:product.style,sourceUrl:product.sourceUrl,detailHash:current.detailHash,textHash:current.textHash,points,method:'user-selected-official-points',selectedAt:new Date().toISOString()};await writeFile(temporary,JSON.stringify(record,null,2));await rename(temporary,file);return record;
 }

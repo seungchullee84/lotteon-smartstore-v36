@@ -279,7 +279,33 @@ function renderDetailPreview(p){
  detailPreviewResizeObserver?.disconnect();
  const box=$('detailPreview');box.replaceChildren();box.scrollTop=0;
  if(document.body.dataset.channel==='smartstore'){
-  if(p.photoSelectionPending){$('detailPreviewStatus').textContent='사진 선택 대기';box.textContent='사진 색상·구도 수정에서 사용할 사진을 고른 뒤 반영해 주세요.';return;}
+  if(p.photoSelectionPending){
+   $('detailPreviewStatus').textContent='사진 선택 대기';
+   const note=document.createElement('p');
+   note.textContent='사진 색상·구도 수정에서 사용할 사진을 고른 뒤 반영해 주세요.';
+   const points=document.createElement('section');
+   points.setAttribute('aria-live','polite');
+   points.textContent='공식 소구점을 확인하고 있습니다.';
+   box.append(note,points);
+   void fetch('/api/smartstore-point-picker?channel=smartstore&style='+encodeURIComponent(p.style))
+    .then(async response=>{
+     const result=await response.json();
+     if(!response.ok)throw Error(result.error);
+     if(!points.isConnected||result.style!==p.style||result.sourceUrl!==p.sourceUrl)return;
+     const selected=result.selectedIds.map(id=>result.candidates.find(point=>point.id===id)).filter(Boolean);
+     const heading=document.createElement('h4');
+     heading.textContent='공식 근거 소구점 '+selected.length+'개';
+     const list=document.createElement('ol');
+     for(const point of selected){
+      const item=document.createElement('li'),title=document.createElement('strong');
+      title.textContent=point.title;
+      item.append(title,' · '+point.description);
+      list.append(item);
+     }
+     points.replaceChildren(heading,list);
+    }).catch(error=>{if(points.isConnected)points.textContent='공식 소구점 확인 필요 · '+error.message;});
+   return;
+  }
   $('detailPreviewStatus').textContent=p.smartstoreDetail?.sellingPointReview?.status==='needs-review'?(p.smartstoreDetail.sellingPointReview.message||'소구점 공식 근거 확인 필요'):'';
   const frame=document.createElement('iframe');frame.className='smartstore-template-preview';frame.title='스마트스토어 확정 템플릿 상세페이지';frame.allow='autoplay; fullscreen; picture-in-picture';
   frame.src='/smartstore-detail-preview.html?style='+encodeURIComponent(p.style)+'&v='+encodeURIComponent(smartstoreListingState?.release?.version||Date.now())+'&fields='+encodeURIComponent(JSON.stringify(smartstoreDetailFields()));box.append(frame);frame.addEventListener('load',()=>{if(typeof applyTemplateHeadlinePreview==='function')applyTemplateHeadlinePreview();});
