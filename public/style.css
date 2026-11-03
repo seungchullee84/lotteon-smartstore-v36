@@ -422,9 +422,9 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
 .upload-progress-message{margin:8px 0 0;font-size:14px;line-height:1.6;overflow-wrap:anywhere}
 #smartstoreUploadProgress[data-status="error"],#smartstoreUploadProgress[data-status="stopped"]{background:#fff7ed;border-color:#e3b883;color:#774219}
 /* A visible, indeterminate activity signal from the first click to the real result. */
-body[data-channel="smartstore"] #smartstoreStart.working{opacity:1;padding-left:46px;overflow:hidden;background:#076b3c;cursor:progress}
-#smartstoreStart.working:before{left:20px;width:16px;height:16px;top:calc(50% - 10px);border-width:3px}
-#smartstoreStart.working:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 20%,#ffffff24 45%,transparent 70%);transform:translateX(-100%);animation:uploadSweep 2s ease-in-out infinite}
+:is(body[data-channel="smartstore"] #smartstoreStart,body[data-channel="lotte"] #run).working{opacity:1;padding-left:46px;overflow:hidden;background:#076b3c;cursor:progress}
+:is(#smartstoreStart,#run).working:before{left:20px;width:16px;height:16px;top:calc(50% - 10px);border-width:3px}
+:is(#smartstoreStart,#run).working:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 20%,#ffffff24 45%,transparent 70%);transform:translateX(-100%);animation:uploadSweep 2s ease-in-out infinite}
 #clickFeedback.upload-working{width:420px;max-width:calc(100vw - 32px);padding:22px 26px;text-align:left;background:#192824;border-color:#75dfaa66;box-shadow:0 12px 36px #122b3a38;overflow:hidden}
 #clickFeedback.upload-working:after{content:'';position:absolute;left:0;bottom:0;width:42%;height:3px;background:linear-gradient(90deg,transparent,#81efb5,transparent);animation:uploadActivity 1.8s ease-in-out infinite}
 .upload-motion{display:flex;align-items:center;gap:22px}
@@ -443,4 +443,4 @@ body[data-channel="smartstore"] #smartstoreStart.working{opacity:1;padding-left:
 @keyframes uploadActivity{0%{transform:translateX(-100%)}100%{transform:translateX(340%)}}
 @keyframes uploadPulse{50%{box-shadow:0 0 0 5px #15985a22}}
 @media(max-width:420px){#clickFeedback.upload-working{padding:18px}.upload-motion{gap:14px}.upload-motion-scene{width:52px;height:52px}.upload-motion-body{column-gap:10px}.upload-motion-body>strong{font-size:22px}}
-@media(prefers-reduced-motion:reduce){#smartstoreStart.working:after,#clickFeedback.upload-working:after{animation:none;display:none}.upload-motion *,.upload-motion-scene:before,.upload-motion-scene:after,.upload-progress-activity:before{animation:none!important}}
+@media(prefers-reduced-motion:reduce){:is(#smartstoreStart,#run).working:after,#clickFeedback.upload-working:after{animation:none;display:none}.upload-motion *,.upload-motion-scene:before,.upload-motion-scene:after,.upload-progress-activity:before{animation:none!important}}
