@@ -26,7 +26,7 @@ test('새 사진 경로에서 품번을 정확히 찾고 분석 전에도 1번 �
   const options={desktop:root,dataRoot:path.join(root,'data')};
   const found=await findPhotos(product,options);assert.equal(found.length,2);assert.ok(found.every(p=>p.file.startsWith(chosen+path.sep)));
   const preview=await listingPreview(product,options);assert.equal(preview.main.sourceName,'1.jpg');assert.equal(preview.previewOnly,true);
-  const work=await originalListingMain(product,options);assert.equal((await sharp(work).metadata()).width,750);assert.equal((await sharp(work).metadata()).height,1000);assert.deepEqual(await readFile(path.join(chosen,'1.jpg')),original);
+  const work=await originalListingMain(product,options);assert.equal(work,path.join(chosen,'1.jpg'));assert.deepEqual(await readFile(work),original);assert.deepEqual(await readFile(path.join(chosen,'1.jpg')),original);
   await assert.rejects(prepareListingImages(product,root,options),/선택을 먼저/);
  }finally{await rm(root,{recursive:true,force:true});}
 });
@@ -54,7 +54,7 @@ test('옆면 없이도 다른 색상 정면만 공식 색상 순서로 추가하
  assert.ok(result.extras.every(p=>p.role==='front'&&!p.bytes.equals(result.main.bytes)));
 });
 
-test('대표·추가는 750×1000 JPG 작업본을 사용하고 원본 바이트·EXIF는 보존한다',async()=>{
+test('대표·추가 미리보기와 업로드는 변환 없이 원본 바이트·EXIF·포맷을 사용한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-original-'));
  try{
   const photoRoot=path.join(root,'photos'),output=path.join(root,'output'),dataRoot=path.join(root,'data');await mkdir(photoRoot);await mkdir(output);
@@ -67,7 +67,7 @@ test('대표·추가는 750×1000 JPG 작업본을 사용하고 원본 바이트
   assert.deepEqual(await readFile(path.join(draftRoot,listingImages.main.file)),main);assert.deepEqual(await readFile(path.join(draftRoot,listingImages.extras[0].file)),side);
   await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...product,listingImages}));
   const selected=await prepareListingImages(product,output,{dataRoot,photoRoots:[photoRoot]});
-  for(const file of [selected.main,...selected.extras]){const meta=await sharp(file).metadata();assert.equal(meta.width,750);assert.equal(meta.height,1000);assert.equal(meta.format,'jpeg');assert.equal(path.extname(file),'.jpg');}
+  assert.equal(selected.main,path.join(photoRoot,'1.jpg'));assert.deepEqual(await readFile(selected.main),main);assert.equal((await sharp(selected.main).metadata()).orientation,6);assert.equal(selected.extras[0],path.join(photoRoot,'옆면.png'));assert.deepEqual(await readFile(selected.extras[0]),side);assert.equal((await sharp(selected.extras[0]).metadata()).format,'png');
   assert.deepEqual(await readFile(path.join(photoRoot,'1.jpg')),main);assert.deepEqual(await readFile(path.join(photoRoot,'옆면.png')),side);assert.equal((await sharp(path.join(photoRoot,'1.jpg')).metadata()).orientation,6);
   await unlink(path.join(photoRoot,'옆면.png'));await assert.rejects(prepareListingImages(product,output,{dataRoot,photoRoots:[photoRoot]}),/추가사진 원본/);
  }finally{await rm(root,{recursive:true,force:true});}
@@ -94,7 +94,7 @@ test('공식몰 대표 원본을 추가 첫 번째로 한 번만 넣고 제공 �
   const photos=[];for(let i=0;i<10;i++){const bytes=await sharp({create:{width:80,height:100,channels:3,background:{r:i*20,g:50,b:80}}}).jpeg().toBuffer(),name=i===0?'1.jpg':String(i+1)+'.jpg';await writeFile(path.join(pictures,name),bytes);photos.push({name,bytes,color:product.colors[i],role:'front'});}
   const draftRoot=path.join(dataRoot,'smartstore-details',product.style),listingImages={...await saveListingSelection(draftRoot,{main:photos[0],extras:photos.slice(1)}),trustedFolder:true};await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify({...product,listingImages}));
   const options={dataRoot,photoRoots:[pictures]},preview=await listingPreview(product,options),selected=await prepareListingImages(product,folder,options);
-  assert.equal(preview.extras.length,9);assert.equal(preview.extras[0].role,'official-main');assert.deepEqual(preview.extras.slice(1).map(p=>p.sourceName),photos.slice(1,9).map(p=>p.name));assert.equal(selected.extras.length,9);assert.deepEqual(await readFile(path.join(folder,'main.jpg')),official); for(const file of [selected.main,...selected.extras]){const meta=await sharp(file).metadata();assert.equal(meta.width,750);assert.equal(meta.height,1000);assert.equal(meta.format,'jpeg');}assert.notDeepEqual(await readFile(selected.main),official);
+  assert.equal(preview.extras.length,9);assert.equal(preview.extras[0].role,'official-main');assert.deepEqual(preview.extras.slice(1).map(p=>p.sourceName),photos.slice(1,9).map(p=>p.name));assert.equal(selected.extras.length,9);assert.deepEqual(await readFile(path.join(folder,'main.jpg')),official); assert.deepEqual(await readFile(selected.main),photos[0].bytes);assert.deepEqual(await readFile(selected.extras[0]),official);for(let i=1;i<selected.extras.length;i++)assert.deepEqual(await readFile(selected.extras[i]),photos[i].bytes);assert.notDeepEqual(await readFile(selected.main),official);
   assert.deepEqual((await listingPreview(product,options)).extras,preview.extras);const raw=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));assert.equal(raw.listingImages.extras.filter(p=>p.role==='official-main').length,0,'재실행 때 공식 사진을 초안에 누적하지 않음');
   await writeFile(path.join(folder,'product.json'),JSON.stringify({...product,style:'326932'}));await assert.rejects(prepareListingImages(product,folder,options),/공식몰 대표사진을 다시 수집/);
  }finally{await rm(root,{recursive:true,force:true});}

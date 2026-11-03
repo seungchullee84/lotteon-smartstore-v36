@@ -684,11 +684,11 @@ function syncListingImages(state){
  const custom=$('smartstoreListingExtras'),original=$('originalExtraPreviews');
  const listing=state.smartstoreListing,smart=document.body.dataset.channel==='smartstore';
  const note=$('mainSourceNote');if(!note.dataset.original)note.dataset.original=note.textContent;
- note.textContent=smart?(listing?'대표사진: '+listing.sourceNames[0]+' · '+listing.mainColor+' · 현재 품번 사진을 750×1000 JPG로 변환 · 비율 유지·흰 여백 · 원본 보관':'바탕화면 상품등록기사진폴더의 해당 품번 폴더에 1.jpg 또는 1번.jpg를 넣어 주세요.'):note.dataset.original;
+ note.textContent=smart?(listing?'대표사진: '+listing.sourceNames[0]+' · '+listing.mainColor+' · 현재 품번 폴더 원본 그대로 · 크기·비율·용량 변경 없음':'바탕화면 상품등록기사진폴더의 해당 품번 폴더에 1.jpg 또는 1번.jpg를 넣어 주세요.'):note.dataset.original;
  $('main').hidden=smart&&!listing;
  $('colorChipStatus').hidden=smart;$('extendBackground').hidden=smart;
- $('downloadMain1500').textContent=smart?'대표이미지 750×1000 JPG 저장':'대표이미지 1500×1500 저장';
- $('main').alt=smart?'선택한 대표사진 · 750×1000 JPG 작업본':'1500×1500 대표이미지';
+ $('downloadMain1500').textContent=smart?'대표이미지 원본 저장':'대표이미지 1500×1500 저장';
+ $('main').alt=smart?'선택한 대표사진 원본':'1500×1500 대표이미지';
  document.querySelector('.main-image-heading h3').textContent=smart?'대표이미지 · 선택한 사진':'대표이미지';
 
  custom.hidden=!smart||!listing;original.hidden=smart;$('extraImages').querySelector('h3').textContent=smart?'추가이미지':'추가이미지 (최대 2장)';
@@ -701,7 +701,7 @@ function syncListingImages(state){
  }
  if(custom.dataset.stamp!==stamp){
   custom.dataset.stamp=stamp;custom.replaceChildren();
-  listing.extraColors.forEach((color,i)=>{const card=document.createElement('div');card.className='extra-image-card';const img=document.createElement('img');img.src=base+'extra-'+i+query;const official=listing.extraRoles?.[i]==='official-main',angle=official||listing.extraRoles?.[i]==='provided'?'':listing.extraRoles?.[i]==='alternate'?'다른 구도':color===listing.mainColor?'옆면':'정면';img.alt=color+(angle?' '+angle:'');const name=document.createElement('p');name.textContent=official?'공식몰 대표사진 · 추가 1':color+(angle?' · '+angle:'');const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent=official?'공식몰 원본 저장':'750×1000 JPG 저장';button.onclick=()=>saveSelectedImage('extra-'+i,button);card.append(img,name,button);custom.append(card);});
+  listing.extraColors.forEach((color,i)=>{const card=document.createElement('div');card.className='extra-image-card';const img=document.createElement('img');img.src=base+'extra-'+i+query;const official=listing.extraRoles?.[i]==='official-main',angle=official||listing.extraRoles?.[i]==='provided'?'':listing.extraRoles?.[i]==='alternate'?'다른 구도':color===listing.mainColor?'옆면':'정면';img.alt=color+(angle?' '+angle:'');const name=document.createElement('p');name.textContent=official?'공식몰 대표사진 · 추가 1':color+(angle?' · '+angle:'');const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent=official?'공식몰 원본 저장':'원본 저장';button.onclick=()=>saveSelectedImage('extra-'+i,button);card.append(img,name,button);custom.append(card);});
  }
  $('extraImageStatus').textContent=listing.previewOnly?'폴더 1번 사진을 표시 중입니다. 정보 수집 또는 시작을 누르면 폴더 사진을 추가·상세에 연결합니다.':'대표: '+listing.mainColor+' (선택한 대표사진) · 추가 '+listing.extraColors.length+'장 · '+(listing.extraRoles?.[0]==='official-main'?'공식몰 대표사진을 첫 번째로 · ':'')+(listing.extraRoles?.includes('provided')?'품번 폴더의 제공 사진':'옆면 또는 다른 구도 + 다른 색상 정면');
  $('extraImages').hidden=false;
