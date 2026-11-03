@@ -72,6 +72,16 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   await page.locator('#channelSmartstore').click();
   const allowedTitle='지오다노 남자 브이넥 아가일 니트 남성브이넥니트 356956';
   await page.locator('#smartstoreName').fill(allowedTitle);
+  await page.locator('#style').fill('356956');
+  for(const mode of ['classic','minimal','classic','minimal']){
+   await page.locator('#'+mode+'View').click();
+   assert.equal(await page.locator('body').getAttribute('data-view'),mode);
+   assert.equal(await page.locator('#smartstoreName').inputValue(),allowedTitle,'화면 전환이 편집 중인 상품명을 유지');
+   assert.equal(await page.locator('#style').inputValue(),'356956','화면 전환이 입력한 품번을 유지');
+   assert.equal(await page.locator('#logs').count(),1,'진행 기록 DOM을 복제하지 않음');
+   assert.equal(await page.locator('#programDetails,#progressDetails').count(),mode==='minimal'?2:0);
+  }
+  assert.equal(await page.evaluate(()=>localStorage.getItem('registrar-view-mode-v1')),'minimal');
   assert.equal(await page.locator('#smartstoreTest,#smartstoreImages,#smartstoreAISettings,#smartstoreAIDialog').count(),0);
   assert.equal(await page.locator('#smartstoreOpen').innerText(),'1. 스마트스토어 로그인 창 열기');
   const login=await page.locator('#smartstoreOpen').evaluate(el=>({weight:getComputedStyle(el).fontWeight,background:getComputedStyle(el).backgroundColor}));

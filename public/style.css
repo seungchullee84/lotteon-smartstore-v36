@@ -427,7 +427,9 @@ body[data-view="minimal"] #status{background:#edf2f7;color:#344054}
 body[data-view="minimal"] #progressCard>.bar button{min-height:34px;padding:6px 11px;font-size:12px}
 body[data-view="minimal"] #progressCard>p:last-child{font-size:11px;margin-bottom:0}
 body[data-view="minimal"] .workspace-moment:not([data-state="collecting"]):not([data-state="complete"]):not([data-state="error"]){display:none}
-body[data-view="minimal"] .workspace-moment{max-width:300px;margin:16px 0;background:#f8f9fb;border-color:var(--line)}
+body[data-view="minimal"] .workspace-moment{display:flex;align-items:center;gap:14px;margin:12px 0;padding:8px 12px;text-align:left;background:#f8f9fb;border-color:var(--line)}
+body[data-view="minimal"] .workspace-moment .moment-scene{flex:0 0 160px;transform:scale(.65);margin:-18px -28px}
+body[data-view="minimal"] .workspace-moment p{margin:0;font-size:13px}
 body[data-view="minimal"] .giordano-signature{flex-direction:row;justify-content:flex-end;flex-wrap:wrap;gap:16px;margin:16px 0 0;padding:12px 0 0;border-top:1px solid #edf0f4}
 body[data-view="minimal"] .giordano-signature .giordano-official-logo{width:116px;max-width:40%}
 body[data-view="minimal"] .maker-credit{gap:8px;margin:0}
