@@ -21,7 +21,7 @@ export async function officialPointSource(product,folder,pageText,{dataRoot=path
  };
  const catalog=await catalogImageSource(product,detailHash,{dataRoot,desktop});
  if(catalog){
-  if(catalog.pageText!==pageText)await saveRegistrationSource(catalog.imageText);
+  await saveRegistrationSource(catalog.imageText);
   return {text:[officialImageBenefitText(catalog.imageText),pageText].filter(Boolean).join('\n•\n'),imageChecked:true,detailHash,method:'official-catalog-image-cache'};
  }
  const key=JSON.stringify([dataRoot,product.style,product.sourceUrl,detailHash]);
