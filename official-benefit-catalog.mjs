@@ -1,5 +1,5 @@
 import {desktopDirectory} from './desktop-downloads.mjs';
-import {NEW_PRODUCT_STORAGE} from './new-product-research.mjs';
+import {newProductStorage} from './new-product-research.mjs';
 import {officialProductFingerprint,fetchOfficialDetailVersion,MAX_OFFICIAL_DETAIL_BYTES} from './benefit-updates.mjs';
 import {readFile,writeFile,mkdir,readdir} from 'node:fs/promises';
 import {atomicWrite} from './atomic-file.mjs';
@@ -10,13 +10,14 @@ export function categoryPageUrl(url,page){const source=new URL(url),target=new U
 export const CATALOG_RULE='adult-official-benefits-1';
 export function adultProduct(product){const text=[...(product.sourceCategory||[]),product.gender||'',product.rawName||''].join(' ');return !/JUNIOR|KIDS|BOYS|GIRLS|주니어|키즈|아동|여아|남아/i.test(text)&&/\bMEN\b|\bWOMEN\b|G-MOTION|남성|여성|성인|공용|UNISEX/i.test(text);}
 export function sameOfficialProduct(a,b){try{const x=new URL(a),y=new URL(b);return x.origin==='https://www.giordano.co.kr'&&y.origin===x.origin&&x.pathname==='/shop/detail.php'&&y.pathname===x.pathname&&x.searchParams.get('pno')===y.searchParams.get('pno');}catch{return false;}}
-export async function catalogImageSource(product,detailHash,{dataRoot=path.join(root,'data'),desktop}={}){
+export async function catalogImageSource(product,detailHash,{dataRoot=path.join(root,'data'),desktop,backgroundRoot}={}){
  if(!adultProduct(product))return null;
  let id;try{id=new URL(product.sourceUrl).searchParams.get('pno');}catch{return null;}
  desktop??=await desktopDirectory().catch(()=>null);
  const local=path.join(dataRoot,'official-benefit-catalog');
  const folders=product.gender==='여성'?['여성용','남성용']:['남성용','여성용'];
- for(const directory of desktop?[...folders.map(name=>path.join(desktop,name)),local,NEW_PRODUCT_STORAGE]:[local,NEW_PRODUCT_STORAGE]){
+ backgroundRoot??=await newProductStorage();
+ for(const directory of desktop?[...folders.map(name=>path.join(desktop,name)),local,backgroundRoot]:[local,backgroundRoot]){
  const files=[...(id&&/^[a-f0-9]{16,64}$/i.test(id)?[
   ...(/^[a-f0-9]{64}$/i.test(detailHash)?[path.join(directory,'registration',id,detailHash+'.json')]:[]),
   path.join(directory,'by-source',id+'.json')

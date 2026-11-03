@@ -1,9 +1,13 @@
-import {readFile,mkdir,open,unlink,access} from 'node:fs/promises';
+import {readFile,mkdir,open,unlink,access,stat} from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import {fork} from 'node:child_process';
 import {atomicWrite} from './atomic-file.mjs';
-export const NEW_PRODUCT_STORAGE='D:/KC334/Desktop/지오다노소구점자료/auto-new-products';
+import {desktopDirectory} from './desktop-downloads.mjs';
+export async function newProductStorage(){
+ if(process.platform==='win32')try{await access('D:/');return 'D:/KC334/Desktop/지오다노소구점자료/auto-new-products';}catch{}
+ return path.join(await desktopDirectory(),'지오다노소구점자료','auto-new-products');
+}
 const json=async(file,fallback)=>{try{return JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code==='ENOENT')return fallback;throw e;}};
 export function appendNewProducts(queue,website){
  const ids=new Set(queue.items.map(item=>item.id));
@@ -39,7 +43,7 @@ export function runNewProductWorker(root,item,storage,{signal,onMetrics=()=>{}}=
   child.on('exit',code=>{clearTimeout(killTimer);signal?.removeEventListener('abort',abort);if(signal?.aborted)reject(signal.reason);else if(code===0&&result)resolve(result);else reject(Error(error||'신상품 조사 프로세스 종료 '+code));});
  });
 }
-export function startNewProductResearch(root,{isBusy=()=>false,sample=systemSampler(),storage=NEW_PRODUCT_STORAGE,storageReady=async()=>{await access('D:/');},runWorker=runNewProductWorker,clock=()=>Date.now(),interval=30000}={}){
+export function startNewProductResearch(root,{isBusy=()=>false,sample=systemSampler(),storage,storageReady=async()=>{await access(path.parse(storage).root);},runWorker=runNewProductWorker,clock=()=>Date.now(),interval=30000}={}){
  const file=path.join(root,'data','new-product-research.json'),lock=file+'.lock';
  const state={status:'waiting',message:'신상품 폴더 조사 준비',queued:0,completed:0,needsReview:0};
  let website,pending,stopped=false,controller,timer;
@@ -47,13 +51,14 @@ export function startNewProductResearch(root,{isBusy=()=>false,sample=systemSamp
  async function tick(){if(stopped)return;if(pending)return pending;pending=(async()=>{
   await mkdir(path.dirname(file),{recursive:true});let handle;
   try{handle=await open(lock,'wx');await handle.writeFile(String(process.pid));}
-  catch(e){if(e.code!=='EEXIST')throw e;const pid=Number(await readFile(lock,'utf8').catch(()=>0));if(pid>0){try{process.kill(pid,0);state.message='다른 등록기에서 신상품 폴더 조사 관리 중';return;}catch{await unlink(lock).catch(()=>{});}}return;}
+  catch(e){if(e.code!=='EEXIST')throw e;const pid=Number(await readFile(lock,'utf8').catch(()=>0));if(pid>0){try{process.kill(pid,0);state.message='다른 등록기에서 신상품 폴더 조사 관리 중';return;}catch{await unlink(lock).catch(()=>{});}}else if(clock()-(await stat(lock)).mtimeMs>60000)await unlink(lock).catch(()=>{});return;}
   try{
    const q=appendNewProducts(await json(file,{enabledAt:new Date(clock()).toISOString(),items:[]}),website);
    for(const item of q.items)if(item.status==='running')item.status='queued';
    await persist(q);
    const update=()=>{state.queued=q.items.filter(x=>['queued','running'].includes(x.status)).length;state.completed=q.items.filter(x=>x.status==='complete').length;state.needsReview=q.items.filter(x=>['needs-review','failed'].includes(x.status)).length;};update();
-   try{await storageReady();}catch{state.status='waiting-storage';state.message='신상품 폴더 조사 대기 · D드라이브 연결 필요';return;}
+   try{storage??=await newProductStorage();await storageReady();state.storage=storage;}catch{state.status='waiting-storage';state.message='신상품 폴더 조사 대기 · 저장 폴더 연결 확인 필요';return;}
+   if(stopped)return;
    const reason=resourcePause(sample(),isBusy());if(reason){state.status='waiting';state.message='신상품 폴더 조사 대기 · '+reason;return;}
    const item=(!q.nextWorkAt||Date.parse(q.nextWorkAt)<=clock())&&q.items.find(x=>x.status==='queued'&&(!x.retryAt||Date.parse(x.retryAt)<=clock()));
    if(!item){state.status='idle';state.message=`신상품 폴더 자동 조사 · 대기 ${state.queued} · 완료 ${state.completed} · 확인 필요 ${state.needsReview}`;return;}

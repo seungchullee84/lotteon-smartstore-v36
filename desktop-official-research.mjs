@@ -1,9 +1,9 @@
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {desktopDirectory} from './desktop-downloads.mjs';
-import {NEW_PRODUCT_STORAGE} from './new-product-research.mjs';
+import {newProductStorage} from './new-product-research.mjs';
 
-export async function desktopOfficialUrl(style, desktop) {
+export async function desktopOfficialUrl(style, desktop, backgroundRoot) {
   if (!/^\d{6}$/.test(style)) return null;
   desktop ??= await desktopDirectory().catch(() => null);
   if (!desktop) return null;
@@ -12,7 +12,7 @@ export async function desktopOfficialUrl(style, desktop) {
     path.join(desktop, '여성용', '02-여성상품-상세-소구점후보.json')
   ];
   const sources = new Map();
-  const prepared=await readFile(path.join(NEW_PRODUCT_STORAGE,'products',style+'.json'),'utf8').then(JSON.parse).catch(()=>null);
+  const prepared=await readFile(path.join(backgroundRoot??await newProductStorage(),'products',style+'.json'),'utf8').then(JSON.parse).catch(()=>null);
   for (const file of files) {
     const catalog = await readFile(file, 'utf8').then(value => JSON.parse(value.replace(/^\uFEFF/, ''))).catch(() => null);
     if (!Array.isArray(catalog?.products)) continue;
