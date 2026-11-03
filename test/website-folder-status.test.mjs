@@ -5,7 +5,7 @@ test('오늘 누적 품번 카드에서 대기와 저장 완료를 갱신하고 
   await page.addScriptTag({content:await readFile('public/website-daily.js','utf8')});
   const source=(await readFile('public/app.js','utf8')).split('const $=id=>')[0];await page.addScriptTag({content:source+'\nconst $=id=>document.getElementById(id);'});
   const now=new Date().toISOString(),url='https://www.giordano.co.kr/shop/detail.php?pno='+'a'.repeat(32);
-  const website={checkedAt:now,intervalMinutes:25,batches:[{checkedAt:now,events:[{type:'new',newProductVerified:true,style:'확인 필요',name:'검증용 상품',sourceUrl:url,firstCheckedAt:now}]}]};
+  const website={checkedAt:now,nextCheckAt:now,intervalMinutes:25,batches:[{checkedAt:now,events:[{type:'new',newProductVerified:true,style:'확인 필요',name:'검증용 상품',sourceUrl:url,firstCheckedAt:now}]}]};
   const research={items:[{style:'123456',sourceUrl:url,status:'queued'}]};
   await page.evaluate(({website,research})=>renderWebsiteUpdates(website,false,research),{website,research});await page.getByRole('button',{name:'신상품 1건',exact:true}).click();
   assert.match(await page.locator('#websiteUpdateList').innerText(),/품번 123456/);assert.match(await page.locator('#websiteUpdateList').innerText(),/수집 대기/);

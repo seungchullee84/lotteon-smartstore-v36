@@ -10,7 +10,7 @@ globalThis.folderResearchStatus=function(event,research){
  }
  const labels={queued:'수집 대기',running:'수집 중',complete:'폴더 저장 완료','needs-review':'자료 저장 · 소구점 추가 확인 필요',failed:'수집 실패 · 확인 필요'};
  const saved=['complete','needs-review'].includes(item.status)&&!!item.folder;
- return {label:(labels[item.status]||'상태 확인 중')+(saved&&Number.isInteger(item.pointCount)?' · 소구점 '+item.pointCount+'개':''),folder:saved?item.folder:null,finishedAt:saved?item.finishedAt:null,error:['failed','queued'].includes(item.status)?item.lastError:null};
+ return {style:item.style,label:(labels[item.status]||'상태 확인 중')+(saved&&Number.isInteger(item.pointCount)?' · 소구점 '+item.pointCount+'개':''),folder:saved?item.folder:null,finishedAt:saved?item.finishedAt:null,error:['failed','queued'].includes(item.status)?item.lastError:null};
 };
 globalThis.websiteDailySummary=function(website,now=new Date()){
  const dayKey=value=>{
