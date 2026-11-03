@@ -1,3 +1,4 @@
+import {desktopDirectory} from './desktop-downloads.mjs';
 import {officialProductFingerprint,fetchOfficialDetailVersion,MAX_OFFICIAL_DETAIL_BYTES} from './benefit-updates.mjs';
 import {readFile,writeFile,mkdir,readdir} from 'node:fs/promises';
 import {atomicWrite} from './atomic-file.mjs';
@@ -11,8 +12,13 @@ export function sameOfficialProduct(a,b){try{const x=new URL(a),y=new URL(b);ret
 export async function catalogImageSource(product,detailHash,{dataRoot=path.join(root,'data')}={}){
  if(!adultProduct(product))return null;
  let id;try{id=new URL(product.sourceUrl).searchParams.get('pno');}catch{return null;}
- const files=[...(id&&/^[a-f0-9]{16,64}$/i.test(id)?[path.join(dataRoot,'official-benefit-catalog','by-source',id+'.json')]:[]),path.join(dataRoot,'official-benefit-catalog','products',product.style+'.json')];
- for(const file of files)try{const record=JSON.parse(await readFile(file,'utf8'));if(record.rule===CATALOG_RULE&&record.style===product.style&&record.imageScanComplete===true&&record.detailHash===detailHash&&sameOfficialProduct(record.sourceUrl,product.sourceUrl)&&record.imageText?.trim())return record;}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}return null;
+ const desktop=await desktopDirectory().catch(()=>null);
+ const local=path.join(dataRoot,'official-benefit-catalog');
+ for(const directory of desktop?[path.join(desktop,'남성용'),local]:[local]){
+ const files=[...(id&&/^[a-f0-9]{16,64}$/i.test(id)?[path.join(directory,'by-source',id+'.json')]:[]),path.join(directory,'products',product.style+'.json')];
+ for(const file of files)try{const record=JSON.parse(await readFile(file,'utf8'));if(record.rule===CATALOG_RULE&&record.style===product.style&&record.imageScanComplete===true&&record.detailHash===detailHash&&sameOfficialProduct(record.sourceUrl,product.sourceUrl)&&record.imageText?.trim())return record;}catch(e){if(directory===local&&e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
+ }
+ return null;
 }
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function atomic(file,value){await atomicWrite(file,JSON.stringify(value,null,2));}
