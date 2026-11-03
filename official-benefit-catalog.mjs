@@ -9,16 +9,40 @@ export function categoryPageUrl(url,page){const source=new URL(url),target=new U
 export const CATALOG_RULE='adult-official-benefits-1';
 export function adultProduct(product){const text=[...(product.sourceCategory||[]),product.gender||'',product.rawName||''].join(' ');return !/JUNIOR|KIDS|BOYS|GIRLS|주니어|키즈|아동|여아|남아/i.test(text)&&/\bMEN\b|\bWOMEN\b|G-MOTION|남성|여성|성인|공용|UNISEX/i.test(text);}
 export function sameOfficialProduct(a,b){try{const x=new URL(a),y=new URL(b);return x.origin==='https://www.giordano.co.kr'&&y.origin===x.origin&&x.pathname==='/shop/detail.php'&&y.pathname===x.pathname&&x.searchParams.get('pno')===y.searchParams.get('pno');}catch{return false;}}
-export async function catalogImageSource(product,detailHash,{dataRoot=path.join(root,'data')}={}){
+export async function catalogImageSource(product,detailHash,{dataRoot=path.join(root,'data'),desktop}={}){
  if(!adultProduct(product))return null;
  let id;try{id=new URL(product.sourceUrl).searchParams.get('pno');}catch{return null;}
- const desktop=await desktopDirectory().catch(()=>null);
+ desktop??=await desktopDirectory().catch(()=>null);
  const local=path.join(dataRoot,'official-benefit-catalog');
  for(const directory of desktop?[path.join(desktop,'남성용'),local]:[local]){
- const files=[...(id&&/^[a-f0-9]{16,64}$/i.test(id)?[path.join(directory,'by-source',id+'.json')]:[]),path.join(directory,'products',product.style+'.json')];
+ const files=[...(id&&/^[a-f0-9]{16,64}$/i.test(id)?[
+  ...(/^[a-f0-9]{64}$/i.test(detailHash)?[path.join(directory,'registration',id,detailHash+'.json')]:[]),
+  path.join(directory,'by-source',id+'.json')
+ ]:[]),path.join(directory,'products',product.style+'.json')];
  for(const file of files)try{const record=JSON.parse(await readFile(file,'utf8'));if(record.rule===CATALOG_RULE&&record.style===product.style&&record.imageScanComplete===true&&record.detailHash===detailHash&&sameOfficialProduct(record.sourceUrl,product.sourceUrl)&&record.imageText?.trim())return record;}catch(e){if(directory===local&&e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
  }
  return null;
+}
+export async function saveMenRegistrationBenefits(product,{pageText,imageText,detailHash,desktop,signal}){
+ if(product.gender!=='남성'||!adultProduct(product)||!/^\d{6}$/.test(product.style)||!sameOfficialProduct(product.sourceUrl,product.sourceUrl))return;
+ const id=new URL(product.sourceUrl).searchParams.get('pno');
+ if(!/^[a-f0-9]{16,64}$/i.test(id)||!/^[a-f0-9]{64}$/i.test(detailHash)||!imageText?.trim())return;
+ const directory=path.join(desktop??await desktopDirectory(),'남성용','registration',id);
+ const file=path.join(directory,detailHash+'.json');
+ const points=officialSellingPoints([officialImageBenefitText(imageText),pageText].filter(Boolean).join('\n•\n'));
+ const record={
+  rule:CATALOG_RULE,style:product.style,rawName:product.rawName,gender:product.gender,
+  sourceCategory:product.sourceCategory,sourceUrl:product.sourceUrl,detailUrl:product.images.detail,
+  detailHash,pageText,pageHash:officialProductFingerprint(product,pageText),imageText,
+  imageScanComplete:true,visualReview:false,points,
+  status:points.length>=3?'automatic-source-reviewed':'needs-review'
+ };
+ const existing=await readFile(file,'utf8').then(JSON.parse).catch(error=>{
+  if(error.code!=='ENOENT'&&!(error instanceof SyntaxError))throw error;
+ });
+ if(JSON.stringify(existing&&{...existing,analyzedAt:undefined})===JSON.stringify(record))return;
+ signal?.throwIfAborted();
+ await atomic(file,{...record,analyzedAt:new Date().toISOString()});
 }
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function atomic(file,value){await atomicWrite(file,JSON.stringify(value,null,2));}

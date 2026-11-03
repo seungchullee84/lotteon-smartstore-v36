@@ -1,4 +1,4 @@
-import {catalogImageSource} from './official-benefit-catalog.mjs';
+import {catalogImageSource,saveMenRegistrationBenefits} from './official-benefit-catalog.mjs';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
@@ -8,18 +8,27 @@ const digest=text=>createHash('sha256').update(text).digest('hex');
 const sourceJobs=new Map();
 // Legacy omission flags no longer skip official-source analysis.
 export async function sellingPointsOmitted(){return false;}
-export async function officialPointSource(product,folder,pageText,{dataRoot=path.resolve('data'),signal,log,recognize}={}){
+export async function officialPointSource(product,folder,pageText,{dataRoot=path.resolve('data'),signal,log,recognize,desktop}={}){
  if(!product.images?.detail)return {text:pageText,imageChecked:false,detailHash:null};
  let bytes;try{bytes=await readFile(path.join(folder,'detail.jpg'));}catch(e){if(e.code==='ENOENT')return {text:pageText,imageChecked:false,detailHash:null};throw e;}
  const detailHash=digest(bytes);
  // A visual review already checked this exact official image, including its captions.
  for(const name of ['selling-point-candidates-reviewed.json','selling-point-image-review.json'])try{const manual=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,name),'utf8'));if(manual.version===1&&manual.style===product.style&&manual.sourceUrl===product.sourceUrl&&manual.detailHash===detailHash&&usableSellingPoints(manual.points,manual.text))return {text:manual.text+'\n•\n'+pageText,imageChecked:true,detailHash,method:'visual-official-detail'};}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
- const catalog=await catalogImageSource(product,detailHash,{dataRoot});
- if(catalog)return {text:[officialImageBenefitText(catalog.imageText),pageText].filter(Boolean).join('\n•\n'),imageChecked:true,detailHash,method:'official-catalog-image-cache'};
+ const saveRegistrationSource=async imageText=>{
+  signal?.throwIfAborted();
+  try{await saveMenRegistrationBenefits(product,{pageText,imageText,detailHash,desktop,signal});}
+  catch(error){signal?.throwIfAborted();(log||console.warn)('남성용 소구점 자료 저장 실패: '+error.message);}
+ };
+ const catalog=await catalogImageSource(product,detailHash,{dataRoot,desktop});
+ if(catalog){
+  if(catalog.pageText!==pageText)await saveRegistrationSource(catalog.imageText);
+  return {text:[officialImageBenefitText(catalog.imageText),pageText].filter(Boolean).join('\n•\n'),imageChecked:true,detailHash,method:'official-catalog-image-cache'};
+ }
  const key=JSON.stringify([dataRoot,product.style,product.sourceUrl,detailHash]);
  let job=sourceJobs.get(key);if(!job){job=enrichOfficialProductFacts(product,folder,{dataRoot,signal,log,recognize}).then(p=>p.researchFacts);sourceJobs.set(key,job);job.finally(()=>{if(sourceJobs.get(key)===job)sourceJobs.delete(key);}).catch(()=>{});}
  const facts=await job;signal?.throwIfAborted();
  if(!facts?.imageScanComplete||facts.style!==product.style||facts.sourceUrl!==product.sourceUrl||facts.detailHash!==detailHash)throw Error('현재 공식 상세이미지 전체 확인이 끝나지 않았습니다.');
+ await saveRegistrationSource(facts.text);
  const imageText=String(facts.text||'').split(/(?:^|\n)\s*(?:DETAIL\s*SIZE|CHECK\s*UP|INFORMATION)\b/i)[0];
  return {text:[imageText,pageText].filter(Boolean).join('\n•\n'),imageChecked:true,detailHash,method:'local-official-image-and-page'};
 }
