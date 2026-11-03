@@ -40,7 +40,7 @@ export async function saveOfficialImagePointReview(product,folder,{text,points,d
 }
 export async function reviewSellingPoints(product,source,{dataRoot,detailHash=null,signal}={}){
  signal?.throwIfAborted();
- const identity={version:13,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
+ const identity={version:14,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
  const root=path.join(dataRoot,'smartstore-details',product.style),file=path.join(root,'selling-point-review.json');
  const finish=async(record,text=source)=>{
   const points=record.points?.length>=2?record.points.slice(0,4):completeSellingPoints(record.points,text);
