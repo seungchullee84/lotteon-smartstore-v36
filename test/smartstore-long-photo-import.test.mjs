@@ -1,9 +1,24 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {mkdtemp,rm,readFile} from 'node:fs/promises';import path from 'node:path';import os from 'node:os';import sharp from 'sharp';import {chromium} from 'playwright';
+import {mkdtemp,rm,readFile,readdir,writeFile} from 'node:fs/promises';import path from 'node:path';import os from 'node:os';import sharp from 'sharp';import {chromium} from 'playwright';
 import {registerLongPhotoLayout,extractLongMannequinPhotos,mannequinPhotoRegions} from '../smartstore-long-photo-import.mjs';
 import {stageImportedPhotos,allImportedPhotoChoices} from '../smartstore-photo-import.mjs';
 import {BRAND_VIDEO_HEADING_HEIGHT} from '../smartstore-brand-video.mjs';
 import {ocrPhotoSections,detectLongPhotoRegions,sectionPhotoRectangles} from '../smartstore-long-photo-detect.mjs';
+test('동일 원본·사진 위치 기록만 재사용하며 색상 변경·기록 손상 시 다시 만든다',async()=>{
+ const dataRoot=await mkdtemp(path.join(os.tmpdir(),'layout-cache-'));try{
+  const bytes=await sharp({create:{width:860,height:1200,channels:3,background:'#aba'}}).png().toBuffer();
+  const options={style:'026952',regions:[{color:'01화이트',left:10,top:50,width:400,height:500}],videoAfterTop:800,officialTop:600,dataRoot};
+  assert.equal((await registerLongPhotoLayout(bytes,options)).reused,false);
+  assert.equal((await registerLongPhotoLayout(bytes,options)).reused,true);
+  const changed={...options,regions:[{...options.regions[0],color:'02블랙'}]};
+  assert.equal((await registerLongPhotoLayout(bytes,changed)).reused,false);
+  assert.equal((await registerLongPhotoLayout(bytes,options)).reused,false,'same source with different color mapping must not leave stale records');
+  const dir=path.join(dataRoot,'smartstore-long-photo-layouts'),record=(await readdir(dir)).find(f=>!f.endsWith('-index.json'));
+  await writeFile(path.join(dir,record),'broken');assert.equal((await registerLongPhotoLayout(bytes,options)).reused,false);
+  const replacement=await sharp({create:{width:860,height:1200,channels:3,background:'#fff'}}).png().toBuffer();
+  assert.equal((await registerLongPhotoLayout(replacement,options)).reused,false);
+ }finally{await rm(dataRoot,{recursive:true,force:true});}
+});
 
 test('제작 기록이 없는 구형 긴 상세도 매장 구간·색상명·사진 경계로 분리한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'long-ocr-'));try{

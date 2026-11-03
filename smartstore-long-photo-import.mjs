@@ -23,18 +23,33 @@ export async function registerLongPhotoLayout(bytes,{style,regions,brandIntroHei
  const meta=await sharp(bytes,{limitInputPixels:false}).metadata();
  if(meta.width!==860||meta.height>150000)throw Error('긴 상세 사진 위치의 이미지 크기가 다릅니다.');
  for(const r of regions)if(!r.color||![r.left,r.top,r.width,r.height].every(Number.isInteger)||r.left<0||r.top<0||r.width<150||r.height<150||r.left+r.width>meta.width||r.top+r.height>meta.height)throw Error('마네킹 사진 위치를 확인해 주세요.');
+ // Repeated uploads previously decoded the same long image for every photo
+ // again. Reuse only identical source bytes, geometry, colors and layout rules;
+ // verify the saved records too, so missing/corrupt thumbnails are rebuilt.
+ const key=digest(JSON.stringify({version:1,source:digest(bytes),style,regions,brandIntroHeight,videoAfterTop,officialTop}));
+ const indexFile=path.join(root(dataRoot),style+'-'+key+'-index.json');
+ try{
+  const cached=JSON.parse(await readFile(indexFile,'utf8'));
+  if(cached.key===key&&cached.records?.length&&cached.records.every(r=>new RegExp('^'+style+'-[a-f0-9]{64}\\.json$').test(r.name))){
+   const checks=await Promise.all(cached.records.map(async r=>digest(await readFile(path.join(root(dataRoot),r.name)))===r.sha256));
+   if(checks.every(Boolean))return {reused:true};
+  }
+ }catch{} // A cache miss never replaces source validation or crop generation.
  const records=[{bytes,offset:0,height:meta.height}];
  const first=Number.isInteger(videoAfterTop)?(officialTop<videoAfterTop?0:videoAfterTop):brandIntroHeight+BRAND_VIDEO_HEADING_HEIGHT;
  if(Number.isInteger(first)&&Number.isInteger(officialTop)&&officialTop>first&&officialTop<meta.height)records.push({bytes:await sharp(bytes,{limitInputPixels:false}).extract({left:0,top:first,width:860,height:officialTop-first}).png().toBuffer(),offset:first,height:officialTop-first});
  await mkdir(root(dataRoot),{recursive:true});
+ const savedRecords=[];
  for(const record of records){
   const crops=[];
   for(const r of regions){if(r.top<record.offset||r.top+r.height>record.offset+record.height)continue;
    const region={...r,top:r.top-record.offset};const crop=await sharp(record.bytes,{limitInputPixels:false}).extract({left:region.left,top:region.top,width:region.width,height:region.height}).png().toBuffer();crops.push({...region,thumbnail:(await thumbnail(crop)).toString('base64')});
   }
   if(!crops.length)continue;const sha=digest(record.bytes);
-  await writeFile(path.join(root(dataRoot),style+'-'+sha+'.json'),JSON.stringify({version:1,style,sha256:sha,width:860,height:record.height,thumbnail:(await thumbnail(record.bytes)).toString('base64'),regions:crops}));
+  const name=style+'-'+sha+'.json',text=JSON.stringify({version:1,style,sha256:sha,width:860,height:record.height,thumbnail:(await thumbnail(record.bytes)).toString('base64'),regions:crops});
+  await writeFile(path.join(root(dataRoot),name),text);savedRecords.push({name,sha256:digest(text)});
  }
+ await writeFile(indexFile,JSON.stringify({key,records:savedRecords}));return {reused:false};
 }
 export async function backfillLongPhotoLayouts(style,{dataRoot=path.resolve('data'),downloadFolder,check=()=>{}}={}){
  downloadFolder||=await imageDownloadFolder();let files;try{files=(await readdir(downloadFolder)).filter(f=>f.startsWith(style+'_')&&f.endsWith('_제작정보.json'));}catch(e){if(e.code==='ENOENT')return 0;throw e;}
