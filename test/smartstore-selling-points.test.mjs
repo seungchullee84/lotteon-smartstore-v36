@@ -101,6 +101,10 @@ test('모든 상품 소구점의 브러시드 표시는 기모로 통일하고 �
  for(const [original,expected] of cases){assert.equal(friendlyBenefitDescription(original),expected);assert.equal(friendlyBenefitDescription(expected),expected);const p={title:'장점',description:original,evidence:original};assert.equal(displaySellingPoints([p])[0].description,expected);assert.equal(p.description,original);assert.equal(displaySellingPoints([p])[0].evidence,original);}
  });
 
+ test('수축 최소화 문구를 동사로 표시하고 공식 근거는 보존한다',()=>{
+ const p={title:'워싱으로, 안정감 있게',description:'가먼트 워싱으로 수축을 최소화.',evidence:'가먼트 워시 가공을 적용해 세탁 후 수축을 최소화했습니다.'};
+ const [display]=displaySellingPoints([p]);assert.equal(display.description,'가먼트 워싱으로 수축을 최소화했어요.');assert.equal(display.evidence,p.evidence);assert.equal(p.description,'가먼트 워싱으로 수축을 최소화.');
+ });
  test('연결어와 활용할로 끊긴 OCR은 해요체를 붙여 복원한 것처럼 표시하지 않는다',()=>{
  const description='유지하며,단독 착용은 물론 아우터 안 이너 레이어드로도 활용할.';
  assert.equal(friendlyBenefitDescription(description),'');assert.equal(displaySellingPoints([{title:'다양한 코디에 활용',description,evidence:description}]).length,0);

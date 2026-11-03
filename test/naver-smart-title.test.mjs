@@ -78,6 +78,13 @@ test('공통 기준으로 관심도를 비교하고 최대 39자·품번·롯데
  assert.equal(smartstoreTitle({...product,smartstoreName:r.title}),r.title,'실제 입력 시 인기어와 길이를 그대로 보존');
  const prior=calls,r2=await optimize({...product,style:'000000'},credentials);assert.equal(calls,prior);assert(r2.title.endsWith('000000'));assert(r2.fromCache);
 });
+test('직접 수정한 상품명도 공식 근거로 다시 비교하고 원래 입력을 보존한다',async()=>{
+ const p={style:'026952',name:'남성 퍼펙트 라운드 긴팔티 026952',rawName:'NEW 퍼펙트 크루넥 긴팔티',gender:'남성',material:'면 100%',noticeVerified:true,smartstoreName:'지오다노 남자 코튼100% 긴팔 라운드넥 티셔츠 026952',smartstoreNameUserEdited:true};
+ const before=structuredClone(p);let calls=0;
+ const optimize=createExpandedTitleOptimizer({fetchImpl:async(_,config)=>{calls++;const request=JSON.parse(config.body);return Response.json({...request,results:request.keywordGroups.map(g=>({title:g.groupName,data:[{period:request.endDate,ratio:10}]}))});}});
+ const result=await optimize(p,credentials);
+ assert(calls>0);assert(result.hasData);assert(result.length>=27&&result.length<=39);assert.equal(result.originalTitle,p.smartstoreName);assert.deepEqual(p,before);
+});
 test('27자 미만과 39자 초과를 차단하며 보강 근거가 없으면 특성을 발명하지 않음',()=>{
  assert.throws(()=>assertSmartstoreTitleLength('가'.repeat(26)),/27~39/);
  assert.throws(()=>assertSmartstoreTitleLength('가'.repeat(40)),/27~39/);

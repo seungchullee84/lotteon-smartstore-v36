@@ -7,6 +7,9 @@ import {garmentSynonyms,featureSynonyms,titleFeatureGroups,titleCategoryAliases,
 const synonyms=garmentSynonyms;
 const featureWords=['브이넥','터틀넥','라운드','아가일','기모','경량','스트라이프','와이드','밴딩','체크','후드','집업','긴팔','반팔','숏','롱','데님','트레이닝','퀼팅'];
 const neckAliases=['라운드넥','크루넥'];
+// Candidate research starts from official facts, even when the current title
+// was edited manually. Preserve the caller's original title and edit flag.
+const officialTitleProduct=product=>({...product,smartstoreName:'',smartstoreNameUserEdited:false});
 function officialTitleFacts(product){
  const facts=product.researchFacts;
  const matched=facts&&facts.style===product.style&&product.sourceUrl&&facts.sourceUrl===product.sourceUrl;
@@ -50,13 +53,13 @@ function semanticAtoms(text,kind){
  return result;
 }
 export function hasDuplicateTitleMeaning(product,title){
- const kind=titleCandidates({...product,smartstoreName:''}).kind;
+ const kind=titleCandidates(officialTitleProduct(product)).kind;
  const atoms=semanticAtoms(title,kind);
  return new Set(atoms).size!==atoms.length;
 }
 export function expandedTitleCandidates(product){
- const normalized=smartstoreTitle({...product,smartstoreName:''});
- const p={...product,name:normalized,smartstoreName:''},basic=titleCandidates(p),words=keywordCandidates(p);
+ const normalized=smartstoreTitle(officialTitleProduct(product));
+ const p={...officialTitleProduct(product),name:normalized},basic=titleCandidates(p),words=keywordCandidates(p);
  const aliases=categoryAliases(product,basic.kind);
  const necks=hasRoundNeck(product)?[...neckAliases.flatMap(neck=>[neck,neck+basic.kind]),'라운드'+basic.kind]:[];
  const sexes=product.gender==='남성'?['남성','남자']:product.gender==='여성'?['여성','여자']:[];
@@ -84,8 +87,8 @@ export function expandedTitleCandidates(product){
 }
 
 export function composePopularTitle(product,ranking){
- let base=smartstoreTitle({...product,smartstoreName:''});
- const kind=titleCandidates({...product,smartstoreName:''}).kind;
+ let base=smartstoreTitle(officialTitleProduct(product));
+ const kind=titleCandidates(officialTitleProduct(product)).kind;
  const scores=new Map(ranking.map(e=>[e.keyword,e.score]));
  const aliases=categoryAliases(product,kind);
  const sex=product.gender;
@@ -177,7 +180,7 @@ export function createExpandedTitleOptimizer(options={}){
  const optimize=createKeywordOptimizer({...options,candidateFactory:expandedTitleCandidates});
  return async(product,credentials)=>{
   const research=researchProvider(product);
-  const normalized={...product,name:smartstoreTitle({...product,smartstoreName:''}),smartstoreName:''};
+  const normalized={...officialTitleProduct(product),name:smartstoreTitle(officialTitleProduct(product))};
   const result=await optimize(normalized,credentials);
   const proposal=composePopularTitle(product,result.ranking);
   return {...proposal,originalTitle:smartstoreTitle(product),hasData:true,researchUsed:research.candidates.length>0,referenceTerms:research.titleTerms,period:result.period,fromCache:result.fromCache,source:'네이버 데이터랩 통합검색어 트렌드 API',metric:'검색 상대지수',expanded:true,categoryAudit:result.categoryAudit,candidates:result.ranking,note:result.categoryAudit.note+' 상품 종류·동의어·성별·실제 특성의 검색 관심도를 공통 기준으로 비교했습니다. 품번·공백 포함 27~39자를 충족하는 상품명만 제안합니다. 길이 보강에도 공식 상품 근거만 사용합니다. 월간 절대 검색량이나 노출 순위를 뜻하지 않습니다.'};

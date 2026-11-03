@@ -196,8 +196,8 @@ export function friendlyBenefitDescription(value){
   if(added)return added[1]+' '+added[2]+(hasFinalConsonant(added[2])?'을':'를')+' 더했어요.';
   if(/(?:편안하게|따뜻하게|포근하게|가볍게|깔끔하게|부드럽게|탄탄하게|유연하게)$/.test(text))return text+' 입어요.';
   if(/가능$/.test(text))return text+'해요.';
-  const action=text.match(/^(.+?)\s*(제공|유지|조절|연출|구현|확보|완성|강화)$/);
-  if(action){const [,subject,verb]=action,object=/(?:으로|로|을|를|게)$/.test(subject)?subject:subject+(hasFinalConsonant(subject)?'을':'를');return object+' '+({제공:'제공해요',유지:'유지해요',조절:'조절할 수 있어요',연출:'연출할 수 있어요',구현:'구현했어요',확보:'확보했어요',완성:'완성해요',강화:'강화했어요'}[verb])+'.';}
+  const action=text.match(/^(.+?)\s*(제공|유지|조절|연출|구현|확보|완성|강화|최소화)$/);
+  if(action){const [,subject,verb]=action,object=/(?:으로|로|을|를|게)$/.test(subject)?subject:subject+(hasFinalConsonant(subject)?'을':'를');return object+' '+({제공:'제공해요',유지:'유지해요',조절:'조절할 수 있어요',연출:'연출할 수 있어요',구현:'구현했어요',확보:'확보했어요',완성:'완성해요',강화:'강화했어요',최소화:'최소화했어요'}[verb])+'.';}
   if(/(?:습니다|니다)$/.test(text))return '';
   return text+(hasFinalConsonant(text)?'이에요.':'예요.');
  };
