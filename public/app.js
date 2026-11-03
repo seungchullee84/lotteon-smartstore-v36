@@ -1,43 +1,4 @@
 let smartstoreListingState=null,tagResearchReady=false;
-// View preferences affect presentation only, including when a product is being edited.
-function initializeViewMode(){
- const key='registrar-view-mode-v1';
- const folds=[
-  {element:document.querySelector('.release-info'),id:'programDetails',label:'버전 · 자동 수집 상태'},
-  {element:document.getElementById('logs'),id:'progressDetails',label:'상세 진행 기록'}
- ];
- function apply(mode){
-  document.body.dataset.view=mode;
-  document.getElementById('minimalView').setAttribute('aria-pressed',String(mode==='minimal'));
-  document.getElementById('classicView').setAttribute('aria-pressed',String(mode==='classic'));
-  for(const {element,id,label} of folds){
-   if(!element)continue;
-   const existing=document.getElementById(id);
-   if(mode==='classic'){
-    if(existing)existing.replaceWith(element);
-   }else if(!existing){
-    const details=document.createElement('details'),summary=document.createElement('summary');
-    details.id=id;details.className='minimal-fold';summary.textContent=label;
-    element.before(details);details.append(summary,element);
-    if(id==='progressDetails'&&element.textContent.trim())details.open=true;
-   }
-  }
-  try{localStorage.setItem(key,mode);}catch{}
-  document.dispatchEvent(new Event('register-view-change'));
- }
- let mode='minimal';
- try{if(localStorage.getItem(key)==='classic')mode='classic';}catch{}
- document.getElementById('minimalView').onclick=()=>apply('minimal');
- document.getElementById('classicView').onclick=()=>apply('classic');
- apply(mode);
- let wasBusy=false;
- document.addEventListener('register-state',({detail})=>{
-  const details=document.getElementById('progressDetails');
-  if(details&&((detail.busy&&!wasBusy)||detail.phase==='error'))details.open=true;
-  wasBusy=!!detail.busy;
- });
-}
-initializeViewMode();
 const activeChannel=()=>document.body.dataset.channel==='smartstore'?'smartstore':'lotte';
 let refreshTimer=null,refreshPending=false,refreshAgain=false,smartstoreDetailTimer,channelViewId=0;
 let websiteSelection=null;
@@ -186,7 +147,7 @@ async function copyProgress(errorOnly=false){
  announce(errorOnly?'오류를 복사했습니다.':'진행 기록과 오류를 복사했습니다.','success');
 }
 $('copyError').onclick=()=>copyProgress(true);
-function syncButtons(){if($('smartstoreDetailOnly')){const active=smartstoreDetailStarting||serverBusy&&serverPhase==='smartstore-detail-only';$('smartstoreDetailOnly').textContent=active?'상세설명 교체 진행 중…':'상세설명만 교체 · 조회/수정';$('smartstoreDetailOnly').setAttribute('aria-busy',String(active));}if($('smartstoreStart'))$('smartstoreStart').textContent=smartstoreStarting?'시작 요청 중…':serverBusy&&serverPhase==='smartstore-auto'?'자동 작업 진행 중…':document.body.dataset.view==='minimal'?'시작 · 전체 입력·업로드':'▶ 시작 · 전체 입력·업로드 (신규 등록 시 사용 · 복사나 수정하기 해놓고 시작)';for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreTemplate1','smartstoreTemplate2','smartstoreOpen','smartstoreOptimizeTitle','naverSettings','browserLoginSettings','smartstoreStart','smartstoreDetailOnly','smartstoreImportPhotos','smartstoreCombinePhotos','photoImportApply','smartstoreAutoTags'])if($(id))$(id).disabled=requestLock||serverBusy||['smartstoreAutoTags'].includes(id)&&!tagResearchReady||['smartstoreDetailOnly','smartstoreTemplate1','smartstoreTemplate2'].includes(id)&&!product;}
+function syncButtons(){if($('smartstoreDetailOnly')){const active=smartstoreDetailStarting||serverBusy&&serverPhase==='smartstore-detail-only';$('smartstoreDetailOnly').textContent=active?'상세설명 교체 진행 중…':'상세설명만 교체 · 조회/수정';$('smartstoreDetailOnly').setAttribute('aria-busy',String(active));}if($('smartstoreStart'))$('smartstoreStart').textContent=smartstoreStarting?'시작 요청 중…':serverBusy&&serverPhase==='smartstore-auto'?'자동 작업 진행 중…':'▶ 시작 · 전체 입력·업로드 (신규 등록 시 사용 · 복사나 수정하기 해놓고 시작)';for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreTemplate1','smartstoreTemplate2','smartstoreOpen','smartstoreOptimizeTitle','naverSettings','browserLoginSettings','smartstoreStart','smartstoreDetailOnly','smartstoreImportPhotos','smartstoreCombinePhotos','photoImportApply','smartstoreAutoTags'])if($(id))$(id).disabled=requestLock||serverBusy||['smartstoreAutoTags'].includes(id)&&!tagResearchReady||['smartstoreDetailOnly','smartstoreTemplate1','smartstoreTemplate2'].includes(id)&&!product;}
 function action(id,fn){$(id).onclick=async()=>{
  const primary=id in buttonLabels;if(primary&&(requestLock||serverBusy))return;
  if(id==='run'&&!$('form').reportValidity())return;
@@ -921,5 +882,3 @@ if($('smartstoreCombinePhotos'))$('smartstoreCombinePhotos').onclick=async()=>{
  catch(error){announce(error.message,'failed');}
  finally{requestLock=false;button.textContent='📁＋🌐 마네킨샷+공홈 조합 (새로 업로드 시 사용)';syncButtons();await refresh();}
 };
-
-document.addEventListener('register-view-change',()=>syncButtons());
