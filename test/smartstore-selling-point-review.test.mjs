@@ -1,12 +1,12 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,readFile,writeFile,mkdir,cp} from 'node:fs/promises';import {createHash} from 'node:crypto';import path from 'node:path';import os from 'node:os';import {reviewSellingPoints,saveOfficialImagePointReview,officialPointSource} from '../smartstore-selling-point-review.mjs';import {assertRequiredSellingPoints} from '../smartstore-selling-points.mjs';
 const product={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=test',name:'공식 의류'};
 
-test('남성 등록에서 바뀐 공식 원본은 분석해 바탕화면에 저장하고 복사본에서도 재사용한다',async()=>{
+for(const [gender,genderFolder] of [['남성','남성용'],['여성','여성용']])test(gender+' 등록에서 바뀐 공식 원본은 분석해 바탕화면에 저장하고 복사본에서도 재사용한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'men-registration-benefits-'));
  try{
   const desktop=path.join(root,'desktop');
   const id='a'.repeat(32);
-  const p={...product,gender:'남성',sourceUrl:product.sourceUrl.replace('test',id),images:{detail:'https://www.giordano.co.kr/detail.jpg'}};
+  const p={...product,gender,sourceUrl:product.sourceUrl.replace('test',id),images:{detail:'https://www.giordano.co.kr/detail.jpg'}};
   const imageText='부드러운 원단으로 편안한 착용감을 제공합니다.';
   let calls=0;
   const options={dataRoot:path.join(root,'local'),desktop,recognize:async()=>{calls++;return imageText;}};
@@ -14,7 +14,7 @@ test('남성 등록에서 바뀐 공식 원본은 분석해 바탕화면에 저�
   for(const content of ['first official image','updated official image']){
    await writeFile(path.join(root,'detail.jpg'),content);
    const source=await officialPointSource(p,root,pageText,options);
-   const record=JSON.parse(await readFile(path.join(desktop,'남성용','registration',id,source.detailHash+'.json'),'utf8'));
+   const record=JSON.parse(await readFile(path.join(desktop,genderFolder,'registration',id,source.detailHash+'.json'),'utf8'));
    assert.equal(record.detailHash,createHash('sha256').update(content).digest('hex'));
    assert.equal(record.pageText,pageText);
    assert.equal(record.imageText,imageText);
@@ -27,7 +27,7 @@ test('남성 등록에서 바뀐 공식 원본은 분석해 바탕화면에 저�
   }
   const changedText='허리 스트링으로 둘레를 조절할 수 있습니다.';
   const updated=await officialPointSource(p,root,changedText,options);
-  const record=JSON.parse(await readFile(path.join(desktop,'남성용','registration',id,updated.detailHash+'.json'),'utf8'));
+  const record=JSON.parse(await readFile(path.join(desktop,genderFolder,'registration',id,updated.detailHash+'.json'),'utf8'));
   assert.equal(record.pageText,changedText);
   assert(!record.points.some(point=>point.evidence.includes(pageText)));
   assert.equal(calls,2);

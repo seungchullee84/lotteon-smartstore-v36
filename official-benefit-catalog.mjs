@@ -14,7 +14,8 @@ export async function catalogImageSource(product,detailHash,{dataRoot=path.join(
  let id;try{id=new URL(product.sourceUrl).searchParams.get('pno');}catch{return null;}
  desktop??=await desktopDirectory().catch(()=>null);
  const local=path.join(dataRoot,'official-benefit-catalog');
- for(const directory of desktop?[path.join(desktop,'남성용'),local]:[local]){
+ const folders=product.gender==='여성'?['여성용','남성용']:['남성용','여성용'];
+ for(const directory of desktop?[...folders.map(name=>path.join(desktop,name)),local]:[local]){
  const files=[...(id&&/^[a-f0-9]{16,64}$/i.test(id)?[
   ...(/^[a-f0-9]{64}$/i.test(detailHash)?[path.join(directory,'registration',id,detailHash+'.json')]:[]),
   path.join(directory,'by-source',id+'.json')
@@ -23,11 +24,12 @@ export async function catalogImageSource(product,detailHash,{dataRoot=path.join(
  }
  return null;
 }
-export async function saveMenRegistrationBenefits(product,{pageText,imageText,detailHash,desktop,signal}){
- if(product.gender!=='남성'||!adultProduct(product)||!/^\d{6}$/.test(product.style)||!sameOfficialProduct(product.sourceUrl,product.sourceUrl))return;
+export async function saveRegistrationBenefits(product,{pageText,imageText,detailHash,desktop,signal}){
+ const genderFolder=({'남성':'남성용','여성':'여성용'})[product.gender];
+ if(!genderFolder||!adultProduct(product)||!/^\d{6}$/.test(product.style)||!sameOfficialProduct(product.sourceUrl,product.sourceUrl))return;
  const id=new URL(product.sourceUrl).searchParams.get('pno');
  if(!/^[a-f0-9]{16,64}$/i.test(id)||!/^[a-f0-9]{64}$/i.test(detailHash)||!imageText?.trim())return;
- const directory=path.join(desktop??await desktopDirectory(),'남성용','registration',id);
+ const directory=path.join(desktop??await desktopDirectory(),genderFolder,'registration',id);
  const file=path.join(directory,detailHash+'.json');
  const points=officialSellingPoints([officialImageBenefitText(imageText),pageText].filter(Boolean).join('\n•\n'));
  const record={

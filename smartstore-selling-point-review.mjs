@@ -1,4 +1,4 @@
-import {catalogImageSource,saveMenRegistrationBenefits} from './official-benefit-catalog.mjs';
+import {catalogImageSource,saveRegistrationBenefits} from './official-benefit-catalog.mjs';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
@@ -16,8 +16,8 @@ export async function officialPointSource(product,folder,pageText,{dataRoot=path
  for(const name of ['selling-point-candidates-reviewed.json','selling-point-image-review.json'])try{const manual=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,name),'utf8'));if(manual.version===1&&manual.style===product.style&&manual.sourceUrl===product.sourceUrl&&manual.detailHash===detailHash&&usableSellingPoints(manual.points,manual.text))return {text:manual.text+'\n•\n'+pageText,imageChecked:true,detailHash,method:'visual-official-detail'};}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
  const saveRegistrationSource=async imageText=>{
   signal?.throwIfAborted();
-  try{await saveMenRegistrationBenefits(product,{pageText,imageText,detailHash,desktop,signal});}
-  catch(error){signal?.throwIfAborted();(log||console.warn)('남성용 소구점 자료 저장 실패: '+error.message);}
+  try{await saveRegistrationBenefits(product,{pageText,imageText,detailHash,desktop,signal});}
+  catch(error){signal?.throwIfAborted();(log||console.warn)('상품 소구점 자료 저장 실패: '+error.message);}
  };
  const catalog=await catalogImageSource(product,detailHash,{dataRoot,desktop});
  if(catalog){
