@@ -1,4 +1,5 @@
 import {startNewListingMonitor} from './homepage-new-list.mjs';
+import {registerCookieName,validRegisterCookie} from './register-session.mjs';
 import {startNewProductResearch} from './new-product-research.mjs';
 import {reusableSmartstoreCollection} from './smartstore-resume-collection.mjs';
 import {smartstorePreparationStatus} from './smartstore-preparation-status.mjs';
@@ -129,8 +130,8 @@ const server=http.createServer(async(req,res)=>{
     if(req.headers.host!==`127.0.0.1:${server.address().port}`){res.writeHead(403);return res.end();}
     const port=server.address().port;
     if(req.method==='POST'&&req.headers.origin!==`http://127.0.0.1:${port}`)return json(res,403,{error:'잘못된 요청 출처'});
-    const cookie=(req.headers.cookie||'').split(';').map(s=>s.trim()).includes('session='+token);
-    if(url.pathname==='/'&&url.searchParams.get('key')===token){res.writeHead(302,{'Set-Cookie':`session=${token}; HttpOnly; SameSite=Strict; Path=/`,'Location':'/'});return res.end();}
+    const cookie=validRegisterCookie(req.headers.cookie,token,port);
+    if(url.pathname==='/'&&url.searchParams.get('key')===token){res.writeHead(302,{'Set-Cookie':`${registerCookieName(port)}=${token}; HttpOnly; SameSite=Strict; Path=/`,'Location':'/'});return res.end();}
     if(!cookie)return json(res,403,{error:'시작 화면의 전용 링크로 접속해 주세요.'});
     if(['GET','HEAD'].includes(req.method)&&url.pathname==='/smartstore-brand-video.mp4')return await serveBrandVideo(req,res,dataRoot,url.searchParams.get('variant')==='women'?{filename:'women.mp4',expectedHash:WOMEN_VIDEO_HASH}:undefined);
     if(req.method==='GET'&&url.pathname==='/api/branding')return json(res,200,await protectedBranding.get());
@@ -627,9 +628,10 @@ const server=http.createServer(async(req,res)=>{
     json(res,404,{error:'없는 경로'});
   }catch(e){json(res,400,{error:e.message});}
 });
-server.listen(desktopSession?.port||0,'127.0.0.1',()=>{
+server.listen(desktopSession?.port||0,'127.0.0.1',async()=>{
   if(state.product?.photoSelectionPending&&state.folder)startPhotoColorDraft(state.product,state.folder);
   const url=`http://127.0.0.1:${server.address().port}/?key=${token}`;
+  await writeFile(path.join(dataRoot,'active-register-session.json'),JSON.stringify({port:server.address().port,token,pid:process.pid,startedAt:new Date().toISOString()})).catch(()=>{});
   console.log('\n지오다노 등록 도우미: '+url+'\n이 창을 닫으면 프로그램이 종료됩니다.');
   if(!desktopSession&&!process.env.NO_AUTO_OPEN){const child=spawn('cmd.exe',['/c','start','',url],{windowsHide:true,stdio:'ignore'});child.on('error',()=>{});}
 });
