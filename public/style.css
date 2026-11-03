@@ -414,3 +414,10 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
  body[data-channel="smartstore"] #smartstorePhotoStep .extra-previews{grid-template-columns:repeat(2,minmax(0,1fr))}
  body[data-channel="smartstore"] #smartstoreSellerStep .workflow-seller-actions>button{width:100%}
 }
+/* Step 5 keeps progress beside the initiating button, including after completion. */
+#smartstoreUploadProgress{margin-top:14px;padding:16px 18px;border:1px solid #b8d8c8;border-radius:10px;background:#f3faf6;color:#214d3b}
+#smartstoreUploadProgress[hidden]{display:none}
+.upload-progress-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.upload-progress-clock{font-variant-numeric:tabular-nums;font-size:14px;white-space:nowrap}
+.upload-progress-message{margin:8px 0 0;font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+#smartstoreUploadProgress[data-status="error"],#smartstoreUploadProgress[data-status="stopped"]{background:#fff7ed;border-color:#e3b883;color:#774219}
