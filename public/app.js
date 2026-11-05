@@ -15,7 +15,7 @@ function renderWebsiteUpdates(website,onDemand=false,folderResearch){
  summary.classList.toggle('has-updates',events.some(event=>event.type==='new'||event.type==='changed'));
  summary.replaceChildren(document.createTextNode('홈페이지 오늘 누적 '+daily.day.slice(5).replace('-','.')+' · '));
  for(const [type,label,count] of [['new','신상품',daily.newCount],['changed','변경',daily.changedCount],['discovered','기존·미확인',daily.discoveredCount]]){
-  const button=document.createElement('button');button.type='button';button.id=type==='new'?'websiteNewToggle':'websiteChangedToggle';button.className='website-category-toggle';button.setAttribute('aria-pressed',String(websiteSelection===type));button.textContent=label+' '+count+'건';button.onclick=()=>{websiteSelection=websiteSelection===type?null:type;delete list.dataset.stamp;renderWebsiteUpdates(website,onDemand,folderResearch);};summary.append(button,document.createTextNode(' '));
+  const button=document.createElement('button');button.type='button';button.id={new:'websiteNewToggle',changed:'websiteChangedToggle',discovered:'websiteDiscoveredToggle'}[type];button.className='website-category-toggle';button.setAttribute('aria-pressed',String(websiteSelection===type));button.textContent=label+' '+count+'건';button.onclick=()=>{websiteSelection=websiteSelection===type?null:type;delete list.dataset.stamp;renderWebsiteUpdates(website,onDemand,folderResearch);};summary.append(button,document.createTextNode(' '));
  }
  summary.append(document.createTextNode(' · 마지막 확인 '+time(website.checkedAt)+' (한국 시간) · '+(website.intervalMinutes||20)+'분 간격'));list.hidden=!websiteSelection;
  list.replaceChildren();
@@ -205,7 +205,7 @@ async function fillMissingLotteCategory(){
  $('lotteCategorySuggestionStatus').textContent=result.message;
 }
 $('lotteCategorySuggest').onclick=async()=>{try{await fillMissingLotteCategory();}catch(error){$('lotteCategorySuggestionStatus').textContent=error.message;}};
-function populate(p){p.country=['대한민국','한국','중국','베트남','방글라데시','미얀마','인도네시아','캄보디아','인도','태국','필리핀','파키스탄','스리랑카','말레이시아','일본','이탈리아','포르투갈','튀르키예','터키','미국','프랑스','대만','네팔','라오스'].includes(p.country)?p.country:'';product=p;const form=$('form');for(const key of ['name','gender','consumerPrice','material','country','washing','manufactured','keywords','templateHeadline'])form.elements[key].value=p[key]||'';form.elements.colors.value=p.colors.join(',');form.elements.sizes.value=p.sizes.join(',');for(const key of ['commonMiddle','commonSmall','channelMiddle','channelSmall'])form.elements[key].value=p.category[key]||'';$('source').textContent='품번 '+p.style+' · '+p.rawName.replace(/\[[^\]]*\]/g,'').replace(/변우석|문가영|박현지/g,'').trim();$('warnings').textContent=(p.fieldStatus?Object.entries(p.fieldStatus).map(([k,v])=>({material:'소재',washing:'세탁방법',category:'상품분류'}[k]||k)+': '+v).join(' / ')+' — ':'')+p.warnings.join(' ');for(const k of ['material','washing'])form.elements[k].placeholder='확인 필요 — 공식 고시 원본과 대조';$('ocr').textContent=p.ocrText;$('info').src='/image/info?t='+Date.now();if(activeChannel()==='lotte'){$('main').src='/image/main?t='+Date.now();renderExtraImages(p,true);}$('review').hidden=false;syncNoticeCopy();}
+function populate(p){p.country=['대한민국','한국','중국','베트남','방글라데시','미얀마','인도네시아','캄보디아','인도','태국','필리핀','파키스탄','스리랑카','말레이시아','일본','이탈리아','포르투갈','튀르키예','터키','미국','프랑스','대만','네팔','라오스'].includes(p.country)?p.country:'';product=p;const form=$('form');for(const key of ['name','gender','consumerPrice','material','country','washing','manufactured','keywords','templateHeadline'])form.elements[key].value=p[key]||'';form.elements.colors.value=p.colors.join(',');form.elements.sizes.value=p.sizes.join(',');for(const key of ['commonMiddle','commonSmall','channelMiddle','channelSmall'])form.elements[key].value=p.category[key]||'';$('source').textContent='품번 '+p.style+' · '+p.rawName.replace(/\[[^\]]*\]/g,'').replace(/변우석|문가영|박현지/g,'').trim();$('warnings').textContent=(p.fieldStatus?Object.entries(p.fieldStatus).map(([k,v])=>({material:'소재',country:'제조국',washing:'세탁방법',category:'상품분류'}[k]||k)+': '+v).join(' / ')+' — ':'')+p.warnings.join(' ');for(const k of ['material','washing'])form.elements[k].placeholder='확인 필요 — 공식 고시 원본과 대조';$('ocr').textContent=p.ocrText;$('info').src='/image/info?t='+Date.now();if(activeChannel()==='lotte'){$('main').src='/image/main?t='+Date.now();renderExtraImages(p,true);}$('review').hidden=false;syncNoticeCopy();}
 const renderProduct=populate;
 function renderWashingIcons(p){
  const list=$('washingIconList');list.replaceChildren();
@@ -374,7 +374,7 @@ function updateCollectionStatus(s){
  if(s.phase==='collect'&&s.busy){badge.hidden=false;badge.className='collect-pending';badge.textContent='정보 수집 중… 잠시 기다려 주세요.';return;}
  if(s.phase==='error'){badge.hidden=false;badge.className='collect-failed';badge.textContent=s.product?'작업 확인 필요 · 기존 수집정보는 유지됩니다. 진행 기록을 확인해 주세요.':'정보 수집을 완료하지 못했습니다. 진행 기록을 확인해 주세요.';return;}
  if(activeChannel()==='smartstore'&&s.product?.smartstoreDetail?.pendingPhotoCount){badge.hidden=false;badge.className='collect-pending';badge.textContent='품번 '+s.product.style+' · 사진 '+s.product.smartstoreDetail.pendingPhotoCount+'장 색상 연결 확인 필요';return;}
- if(s.product){badge.hidden=false;badge.className='collect-complete';badge.textContent='✓ 정보 수집 완료 · 품번 '+s.product.style+' · 아래 내용을 검토해 주세요.';return;}
+ if(s.product){badge.hidden=false;badge.className='collect-complete';badge.textContent='✓ 수집 완료 · '+s.product.style;return;}
  badge.hidden=true;badge.textContent='';
 }
 
@@ -545,7 +545,8 @@ async function optimizeSmartstoreTitle({remember=false}={}){
    if(stale){$('naverTitleResult').textContent='조회 중 상품명이 바뀌어 제안값을 적용하지 않았습니다. 다시 조회해 주세요.';return;}
    if(result.hasData||result.researchUsed){current.smartstoreNameUserEdited=false;current.smartstoreName=result.title;field.value=result.title;$('smartstoreNameStatus').textContent=smartstoreTitleStatus(field.value,result.hasData?'네이버 검색 관심도 비교':'연결 자료·공식 상품 근거 참고');}
    if(remember&&(result.hasData||result.researchUsed))rememberProductField('smartstoreName',field.value);
-   $('naverTitleResult').textContent=result.period?result.source+' · '+result.period.startDate+' ~ '+result.period.endDate+(result.fromCache?' · 최근 조회 재사용':'')+' · '+(result.expanded?'인기 검색어 '+result.candidates.length+'개 비교 · '+result.length+'자':result.hasData?'성별 표현 비교 '+result.comparedDays+'일 / 특성 순서 비교 '+result.featureComparedDays+'일':'조회 자료가 없어 기존 상품명 유지')+' · '+result.note:result.source+' · '+result.note+' 참고 표현: '+(result.referenceTerms||[]).join(', ');
+   $('naverTitleDetail').textContent=result.period?result.source+' · '+result.period.startDate+' ~ '+result.period.endDate+(result.fromCache?' · 최근 조회 재사용':'')+' · '+(result.expanded?'인기 검색어 '+result.candidates.length+'개 비교 · '+result.length+'자':result.hasData?'성별 표현 비교 '+result.comparedDays+'일 / 특성 순서 비교 '+result.featureComparedDays+'일':'조회 자료가 없어 기존 상품명 유지')+' · '+result.note:result.source+' · '+result.note+' 참고 표현: '+(result.referenceTerms||[]).join(', ');
+   $('naverTitleResult').textContent=result.period?result.period.startDate+' ~ '+result.period.endDate+' · 후보 '+result.candidates.length+'개 비교':result.source;
    for(const entry of result.candidates){const li=document.createElement('li');li.textContent=entry.keyword+': '+(result.expanded?'비교 기준 대비 검색 관심도 '+entry.score.toFixed(3):entry.mean===null?'자료 없음':'반환된 일별 상대지수 평균 '+entry.mean.toFixed(2)+' · '+entry.pointCount+'일');$('naverTitleCandidates').append(li);}
    $('error').textContent='';
  }catch(e){$('naverTitleResult').textContent='네이버 조회 실패 · 기존 상품명 유지 · '+e.message;}
@@ -591,7 +592,7 @@ const beforeSmartstorePopulate=populate;populate=function(p){
 function populateSmartstoreFields(p){$('smartstorePrice').value=p.consumerPrice||'';
  $('smartstoreName').value=p.smartstoreName||'';
  if(p.smartstoreNameUserEdited)$('smartstoreNameStatus').textContent=[...$('smartstoreName').value].length+'자 · 수정한 상품명 그대로 사용';
- $('naverTitleResult').textContent='네이버 데이터 조회 전';$('naverTitleCandidates').replaceChildren();
+ $('naverTitleResult').textContent='네이버 데이터 조회 전';$('naverTitleDetail').textContent='';$('naverTitleCandidates').replaceChildren();
  arrangeSmartstoreTitle().then(autoOptimizeSmartstoreTitle).catch(e=>{$('smartstoreNameStatus').textContent=e.message;});
 };
 
@@ -645,7 +646,7 @@ function renderExtraImages(p,refresh=false){
  if(activeChannel()!=='lotte')return;
  $('extraImages').hidden=false;
  const count=['extra1','extra2'].filter(k=>p.images[k]).length;
- $('extraImageStatus').textContent=count?'추가이미지 '+count+'장 · × 버튼으로 제외할 수 있습니다.':'사용할 추가이미지가 없습니다. 대표이미지만 업로드합니다.';
+ $('extraImageStatus').textContent=count?'추가이미지 '+count+'장':'추가이미지가 없습니다.';
  for(const key of ['extra1','extra2']){
   const present=!!p.images[key],number=key==='extra1'?'1':'2';
   $(key+'Card').hidden=!present;$(key).hidden=!present;$('saveExtra'+number).hidden=!present;
@@ -719,7 +720,7 @@ function syncListingImages(state){
  const custom=$('smartstoreListingExtras'),original=$('originalExtraPreviews');
  const listing=state.smartstoreListing,smart=document.body.dataset.channel==='smartstore';
  const note=$('mainSourceNote');if(!note.dataset.original)note.dataset.original=note.textContent;
- note.textContent=smart?(listing?'대표사진: '+listing.sourceNames[0]+' · '+listing.mainColor+' · 현재 품번 폴더 원본 그대로 · 크기·비율·용량 변경 없음':'바탕화면 상품등록기사진폴더의 해당 품번 폴더에 1.jpg 또는 1번.jpg를 넣어 주세요.'):note.dataset.original;
+ note.textContent=smart?(listing?listing.sourceNames[0]+' · '+listing.mainColor:'사진 색상·구도 수정에서 대표사진을 선택해 주세요.'):note.dataset.original;
  $('main').hidden=smart&&!listing;
  $('colorChipStatus').hidden=smart;$('extendBackground').hidden=smart;
  $('downloadMain1500').textContent=smart?'대표이미지 원본 저장':'대표이미지 1500×1500 저장';
@@ -738,7 +739,7 @@ function syncListingImages(state){
   custom.dataset.stamp=stamp;custom.replaceChildren();
   listing.extraColors.forEach((color,i)=>{const card=document.createElement('div');card.className='extra-image-card';const img=document.createElement('img');img.src=base+'extra-'+i+query;const official=listing.extraRoles?.[i]==='official-main',angle=official||listing.extraRoles?.[i]==='provided'?'':listing.extraRoles?.[i]==='alternate'?'다른 구도':color===listing.mainColor?'옆면':'정면';img.alt=color+(angle?' '+angle:'');const name=document.createElement('p');name.textContent=official?'공식몰 대표사진 · 추가 1':color+(angle?' · '+angle:'');const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent=official?'공식몰 원본 저장':'원본 저장';button.onclick=()=>saveSelectedImage('extra-'+i,button);card.append(img,name,button);custom.append(card);});
  }
- $('extraImageStatus').textContent=listing.previewOnly?'폴더 1번 사진을 표시 중입니다. 정보 수집 또는 시작을 누르면 폴더 사진을 추가·상세에 연결합니다.':'대표: '+listing.mainColor+' (선택한 대표사진) · 추가 '+listing.extraColors.length+'장 · '+(listing.extraRoles?.[0]==='official-main'?'공식몰 대표사진을 첫 번째로 · ':'')+(listing.extraRoles?.includes('provided')?'품번 폴더의 제공 사진':'옆면 또는 다른 구도 + 다른 색상 정면');
+ $('extraImageStatus').textContent=listing.previewOnly?'사진을 선택·반영하면 추가이미지가 표시됩니다.':'추가이미지 '+listing.extraColors.length+'장';
  $('extraImages').hidden=false;
 }
 
@@ -811,9 +812,7 @@ populate=function(p){
  highlightReviewFields();syncNoticeCopy();renderDetailPreview(reviewed);
 };
 
-// Current product links and secure, optional photo-analysis setup.
-const officialProductLink=document.createElement('a');officialProductLink.id='officialProductLink';officialProductLink.className='official-product-link';officialProductLink.target='_blank';officialProductLink.rel='noopener noreferrer';officialProductLink.href='https://www.giordano.co.kr/';officialProductLink.title='지오다노 공식 상품페이지 열기';officialProductLink.setAttribute('aria-label','지오다노 공식 상품페이지 열기');
-officialProductLink.innerHTML='<img src="/giordano-official-logo.png" alt="GIORDANO"><span>공식몰 ↗</span>';$('smartstoreOptimizeTitle').insertAdjacentElement('afterend',officialProductLink);
+// Secure, optional photo-analysis setup.
 const photoSettingsButton=document.createElement('button');photoSettingsButton.id='photoAnalysisSettingsButton';photoSettingsButton.type='button';photoSettingsButton.className='secondary';photoSettingsButton.textContent='사진 자동분석 연결';$('naverConnectionMenu').querySelector('.bar').append(photoSettingsButton);
 const photoDialog=document.createElement('dialog');photoDialog.id='photoAnalysisDialog';photoDialog.innerHTML='<form id="photoAnalysisForm"><h3>사진 자동분석 연결</h3><p>새 품번의 사진을 공식 정보와 대조해 색상·각도·케어라벨을 자동 분류합니다.</p><label>OpenAI API 키<input id="photoAnalysisKey" type="password" autocomplete="off" spellcheck="false" required></label><small>키는 이 PC의 Windows 사용자 암호화로 보관하며 채팅이나 GitHub에 올리지 않습니다.</small><p id="photoAnalysisMessage" role="status"></p><div class="bar"><button type="submit">암호화 저장</button><button id="closePhotoAnalysis" class="secondary" type="button">닫기</button></div></form>';document.body.append(photoDialog);
 photoSettingsButton.onclick=()=>{$('photoAnalysisForm').reset();$('photoAnalysisMessage').textContent=photoAnalysisConfigured?'연결키가 저장돼 있습니다. 실제 사진분석은 시작 버튼을 누를 때 실행합니다.':'한 번 연결하면 새 품번도 시작 버튼에서 사진을 자동 분류합니다.';photoDialog.showModal();};
@@ -847,8 +846,6 @@ async function removeRecommendedTag(tag,button){
 function syncEnhancedFeatures(state){
  if(activeChannel()!=='smartstore')return;
  photoAnalysisConfigured=!!state.backgroundConfigured;const p=state.product;if(!p)return;
- try{const url=new URL(p.sourceUrl);officialProductLink.href=url.origin==='https://www.giordano.co.kr'?url.href:'https://www.giordano.co.kr/';}catch{officialProductLink.href='https://www.giordano.co.kr/';}
- officialProductLink.title=p.style+' 지오다노 공식 상품페이지 열기';
  const status=state.photoPreparation?.style===p.style?state.photoPreparation:null;
  photoPreparationStatus.textContent=status?.message||state.smartstoreListing?.photoReview?.message|| (status?.status==='ready'?'사진 연결 확인 · 대표 1장 · 추가 '+status.extraCount+'장 · 상세사진 '+status.detailCount+'장':status?.status==='preparing'?'품번 폴더 사진을 추가이미지·상세 미리보기에 연결 중…':status?.message||(!state.smartstoreListing?'현재 품번 폴더의 사진을 확인해 주세요.':state.smartstoreListing.previewOnly?'대표사진만 우선 표시 중 · 정보 수집 또는 시작을 누르면 추가·상세사진을 연결합니다.':'품번 폴더 사진을 추가이미지·상세 미리보기에 연결했습니다.'));
  if(manualTagStyle!==p.style){manualTagStyle=p.style;manualTagHasSelection=!!state.tagResearch?.manual;manualTagChoices=new Map((state.tagResearch?.manualTags||[]).map(t=>[t.id,t]));let saved;try{saved=JSON.parse(localStorage.getItem('smartstore-tags.v1.'+p.style));}catch{}if(saved?.sourceUrl===p.sourceUrl&&Array.isArray(saved.tags)&&saved.tags.length<=10){manualTagHasSelection=true;manualTagChoices=new Map(saved.tags.map(t=>[t.id,t]));}$('manualTagSaveStatus').textContent=manualTagHasSelection?'선택한 태그를 등록기에 적용했습니다. 네이버 입력은 태그 자동입력 또는 시작을 누르세요.':'';$('manualTagResults').replaceChildren();tagPicker.hidden=!manualTagHasSelection;drawManualTagChoices();}
@@ -933,33 +930,31 @@ if($('smartstoreCombinePhotos'))$('smartstoreCombinePhotos').onclick=async()=>{
  const heading=document.createElement('strong');heading.textContent='신규 상품 준비';
  const list=document.createElement('ol');
  steps.forEach(([id,label],index)=>{const li=document.createElement('li'),link=document.createElement('a'),number=document.createElement('span');link.href='#'+id;number.textContent=String(index+1);link.append(number,document.createTextNode(label));link.addEventListener('click',event=>{event.preventDefault();el(id)?.scrollIntoView({block:'start',behavior:'auto'});});li.append(link);list.append(li);});
- const help=document.createElement('p');help.textContent='1번부터 차례로 확인하세요. 단계 이름을 누르면 해당 위치로 이동합니다.';
- nav.append(heading,list,help);main.prepend(nav);
+ nav.append(heading,list);main.prepend(nav);
  const section=(id,step,title,note)=>{
   const box=document.createElement('section');box.id=id;box.className='card smartstore-workflow-step';box.dataset.channelOnly='smartstore';
   const h=document.createElement('h2');h.dataset.step=step;h.textContent=title;box.append(h);
   if(note){const p=document.createElement('p');p.className='workflow-step-note';p.textContent=note;box.append(p);}
   return box;
  };
- const photo=section('smartstorePhotoStep','02','사진 확인','대표·추가사진을 확인하고, 사진 색상·구도 수정에서 컬러별 사진을 연결하세요.');
+ const photo=section('smartstorePhotoStep','02','사진 확인','');
  const photoContent=document.createElement('div');photoContent.className='workflow-photo-content workflow-product-content';photo.append(photoContent);
- const reviewStep=section('smartstoreReviewStep','03','등록 내용 검토','상품명·소구점·색상·사이즈와 상세 미리보기를 확인하세요.');
+ const reviewStep=section('smartstoreReviewStep','03','등록 내용 검토','');
  // The original review heading is reused below, so keep only one section heading.
  reviewStep.querySelector('h2').remove();
  const reviewContent=document.createElement('div');reviewContent.className='workflow-review-content workflow-product-content';reviewStep.append(reviewContent);
- const seller=section('smartstoreSellerStep','04','판매자 화면 준비','스마트스토어에 로그인한 뒤, 사용할 상품의 복사등록 화면을 하나 열어 주세요. 시작할 때 대상 화면을 다시 확인합니다.');
+ const seller=section('smartstoreSellerStep','04','판매자 화면 준비','로그인 후 사용할 수정·복사등록 화면을 하나 열어 주세요.');
  const sellerActions=document.createElement('div');sellerActions.className='bar workflow-seller-actions';seller.append(sellerActions);
  const uploadTitle=document.createElement('h2');uploadTitle.id='smartstoreUploadStep';uploadTitle.dataset.channelOnly='smartstore';uploadTitle.dataset.step='05';uploadTitle.textContent='입력·업로드 시작';
  const extras=document.createElement('details');extras.id='smartstoreExtraTools';extras.className='card';extras.dataset.channelOnly='smartstore';
  const summary=document.createElement('summary');summary.textContent='기존 상품 수정 · 추가 기능';
- const extraNote=document.createElement('p');extraNote.className='workflow-step-note';extraNote.textContent='필요한 기능만 따로 실행할 때 사용하세요. 상세설명만 교체는 조회/수정 화면에서 진행합니다.';
- const extraActions=document.createElement('div');extraActions.className='workflow-extra-actions';extras.append(summary,extraNote,extraActions);
+ const extraActions=document.createElement('div');extraActions.className='workflow-extra-actions';extras.append(summary,extraActions);
  const placeholders=[];
  function move(node,target){if(!node)return;const marker=document.createComment('workflow original position');node.before(marker);placeholders.push({node,marker});target.append(node);}
  const waiting=(box,text)=>{const p=document.createElement('p');p.className='workflow-waiting';p.textContent=text;box.append(p);};
- waiting(photo,'상품을 수집하면 현재 품번의 사진을 확인할 수 있습니다.');
- waiting(reviewStep,'상품을 수집하면 등록 내용과 상세 미리보기가 표시됩니다.');
- const uploadWaiting=document.createElement('p');uploadWaiting.className='workflow-waiting';uploadWaiting.dataset.channelOnly='smartstore';uploadWaiting.textContent='상품 수집과 사진·내용 검토를 마친 뒤 시작하세요.';
+ waiting(photo,'상품 수집 후 사진이 표시됩니다.');
+ waiting(reviewStep,'상품 수집 후 입력란이 표시됩니다.');
+ const uploadWaiting=document.createElement('p');uploadWaiting.className='workflow-waiting';uploadWaiting.dataset.channelOnly='smartstore';uploadWaiting.textContent='상품 수집 후 시작할 수 있습니다.';
  let active=false,reviewWasHidden=review.hidden;
  function updateReady(state){
   document.body.dataset.workflowReady=String(!!state?.productStyle);
@@ -979,7 +974,7 @@ if($('smartstoreCombinePhotos'))$('smartstoreCombinePhotos').onclick=async()=>{
    review.append(extras);
    for(const id of ['smartstoreImportPhotos','smartstoreCombinePhotos','smartstoreDetailOnly','detailOnlyCompletion','smartstoreAutoTags'])move(el(id),extraActions);
    move(el('twoChoicePanel'),extras);
-   collectionTitle.textContent='상품 수집';collectionNote.textContent='품번을 입력해 공식몰 상품정보와 이미지를 가져오세요.';
+   collectionTitle.textContent='상품 수집';collectionNote.textContent='품번으로 상품을 불러오세요.';
    reviewTitle.textContent='등록 내용 검토';reviewTitle.dataset.step='03';progressTitle.removeAttribute('data-step');
    el('smartstoreOpen').textContent='스마트스토어 로그인 창 열기';
   }else{

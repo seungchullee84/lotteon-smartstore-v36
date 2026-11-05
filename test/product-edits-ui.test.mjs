@@ -6,15 +6,16 @@ import os from 'node:os';
 import path from 'node:path';
 import {chromium} from 'playwright';
 import {createProductEditStore} from '../product-edits.mjs';
+import {startSmartstoreProgress,finishSmartstoreProgress} from '../smartstore-job-progress.mjs';
 
 test('직접 수정 → 같은 품번 재수집 → 새로고침 → 시작에서 유지하고 다른 품번에 넘기지 않는다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'register-product-edits-ui-')),store=createProductEditStore(root);
  const base=style=>({style,sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno='+style,rawName:'공식 맨투맨',name:'남성 공식 맨투맨 '+style,gender:'남성',consumerPrice:32800,colors:['01틸그린'],sizes:['M','L'],material:'면 60%',country:'베트남',washing:'공식 손세탁',manufactured:'2026-09',keywords:'지오다노,공식키워드',images:{main:'official-main.jpg',detail:'official-detail.jpg'},category:{},warnings:[]});
- let current=base('026981'),revision=1,collections=0,startRequest,serverError=null;
+ let current=base('026981'),revision=1,collections=0,startRequest,serverError=null,autoProgress=null;
  const reply=(res,data,status=200)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data));};
  const server=http.createServer(async(req,res)=>{try{
   const url=new URL(req.url,'http://localhost');
-  if(url.pathname==='/api/state')return reply(res,{busy:false,phase:'done',logs:[],revision,error:serverError,product:current});
+  if(url.pathname==='/api/state')return reply(res,{busy:false,phase:'done',logs:[],revision,error:serverError,product:current,autoProgress});
   if(url.pathname==='/api/naver-status')return reply(res,{configured:false,researchConfigured:false});
   if(url.pathname==='/api/branding')return reply(res,{visible:false});
   if(req.method==='POST'){
@@ -24,7 +25,7 @@ test('직접 수정 → 같은 품번 재수집 → 새로고침 → 시작에�
     if(body.edits)await store.save(body.edits,current.style);
     current=await store.apply({...base(body.style),keywords:'지오다노,새 공식키워드',images:{main:'new-main-'+(++collections)+'.jpg',detail:'new-detail.jpg'}});revision++;return reply(res,{ok:true},202);
    }
-   if(url.pathname==='/api/smartstore-auto'){startRequest=body;if(body.edits)await store.save(body.edits,current.style);return reply(res,{ok:true},202);}
+   if(url.pathname==='/api/smartstore-auto'){startRequest=body;if(body.edits)await store.save(body.edits,current.style);autoProgress=startSmartstoreProgress();finishSmartstoreProgress(autoProgress,'done');return reply(res,{ok:true},202);}
    if(url.pathname==='/api/naver-keywords')return reply(res,{error:'비교 자료 없음'},503);
   }
   const files={'/':'public/index.html','/smartstore-template-headline.js':'public/smartstore-template-headline.js','/detail-preview.js':'public/detail-preview.js','/app.js':'public/app.js','/style.css':'public/style.css','/smartstore-title.mjs':'smartstore-title.mjs'};

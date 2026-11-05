@@ -43,4 +43,10 @@ test('기모 데님은 기모팬츠 대신 청바지의 실제 핏 경로를 우
 
 test('여성 기모 테리 조거는 트레이닝복과 실제 트레이닝하의로 연결',()=>{const r=resolveCatalogCategory({gender:'여성',name:'여성 기모 테리 조거 바지 416970',sourceCategory:['WOMEN','PANTS','트레이닝/스웻팬츠'],category:{channelMiddle:'바지/레깅스',channelSmall:'기모팬츠'}},catalog,common);assert.equal(r.category.channelMiddle,'트레이닝복');assert.equal(r.category.channelSmall,'트레이닝하의');assert.equal(r.category.channelCodes.small,'BC34140300');});
 
-test('남성 기모 트레이닝은 트레이닝 매칭보다 사용자 확인 기모팬츠 경로를 우선한다',()=>{const r=resolveCatalogCategory({gender:'남성',rawName:'브러시드 테리 스웻 팬츠',sourceCategory:['MEN','PANTS','트레이닝/스웻팬츠'],category:{channelMiddle:'트레이닝복',channelSmall:'트레이닝하의'}},catalog,common);assert.equal(r.category.channelMiddle,'바지');assert.equal(r.category.channelSmall,'기모팬츠');assert.equal(r.path.small.code,'BC31050100');});
+test('남성 트레이닝 전 상품은 사용자 확인 공통·채널 분류를 함께 사용한다',()=>{
+ for(const rawName of ['브러시드 테리 스웻 팬츠','플리스 스웻 팬츠','무기모 트레이닝 바지','테리 조거 팬츠']){
+  const r=resolveCatalogCategory({gender:'남성',rawName,sourceCategory:['MEN','PANTS','트레이닝/스웻팬츠'],category:{channelMiddle:'트레이닝복',channelSmall:'트레이닝하의'}},catalog,common);
+  assert.equal(r.category.commonMajor,'L0014 : 남성의류');assert.equal(r.category.commonMiddle,'M0297 : 남성의류하의');assert.equal(r.category.commonSmall,'00683 : 남성캐주얼바지');
+  assert.equal(r.category.channelMiddle,'바지');assert.equal(r.category.channelSmall,'기모팬츠');assert.equal(r.path.small.code,'BC31050100');
+ }
+});

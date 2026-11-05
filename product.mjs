@@ -1,6 +1,6 @@
 import {desktopOfficialUrl} from './desktop-official-research.mjs';
 import {resolveCatalogCategory} from './category-catalog.mjs';
-import {isMensUnderwear,MENS_UNDERWEAR_CATEGORY,brushedTrainingCategory} from './category.mjs';
+import {isMensUnderwear,MENS_UNDERWEAR_CATEGORY,mensTrainingCategory} from './category.mjs';
 import {officialColorChips,collectColorChips} from './color-chips.mjs';
 import {prepareMainImage} from './main-image.mjs';
 import {normalizeCountry} from './country.mjs';
@@ -50,11 +50,11 @@ export async function findAdultProductUrl(links,style,readCandidate,cancelled=()
 export function productClassification(html) {
   const $=cheerio.load(html);
   // Only the product breadcrumb is authoritative. Global menus contain both sexes.
-  const majors=$('.navi a.prdpath1').map((_,e)=>$(e).text().trim().toUpperCase()).get();
-  const unique=[...new Set(majors)];
-  const gender=unique.length===1?({WOMEN:'여성',MEN:'남성'}[unique[0]]||''):'';
   const nav=$('.navi').filter((_,el)=>$(el).find('a.prdpath1').length>0).first();
+  const majors=nav.find('a.prdpath1').map((_,e)=>$(e).text().trim()).get();
   const sourceCategory=nav.find('a').map((_,e)=>$(e).text().trim()).get().slice(1,-1);
+  const genders=[...new Set([...majors,...sourceCategory].map(label=>({MEN:'남성',WOMEN:'여성',남성:'남성',여성:'여성'}[label.toUpperCase()])).filter(Boolean))];
+  const gender=genders.length===1?genders[0]:'';
   const category={commonMiddle:'',commonSmall:'',channelMiddle:'',channelSmall:''};
   const itemTitle=(nav.find('a').last().text()||$('title').text()).replace(/트리코트/g,'');
   if(gender&&/벨트/.test(itemTitle))Object.assign(category,{commonMajor:'L0022 : 가방/피혁잡화',commonMiddle:'M0307 : 벨트',commonSmall:gender==='남성'?'01033 : 남성벨트':'01032 : 여성벨트',channelMajor:'브랜드가방',channelMiddle:'벨트',channelSmall:gender+'벨트'});
@@ -102,7 +102,7 @@ export function productClassification(html) {
   // 2026-10-26 partner portal popup: filtered lookup returns 2076 머플러 / N.
   // This is the common classification, not the separate LotteON display tree.
   if(/머플러|\bMUFFLER\b/i.test(itemTitle))Object.assign(category,{commonMajor:'L0001 : 패션/장신',commonMiddle:'M0357 : 패션액세서리',commonSmall:'01068 : 머플러'});
-  const brushed=brushedTrainingCategory({gender,sourceCategory,rawName:itemTitle,category});if(brushed)Object.assign(category,brushed);
+  const trainingCategory=mensTrainingCategory({gender,sourceCategory,rawName:itemTitle,category});if(trainingCategory)Object.assign(category,trainingCategory);
   return {gender,sourceCategory,category};
 }
 export function validateStyle(value) {
@@ -113,7 +113,9 @@ export function repairCategoryFields(product){
   if(!product.category||!product.sourceCategory?.length)return;
   const escape=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const links=product.sourceCategory.map((s,i)=>'<a'+(i===0?' class="prdpath1"':'')+'>'+escape(s)+'</a>').join('');
-  const suggested=productClassification('<div class="navi"><a>Home</a>'+links+'<a>'+escape(product.rawName||product.name)+'</a></div>').category;
+  const classification=productClassification('<div class="navi"><a>Home</a>'+links+'<a>'+escape(product.rawName||product.name)+'</a></div>');
+  if(!product.gender&&classification.gender)product.gender=classification.gender;
+  const suggested=classification.category;
   if(suggested.commonMajor&&/벨트/.test(product.rawName||product.name)){
     for(const field of ['commonMajor','commonMiddle','commonSmall'])product.category[field]=suggested[field];
     Object.assign(product.category,{channelMajor:'브랜드가방',channelMiddle:'벨트',channelSmall:product.gender+'벨트'});

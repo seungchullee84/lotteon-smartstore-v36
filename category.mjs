@@ -1,8 +1,14 @@
 export const MENS_UNDERWEAR_CATEGORY=Object.freeze({commonMajor:'L0014 : 남성의류',commonMiddle:'M0059 : 남성속옷',commonSmall:'00715 : 남성내의',channelMajor:'남성의류',channelMiddle:'남성속옷',channelSmall:'남성내의',channelDetail:''});
-export function brushedTrainingCategory(product){
+export function mensTrainingCategory(product){
  const text=[product.rawName||product.name,...(product.sourceCategory||[])].join(' ').replace(/\s/g,'');
- if(product.gender!=='남성'||!/바지|팬츠|PANTS/i.test(text)||!/트레이닝|스웻|스웨트|조거/.test(text)||/데님|청바지|무기모|비기모|노기모|기모(?:가|는|이)?없|기모아닌|기모미사용/i.test(text)||!/기모|브러시드|브러쉬드|brushed/i.test(text))return null;
- return {...product.category,channelMajor:'브랜드남성의류',channelMiddle:'바지',channelSmall:'기모팬츠',channelDetail:'',channelCodes:{major:'BC31000000',middle:'BC31050000',small:'BC31050100',detail:''}};
+ if(product.gender!=='남성'||!/바지|팬츠|PANTS/i.test(text)||!/트레이닝|스웻|스웨트|조거/.test(text)||/데님|청바지/i.test(text))return null;
+ return {...product.category,commonMajor:'L0014 : 남성의류',commonMiddle:'M0297 : 남성의류하의',commonSmall:'00683 : 남성캐주얼바지',channelMajor:'브랜드남성의류',channelMiddle:'바지',channelSmall:'기모팬츠',channelDetail:'',channelCodes:{major:'BC31000000',middle:'BC31050000',small:'BC31050100',detail:''}};
+}
+export function brushedTrainingCategory(product){
+ const category=mensTrainingCategory(product);
+ const text=[product.rawName||product.name,...(product.sourceCategory||[])].join(' ').replace(/\s/g,'');
+ if(!category||/무기모|비기모|노기모|기모(?:가|는|이)?없|기모아닌|기모미사용/i.test(text)||!/기모|브러시드|브러쉬드|brushed/i.test(text))return null;
+ return category;
 }
 export function isMensUnderwear(product){
  const title=product.rawName||product.name||'';

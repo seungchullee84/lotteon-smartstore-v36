@@ -76,7 +76,8 @@ export async function openSmartstoreEditor(page,{check=()=>{}}={}){
  const [editor]=await Promise.all([page.waitForEvent('popup',{timeout:45000}),input.click({timeout:30000})]);
  await editor.bringToFront();return editor;
 }
-export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,partsCacheRoot,log=()=>{},videoOptions,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop}={}){
+export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,partsCacheRoot,log=()=>{},videoOptions,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,signal}={}){
+ signal?.throwIfAborted();
  const video=includeVideo?await requireBrandVideo(dataRoot,videoOptions):null;
  const meta=await sharp(png,{limitInputPixels:false}).metadata();
  const brand=videoAfterTop===undefined&&brandIntroHeight===undefined?await sharp(brandFile).metadata():null;const firstHeight=videoAfterTop??(brandIntroHeight??Math.round(meta.width*brand.height/brand.width))+BRAND_VIDEO_HEADING_HEIGHT;
@@ -94,6 +95,7 @@ export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=t
  let cached;try{cached=JSON.parse(await readFile(cacheFile,'utf8'));}catch{}
  const parts=[];let bannerLink=null,footerIndex,reusedCount=0;const records=[];
  for(let index=0;index<boundaries.length-1;index++){
+  signal?.throwIfAborted();
   const top=boundaries[index],height=boundaries[index+1]-top;
   const footer=top===footerTop;
   const banner=top===bannerTop;
@@ -107,6 +109,7 @@ export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=t
   if(bytes.length>19000000){bytes=await sharp(bytes,{limitInputPixels:false}).png({compressionLevel:9,adaptiveFiltering:true}).toBuffer();reused=false;}
   records.push({name:path.basename(file),sha256:createHash('sha256').update(bytes).digest('hex')});
   if(bytes.length>19000000)throw Error('상세 구간 한 장의 업로드 용량을 초과했습니다. 원본과 표를 유지하기 위해 중간 분할하지 않았습니다.');
+  signal?.throwIfAborted();
   if(!reused)await writeFile(file,bytes);else reusedCount++;parts.push(file);
   if(footer)footerIndex=index;
   if(banner)bannerLink={index,file,url:STORE_BANNER_URL};

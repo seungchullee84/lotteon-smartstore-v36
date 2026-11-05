@@ -1,36 +1,52 @@
-#manualPhotoReviewDialog{width:min(1100px,94vw);max-height:90vh;overflow:auto;overflow-anchor:none;border:1px solid #a6c9b1;border-radius:14px;padding:22px}
+#manualPhotoReviewOpen{min-height:44px;padding:9px 15px;background:#ffedcb;color:#563400;border:1px solid #bc8738;font-weight:750}
+#manualPhotoReviewOpen:not(:disabled):hover{background:#ffe3ae;border-color:#926222;color:#432900}
+#manualPhotoReviewOpen:focus-visible{outline:2px solid #926222;outline-offset:2px}
+#manualPhotoReviewDialog{box-sizing:border-box;width:min(1100px,94vw);max-height:90vh;overflow:auto;overflow-anchor:none;border:1px solid #b8c6bd;border-radius:14px;padding:0;color:#202a24;background:#fff}
 #manualPhotoReviewDialog::backdrop{background:#102c1e88}
-.photo-selection-toolbar{position:sticky;top:-22px;z-index:2;padding:12px 0;background:#fff;border-bottom:1px solid #d6e3d9;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-#manualPhotoSelectionStatus{margin:0 0 4px;flex-basis:100%;font-size:20px;font-weight:700;color:#b94b00;line-height:1.65}
+.photo-selection-toolbar{position:sticky;top:0;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;align-items:center;padding:16px 20px;background:#fff;border-bottom:1px solid #dce3dd}
+.photo-review-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:5px 12px}
+#manualPhotoReviewTitle{margin:0;font-size:19px;line-height:1.5;color:#202a24}
+#manualPhotoReviewSummary{color:#5b685f;font-size:13px;white-space:nowrap}
+.photo-review-actions{display:flex;gap:8px;align-items:center}
+.photo-review-actions button{min-height:39px;margin:0;padding:8px 15px;font-size:14px;white-space:nowrap}
+#manualPhotoReviewApply{font-weight:700}
+#manualPhotoSelectionStatus{grid-column:1/-1;margin:0;font-size:13px;font-weight:500;color:#5b685f;line-height:1.6}
+.photo-review-body{padding:14px 20px 20px}
+.photo-order-guide{margin:0 0 10px;font-size:13px;line-height:1.6;color:#5b685f}
 #photoPointPicker{margin:16px 0;padding:14px;border:1px solid #bed4c5;border-radius:9px;background:#f6faf7}
 #photoPointPicker summary{cursor:pointer;font-size:18px;font-weight:700}
 #photoPointPicker label.point-omit{display:flex;flex-direction:row;justify-content:flex-start;gap:10px;align-items:center;padding:12px;font-weight:700}
 #photoPointOmit{width:18px;min-width:18px;height:18px;flex:none;margin:0}
-#manualPhotoReviewGrid .photo-main-choice{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-weight:700;color:#245d3d}
-#manualPhotoReviewGrid .photo-main-choice input{width:18px;height:18px;margin:0}
+#manualPhotoReviewGrid .photo-main-choice{display:inline-flex;align-items:center;gap:5px;flex:none;margin:0;font-size:13px;font-weight:700;color:#245d3d;cursor:pointer}
+#manualPhotoReviewGrid .photo-main-choice input{width:16px;height:16px;margin:0;accent-color:#087c42}
 #photoPointCandidates{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
 #photoPointCandidates label{display:flex;align-items:flex-start;gap:10px;padding:12px;background:white;border:1px solid #cbdcd0;border-radius:8px}
 #photoPointCandidates input{width:18px;min-width:18px;margin:4px 0}
 #photoPointCandidates strong,#photoPointCandidates span span,#photoPointCandidates small{display:block;margin-bottom:7px;line-height:1.6}
 #photoPointCandidates small{color:#607065;font-size:12px}
 #manualPhotoReviewGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-#manualPhotoReviewGrid>div{padding:10px;border:2px solid var(--photo-accent,#b2bdb6);border-top-width:7px;border-radius:10px;background:var(--photo-tint,#fff)}
+#manualPhotoReviewGrid>.photo-review-card{min-width:0;padding:10px;border:1px solid #d5ded7;border-radius:10px;background:#fff}
+#manualPhotoReviewGrid>.photo-review-card[data-main="true"]{border-color:#37865b;box-shadow:0 0 0 1px #37865b}
+#manualPhotoReviewGrid .photo-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:30px;margin-bottom:8px}
 #manualPhotoReviewGrid .photo-color-badge,#manualPhotoReviewLegend .photo-color-badge{display:inline-block;margin:0 0 10px;padding:6px 12px;border-radius:7px;background:var(--photo-accent,#59665f);color:#fff;font-size:15px;font-weight:700;line-height:1.3}
-#manualPhotoReviewLegend{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+#manualPhotoReviewLegend{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
 #manualPhotoReviewLegend .photo-color-badge{margin:0}
-#manualPhotoReviewGrid .photo-group-heading{grid-column:1/-1;margin:14px 0 0;padding:10px 14px;border-left:7px solid var(--photo-accent);background:var(--photo-tint);color:var(--photo-accent);font-size:19px;line-height:1.4}
-#manualPhotoReviewGrid .photo-color-empty{grid-column:1/-1;margin:0;padding:18px;border:1px dashed #b9c6bf;color:#59675e;background:#f5f7f6;font-size:15px}
-#manualPhotoReviewGrid img{width:100%;height:330px;object-fit:contain;background:#f4f6f4}
+#manualPhotoReviewGrid .photo-group-heading{grid-column:1/-1;display:flex;align-items:center;margin:6px 0 0;padding:8px 10px;border-radius:6px;background:#f4f6f4;color:#202a24;font-size:15px;line-height:1.4}
+#manualPhotoReviewGrid .photo-group-empty{margin-bottom:-6px;font-size:13px;font-weight:500}
+#manualPhotoReviewGrid .photo-review-card>img{display:block;width:100%;height:300px;object-fit:contain;background:#f5f6f5;border-radius:6px}
 #manualPhotoReviewGrid p{overflow-wrap:anywhere;font-size:12px}
-#manualPhotoReviewGrid select{display:block;width:100%;margin:6px 0;padding:8px}
-#manualPhotoReviewMessage{white-space:pre-wrap;font-weight:600}
+#manualPhotoReviewGrid .photo-file-name{margin:8px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#657268;font-size:11px}
+#manualPhotoReviewGrid select{box-sizing:border-box;display:block;width:100%;min-width:0;min-height:36px;margin:4px 0 0;padding:6px 8px;border:1px solid #b9c6bd;border-radius:6px;background:#fff;color:#202a24;font-size:13px}
+.photo-card-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:10px}
+.photo-card-fields label{min-width:0;font-size:12px;font-weight:600;color:#536057}
+#manualPhotoReviewMessage{margin:14px 0;white-space:pre-wrap;font-size:13px;font-weight:600;line-height:1.6}
+#manualPhotoReviewMessage:empty,#manualPhotoSelectionStatus:empty{display:none}
 #manualPhotoReviewGrid>.photo-unused{background:#eef0ee;border-style:dashed}
 #manualPhotoReviewGrid>.photo-unused img{opacity:.45}
 @media(max-width:760px){#manualPhotoReviewGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:480px){#manualPhotoReviewGrid{grid-template-columns:1fr}}
+@media(max-width:480px){#manualPhotoReviewGrid{grid-template-columns:1fr}.photo-selection-toolbar{grid-template-columns:1fr;padding:12px 14px}.photo-review-actions{justify-content:flex-end}.photo-review-body{padding:12px 14px}.photo-review-actions button{flex:1}}
 
-#manualPhotoReviewGrid .photo-order-handle{display:block;font-size:12px;color:#53685d;padding:7px 0;cursor:grab}#manualPhotoReviewGrid .photo-dragging{opacity:.5}#manualPhotoReviewGrid .photo-drop-target{outline:3px dashed #527766;outline-offset:3px}
+#manualPhotoReviewGrid .photo-dragging{opacity:.5}#manualPhotoReviewGrid .photo-drop-target{outline:3px dashed #527766;outline-offset:3px}
 
-.photo-order-picker{display:flex;gap:12px;align-items:center;padding:8px 0}.photo-order-number{font-size:16px;color:#365a46}.photo-order-picker select{width:88px;min-height:34px}
 
-#manualPhotoReviewGrid .photo-color-badge,#manualPhotoReviewLegend .photo-color-badge{display:inline-flex;align-items:center;gap:9px;background:#fff;color:#252a27;border:1px solid #d4d9d5}#manualPhotoReviewGrid .photo-group-heading{color:#252a27;background:#f7f8f7}#manualPhotoReviewGrid .photo-official-chip,#manualPhotoReviewLegend .photo-official-chip{display:inline-block;width:28px;height:28px;min-width:28px;object-fit:contain;border:1px solid #b9bfbb;border-radius:3px;background:#fff;vertical-align:middle;margin:0 9px 0 0}#manualPhotoReviewGrid>div>.photo-official-chip{display:none}
+#manualPhotoReviewGrid .photo-color-badge,#manualPhotoReviewLegend .photo-color-badge{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#252a27;border:1px solid #d4d9d5;padding:4px 7px;font-size:12px;line-height:1.4}#manualPhotoReviewGrid .photo-card-top .photo-color-badge{min-width:0;margin:0;border:0;padding:0;overflow-wrap:anywhere;font-size:12px}#manualPhotoReviewGrid .photo-official-chip,#manualPhotoReviewLegend .photo-official-chip{display:inline-block;width:20px;height:20px;min-width:20px;object-fit:contain;border:1px solid #b9bfbb;border-radius:3px;background:#fff;vertical-align:middle;margin:0 6px 0 0}#manualPhotoReviewGrid>div>.photo-official-chip{display:none}

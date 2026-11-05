@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {similarCategory} from '../category.mjs';
-import {productClassification} from '../product.mjs';
+import {productClassification,repairCategoryFields} from '../product.mjs';
 
 test('면바지는 면바지/밴딩팬츠로 연결하고 다른 하의를 대신 선택하지 않음',()=>{
   const labels=['레깅스','면바지/밴딩팬츠','반바지/치마바지','슬랙스','청반바지'];
@@ -41,6 +41,16 @@ test('하위 항목에 맞는 상위 경로를 함께 보정',async()=>{
 test('기모 배럴핏 데님은 소재와 핏으로 분류',()=>{const p=productClassification('<div class="navi"><a>Home</a><a class="prdpath1">WOMEN</a><a>PANTS</a><a>데님</a><a>NEW 브러시드 배럴핏 데님</a></div>');assert.equal(p.category.channelMiddle,'청바지');assert.equal(p.category.channelSmall,'부츠컷/와이드핏');});
 
 test('기모보다 트레이닝 상품 종류를 우선',()=>{const p=productClassification('<div class="navi"><a>Home</a><a class="prdpath1">WOMEN</a><a>PANTS</a><a>트레이닝/스웻팬츠</a><a>브러시드 테리 조거 팬츠</a></div>');assert.equal(p.category.channelMiddle,'트레이닝복');assert.equal(p.category.channelSmall,'트레이닝하의');});
+
+test('신상품 한글 경로에서도 남녀를 구별하고 기존 성별 공란 자료를 복구한다',()=>{
+ for(const [label,gender,commonSmall,channelSmall] of [['남성','남성','00683 : 남성캐주얼바지','기모팬츠'],['여성','여성','00866 : 여성패션트레이닝복','트레이닝하의']]){
+  const html='<nav><a>MEN</a><a>WOMEN</a></nav><div class="navi"><a>Home</a><a class="prdpath1">신상품</a><a>'+label+'</a><a>플리스 스웻 팬츠</a></div>';
+  const classified=productClassification(html);assert.equal(classified.gender,gender);
+  const product={gender:'',rawName:'플리스 스웻 팬츠',sourceCategory:classified.sourceCategory,category:{}};
+  repairCategoryFields(product);assert.equal(product.gender,gender);assert.equal(product.category.commonSmall,commonSmall);assert.equal(product.category.channelSmall,channelSmall);
+ }
+ assert.equal(productClassification('<div class="navi"><a>Home</a><a class="prdpath1">남성</a><a>여성</a><a>스웻 팬츠</a></div>').gender,'');
+});
 
 test('남성 기모 스웻 팬츠만 바지/기모팬츠로 연결하고 비기모·데님은 강제하지 않는다',async()=>{
  const {brushedTrainingCategory}=await import('../category.mjs');const p={gender:'남성',rawName:'NEW 브러시드 테리 스트레이트 스웻 팬츠',sourceCategory:['MEN','PANTS','트레이닝/스웻팬츠'],category:{channelMiddle:'트레이닝복',channelSmall:'트레이닝하의'}};

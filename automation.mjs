@@ -6,7 +6,7 @@ import {tryLotteLogin,selectLottePage} from './browser-login.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {OptionCoverage} from './option-coverage.mjs';
-import {categoryAlternatives,similarCategory,channelCategoryPath,brushedTrainingCategory} from './category.mjs';
+import {categoryAlternatives,similarCategory,channelCategoryPath,brushedTrainingCategory,mensTrainingCategory} from './category.mjs';
 import { matchColor, validateStyle } from './product.mjs';
 import {buildDetailContent} from './detail-html.mjs';
 import {prepareMainImage} from './main-image.mjs';
@@ -722,7 +722,7 @@ export class LotteAutomation extends BrowserAutomation {
     const major=p.category.channelMajor||(p.gender==='여성'?'브랜드여성의류':'브랜드남성의류');
     const matchKey=categoryKey(p);
     const known=(await loadCategoryCache(this.root)).matches.find(m=>m.key===matchKey&&m.actual.major===major);
-    if(known&&!brushedTrainingCategory(p)){p.category.channelMiddle=known.actual.middle;p.category.channelSmall=known.actual.small;this.log('검증된 분류 매칭표 사용: '+major+' > '+known.actual.middle+' > '+known.actual.small);}
+    if(known&&!mensTrainingCategory(p)){p.category.channelMiddle=known.actual.middle;p.category.channelSmall=known.actual.small;this.log('검증된 분류 매칭표 사용: '+major+' > '+known.actual.middle+' > '+known.actual.small);}
     await this.similarCategoryClick(major,'L');p.category.channelMiddle=await this.similarCategoryClick(p.category.channelMiddle,'M');await this.settle();p.category.channelSmall=await this.similarCategoryClick(p.category.channelSmall,'S');await this.settle();
     if(p.category.channelDetail)p.category.channelDetail=await this.similarCategoryClick(p.category.channelDetail,'D');
     // Select category's own add button by its visible enclosing block.

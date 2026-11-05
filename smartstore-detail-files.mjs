@@ -215,21 +215,27 @@ export function localSmartstorePreview(p){
  return smartstoreDetailDocument(p,{assetBase:'/smartstore-template/',fontUrl:'/smartstore-template/GowunDodum-Regular.ttf',imageUrl:src=>map.get(src)||src});
 }
 
-export async function saveSmartstoreDetail(product,folder,output,{signal,...options}={}){
- const videoOptions={...productVideoOptions(product),...options.videoOptions};
+export async function saveSmartstoreDetail(product,folder,output,options={}){
+ const prepared=await prepareSmartstoreDetail(product,folder,options);
+ return renderPreparedSmartstoreDetail(prepared,folder,output,options);
+}
+
+export async function renderPreparedSmartstoreDetail(p,folder,output,{signal,...options}={}){
+ const videoOptions={...productVideoOptions(p),...options.videoOptions};
  await requireBrandVideo(options.dataRoot,videoOptions);
- const p=await prepareSmartstoreDetail(product,folder,options);assertRequiredSellingPoints({...p.smartstoreDetail,sellingPoints:displaySellingPoints(p.smartstoreDetail.sellingPoints)});const data=new Map();
+ assertRequiredSellingPoints({...p.smartstoreDetail,sellingPoints:displaySellingPoints(p.smartstoreDetail.sellingPoints)});const data=new Map();
  const check=()=>{if(signal?.aborted)throw Error('상세페이지 만들기를 중단했습니다.');};check();
- for(const name of TEMPLATE_ASSET_NAMES.filter(n=>!n.endsWith('.ttf')))data.set(TEMPLATE_ASSET_BASE+name,'data:image/'+(name.endsWith('.png')?'png':'jpeg')+';base64,'+(await readFile(path.join(assetsRoot,name))).toString('base64'));
+ for(const name of TEMPLATE_ASSET_NAMES.filter(n=>!n.endsWith('.ttf'))){check();data.set(TEMPLATE_ASSET_BASE+name,'data:image/'+(name.endsWith('.png')?'png':'jpeg')+';base64,'+(await readFile(path.join(assetsRoot,name))).toString('base64'));}
  for(const [key,src] of Object.entries(p.images)){
+  check();
   if(!/^(detail|size|check|info|main|extra[12]|color[1-9]\d*_[123])$/.test(key))continue;
   try{const bytes=await readFile(path.join(folder,key+'.jpg'));data.set(src,'data:image/jpeg;base64,'+(await sharp(bytes).rotate().resize({width:860,withoutEnlargement:true}).jpeg({quality:96}).toBuffer()).toString('base64'));}catch(e){if(e.code==='ENOENT')throw Error('현재 상품의 '+key+' 원본 파일을 확인해 주세요.');throw e;}
  }
- for(const [src,file] of Object.entries(p.smartstoreDetail.photoFiles))data.set(src,'data:image/jpeg;base64,'+(await readFile(path.join(folder,file))).toString('base64'));
+ for(const [src,file] of Object.entries(p.smartstoreDetail.photoFiles)){check();data.set(src,'data:image/jpeg;base64,'+(await readFile(path.join(folder,file))).toString('base64'));}
  const imageUrl=src=>{if(!data.has(src))throw Error('현재 상품에 연결되지 않은 상세 이미지: '+src);return data.get(src);};
  const fontUrl='data:font/ttf;base64,'+(await readFile(path.join(assetsRoot,'GowunDodum-Regular.ttf'))).toString('base64');
  const document=smartstoreDetailDocument(p,{imageUrl,fontUrl,includeVideo:false,includeNavigation:false});
- const cacheRoot=options.renderCacheRoot||path.join(options.dataRoot||path.join(appRoot,'data'),'smartstore-render-cache','template-'+document.templateVariant);
+ const cacheRoot=options.renderCacheRoot||path.join(options.renderCacheBase||path.join(options.dataRoot||path.join(appRoot,'data'),'smartstore-render-cache'),'template-'+document.templateVariant);
  const cacheKey=await renderCacheKey(document.html);let height,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,photoRegions,renderCacheHit=false;
  let browser;const close=()=>browser?.close().catch(()=>{});signal?.addEventListener('abort',close,{once:true});
  const partial=output+'.partial';
@@ -255,11 +261,12 @@ export async function saveSmartstoreDetail(product,folder,output,{signal,...opti
   const {rename}=await import('node:fs/promises');await rename(partial,output);
   await cacheRenderedDetail(cacheRoot,p.style,cacheKey,output,height,{brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,photoRegions});
   }
-  await registerLongPhotoLayout(await readFile(output),{style:p.style,regions:photoRegions,brandIntroHeight,videoAfterTop,officialTop,dataRoot:options.dataRoot||path.join(appRoot,'data')});
+  check();
+  if(!options.cacheOnly)await registerLongPhotoLayout(await readFile(output),{style:p.style,regions:photoRegions,brandIntroHeight,videoAfterTop,officialTop,dataRoot:options.dataRoot||path.join(appRoot,'data')});
   // The editor upload only needs the rendered image, section boundaries and
   // existing brand video. Avoid generating the HTML, duplicate video and
   // separate banner/footer exports used by the manual download workflow.
-  if(options.uploadOnly)return {width:860,height,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,photoCount:p.smartstoreDetail.photoCount,includeVideo:true,videoOptions,renderCacheHit};
+  if(options.uploadOnly||options.cacheOnly)return {width:860,height,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,photoCount:p.smartstoreDetail.photoCount,includeVideo:true,videoOptions,renderCacheHit};
   const stem=output.replace(/\.[^.]+$/,'');
   const video=await exportBrandVideo(stem,options.dataRoot,videoOptions);check();
   await writeFile(stem+'.html',smartstoreDetailDocument(p,{imageUrl,fontUrl,videoUrl:encodeURIComponent(video.filename)}).html);

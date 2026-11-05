@@ -155,7 +155,7 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   currentProduct={...product,style:'376922',name:'여성 후드 숏 푸퍼 자켓 376922',gender:'여성'};revision++;
   await page.waitForFunction(()=>document.getElementById('source').textContent.includes('376922'));
   await page.locator('#channelSmartstore').click();
-  await page.waitForFunction(()=>document.getElementById('naverTitleResult').textContent.includes('통합검색어 트렌드 API'));
+  await page.waitForFunction(()=>document.getElementById('naverTitleDetail').textContent.includes('통합검색어 트렌드 API'));
   assert.equal(await page.locator('input[name="name"]').inputValue(),currentProduct.name);
   assert.equal(await page.locator('#smartstoreName').inputValue(),'지오다노 여성 후드 숏 패딩 자켓 376922');
   const selectedTitle='사용자  수정 후드티 376922';
