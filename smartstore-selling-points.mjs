@@ -183,6 +183,8 @@ const hasFinalConsonant=text=>{const c=text.charCodeAt(text.length-1);return c>=
 export function friendlyBenefitDescription(value){
  const sentence=part=>{
   let text=part.trim().replace(/[.!?]+$/,'');if(!text||!completeCopy(text)||!cleanSource(text))return '';
+  // Repair old display copy too. A verb/adjective stem is never a noun predicate.
+  text=text.replace(/(포근|따뜻|편안|탄탄|쾌적|유연|시원|지지|제공|유지|조절|연출|구현|확보|완성|강화|최소화|활용|수납|커버|가능)(?:이에요|예요)$/,'$1');
   if(/요$/.test(text))return text+'.';
   for(const [ending,replacement] of [
    [/하였습니다$/,'했어요'],[/되었습니다$/,'됐어요'],[/합니다$/,'해요'],[/됩니다$/,'돼요'],[/했습니다$/,'했어요'],[/됐습니다$/,'됐어요'],
@@ -191,15 +193,25 @@ export function friendlyBenefitDescription(value){
    [/가볍습니다$/,'가벼워요'],[/럽습니다$/,'러워요'],[/롭습니다$/,'로워요'],[/넓습니다$/,'넓어요'],[/좁습니다$/,'좁아요'],[/짧습니다$/,'짧아요'],[/깁니다$/,'길어요'],[/맞습니다$/,'맞아요'],
    [/높였습니다$/,'높였어요'],[/줄였습니다$/,'줄였어요'],[/살렸습니다$/,'살렸어요'],[/입습니다$/,'입어요'],[/높습니다$/,'높아요'],[/낮습니다$/,'낮아요'],[/적습니다$/,'적어요'],[/많습니다$/,'많아요'],[/않습니다$/,'않아요']
   ])if(ending.test(text))return text.replace(ending,replacement)+'.';
-  if(/입니다$/.test(text)){text=text.slice(0,-3);return text+(hasFinalConsonant(text)?'이에요.':'예요.');}
+  if(/입니다$/.test(text))text=text.slice(0,-3);
   const added=text.match(/^(.+(?:으로|로))\s*더한\s+(.+)$/);
   if(added)return added[1]+' '+added[2]+(hasFinalConsonant(added[2])?'을':'를')+' 더했어요.';
-  if(/(?:편안하게|따뜻하게|포근하게|가볍게|깔끔하게|부드럽게|탄탄하게|유연하게)$/.test(text))return text+' 입어요.';
+  const styling=text.match(/^(.+?)\s*매치 가능한 데일리 라인업 연출$/);
+  if(styling)return styling[1]+' 코디하기 좋아요.';
+  for(const [ending,replacement] of [
+   [/포근$/,'포근하게 입을 수 있어요'],[/따뜻$/,'따뜻하게 입을 수 있어요'],[/편안$/,'편안하게 입을 수 있어요'],[/쾌적$/,'쾌적하게 입을 수 있어요'],
+   [/탄탄$/,'탄탄해요'],[/유연$/,'유연해요'],[/시원$/,'시원해요'],[/부드러움$/,'부드러워요'],[/가벼움$/,'가벼워요'],
+   [/편안한 움직임$/,'편안하게 움직일 수 있어요'],[/자연스러운 움직임$/,'자연스럽게 움직일 수 있어요']
+  ])if(ending.test(text))return text.replace(ending,replacement)+'.';
+  if(/(?:편안하게|따뜻하게|포근하게|가볍게|부드럽게|탄탄하게|유연하게)$/.test(text))return text+' 입어요.';
+  if(/(?:깔끔하게|자연스럽게|멋스럽게|감각적으로|고급스럽게|스포티하게)$/.test(text))return text+' 연출할 수 있어요.';
   if(/가능$/.test(text))return text+'해요.';
-  const action=text.match(/^(.+?)\s*(제공|유지|조절|연출|구현|확보|완성|강화|최소화)$/);
-  if(action){const [,subject,verb]=action,object=/(?:으로|로|을|를|게)$/.test(subject)?subject:subject+(hasFinalConsonant(subject)?'을':'를');return object+' '+({제공:'제공해요',유지:'유지해요',조절:'조절할 수 있어요',연출:'연출할 수 있어요',구현:'구현했어요',확보:'확보했어요',완성:'완성해요',강화:'강화했어요',최소화:'최소화했어요'}[verb])+'.';}
+  const action=text.match(/^(.+?)\s+(제공|유지|조절|연출|구현|확보|완성|강화|최소화|지지|활용|수납|커버)$/);
+  if(action){const [,subject,verb]=action,object=/(?:으로|로|을|를|게|에|에서|에도|없이)$/.test(subject)?subject:subject+(hasFinalConsonant(subject)?'을':'를');return object+' '+({제공:'제공해요',유지:'유지해요',조절:'조절할 수 있어요',연출:'연출할 수 있어요',구현:'구현했어요',확보:'확보했어요',완성:'완성해요',강화:'강화했어요',최소화:'최소화했어요',지지:'받쳐줘요',활용:'활용할 수 있어요',수납:'수납할 수 있어요',커버:'커버해줘요'}[verb])+'.';}
   if(/(?:습니다|니다)$/.test(text))return '';
-  return text+(hasFinalConsonant(text)?'이에요.':'예요.');
+  // Only known noun phrases take 이에요/예요; unknown fragments stay out of copy.
+  if(/(?:착용감|촉감|터치감|감촉|보온성|복원력|신축성|내구성|활동성|두께감|실루엣|디자인|원단|소재|스판|충전재|외피|겉감|안감|텍스처|짜임|패턴|기장|핏|아이템|스웨터|가디건|머플러|디테일|포인트|컬러|색감|구조)$/.test(text))return text+(hasFinalConsonant(text)?'이에요.':'예요.');
+  return '';
  };
  return String(value||'').split(/(?<=[.!?])\s+/).map(sentence).filter(Boolean).join(' ');
 }

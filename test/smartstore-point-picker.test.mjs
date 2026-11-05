@@ -5,6 +5,8 @@ test('공식 후보 5개 중 고른 순서를 저장하고 템플릿 검토에�
  const product={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=test'},options={dataRoot,sourceOverride:{text,detailHash:null}};
  try{const picker=await pointPicker(product,dataRoot,options);assert.equal(picker.candidates.length,5);const selectedIds=[4,0,2].map(i=>picker.candidates[i].id),input={style:product.style,channel:'smartstore',revision:picker.revision,selectedIds};await savePointSelection(product,dataRoot,input,options);
   const reopened=await pointPicker(product,dataRoot,options);assert.deepEqual(new Set(reopened.selectedIds),new Set(selectedIds));const review=await reviewSellingPoints(product,text,{dataRoot});assert.equal(review.method,'user-selected-official-points');assert.deepEqual(review.points.map(p=>p.title),[4,0,2].map(i=>picker.candidates[i].title));
+  assert(picker.candidates.every(p=>p.displayDescription.endsWith('요.')));
+  assert(review.points.every(p=>!Object.hasOwn(p,'displayDescription')),'화면 문구를 공식 원문·선택 자료에 덮어쓰지 않는다');
   await assert.rejects(savePointSelection(product,dataRoot,{...input,selectedIds:['bad','bad','bad']},options));await assert.rejects(savePointSelection(product,dataRoot,{...input,revision:'stale'},options));await assert.rejects(savePointSelection(product,dataRoot,{...input,channel:'lotte'},options));
   const changed=await reviewSellingPoints(product,'부드러운 코튼 원단으로 편안하게 입습니다.',{dataRoot});assert.notEqual(changed.method,'user-selected-official-points');
  }finally{await rm(dataRoot,{recursive:true,force:true});}

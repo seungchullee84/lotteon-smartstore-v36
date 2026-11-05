@@ -110,6 +110,29 @@ test('모든 상품 소구점의 브러시드 표시는 기모로 통일하고 �
  assert.equal(friendlyBenefitDescription(description),'');assert.equal(displaySellingPoints([{title:'다양한 코디에 활용',description,evidence:description}]).length,0);
  });
 
+test('모든 품번의 저장된 형용사·동작 문구에 명사 어미를 붙이지 않는다',()=>{
+ const cases=[
+  ['뛰어난 보온성과 우수한 신축성으로 한겨울에도 포근.','뛰어난 보온성과 우수한 신축성으로 한겨울에도 포근하게 입을 수 있어요.'],
+  ['허리를 압박 없이 편안하게 지지.','허리를 압박 없이 편안하게 받쳐줘요.'],
+  ['다양한 겨울 상의와 손쉽게 매치 가능한 데일리 라인업 연출.','다양한 겨울 상의와 손쉽게 코디하기 좋아요.'],
+  ['고밀도 원단을 사용해 탄탄.','고밀도 원단을 사용해 탄탄해요.'],
+  ['허리 스트링을 조절하여 편안.','허리 스트링을 조절하여 편안하게 입을 수 있어요.'],
+  ['신축성 있는 원단으로 편안한 움직임.','신축성 있는 원단으로 편안하게 움직일 수 있어요.'],
+  ['다양한 코디에 활용.','다양한 코디에 활용할 수 있어요.'],
+  ['겨울에도 포근이에요.','겨울에도 포근하게 입을 수 있어요.'],
+  ['허리를 편안하게 지지예요.','허리를 편안하게 받쳐줘요.'],
+ ];
+ for(const [description,expected] of cases){
+  assert.equal(friendlyBenefitDescription(description),expected);
+  assert.equal(friendlyBenefitDescription(expected),expected);
+  for(const style of ['116930','326930','375908']){
+   const saved={style,title:'편안한 착용감',description,evidence:description};
+   const [display]=displaySellingPoints([saved]);assert.equal(display.description,expected);assert.equal(display.evidence,description);assert.equal(saved.description,description);
+  }
+ }
+ for(const description of ['옷의 장점 미상태.','편안한 착용 중간문구.'])assert.equal(friendlyBenefitDescription(description),'');
+});
+
 test('공식 근거의 깃털 빠짐 최소화와 고급스러움도 구매 장점으로 인정',()=>{
  const points=[{title:'털 빠짐 부담을 덜어줘요',description:'이중 다운백으로 깃털 빠짐을 최소화했어요.',evidence:'이중 다운백으로 깃털 빠짐을 최소화했습니다.'},{title:'은은한 광택으로 멋스럽게',description:'은은한 광택으로 고급스러운 분위기를 더해요.',evidence:'은은한 광택으로 고급스러움을 느낄 수 있습니다.'}];assert(usableSellingPoints(points,points.map(p=>p.evidence).join(' ')));assert(!usableSellingPoints(points,'일반 자켓입니다.'));
 });
