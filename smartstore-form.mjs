@@ -56,8 +56,12 @@ export async function ensureSmartstoreOptionMode(page,check=()=>{}){
  await enabledLabel.waitFor({state:'visible'});
  if(!await enabled.isChecked()){check();await enabledLabel.click();}
  for(const name of ['직접 입력하기','조합형']){
-  const radio=panel.getByRole('radio',{name,exact:true});await radio.waitFor({state:'attached'});
-  if(!await radio.isChecked()){check();await radio.locator('..').click();}
+  const radio=panel.getByLabel(name,{exact:true});await radio.waitFor({state:'attached'});
+  if(!await radio.isChecked()){
+   const id=await radio.getAttribute('id'),associated=id?panel.locator('label[for='+JSON.stringify(id)+']'):null;
+   const label=associated&&await associated.count()===1?associated:radio.locator('xpath=ancestor::label[1]');
+   check();await label.click();
+  }
   if(!await radio.isChecked())throw Error('옵션 입력 방식 확인 실패: '+name);
  }
 }
@@ -105,9 +109,10 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   if((await optionCount.locator('.selectize-input').innerText()).trim()!=='2개'){
     await optionCount.locator('.selectize-input').click();await optionCount.locator('.selectize-dropdown-content').getByText('2개',{exact:true}).click();
   }
-  const same=await page.locator('#choice_option_value0').evaluate((e,values)=>e.value===values,plan.colors.join(','))&&await page.locator('#choice_option_value1').evaluate((e,values)=>e.value===values,plan.sizes.join(','))&&Number(await page.getByRole('grid').getAttribute('aria-rowcount'))===plan.expectedOptions+2;
+  await page.locator('#choice_option_name1').waitFor({state:'visible'});
+  const same=await optionName.inputValue()==='컬러'&&await page.locator('#choice_option_name1').inputValue()==='사이즈'&&await page.locator('#choice_option_value0').evaluate((e,values)=>e.value===values,plan.colors.join(','))&&await page.locator('#choice_option_value1').evaluate((e,values)=>e.value===values,plan.sizes.join(','))&&Number(await page.getByRole('grid').getAttribute('aria-rowcount'))===plan.expectedOptions+2;
   if(!same){
-  await fill(optionName,'색상');await fill(page.locator('#choice_option_value0'),plan.colors.join(','));
+  await fill(optionName,'컬러');await fill(page.locator('#choice_option_value0'),plan.colors.join(','));
   await fill(page.locator('#choice_option_name1'),'사이즈');await fill(page.locator('#choice_option_value1'),plan.sizes.join(','));
   await page.getByRole('button',{name:'옵션목록으로 적용',exact:true}).click();
   }
@@ -144,7 +149,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   const directDate=page.getByRole('radio',{name:'직접입력',exact:true}).filter({visible:true}).first();
   if(!await directDate.evaluate(e=>e.checked))await directDate.locator('..').click();
   await fill(page.locator('input[ng-model="vm.dateText"]'),plan.manufactured);
-  const tagReport=await fillResearchTags(page,plan.tagResearch||researchForProduct(plan),log,check);
+  const tagReport=assets?.preserveTags===true?{tagsTouched:false,tagStatus:'paused'}:await fillResearchTags(page,plan.tagResearch||researchForProduct(plan),log,check);
   await open(/^판매자 코드/,page.locator('#seller-code1'));
   const sellerCode=await fillSmartstoreSellerCode(page,plan,{check,log});
   log('판매자 상품코드 확인: '+sellerCode+' · 바코드·내부코드 유지');
@@ -177,7 +182,13 @@ export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=fal
     await container.getByRole('button',{name:'이미지 등록',exact:true}).click();
     const dialog=page.getByRole('dialog');await dialog.getByRole('button',{name:'내 사진',exact:true}).waitFor({state:'visible',timeout:15000});
     const choosing=page.waitForEvent('filechooser');await dialog.getByRole('button',{name:'내 사진',exact:true}).click();
-    await (await choosing).setFiles(files);
+    const chooser=await choosing;
+    try{check();await chooser.setFiles(files,{timeout:60000});}
+    catch(error){
+      check();
+      const uploaded=await container.locator('img').evaluateAll((images,count)=>images.length===count&&images.every(n=>/naver\.net|pstatic\.net/.test(n.src)),files.length);
+      if(!uploaded)throw error;
+    }
     await container.locator('img').first().waitFor({state:'visible',timeout:30000});
     await page.waitForFunction(({id,count})=>{const images=[...document.querySelector('ncp-product-temp-photo-infra-image-upload#'+id).querySelectorAll('img')];return images.length===count&&images.every(n=>/naver\.net|pstatic\.net/.test(n.src));},{id,count:files.length},{timeout:60000});
     if(id==='tagImages'){

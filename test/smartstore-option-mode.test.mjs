@@ -3,6 +3,15 @@ import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {ensureSmartstoreOptionMode,readSmartstoreOptionRows,verifySmartstoreOptions} from '../smartstore-form.mjs';
 
+test('숨겨진 직접 입력·조합형 라디오도 연결된 보이는 라벨로 선택하고 다시 실행해도 유지한다',async()=>{
+ const browser=await chromium.launch({headless:true});try{
+  const page=await browser.newPage();page.setDefaultTimeout(1500);
+  await page.setContent(`<ui-view name="option"><input id="option_choice_type_true" type="radio" checked hidden><label for="option_choice_type_true">설정함</label><input id="direct" type="radio" name="mode" hidden><label for="direct">직접 입력하기</label><input id="template" type="radio" name="mode" checked hidden><label for="template">템플릿</label><input id="combined" type="radio" name="type" hidden><label for="combined">조합형</label></ui-view>`);
+  await ensureSmartstoreOptionMode(page);assert(await page.locator('#direct').isChecked());assert(await page.locator('#combined').isChecked());
+  await ensureSmartstoreOptionMode(page);assert(await page.locator('#direct').isChecked());assert(await page.locator('#combined').isChecked());
+ }finally{await browser.close();}
+});
+
 test('hidden styled radios do not cause an already open option panel to close on repeated runs',async()=>{
  const browser=await chromium.launch({headless:true});
  try{

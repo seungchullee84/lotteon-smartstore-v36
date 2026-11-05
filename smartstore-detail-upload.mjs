@@ -41,7 +41,7 @@ export async function attachSmartstorePhoto(editor,file,{check=()=>{},timeout=15
   const deadline=Date.now()+timeout;
   while(Date.now()<deadline){
    check();
-   if(chooser){await chooser.setFiles(file);check();return;}
+   if(chooser){await chooser.setFiles(file,{timeout:60000});check();return;}
    if(await picker.count()){
     if(await picker.count()!==1)throw Error('사진 선택 창을 한 곳으로 확인하지 못했습니다.');
     if(!clickedPicker){await picker.getByRole('button',{name:'내 사진',exact:true}).click({timeout:3000});clickedPicker=true;}

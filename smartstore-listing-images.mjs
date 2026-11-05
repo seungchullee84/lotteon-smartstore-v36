@@ -3,7 +3,8 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {findPhotos} from './smartstore-photo-files.mjs';
 import {selectedMainPhoto} from './smartstore-main-selection.mjs';
-const LISTING_IMAGE_VERSION='original-bytes-v1';
+import {workingProductPhoto,PHOTO_WORK_VERSION} from './smartstore-photo-work.mjs';
+const LISTING_IMAGE_VERSION=PHOTO_WORK_VERSION;
 const hash=b=>createHash('sha256').update(b).digest('hex');
 function withOfficialMain(product,manifest){
  if(!Array.isArray(manifest.extras))throw Error('추가이미지 선택 자료를 확인해 주세요.');
@@ -56,18 +57,18 @@ export async function prepareListingImages(product,folder,{dataRoot,...photoOpti
  if(!manifest.main||!Array.isArray(manifest.extras)||manifest.extras.length>9)throw Error('스마트스토어 이미지 선택 자료를 확인해 주세요.');
  const photos=await findPhotos(product,{...photoOptions,dataRoot});
  const original=await selectedMainPhoto(photos,product,dataRoot);
- const main=original.file,extras=[];
+ const main=await workingProductPhoto(original,product,{dataRoot}),extras=[];
  for(const entry of manifest.extras){
   if(entry.role==='official-main'){
    const collected=JSON.parse(await readFile(path.join(folder,'product.json'),'utf8'));
    if(collected.style!==product.style||collected.sourceUrl!==product.sourceUrl||collected.images?.main!==product.images.main||entry.sourceUrl!==product.images.main)throw Error('현재 품번의 공식몰 대표사진을 다시 수집해 주세요.');
-   extras.push(path.join(folder,'main.jpg'));continue;
+   extras.push(await workingProductPhoto({file:path.join(folder,'main.jpg')},product,{dataRoot}));continue;
   }
   if(!product.colors.includes(entry.color)&&!(manifest.trustedFolder&&entry.role==='provided'))throw Error('추가사진의 색상을 확인해 주세요.');
   const exact=photos.filter(p=>p.name===entry.sourceName&&(!entry.sourceHash||hash(p.bytes)===entry.sourceHash));
   const matches=exact.length?exact:photos.filter(p=>entry.sourceHash?hash(p.bytes)===entry.sourceHash:p.name===entry.sourceName);
   if(matches.length!==1)throw Error('품번 폴더에서 추가사진 원본을 확인해 주세요: '+entry.sourceName);
-  extras.push(matches[0].file);
+  extras.push(await workingProductPhoto(matches[0],product,{dataRoot}));
  }
  return {main,extras,manifest};
 }

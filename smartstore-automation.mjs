@@ -54,12 +54,13 @@ export class SmartstoreAutomation extends BrowserAutomation{
     try{await this.page.locator('input[name="product.name"]').waitFor({state:'visible',timeout:10000});}catch{throw Error('전용 크롬에서 스마트스토어 로그인 후 수정 또는 복사등록 화면을 열어 주세요.');}
     if(!isSmartstoreInputUrl(this.page.url()))throw Error('수정 또는 복사등록 화면에서 실행해 주세요.');
     this.log('대상 화면 확인 · '+this.copyFormUrl+' · '+await this.page.locator('input[name="product.name"]').inputValue());
+    this.log('기존 반영 상태 · 대표 '+await this.page.locator('ncp-product-temp-photo-infra-image-upload#representImage img').count()+'장 · 추가 '+await this.page.locator('ncp-product-temp-photo-infra-image-upload#optionalImages img').count()+'장 · 옵션 '+(await this.page.locator('#choice_option_name0').inputValue().catch(()=>''))+' / '+(await this.page.locator('#choice_option_name1').inputValue().catch(()=>'')));
   }
-  async uploadPrepared(p,folder,{main,extras,detailParts,careLabels=[]}){
+  async uploadPrepared(p,folder,{main,extras,detailParts,careLabels=[],preserveTags=false}){
     this.check();if(this.boundProductStyle&&this.boundProductStyle!==p.style)throw Error('전체 입력할 품번이 변경되었습니다.');const plan={...smartstorePlan(p,p.consumerPrice),tagResearch:selectedProductTagResearch(p,{dataRoot:this.root})};
     if(!this.page||this.page.isClosed()||this.page.url()!==this.copyFormUrl||!isSmartstoreInputUrl(this.page.url()))throw Error('자동화 중 등록 화면이 변경됐습니다.');
     const check=()=>{this.check();if(this.page.isClosed()||this.page.url()!==this.copyFormUrl)throw Error('등록 화면이 변경되어 업로드를 중단했습니다.');};
-    const report=await fillSmartstore({playwright:this.page,url:()=>this.page.url()},plan,{main,extras,careLabels,replaceImages:true,detail:true},this.log,check);
+    const report=await fillSmartstore({playwright:this.page,url:()=>this.page.url()},plan,{main,extras,careLabels,replaceImages:true,detail:true,preserveTags},this.log,check);
     check();const detail=await uploadSmartstoreDetail(this.page,detailParts,{check,log:this.log,mode:this.formMode||'copy'});
     const {writeFile}=await import('node:fs/promises');const result={...report,...detail,formUrl:this.copyFormUrl,formMode:this.formMode,published:false};
     await writeFile(path.join(folder,'smartstore-auto-result.json'),JSON.stringify(result,null,2));return result;

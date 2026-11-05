@@ -24,7 +24,9 @@ export function mannequinWearingNote(p){
   bottom=/바지|팬츠|슬랙스|청바지|반바지|스커트/.test(name);
   if(!bottom&&!/티셔츠|후드|맨투맨|셔츠|니트|스웨터|스웻|스웨트|가디건|자켓|재킷|점퍼|패딩|코트|베스트|조끼|블라우스/.test(name))return '';
  }
- return `${male?'남성':'여성'} ${bottom?'하의':'상의'} · ${bottom?(male?'32':'26'):(male?'L':'S')} 사이즈 착용`;
+ const letterSizing=Array.isArray(p.sizes)&&p.sizes.some(size=>/^(?:X{0,3}S|M|X{0,3}L|[2-5]XL)(?:\s*\([^)]*\))?$/i.test(String(size).normalize('NFKC').trim()));
+ const wearingSize=bottom&&!letterSizing?(male?'32':'26'):(male?'L':'S');
+ return `${male?'남성':'여성'} ${bottom?'하의':'상의'} · ${wearingSize} 사이즈 착용`;
 }
 function safeImage(src){
  if(typeof src!=='string'||!(/^(https?:\/\/|\/image\/|\/smartstore-photo\/|\/smartstore-template\/|data:image\/(png|jpeg|webp);base64,|file:\/\/)/.test(src)))throw Error('상세페이지 이미지 주소를 확인해 주세요.');

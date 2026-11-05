@@ -447,7 +447,7 @@ const server=http.createServer(async(req,res)=>{
             upload:async(p,folder,{main,detail})=>{
               const selected=await prepareListingImages(p,folder,{dataRoot});
               const careLabels=await prepareCareLabelImages(p,folder,{dataRoot});
-              return smartBot.uploadPrepared(p,folder,{main:selected.main,extras:selected.extras,detailParts:detail.parts,careLabels});
+              return smartBot.uploadPrepared(p,folder,{main:selected.main,extras:selected.extras,detailParts:detail.parts,careLabels,preserveTags:b.preserveTags===true});
             }
           });
           if(result.tagStatus)state.tagResult={style:state.product.style,tagStatus:result.tagStatus,tagCount:result.tagCount,tagMissing:result.tagMissing,searchTagsVerified:result.searchTagsVerified,selectedTags:result.selectedTags};state.autoStep='done';await writeFile(path.join(result.folder,'smartstore-auto-completed.json'),JSON.stringify(result,null,2));
