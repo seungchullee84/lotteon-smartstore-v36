@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildDetailContent} from '../detail-html.mjs';
+import {buildDetailContent,officialDetailKeys} from '../detail-html.mjs';
 test('기존 상세 이미지가 있으면 색상별 사진이 준비되어 있어도 원본만 사용',()=>{
   assert.deepEqual(buildDetailContent({detail:'original.jpg',main:'main.jpg',info:'info.jpg'},['블랙'],{'블랙':['black1.jpg','black2.jpg']},'original.jpg').sources,['original.jpg','info.jpg']);
 });
