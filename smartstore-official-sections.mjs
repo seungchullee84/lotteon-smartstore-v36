@@ -2,11 +2,11 @@ import {readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
-const width=96,rule='full-width-pixel-inclusion-3';
+const width=96,rule='full-width-pixel-inclusion-4';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 async function pixels(bytes,height){return sharp(bytes,{limitInputPixels:false}).flatten({background:'#fff'}).resize(width,height,{fit:'fill'}).greyscale().raw().toBuffer();}
 function rows(bytes,height){const out=new Float64Array(height);for(let y=0;y<height;y++)for(let x=0;x<width;x++)out[y]+=255-bytes[y*width+x];return out;}
-export async function officialSectionMatch(detail,section){
+async function matchFullWidthSection(detail,section){
  const dm=await sharp(detail,{limitInputPixels:false}).metadata(),sm=await sharp(section,{limitInputPixels:false}).metadata();
  const height=Math.round(sm.height*dm.width/sm.width);
  if(!height||height>dm.height)return {included:false};
@@ -43,8 +43,24 @@ export async function officialSectionMatch(detail,section){
  }
  return best;
 }
+export async function officialSectionMatch(detail,section){
+ const match=await matchFullWidthSection(detail,section);
+ if(match.included)return match;
+ const {data,info}=await sharp(section,{limitInputPixels:false}).flatten({background:'#fff'}).greyscale().raw().toBuffer({resolveWithObject:true});
+ const blank=y=>data.subarray(y*info.width,(y+1)*info.width).every(value=>value>=245);
+ let top=0,bottom=info.height;
+ while(top<bottom&&blank(top))top++;
+ while(bottom>top&&blank(bottom-1))bottom--;
+ if(top===bottom||bottom-top===info.height)return match;
+ // Standalone sections can have more outer whitespace than fits in the long
+ // image. Compare all visible content and require a close pixel match.
+ const sample=await sharp(section,{limitInputPixels:false}).extract({left:0,top,width:info.width,height:bottom-top}).png().toBuffer();
+ const trimmed=await matchFullWidthSection(detail,sample);
+ return trimmed.included&&trimmed.error<=.06?{...trimmed,comparison:'without-vertical-padding'}:match;
+}
 export async function embeddedOfficialSections(product,folder){
  if(!product.images?.detail)return [];
+ if(!['size','check','info'].some(key=>product.images[key]))return [];
  const detail=await readFile(path.join(folder,'detail.jpg')),files={detail:hash(detail)},sections={};
  for(const key of ['size','check','info'])if(product.images[key]){
   try{sections[key]=await readFile(path.join(folder,key+'.jpg'));files[key]=hash(sections[key]);}catch(e){if(e.code!=='ENOENT')throw e;}

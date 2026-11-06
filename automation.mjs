@@ -9,6 +9,7 @@ import {OptionCoverage} from './option-coverage.mjs';
 import {categoryAlternatives,similarCategory,channelCategoryPath,brushedTrainingCategory,mensTrainingCategory} from './category.mjs';
 import { matchColor, validateStyle } from './product.mjs';
 import {buildDetailContent} from './detail-html.mjs';
+import {embeddedOfficialSections} from './smartstore-official-sections.mjs';
 import {prepareMainImage} from './main-image.mjs';
 
 const PORTAL='https://together.lotteshopping.com/EMDV3/index.html';
@@ -341,7 +342,7 @@ export class LotteAutomation extends BrowserAutomation {
       this.log('상품정보고시 입력');
       // Nexacro merged grid cells use separate columns. Calibrate once rather than guessing.
       await this.fillNotices(p);
-      await this.fillHTML(p);
+      await this.fillHTML(p,folder);
       const add=this.locator('ful_prd00_upfile0_fileitembutton');
       const imageButton=await add.count()?add:this.page.locator('[id*="ful_prd00"]').getByText('추가',{exact:true}).last();
       await this.reveal(imageButton);
@@ -437,9 +438,10 @@ export class LotteAutomation extends BrowserAutomation {
     this.log('제조자 사용 · 제조연월 '+manufactured+' 자동 입력 및 반영 확인 완료');
   }
 
-  async fillHTML(p){
+  async fillHTML(p,folder){
     this.log('공식 상세 HTML 및 대표이미지 입력');
-    const {html,sources}=buildDetailContent(p.images,p.colors,p.colorImages,p.originalDetailUrl);
+    const embedded=folder?await embeddedOfficialSections(p,folder):[];
+    const {html,sources}=buildDetailContent(p.images,p.colors,p.colorImages,p.originalDetailUrl,embedded);
     if(!p.images.detail)this.log('상세 이미지가 없어 대표컷·추가컷으로 상세페이지를 구성합니다.');
     // Resolve editor iframe from the actual document rather than global JS editor objects.
     let frame;

@@ -2,9 +2,11 @@ import sharp from 'sharp';
 import path from 'node:path';
 import {readFile} from 'node:fs/promises';
 import {buildDetailContent} from './detail-html.mjs';
+import {embeddedOfficialSections} from './smartstore-official-sections.mjs';
 
 export async function saveLongDetailImage(product,folder,output){
- const {sources}=buildDetailContent(product.images,product.colors,product.colorImages,product.originalDetailUrl);
+ const embedded=await embeddedOfficialSections(product,folder);
+ const {sources}=buildDetailContent(product.images,product.colors,product.colorImages,product.originalDetailUrl,embedded);
  if(!sources.length)throw Error('저장할 상세이미지가 없습니다.');
  const images=new Map();
  for(const src of new Set(sources)){

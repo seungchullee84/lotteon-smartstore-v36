@@ -41,7 +41,8 @@ import {desktopDirectory,imageDownloadFolder} from './desktop-downloads.mjs';
 import http from 'node:http';
 import {randomBytes} from 'node:crypto';
 import {readFile,writeFile,mkdir,mkdtemp,unlink,rmdir} from 'node:fs/promises';
-import {buildDetailContent} from './detail-html.mjs';
+import {officialDetailKeys} from './detail-html.mjs';
+import {embeddedOfficialSections} from './smartstore-official-sections.mjs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
@@ -238,6 +239,13 @@ const server=http.createServer(async(req,res)=>{
       if(!bundle.files[name])return json(res,404,{error:'없는 두 상품 상세 파일'});
       if(name==='brand.mp4')return await serveBrandVideo(req,res,dataRoot);
       const bytes=await readFile(bundle.files[name]);res.writeHead(200,{'Content-Type':name.endsWith('.html')?'text/html; charset=utf-8':'image/png','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; img-src 'self' data:; media-src 'self'; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; frame-ancestors 'self'; base-uri 'none'"});return res.end(bytes);
+    }
+    if(req.method==='GET'&&url.pathname==='/api/lotte-detail-preview'){
+      const {product,folder}=state;
+      if(!product||!folder||url.searchParams.get('style')!==product.style)return json(res,409,{error:'상품이 변경되었습니다. 상세 미리보기를 다시 열어 주세요.'});
+      const embedded=await embeddedOfficialSections(product,folder);
+      if(state.product!==product||state.folder!==folder)return json(res,409,{error:'상품이 변경되었습니다.'});
+      return json(res,200,{keys:officialDetailKeys(product.images,embedded)});
     }
     if(req.method==='GET'&&url.pathname==='/smartstore-detail-preview.html'){
       const current=state.product;if(!current||!state.folder)return json(res,400,{error:'먼저 상품을 수집해 주세요.'});
