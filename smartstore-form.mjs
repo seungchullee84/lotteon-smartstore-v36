@@ -289,10 +289,10 @@ function confirmedImageAddress(source,registered){
 }
 
 export async function readSmartstoreImageSlot(container){
- const {sources,registered}=await container.evaluate(slot=>{
-  const uploaded=slot.querySelector('input[name="_hidden_uploaded_names"]');
+ const {sources,registered}=await container.evaluateAll(([slot])=>{
+  const uploaded=slot?.querySelector('input[name="_hidden_uploaded_names"]');
   return {
-   sources:[...slot.querySelectorAll('img')].map(image=>image.currentSrc||image.src),
+   sources:Array.from(slot?.querySelectorAll('img')??[],image=>image.currentSrc||image.src),
    registered:uploaded?uploaded.value.split(',').map(value=>value.trim()).filter(Boolean):null
   };
  });
