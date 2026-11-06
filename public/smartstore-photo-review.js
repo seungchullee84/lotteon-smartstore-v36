@@ -136,11 +136,14 @@
   const old=node.querySelector(':scope > .photo-official-chip');if(old)old.remove();
   if(!node.dataset.photoId&&chip?.image&&/^data:image\/jpeg;base64,/.test(chip.image)){const image=document.createElement('img');image.className='photo-official-chip';image.src=chip.image;image.alt=color+' 공식 색상칩';image.draggable=false;node.prepend(image);}
  }
- function arrangePhotoGroups(){
+ function arrangePhotoGroups(movedCard){
   const sectionNames=[...current.colors,'색상 선택 필요','케어라벨','사용 안 함'];
   const unassigned=current.colors.length;
   const groups=sectionNames.map(()=>[]);
-  for(const card of grid.querySelectorAll(':scope > [data-photo-id]')){
+  const orderedCards=[...grid.querySelectorAll(':scope > [data-photo-id]')];
+  const movedIndex=orderedCards.indexOf(movedCard);
+  if(movedIndex>=0)orderedCards.push(...orderedCards.splice(movedIndex,1));
+  for(const card of orderedCards){
    const role=card.querySelector('[data-field=role]').value;
    const index=current.colors.indexOf(dragGroup(card));
    let section=index<0?unassigned:index;
@@ -162,7 +165,6 @@
  }
  sortButton.onclick=()=>{if(!loading&&current)arrangePhotoGroups();};
 
- // Keep the cards in place while edits are in progress.
  function updatePhotoSummary(){
   const cards=grid.querySelectorAll(':scope > [data-photo-id]');
   assignOrderedRoles();
@@ -268,8 +270,13 @@
      const top=dialog.scrollTop;update();updatePhotoSummary();rememberSelection();dialog.scrollTop=top;
     };
     color.onchange=()=>{
-     const top=dialog.scrollTop;card.dataset.colorOverride='true';
-     update();updatePhotoSummary();rememberSelection();dialog.scrollTop=top;
+     const focused=document.activeElement===color;
+     card.dataset.colorOverride='true';
+     update();
+     arrangePhotoGroups(card);
+     rememberSelection();
+     if(focused)color.focus({preventScroll:true});
+     card.scrollIntoView({block:'nearest',inline:'nearest'});
     };
     card.refreshPhotoView=update;update();
     const cardTop=document.createElement('div');cardTop.className='photo-card-top';cardTop.append(badge,mainLabel);
