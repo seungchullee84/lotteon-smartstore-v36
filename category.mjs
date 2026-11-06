@@ -14,6 +14,13 @@ export function isMensUnderwear(product){
  const title=product.rawName||product.name||'';
  return product.gender==='남성'&&(/지워머|내의|내복/.test(title)||(product.sourceCategory?.includes('INNERWEAR')&&/발열|레깅스/.test(title)));
 }
+export function isMensFleeceZipJacket(product){
+ const title=product.rawName||product.name||'';
+ return product.gender==='남성'
+  && !product.sourceCategory?.some(label=>/^(TOP|PANTS|INNERWEAR|WOMEN|여성)$/i.test(label)||/주니어|JUNIOR/i.test(label))
+  && /플리스|후리스|\bfleece\b/i.test(title) && /집업|\bzip[-\s]*up\b/i.test(title)
+  && !/후드|후디|hood|팬츠|바지|pants|조끼|베스트|vest|니트|가디건|카디건|스웨터|맨투맨|티셔츠|패딩|다운|푸퍼|바람막이|윈드브레이커|코트|아노락|반\s*집업|하프\s*집업|(?:half|quarter)[-\s]*zip/i.test(title);
+}
 export function categoryAlternatives(value){
  const label=value.replace(/^[^:：]*[:：]\s*/,'').trim();const gender=label.match(/^(남성|여성)/)?.[0]||'';const base=label.replace(/^(남성|여성)/,'');
  const groups=[['바람막이','바람막이점퍼','윈드브레이커'],['스웨트셔츠/후드/집업','후드티셔츠','후드티','후드','맨투맨/후드티','맨투맨/후드','스웨트셔츠','맨투맨'],['티셔츠/맨투맨','긴팔티셔츠/맨투맨','티셔츠/후드','티셔츠/탑','티셔츠','라운드넥티셔츠','라운드티셔츠','긴팔티셔츠'],['트레이닝바지','트레이닝하의','트레이닝팬츠','스웻팬츠','스웨트팬츠','트레이닝복'],['바지','팬츠','캐주얼바지','바지/레깅스'],['면바지','치노면바지','치노팬츠','코튼팬츠','면바지/밴딩팬츠'],['기모팬츠','기모바지','브러시드팬츠'],['청바지','데님','데님팬츠'],['재킷','자켓','자켓/코트','재킷/코트'],['점퍼','점퍼/패딩/야상','점퍼/패딩','재킷/점퍼'],['패딩','패딩/다운','패딩점퍼','다운점퍼','패딩/다운점퍼'],['니트','니트/스웨터','스웨터/풀오버','스웨터','풀오버','니트/가디건','스웨터/가디건'],['가디건','카디건','집업니트','집업 니트','니트집업'],['코트','롱코트','하프코트','트렌치코트','자켓/코트','재킷/코트']];
@@ -42,7 +49,7 @@ export function channelCategoryPath(category){
  if(leaf==='니트머플러')return {...category,channelMajor:'잡화',channelMiddle:'워머/머플러',channelSmall:'니트머플러',channelDetail:''};
  const paths=[
   {leaves:['청바지','데님','데님팬츠','부츠컷/와이드핏','스키니/슬림핏','스트레이트핏'],middle:'청바지'},
-  {leaves:['바람막이','바람막이점퍼','윈드브레이커','패딩','패딩/다운','패딩점퍼','다운점퍼','패딩/다운점퍼'],middle:'점퍼/패딩/야상'},
+  {leaves:['집업점퍼','바람막이','바람막이점퍼','윈드브레이커','패딩','패딩/다운','패딩점퍼','다운점퍼','패딩/다운점퍼'],middle:'점퍼/패딩/야상'},
   {leaves:['코트','롱코트','하프코트','트렌치코트','재킷','자켓','캐주얼자켓','캐주얼재킷','트위드자켓','테일러드자켓','노카라자켓','린넨/마자켓'],middle:'자켓/코트'},
   {leaves:['면바지','면바지/밴딩팬츠','치노면바지','치노팬츠','코튼팬츠','슬랙스','기모팬츠','기모바지','브러시드팬츠'],middle:'바지'},
   {leaves:['트레이닝바지','트레이닝팬츠','스웻팬츠','스웨트팬츠'],middle:'트레이닝복'}

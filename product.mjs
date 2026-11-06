@@ -1,6 +1,6 @@
 import {desktopOfficialUrl} from './desktop-official-research.mjs';
 import {resolveCatalogCategory} from './category-catalog.mjs';
-import {isMensUnderwear,MENS_UNDERWEAR_CATEGORY,mensTrainingCategory} from './category.mjs';
+import {isMensUnderwear,MENS_UNDERWEAR_CATEGORY,mensTrainingCategory,isMensFleeceZipJacket} from './category.mjs';
 import {officialColorChips,collectColorChips} from './color-chips.mjs';
 import {prepareMainImage} from './main-image.mjs';
 import {normalizeCountry} from './country.mjs';
@@ -84,6 +84,9 @@ export function productClassification(html) {
     if(/패딩|푸퍼|다운/.test(title)&&!/코트/.test(title))Object.assign(category,{commonMiddle:gender+'의류아우터',commonSmall:gender+'점퍼',channelMiddle:'점퍼/패딩/야상',channelSmall:'패딩/다운점퍼'});
   }
   if(gender&&sourceCategory.includes('OUTER')&&/윈드브레이커|바람막이/.test(sourceCategory.join(' ')+' '+itemTitle))Object.assign(category,{commonMiddle:gender+'의류아우터',commonSmall:gender+'점퍼',channelMiddle:'점퍼/패딩/야상',channelSmall:'바람막이점퍼'});
+  if((!category.channelSmall||['재킷','캐주얼자켓'].includes(category.channelSmall))&&isMensFleeceZipJacket({gender,sourceCategory,rawName:itemTitle})){
+    Object.assign(category,{commonMiddle:'남성의류아우터',commonSmall:'남성점퍼',channelMiddle:'점퍼/패딩/야상',channelSmall:'집업점퍼'});
+  }
   // Only mappings verified against the partner portal are prefilled.
   if(gender==='여성'&&sourceCategory.includes('TOP')&&sourceCategory.includes('긴팔티'))Object.assign(category,{commonMiddle:'M0210 : 여성의류상의',commonSmall:'00843 : 여성티셔츠/탑',channelMiddle:'티셔츠/맨투맨',channelSmall:'라운드넥티셔츠'});
   // Fall back to the product name when the official breadcrumb has no mapping.

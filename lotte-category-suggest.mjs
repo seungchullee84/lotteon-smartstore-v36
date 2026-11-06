@@ -9,6 +9,10 @@ export function suggestMissingLotteCategory(product){
  const suggested=productClassification('<div class="navi"><a>Home</a>'+links+'<a>'+escape(product.rawName||product.name)+'</a></div>');
  // Never infer a missing sex or reuse the other sex's tree.
  if(!['남성','여성'].includes(product.gender)||suggested.gender!==product.gender)return {category:before,filled:[],missing:LOTTE_CATEGORY_FIELDS.filter(key=>!before[key]?.trim()),message:'공식 상품 경로의 성별을 확인해 주세요.'};
+ if(suggested.category.channelSmall==='집업점퍼'){
+  const label=value=>value?.replace(/^\w+\s*[:：]\s*/,'').replace(/\s/g,'');
+  if(LOTTE_CATEGORY_FIELDS.some(key=>label(before[key])&&label(before[key])!==label(suggested.category[key])))return {category:before,filled:[],missing:LOTTE_CATEGORY_FIELDS.filter(key=>!before[key]?.trim()),message:'입력된 분류를 유지했습니다. 남은 공란을 확인해 주세요.'};
+ }
  const candidate={...product,category:{...before}};
  for(const [key,value] of Object.entries(suggested.category))if(!candidate.category[key]?.trim()&&typeof value==='string')candidate.category[key]=value;
  repairCategoryFields(candidate);

@@ -1,4 +1,4 @@
-import {isMensUnderwear,MENS_UNDERWEAR_CATEGORY,channelCategoryPath,mensTrainingCategory} from './category.mjs';
+import {isMensUnderwear,MENS_UNDERWEAR_CATEGORY,channelCategoryPath,mensTrainingCategory,isMensFleeceZipJacket} from './category.mjs';
 import {readFileSync} from 'node:fs';
 const strip=s=>String(s||'').replace(/^[^:：]*[:：]\s*/,'').replace(/\s/g,'');
 export function loadCatalog(){
@@ -64,6 +64,7 @@ export function resolveCatalogCategory(p,catalog=loadCatalog(),common=null){
   prefer(/무스탕|가죽/.test(text),'무스탕/가죽자켓','가죽자켓');
   prefer(/패딩|다운|푸퍼/.test(text),/조끼|베스트/.test(text)?'패딩조끼':'패딩/다운점퍼');
   prefer(/바람막이|윈드브레이커/.test(text),'바람막이점퍼');
+  prefer(!wanted&&isMensFleeceZipJacket(p),'집업점퍼');
   prefer(/바지|팬츠|PANTS|슬랙스/.test(text),...(/데님|청바지/.test(text)?['청바지']:/슬랙스/.test(text)?['슬랙스']:/트레이닝|스웻|스웨트|조거/.test(text)?['트레이닝하의','트레이닝바지']:['면바지/밴딩팬츠','치노면바지','면바지']));
   prefer(/가디건|카디건/.test(text),/집업/.test(text)?'집업가디건':/브이|V넥/i.test(text)?'브이넥가디건':/라운드/.test(text)?'라운드넥가디건':'가디건');
   prefer(/데님|청바지/.test(text)&&/바지|팬츠|PANTS|청바지/.test(text),/와이드|부츠컷/.test(text)?'부츠컷/와이드핏':/스키니|슬림/.test(text)?'스키니/슬림핏':/스트레이트|일자/.test(text)?'스트레이트핏':'청바지');

@@ -6,6 +6,24 @@ import path from 'node:path';
 import {suggestMissingLotteCategory,LOTTE_CATEGORY_FIELDS} from '../lotte-category-suggest.mjs';
 import {saveCategoryMatch,loadCategoryCache,categoryKey} from '../category-cache.mjs';
 const product=(gender,rawName,section='TOP')=>({gender,rawName,name:rawName,sourceCategory:[gender==='남성'?'MEN':'WOMEN',section],category:{commonMiddle:'',commonSmall:'',channelMiddle:'',channelSmall:''}});
+test('남성 플리스 집업은 실제 집업점퍼 경로를 적용하고 다른 형태와 구분한다',()=>{
+ const current={...product('남성','NEW 플리스 목넥 집업'),style:'026992',sourceCategory:['신상품','남성']};
+ const similar={...product('남성','후리스 하이넥 집업 재킷','OUTER'),sourceCategory:['MEN','OUTER','캐주얼재킷']};
+ for(const item of [current,similar]){
+  const {category,missing}=suggestMissingLotteCategory(item);
+  assert.deepEqual(missing,[]);
+  assert.equal(category.commonMiddle,'M0010 : 남성의류아우터');
+  assert.equal(category.commonSmall,'00689 : 남성점퍼');
+  assert.equal(category.channelMiddle,'점퍼/패딩/야상');
+  assert.equal(category.channelSmall,'집업점퍼');
+  assert.equal(category.channelCodes.small,'BC31090300');
+ }
+ for(const [gender,title,section] of [['남성','플리스 후드 집업','OUTER'],['남성','플리스 하프 집업','OUTER'],['남성','플리스 집업 조끼','OUTER'],['남성','플리스 스웻 팬츠','PANTS'],['여성','플리스 목넥 집업','OUTER']]){
+  assert.notEqual(suggestMissingLotteCategory(product(gender,title,section)).category.channelSmall,'집업점퍼');
+ }
+ const chosen={...current,category:{...current.category,channelSmall:'캐주얼자켓'}};
+ assert.equal(suggestMissingLotteCategory(chosen).category.channelSmall,'캐주얼자켓');
+});
 test('공란 여성 후드 집업은 실제 여성 목록의 유사 경로로 완성한다',()=>{
  const result=suggestMissingLotteCategory(product('여성','플리스 후드 집업'));
  assert.deepEqual(result.missing,[]);assert.equal(result.category.channelSmall,'후드티/후드집업');assert.equal(result.category.commonSmall,'00843 : 여성티셔츠/탑');
