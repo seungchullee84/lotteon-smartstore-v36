@@ -1,6 +1,11 @@
 const attempts=new WeakMap();
 const samePortal=page=>{try{const u=new URL(page.url());return u.origin==='https://together.lotteshopping.com'&&u.pathname.startsWith('/EMDV3/');}catch{return false;}};
 const idSelector='[id$="div_Login_edt_LoginId_input"]',passwordSelector='[id$="div_Login_edt_LoginPassword_input"]',buttonSelector='[id$="div_Login_btn_Login"]';
+const expiryMessage=/세션\s*(?:정보\s*)?(?:이|가)?\s*만료|로그인\s*시간\s*(?:이|가)?\s*만료/;
+export const LOTTE_SESSION_EXPIRED='롯데 EDI 세션이 만료됐습니다. 전용 크롬에서 안내창을 닫고 다시 로그인해 주세요.';
+export async function lotteSessionExpired(page){
+ return samePortal(page)&&await page.getByText(expiryMessage).filter({visible:true}).first().isVisible().catch(()=>false);
+}
 export async function selectLottePage(pages,previous){
  const eligible=pages.filter(page=>!page.isClosed()&&samePortal(page));
  if(eligible.includes(previous))return previous;
@@ -10,11 +15,16 @@ export async function selectLottePage(pages,previous){
 export async function tryLotteLogin(page,{store,log=()=>{},check=()=>{},timeout=12000,waitForForm=false}={}){
  if(!samePortal(page))return {status:'unrelated'};
  const id=page.locator(idSelector),password=page.locator(passwordSelector),button=page.locator(buttonSelector);
+ if(await lotteSessionExpired(page))return {status:'expired'};
  if(waitForForm&&!await id.isVisible().catch(()=>false)&&!await page.getByText('로그아웃',{exact:true}).first().isVisible().catch(()=>false)){
   await id.waitFor({state:'visible',timeout:6000}).catch(()=>{});
  }
+ if(await lotteSessionExpired(page))return {status:'expired'};
  // Only the known visible official login form is eligible. Never inspect cookies.
- if(!await id.isVisible().catch(()=>false)){attempts.delete(page);return {status:'session'};}
+ if(!await id.isVisible().catch(()=>false)){
+  if(await page.getByText('로그아웃',{exact:true}).first().isVisible().catch(()=>false)){attempts.delete(page);return {status:'session'};}
+  return {status:'unknown'};
+ }
  if(!await password.isVisible().catch(()=>false)||!await button.isVisible().catch(()=>false))return {status:'manual'};
  let credentials;try{credentials=await store.load();}catch{log('자동 로그인 설정을 읽지 못했습니다. 설정 화면에서 다시 저장하거나 직접 로그인해 주세요.');return {status:'unavailable'};}
  if(!credentials)return {status:'unconfigured'};
@@ -38,6 +48,7 @@ export async function tryLotteLogin(page,{store,log=()=>{},check=()=>{},timeout=
   const until=Date.now()+timeout;
   while(Date.now()<until&&!dialog){
    check();if(!samePortal(page))break;
+   if(await lotteSessionExpired(page))return {status:'expired'};
    if(!await id.isVisible()){
     const logout=page.getByText('로그아웃',{exact:true});
     if(await logout.first().isVisible().catch(()=>false)){

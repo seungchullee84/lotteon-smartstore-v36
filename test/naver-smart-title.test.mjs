@@ -16,6 +16,13 @@ test('27자 이상을 지키며 근거 있는 동의어와 남성 표기를 보�
  assert(!hasDuplicateTitleMeaning(p,result.title));assert.deepEqual(p,before);
  assert.equal(composePopularTitle(p,ranking.filter(e=>!['풀집업자켓','남성용자켓'].includes(e.keyword))).title,result.title,'낮은 관심도의 긴 표현이 없어도 결과 유지');
 });
+test('026992 플리스 목넥 집업은 제목에 점퍼가 없어도 상품 종류를 확인한다',()=>{
+ const p={style:'026992',name:'남성 플리스 목넥 집업 026992',rawName:'NEW 플리스 목넥 집업',gender:'남성',sourceCategory:['신상품','남성']};
+ const candidates=expandedTitleCandidates(p);
+ assert(candidates.includes('남성점퍼'));
+ assert.equal(composePopularTitle(p,[]).title,'지오다노 남성 플리스 목넥 집업 점퍼 026992');
+ assert.throws(()=>expandedTitleCandidates({...p,rawName:'플리스 반집업',name:'남성 플리스 반집업 026992'}),/상품 종류/);
+});
 test('핏·짜임·플리스 후보도 원문 근거가 있을 때만 확장',()=>{
  const p={style:'123456',gender:'여성',name:'여성 케이블 레귤러핏 니트 123456',rawName:'여성 케이블 레귤러핏 니트'};
  const candidates=expandedTitleCandidates(p);

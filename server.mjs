@@ -51,6 +51,7 @@ import {searchProductTags,saveSelectedProductTags,selectedProductTagResearch,rem
 import {assertAdultProduct,collect,parseProductInput,buildKeywords,repairCategoryFields} from './product.mjs';
 import {LotteAutomation} from './automation.mjs';
 import {createBrowserLoginStore} from './browser-login-store.mjs';
+import {LOTTE_SESSION_EXPIRED} from './browser-login.mjs';
 import {prepareMainImage,backgroundImageStatus,backgroundSelection,applyExtraExclusions,excludeExtraImage} from './main-image.mjs';
 import sharp from 'sharp';
 import {saveIconMeaning,iconWashingResult} from './washing-icons.mjs';
@@ -86,7 +87,7 @@ const state={busy:false,phase:'idle',logs:[],product:null,folder:null,error:null
 const newProductResearch=startNewProductResearch(root,{isBusy:()=>state.busy||state.photoPreparation?.status==='preparing'});
 const benefitResearch=startNewListingMonitor(root,{onSnapshot:website=>{void newProductResearch.observe(website);}});
 benefitResearch.state.folderResearch=newProductResearch.state;
-if(process.env.REGISTER_RESTORE){const restored=path.resolve(process.env.REGISTER_RESTORE);if(restored.startsWith(dataRoot+path.sep)){state.product=JSON.parse(await readFile(restored,'utf8'));repairCategoryFields(state.product);if(state.product.categoryMatch){state.product.fieldStatus||={};state.product.fieldStatus.category=state.product.categoryMatch.status;}state.product.keywords=buildKeywords(state.product);state.folder=path.dirname(restored);state.phase='done';state.revision++;}}
+if(process.env.REGISTER_RESTORE){const restored=path.resolve(process.env.REGISTER_RESTORE);if(restored.startsWith(dataRoot+path.sep)){state.product=JSON.parse(await readFile(restored,'utf8'));repairCategoryFields(state.product);if(state.product.categoryMatch){state.product.fieldStatus||={};state.product.fieldStatus.category=state.product.categoryMatch.status;}state.product.keywords??=buildKeywords(state.product);state.folder=path.dirname(restored);state.phase='done';state.revision++;}}
 if(state.product){try{assertAdultProduct(state.product);}catch(error){if(error.code!=='JUNIOR_PRODUCT')throw error;state.product=null;state.folder=null;state.phase='error';state.error=error.message;state.revision++;}}
 if(state.product){state.product=await productEdits.apply(state.product);await applyExtraExclusions(state.folder,state.product);}
 if(state.product&&state.folder){
@@ -619,7 +620,7 @@ const server=http.createServer(async(req,res)=>{
         res.once('finish',()=>{server.close(()=>process.exit(0));setTimeout(()=>process.exit(0),1500).unref();});
         return json(res,200,{ok:true});
       }
-      if(url.pathname==='/api/open'){if(state.busy)throw Error('작업 중에는 브라우저를 다시 열 수 없습니다.');await bot.open();state.error=null;return json(res,200,{ok:true});}
+      if(url.pathname==='/api/open'){if(state.busy)throw Error('작업 중에는 브라우저를 다시 열 수 없습니다.');const login=await bot.open();if(login.status==='expired')return json(res,409,{error:LOTTE_SESSION_EXPIRED});state.error=null;return json(res,200,{ok:true});}
       if(url.pathname==='/api/collect'){
         if(state.busy)return json(res,409,{error:'진행 중인 작업이 있습니다.'});
         if(b.allowMissingDetail===true&&state.detailFallbackRequest?.input!==b.style)return json(res,400,{error:'먼저 일반 수집으로 해당 상품의 상세 원본 누락을 확인해 주세요.'});

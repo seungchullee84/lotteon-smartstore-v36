@@ -2,6 +2,7 @@ import {smartstoreTitle,assertSmartstoreTitleLength} from './smartstore-title.mj
 import {titleCandidates} from './naver-title.mjs';
 import {keywordCandidates,createKeywordOptimizer} from './naver-keywords.mjs';
 import {researchForProduct} from './apparel-tag-research.mjs';
+import {isMensFleeceZipJacket} from './category.mjs';
 import {garmentSynonyms,featureSynonyms,titleFeatureGroups,titleCategoryAliases,featureQueryForms,mentionedFeatureVariant} from './apparel-title-synonyms.mjs';
 
 const synonyms=garmentSynonyms;
@@ -26,7 +27,7 @@ function productFeatures(product){
  return titleFeatureGroups(officialTitleFacts(product),product);
 }
 // Official naming is evidence of product facts, never evidence of popularity.
-const factualWord=/^(?:브이넥|터틀넥|아가일|기모|경량|스트라이프|와이드|테이퍼드|히든밴딩|밴딩|브러시드|체크|후드|집업|긴팔|반팔|숏|숏기장|롱|데님|트레이닝|퀼팅|슬림|레귤러|오버핏|코튼|면|울|캐시미어|나일론|폴리에스터|오리털|거위털|구스|덕|스판|린넨|\d+%)+$/;
+const factualWord=/^(?:브이넥|터틀넥|목넥|하이넥|스탠드넥|플리스|후리스|아가일|기모|경량|스트라이프|와이드|테이퍼드|히든밴딩|밴딩|브러시드|체크|후드|집업|긴팔|반팔|숏|숏기장|롱|데님|트레이닝|퀼팅|슬림|레귤러|오버핏|코튼|면|울|캐시미어|나일론|폴리에스터|오리털|거위털|구스|덕|스판|린넨|\d+%)+$/;
 const categoryAliases=titleCategoryAliases;
 // Compound search phrases are decomposed before comparing meanings. A gender
 // or garment repeated inside 여성패딩/후드패딩 still counts as repetition.
@@ -76,13 +77,16 @@ export function expandedTitleCandidates(product){
   const term=form+(aliases[0]||basic.kind);
   return sexes.length?[sexes[0]+term,term]:[term];
  })));
- const mandatory=[...new Set([words[0],...aliases.flatMap(alias=>[alias,...sexes.map(sex=>sex+alias)]),...variantPairs])];
  const excludedAliases=(synonyms[basic.kind]||[]).filter(alias=>!aliases.includes(alias));
+ const allowedAlias=term=>{
+  const remaining=aliases.reduce((text,alias)=>text.replaceAll(alias,''),term);
+  return !excludedAliases.some(alias=>remaining.includes(alias));
+ };
+ const mandatory=[...new Set([words[0],...aliases.flatMap(alias=>[alias,...sexes.map(sex=>sex+alias)]),...variantPairs])].filter(allowedAlias);
  const researchTerms=researchForProduct(product).titleTerms.filter(term=>
-  !(excludedAliases.some(alias=>term.includes(alias))&&!aliases.some(alias=>term.includes(alias)))&&
   !featureSynonyms.some(group=>group.variants.some(word=>word.length>1&&term.includes(word))&&!features.some(f=>f.id===group.id))
  );
- const optional=[...new Set([...researchTerms,...necks,...queries,...words,...combined])].filter(term=>!mandatory.includes(term));
+ const optional=[...new Set([...researchTerms,...necks,...queries,...words,...combined])].filter(term=>!mandatory.includes(term)&&allowedAlias(term));
  return [...mandatory,...optional.slice(0,Math.max(0,49-mandatory.length))];
 }
 
@@ -120,6 +124,7 @@ export function composePopularTitle(product,ranking){
  words.unshift(...[...choices].sort((a,b)=>Number(materialIds.includes(b.id))-Number(materialIds.includes(a.id))).map(f=>f.ranked[0]));
  // Replace an exact category synonym without changing fabric, fit or model facts.
  for(let i=0;i<words.length;i++)if(mainAliases.includes(words[i]))words[i]=primary;
+ if(kind==='점퍼'&&isMensFleeceZipJacket(product)&&!words.includes(primary))words.push(primary);
  if(kind==='패딩'&&!/조끼|베스트/.test(base)&&words.some(word=>['자켓','재킷','점퍼'].includes(word))){
   const garment=['점퍼','자켓','재킷'].sort((a,b)=>(scores.get(b)||0)-(scores.get(a)||0))[0];
   words=words.filter(word=>!['자켓','재킷','점퍼'].includes(word));words.unshift(garment);

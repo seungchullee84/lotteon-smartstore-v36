@@ -6,6 +6,7 @@ import os from 'node:os';
 import {chromium} from 'playwright';
 import {createBrowserLoginStore} from '../browser-login-store.mjs';
 import {tryLotteLogin,selectLottePage} from '../browser-login.mjs';
+import {LotteAutomation} from '../automation.mjs';
 import {publishable} from '../github-sync.mjs';
 
 test('계정은 Windows 사용자 암호화로만 저장하고 상태 응답·공유에서 제외한다',{skip:process.platform!=='win32'},async()=>{
@@ -54,6 +55,25 @@ test('공식 로그인 화면에서만 한 번 입력하고 성공·실패·수�
   assert.equal((await tryLotteLogin(disabled,{store:{load:async()=>null}})).status,'unconfigured');assert.equal(await disabled.locator('input').first().inputValue(),'');
   assert.equal(await selectLottePage([page,delayed,disabled],null),delayed,'다시 연결할 때 남아 있는 로그인 화면보다 로그인된 창을 재사용');
   assert.equal(await selectLottePage([page,delayed,disabled],page),page,'이미 연결한 작업 창을 유지');
+ }finally{await browser.close();}
+});
+
+test('롯데 세션 만료 안내가 남아 있으면 이전 입력 화면과 자동 로그인을 건드리지 않는다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const page=await browser.newPage();
+  await page.route('**/*',route=>route.fulfill({contentType:'text/html; charset=utf-8',body:'<main></main>'}));
+  await page.goto('https://together.lotteshopping.com/EMDV3/index.html');
+  const store={load:async()=>assert.fail('계정 읽기 금지')};
+  assert.equal((await tryLotteLogin(page,{store})).status,'unknown');
+  await page.setContent('<input id="edt_style_input" value="026992(DT)"><div role="alert">세션정보가 만료되었습니다</div><input id="form_div_Login_edt_LoginId_input">');
+  assert.equal((await tryLotteLogin(page,{store})).status,'expired');
+  const bot=new LotteAutomation('',()=>{});
+  bot.page=page;
+  bot.activateRegistration=async()=>assert.fail('이전 상품등록 화면 조작 금지');
+  await assert.rejects(bot.run({style:'026992',category:{}},'',false),/롯데 EDI 세션이 만료/);
+  await assert.rejects(bot.settle(),/롯데 EDI 세션이 만료/);
+  assert.equal(await page.locator('#edt_style_input').inputValue(),'026992(DT)');
  }finally{await browser.close();}
 });
 

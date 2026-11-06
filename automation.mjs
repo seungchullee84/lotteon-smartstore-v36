@@ -2,7 +2,7 @@ import {resolveCatalogCategory} from './category-catalog.mjs';
 import {categoryKey,loadCategoryCache,saveCategoryMatch} from './category-cache.mjs';
 import {BrowserAutomation} from './browser-connection.mjs';
 import {createBrowserLoginStore} from './browser-login-store.mjs';
-import {tryLotteLogin,selectLottePage} from './browser-login.mjs';
+import {tryLotteLogin,selectLottePage,lotteSessionExpired,LOTTE_SESSION_EXPIRED} from './browser-login.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {OptionCoverage} from './option-coverage.mjs';
@@ -24,8 +24,9 @@ export class LotteAutomation extends BrowserAutomation {
     const cdp=await this.context.newCDPSession(this.page);
     try{const {windowId}=await cdp.send('Browser.getWindowForTarget');await cdp.send('Browser.setWindowBounds',{windowId,bounds:{windowState:'normal'}});await cdp.send('Browser.setWindowBounds',{windowId,bounds:{windowState:'maximized'}});}finally{await cdp.detach();}
     await this.page.bringToFront();
-    await this.ensureLogin(true);
-    this.log('전용 크롬에 연결했습니다. 로그인 후 상품등록 화면을 열어 주세요.');
+    const login=await this.ensureLogin(true);
+    this.log(login.status==='expired'?LOTTE_SESSION_EXPIRED:'전용 크롬에 연결했습니다. 로그인 후 상품등록 화면을 열어 주세요.');
+    return login;
   }
   async wait(message){
     this.log(message); this.onPause?.(message);
@@ -103,7 +104,7 @@ export class LotteAutomation extends BrowserAutomation {
   async click(loc){this.check();await this.reveal(loc);await loc.click();await this.pace();}
   async set(suffix,value){const loc=this.locator(suffix);await this.click(loc);await loc.fill(String(value));await this.pace();await loc.press('Tab');await this.pace();}
   async textClick(text,scope=this.page){await this.click(scope.getByText(text,{exact:true}).filter({visible:true}).last());}
-  async settle(){await this.page.locator('[id$="waitwindow"]').waitFor({state:'hidden',timeout:45000}).catch(()=>{});this.check();}
+  async settle(){await this.page.locator('[id$="waitwindow"]').waitFor({state:'hidden',timeout:45000}).catch(()=>{});this.check();if(await lotteSessionExpired(this.page))throw Error(LOTTE_SESSION_EXPIRED);}
   async combo(suffix,choice,allowSimilar=false,knownLabels=null){
     const input=this.locator(suffix+'_comboedit_input');
     await this.reveal(input);
@@ -298,12 +299,13 @@ export class LotteAutomation extends BrowserAutomation {
   async run(p,folder,finalize){
     validateStyle(p.style);this.stopped=false;
     const catalogMatch=resolveCatalogCategory(p);if(catalogMatch.path){p.category=catalogMatch.category;this.log('실제 분류 매칭표 적용: '+p.category.commonSmall+' / '+p.category.channelMiddle+' > '+p.category.channelSmall)}
-    if(!this.page||this.page.isClosed()||this.browser&&!this.browser.isConnected())await this.open();
-    else await this.ensureLogin();
+    const login=!this.page||this.page.isClosed()||this.browser&&!this.browser.isConnected()?await this.open():await this.ensureLogin();
+    if(login.status==='expired')throw Error(LOTTE_SESSION_EXPIRED);
     const start=Date.now();
     this.log('자동입력 시작');
     try{
       if(!await this.page.locator('[id*="TabFrame_form_tab_Menu_OCPIPMPiMPrdcInfoRgstM_"]').count())await this.wait('전용 크롬에서 로그인·추가 인증을 완료하고 온라인 상품등록 화면을 연 뒤 매장 품번 241142를 선택하고 계속을 눌러 주세요.');
+      if(await lotteSessionExpired(this.page))throw Error(LOTTE_SESSION_EXPIRED);
       await this.activateRegistration();
       const channelOpen=await this.locator('cbo_preSet_comboedit_input').count()>0;
       if(channelOpen){
@@ -372,7 +374,12 @@ export class LotteAutomation extends BrowserAutomation {
       await this.snapshot(folder,'completed');await this.textClick('확인');
       const seconds=Math.round((Date.now()-start)/1000);this.log(`등록 요청 완료 (${Math.floor(seconds/60)}분 ${seconds%60}초)`);
       await writeFile(path.join(folder,'result.json'),JSON.stringify({style:p.style,status:'requested',seconds,at:new Date().toISOString()},null,2));
-    }catch(e){if(this.stopped)throw Error('사용자가 중단했습니다. 입력된 내용은 크롬에 남아 있습니다.');await this.snapshot(folder,'stopped').catch(()=>{});throw Error(e.message+' 입력된 내용은 브라우저에 남아 있습니다. 신규를 다시 실행하기 전에 중복 여부를 확인해 주세요.');}
+    }catch(e){
+      if(this.stopped)throw Error('사용자가 중단했습니다. 입력된 내용은 크롬에 남아 있습니다.');
+      await this.snapshot(folder,'stopped').catch(()=>{});
+      if(e.message===LOTTE_SESSION_EXPIRED||await lotteSessionExpired(this.page))throw Error(LOTTE_SESSION_EXPIRED+' 재로그인 후 기존 입력과 중복 등록 여부를 확인해 주세요.');
+      throw Error(e.message+' 입력된 내용은 브라우저에 남아 있습니다. 신규를 다시 실행하기 전에 중복 여부를 확인해 주세요.');
+    }
   }
   async fillNotices(p){
     const grid='grd_PintfcnItem';

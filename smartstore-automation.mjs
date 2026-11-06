@@ -54,7 +54,8 @@ export class SmartstoreAutomation extends BrowserAutomation{
     try{await this.page.locator('input[name="product.name"]').waitFor({state:'visible',timeout:10000});}catch{throw Error('전용 크롬에서 스마트스토어 로그인 후 수정 또는 복사등록 화면을 열어 주세요.');}
     if(!isSmartstoreInputUrl(this.page.url()))throw Error('수정 또는 복사등록 화면에서 실행해 주세요.');
     this.log('대상 화면 확인 · '+this.copyFormUrl+' · '+await this.page.locator('input[name="product.name"]').inputValue());
-    this.log('기존 반영 상태 · 대표 '+await this.page.locator('ncp-product-temp-photo-infra-image-upload#representImage img').count()+'장 · 추가 '+await this.page.locator('ncp-product-temp-photo-infra-image-upload#optionalImages img').count()+'장 · 옵션 '+(await this.page.locator('#choice_option_name0').inputValue().catch(()=>''))+' / '+(await this.page.locator('#choice_option_name1').inputValue().catch(()=>'')));
+    const options=await this.page.locator('#choice_option_name0, #choice_option_name1').evaluateAll(inputs=>Object.fromEntries(inputs.map(input=>[input.id,input.value])));
+    this.log('기존 반영 상태 · 대표 '+await this.page.locator('ncp-product-temp-photo-infra-image-upload#representImage img').count()+'장 · 추가 '+await this.page.locator('ncp-product-temp-photo-infra-image-upload#optionalImages img').count()+'장 · 옵션 '+(options.choice_option_name0||'')+' / '+(options.choice_option_name1||''));
   }
   async uploadPrepared(p,folder,{main,extras,detailParts,careLabels=[],preserveTags=false}){
     this.check();if(this.boundProductStyle&&this.boundProductStyle!==p.style)throw Error('전체 입력할 품번이 변경되었습니다.');const plan={...smartstorePlan(p,p.consumerPrice),tagResearch:selectedProductTagResearch(p,{dataRoot:this.root})};

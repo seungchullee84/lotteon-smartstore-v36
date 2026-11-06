@@ -46,7 +46,6 @@ export function validateAnalysis(result,product,description,unknown){
  return result;
 }
 async function prepareSmartstoreAutoImpl(product,folder,{dataRoot,apiKey,signal,fetchImpl=fetch,photoRoots,desktop,log=()=>{},trustFolder=true,recognizePhoto}){
- assertAdultProduct(product);
  if(!/^\d{6}$/.test(product.style)||new URL(product.sourceUrl).origin!=='https://www.giordano.co.kr')throw Error('공식 상품 출처를 확인해 주세요.');
  let html;try{html=await readFile(path.join(folder,'smartstore-official.html'),'utf8');}catch(e){if(e.code!=='ENOENT')throw e;}
  if(!html){const response=await fetchImpl(product.sourceUrl,{signal,redirect:'error'});if(!response.ok)throw Error('공식 상품 소개를 가져오지 못했습니다.');html=await response.text();}
@@ -54,10 +53,12 @@ async function prepareSmartstoreAutoImpl(product,folder,{dataRoot,apiKey,signal,
  let description=officialDescription(html,product);
  const omitPoints=await sellingPointsOmitted(product,dataRoot);
  if(!omitPoints)description=(await officialPointSource(product,folder,description,{dataRoot,signal,log})).text;
+ product={...product,officialDescription:description};
 
  const detailHash=product.images.detail?hash(await readFile(path.join(folder,'detail.jpg'))):null;
  const root=path.join(dataRoot,'smartstore-details',product.style);await mkdir(root,{recursive:true});
  let old;try{old=JSON.parse(await readFile(path.join(root,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+ const previousFiles=old?.style===product.style&&old.sourceUrl===product.sourceUrl?old.photoMapping?.files||[]:[];
  const known=new Map();
  // Human-verified prior mappings are reused by image bytes, never just a date filename.
  if(old?.style===product.style&&old.sourceUrl===product.sourceUrl)for(const group of old.photos||[])for(const [rank,relative] of (group.files||[]).entries()){
@@ -85,7 +86,7 @@ async function prepareSmartstoreAutoImpl(product,folder,{dataRoot,apiKey,signal,
  const photos=found;
  if(!photos.length){const error=Error('현재 품번 '+product.style+' 폴더에 상품사진을 넣어 주세요. 이전 품번이나 삭제된 사진은 사용하지 않습니다.');error.code='PHOTO_FOLDER_EMPTY';throw error;}
  const unknown=[];const mapped=[];
- for(const file of photos){const cached=known.get(hash(file.bytes));const previous=cached?.reviewed===true?cached:old?.photoMapping?.files?.find(r=>r.name===file.name&&r.hash===hash(file.bytes)&&r.role!=='provided')||cached;if(previous?.automatic===true&&previous.reviewed!==true){unknown.push({...file});continue;}if(previous&&previous.role==='detail'&&previous.reviewed!==true&&product.colors.includes(previous.color)){unknown.push({...file,colorHint:previous.color,existingMapping:previous});continue;}if(previous&&previous.role!=='provided'){mapped.push({...file,color:previous.color,role:previous.role,...(previous.automatic===true?{automatic:true,autoValidated:previous.autoValidated===true,evidence:previous.evidence}:{}),...(previous.reviewed===true?{reviewed:true,reviewedAt:previous.reviewedAt,reviewBasis:previous.reviewBasis,reviewedBy:previous.reviewedBy}:{})});continue;}
+ for(const file of photos){const digest=hash(file.bytes),cached=known.get(digest);const previous=cached?.reviewed===true?cached:previousFiles.find(r=>r.name===file.name&&r.hash===digest&&r.role!=='provided')||cached;if(previous?.automatic===true&&previous.reviewed!==true){unknown.push({...file});continue;}if(previous&&previous.role==='detail'&&previous.reviewed!==true&&product.colors.includes(previous.color)&&(!detailHash||previous.externalAnalysisDetailHash!==detailHash)){unknown.push({...file,colorHint:previous.color,existingMapping:previous});continue;}if(previous&&previous.role!=='provided'){mapped.push({...file,color:previous.color,role:previous.role,...(previous.automatic===true?{automatic:true,autoValidated:previous.autoValidated===true,evidence:previous.evidence}:{}),...(previous.reviewed===true?{reviewed:true,reviewedAt:previous.reviewedAt,reviewBasis:previous.reviewBasis,reviewedBy:previous.reviewedBy}:{})});continue;}
   const parent=norm(path.basename(path.dirname(file.file)));const exact=product.colors.find(color=>[norm(color),norm(color).replace(/^\d+/, '')].includes(parent));
   // A color folder can identify its color, but cannot establish front/side/detail.
   unknown.push({...file,...(exact?{colorHint:exact}:{}),...(isCareLabelPhoto(file)?{roleHint:'care-label'}:{})});
@@ -114,10 +115,10 @@ async function prepareSmartstoreAutoImpl(product,folder,{dataRoot,apiKey,signal,
   for(const file of unknown)await addImage(file.bytes,'PHOTO '+file.id,800);
  }
  const analysis=validateAnalysis(await requestSmartstoreAnalysis({apiKey,content,signal,fetchImpl}),product,description,unknown);
- for(const p of analysis.photos)mapped.push({...unknown.find(f=>f.id===p.id),...p});
+ for(const p of analysis.photos)mapped.push({...unknown.find(f=>f.id===p.id),...p,externalAnalysisDetailHash:detailHash});
  const listingImages=await saveListingSelection(root,chooseListingPhotos(mapped,product));
  const imported=importedPhotoSelection(product,old);
- const groups=[],records=mapped.map(p=>({...old?.photoMapping?.files?.find(r=>r.hash===hash(p.bytes)),name:p.name,color:p.color,role:p.role,hash:hash(p.bytes),confidence:p.confidence??1}));
+ const groups=[],records=mapped.map(p=>({...previousFiles.find(r=>r.hash===hash(p.bytes)),name:p.name,color:p.color,role:p.role,hash:hash(p.bytes),confidence:p.confidence??1,...(p.externalAnalysisDetailHash?{externalAnalysisDetailHash:p.externalAnalysisDetailHash}:{})}));
  for(const color of product.colors){const files=[];const order=imported?.get(color)||[];const selected=mapped.filter(p=>p.color===color&&p.role!=='care-label'&&(!imported||order.includes(hash(p.bytes)))).sort((a,b)=>imported?order.indexOf(hash(a.bytes))-order.indexOf(hash(b.bytes)):Number(/^1(?:번)?\./i.test(b.name))-Number(/^1(?:번)?\./i.test(a.name))||['front','side','detail'].indexOf(a.role)-['front','side','detail'].indexOf(b.role));for(const p of selected){const relative='auto/'+hash(p.bytes).slice(0,24)+'.jpg';await mkdir(path.join(root,'auto'),{recursive:true});const bytes=await sharp(p.bytes).rotate().jpeg({quality:97}).toBuffer();await writeFile(path.join(root,relative),bytes);records.find(r=>r.hash===hash(p.bytes)).preparedHash=hash(bytes);files.push(relative);}if(files.length)groups.push({color,files});}
  const draft={officialPalettePhotos:old?.style===product.style&&old?.sourceUrl===product.sourceUrl?old.officialPalettePhotos:undefined,manualPhotoOrder:old?.style===product.style&&old?.sourceUrl===product.sourceUrl?old.manualPhotoOrder:undefined,importedMainPhoto:old?.importedMainPhoto,importedColorPhotos:old?.importedColorPhotos,officialPhotos:old?.sourceUrl===product.sourceUrl&&old?.officialDetailHash===detailHash?old.officialPhotos:undefined,includeBrandVideo:old?.sourceUrl===product.sourceUrl?old.includeBrandVideo:undefined,careLabels:await saveCareLabelSelection(root,mapped.filter(p=>p.role==='care-label')),style:product.style,sourceUrl:product.sourceUrl,officialDetailHash:detailHash,listingImages,headline:product.name,sellingPoints:analysis.points.map(p=>({...p,evidence:p.evidence+' / '+product.sourceUrl})),photos:groups,preparedAt:new Date().toISOString(),photoMapping:{basis:'공식 색상칩·상세 대조 / 기존 확인 사진은 내용 해시로 재사용',files:records,ignoredPhotos:old?.photoMapping?.ignoredPhotos||[]}};
  signal?.throwIfAborted();await writeFile(path.join(root,'draft.json.tmp'),JSON.stringify(draft,null,2));await rename(path.join(root,'draft.json.tmp'),path.join(root,'draft.json'));
@@ -128,4 +129,4 @@ async function prepareSmartstoreAutoImpl(product,folder,{dataRoot,apiKey,signal,
  return {...prepared,officialDescription:description};
 }
 
-export async function prepareSmartstoreAuto(product,folder,options){const colors=[...product.colors],sizes=[...(product.sizes||[])];const prepared=await prepareSmartstoreAutoImpl(product,folder,options);if(JSON.stringify(prepared.colors)!==JSON.stringify(colors)||JSON.stringify(prepared.sizes||[])!==JSON.stringify(sizes))throw Error('사진 처리 중 판매 옵션 변경을 감지했습니다. 전체 색상·사이즈를 보존해야 합니다.');return prepared;}
+export async function prepareSmartstoreAuto(product,folder,options){assertAdultProduct(product);const colors=[...product.colors],sizes=[...(product.sizes||[])];const prepared=await prepareSmartstoreAutoImpl(product,folder,options);if(JSON.stringify(prepared.colors)!==JSON.stringify(colors)||JSON.stringify(prepared.sizes||[])!==JSON.stringify(sizes))throw Error('사진 처리 중 판매 옵션 변경을 감지했습니다. 전체 색상·사이즈를 보존해야 합니다.');return prepared;}
