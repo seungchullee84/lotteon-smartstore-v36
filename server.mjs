@@ -732,7 +732,7 @@ const server=http.createServer(async(req,res)=>{
         state.product=p;job('register',()=>bot.run(p,state.folder,b.finalize===true));return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/continue'){state.paused=null;bot.resume();return json(res,200,{ok:true});}
-      if(url.pathname==='/api/stop'){if(state.busy){const phase=state.phase;state.phase='stopping';state.paused=null;activeAbort?.abort();if(phase==='register')await bot.stop();if(phase==='smartstore'||phase==='smartstore-auto'||phase==='smartstore-detail-only')await smartBot.stop();}return json(res,200,{ok:true});}
+      if(url.pathname==='/api/stop'){if(state.busy){const phase=state.phase;state.phase='stopping';state.paused=null;activeAbort?.abort();if(phase==='register')await bot.stop();if(phase==='smartstore'||phase==='smartstore-auto'||phase==='smartstore-detail-only'||phase==='smartstore-extra-only')await smartBot.stop();}return json(res,200,{ok:true});}
     }
     if(req.method==='GET'&&url.pathname==='/detail-preview.html'){
       res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; img-src https://www.giordano.co.kr; style-src 'unsafe-inline'; frame-ancestors 'none'"});
