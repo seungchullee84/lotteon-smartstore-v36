@@ -9,7 +9,7 @@
   <p id="manualPhotoSelectionStatus" role="status"></p>
  </div><div class="photo-review-body">
   <div class="photo-review-order">
-   <p class="photo-order-guide">사진을 누른 채 같은 색상 안에서 끌어 순서를 바꾸세요. 1번 정면 · 2번 옆면 · 3번부터 디테일</p>
+   <p class="photo-order-guide">같은 색상끼리 끌어 순서를 바꾸세요. 1번 정면 · 2번 옆면 · 3번부터 디테일</p>
    <button type="button" class="secondary" id="manualPhotoReviewSort" title="수정한 색상에 맞춰 사진을 다시 모아요">색상별 정렬</button>
   </div>
   <div id="manualPhotoReviewLegend" aria-label="상품 색상 구분"></div>
@@ -26,28 +26,37 @@
  function photoDropAt(x,y,drag){
   const hit=document.elementFromPoint(x,y);
   if(!grid.contains(hit))return null;
-  const hitCard=hit?.closest('[data-photo-id]');
+  let target=hit.closest('[data-photo-id]');
   const accepts=card=>card!==drag.card&&dragGroup(card)===drag.color;
-  if(hitCard&&!accepts(hitCard))return null;
-  if(!hitCard&&hit!==grid)return null;
-  const target=hitCard||[...grid.querySelectorAll(':scope > [data-photo-id]')].find(card=>{
-   if(!accepts(card))return false;
-   const box=card.getBoundingClientRect();
-   // Also accept the gap between adjacent cards in the same row.
-   return x>=box.left-7&&x<=box.right+7&&y>=box.top&&y<=box.bottom;
-  });
+  if(target&&!accepts(target))return null;
+  if(hit===grid){
+   // In the gaps, use the nearest eligible card instead of DOM order.
+   let closest=Infinity;
+   for(const card of grid.querySelectorAll(':scope > [data-photo-id]')){
+    if(!accepts(card))continue;
+    const box=card.getBoundingClientRect();
+    const dx=Math.max(box.left-x,x-box.right,0);
+    const dy=Math.max(box.top-y,y-box.bottom,0);
+    const distance=dx*dx+dy*dy;
+    if(dx>drag.columnGap||dy>drag.rowGap||distance>=closest)continue;
+    target=card;
+    closest=distance;
+   }
+  }
   if(!target)return null;
   const box=target.getBoundingClientRect();
   const vertical=matchMedia('(max-width: 480px)').matches;
-  const after=vertical?y>box.top+box.height/2:x>box.left+box.width/2;
+  let after=y>box.bottom;
+  if(y>=box.top&&y<=box.bottom)after=vertical?y>box.top+box.height/2:x>box.left+box.width/2;
   return {target,after};
  }
  function clearPhotoDrag(){
   if(!photoDrag)return;
-  const {card,pointerId,drop}=photoDrag;
+  const {card,pointerId,highlight,preview}=photoDrag;
   photoDrag=null;
   card.classList.remove('photo-dragging');
-  drop?.target.removeAttribute('data-photo-drop');
+  highlight?.classList.remove('photo-drop-target');
+  preview?.remove();
   if(grid.hasPointerCapture(pointerId))grid.releasePointerCapture(pointerId);
  }
  grid.addEventListener('pointerdown',event=>{
@@ -57,26 +66,38 @@
   if(!color||card.querySelector('[data-field=role]').disabled)return;
   event.preventDefault();
   grid.setPointerCapture(event.pointerId);
-  photoDrag={card,color,pointerId:event.pointerId,x:event.clientX,y:event.clientY,started:false,drop:null};
+  const {columnGap,rowGap}=getComputedStyle(grid);
+  photoDrag={card,color,pointerId:event.pointerId,x:event.clientX,y:event.clientY,columnGap:parseFloat(columnGap)/2+1,rowGap:parseFloat(rowGap)/2+1};
  });
  grid.addEventListener('pointermove',event=>{
   const drag=photoDrag;
   if(drag?.pointerId!==event.pointerId)return;
-  if(!drag.started){
-   if(Math.hypot(event.clientX-drag.x,event.clientY-drag.y)<5)return;
-   drag.started=true;
+  if(!drag.preview){
+   if(Math.hypot(event.clientX-drag.x,event.clientY-drag.y)<3)return;
+   const image=drag.card.querySelector(':scope > img');
+   const box=image.getBoundingClientRect();
+   drag.preview=image.cloneNode();
+   drag.preview.className='photo-drag-preview';
+   drag.preview.alt='';
+   drag.preview.loading='eager';
+   drag.preview.style.width=box.width+'px';
+   drag.preview.style.height=box.height+'px';
+   drag.offsetX=box.left-drag.x;
+   drag.offsetY=box.top-drag.y;
+   dialog.append(drag.preview);
    drag.card.classList.add('photo-dragging');
   }
-  const drop=photoDropAt(event.clientX,event.clientY,drag);
-  if(drag.drop?.target===drop?.target&&drag.drop?.after===drop?.after)return;
-  drag.drop?.target.removeAttribute('data-photo-drop');
-  drag.drop=drop;
-  if(drop)drop.target.dataset.photoDrop=drop.after?'after':'before';
+  drag.preview.style.transform='translate('+ (event.clientX+drag.offsetX)+'px,'+(event.clientY+drag.offsetY)+'px)';
+  const target=photoDropAt(event.clientX,event.clientY,drag)?.target;
+  if(drag.highlight===target)return;
+  drag.highlight?.classList.remove('photo-drop-target');
+  drag.highlight=target;
+  target?.classList.add('photo-drop-target');
  });
  grid.addEventListener('pointerup',event=>{
   const drag=photoDrag;
   if(drag?.pointerId!==event.pointerId)return;
-  const drop=drag.started&&!loading?photoDropAt(event.clientX,event.clientY,drag):null;
+  const drop=drag.preview&&!loading?photoDropAt(event.clientX,event.clientY,drag):null;
   clearPhotoDrag();
   if(!drop)return;
   const before=drop.after?drop.target.nextSibling:drop.target;
