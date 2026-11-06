@@ -29,7 +29,8 @@ export async function classifyFastPhotoDraft(product,photos,{dataRoot,folder,sig
  const started=performance.now(),kind=garmentKind(product),chips=await photoReviewChips(product,folder);
  const references=product.colors.map(color=>({quantiles:chips[color]?.color?.match(/^#([a-f\d]{6})$/i)?.[1]?.match(/../g).map(v=>{const n=parseInt(v,16);return [n,n,n];})}));
  const root=path.join(dataRoot,'smartstore-photo-fast-cache');await mkdir(root,{recursive:true});
- const identity=JSON.stringify([FAST_PHOTO_VERSION,product.style,product.sourceUrl,product.colors,kind,references]);
+ const chipHashes=product.colors.map(color=>chips[color]?.image?createHash('sha256').update(chips[color].image).digest('hex'):null);
+ const identity=JSON.stringify([FAST_PHOTO_VERSION,product.style,product.sourceUrl,product.colors,kind,references,chipHashes]);
  const results=[],samples=[];let worker,ocrCount=0,reused=0;
  const recognize=recognizePhoto||(async(bytes,sample)=>{
   worker||=await createWorker('kor+eng');signal?.throwIfAborted();
