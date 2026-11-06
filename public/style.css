@@ -479,4 +479,22 @@ header .header-details .release-info {
 .image-workbench #main {
   max-width: 420px;
 }
+.collection-seller-option {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+  font-size: 13px;
+}
+.collection-seller-option input {
+  width: auto;
+  margin: 0;
+}
+#autoOpenSellerStatus {
+  margin: 6px 0 0;
+  font-size: 12px;
+}
+#autoOpenSellerStatus:empty {
+  display: none;
+}
 }
