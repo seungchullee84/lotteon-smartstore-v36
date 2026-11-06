@@ -270,10 +270,40 @@ async function selectSmartstoreImageFile(page,container,{receipt,check,fileCount
  }finally{page.off('filechooser',capture);}
 }
 
+function isNaverImageUrl(url){
+ return ['https:','http:'].includes(url.protocol)&&!url.username&&!url.password&&!url.port&&/(^|\.)(naver|pstatic)\.net$/.test(url.hostname);
+}
+
+function confirmedImageAddress(source,registered){
+ try{
+  const preview=new URL(source);
+  if(registered===null)return isNaverImageUrl(preview)?preview.href:null;
+  const uploaded=new URL(registered);
+  if(!isNaverImageUrl(uploaded))return null;
+  const direct=isNaverImageUrl(preview)&&preview.hostname===uploaded.hostname&&preview.pathname===uploaded.pathname;
+  // SmartStore can render /<CDN host>/<path> on its own origin.
+  // Accept this form only when it matches the URL written to the slot.
+  const proxy=preview.origin==='https://sell.smartstore.naver.com'&&preview.pathname==='/'+uploaded.hostname+uploaded.pathname;
+  return direct||proxy?uploaded.href:null;
+ }catch{return null;}
+}
+
+export async function readSmartstoreImageSlot(container){
+ const {sources,registered}=await container.evaluate(slot=>{
+  const uploaded=slot.querySelector('input[name="_hidden_uploaded_names"]');
+  return {
+   sources:[...slot.querySelectorAll('img')].map(image=>image.currentSrc||image.src),
+   registered:uploaded?uploaded.value.split(',').map(value=>value.trim()).filter(Boolean):null
+  };
+ });
+ const confirmed=sources.map((source,index)=>confirmedImageAddress(source,registered===null?null:registered[index]));
+ return {sources,confirmed:registered!==null&&registered.length!==sources.length?[]:confirmed};
+}
+
 export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=false,receipt,log=()=>{}}={},check=()=>{}){
  if(!files?.length&&!replaceImages)return;
  check();const container=page.locator('ncp-product-temp-photo-infra-image-upload#'+id);
- const sources=()=>container.locator('img').evaluateAll(images=>images.map(image=>image.currentSrc||image.src));
+ const read=()=>readSmartstoreImageSlot(container);
  const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
  const label=({representImage:'대표사진',optionalImages:'추가사진',tagImages:'택·케어라벨'})[id]||'사진';
  const fail=()=>Error('첨부한 사진을 같은 파일로 확인하지 못했습니다. 중복 첨부를 막기 위해 현재 사진을 그대로 두었습니다.');
@@ -289,24 +319,20 @@ export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=fal
  };
  // Browser animation frames can pause when the dedicated window is minimized.
  // Read the slot from Node so attachment checks continue in the background.
- const waitForSources=async(matches,timeout,message)=>{
+ const waitForSlot=async(matches,timeout,message)=>{
   const deadline=Date.now()+timeout;
   while(true){
    check();
-   const observed=await sources();
+   const observed=await read();
    check();
    if(matches(observed))return observed;
    if(Date.now()>=deadline)throw Object.assign(Error(message(observed)),{code:'SMARTSTORE_UI_DELAY'});
    await new Promise(resolve=>setTimeout(resolve,150));
   }
  };
- const isHosted=(source,name)=>{
+ const sameFileName=(source,name)=>{
   try{
-   const url=new URL(source);
-   // Seller thumbnails can retain a legacy HTTP URL in the image attribute.
-   // This checks the seller's existing thumbnail and does not fetch that URL.
-   return ['https:','http:'].includes(url.protocol)&&/(^|\.)(naver|pstatic)\.net$/.test(url.hostname)&&
-    (name===undefined||decodeURIComponent(url.pathname.split('/').at(-1))===name);
+   return decodeURIComponent(new URL(source).pathname.split('/').at(-1))===name;
   }catch{return false;}
  };
  const describeSources=observed=>[...new Set(observed.map(source=>{
@@ -316,17 +342,23 @@ export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=fal
    return url.hostname?`${url.protocol}//${url.hostname}`:url.protocol;
   }catch{return '주소 미확인';}
  }))].join(', ')||'사진 없음';
- const waitHosted=(timeout,names)=>waitForSources(
-  observed=>observed.length===files.length&&observed.every((source,i)=>isHosted(source,names?.[i])),
-  timeout,
-  observed=>{
-   const hosted=observed.filter(source=>isHosted(source)).length;
-   return `${label} 반영 확인 지연 · 판매자 화면 ${observed.length}장 / 요청 ${files.length}장 · 네이버 주소 ${hosted}장`+
-    (names&&hosted===files.length?' · 요청 파일명 일치 확인 실패':` · ${describeSources(observed)}`);
-  }
- );
+ const matchesUpload=({sources,confirmed},names)=>sources.length===files.length&&confirmed.length===files.length&&
+  confirmed.every((source,i)=>source&&(!names||sameFileName(source,names[i])));
+ const waitHosted=async(timeout,names)=>{
+  const slot=await waitForSlot(
+   observed=>matchesUpload(observed,names),
+   timeout,
+   ({sources,confirmed})=>{
+    const hosted=confirmed.filter(Boolean).length;
+    return `${label} 반영 확인 지연 · 판매자 화면 ${sources.length}장 / 요청 ${files.length}장 · 네이버 첨부 주소 일치 ${hosted}장`+
+     (names&&hosted===files.length?' · 요청 파일명 일치 확인 실패':` · ${describeSources(sources)}`);
+   }
+  );
+  return slot.sources;
+ };
  if(receipt?.attached){
-  if(!equal(await sources(),receipt.attached))throw fail();
+  const observed=await read();
+  if(!equal(observed.sources,receipt.attached)||(files?.length&&!matchesUpload(observed)))throw fail();
   log('이미 첨부된 사진 '+receipt.attached.length+'장 확인 · 다시 올리지 않음');
   if(!receipt.done)await finish();
   return;
@@ -342,7 +374,7 @@ export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=fal
   log('이전 시도에서 첨부된 사진 '+receipt.attached.length+'장 확인 · 다시 올리지 않음');
   return;
  }
- let existing=await sources();
+ let {sources:existing}=await read();
  if(receipt?.cleared&&existing.length)throw fail();
  if(!receipt?.cleared&&replaceImages===true){
   const original=receipt?(receipt.original??=existing):existing;
@@ -350,7 +382,7 @@ export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=fal
   while(existing.length){
    check();const count=existing.length;
    await container.getByRole('button',{name:'이미지 삭제',exact:true}).first().click();
-   const remaining=await waitForSources(images=>images.length<count,8000,()=>label+' 기존 사진 정리 확인 지연');
+   const {sources:remaining}=await waitForSlot(slot=>slot.sources.length<count,8000,()=>label+' 기존 사진 정리 확인 지연');
    if(remaining.length!==count-1||!equal(remaining,existing.slice(1)))throw fail();
    existing=remaining;
   }
