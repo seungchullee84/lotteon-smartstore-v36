@@ -489,9 +489,10 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
   }
   :root {
     --ui-white: #fff;
-    --ui-mist: #f5f6f8;
-    --ui-frost: #f5f6f8;
-    --ui-line: #d0d4e4;
+    --ui-canvas: #e4eaf2;
+    --ui-surface: #f0f3f8;
+    --ui-mist: #e7edf5;
+    --ui-line: #cbd5e2;
     --ui-disabled: #e6e7ea;
     --ui-ink: #333333;
     --ui-muted: #535768;
@@ -500,9 +501,9 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     --ui-link: #4c4ccc;
     --ui-action: #6161ff;
     --ui-mint: #bcfe90;
-    --ui-aqua: #d1faff;
-    --ui-lavender: #eddff7;
-    --ui-periwinkle: #e7ecff;
+    --ui-aqua: #e0ecec;
+    --ui-lavender: #e9e6f2;
+    --ui-periwinkle: #e0e6f5;
     --ui-attention: #885019;
     --ui-font: Poppins, Manrope, 'DM Sans', 'Plus Jakarta Sans', 'Malgun Gothic', sans-serif;
     --ui-card-radius: 24px;
@@ -514,25 +515,25 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     --ui-section-gap: 64px;
     --ui-shell-width: 1760px;
     --ui-gutter: clamp(16px, 2vw, 24px);
-    --ui-card-shadow: 0 2px 48px rgb(205 208 223 / .4);
+    --ui-card-shadow: 0 2px 24px rgb(64 82 110 / .10);
     font: 400 16px/1.5 var(--ui-font);
     letter-spacing: -.01em;
     color: var(--ui-ink);
-    background: var(--ui-mist);
+    background: var(--ui-canvas);
   }
   body[data-channel] {
     --accent: var(--ui-link);
     --line: var(--ui-line);
     --muted: var(--ui-muted);
     color: var(--ui-ink);
-    background: var(--ui-mist);
+    background: var(--ui-canvas);
   }
   header, main { max-width: var(--ui-shell-width); padding-inline: var(--ui-gutter); }
   header {
     margin-bottom: 0;
     padding-block: 24px 32px;
     border-bottom: 1px solid var(--ui-line);
-    background: var(--ui-white);
+    background: var(--ui-surface);
   }
   header > .bar { min-height: 44px; gap: 8px; margin-bottom: 24px; }
   header .header-details .release-info {
@@ -580,7 +581,7 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
 
   main { padding-block: 40px var(--ui-section-gap); gap: 24px; }
   .card, dialog, #largeDetailPreview {
-    background: var(--ui-white);
+    background: var(--ui-surface);
     color: var(--ui-ink);
     border: 1px solid var(--ui-line);
     border-radius: var(--ui-card-radius);
@@ -597,7 +598,7 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
   body[data-channel="smartstore"] .workflow-photo-content { gap: var(--ui-element-gap); }
   :is(.channel-switcher, #smartstoreWorkflow) {
     padding: 16px 24px;
-    background: var(--ui-white);
+    background: var(--ui-surface);
     border: 1px solid var(--ui-line);
     border-radius: var(--ui-nav-radius);
   }
@@ -634,10 +635,11 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     .template-headline-editor, .manual-tag-picker, .notice-text-panel, .website-current-group,
     .photo-import-card) { border: 1px solid var(--ui-line); border-radius: var(--ui-card-radius); }
   .product-summary { padding: 16px 20px; }
+  .website-current-group { background: var(--ui-surface); }
   #smartstoreTitlePanel { background: var(--ui-lavender); }
   #templateHeadlineEditor { background: var(--ui-periwinkle); }
   #collectionCard .workspace-moment {
-    background: var(--ui-frost);
+    background: var(--ui-mist);
     border: 1px solid var(--ui-line);
     border-radius: var(--ui-nav-radius);
     box-shadow: none;
@@ -665,7 +667,7 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
   }
   dialog { font-family: var(--ui-font); }
   dialog::backdrop { background: rgb(51 51 51 / .42); }
-  .notice-dialog-heading { background: var(--ui-white); }
+  .notice-dialog-heading { background: var(--ui-surface); }
 
   :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
     border: 1px solid var(--ui-input-line);
