@@ -521,6 +521,23 @@ const server=http.createServer(async(req,res)=>{
           }
         });return json(res,202,{ok:true});
       }
+      if(url.pathname==='/api/smartstore-extra-only'){
+        if(state.busy)throw Error('현재 작업이 끝난 뒤 추가사진을 첨부해 주세요.');
+        const product=state.product,folder=state.folder,revision=state.revision;
+        if(b.channel!=='smartstore'||!product||!folder||b.style!==product.style||b.sourceUrl!==product.sourceUrl)throw Error('현재 스마트스토어 상품을 확인해 주세요.');
+        if(product.photoSelectionPending)throw Error('사진을 먼저 선택하고 추가이미지에 반영해 주세요.');
+        job('smartstore-extra-only',async()=>{
+          const signal=activeAbort.signal;
+          const checkCurrent=()=>{
+            signal.throwIfAborted();
+            if(state.product!==product||state.folder!==folder||state.revision!==revision)throw changedSmartstoreSource();
+          };
+          const {extras}=await prepareListingImages(product,folder,{dataRoot});
+          checkCurrent();
+          const count=await smartBot.uploadExtraPhotos(product,extras,{checkCurrent});
+          log('추가사진 '+count+'장 첨부 확인 · 상품 저장 안 함');
+        });return json(res,202,{ok:true});
+      }
       if(url.pathname==='/api/smartstore-import-photos'){
         if(state.busy)throw Error('현재 작업이 끝난 뒤 사진을 가져와 주세요.');
         if(!/^\d{6}$/.test(b.style||''))throw Error('사진을 가져올 품번 6자리를 입력해 주세요.');

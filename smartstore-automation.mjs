@@ -2,7 +2,7 @@ import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {BrowserAutomation} from './browser-connection.mjs';
 import {createBrowserLoginStore} from './browser-login-store.mjs';
 import {selectSmartstorePage,trySmartstoreLogin} from './smartstore-login.mjs';
-import {fillSmartstore,smartstorePlan,isSmartstoreInputUrl} from './smartstore-form.mjs';
+import {fillSmartstore,smartstorePlan,isSmartstoreInputUrl,uploadSmartstoreImageSlot} from './smartstore-form.mjs';
 import {prepareListingImages} from './smartstore-listing-images.mjs';
 import path from 'node:path';
 import {researchForProduct} from './apparel-tag-research.mjs';
@@ -98,6 +98,27 @@ export class SmartstoreAutomation extends BrowserAutomation{
     const {writeFile}=await import('node:fs/promises');const result={...report,...detail,formUrl:url,formMode:this.formMode,published:false};
     await writeFile(path.join(folder,'smartstore-auto-result.json'),JSON.stringify(result,null,2));return result;
   }
+  async uploadExtraPhotos(product,files,{checkCurrent=()=>{}}={}){
+    if(!Array.isArray(files)||files.length<1||files.length>9)throw Error('첨부할 추가사진을 1~9장 준비해 주세요.');
+    this.stopped=false;
+    checkCurrent();
+    await this.bindCopyForm(product,{extraPhotosOnly:true});
+    checkCurrent();
+    const page=this.page;
+    const binding=await bindSmartstoreDraft(page,'input[name="product.name"]');
+    const check=()=>{this.check();checkCurrent();binding.check();};
+    try{
+      check();
+      await binding.verify();
+      const slot=page.locator('ncp-product-temp-photo-infra-image-upload#optionalImages');
+      if(await slot.locator('img').count())throw Error('추가사진 칸에 이미 사진이 있습니다. 중복을 막기 위해 빈 추가사진 칸에서만 첨부할 수 있습니다.');
+      this.log('판매자센터 추가사진 칸에 '+files.length+'장 첨부 중…');
+      await uploadSmartstoreImageSlot(page,'optionalImages',files,{log:this.log},check);
+      await binding.verify();
+      check();
+      return files.length;
+    }finally{binding.dispose();}
+  }
   async open(){
     this.stopped=false;
     await this.connectChrome(SMARTSTORE_HOME);
@@ -134,7 +155,7 @@ export class SmartstoreAutomation extends BrowserAutomation{
     }
     return {...report,style:product.style,validationOnly:true,originalTagsRestored:true,applied:false,saved:false,published:false};
   }
-  async bindCopyForm(product){
+  async bindCopyForm(product,{extraPhotosOnly=false}={}){
     await this.connectChrome(SMARTSTORE_HOME);
     const forms=()=>this.context.pages().filter(p=>!p.isClosed()&&(/\/products\/copy\/\d+(?:[?]|$)/.test(p.url())||isSmartstoreDetailEditUrl(p.url()))&&isSmartstoreInputUrl(p.url()));
     let pages=forms();if(!pages.length){await this.open();pages=forms();}
@@ -145,7 +166,7 @@ export class SmartstoreAutomation extends BrowserAutomation{
     if(this.formMode==='edit'){
       if(!/^\d{6}$/.test(product?.style||''))throw Error('전체 입력할 현재 품번을 확인해 주세요.');
       this.originalSellerCode=await readDetailOnlySellerCode(this.page);
-      this.log('수정 화면 전체 교체 · 기존 코드 '+this.originalSellerCode+' → 현재 품번 '+product.style+' · 상품 저장 안 함');
+      this.log(extraPhotosOnly?'수정 화면 추가사진 첨부 · 판매자 코드 '+this.originalSellerCode+' · 준비 품번 '+product.style:'수정 화면 전체 교체 · 기존 코드 '+this.originalSellerCode+' → 현재 품번 '+product.style+' · 상품 저장 안 함');
     }
     this.boundProductStyle=product?.style;this.copyFormUrl=this.page.url();
   }
