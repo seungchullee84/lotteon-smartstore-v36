@@ -25,6 +25,7 @@
  function assignOrderedRoles(){const counts=new Map();for(const card of grid.querySelectorAll(':scope > [data-photo-id]')){const color=dragGroup(card);if(!color)continue;const index=counts.get(color)||0;counts.set(color,index+1);const role=card.querySelector('[data-field=role]'),value=index===0?'front':index===1?'side':'detail';if(role.value!==value){role.value=value;card.refreshPhotoView?.();}}}
  function photoDropAt(x,y,drag){
   const hit=document.elementFromPoint(x,y);
+  if(!grid.contains(hit))return null;
   const hitCard=hit?.closest('[data-photo-id]');
   const accepts=card=>card!==drag.card&&dragGroup(card)===drag.color;
   if(hitCard&&!accepts(hitCard))return null;

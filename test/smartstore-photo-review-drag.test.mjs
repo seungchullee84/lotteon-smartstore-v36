@@ -18,7 +18,7 @@ test('같은 색상 드래그는 순서를 저장·복원하며 1번은 정면�
  const ids=()=>cards.evaluateAll(nodes=>nodes.map(n=>n.dataset.photoId));assert.deepEqual(await ids(),['a','b','c']);
  assert.equal(await page.locator('#manualPhotoSelectionSave').count(),0);assert.equal(await page.locator('#manualPhotoReviewApply').isVisible(),true);assert.equal(await page.locator('#manualPhotoReviewApply').count(),1);
  const autosaved=page.waitForResponse(r=>r.url().endsWith('/api/smartstore-photo-review-draft'));
- const target=page.locator('[data-photo-id="a"]'),box=await target.boundingBox();await page.locator('[data-photo-id="b"]').dragTo(target,{targetPosition:{x:10,y:Math.min(100,box.height/2)}});assert.deepEqual(await ids(),['b','a','c']);
+ const target=page.locator('[data-photo-id="a"] > img');await page.locator('[data-photo-id="b"] > img').dragTo(target,{targetPosition:{x:10,y:100}});assert.deepEqual(await ids(),['b','a','c']);
  await autosaved;assert.deepEqual(lastSaved.items.map(i=>i.id),['b','a','c']);assert.equal(lastSaved.mainId,'a');assert.equal(lastSaved.items.find(i=>i.id==='b').role,'front');assert.equal(lastSaved.items.find(i=>i.id==='a').role,'side');
  await page.locator('[data-photo-id="b"]').dragTo(page.locator('[data-photo-id="c"]'));assert.deepEqual(await ids(),['b','a','c']);
  await page.locator('#manualPhotoReviewClose').click();await page.locator('#manualPhotoReviewOpen').click();await cards.first().waitFor();assert.deepEqual(await ids(),['b','a','c']);assert.equal(await page.locator('[data-photo-id="a"] input[type=radio]').isChecked(),true);await page.locator('[data-photo-id="a"]').dragTo(page.locator('[data-photo-id="b"]'),{targetPosition:{x:10,y:100}});assert.deepEqual(await ids(),['a','b','c']);assert.equal(await page.locator('[data-photo-id="a"] [data-field=role]').inputValue(),'front');assert.equal(await page.locator('[data-photo-id="c"] [data-field=role]').inputValue(),'front');await page.locator('[data-photo-id="a"] [data-field=role]').selectOption('back');assert.deepEqual(await ids(),['a','b','c']);assert.equal(await page.locator('[data-photo-id="b"] [data-field=role]').inputValue(),'side');assert.equal(await page.locator('[data-field=order]').count(),0);
@@ -57,6 +57,17 @@ test('같은 색상 드래그는 순서를 저장·복원하며 1번은 정면�
  assert.equal(new Set(layout.slice(0,4).map(card=>card.left)).size,4);
  assert.equal(layout[4].left,layout[0].left);
  assert.ok(layout[4].top>layout[0].top&&layout[5].top>layout[4].top);
+
+ // Press the photo and release in the gap between two cards.
+ const [from,left,right]=await Promise.all(['d','a','c'].map(id=>page.locator('[data-photo-id="'+id+'"] > img').boundingBox()));
+ const gapX=(left.x+left.width+right.x)/2,dropY=right.y+100;
+ await page.mouse.move(from.x+from.width/2,from.y+100);
+ await page.mouse.down();
+ await page.mouse.move(gapX,dropY);
+ assert.equal(await page.locator('[data-photo-drop]').count(),1);
+ await page.mouse.up();
+ assert.deepEqual(await ids(),['a','d','c','e','f','b']);
+ assert.equal(await page.locator('[data-photo-drop], .photo-dragging').count(),0);
  assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });
