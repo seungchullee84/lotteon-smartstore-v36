@@ -14,13 +14,14 @@ export const FAST_PHOTO_VERSION='thumbnail-color-label-v1';
 export async function inspectPhotoThumbnail(bytes,kind){
  const {data,info}=await sharp(bytes).rotate().resize({width:320,height:480,fit:'inside',withoutEnlargement:true}).flatten({background:'#fff'}).removeAlpha().raw().toBuffer({resolveWithObject:true});
  const gray=Uint8Array.from({length:info.width*info.height},(_,i)=>Math.round((data[i*3]+data[i*3+1]+data[i*3+2])/3));
- let ink=0,textRows=0;
- for(let y=2;y<info.height-2;y++){let row=0;for(let x=2;x<info.width-2;x++){const i=y*info.width+x,v=gray[i];if(Math.max(gray[i-2],gray[i+2])-v>45&&Math.max(gray[i-info.width*2],gray[i+info.width*2])-v>30)row++;}ink+=row;if(row>=5)textRows++;}
+ let ink=0,textRows=0;const inkX=[],inkY=[];
+ for(let y=2;y<info.height-2;y++){let row=0;for(let x=2;x<info.width-2;x++){const i=y*info.width+x,v=gray[i];if(Math.max(gray[i-2],gray[i+2])-v>45&&Math.max(gray[i-info.width*2],gray[i+info.width*2])-v>30){row++;inkX.push(x);inkY.push(y);}}ink+=row;if(row>=5)textRows++;}
  const textCandidate=ink/gray.length>=.012&&textRows>=40;
  const values=[[],[],[]],top=kind==='upper'?.22:.35,bottom=kind==='upper'?.5:.72;
  for(let y=Math.floor(info.height*top);y<info.height*bottom;y++)for(let x=Math.floor(info.width*.32);x<info.width*.68;x++)for(let c=0;c<3;c++)values[c].push(data[(y*info.width+x)*3+c]);
  const quantiles=values.map(v=>{v.sort((a,b)=>a-b);return [.2,.5,.8].map(q=>v[Math.floor(q*v.length)]);});
- return {textCandidate,quantiles,inkRatio:ink/gray.length,textRows};
+ const span=(v,size)=>{v.sort((a,b)=>a-b);return [Math.max(0,(v[Math.floor(v.length*.02)]-6)/size),Math.min(1,(v[Math.floor(v.length*.98)]+6)/size)];};
+ return {textCandidate,quantiles,inkRatio:ink/gray.length,textRows,textBounds:textCandidate?{x:span(inkX,info.width),y:span(inkY,info.height)}:null};
 }
 
 export async function classifyFastPhotoDraft(product,photos,{dataRoot,folder,signal,log=()=>{},recognizePhoto}={}){
@@ -30,10 +31,13 @@ export async function classifyFastPhotoDraft(product,photos,{dataRoot,folder,sig
  const root=path.join(dataRoot,'smartstore-photo-fast-cache');await mkdir(root,{recursive:true});
  const identity=JSON.stringify([FAST_PHOTO_VERSION,product.style,product.sourceUrl,product.colors,kind,references]);
  const results=[];let worker,ocrCount=0,reused=0;
- const recognize=recognizePhoto||(async(bytes)=>{
+ const recognize=recognizePhoto||(async(bytes,sample)=>{
   worker||=await createWorker('kor+eng');signal?.throwIfAborted();
-  await worker.setParameters({tessedit_pageseg_mode:'11'});
-  return (await worker.recognize(await sharp(bytes).rotate().resize({width:1000,height:1400,fit:'inside',withoutEnlargement:true}).toBuffer())).data.text;
+  await worker.setParameters({tessedit_pageseg_mode:'6'});
+  const resized=await sharp(bytes).rotate().resize({width:1000,height:1400,fit:'inside',withoutEnlargement:true}).toBuffer(),meta=await sharp(resized).metadata(),{x,y}=sample.textBounds;
+  const left=Math.floor(x[0]*meta.width),top=Math.floor(y[0]*meta.height),width=Math.max(1,Math.ceil(x[1]*meta.width)-left),height=Math.max(1,Math.ceil(y[1]*meta.height)-top);
+  const input=await sharp(resized).extract({left,top,width,height}).greyscale().blur(.7).normalize().toBuffer();
+  return (await worker.recognize(input)).data.text;
  });
  const abort=()=>{void worker?.terminate().catch(()=>{});};signal?.addEventListener('abort',abort,{once:true});
  try{
@@ -44,7 +48,7 @@ export async function classifyFastPhotoDraft(product,photos,{dataRoot,folder,sig
    else{
     const sample=await inspectPhotoThumbnail(photo.bytes,kind);let label=false,text='',ocrFailed=false;
     if(sample.textCandidate){
-     try{ocrCount++;text=await recognize(photo.bytes);label=careLabelText(text);}catch(e){signal?.throwIfAborted();ocrFailed=true;log('라벨 자동 구분 확인 필요 · '+photo.name);}
+     try{ocrCount++;text=await recognize(photo.bytes,sample);label=careLabelText(text);}catch(e){signal?.throwIfAborted();ocrFailed=true;log('라벨 자동 구분 확인 필요 · '+photo.name);}
     }
     // Dense text without a confirmed label must not become an apparel color.
     const colorResult=label||sample.textCandidate?null:resolveDraftPhotoColor({quantiles:sample.quantiles},product.colors,references);
