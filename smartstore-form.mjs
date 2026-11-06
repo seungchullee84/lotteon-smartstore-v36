@@ -296,8 +296,9 @@ export async function readSmartstoreImageSlot(container){
    registered:uploaded?uploaded.value.split(',').map(value=>value.trim()).filter(Boolean):null
   };
  });
- const confirmed=sources.map((source,index)=>confirmedImageAddress(source,registered===null?null:registered[index]));
- return {sources,confirmed:registered!==null&&registered.length!==sources.length?[]:confirmed};
+ const confirmed=registered!==null&&registered.length!==sources.length?[]:
+  sources.map((source,index)=>confirmedImageAddress(source,registered?.[index]??null));
+ return {sources,confirmed};
 }
 
 export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=false,receipt,log=()=>{}}={},check=()=>{}){

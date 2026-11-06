@@ -240,6 +240,62 @@ test('화면 갱신이 멈춰도 이전 주소와 실제 선택된 썸네일을 
  }
 });
 
+test('판매자 주소의 대표 미리보기는 첨부 주소 일치 후 추가사진 6장 교체로 이어진다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-proxy-photos-'));
+ const names=['main.jpg',...Array.from({length:6},(_,index)=>'extra-'+(index+1)+'.jpg')];
+ const files=names.map(name=>path.join(root,name));
+ const browser=await chromium.launch({headless:true});
+ try{
+  await Promise.all(files.map(file=>writeFile(file,'fixture')));
+  const page=await browser.newPage();
+  await page.route('https://sell.smartstore.naver.com/',route=>route.fulfill({contentType:'text/html; charset=utf-8',body:fixture()}));
+  await page.route('**/*.jpg',route=>route.fulfill({body:''}));
+  await page.goto('https://sell.smartstore.naver.com/#/products/edit/42');
+  await page.evaluate(()=>{
+   const host='shop1.phinf.naver.net',serverAddress=name=>'http://'+host+'/test/'+name;
+   const savedNames=slot=>slot.querySelector('input[name="_hidden_uploaded_names"]');
+   const append=(slot,name)=>{
+    const row=document.createElement('div'),image=document.createElement('img'),remove=document.createElement('button');
+    image.src='/'+host+'/test/'+name;image.alt='등록한 이미지';
+    remove.textContent='이미지 삭제';
+    remove.onclick=()=>{
+     savedNames(slot).value=savedNames(slot).value.split(',').filter(url=>url!==serverAddress(name)).join(',');
+     row.remove();
+    };
+    row.append(image,remove);slot.append(row);
+   };
+   for(const [id,names] of [['representImage',['old-main.jpg']],['optionalImages',['old-first.jpg','old-second.jpg']]]){
+    const slot=document.getElementById(id),input=document.createElement('input');
+    input.name='_hidden_uploaded_names';input.hidden=true;input.value=names.map(serverAddress).join(',');
+    slot.append(input);for(const name of names)append(slot,name);
+   }
+   window.attachEvents=[];
+   document.getElementById('chosen').onchange=event=>{
+    const slot=window.slot,names=Array.from(event.target.files,file=>file.name);
+    window.attachEvents.push('selected:'+slot.id);
+    for(const name of names)append(slot,name);
+    savedNames(slot).value=names.map(name=>serverAddress('pending-'+name)).join(',');
+    event.target.value='';event.target.parentElement.hidden=true;
+    setTimeout(()=>{
+     savedNames(slot).value=names.map(serverAddress).join(',');
+     window.attachEvents.push('confirmed:'+slot.id);
+    },250);
+   };
+  });
+  const signal=AbortSignal.timeout(8000);
+  await uploadSmartstoreImages(page,{main:files[0],extras:files.slice(1),replaceImages:true},()=>signal.throwIfAborted(),{slots:{}});
+  assert.deepEqual(await page.evaluate(()=>window.attachEvents),[
+   'selected:representImage','confirmed:representImage','selected:optionalImages','confirmed:optionalImages'
+  ]);
+  assert.deepEqual(await page.locator('#optionalImages img').evaluateAll(images=>images.map(img=>img.src.split('/').at(-1))),names.slice(1));
+  assert.equal(await page.evaluate(()=>window.saved),0);
+ }finally{
+  await browser.close();
+  await Promise.all(files.map(file=>unlink(file).catch(()=>{})));
+  await rmdir(root);
+ }
+});
+
 test('추가사진 교체는 기존 추가사진만 지우고 선택한 순서로 첨부한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-extra-only-'));
  const files=['official.jpg','side.jpg','front.jpg'].map(name=>path.join(root,name));
