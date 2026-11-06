@@ -240,6 +240,43 @@ test('화면 갱신이 멈춰도 이전 주소와 실제 선택된 썸네일을 
  }
 });
 
+test('추가사진 교체는 기존 추가사진만 지우고 선택한 순서로 첨부한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-extra-only-'));
+ const files=['official.jpg','side.jpg','front.jpg'].map(name=>path.join(root,name));
+ const browser=await chromium.launch({headless:true});
+ try{
+  await Promise.all(files.map(file=>writeFile(file,'fixture')));
+  const context=await browser.newContext();
+  await context.route('**/*',route=>route.fulfill({contentType:'text/html; charset=utf-8',body:fixture()}));
+  const page=await context.newPage();
+  await page.goto('https://sell.smartstore.naver.com/#/products/edit/42');
+  await page.evaluate(()=>{
+   const main=document.querySelector('#representImage');
+   main.innerHTML='<img src="/seller-image/representative.jpg"><button>이미지 삭제</button>';
+   main.querySelector('button').onclick=()=>{window.mainDeleted=true;};
+   const extras=document.querySelector('#optionalImages');
+   for(const file of ['old-1.jpg','old-2.jpg']){
+    const row=document.createElement('div');
+    row.innerHTML='<img src="https://phinf.pstatic.net/'+file+'"><button>이미지 삭제</button>';
+    row.querySelector('button').onclick=()=>row.remove();extras.append(row);
+   }
+   document.querySelector('input[name="product.name"]').value='기존 판매자 상품명';
+  });
+  const bot=new SmartstoreAutomation(root,()=>{});
+  bot.context=context;bot.connectChrome=async()=>{};
+  assert.equal(await bot.uploadExtraPhotos(product,files),3);
+  assert.deepEqual(await page.evaluate(()=>({
+   main:document.querySelector('#representImage img').getAttribute('src'),mainDeleted:!!window.mainDeleted,
+   title:document.querySelector('input[name="product.name"]').value,files:window.files,
+   extras:Array.from(document.querySelectorAll('#optionalImages img'),image=>image.src.split('/').at(-1)),saved:window.saved
+  })),{main:'/seller-image/representative.jpg',mainDeleted:false,title:'기존 판매자 상품명',files:['official.jpg','side.jpg','front.jpg'],extras:['official.jpg','side.jpg','front.jpg'],saved:0});
+ }finally{
+  await browser.close();
+  await Promise.all(files.map(file=>unlink(file).catch(()=>{})));
+  await rmdir(root);
+ }
+});
+
 test('한 번 시작하면 상품명 입력 지연과 상세 첨부 확인 지연을 스스로 복구하고 파일은 한 번만 보낸다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-auto-retry-')),files=['main.jpg','extra.jpg','detail-1.png','detail-2.png'].map(name=>path.join(root,name));
  const browser=await chromium.launch({headless:true});
