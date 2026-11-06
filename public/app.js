@@ -85,6 +85,78 @@ async function post(endpoint,data={}){
  catch(e){if(e.name==='TimeoutError')throw Error('서버 응답 시간이 초과됐습니다. 진행 기록에서 작업 상태를 확인해 주세요.');if(e instanceof TypeError)throw Error('등록기 서버와 연결되지 않았습니다. 잠시 후 새로고침해 주세요.');throw e;}
 }
 let requestLock=false,serverBusy=false,serverPhase='idle',smartstoreStarting=false,smartstoreDetailStarting=false,smartstoreRequestAt=0,lotteRequestEpoch=0;
+let pendingSellerOpen=null;
+const autoSellerPreference='register.auto-open-seller';
+const autoOpenSeller=document.createElement('input');
+autoOpenSeller.type='checkbox';
+autoOpenSeller.id='autoOpenSeller';
+autoOpenSeller.checked=true;
+try{autoOpenSeller.checked=localStorage.getItem(autoSellerPreference)!=='off';}catch{}
+const autoOpenSellerLabel=document.createElement('label');
+autoOpenSellerLabel.className='collection-seller-option';
+autoOpenSellerLabel.append(autoOpenSeller,'수집 완료 후 판매자센터 열기');
+const autoOpenSellerStatus=document.createElement('p');
+autoOpenSellerStatus.id='autoOpenSellerStatus';
+autoOpenSellerStatus.setAttribute('role','status');
+$('collectionStatus').before(autoOpenSellerLabel,autoOpenSellerStatus);
+autoOpenSeller.addEventListener('change',()=>{
+ if(!autoOpenSeller.checked){pendingSellerOpen=null;autoOpenSellerStatus.textContent='';}
+ try{localStorage.setItem(autoSellerPreference,autoOpenSeller.checked?'on':'off');}catch{}
+});
+
+function openSellerCenter(channel){
+ pendingSellerOpen=null;
+ return post(channel==='smartstore'?'smartstore-open':'open');
+}
+async function collectForReview(input,allowMissingDetail=false){
+ pendingSellerOpen=null;
+ autoOpenSellerStatus.textContent='';
+ const channel=activeChannel(),view=channelViewId;
+ let revision=smartstoreListingState?.revision;
+ if(autoOpenSeller.checked&&revision===undefined){
+  try{
+   const response=await fetch('/api/state?channel='+channel,{signal:AbortSignal.timeout(5000)});
+   if(response.ok)revision=(await response.json()).revision;
+  }catch{}
+ }
+ const result=await post('collect',{style:input,allowMissingDetail,channel,edits:currentProductEdits()});
+ if(autoOpenSeller.checked&&revision!==undefined)pendingSellerOpen={input,channel,view,revision};
+ return result;
+}
+function sameCollectedProduct(input,product){
+ if(!product)return false;
+ if(/^\d{6}$/.test(input))return product.style===input;
+ try{
+  const requested=new URL(input),actual=new URL(product.sourceUrl);
+  return requested.searchParams.get('pno')===actual.searchParams.get('pno');
+ }catch{return false;}
+}
+function syncCollectedSellerOpen(state){
+ const request=pendingSellerOpen;
+ if(!request||requestLock||state.busy)return;
+ if(request.view!==channelViewId||request.channel!==activeChannel()){pendingSellerOpen=null;return;}
+ if(state.collectionInput!==request.input){
+  if(state.revision>request.revision)pendingSellerOpen=null;
+  return;
+ }
+ if(state.phase==='error'||state.phase==='stopped'){pendingSellerOpen=null;return;}
+ if(state.phase!=='done'||state.completedJob!=='collect'||state.revision<=request.revision)return;
+ pendingSellerOpen=null;
+ if(!sameCollectedProduct(request.input,state.product))return;
+ void openCollectedSeller(request.channel);
+}
+async function openCollectedSeller(channel){
+ const label=channel==='smartstore'?'스마트스토어':'롯데ON';
+ requestLock=true;
+ syncButtons();
+ autoOpenSellerStatus.textContent=label+' 판매자센터 여는 중…';
+ try{
+  await openSellerCenter(channel);
+  autoOpenSellerStatus.textContent=label+' 판매자센터를 열었습니다.';
+ }catch(error){
+  autoOpenSellerStatus.textContent=label+' 판매자센터 자동 열기 확인 필요 · '+error.message;
+ }finally{requestLock=false;syncButtons();}
+}
 const buttonLabels={open:'1. 크롬 로그인 창 열기',collect:'2. 공식몰 정보 수집',run:'3. 검토한 내용으로 입력 시작'};
 const busyLabels={open:'크롬 연결 중…',collect:'공식몰 정보 수집 중…',run:'작업 중 · 롯데ON 입력 준비…'};
 const feedback=document.createElement('div');feedback.id='clickFeedback';feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');document.body.append(feedback);
@@ -193,7 +265,7 @@ function action(id,fn){$(id).onclick=async()=>{
  }catch(e){$('error').textContent=e.message;announce('처리하지 못했습니다: '+e.message,'failed');}
  finally{if(primary){requestLock=false;delete $(id).dataset.pending;syncButtons();if(runState)syncFeedbackWithState(runState);}}
  };}
-action('open',()=>post('open'));action('collect',()=>post('collect',{style:$('style').value.trim(),allowMissingDetail:false,channel:document.body.dataset.channel,edits:currentProductEdits()}));action('stop',async()=>{const b=$('stop');if(b.disabled)return;b.disabled=true;b.textContent='중단 중…';announce('중단 요청 중 — 추가 입력을 취소합니다');try{await post('stop');announce('중단 요청을 전달했습니다','success');}finally{b.disabled=false;b.textContent='중단';}});action('continue',()=>post('continue'));
+action('open',()=>openSellerCenter('lotte'));action('collect',()=>collectForReview($('style').value.trim()));action('stop',async()=>{const b=$('stop');if(b.disabled)return;pendingSellerOpen=null;b.disabled=true;b.textContent='중단 중…';announce('중단 요청 중 — 추가 입력을 취소합니다');try{await post('stop');announce('중단 요청을 전달했습니다','success');}finally{b.disabled=false;b.textContent='중단';}});action('continue',()=>post('continue'));
 $('style').addEventListener('keydown',event=>{
  if(event.key!=='Enter'||event.isComposing||event.keyCode===229)return;
  event.preventDefault();
@@ -392,6 +464,7 @@ populate=function(p){populateWithImageButtons(p);$('saveExtra1').hidden=!p.image
 if(product){$('saveExtra1').hidden=!product.images.extra1;$('saveExtra2').hidden=!product.images.extra2;}
 
 function updateCollectionStatus(s){
+ syncCollectedSellerOpen(s);
  updateCollectionAnimation(s);
  const badge=$('collectionStatus');
  if(s.phase==='collect'&&s.busy){badge.hidden=false;badge.className='collect-pending';badge.textContent='정보 수집 중… 잠시 기다려 주세요.';return;}
@@ -417,7 +490,7 @@ $('retryMissingDetail').onclick=async()=>{
  if(!missingDetailRequest||requestLock||serverBusy)return;
  if(!window.confirm('상세 원본 누락이 확인된 상품만 대표·색상별 사진으로 구성합니다. 진행할까요?'))return;
  const input=missingDetailRequest.input;requestLock=true;$('retryMissingDetail').disabled=true;syncButtons();
- try{await post('collect',{style:input,allowMissingDetail:true,channel:document.body.dataset.channel,edits:currentProductEdits()});serverBusy=true;serverPhase='collect';$('missingDetailChoice').hidden=true;announce('승인한 상품을 대체 구성으로 다시 수집합니다.');}
+ try{await collectForReview(input,true);serverBusy=true;serverPhase='collect';$('missingDetailChoice').hidden=true;announce('승인한 상품을 대체 구성으로 다시 수집합니다.');}
  catch(e){$('error').textContent=e.message;announce(e.message,'failed');}
  finally{requestLock=false;syncButtons();}
 };
@@ -542,7 +615,7 @@ async function saveBrowserLogin(action){
 }
 $('browserLoginForm').onsubmit=event=>{event.preventDefault();void saveBrowserLogin('save');};
 $('deleteBrowserLogin').onclick=()=>void saveBrowserLogin('delete');
-$('smartstoreOpen').onclick=async()=>{try{await post('smartstore-open');announce('로그인 후 원하는 상품의 복사등록 화면을 직접 열고 시작을 눌러 주세요.','success');}catch(e){$('error').textContent=e.message;}};
+$('smartstoreOpen').onclick=async()=>{try{await openSellerCenter('smartstore');announce('로그인 후 원하는 상품의 복사등록 화면을 직접 열고 시작을 눌러 주세요.','success');}catch(e){$('error').textContent=e.message;}};
 async function arrangeSmartstoreTitle(useCurrent=true){
  if(!product||activeChannel()!=='smartstore')return;
  if(product.smartstoreNameUserEdited&&useCurrent)return;
