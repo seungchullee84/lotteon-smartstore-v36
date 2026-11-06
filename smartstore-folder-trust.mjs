@@ -11,11 +11,8 @@ import {importedPhotoSelection} from './smartstore-imported-selection.mjs';
 import {savePhotoMappings} from './smartstore-photo-mapping-cache.mjs';
 import {selectedMainPhoto} from './smartstore-main-selection.mjs';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
-export function careLabelText(text){
- const words=['제조국','제조연월','혼용률','취급주의','관리번호','LOT','MADE IN','폴리에스터','소비자상담'];
- const compact=String(text||'').replace(/\s+/g,'').toUpperCase();
- return words.filter(word=>compact.includes(word.replace(/\s+/g,'').toUpperCase())).length>=3;
-}
+import {careLabelText} from './smartstore-care-label-text.mjs';
+export {careLabelText} from './smartstore-care-label-text.mjs';
 // The style folder is user-authoritative. Unknown color/angle stays unlabelled;
 // local OCR separates care labels without requiring a remote image-analysis key.
 export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mapped=[],old,description,detailHash,signal,log=()=>{},recognizePhoto}={}){
