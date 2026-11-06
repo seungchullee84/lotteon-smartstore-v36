@@ -628,8 +628,8 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     .template-headline-editor, .manual-tag-picker, .notice-text-panel, .website-current-group,
     .photo-import-card) { border: 1px solid var(--ui-line); border-radius: var(--ui-card-radius); }
   .product-summary { padding: 16px 20px; }
-  .smartstore-title-panel { background: var(--ui-lavender); }
-  .template-headline-editor { background: var(--ui-periwinkle); }
+  #smartstoreTitlePanel { background: var(--ui-lavender); }
+  #templateHeadlineEditor { background: var(--ui-periwinkle); }
   #collectionCard .workspace-moment {
     background: var(--ui-frost);
     border: 1px solid var(--ui-line);
