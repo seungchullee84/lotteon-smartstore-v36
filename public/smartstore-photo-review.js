@@ -8,20 +8,24 @@
   <div class="photo-review-actions"><button type="button" id="manualPhotoReviewApply">사진 반영</button><button type="button" class="secondary" id="manualPhotoReviewClose">닫기</button></div>
   <p id="manualPhotoSelectionStatus" role="status"></p>
  </div><div class="photo-review-body">
-  <p class="photo-order-guide">색상을 바꿔도 사진 위치는 유지돼요. 같은 색상끼리 끌어 순서를 바꾸세요. 1번 정면 · 2번 옆면 · 3번부터 디테일</p>
+  <div class="photo-review-order">
+   <p class="photo-order-guide">같은 색상끼리 끌어 순서를 바꾸세요. 1번 정면 · 2번 옆면 · 3번부터 디테일</p>
+   <button type="button" class="secondary" id="manualPhotoReviewSort" title="수정한 색상에 맞춰 사진을 다시 모아요">색상별 정렬</button>
+  </div>
   <div id="manualPhotoReviewLegend" aria-label="상품 색상 구분"></div>
   <div id="manualPhotoReviewGrid"></div>
   <p id="manualPhotoReviewMessage" role="status"></p>
   <details id="photoPointPicker"><summary>소구점 선택</summary><p>공식 근거에서 구매 장점 2~4개를 고르세요.</p><div id="photoPointCandidates"></div><p id="photoPointMessage" role="status"></p><button id="photoPointApply" type="button">소구점 반영</button></details>
  </div>`;
  document.body.append(dialog);let current=null,loading=false;const grid=dialog.querySelector('#manualPhotoReviewGrid'),message=dialog.querySelector('#manualPhotoReviewMessage'),apply=dialog.querySelector('#manualPhotoReviewApply');
+ const sortButton=dialog.querySelector('#manualPhotoReviewSort');
  let draftTimer=null,draftQueue=Promise.resolve(),pendingDraft=null,draftVersion=0;
  let draggedCard=null;
  const dragGroup=card=>{const role=card?.querySelector('[data-field=role]')?.value,color=card?.querySelector('[data-field=color]')?.value;return color&&!['care-label','excluded'].includes(role)?color:null;};
  function assignOrderedRoles(){const counts=new Map();for(const card of grid.querySelectorAll(':scope > [data-photo-id]')){const color=dragGroup(card);if(!color)continue;const index=counts.get(color)||0;counts.set(color,index+1);const role=card.querySelector('[data-field=role]'),value=index===0?'front':index===1?'side':'detail';if(role.value!==value){role.value=value;card.refreshPhotoView?.();}}}
  grid.addEventListener('dragstart',event=>{const card=event.target.closest('[data-photo-id]');if(!card||loading||card.querySelector('[data-field=role]').disabled||!dragGroup(card)||event.target.closest('select,input,button')){event.preventDefault();return;}draggedCard=card;card.classList.add('photo-dragging');event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',card.dataset.photoId);});
  grid.addEventListener('dragover',event=>{const card=event.target.closest('[data-photo-id]');grid.querySelectorAll('.photo-drop-target').forEach(n=>n.classList.remove('photo-drop-target'));if(!draggedCard||!card||card===draggedCard||dragGroup(card)!==dragGroup(draggedCard))return;event.preventDefault();event.dataTransfer.dropEffect='move';card.classList.add('photo-drop-target');});
- grid.addEventListener('drop',event=>{const target=event.target.closest('[data-photo-id]');if(!draggedCard||!target||target===draggedCard||dragGroup(target)!==dragGroup(draggedCard))return;event.preventDefault();const top=dialog.scrollTop,box=target.getBoundingClientRect(),after=event.clientX>box.left+box.width/2;grid.insertBefore(draggedCard,after?target.nextSibling:target);[...grid.querySelectorAll(':scope > [data-photo-id]')].forEach((card,index)=>card.dataset.originalOrder=String(index));dialog.dataset.keepPhotoOrder='true';groupPhotos();dialog.scrollTop=top;rememberSelection();message.textContent='사진 순서를 저장했습니다. 사진 반영을 눌러 주세요.';});
+ grid.addEventListener('drop',event=>{const target=event.target.closest('[data-photo-id]');if(!draggedCard||!target||target===draggedCard||dragGroup(target)!==dragGroup(draggedCard))return;event.preventDefault();const top=dialog.scrollTop,box=target.getBoundingClientRect(),after=event.clientX>box.left+box.width/2;grid.insertBefore(draggedCard,after?target.nextSibling:target);updatePhotoSummary();dialog.scrollTop=top;rememberSelection();message.textContent='사진 순서를 저장했습니다. 사진 반영을 눌러 주세요.';});
  grid.addEventListener('dragend',()=>{draggedCard?.classList.remove('photo-dragging');draggedCard=null;grid.querySelectorAll('.photo-drop-target').forEach(n=>n.classList.remove('photo-drop-target'));});
 
  const selectionStatus=dialog.querySelector('#manualPhotoSelectionStatus');
@@ -46,15 +50,35 @@
   const old=node.querySelector(':scope > .photo-official-chip');if(old)old.remove();
   if(!node.dataset.photoId&&chip?.image&&/^data:image\/jpeg;base64,/.test(chip.image)){const image=document.createElement('img');image.className='photo-official-chip';image.src=chip.image;image.alt=color+' 공식 색상칩';image.draggable=false;node.prepend(image);}
  }
- // Keep every card mounted in its chosen slot. Color edits only change labels/counts.
- function groupPhotos({initial=false}={}){
-  if(!current)return;
-  const cards=[...grid.querySelectorAll(':scope > [data-photo-id]')];
-  if(initial){
-   const rank=card=>{const role=card.querySelector('[data-field=role]').value,color=card.querySelector('[data-field=color]').value,index=current.colors.indexOf(color);return role==='excluded'?current.colors.length+2:role==='care-label'?current.colors.length+1:index<0?current.colors.length:index;};
-   cards.sort((a,b)=>rank(a)-rank(b)||Number(a.dataset.originalOrder)-Number(b.dataset.originalOrder));
-   const fragment=document.createDocumentFragment();for(const card of cards)fragment.append(card);grid.append(fragment);
+ function arrangePhotoGroups(){
+  const sectionNames=[...current.colors,'색상 선택 필요','케어라벨','사용 안 함'];
+  const unassigned=current.colors.length;
+  const groups=sectionNames.map(()=>[]);
+  for(const card of grid.querySelectorAll(':scope > [data-photo-id]')){
+   const role=card.querySelector('[data-field=role]').value;
+   const index=current.colors.indexOf(dragGroup(card));
+   let section=index<0?unassigned:index;
+   if(role==='care-label')section=unassigned+1;
+   if(role==='excluded')section=unassigned+2;
+   groups[section].push(card);
   }
+  const fragment=document.createDocumentFragment();
+  for(const [index,cards] of groups.entries()){
+   if(!cards.length)continue;
+   const heading=document.createElement('h3');
+   heading.className='photo-group-heading';
+   heading.textContent=sectionNames[index];
+   decorateColor(heading,index);
+   fragment.append(heading,...cards);
+  }
+  grid.replaceChildren(fragment);
+  updatePhotoSummary();
+ }
+ sortButton.onclick=()=>{if(!loading&&current)arrangePhotoGroups();};
+
+ // Keep the cards in place while edits are in progress.
+ function updatePhotoSummary(){
+  const cards=grid.querySelectorAll(':scope > [data-photo-id]');
   assignOrderedRoles();
   const counts=new Map();for(const card of cards){const color=dragGroup(card);if(color)counts.set(color,(counts.get(color)||0)+1);}
   for(const badge of dialog.querySelectorAll('#manualPhotoReviewLegend [data-color]')){const count=counts.get(badge.dataset.color)||0,label=count+'장'+(count?'':' · 사진 없음'),node=badge.querySelector('.photo-color-count');if(node.textContent!==label)node.textContent=label;}
