@@ -6,14 +6,14 @@ import {chromium} from 'playwright';
 test('실제 시작 핸들러는 응답 대기 중에도 즉시 움직이며 중복 요청과 실패 후 애니메이션을 막는다',async()=>{
  const source=await readFile(new URL('../public/app.js',import.meta.url),'utf8');
  const feedback=source.slice(source.indexOf('let feedbackTimer'),source.indexOf('async function copyProgress('));
- const buttons=source.slice(source.indexOf('function syncButtons()'),source.indexOf('function action('));
+ const buttons=source.slice(source.indexOf('function smartstoreRetry()'),source.indexOf('function action('));
  const start=source.slice(source.indexOf('function paintSmartstoreStart()'),source.indexOf("$('smartstoreDetailOnly').onclick="));
  const browser=await chromium.launch({headless:true});try{
   const page=await browser.newPage({viewport:{width:780,height:640}});
   await page.setContent(`<body data-channel="smartstore"><main style="display:block;padding-top:175px;max-width:700px"><section class="card"><p>동작 확인용 화면 · 판매자 화면에 전송하지 않음</p><h2>5. 입력·업로드 시작</h2><input id="style" value="026952"><p>확인한 상품정보와 사진으로 업로드를 준비합니다.</p><div class="register-actions"><button id="smartstoreStart">입력·업로드 시작</button></div><p id="error"></p></section></main><div id="clickFeedback" role="status"></div><div hidden><button id="open"></button><button id="collect"></button><button id="run"></button></div></body>`);
   await page.addStyleTag({content:await readFile(new URL('../public/style.css',import.meta.url),'utf8')});
   await page.addScriptTag({content:`const $=id=>document.getElementById(id),feedback=$('clickFeedback');
-   let requestLock=false,serverBusy=false,serverPhase='idle',smartstoreStarting=false,smartstoreRequestAt=0,product=null;
+   let requestLock=false,serverBusy=false,serverPhase='idle',smartstoreStarting=false,smartstoreRequestAt=0,product=null,smartstoreListingState=null;
    const buttonLabels={},busyLabels={};window.requests=0;
    const flushManualTagSelection=async()=>{},currentProductEdits=()=>({}),currentManualTags=()=>[],refresh=()=>{};
    const post=async()=>{window.requests++;await new Promise((resolve,reject)=>{window.rejectRequest=reject;});};

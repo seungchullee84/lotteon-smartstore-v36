@@ -30,7 +30,7 @@ export async function assertNativeVideoToolbar(editor){
 
 // Use ONE's file attachment UI. Never convert a localhost/file URL into seller HTML.
 // Report success only after ONE creates a native component with a stable identity.
-export async function insertNativeBrandVideo(editor,{check=()=>{},dataRoot,videoOptions,timeout=120000}={}){
+export async function insertNativeBrandVideo(editor,{check=()=>{},dataRoot,videoOptions,onSubmit=()=>{},timeout=120000}={}){
  check();const {file,sha256}=await requireBrandVideo(dataRoot,videoOptions);
  const before=await editor.locator('.se-component.se-video').count();
  const originalPages=new Set(editor.context().pages());
@@ -50,7 +50,7 @@ export async function insertNativeBrandVideo(editor,{check=()=>{},dataRoot,video
  await clickToolbar();
  while(Date.now()<deadline){
   check();
-  if(!attached&&toolbarChooser){await toolbarChooser.setFiles(file);attached=true;}
+  if(!attached&&toolbarChooser){check();onSubmit();await toolbarChooser.setFiles(file);attached=true;}
   const videos=editor.locator('.se-component.se-video');
   if(attached&&await videos.count()===before+1){
    await videos.last().scrollIntoViewIfNeeded();
@@ -67,12 +67,12 @@ export async function insertNativeBrandVideo(editor,{check=()=>{},dataRoot,video
     let inputs=scope.locator('input[type="file"][accept*="video"],input[type="file"][accept*=".mp4"]');
     // Some upload windows expose an untyped single file input. Only use it in a new video popup.
     if(!await inputs.count()&&popupPages.includes(scope.page())&&/동영상/.test(await scope.locator('body').innerText().catch(()=>'')))inputs=scope.locator('input[type="file"]');
-    if(await inputs.count()===1){check();await inputs.setInputFiles(file);attached=true;break;}
+    if(await inputs.count()===1){check();onSubmit();await inputs.setInputFiles(file);attached=true;break;}
     const uploader=scope.locator('#video-uploader-wrap');
     const add=uploader.getByRole('button',{name:'동영상 추가',exact:true});
     if(await add.count()===1&&await add.isVisible()){
      check();const [chooser]=await Promise.all([scope.page().waitForEvent('filechooser',{timeout:10000}),add.click()]);
-     await chooser.setFiles(file);attached=true;break;
+     check();onSubmit();await chooser.setFiles(file);attached=true;break;
     }
    }else if(!completed){
     // Restrict completion to the upload dialog or popup, never the seller form's Register button.

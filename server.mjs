@@ -14,6 +14,7 @@ import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
 import {resolveDetailTemplate} from './smartstore-template-choice.mjs';
 import {serveBrandVideo,WOMEN_VIDEO_HASH} from './smartstore-brand-video.mjs';
 import {runSmartstoreAuto} from './smartstore-auto.mjs';
+import {smartstoreAssetStamp,smartstoreSourceStamp} from './smartstore-upload-recovery.mjs';
 import {startSmartstoreProgress,advanceSmartstoreProgress,finishSmartstoreProgress} from './smartstore-job-progress.mjs';
 import {runSmartstoreDetailOnly} from './smartstore-detail-only.mjs';
 import {prepareSmartstoreAuto} from './smartstore-auto-prepare.mjs';
@@ -34,7 +35,7 @@ import {SmartstoreAutomation} from './smartstore-automation.mjs';
 import {smartstorePlan} from './smartstore-form.mjs';
 import {researchForProduct} from './apparel-tag-research.mjs';
 import {createExpandedTitleOptimizer as createNaverTitleOptimizer,hasDuplicateTitleMeaning} from './naver-smart-title.mjs';
-import {smartstoreTitle,assertSmartstoreTitleLength,applySelectedSmartstoreTitle,assertSmartstoreInputTitle} from './smartstore-title.mjs';
+import {smartstoreTitle,applySelectedSmartstoreTitle,assertSmartstoreInputTitle} from './smartstore-title.mjs';
 import {saveLongDetailImage} from './long-detail-image.mjs';
 import {desktopDirectory,imageDownloadFolder} from './desktop-downloads.mjs';
 import http from 'node:http';
@@ -98,6 +99,12 @@ let extraImageEdits=Promise.resolve();
 function log(message){if(state.phase==='smartstore-auto'&&state.autoProgress?.status==='running')state.autoProgress.message=message;state.logs.push({time:new Date().toLocaleTimeString('ko-KR'),message});state.logs=state.logs.slice(-300);console.log(message);}
 const bot=new LotteAutomation(dataRoot,log);bot.onPause=message=>{state.paused=message;};
 const smartBot=new SmartstoreAutomation(dataRoot,log);
+let pendingSmartstoreRun=null;
+function releaseSmartstoreRun(run){
+ run?.formBinding?.dispose();run?.editor?.binding?.dispose();
+ if(pendingSmartstoreRun===run)pendingSmartstoreRun=null;
+}
+const changedSmartstoreSource=()=>Object.assign(Error('품번·입력값·사진 또는 상세 원본이 바뀌었습니다. 기존 입력 화면은 그대로 두었습니다. 자료를 확인한 뒤 새로 연 수정·복사등록 화면에서 시작해 주세요.'),{code:'SMARTSTORE_RESUME_SOURCE_CHANGED'});
 function colorRecoveryOptions(signal,apiKey){return {dataRoot,signal,apiKey,log,
  readSource:(product,options)=>smartBot.importExistingPhotos(product,options),
  assertCurrent:(product,folder)=>{if(state.product?.style!==product.style||state.product?.sourceUrl!==product.sourceUrl||state.folder!==folder)throw Error('현재 상품이 변경되어 수집 사진을 적용하지 않았습니다.');},
@@ -111,6 +118,7 @@ async function publishPhotoPreview(product,folder){
  state.photoPreparation=smartstorePreparationStatus(product,listing);state.revision++;
  log('미리보기 갱신 · 대표 1장 · 추가 '+listing.extras.length+'장 · 상세사진 '+(product.smartstoreDetail?.photoCount||0)+'장 · '+(state.photoPreparation.templateReady?'사진·템플릿 준비 완료':state.photoPreparation.message));
  if(state.phase!=='smartstore-auto')warmSmartstoreUpload(product,folder);
+ return listing;
 }
 let uploadWorkRoot,uploadWarmup;
 function smartstoreUploadWorkRoot(){
@@ -410,48 +418,104 @@ const server=http.createServer(async(req,res)=>{
         return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/smartstore-auto'){
-        if(state.product?.photoSelectionPending)throw Error('사진을 먼저 선택하고 템플릿·추가이미지에 반영해 주세요.');
         if(state.busy)throw Error('진행 중인 작업이 있습니다.');
-        parseProductInput(b.style);
-        const detailTemplate=resolveDetailTemplate(b.detailTemplate??state.product?.detailTemplate);
-        if(b.edits)await productEdits.save(b.edits,state.product?.style);
-        const selectedTitle=b.selectedTitle;const input=b.style,key=backgroundApiKey;const previous=state.product,previousFolder=state.folder;const parsedInput=parseProductInput(input);const sourceUrlHint=previous&&(parsedInput.style===previous.style||parsedInput.url===previous.sourceUrl)?previous.sourceUrl:null;smartBot.stopped=false;bot.stopped=false;
+        if(state.product?.photoSelectionPending)throw Error('사진을 먼저 선택하고 템플릿·추가이미지에 반영해 주세요.');
+        const input=b.style,parsedInput=parseProductInput(input),key=backgroundApiKey;
+        const previous=state.product,previousFolder=state.folder;
+        const detailTemplate=resolveDetailTemplate(b.detailTemplate??previous?.detailTemplate);
+        const selectedTitle=b.selectedTitle;
+        const last=pendingSmartstoreRun;
+        const retry=b.resumeId!==undefined;
+        if(retry){
+          const ready=last?.checkpoint.ready;
+          if(!ready||b.resumeId!==last.id)throw Error('이어서 진행할 이전 작업을 찾지 못했습니다. 현재 판매자 화면부터 확인해 주세요.');
+          const p=ready.prepared;
+          const sameInput=parsedInput.url?parsedInput.url===p.sourceUrl:parsedInput.style===p.style;
+          if(!sameInput||previous?.style!==p.style||previous?.sourceUrl!==p.sourceUrl||previousFolder!==ready.folder||
+             last.revision!==state.revision||detailTemplate!==p.detailTemplate||
+             selectedTitle&&(selectedTitle.style!==p.style||String(selectedTitle.title??'').trim()!==p.smartstoreName)||
+             Object.entries(b.edits?.fields||{}).some(([name,value])=>name==='smartstoreName'?String(value).trim()!==p.smartstoreName:p.userEditedFields?.[name]!==value)){
+            if(state.autoProgress?.retry?.id===last.id)state.autoProgress.retry=null;
+            throw changedSmartstoreSource();
+          }
+        }else{
+          if(last?.form&&await last.formBinding?.verify().then(()=>true,()=>false))throw Error('이전 상품 입력이 이 화면에 남아 있습니다. 이어서 진행하거나 판매자센터에서 새 수정·복사등록 화면을 열어 주세요.');
+          releaseSmartstoreRun(last);
+          if(b.edits)await productEdits.save(b.edits,previous?.style);
+        }
+        const run=retry?last:{id:randomBytes(8).toString('hex'),checkpoint:{},history:[],folder:null};
+        const sourceUrlHint=previous&&(parsedInput.style===previous.style||parsedInput.url===previous.sourceUrl)?previous.sourceUrl:null;
         job('smartstore-auto',async()=>{
-          const signal=activeAbort.signal;
-          const result=await runSmartstoreAuto({input,apiKey:key,signal,log,step:name=>{state.autoStep=name;advanceSmartstoreProgress(state.autoProgress,name);},
-            preflight:p=>smartBot.preflight(p),
-            collect:async value=>{
-              const reused=previous?.gender==='남성'?null:await reusableSmartstoreCollection(parsedInput,previous,previousFolder,{dataRoot});
-              const folder=reused?.folder||path.join(dataRoot,'smartstore-auto-'+Date.now());
-              if(reused)log('현재 수집 자료 이어서 사용 · 공식몰 중복 수집 생략');
-              let product=reused?.product||await collect(value,folder,log,()=>signal.aborted,signal,{saveSmartstoreSource:true,sourceUrlHint,noticeCacheRoot:path.join(dataRoot,'smartstore-notice-cache'),prepareMain:false});
-              product.keywords=buildKeywords(product);
-              product=await productEdits.apply(product);product.detailTemplate=detailTemplate;
-              if(selectedTitle){Object.assign(product,applySelectedSmartstoreTitle(product,selectedTitle));log('현재 전용 상품명 그대로 사용 · 자동 재작성 없음');}
-              else{product.smartstoreName=smartstoreTitle(product);
-              const optimized=await optimizeNaverTitle(product,naverCredentials);
-              product.smartstoreName=optimized.title;log('상품명 자동 최적화 · '+optimized.source);
-              assertSmartstoreTitleLength(product.smartstoreName);
+          const signal=activeAbort.signal,progress=state.autoProgress,timings={};
+          progress.timings=timings;
+          const checkCurrent=()=>{signal.throwIfAborted();if(run.revision!==state.revision||state.product?.style!==run.style||state.folder!==run.folder)throw changedSmartstoreSource();};
+          const verifySources=async(p,folder)=>{checkCurrent();if(run.sourceStamp!==await smartstoreSourceStamp(p,folder,{dataRoot}))throw changedSmartstoreSource();checkCurrent();};
+          let status='error';
+          try{
+            const result=await runSmartstoreAuto({input,apiKey:key,signal,log,checkpoint:run.checkpoint,
+              verifyResume:async ready=>{
+                await run.formBinding?.verify();await run.editor?.binding?.verify();
+                await verifySources(ready.prepared,ready.folder);
+              },
+              step:(name,label)=>{state.autoStep=name;advanceSmartstoreProgress(progress,name);progress.stepLabel=label;},
+              onTiming:(name,timing)=>{timings[name]=timing;},
+              preflight:p=>smartBot.preflight(p,{run}),
+              collect:async value=>{
+                const reused=previous?.gender==='남성'?null:await reusableSmartstoreCollection(parsedInput,previous,previousFolder,{dataRoot});
+                const folder=reused?.folder||path.join(dataRoot,'smartstore-auto-'+Date.now());run.folder=folder;
+                if(reused)log('현재 수집 자료 이어서 사용 · 공식몰 중복 수집 생략');
+                let product=reused?.product||await collect(value,folder,log,()=>signal.aborted,signal,{saveSmartstoreSource:true,sourceUrlHint,noticeCacheRoot:path.join(dataRoot,'smartstore-notice-cache'),prepareMain:false});
+                product.keywords=buildKeywords(product);
+                product=await productEdits.apply(product);product.detailTemplate=detailTemplate;
+                if(selectedTitle?.style===product.style){Object.assign(product,applySelectedSmartstoreTitle(product,selectedTitle));log('현재 전용 상품명 그대로 사용');}
+                else product.smartstoreName=smartstoreTitle(product);
+                smartstorePlan(product,product.consumerPrice);
+                return {product,folder};
+              },
+              onProduct:async(product,folder)=>{run.style=product.style;state.product=product;state.folder=folder;state.photoPreparation={style:product.style,status:'preparing'};state.revision++;},
+              onPrepared:async(product,folder)=>{
+                const listing=await publishPhotoPreview(product,folder);
+                run.revision=state.revision;run.sourceStamp=await smartstoreSourceStamp(product,folder,{dataRoot});
+                return listing;
+              },
+              prepare:(p,folder)=>prepareSmartstoreWithColorRecovery(p,folder,colorRecoveryOptions(signal,key)),
+              includeMain:false,
+              render:async(p,folder)=>{
+                const output=path.join(folder,p.style+'_스마트스토어자동상세_'+Date.now()+'.png');
+                const {detail,parts}=await renderSmartstoreUpload(p,folder,output,{signal,prepared:true});
+                return {...detail,path:output,parts};
+              },
+              upload:async(p,folder,{detail,preview,measure})=>{
+                const assets=await measure('uploadFiles',async()=>{
+                  if(!retry)await verifySources(p,folder);
+                  const careLabels=run.assets?.careLabels??await prepareCareLabelImages(p,folder,{dataRoot});
+                  const files=[preview.main,...preview.extras,...careLabels,...detail.parts.files,...(detail.parts.video?[detail.parts.video.file]:[])];
+                  const assetStamp=await smartstoreAssetStamp(files);
+                  if(run.assetStamp&&run.assetStamp!==assetStamp)throw changedSmartstoreSource();
+                  run.assetStamp=assetStamp;return (run.assets={main:preview.main,extras:preview.extras,careLabels});
+                });
+                return smartBot.uploadPrepared(p,folder,{...assets,detailParts:detail.parts,preserveTags:true,measure,run,checkCurrent});
               }
-              smartstorePlan(product,product.consumerPrice);
-              return {product,folder};
-            },
-            onProduct:async(product,folder)=>{state.product=product;state.folder=folder;state.photoPreparation={style:product.style,status:'preparing'};state.revision++;},
-            onPrepared:publishPhotoPreview,
-            prepare:(p,folder)=>prepareSmartstoreWithColorRecovery(p,folder,colorRecoveryOptions(signal,key)),
-            includeMain:false,
-            render:async(p,folder)=>{
-              const output=path.join(folder,p.style+'_스마트스토어자동상세_'+Date.now()+'.png');
-              const {detail,parts}=await renderSmartstoreUpload(p,folder,output,{signal,prepared:true});
-              return {...detail,path:output,parts};
-            },
-            upload:async(p,folder,{main,detail})=>{
-              const selected=await prepareListingImages(p,folder,{dataRoot});
-              const careLabels=await prepareCareLabelImages(p,folder,{dataRoot});
-              return smartBot.uploadPrepared(p,folder,{main:selected.main,extras:selected.extras,detailParts:detail.parts,careLabels,preserveTags:b.preserveTags===true});
+            });
+            checkCurrent();
+            await writeFile(path.join(result.folder,'smartstore-auto-completed.json'),JSON.stringify(result,null,2));
+            state.autoStep='done';status='done';releaseSmartstoreRun(run);
+          }catch(error){
+            status=signal.aborted?'stopped':'error';
+            const changed=/^SMARTSTORE_RESUME_.*CHANGED$/.test(error.code||'');
+            if(run.checkpoint.ready&&(!signal.aborted||run.form)){
+              // Keep the form binding as a guard even when this retry cannot
+              // continue. A fresh start must use a freshly opened form.
+              pendingSmartstoreRun=run;
+              if(!signal.aborted&&!changed)progress.retry={id:run.id,style:run.style,sourceUrl:run.checkpoint.ready.prepared.sourceUrl};
+            }else releaseSmartstoreRun(run);
+            throw error;
+          }finally{
+            if(run.folder&&run.style){
+              run.history.push({startedAt:progress.startedAt,finishedAt:Date.now(),status,step:progress.step,timings});
+              await writeFile(path.join(run.folder,'smartstore-auto-timings.json'),JSON.stringify({style:run.style,unit:'ms',attempts:run.history},null,2)).catch(()=>log('구간 시간은 화면에서 확인할 수 있습니다. 기록 파일을 쓰지 못했습니다.'));
             }
-          });
-          if(result.tagStatus)state.tagResult={style:state.product.style,tagStatus:result.tagStatus,tagCount:result.tagCount,tagMissing:result.tagMissing,searchTagsVerified:result.searchTagsVerified,selectedTags:result.selectedTags};state.autoStep='done';await writeFile(path.join(result.folder,'smartstore-auto-completed.json'),JSON.stringify(result,null,2));
+          }
         });return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/smartstore-import-photos'){

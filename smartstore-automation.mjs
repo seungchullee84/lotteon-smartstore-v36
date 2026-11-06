@@ -8,6 +8,7 @@ import path from 'node:path';
 import {researchForProduct} from './apparel-tag-research.mjs';
 import {selectedProductTagResearch} from './smartstore-tag-selection.mjs';
 import {fillResearchTags} from './smartstore-research-tags.mjs';
+import {bindSmartstoreDraft} from './smartstore-upload-recovery.mjs';
 export const SMARTSTORE_HOME='https://sell.smartstore.naver.com/';
 import {uploadSmartstoreDetail} from './smartstore-detail-upload.mjs';
 import {readExistingPhotos,readIsolatedPhotoSource} from './smartstore-photo-import.mjs';
@@ -47,8 +48,18 @@ export class SmartstoreAutomation extends BrowserAutomation{
     const {writeFile}=await import('node:fs/promises');
     await writeFile(path.join(folder,'smartstore-detail-only-result.json'),JSON.stringify({...result,style:product.style,detailOnly:true,saved:false,published:false},null,2));return result;
   }
-  async preflight(product){
-    this.stopped=false;await this.bindCopyForm(product);
+  async preflight(product,{run}={}){
+    this.stopped=false;
+    if(run?.formBinding){
+      const binding=run.formBinding;
+      await binding.verify();
+      const forms=this.context?.pages().filter(p=>!p.isClosed()&&isSmartstoreInputUrl(p.url())&&/\/products\/(?:copy|edit)\//.test(p.url()))||[];
+      if(forms.length!==1||forms[0]!==binding.page)throw Error('처음 입력하던 수정·복사등록 창 하나만 남겨 주세요.');
+      this.page=binding.page;this.copyFormUrl=binding.url;this.formMode=isSmartstoreDetailEditUrl(binding.url)?'edit':'copy';this.boundProductStyle=product.style;
+      this.log('이전 작업과 같은 품번·판매자 화면 확인');
+      return;
+    }
+    await this.bindCopyForm(product);
     const notice=this.page.locator('.modal-content').filter({hasText:'판매상품이 안전기준 준수 대상'});
     if(await notice.isVisible())await notice.getByRole('button',{name:'확인',exact:true}).click();
     try{await this.page.locator('input[name="product.name"]').waitFor({state:'visible',timeout:10000});}catch{throw Error('전용 크롬에서 스마트스토어 로그인 후 수정 또는 복사등록 화면을 열어 주세요.');}
@@ -56,14 +67,18 @@ export class SmartstoreAutomation extends BrowserAutomation{
     this.log('대상 화면 확인 · '+this.copyFormUrl+' · '+await this.page.locator('input[name="product.name"]').inputValue());
     const options=await this.page.locator('#choice_option_name0, #choice_option_name1').evaluateAll(inputs=>Object.fromEntries(inputs.map(input=>[input.id,input.value])));
     this.log('기존 반영 상태 · 대표 '+await this.page.locator('ncp-product-temp-photo-infra-image-upload#representImage img').count()+'장 · 추가 '+await this.page.locator('ncp-product-temp-photo-infra-image-upload#optionalImages img').count()+'장 · 옵션 '+(options.choice_option_name0||'')+' / '+(options.choice_option_name1||''));
+    if(run)run.formBinding=await bindSmartstoreDraft(this.page,'input[name="product.name"]');
   }
-  async uploadPrepared(p,folder,{main,extras,detailParts,careLabels=[],preserveTags=false}){
-    this.check();if(this.boundProductStyle&&this.boundProductStyle!==p.style)throw Error('전체 입력할 품번이 변경되었습니다.');const plan={...smartstorePlan(p,p.consumerPrice),tagResearch:selectedProductTagResearch(p,{dataRoot:this.root})};
-    if(!this.page||this.page.isClosed()||this.page.url()!==this.copyFormUrl||!isSmartstoreInputUrl(this.page.url()))throw Error('자동화 중 등록 화면이 변경됐습니다.');
-    const check=()=>{this.check();if(this.page.isClosed()||this.page.url()!==this.copyFormUrl)throw Error('등록 화면이 변경되어 업로드를 중단했습니다.');};
-    const report=await fillSmartstore({playwright:this.page,url:()=>this.page.url()},plan,{main,extras,careLabels,replaceImages:true,detail:true,preserveTags},this.log,check);
-    check();const detail=await uploadSmartstoreDetail(this.page,detailParts,{check,log:this.log,mode:this.formMode||'copy'});
-    const {writeFile}=await import('node:fs/promises');const result={...report,...detail,formUrl:this.copyFormUrl,formMode:this.formMode,published:false};
+  async uploadPrepared(p,folder,{main,extras,detailParts,careLabels=[],preserveTags=false,run,measure=(_,fn)=>fn(),checkCurrent=()=>{}}){
+    this.check();if(this.boundProductStyle&&this.boundProductStyle!==p.style)throw Error('전체 입력할 품번이 변경되었습니다.');
+    const plan={...smartstorePlan(p,p.consumerPrice),tagResearch:preserveTags?undefined:selectedProductTagResearch(p,{dataRoot:this.root})};
+    const page=this.page,url=this.copyFormUrl;
+    const check=()=>{this.check();checkCurrent();run?.formBinding?.check();if(!page||page.isClosed()||page.url()!==url||!isSmartstoreInputUrl(url))throw Error('등록 화면이 변경되어 업로드를 중단했습니다.');};
+    const stage=(name,fn)=>measure(name,async()=>{check();await run?.formBinding?.verify();return fn();});
+    check();
+    const report=await fillSmartstore({playwright:page,url:()=>page.url()},plan,{main,extras,careLabels,replaceImages:true,detail:true,preserveTags},this.log,check,{measure:stage,resume:run?(run.form||={}):undefined});
+    check();const detail=await uploadSmartstoreDetail(page,detailParts,{check,log:this.log,mode:this.formMode||'copy',measure:stage,resume:run?(run.editor||={}):undefined});
+    const {writeFile}=await import('node:fs/promises');const result={...report,...detail,formUrl:url,formMode:this.formMode,published:false};
     await writeFile(path.join(folder,'smartstore-auto-result.json'),JSON.stringify(result,null,2));return result;
   }
   async open(){

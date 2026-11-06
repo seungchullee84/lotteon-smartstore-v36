@@ -6,6 +6,7 @@ import {smartstoreTitle,assertSmartstoreInputTitle} from './smartstore-title.mjs
 import {learnedFields,sellerProductCode} from './smartstore-learned.mjs';
 import {researchForProduct} from './apparel-tag-research.mjs';
 import {fillResearchTags} from './smartstore-research-tags.mjs';
+import path from 'node:path';
 
 export function smartstorePlan(p,salePrice){
   if(!/^\d{6}$/.test(p?.style))throw Error('먼저 상품을 수집해 주세요.');
@@ -34,7 +35,9 @@ export async function readSmartstoreOptionRows(page,plan,check=()=>{}){
     const rendered=await page.locator('[role="row"][row-index]').evaluateAll(es=>es.filter(e=>e.querySelector('[col-id="optionName1"]')&&e.querySelector('[col-id="optionName2"]')&&e.querySelector('[col-id="stockQuantity"]')).map(e=>({index:Number(e.getAttribute('row-index')),color:e.querySelector('[col-id="optionName1"]').textContent.trim(),size:e.querySelector('[col-id="optionName2"]').textContent.trim(),stock:Number(e.querySelector('[col-id="stockQuantity"]').textContent.trim())})));
     for(const row of rendered)rows.set(row.index,row);
   };
-  check();await page.locator('[role="gridcell"][col-id="optionName1"]').first().press('Control+Home');
+  check();await remember();
+  if(rows.size===plan.expectedOptions&&Array.from({length:plan.expectedOptions},(_,index)=>index).every(index=>rows.has(index)))return [...rows.values()];
+  await page.locator('[role="gridcell"][col-id="optionName1"]').first().press('Control+Home');
   await cell(0).waitFor({state:'visible',timeout:8000});await remember();
   // Virtual grids remove off-screen rows. Move through each missing range instead
   // of jumping straight to the end and losing the middle combinations.
@@ -88,7 +91,45 @@ export async function fillSmartstoreValue(loc,value,check=()=>{}){
  if(actual!=='<redacted>'&&String(actual).replaceAll(',','')!==expected.replaceAll(',',''))throw Error('입력값 확인 실패: '+expected.slice(0,50));
  return true;
 }
-export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
+export async function fillSmartstoreOptions(page,plan,{check=()=>{},log=()=>{},completed=false}={}){
+  const fill=(loc,value)=>fillSmartstoreValue(loc,value,check);
+  const optionName=page.locator('#choice_option_name0');
+  const changed=()=>Error('완료된 옵션 또는 재고가 바뀌었습니다. 현재 입력을 보존하고 이어서 진행을 멈췄습니다.');
+  if(completed){
+    const panel=page.locator('ui-view[name="option"]');
+    if(!await panel.locator('#option_choice_type_true').isChecked()||!await panel.getByLabel('직접 입력하기',{exact:true}).isChecked()||!await panel.getByLabel('조합형',{exact:true}).isChecked())throw changed();
+  }else await ensureSmartstoreOptionMode(page,check);
+  const optionCount=page.locator('input[ng-model="vm.choiceOptionNameCount"]').locator('..');
+  if((await optionCount.locator('.selectize-input').innerText()).trim()!=='2개'){
+    if(completed)throw changed();
+    check();await optionCount.locator('.selectize-input').click();await optionCount.locator('.selectize-dropdown-content').getByText('2개',{exact:true}).click();
+  }
+  await page.locator('#choice_option_name1').waitFor({state:'visible'});
+  const same=await optionName.inputValue()==='컬러'&&await page.locator('#choice_option_name1').inputValue()==='사이즈'&&await page.locator('#choice_option_value0').inputValue()===plan.colors.join(',')&&await page.locator('#choice_option_value1').inputValue()===plan.sizes.join(',')&&Number(await page.getByRole('grid').getAttribute('aria-rowcount'))===plan.expectedOptions+2;
+  let pairsMatch=false;
+  if(same){
+    const rows=await readSmartstoreOptionRows(page,plan,check);
+    try{
+      const count=verifySmartstoreOptions(plan,rows);
+      log('기존 옵션 조합·재고 '+count+'개 일치 · 다시 생성하거나 일괄수정하지 않았습니다.');
+      return count;
+    }catch{if(completed)throw changed();}
+    try{verifySmartstoreOptions({...plan,stockPerOption:0},rows.map(row=>({...row,stock:0})));pairsMatch=true;}catch{}
+  }else if(completed)throw changed();
+  if(!pairsMatch){
+    await fill(optionName,'컬러');await fill(page.locator('#choice_option_value0'),plan.colors.join(','));
+    await fill(page.locator('#choice_option_name1'),'사이즈');await fill(page.locator('#choice_option_value1'),plan.sizes.join(','));
+    check();await page.getByRole('button',{name:'옵션목록으로 적용',exact:true}).click();
+  }
+  await applySmartstoreBulkStock(page,plan,check);
+  const count=verifySmartstoreOptions(plan,await readSmartstoreOptionRows(page,plan,check));
+  log('색상 '+plan.colors.length+' × 사이즈 '+plan.sizes.length+' 옵션 조합·재고 확인');
+  return count;
+}
+const basicFields='input[name="product.name"],#prd_price2';
+const noticeFields='#prd,#prd_col,#prd_size,#prd_caution,#seller-code1,#material-detail,input[name="product.detailAttribute.manufactureDate"],input[ng-model="vm.dateText"],[ng-model^="vm.viewData.originAreaInfo."]';
+const readFields=(page,selector)=>page.locator(selector).evaluateAll(nodes=>nodes.map(n=>[n.id,n.name,n.getAttribute('ng-model'),n.value,n.type==='radio'||n.type==='checkbox'?n.checked:null]));
+export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{},{measure=(_,fn)=>fn(),resume}={}){
   assertSmartstoreInputTitle(plan.name,plan.nameUserEdited);
   const page=tab.playwright;
   if(!isSmartstoreInputUrl(await tab.url()))throw Error('스마트스토어 로그인 후 상품 등록 화면을 열어 주세요.');
@@ -98,30 +139,30 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   const learned=learnedFields(plan);
   const fill=(loc,value)=>fillSmartstoreValue(loc,value,check);
   const open=async(name,field)=>{if(!await field.isVisible())await page.getByRole('button',{name}).click();};
-  log('스마트스토어 '+(editing?'수정':'복사등록')+' 입력 · 조사 자료 태그 자동입력 · 상품 저장/등록 안 함');
+  const phase=(name,fn,selector)=>measure(name,async()=>{
+    check();const old=resume?.fields?.[name];
+    if(old){
+      if(JSON.stringify(await readFields(page,selector))!==old.snapshot)throw Error('이전에 완료한 상품 입력값이 바뀌었습니다. 현재 입력값을 그대로 두었습니다.');
+      log('기존 반영 확인 · '+(name==='basic'?'상품명·가격':'상품정보·고시')+' 다시 입력하지 않았습니다.');
+      return old.value;
+    }
+    const value=await fn();check();
+    if(resume&&selector)(resume.fields||={})[name]={snapshot:JSON.stringify(await readFields(page,selector)),value};
+    return value;
+  });
+  log('스마트스토어 '+(editing?'수정':'복사등록')+' 입력 · 상품 저장/등록 안 함');
   log('카테고리 자동선택 중지 · 현재 선택된 분류 유지');
-  await fill(page.locator('input[name="product.name"]'),plan.name);
-  await fill(page.locator('#prd_price2'),plan.salePrice);
-  log('상품명·테스트 판매가 '+plan.salePrice+'원 확인');
-  const optionName=page.locator('#choice_option_name0');
-  await ensureSmartstoreOptionMode(page,check);
-  const optionCount=page.locator('input[ng-model="vm.choiceOptionNameCount"]').locator('..');
-  if((await optionCount.locator('.selectize-input').innerText()).trim()!=='2개'){
-    await optionCount.locator('.selectize-input').click();await optionCount.locator('.selectize-dropdown-content').getByText('2개',{exact:true}).click();
-  }
-  await page.locator('#choice_option_name1').waitFor({state:'visible'});
-  const same=await optionName.inputValue()==='컬러'&&await page.locator('#choice_option_name1').inputValue()==='사이즈'&&await page.locator('#choice_option_value0').evaluate((e,values)=>e.value===values,plan.colors.join(','))&&await page.locator('#choice_option_value1').evaluate((e,values)=>e.value===values,plan.sizes.join(','))&&Number(await page.getByRole('grid').getAttribute('aria-rowcount'))===plan.expectedOptions+2;
-  if(!same){
-  await fill(optionName,'컬러');await fill(page.locator('#choice_option_value0'),plan.colors.join(','));
-  await fill(page.locator('#choice_option_name1'),'사이즈');await fill(page.locator('#choice_option_value1'),plan.sizes.join(','));
-  await page.getByRole('button',{name:'옵션목록으로 적용',exact:true}).click();
-  }
-  await applySmartstoreBulkStock(page,plan,check);
-  const rows=await readSmartstoreOptionRows(page,plan,check);
-  const verifiedOptions=verifySmartstoreOptions(plan,rows);
-  log('색상 '+plan.colors.length+' × 사이즈 '+plan.sizes.length+' 옵션 조합 생성');
-  if(assets&&(assets.main||Array.isArray(assets.extras))){await uploadSmartstoreImages(page,assets,check);log(assets.main?'대표·추가 이미지 업로드 완료':'추가이미지 정리 완료 · 대표이미지 교체 제외');}
+  await phase('basic',async()=>{
+    await fill(page.locator('input[name="product.name"]'),plan.name);
+    await fill(page.locator('#prd_price2'),plan.salePrice);
+    log('상품명·판매가 '+plan.salePrice+'원 확인');
+  },basicFields);
+  const verifiedOptions=await phase('options',()=>fillSmartstoreOptions(page,plan,{check,log,completed:resume?.options===true}));
+  if(resume)resume.options=true;
+  const slots=resume?(resume.slots||={}):undefined;
+  if(assets&&(assets.main||Array.isArray(assets.extras))){await uploadSmartstoreImages(page,assets,check,{measure:phase,slots,log});log(assets.main?'대표·추가 이미지 첨부 확인':'추가이미지 정리 완료 · 대표이미지 교체 제외');}
   if(!assets?.detail)log('복사된 상세설명 유지 · 별도로 지시한 이미지 입력만 수행');
+  const {origin,manufactureDate,sellerCode,tagReport}=await phase('productInfo',async()=>{
   await open(/^상품 주요정보/,page.getByRole('textbox',{name:'품번',exact:true}));
   await fillProductAttributes(page,learned,log,check);
   const origin=await fillSmartstoreOrigin(page,plan.country,check);
@@ -155,50 +196,93 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{}){
   log('판매자 상품코드 확인: '+sellerCode+' · 바코드·내부코드 유지');
   await open(/^노출 채널/,page.locator('#material-detail'));
   await fill(page.locator('#material-detail'),learned.material);
-  if(Object.hasOwn(assets||{},'careLabels')){await uploadSmartstoreImageSlot(page,'tagImages',assets.careLabels,{replaceImages:true},check);log(assets.careLabels.length?'현재 품번 택/케어라벨 '+assets.careLabels.length+'장 교체 완료':'품번 폴더에 택/케어라벨 없음 · 복사된 기존 라벨 삭제 완료');}
+  return {origin,manufactureDate,sellerCode,tagReport};
+  },noticeFields);
+  if(Object.hasOwn(assets||{},'careLabels'))await phase('careLabels',async()=>{
+    await uploadSmartstoreImageSlot(page,'tagImages',assets.careLabels,{replaceImages:true,receipt:slots?(slots.tagImages||={}):undefined,log},check);
+    log(assets.careLabels.length?'현재 품번 택/케어라벨 '+assets.careLabels.length+'장 교체 확인':'품번 폴더에 택/케어라벨 없음 · 복사된 기존 라벨 확인');
+  });
   log('소재(설명)에 현재 상품 소재·혼용률 입력 확인');
   log('소재·색상·치수·제조국·세탁방법 입력 · A/S·품질보증·미성년자 구매 기존값 유지');
   log('입력 테스트 완료 · '+verifiedOptions+'개 옵션 각 '+plan.stockPerOption+'개 재고 확인 · 저장/등록은 하지 않았습니다.');
   return {style:plan.style,salePrice:plan.salePrice,verifiedOptions,stockPerOption:plan.stockPerOption,manufactureDate,imagesSkipped:!assets,saved:false,keywordsTouched:false,...tagReport,sellerCode,origin};
 }
 
-export async function uploadSmartstoreImages(page,assets,check=()=>{}){
- const upload=(id,files)=>uploadSmartstoreImageSlot(page,id,files,assets,check);
- if(assets.main)await upload('representImage',[assets.main]);
- await upload('optionalImages',assets.extras);
+export async function uploadSmartstoreImages(page,assets,check=()=>{},{measure=(_,fn)=>fn(),slots,log}={}){
+ const upload=(id,files)=>uploadSmartstoreImageSlot(page,id,files,{...assets,receipt:slots?(slots[id]||={}):undefined,log},check);
+ if(assets.main)await measure('mainImage',()=>upload('representImage',[assets.main]));
+ if(Array.isArray(assets.extras))await measure('extraImages',()=>upload('optionalImages',assets.extras));
 }
 
-export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=false}={},check=()=>{}){
-    if(!files?.length&&!replaceImages)return;
-    check();const container=page.locator('ncp-product-temp-photo-infra-image-upload#'+id);
-    if(replaceImages===true){
-      while(await container.locator('img').count()){
-        check();const count=await container.locator('img').count();
-        await container.getByRole('button',{name:'이미지 삭제',exact:true}).first().click();
-        await page.waitForFunction(({id,count})=>document.querySelector('ncp-product-temp-photo-infra-image-upload#'+id).querySelectorAll('img').length<count,{id,count});
-      }
-    }else if(await container.locator('img').count())throw Error('기존 '+id+' 이미지가 있어 덮어쓰지 않았습니다. 새 입력 화면에서 실행해 주세요.');
-    if(!files?.length)return;
-    await container.getByRole('button',{name:'이미지 등록',exact:true}).click();
-    const dialog=page.getByRole('dialog');await dialog.getByRole('button',{name:'내 사진',exact:true}).waitFor({state:'visible',timeout:15000});
-    const choosing=page.waitForEvent('filechooser');await dialog.getByRole('button',{name:'내 사진',exact:true}).click();
-    const chooser=await choosing;
-    try{check();await chooser.setFiles(files,{timeout:60000});}
-    catch(error){
-      check();
-      const uploaded=await container.locator('img').evaluateAll((images,count)=>images.length===count&&images.every(n=>/naver\.net|pstatic\.net/.test(n.src)),files.length);
-      if(!uploaded)throw error;
-    }
-    await container.locator('img').first().waitFor({state:'visible',timeout:30000});
-    await page.waitForFunction(({id,count})=>{const images=[...document.querySelector('ncp-product-temp-photo-infra-image-upload#'+id).querySelectorAll('img')];return images.length===count&&images.every(n=>/naver\.net|pstatic\.net/.test(n.src));},{id,count:files.length},{timeout:60000});
-    if(id==='tagImages'){
-      const progress=page.locator('.modal-content').filter({hasText:'상품정보 추출 중입니다.'});
-      if(await progress.isVisible())await progress.getByRole('button',{name:'확인',exact:true}).click();
-      await page.waitForFunction(()=>[...document.querySelectorAll('.modal-content')].some(e=>e.getBoundingClientRect().height&&e.textContent.includes('택/케어라벨 이미지 분석 추출 결과'))||/분석실패|결과없음/.test(document.querySelector('ncp-product-temp-photo-infra-image-upload#tagImages')?.textContent||''),null,{timeout:60000});
-      const result=page.locator('.modal-content').filter({hasText:'택/케어라벨 이미지 분석 추출 결과'});
-      if(await result.isVisible()){check();await result.getByRole('button',{name:'닫기',exact:true}).click();await result.waitFor({state:'hidden'});}
-    }
+export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=false,receipt,log=()=>{}}={},check=()=>{}){
+ if(!files?.length&&!replaceImages)return;
+ check();const container=page.locator('ncp-product-temp-photo-infra-image-upload#'+id);
+ const sources=()=>container.locator('img').evaluateAll(images=>images.map(n=>n.src));
+ const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+ const fail=()=>Error('첨부한 사진을 같은 파일로 확인하지 못했습니다. 중복 첨부를 막기 위해 현재 사진을 그대로 두었습니다.');
+ const finish=async()=>{
+  if(id==='tagImages'&&files?.length){
+   const progress=page.locator('.modal-content').filter({hasText:'상품정보 추출 중입니다.'});
+   if(await progress.isVisible()){check();await progress.getByRole('button',{name:'확인',exact:true}).click();}
+   await page.waitForFunction(()=>[...document.querySelectorAll('.modal-content')].some(e=>e.getBoundingClientRect().height&&e.textContent.includes('택/케어라벨 이미지 분석 추출 결과'))||/분석실패|결과없음/.test(document.querySelector('ncp-product-temp-photo-infra-image-upload#tagImages')?.textContent||''),null,{timeout:60000});
+   const result=page.locator('.modal-content').filter({hasText:'택/케어라벨 이미지 분석 추출 결과'});
+   if(await result.isVisible()){check();await result.getByRole('button',{name:'닫기',exact:true}).click();await result.waitFor({state:'hidden'});}
   }
+  if(receipt)receipt.done=true;
+ };
+ const waitHosted=(timeout,names)=>page.waitForFunction(({id,count,names})=>{
+  const images=[...document.querySelectorAll('ncp-product-temp-photo-infra-image-upload#'+id+' img')];
+  return images.length===count&&images.every((n,i)=>{
+   try{const u=new URL(n.src);return u.protocol==='https:'&&/(^|\.)(naver|pstatic)\.net$/.test(u.hostname)&&(!names||decodeURIComponent(u.pathname.split('/').at(-1))===names[i]);}catch{return false;}
+  });
+ },{id,count:files?.length||0,names},{timeout});
+ if(receipt?.attached){
+  if(!equal(await sources(),receipt.attached))throw fail();
+  log('이미 첨부된 사진 '+receipt.attached.length+'장 확인 · 다시 올리지 않음');
+  if(!receipt.done)await finish();
+  return;
+ }
+ if(receipt?.submitted){
+  // A chooser timeout can occur after submission. Do not infer which files
+  // were applied from just the slot count or send the same batch blindly.
+  await waitHosted(4000,files.map(file=>path.basename(file))).catch(()=>{throw fail();});
+  check();receipt.attached=await sources();await finish();
+  log('이전 시도에서 첨부된 사진 '+receipt.attached.length+'장 확인 · 다시 올리지 않음');
+  return;
+ }
+ let existing=await sources();
+ if(receipt?.cleared&&existing.length)throw fail();
+ if(!receipt?.cleared&&replaceImages===true){
+  const original=receipt?(receipt.original??=existing):existing;
+  if(existing.length>original.length||!equal(existing,original.slice(original.length-existing.length)))throw fail();
+  while(existing.length){
+   check();const count=existing.length;
+   await container.getByRole('button',{name:'이미지 삭제',exact:true}).first().click();
+   await page.waitForFunction(({id,count})=>document.querySelector('ncp-product-temp-photo-infra-image-upload#'+id)?.querySelectorAll('img').length<count,{id,count});
+   const remaining=await sources();
+   if(remaining.length!==count-1||!equal(remaining,existing.slice(1)))throw fail();
+   existing=remaining;
+  }
+  if(receipt)receipt.cleared=true;
+ }else if(existing.length)throw Error('기존 '+id+' 이미지가 있어 덮어쓰지 않았습니다. 새 입력 화면에서 실행해 주세요.');
+ if(!files?.length){if(receipt)receipt.attached=[];await finish();return;}
+ const pick=page.getByRole('dialog').getByRole('button',{name:'내 사진',exact:true}).filter({visible:true});
+ if(!await pick.count()){
+  check();if(receipt)receipt.picker=true;
+  await container.getByRole('button',{name:'이미지 등록',exact:true}).click();
+ }else if(!receipt?.picker)throw Error('열려 있는 사진 선택 창을 먼저 확인해 주세요.');
+ await pick.waitFor({state:'visible',timeout:15000});
+ check();const [chooser]=await Promise.all([page.waitForEvent('filechooser',{timeout:10000}),pick.click()]);
+ check();if(receipt)receipt.submitted=true;
+ try{await chooser.setFiles(files,{timeout:60000});}
+ catch(error){
+  check();
+  try{await waitHosted(3000,files.map(file=>path.basename(file)));}catch{throw error;}
+ }
+ await waitHosted(60000);check();
+ if(receipt)receipt.attached=await sources();
+ await finish();
+}
 
 export async function fillSmartstoreSellerCode(page,plan,{check=()=>{},log=()=>{}}={}){
  check();

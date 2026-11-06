@@ -420,6 +420,7 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
 .upload-progress-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .upload-progress-clock{font-variant-numeric:tabular-nums;font-size:14px;white-space:nowrap}
 .upload-progress-message{margin:8px 0 0;font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+.upload-progress-metrics{margin-top:8px;padding-top:7px;border-top:1px solid #ced8e3;color:#27364a;font-size:13px;font-variant-numeric:tabular-nums;line-height:1.65}
 #smartstoreUploadProgress[data-status="error"],#smartstoreUploadProgress[data-status="stopped"]{background:#fff7ed;border-color:#e3b883;color:#774219}
 /* A visible, indeterminate activity signal from the first click to the real result. */
 :is(body[data-channel="smartstore"] #smartstoreStart,body[data-channel="lotte"] #run).working{opacity:1;padding-left:46px;overflow:hidden;background:#076b3c;cursor:progress}

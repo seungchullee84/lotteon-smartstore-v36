@@ -170,7 +170,13 @@ async function copyProgress(errorOnly=false){
  announce(errorOnly?'오류를 복사했습니다.':'진행 기록과 오류를 복사했습니다.','success');
 }
 $('copyError').onclick=()=>copyProgress(true);
-function syncButtons(){if($('smartstoreDetailOnly')){const active=smartstoreDetailStarting||serverBusy&&serverPhase==='smartstore-detail-only';$('smartstoreDetailOnly').textContent=active?'상세설명 교체 진행 중…':'상세설명만 교체 · 조회/수정';$('smartstoreDetailOnly').setAttribute('aria-busy',String(active));}if($('smartstoreStart')){const button=$('smartstoreStart'),active=smartstoreStarting||serverBusy&&serverPhase==='smartstore-auto';button.textContent=smartstoreStarting?'작업 중 · 시작 준비…':active?'작업 중 · 입력·업로드…':'입력·업로드 시작';button.classList.toggle('working',active);button.setAttribute('aria-busy',String(active));}for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreTemplate1','smartstoreTemplate2','smartstoreOpen','smartstoreOptimizeTitle','naverSettings','browserLoginSettings','smartstoreStart','smartstoreDetailOnly','smartstoreImportPhotos','smartstoreCombinePhotos','photoImportApply','smartstoreAutoTags'])if($(id))$(id).disabled=requestLock||serverBusy||['smartstoreAutoTags'].includes(id)&&!tagResearchReady||['smartstoreDetailOnly','smartstoreTemplate1','smartstoreTemplate2'].includes(id)&&!product;}
+function smartstoreRetry(){
+ const retry=smartstoreListingState?.autoProgress?.retry;
+ if(!retry||retry.style!==product?.style)return null;
+ const input=$('style').value.trim()||product.style;
+ return input===retry.style||input===retry.sourceUrl?retry:null;
+}
+function syncButtons(){if($('smartstoreDetailOnly')){const active=smartstoreDetailStarting||serverBusy&&serverPhase==='smartstore-detail-only';$('smartstoreDetailOnly').textContent=active?'상세설명 교체 진행 중…':'상세설명만 교체 · 조회/수정';$('smartstoreDetailOnly').setAttribute('aria-busy',String(active));}if($('smartstoreStart')){const button=$('smartstoreStart'),active=smartstoreStarting||serverBusy&&serverPhase==='smartstore-auto';button.textContent=smartstoreStarting?'작업 중 · 시작 준비…':active?'작업 중 · 입력·업로드…':smartstoreRetry()?'실패한 곳부터 이어서':'입력·업로드 시작';button.classList.toggle('working',active);button.setAttribute('aria-busy',String(active));}for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));el.textContent=active?busyLabels[id]:buttonLabels[id];}for(const id of ['smartstoreTemplate1','smartstoreTemplate2','smartstoreOpen','smartstoreOptimizeTitle','naverSettings','browserLoginSettings','smartstoreStart','smartstoreDetailOnly','smartstoreImportPhotos','smartstoreCombinePhotos','photoImportApply','smartstoreAutoTags'])if($(id))$(id).disabled=requestLock||serverBusy||['smartstoreAutoTags'].includes(id)&&!tagResearchReady||['smartstoreDetailOnly','smartstoreTemplate1','smartstoreTemplate2'].includes(id)&&!product;}
 function action(id,fn){$(id).onclick=async()=>{
  const primary=id in buttonLabels;if(primary&&(requestLock||serverBusy))return;
  if(id==='run'&&!$('form').reportValidity())return;
@@ -631,8 +637,16 @@ $('smartstoreStart').onclick=async()=>{
  if(!style){$('error').textContent='품번 또는 공식몰 상품 URL을 먼저 입력해 주세요.';return;}
  smartstoreRequestAt=Date.now();document.dispatchEvent(new CustomEvent('smartstore-auto-request',{detail:{status:'starting'}}));
  requestLock=true;smartstoreStarting=true;$('error').textContent='';$('smartstoreStart').disabled=true;syncButtons();announce('시작 요청 접수 중 · 수정/복사등록 화면을 확인합니다.');
- try{await paintSmartstoreStart();await flushManualTagSelection();await post('smartstore-auto',{style,detailTemplate:product?.detailTemplate===2?2:1,selectedTitle:product?{style:product.style,title:$('smartstoreName').value}:undefined,edits:currentProductEdits(),selectedTags:currentManualTags()});serverBusy=true;serverPhase='smartstore-auto';announce('자동 작업 시작 · 선택한 수정/복사등록 화면에 업로드합니다.');void refresh();}catch(e){smartstoreRequestAt=0;document.dispatchEvent(new CustomEvent('smartstore-auto-request',{detail:{status:'failed',error:e.message}}));$('error').textContent=e.message;announce('처리하지 못했습니다: '+e.message,'failed');}finally{requestLock=false;smartstoreStarting=false;syncButtons();}
+ const retry=smartstoreRetry();
+ try{
+  await paintSmartstoreStart();
+  await post('smartstore-auto',{style,detailTemplate:product?.detailTemplate===2?2:1,selectedTitle:product?{style:product.style,title:$('smartstoreName').value}:undefined,edits:currentProductEdits(),selectedTags:currentManualTags(),resumeId:retry?.id});
+  serverBusy=true;serverPhase='smartstore-auto';announce(retry?'이어서 진행 · 이전 입력 확인 중':'자동 작업 시작 · 선택한 수정/복사등록 화면에 업로드합니다.');void refresh();
+ }catch(e){
+  smartstoreRequestAt=0;document.dispatchEvent(new CustomEvent('smartstore-auto-request',{detail:{status:'failed',error:e.message}}));$('error').textContent=e.message;announce('처리하지 못했습니다: '+e.message,'failed');void refresh();
+ }finally{requestLock=false;smartstoreStarting=false;syncButtons();}
 };
+$('style').addEventListener('input',syncButtons);
 $('smartstoreDetailOnly').onclick=async()=>{
  if(requestLock||serverBusy)return;
  if(!product){$('error').textContent='먼저 상품 정보와 상세 미리보기를 준비해 주세요.';return;}
