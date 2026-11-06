@@ -273,7 +273,7 @@ async function selectSmartstoreImageFile(page,container,{receipt,check,fileCount
 export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=false,receipt,log=()=>{}}={},check=()=>{}){
  if(!files?.length&&!replaceImages)return;
  check();const container=page.locator('ncp-product-temp-photo-infra-image-upload#'+id);
- const sources=()=>container.locator('img').evaluateAll(images=>images.map(n=>n.src));
+ const sources=()=>container.locator('img').evaluateAll(images=>images.map(image=>image.currentSrc||image.src));
  const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
  const label=({representImage:'대표사진',optionalImages:'추가사진',tagImages:'택·케어라벨'})[id]||'사진';
  const fail=()=>Error('첨부한 사진을 같은 파일로 확인하지 못했습니다. 중복 첨부를 막기 위해 현재 사진을 그대로 두었습니다.');
@@ -303,14 +303,27 @@ export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=fal
  const isHosted=(source,name)=>{
   try{
    const url=new URL(source);
-   return url.protocol==='https:'&&/(^|\.)(naver|pstatic)\.net$/.test(url.hostname)&&
+   // Seller thumbnails can retain a legacy HTTP URL in the image attribute.
+   // This checks the seller's existing thumbnail and does not fetch that URL.
+   return ['https:','http:'].includes(url.protocol)&&/(^|\.)(naver|pstatic)\.net$/.test(url.hostname)&&
     (name===undefined||decodeURIComponent(url.pathname.split('/').at(-1))===name);
   }catch{return false;}
  };
+ const describeSources=observed=>[...new Set(observed.map(source=>{
+  try{
+   const url=new URL(source);
+   if(['blob:','data:'].includes(url.protocol))return '임시 미리보기';
+   return url.hostname?`${url.protocol}//${url.hostname}`:url.protocol;
+  }catch{return '주소 미확인';}
+ }))].join(', ')||'사진 없음';
  const waitHosted=(timeout,names)=>waitForSources(
   observed=>observed.length===files.length&&observed.every((source,i)=>isHosted(source,names?.[i])),
   timeout,
-  observed=>`${label} 반영 확인 지연 · 판매자 화면 ${observed.length}장 / 요청 ${files.length}장`
+  observed=>{
+   const hosted=observed.filter(source=>isHosted(source)).length;
+   return `${label} 반영 확인 지연 · 판매자 화면 ${observed.length}장 / 요청 ${files.length}장 · 네이버 주소 ${hosted}장`+
+    (names&&hosted===files.length?' · 요청 파일명 일치 확인 실패':` · ${describeSources(observed)}`);
+  }
  );
  if(receipt?.attached){
   if(!equal(await sources(),receipt.attached))throw fail();
