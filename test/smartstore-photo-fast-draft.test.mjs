@@ -21,7 +21,7 @@ test('새 사진은 축소 표본으로 초안을 만들고 글자 후보만 OCR
   for(const photo of photos)await writeFile(path.join(photoRoots[0],photo.name),photo.bytes);
   let review=await photoReview(product,{dataRoot:root,photoRoots});await savePhotoReviewDraft(product,{...review,channel:'smartstore',items:review.items.map(i=>({...i,role:'detail',roleOverride:false}))},{dataRoot:root,photoRoots});
   await prefillPhotoColors(product,folder,{dataRoot:root,photoRoots,classify:(_,items,o)=>classifyFastPhotoDraft(product,items,{...o,recognizePhoto})});
-  review=await photoReview(product,{dataRoot:root,photoRoots});assert.equal(review.items.find(i=>i.name==='20261107.jpg').role,'care-label','自動保存された初期detailはラベルを隠さない');
+  review=await photoReview(product,{dataRoot:root,photoRoots});assert.equal(review.items.find(i=>i.name==='20261107.jpg').role,'care-label','자동 저장한 초기 구도가 라벨 판별을 가리지 않는다');
   const manual={...review,channel:'smartstore',items:review.items.map(i=>({...i,color:'02그레이',role:'front',colorOverride:true,roleOverride:true}))};await savePhotoReviewDraft(product,manual,{dataRoot:root,photoRoots});assert.notEqual((await photoReview(product,{dataRoot:root,photoRoots})).items.find(i=>i.name==='20261107.jpg').role,'care-label','사용자 라벨 오판 수정 유지');
   const controller=new AbortController();controller.abort();await assert.rejects(classifyFastPhotoDraft(product,photos,{...options,signal:controller.signal}),{name:'AbortError'});
  }finally{await rm(root,{recursive:true,force:true});}

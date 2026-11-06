@@ -5,12 +5,12 @@ import sharp from 'sharp';
 import {createWorker} from 'tesseract.js';
 import {photoDigest} from './smartstore-photo-files.mjs';
 import {photoReviewChips} from './smartstore-photo-review-chips.mjs';
-import {garmentKind,resolveDraftPhotoColor} from './smartstore-local-photo-policy.mjs';
+import {garmentKind,resolveDraftPhotoColor,refineNeutralDraftColors} from './smartstore-local-photo-policy.mjs';
 import {careLabelText} from './smartstore-care-label-text.mjs';
 
 // A quick, explicitly unconfirmed color suggestion, never a garment segmentation
 // or a human review. Original pixels, mappings and seller uploads are untouched.
-export const FAST_PHOTO_VERSION='thumbnail-color-label-v1';
+export const FAST_PHOTO_VERSION='thumbnail-color-label-v2';
 export async function inspectPhotoThumbnail(bytes,kind){
  const {data,info}=await sharp(bytes).rotate().resize({width:320,height:480,fit:'inside',withoutEnlargement:true}).flatten({background:'#fff'}).removeAlpha().raw().toBuffer({resolveWithObject:true});
  const gray=Uint8Array.from({length:info.width*info.height},(_,i)=>Math.round((data[i*3]+data[i*3+1]+data[i*3+2])/3));
@@ -30,7 +30,7 @@ export async function classifyFastPhotoDraft(product,photos,{dataRoot,folder,sig
  const references=product.colors.map(color=>({quantiles:chips[color]?.color?.match(/^#([a-f\d]{6})$/i)?.[1]?.match(/../g).map(v=>{const n=parseInt(v,16);return [n,n,n];})}));
  const root=path.join(dataRoot,'smartstore-photo-fast-cache');await mkdir(root,{recursive:true});
  const identity=JSON.stringify([FAST_PHOTO_VERSION,product.style,product.sourceUrl,product.colors,kind,references]);
- const results=[];let worker,ocrCount=0,reused=0;
+ const results=[],samples=[];let worker,ocrCount=0,reused=0;
  const recognize=recognizePhoto||(async(bytes,sample)=>{
   worker||=await createWorker('kor+eng');signal?.throwIfAborted();
   await worker.setParameters({tessedit_pageseg_mode:'6'});
@@ -52,13 +52,19 @@ export async function classifyFastPhotoDraft(product,photos,{dataRoot,folder,sig
     }
     // Dense text without a confirmed label must not become an apparel color.
     const colorResult=label||sample.textCandidate?null:resolveDraftPhotoColor({quantiles:sample.quantiles},product.colors,references);
-    record={version:FAST_PHOTO_VERSION,hash:digest,color:colorResult?.color||'',careLabel:label,needsReview:!label,evidence:label?{basis:'사진의 제조·혼용·취급 문구 확인',text}: {basis:'축소 사진 중앙 표본과 현재 공식 색상칩 비교 · 자동 추정',textCandidate:sample.textCandidate},elapsedMs:Math.round(performance.now()-started)};
+    record={version:FAST_PHOTO_VERSION,hash:digest,color:colorResult?.color||'',careLabel:label,needsReview:!label,quantiles:sample.textCandidate?null:sample.quantiles,evidence:label?{basis:'사진의 제조·혼용·취급 문구 확인',text}: {basis:'축소 사진 중앙 표본과 현재 공식 색상칩 비교 · 자동 추정',textCandidate:sample.textCandidate},elapsedMs:Math.round(performance.now()-started)};
     if(!ocrFailed){const temp=file+'.'+randomUUID()+'.tmp';await writeFile(temp,JSON.stringify(record));signal?.throwIfAborted();await rename(temp,file);}
    }
-   results.push({...photo,color:record.color,role:record.careLabel?'care-label':'detail',automatic:true,needsReview:record.needsReview,evidence:record.evidence});
+   results.push({...photo,color:record.color,role:record.careLabel?'care-label':'detail',automatic:true,needsReview:record.needsReview,evidence:record.evidence});samples.push({index:results.length-1,quantiles:record.quantiles,colorResult:{color:record.color}});
    log('사진 대조 '+results.length+'/'+photos.length+' · '+photo.name+(record.careLabel?' · 케어라벨 자동 구분':''));
   }
  }finally{signal?.removeEventListener('abort',abort);await worker?.terminate();}
+ // Compare neutral shades within this batch only. Never transfer a style's
+ // lighting correction to another style, and never mark this as reviewed.
+ const neutral=product.colors.map((color,i)=>({color,reference:references[i]})).filter(r=>/블랙|검정|그레이|차콜|화이트/.test(r.color));
+ const neutralRows=samples.filter(r=>r.quantiles&&neutral.some(n=>n.color===r.colorResult.color));
+ refineNeutralDraftColors(neutralRows,neutral.map(r=>r.color),neutral.map(r=>r.reference));
+ for(const row of neutralRows)if(row.colorResult.basis){results[row.index].color=row.colorResult.color;results[row.index].evidence={...results[row.index].evidence,brightnessBasis:row.colorResult.basis};}
  signal?.throwIfAborted();log('빠른 사진 초안 · '+photos.length+'장 · '+((performance.now()-started)/1000).toFixed(2)+'초 · 라벨 문구 확인 '+ocrCount+'장 · 재사용 '+reused+'장');
  return results;
 }
