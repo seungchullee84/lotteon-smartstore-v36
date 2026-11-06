@@ -534,7 +534,10 @@ const server=http.createServer(async(req,res)=>{
           };
           const {extras}=await prepareListingImages(product,folder,{dataRoot});
           checkCurrent();
-          const count=await smartBot.uploadExtraPhotos(product,extras,{checkCurrent});
+          const previousRun=pendingSmartstoreRun;
+          const run=previousRun?.revision===revision&&previousRun.style===product.style&&previousRun.folder===folder&&
+            previousRun.checkpoint.ready?.prepared.sourceUrl===product.sourceUrl?previousRun:undefined;
+          const count=await smartBot.uploadExtraPhotos(product,extras,{checkCurrent,run});
           log('추가사진 '+count+'장 첨부 확인 · 상품 저장 안 함');
         });return json(res,202,{ok:true});
       }

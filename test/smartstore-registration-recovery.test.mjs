@@ -45,7 +45,7 @@ ${['representImage','optionalImages','tagImages'].map(id=>'<ncp-product-temp-pho
    const img=document.createElement('img');img.src='https://phinf.pstatic.net/'+encodeURIComponent(file.name);
    window.slot.append(img);window.files.push(file.name);
   }
-  e.target.value='';e.target.parentElement.hidden=true;
+  e.target.value='';setTimeout(()=>{e.target.parentElement.hidden=true;},250);
  };
 </script>`;
 const editorHtml=`<meta charset="utf-8"><style>img{width:120px;height:120px}.se-text-paragraph{min-height:1em}</style>
@@ -113,6 +113,10 @@ for(const mode of ['copy','edit'])test(mode+' 모의 등록: 추가사진과 두
    measure:async(name,fn)=>{if(name===failAt)throw Error('모의 중단: '+name);return fn();}};
   await assert.rejects(bot.uploadPrepared(product,root,args),/모의 중단: extraImages/);
   assert.deepEqual(await page.evaluate(()=>window.files),['main.jpg']);
+  run.assets={main:files[0],extras:[files[1]]};
+  run.form.slots.optionalImages={cleared:true};
+  assert.equal(await bot.uploadExtraPhotos(product,args.extras,{run}),1);
+  assert.equal(run.form.slots.optionalImages.done,true);
   failAt='detailImage2';await bot.preflight(product,{run});
   await assert.rejects(bot.uploadPrepared(product,root,args),/모의 중단: detailImage2/);
   const editor=run.editor.binding.page;

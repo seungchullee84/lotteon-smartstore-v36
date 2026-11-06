@@ -239,10 +239,18 @@ async function selectSmartstoreImageFile(page,container,{receipt,check,fileCount
  const capture=value=>{chooser=value;};
  page.on('filechooser',capture);
  try{
+  if(await picker.count()&&!receipt?.picker){
+   // A completed upload can leave its picker visible through the closing animation.
+   await picker.waitFor({state:'hidden',timeout:8000}).catch(error=>{
+    check();
+    if(error.name==='TimeoutError')throw Error('열려 있는 사진 선택 창을 닫은 뒤 다시 실행해 주세요.');
+    throw error;
+   });
+  }
   if(!await picker.count()){
    check();if(receipt)receipt.picker=true;
    await container.getByRole('button',{name:'이미지 등록',exact:true}).click({timeout:5000});
-  }else if(!receipt?.picker)throw Error('열려 있는 사진 선택 창을 먼저 확인해 주세요.');
+  }
   const openedAt=Date.now(),deadline=openedAt+10000;
   while(Date.now()<deadline){
    check();if(chooser)return files=>chooser.setFiles(files,{timeout:60000});
@@ -303,7 +311,7 @@ export async function readSmartstoreImageSlot(container){
  return {sources,confirmed};
 }
 
-export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=false,receipt,log=()=>{}}={},check=()=>{}){
+export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=false,receipt={},log=()=>{}}={},check=()=>{}){
  if(!files?.length&&!replaceImages)return;
  check();const container=page.locator('ncp-product-temp-photo-infra-image-upload#'+id);
  const read=()=>readSmartstoreImageSlot(container);
@@ -311,6 +319,11 @@ export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=fal
  const label=({representImage:'대표사진',optionalImages:'추가사진',tagImages:'택·케어라벨'})[id]||'사진';
  const fail=()=>Error('첨부한 사진을 같은 파일로 확인하지 못했습니다. 중복 첨부를 막기 위해 현재 사진을 그대로 두었습니다.');
  const finish=async()=>{
+  if(receipt.picker){
+   const picker=page.getByRole('dialog').filter({visible:true,has:page.getByRole('button',{name:'내 사진',exact:true})});
+   check();await picker.waitFor({state:'hidden',timeout:8000});check();
+   receipt.picker=false;
+  }
   if(id==='tagImages'&&files?.length){
    const progress=page.locator('.modal-content').filter({hasText:'상품정보 추출 중입니다.'});
    if(await progress.isVisible()){check();await progress.getByRole('button',{name:'확인',exact:true}).click();}

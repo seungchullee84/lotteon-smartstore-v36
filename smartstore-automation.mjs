@@ -98,7 +98,7 @@ export class SmartstoreAutomation extends BrowserAutomation{
     const {writeFile}=await import('node:fs/promises');const result={...report,...detail,formUrl:url,formMode:this.formMode,published:false};
     await writeFile(path.join(folder,'smartstore-auto-result.json'),JSON.stringify(result,null,2));return result;
   }
-  async uploadExtraPhotos(product,files,{checkCurrent=()=>{}}={}){
+  async uploadExtraPhotos(product,files,{checkCurrent=()=>{},run}={}){
     if(!Array.isArray(files)||files.length<1||files.length>9)throw Error('첨부할 추가사진을 1~9장 준비해 주세요.');
     this.stopped=false;
     checkCurrent();
@@ -110,10 +110,19 @@ export class SmartstoreAutomation extends BrowserAutomation{
     try{
       check();
       await binding.verify();
+      const receipt={};
+      const sameRun=run?.formBinding?.page===page&&run.assets?.extras?.length===files.length&&
+        run.assets.extras.every((file,index)=>path.resolve(file)===path.resolve(files[index]));
+      if(sameRun){
+        await run.formBinding.verify();check();
+        run.form||={};run.form.slots||={};
+        run.form.slots.optionalImages=receipt;
+      }
       this.log('판매자센터 기존 추가사진 정리 후 선택한 '+files.length+'장 교체 중…');
-      await uploadSmartstoreImageSlot(page,'optionalImages',files,{replaceImages:true,log:this.log},check);
+      await uploadSmartstoreImageSlot(page,'optionalImages',files,{replaceImages:true,receipt,log:this.log},check);
       await binding.verify();
       check();
+      if(sameRun)this.log('추가사진 교체 결과를 전체 입력 이어하기에 반영했습니다.');
       return files.length;
     }finally{binding.dispose();}
   }
