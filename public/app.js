@@ -357,15 +357,15 @@ function renderDetailPreview(p){
   };
   detailPreviewResizeObserver=new ResizeObserver(fit);detailPreviewResizeObserver.observe(box);fit();return;
  }
- const add=(key)=>{const image=document.createElement('img');image.src='/image/'+key+'?t='+Date.now();image.alt='상세 이미지 '+key;image.loading='lazy';image.onerror=()=>{image.remove();$('detailPreviewStatus').textContent='상세 원본 이미지를 불러오지 못했습니다. 원본 상태를 확인해 주세요.';};box.append(image);};
+ const add=(key)=>{const image=document.createElement('img');image.src='/image/'+key+'?t='+Date.now();image.alt='상세 이미지 '+key;image.loading='lazy';image.onerror=()=>{image.remove();$('detailPreviewStatus').textContent='상세 원본 이미지를 불러오지 못했습니다. 원본 상태를 확인해 주세요.';};box.append(image);return image;};
  if(p.originalDetailUrl&&!p.images.detail){$('detailPreviewStatus').textContent='기존 상세 원본을 불러오지 못했습니다. 대체 이미지를 만들지 않습니다.';return;}
  if(p.images.detail){
   $('detailPreviewStatus').textContent='';
-  add('detail');
+  const detail=add('detail');
   const remaining=['size','check','info'].filter(key=>p.images[key]&&p.images[key]!==p.images.detail);
   if(remaining.length){
    const appendSections=keys=>{
-    if(box.dataset.renderSignature!==signature)return;
+    if(box.dataset.renderSignature!==signature||detail.parentNode!==box)return;
     for(const key of remaining)if(keys.includes(key))add(key);
    };
    void fetch('/api/lotte-detail-preview?style='+encodeURIComponent(p.style))
