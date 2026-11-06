@@ -9,7 +9,7 @@
   <p id="manualPhotoSelectionStatus" role="status"></p>
  </div><div class="photo-review-body">
   <div class="photo-review-order">
-   <p class="photo-order-guide">같은 색상끼리 끌어 순서를 바꾸세요. 1번 정면 · 2번 옆면 · 3번부터 디테일</p>
+   <p class="photo-order-guide">사진을 누른 채 같은 색상 안에서 끌어 순서를 바꾸세요. 1번 정면 · 2번 옆면 · 3번부터 디테일</p>
    <button type="button" class="secondary" id="manualPhotoReviewSort" title="수정한 색상에 맞춰 사진을 다시 모아요">색상별 정렬</button>
   </div>
   <div id="manualPhotoReviewLegend" aria-label="상품 색상 구분"></div>
@@ -20,13 +20,77 @@
  document.body.append(dialog);let current=null,loading=false;const grid=dialog.querySelector('#manualPhotoReviewGrid'),message=dialog.querySelector('#manualPhotoReviewMessage'),apply=dialog.querySelector('#manualPhotoReviewApply');
  const sortButton=dialog.querySelector('#manualPhotoReviewSort');
  let draftTimer=null,draftQueue=Promise.resolve(),pendingDraft=null,draftVersion=0;
- let draggedCard=null;
+ let photoDrag=null;
  const dragGroup=card=>{const role=card?.querySelector('[data-field=role]')?.value,color=card?.querySelector('[data-field=color]')?.value;return color&&!['care-label','excluded'].includes(role)?color:null;};
  function assignOrderedRoles(){const counts=new Map();for(const card of grid.querySelectorAll(':scope > [data-photo-id]')){const color=dragGroup(card);if(!color)continue;const index=counts.get(color)||0;counts.set(color,index+1);const role=card.querySelector('[data-field=role]'),value=index===0?'front':index===1?'side':'detail';if(role.value!==value){role.value=value;card.refreshPhotoView?.();}}}
- grid.addEventListener('dragstart',event=>{const card=event.target.closest('[data-photo-id]');if(!card||loading||card.querySelector('[data-field=role]').disabled||!dragGroup(card)||event.target.closest('select,input,button')){event.preventDefault();return;}draggedCard=card;card.classList.add('photo-dragging');event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',card.dataset.photoId);});
- grid.addEventListener('dragover',event=>{const card=event.target.closest('[data-photo-id]');grid.querySelectorAll('.photo-drop-target').forEach(n=>n.classList.remove('photo-drop-target'));if(!draggedCard||!card||card===draggedCard||dragGroup(card)!==dragGroup(draggedCard))return;event.preventDefault();event.dataTransfer.dropEffect='move';card.classList.add('photo-drop-target');});
- grid.addEventListener('drop',event=>{const target=event.target.closest('[data-photo-id]');if(!draggedCard||!target||target===draggedCard||dragGroup(target)!==dragGroup(draggedCard))return;event.preventDefault();const top=dialog.scrollTop,box=target.getBoundingClientRect(),after=event.clientX>box.left+box.width/2;grid.insertBefore(draggedCard,after?target.nextSibling:target);updatePhotoSummary();dialog.scrollTop=top;rememberSelection();message.textContent='사진 순서를 저장했습니다. 사진 반영을 눌러 주세요.';});
- grid.addEventListener('dragend',()=>{draggedCard?.classList.remove('photo-dragging');draggedCard=null;grid.querySelectorAll('.photo-drop-target').forEach(n=>n.classList.remove('photo-drop-target'));});
+ function photoDropAt(x,y,drag){
+  const hit=document.elementFromPoint(x,y);
+  const hitCard=hit?.closest('[data-photo-id]');
+  const accepts=card=>card!==drag.card&&dragGroup(card)===drag.color;
+  if(hitCard&&!accepts(hitCard))return null;
+  if(!hitCard&&hit!==grid)return null;
+  const target=hitCard||[...grid.querySelectorAll(':scope > [data-photo-id]')].find(card=>{
+   if(!accepts(card))return false;
+   const box=card.getBoundingClientRect();
+   // Also accept the gap between adjacent cards in the same row.
+   return x>=box.left-7&&x<=box.right+7&&y>=box.top&&y<=box.bottom;
+  });
+  if(!target)return null;
+  const box=target.getBoundingClientRect();
+  const vertical=matchMedia('(max-width: 480px)').matches;
+  const after=vertical?y>box.top+box.height/2:x>box.left+box.width/2;
+  return {target,after};
+ }
+ function clearPhotoDrag(){
+  if(!photoDrag)return;
+  const {card,pointerId,drop}=photoDrag;
+  photoDrag=null;
+  card.classList.remove('photo-dragging');
+  drop?.target.removeAttribute('data-photo-drop');
+  if(grid.hasPointerCapture(pointerId))grid.releasePointerCapture(pointerId);
+ }
+ grid.addEventListener('pointerdown',event=>{
+  if(photoDrag||loading||event.button!==0||event.pointerType==='touch'||event.target.closest('label,input,select,button'))return;
+  const card=event.target.closest('[data-photo-id]');
+  const color=dragGroup(card);
+  if(!color||card.querySelector('[data-field=role]').disabled)return;
+  event.preventDefault();
+  grid.setPointerCapture(event.pointerId);
+  photoDrag={card,color,pointerId:event.pointerId,x:event.clientX,y:event.clientY,started:false,drop:null};
+ });
+ grid.addEventListener('pointermove',event=>{
+  const drag=photoDrag;
+  if(drag?.pointerId!==event.pointerId)return;
+  if(!drag.started){
+   if(Math.hypot(event.clientX-drag.x,event.clientY-drag.y)<5)return;
+   drag.started=true;
+   drag.card.classList.add('photo-dragging');
+  }
+  const drop=photoDropAt(event.clientX,event.clientY,drag);
+  if(drag.drop?.target===drop?.target&&drag.drop?.after===drop?.after)return;
+  drag.drop?.target.removeAttribute('data-photo-drop');
+  drag.drop=drop;
+  if(drop)drop.target.dataset.photoDrop=drop.after?'after':'before';
+ });
+ grid.addEventListener('pointerup',event=>{
+  const drag=photoDrag;
+  if(drag?.pointerId!==event.pointerId)return;
+  const drop=drag.started&&!loading?photoDropAt(event.clientX,event.clientY,drag):null;
+  clearPhotoDrag();
+  if(!drop)return;
+  const before=drop.after?drop.target.nextSibling:drop.target;
+  if(before===drag.card||before===drag.card.nextSibling)return;
+  const top=dialog.scrollTop;
+  grid.insertBefore(drag.card,before);
+  updatePhotoSummary();
+  dialog.scrollTop=top;
+  rememberSelection();
+  message.textContent='사진 순서를 저장했습니다. 사진 반영을 눌러 주세요.';
+ });
+ for(const type of ['pointercancel','lostpointercapture'])grid.addEventListener(type,event=>{
+  if(photoDrag?.pointerId===event.pointerId)clearPhotoDrag();
+ });
+ dialog.addEventListener('close',clearPhotoDrag);
 
  const selectionStatus=dialog.querySelector('#manualPhotoSelectionStatus');
  function selectionSnapshot(){return {style:current.style,sourceUrl:current.sourceUrl,revision:current.revision,mainId:current.mainId,channel:'smartstore',items:[...grid.querySelectorAll(':scope > [data-photo-id]')].map(c=>({id:c.dataset.photoId,color:c.querySelector('[data-field=color]').value,role:c.querySelector('[data-field=role]').value,colorOverride:c.dataset.colorOverride==='true',roleOverride:c.dataset.roleOverride==='true'}))};}
@@ -103,7 +167,6 @@
     card.dataset.colorOverride=String(!!item.colorOverride);
     card.dataset.roleOverride=String(item.roleOverride??(!!item.role&&!item.roleDefaulted));
     card.dataset.main=String(item.main);
-    card.draggable=true;
     const img=document.createElement('img');
     img.draggable=false;img.loading='lazy';img.decoding='async';
     img.src='/smartstore-review-photo/'+item.id+'?channel=smartstore&style='+data.style;
@@ -135,6 +198,7 @@
      color.disabled=['care-label','excluded'].includes(role.value);
      card.classList.toggle('photo-unused',role.value==='excluded');
      const neutral=['care-label','excluded'].includes(role.value);
+     card.dataset.reorderable=String(!neutral&&!!color.value);
      decorateColor(card,neutral?-1:data.colors.indexOf(color.value));
      badge.textContent=role.value==='excluded'?'사용 안 함':role.value==='care-label'?'케어라벨':color.value||'색상 선택 필요';
      decorateColor(badge,neutral?-1:data.colors.indexOf(color.value));

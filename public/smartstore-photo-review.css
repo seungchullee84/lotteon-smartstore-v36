@@ -48,7 +48,15 @@
 @media(max-width:760px){#manualPhotoReviewGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){#manualPhotoReviewGrid{grid-template-columns:1fr}.photo-selection-toolbar{grid-template-columns:1fr;padding:12px 14px}.photo-review-actions{justify-content:flex-end}.photo-review-body{padding:12px 14px}.photo-review-actions button{flex:1}}
 
-#manualPhotoReviewGrid .photo-dragging{opacity:.5}#manualPhotoReviewGrid .photo-drop-target{outline:3px dashed #527766;outline-offset:3px}
+#manualPhotoReviewGrid [data-reorderable="true"]>img{cursor:grab;user-select:none}
+#manualPhotoReviewGrid .photo-dragging{opacity:.5}
+#manualPhotoReviewGrid .photo-dragging>img{cursor:grabbing}
+#manualPhotoReviewGrid [data-photo-drop="before"]{box-shadow:-4px 0 #527766}
+#manualPhotoReviewGrid [data-photo-drop="after"]{box-shadow:4px 0 #527766}
+@media(max-width:480px){
+ #manualPhotoReviewGrid [data-photo-drop="before"]{box-shadow:0 -4px #527766}
+ #manualPhotoReviewGrid [data-photo-drop="after"]{box-shadow:0 4px #527766}
+}
 
 
 #manualPhotoReviewGrid .photo-color-badge,#manualPhotoReviewLegend .photo-color-badge{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#252a27;border:1px solid #d4d9d5;padding:4px 7px;font-size:12px;line-height:1.4}#manualPhotoReviewGrid .photo-card-top .photo-color-badge{min-width:0;margin:0;border:0;padding:0;overflow-wrap:anywhere;font-size:12px}#manualPhotoReviewGrid .photo-official-chip,#manualPhotoReviewLegend .photo-official-chip{display:inline-block;width:20px;height:20px;min-width:20px;object-fit:contain;border:1px solid #b9bfbb;border-radius:3px;background:#fff;vertical-align:middle;margin:0 6px 0 0}#manualPhotoReviewGrid>div>.photo-official-chip{display:none}
