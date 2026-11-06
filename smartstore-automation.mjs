@@ -110,10 +110,8 @@ export class SmartstoreAutomation extends BrowserAutomation{
     try{
       check();
       await binding.verify();
-      const slot=page.locator('ncp-product-temp-photo-infra-image-upload#optionalImages');
-      if(await slot.locator('img').count())throw Error('추가사진 칸에 이미 사진이 있습니다. 중복을 막기 위해 빈 추가사진 칸에서만 첨부할 수 있습니다.');
-      this.log('판매자센터 추가사진 칸에 '+files.length+'장 첨부 중…');
-      await uploadSmartstoreImageSlot(page,'optionalImages',files,{log:this.log},check);
+      this.log('판매자센터 기존 추가사진 정리 후 선택한 '+files.length+'장 교체 중…');
+      await uploadSmartstoreImageSlot(page,'optionalImages',files,{replaceImages:true,log:this.log},check);
       await binding.verify();
       check();
       return files.length;
