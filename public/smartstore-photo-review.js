@@ -67,7 +67,7 @@
   event.preventDefault();
   grid.setPointerCapture(event.pointerId);
   const {columnGap,rowGap}=getComputedStyle(grid);
-  photoDrag={card,color,pointerId:event.pointerId,x:event.clientX,y:event.clientY,columnGap:parseFloat(columnGap)/2+1,rowGap:parseFloat(rowGap)/2+1};
+  photoDrag={card,color,pointerId:event.pointerId,x:event.clientX,y:event.clientY,columnGap:(parseFloat(columnGap)||0)/2+1,rowGap:(parseFloat(rowGap)||0)/2+1};
  });
  grid.addEventListener('pointermove',event=>{
   const drag=photoDrag;
@@ -173,7 +173,45 @@
  function isSmartstore(){return typeof activeChannel==='function'?activeChannel()==='smartstore':channel()==='smartstore';}
  function sync(){button.hidden=!isSmartstore();if(!isSmartstore()&&dialog.open)dialog.close();}
  let openAfterCollect=false;document.addEventListener('register-state',event=>{const state=event.detail;if(!isSmartstore())return;if(state.phase==='collect'&&state.busy)openAfterCollect=true;if(openAfterCollect&&!state.busy){openAfterCollect=false;if(state.phase==='done'&&state.productStyle&&!dialog.open)button.click();}});const styleInput=document.getElementById('style');styleInput?.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.isComposing&&isSmartstore()){event.preventDefault();event.stopImmediatePropagation();document.getElementById('collect')?.click();}},true);
- let automaticStamp='';document.addEventListener('register-state',async event=>{const status=event.detail?.photoColorDraft;if(!dialog.open||loading||!current||status?.style!==current.style)return;if(['running','needs-review'].includes(status.status)){if(!draftTimer)selectionStatus.textContent=status.message;return;}if(status.status!=='ready'||automaticStamp===status.updatedAt)return;automaticStamp=status.updatedAt;const requested=current;try{const r=await fetch('/api/smartstore-photo-review?channel=smartstore&style='+current.style),data=await r.json();if(!r.ok||!dialog.open||current!==requested||data.revision!==current.revision)return;let changed=false;const cardsById=new Map([...grid.querySelectorAll(':scope > [data-photo-id]')].map(card=>[card.dataset.photoId,card]));for(const item of data.items){const card=cardsById.get(item.id);if(!card)continue;let cardChanged=false;const color=card.querySelector('[data-field=color]'),role=card.querySelector('[data-field=role]');if(card.dataset.colorOverride!=='true'&&!color.value&&item.color){color.value=item.color;changed=cardChanged=true;}if(card.dataset.roleOverride!=='true'&&card.dataset.colorOverride!=='true'&&item.role==='care-label'&&!['care-label','excluded'].includes(role.value)){role.value=item.role||'detail';color.value='';changed=cardChanged=true;}if(cardChanged)card.refreshPhotoView?.();}if(changed){const top=dialog.scrollTop;updatePhotoSummary();dialog.scrollTop=top;}selectionStatus.textContent=status.message;}catch{}});
+ let automaticStamp='',automaticRequest=false;
+ document.addEventListener('register-state',async event=>{
+  const status=event.detail?.photoColorDraft;
+  if(!dialog.open||loading||!current||status?.style!==current.style)return;
+  if(['running','needs-review'].includes(status.status)){
+   if(!draftTimer)selectionStatus.textContent=status.message;
+   return;
+  }
+  if(status.status!=='ready'||automaticStamp===status.updatedAt||automaticRequest||photoDrag)return;
+  automaticRequest=true;
+  const requested=current;
+  try{
+   const response=await fetch('/api/smartstore-photo-review?channel=smartstore&style='+current.style);
+   const data=await response.json();
+   if(!response.ok||!dialog.open||loading||photoDrag||current!==requested||data.revision!==current.revision)return;
+   automaticStamp=status.updatedAt;
+   let changed=false;
+   const cardsById=new Map([...grid.querySelectorAll(':scope > [data-photo-id]')].map(card=>[card.dataset.photoId,card]));
+   for(const item of data.items){
+    const card=cardsById.get(item.id);
+    if(!card||card.dataset.colorOverride==='true')continue;
+    const color=card.querySelector('[data-field=color]'),role=card.querySelector('[data-field=role]');
+    if(card.dataset.roleOverride!=='true'&&item.role==='care-label'&&!['care-label','excluded'].includes(role.value)){
+     role.value='care-label';
+     color.value='';
+    }else if(!color.value&&item.color){
+     color.value=item.color;
+    }else continue;
+    card.refreshPhotoView?.();
+    changed=true;
+   }
+   if(changed){
+    const top=dialog.scrollTop;
+    arrangePhotoGroups();
+    dialog.scrollTop=top;
+   }
+   selectionStatus.textContent=status.message;
+  }catch{}finally{automaticRequest=false;}
+ });
  new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['data-channel','class']});document.addEventListener('register-state',sync);sync();
  dialog.querySelector('#manualPhotoReviewClose').onclick=()=>dialog.close();
  button.onclick=async()=>{

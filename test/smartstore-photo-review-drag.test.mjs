@@ -33,7 +33,7 @@ test('같은 색상 드래그는 순서를 저장·복원하며 1번은 정면�
  assert.equal(await page.locator('[data-photo-id="c"] [data-field=role]').inputValue(),'side');await colorSaved;
  await page.locator('#manualPhotoReviewClose').click();await page.locator('#manualPhotoReviewOpen').click();await cards.first().waitFor();assert.deepEqual(await ids(),['b','a','c']);
  await page.locator('[data-photo-id="b"] [data-field=color]').selectOption('02블랙');assert.match(await page.locator('#manualPhotoReviewLegend [data-color="01화이트"]').textContent(),/0장.*사진 없음/);
- // A late automatic label suggestion replaces an untouched default role, without moving cards.
+ // A late automatic label suggestion replaces an untouched default role.
  await page.locator('[data-photo-id="c"] [data-field=color]').selectOption('');
  await page.evaluate(()=>{const c=document.querySelector('[data-photo-id="c"]');c.dataset.colorOverride='false';c.dataset.roleOverride='false';});
  data.items.find(i=>i.id==='c').role='care-label';data.items.find(i=>i.id==='c').color='';
@@ -63,11 +63,37 @@ test('같은 색상 드래그는 순서를 저장·복원하며 1번은 정면�
  const gapX=(left.x+left.width+right.x)/2,dropY=right.y+100;
  await page.mouse.move(from.x+from.width/2,from.y+100);
  await page.mouse.down();
+ await page.mouse.move(from.x+from.width/2+3,from.y+100);
+ assert.equal(await page.locator('.photo-drag-preview').count(),1);
  await page.mouse.move(gapX,dropY);
- assert.equal(await page.locator('[data-photo-drop]').count(),1);
+ assert.equal(await page.locator('.photo-drop-target').count(),1);
  await page.mouse.up();
  assert.deepEqual(await ids(),['a','d','c','e','f','b']);
- assert.equal(await page.locator('[data-photo-drop], .photo-dragging').count(),0);
+ assert.equal(await page.locator('.photo-drop-target, .photo-dragging, .photo-drag-preview').count(),0);
+
+ const rowSource=await page.locator('[data-photo-id="d"] > img').boundingBox();
+ const nextRow=await page.locator('[data-photo-id="f"]').boundingBox();
+ const rowSaved=page.waitForResponse(r=>r.url().endsWith('/api/smartstore-photo-review-draft'));
+ await page.mouse.move(rowSource.x+rowSource.width/2,rowSource.y+100);
+ await page.mouse.down();
+ await page.mouse.move(nextRow.x+nextRow.width/2,nextRow.y-4);
+ assert.equal(await page.locator('.photo-drop-target').getAttribute('data-photo-id'),'f');
+ await page.mouse.up();
+ assert.deepEqual(await ids(),['a','c','e','d','f','b']);
+ await rowSaved;
+
+ // Recognition can arrive in capture order after the confirmation window opens.
+ await page.locator('#manualPhotoReviewClose').click();
+ data.revision='test-automatic-order';
+ data.colors=['01화이트','02블랙','10네이비'];
+ data.items=['a','b','c'].map(id=>({id,name:id+'.jpg',color:'',role:'detail',main:id==='a'}));
+ await page.locator('#manualPhotoReviewOpen').click();await cards.first().waitFor();
+ assert.deepEqual(await headings.allTextContents(),['색상 선택 필요']);
+ data.items.forEach((item,index)=>{item.color=data.colors[2-index];});
+ await page.evaluate(style=>document.dispatchEvent(new CustomEvent('register-state',{detail:{photoColorDraft:{style,status:'ready',updatedAt:'test-color-order',message:'자동 구분 완료'}}})),data.style);
+ await page.waitForFunction(()=>document.querySelector('#manualPhotoSelectionStatus').textContent==='자동 구분 완료');
+ assert.deepEqual(await headings.allTextContents(),data.colors);
+ assert.deepEqual(await ids(),['c','b','a']);
  assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });
