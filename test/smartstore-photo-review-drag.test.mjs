@@ -83,6 +83,18 @@ test('같은 색상 드래그는 순서를 저장·복원하며 1번은 정면�
  assert.deepEqual(await ids(),['a','c','e','d','f','b']);
  await rowSaved;
 
+ // A short drag can move the card one position while the pointer is still on the source photo.
+ const shortSource=await page.locator('[data-photo-id="c"] > img').boundingBox();
+ const shortX=shortSource.x+shortSource.width/2,shortY=shortSource.y+100;
+ const shortSaved=page.waitForResponse(r=>r.url().endsWith('/api/smartstore-photo-review-draft'));
+ await page.mouse.move(shortX,shortY);
+ await page.mouse.down();
+ await page.mouse.move(shortX-40,shortY);
+ assert.equal(await page.locator('.photo-drop-target').getAttribute('data-photo-id'),'a');
+ await page.mouse.up();
+ assert.deepEqual(await ids(),['c','a','e','d','f','b']);
+ await shortSaved;
+
  // Recognition can arrive in capture order after the confirmation window opens.
  await page.locator('#manualPhotoReviewClose').click();
  data.revision='test-automatic-order';

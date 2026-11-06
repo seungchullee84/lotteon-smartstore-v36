@@ -27,8 +27,8 @@
   const hit=document.elementFromPoint(x,y);
   if(!grid.contains(hit))return null;
   let target=hit.closest('[data-photo-id]');
-  const accepts=card=>card!==drag.card&&dragGroup(card)===drag.color;
-  if(target&&!accepts(target))return null;
+  const accepts=card=>card&&card!==drag.card&&dragGroup(card)===drag.color;
+  if(target&&target!==drag.card&&!accepts(target))return null;
   if(hit===grid){
    // In the gaps, use the nearest eligible card instead of DOM order.
    let closest=Infinity;
@@ -44,8 +44,19 @@
    }
   }
   if(!target)return null;
-  const box=target.getBoundingClientRect();
   const vertical=matchMedia('(max-width: 480px)').matches;
+  const distance=vertical?y-drag.y:x-drag.x;
+  const across=vertical?x-drag.x:y-drag.y;
+  const forward=distance>0;
+  const neighbor=forward?drag.card.nextElementSibling:drag.card.previousElementSibling;
+  if((target===drag.card||target===neighbor)&&accepts(neighbor)&&Math.abs(distance)>Math.abs(across)){
+   const source=drag.card.getBoundingClientRect();
+   const oneStep=Math.max(16,Math.min(36,(vertical?source.height:source.width)*.15));
+   const sameRow=vertical||Math.abs(neighbor.getBoundingClientRect().top-source.top)<1;
+   if(sameRow&&Math.abs(distance)>=oneStep)return {target:neighbor,after:forward};
+  }
+  if(target===drag.card)return null;
+  const box=target.getBoundingClientRect();
   let after=y>box.bottom;
   if(y>=box.top&&y<=box.bottom)after=vertical?y>box.top+box.height/2:x>box.left+box.width/2;
   return {target,after};
