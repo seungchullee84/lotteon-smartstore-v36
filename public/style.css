@@ -535,6 +535,12 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     background: var(--ui-white);
   }
   header > .bar { min-height: 44px; gap: 8px; margin-bottom: 24px; }
+  header .header-details .release-info {
+    min-width: 0;
+    max-width: 100%;
+    flex-shrink: 1;
+    overflow-wrap: anywhere;
+  }
   header .tag { color: var(--ui-muted); font-weight: 500; }
   header .tag::before { background: var(--ui-steel); }
   header h1, h2, h3 {
@@ -758,6 +764,8 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
   }
   @media (max-width: 650px) {
     :root { --ui-card-padding: 16px; --ui-section-gap: 40px; }
+    header .header-details .release-info { margin-inline-start: 0; justify-content: flex-start; }
+    #githubSyncStatus { min-width: 0; }
     main { padding-top: 24px; }
     .channel-switcher { padding: 16px; }
     h2 { font-size: 21px; }
