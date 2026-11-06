@@ -2,7 +2,8 @@ export function assignPhotoRolesByOrder(items){const counts=new Map();for(const 
 import {readFile,writeFile,mkdir,stat,rename} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash,randomUUID} from 'node:crypto';
-import {findPhotos} from './smartstore-photo-files.mjs';
+import {findPhotos,photoDigest} from './smartstore-photo-files.mjs';
+import {readPhotoBytes} from './smartstore-photo-byte-cache.mjs';
 import {readPhotoMappings,savePhotoMappings} from './smartstore-photo-mapping-cache.mjs';
 import {saveCareLabelSelection} from './smartstore-care-label.mjs';
 import sharp from 'sharp';
@@ -18,10 +19,10 @@ export function numberedPhotoColors(colors){const number=c=>{const n=Number(Stri
 const selectionFile=(dataRoot,p)=>{if(!/^\d{6}$/.test(p.style))throw Error('사진 품번을 확인해 주세요.');return path.join(dataRoot,'smartstore-photo-review-drafts',p.style+'.json');};
 async function draftFor(dataRoot,p){try{const d=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',p.style,'draft.json'),'utf8'));return d.sourceUrl===p.sourceUrl?d:{};}catch(e){if(e.code!=='ENOENT')throw e;return {};}}
 export async function photoReview(product,{dataRoot,officialFolder,...options}){
- const photos=await findPhotos(product,{...options,dataRoot,includeExcluded:true}),draft=await draftFor(dataRoot,product),saved=await readPhotoMappings(dataRoot,product);
+ const [photos,draft,saved]=await Promise.all([findPhotos(product,{...options,dataRoot,includeExcluded:true}),draftFor(dataRoot,product),readPhotoMappings(dataRoot,product)]);
  const key=inventoryKey(product,{...options,dataRoot}),inventory=new Map(await Promise.all(photos.map(async p=>[p.id,{file:p.file,stamp:stamp(await stat(p.file))}])));
  inventories.delete(key);inventories.set(key,inventory);while(inventories.size>3)inventories.delete(inventories.keys().next().value);
- const items=photos.map(p=>{const id=hash(p.bytes),mapping=saved.find(r=>r.hash===id&&r.reviewed)||draft.photoMapping?.files?.find(r=>r.hash===id);const care=draft.careLabels?.some(r=>r.sourceHash===id);return {id:p.id,hash:id,name:p.name,main:/^1(?:번)?\.(jpe?g|png|webp)$/i.test(p.name),color:mapping?.color||'',role:care?'care-label':roles.has(mapping?.role)?mapping.role:'',reviewed:!!mapping?.reviewed};});
+ const items=photos.map(p=>{const id=photoDigest(p.bytes),mapping=saved.find(r=>r.hash===id&&r.reviewed)||draft.photoMapping?.files?.find(r=>r.hash===id);const care=draft.careLabels?.some(r=>r.sourceHash===id);return {id:p.id,hash:id,name:p.name,main:/^1(?:번)?\.(jpe?g|png|webp)$/i.test(p.name),color:mapping?.color||'',role:care?'care-label':roles.has(mapping?.role)?mapping.role:'',reviewed:!!mapping?.reviewed};});
  const applied=new Map((await readPhotoFileSelection(dataRoot,product)).map(item=>[item.id,item]));
  for(const item of items){const choice=applied.get(item.id);if(choice?.hash===item.hash){item.role=choice.role;item.color=choice.color;item.reviewed=true;}}
  const mainSelection=await readMainSelection(product,dataRoot);let mainId=mainSelection?items.find(p=>p.hash===mainSelection.sourceHash&&p.name===mainSelection.sourceName)?.id:items.filter(p=>p.main).length===1?items.find(p=>p.main).id:null;
@@ -56,7 +57,7 @@ export async function photoReviewThumbnail(product,id,options){
  let current;try{current=stamp(await stat(source.file));}catch(e){if(e.code==='ENOENT')return null;throw e;}
  if(current!==source.stamp)return null;
  const cacheKey=id+'|'+current;if(thumbnails.has(cacheKey))return thumbnails.get(cacheKey);
- const promise=(async()=>{const bytes=await readFile(source.file);if(hash(source.file+'|'+hash(bytes)).slice(0,20)!==id)return null;return sharp(bytes).rotate().resize({width:400,withoutEnlargement:true}).jpeg().toBuffer();})();
+ const promise=(async()=>{const bytes=await readPhotoBytes(source.file);if(hash(source.file+'|'+photoDigest(bytes)).slice(0,20)!==id)return null;return sharp(bytes).rotate().resize({width:400,withoutEnlargement:true}).jpeg().toBuffer();})();
  thumbnails.set(cacheKey,promise);while(thumbnails.size>96)thumbnails.delete(thumbnails.keys().next().value);
  try{const result=await promise;if(!result)thumbnails.delete(cacheKey);return result;}catch(e){thumbnails.delete(cacheKey);throw e;}
 }

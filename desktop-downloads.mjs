@@ -5,8 +5,18 @@ import path from 'node:path';
 import {mkdir} from 'node:fs/promises';
 
 const run=promisify(execFile);
+let desktopLookup=null,desktopCheckedAt=0;
 
 export async function desktopDirectory(){
+ // Coalesce simultaneous photo requests; refresh periodically for relocated desktops.
+ if(!desktopLookup||Date.now()-desktopCheckedAt>=30000){
+  desktopCheckedAt=Date.now();
+  desktopLookup=resolveDesktopDirectory().catch(error=>{desktopLookup=null;throw error;});
+ }
+ return desktopLookup;
+}
+
+async function resolveDesktopDirectory(){
  let desktop=path.join(os.homedir(),'Desktop');
  if(process.platform==='win32'){
   const {stdout}=await run('powershell.exe',['-NoProfile','-NonInteractive','-Command',"[Console]::OutputEncoding=[System.Text.Encoding]::UTF8; [Environment]::GetFolderPath('DesktopDirectory')"],{windowsHide:true,encoding:'utf8',timeout:10000});
