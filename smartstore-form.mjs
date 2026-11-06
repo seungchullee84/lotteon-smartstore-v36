@@ -275,6 +275,7 @@ export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=fal
  check();const container=page.locator('ncp-product-temp-photo-infra-image-upload#'+id);
  const sources=()=>container.locator('img').evaluateAll(images=>images.map(n=>n.src));
  const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+ const label=({representImage:'대표사진',optionalImages:'추가사진',tagImages:'택·케어라벨'})[id]||'사진';
  const fail=()=>Error('첨부한 사진을 같은 파일로 확인하지 못했습니다. 중복 첨부를 막기 위해 현재 사진을 그대로 두었습니다.');
  const finish=async()=>{
   if(id==='tagImages'&&files?.length){
@@ -286,12 +287,31 @@ export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=fal
   }
   if(receipt)receipt.done=true;
  };
- const waitHosted=(timeout,names)=>page.waitForFunction(({id,count,names})=>{
-  const images=[...document.querySelectorAll('ncp-product-temp-photo-infra-image-upload#'+id+' img')];
-  return images.length===count&&images.every((n,i)=>{
-   try{const u=new URL(n.src);return u.protocol==='https:'&&/(^|\.)(naver|pstatic)\.net$/.test(u.hostname)&&(!names||decodeURIComponent(u.pathname.split('/').at(-1))===names[i]);}catch{return false;}
-  });
- },{id,count:files?.length||0,names},{timeout});
+ // Browser animation frames can pause when the dedicated window is minimized.
+ // Read the slot from Node so attachment checks continue in the background.
+ const waitForSources=async(matches,timeout,message)=>{
+  const deadline=Date.now()+timeout;
+  while(true){
+   check();
+   const observed=await sources();
+   check();
+   if(matches(observed))return observed;
+   if(Date.now()>=deadline)throw Object.assign(Error(message(observed)),{code:'SMARTSTORE_UI_DELAY'});
+   await new Promise(resolve=>setTimeout(resolve,150));
+  }
+ };
+ const isHosted=(source,name)=>{
+  try{
+   const url=new URL(source);
+   return url.protocol==='https:'&&/(^|\.)(naver|pstatic)\.net$/.test(url.hostname)&&
+    (name===undefined||decodeURIComponent(url.pathname.split('/').at(-1))===name);
+  }catch{return false;}
+ };
+ const waitHosted=(timeout,names)=>waitForSources(
+  observed=>observed.length===files.length&&observed.every((source,i)=>isHosted(source,names?.[i])),
+  timeout,
+  observed=>`${label} 반영 확인 지연 · 판매자 화면 ${observed.length}장 / 요청 ${files.length}장`
+ );
  if(receipt?.attached){
   if(!equal(await sources(),receipt.attached))throw fail();
   log('이미 첨부된 사진 '+receipt.attached.length+'장 확인 · 다시 올리지 않음');
@@ -301,8 +321,11 @@ export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=fal
  if(receipt?.submitted){
   // A chooser timeout can occur after submission. Do not infer which files
   // were applied from just the slot count or send the same batch blindly.
-  await waitHosted(4000,files.map(file=>path.basename(file))).catch(()=>{throw fail();});
-  check();receipt.attached=await sources();await finish();
+  receipt.attached=await waitHosted(4000,files.map(file=>path.basename(file))).catch(error=>{
+   if(error.code!=='SMARTSTORE_UI_DELAY')throw error;
+   log(error.message);throw fail();
+  });
+  await finish();
   log('이전 시도에서 첨부된 사진 '+receipt.attached.length+'장 확인 · 다시 올리지 않음');
   return;
  }
@@ -314,8 +337,7 @@ export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=fal
   while(existing.length){
    check();const count=existing.length;
    await container.getByRole('button',{name:'이미지 삭제',exact:true}).first().click();
-   await page.waitForFunction(({id,count})=>document.querySelector('ncp-product-temp-photo-infra-image-upload#'+id)?.querySelectorAll('img').length<count,{id,count});
-   const remaining=await sources();
+   const remaining=await waitForSources(images=>images.length<count,8000,()=>label+' 기존 사진 정리 확인 지연');
    if(remaining.length!==count-1||!equal(remaining,existing.slice(1)))throw fail();
    existing=remaining;
   }
@@ -324,14 +346,17 @@ export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=fal
  if(!files?.length){if(receipt)receipt.attached=[];await finish();return;}
  const attach=await selectSmartstoreImageFile(page,container,{receipt,check,fileCount:files.length,log});
  check();if(receipt)receipt.submitted=true;
- try{await attach(files);}
+ let attached;
+ try{await attach(files);log(`${label} 파일 ${files.length}장 선택 · 판매자 화면 반영 확인 중`);}
  catch(error){
   check();
-  try{await waitHosted(3000,files.map(file=>path.basename(file)));}catch{throw error;}
+  try{attached=await waitHosted(3000,files.map(file=>path.basename(file)));}
+  catch(verificationError){if(verificationError.code!=='SMARTSTORE_UI_DELAY')throw verificationError;throw error;}
  }
- await waitHosted(60000);check();
- if(receipt)receipt.attached=await sources();
+ attached??=await waitHosted(60000);
+ if(receipt)receipt.attached=attached;
  await finish();
+ log(`${label} ${attached.length}장 · 판매자 화면 첨부 확인`);
 }
 
 export async function fillSmartstoreSellerCode(page,plan,{check=()=>{},log=()=>{}}={}){
