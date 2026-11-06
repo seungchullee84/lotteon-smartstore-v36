@@ -132,7 +132,7 @@
     fields.append(colorLabel,roleLabel);
     card.append(cardTop,img,fields,name);cardFragment.append(card);
    }
-   groupPhotos();
+   grid.append(cardFragment);groupPhotos({initial:!restoreLocal&&!data.selectionSavedAt});
    message.textContent='확인 필요 '+data.items.filter(i=>!i.role||(!['care-label','excluded'].includes(i.role)&&!data.colors.includes(i.color))).length+'장';apply.disabled=!data.items.length;if(restoreLocal)rememberSelection();
   }catch(e){message.textContent=e.message;selectionStatus.textContent=e.message;}finally{loading=false;button.disabled=false;}
  };
