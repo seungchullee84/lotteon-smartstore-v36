@@ -459,42 +459,78 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
 
 /* Shared visual tokens for the registrar workspace and its dialogs. */
 @layer registrar-theme {
+  @font-face {
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('/fonts/Poppins-300.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/Poppins-400.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('/fonts/Poppins-500.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/fonts/Poppins-700.woff2') format('woff2');
+  }
   :root {
     --ui-white: #fff;
-    --ui-mist: #f5f5f7;
-    --ui-frost: #fafafc;
-    --ui-line: #d6d6d6;
-    --ui-disabled: #e6e6e8;
-    --ui-ink: #1d1d1f;
-    --ui-muted: #707070;
-    --ui-steel: #86868b;
-    --ui-link: #0066cc;
-    --ui-action: #0071e3;
-    --ui-attention: #b64400;
-    --ui-font: 'SF Pro Text', Inter, 'Helvetica Neue', Arial, 'Malgun Gothic', sans-serif;
-    --ui-display: 'SF Pro Display', Inter, 'Helvetica Neue', Arial, 'Malgun Gothic', sans-serif;
-    --ui-card-radius: 28px;
-    --ui-nav-radius: 20px;
-    --ui-pill-radius: 9999px;
-    --ui-card-padding: 28px;
-    --ui-element-gap: 20px;
-    --ui-gutter: clamp(16px, 4vw, 48px);
-    font: 400 14px/1.47 var(--ui-font);
-    letter-spacing: -.224px;
+    --ui-mist: #f5f6f8;
+    --ui-frost: #f5f6f8;
+    --ui-line: #d0d4e4;
+    --ui-disabled: #e6e7ea;
+    --ui-ink: #333333;
+    --ui-muted: #535768;
+    --ui-steel: #808080;
+    --ui-input-line: #dddfeb;
+    --ui-link: #4c4ccc;
+    --ui-action: #6161ff;
+    --ui-mint: #bcfe90;
+    --ui-aqua: #d1faff;
+    --ui-lavender: #eddff7;
+    --ui-periwinkle: #e7ecff;
+    --ui-attention: #885019;
+    --ui-font: Poppins, Manrope, 'DM Sans', 'Plus Jakarta Sans', 'Malgun Gothic', sans-serif;
+    --ui-card-radius: 24px;
+    --ui-nav-radius: 6px;
+    --ui-media-radius: 12px;
+    --ui-pill-radius: 160px;
+    --ui-card-padding: 24px;
+    --ui-element-gap: 8px;
+    --ui-section-gap: 64px;
+    --ui-shell-width: 1200px;
+    --ui-gutter: clamp(16px, 3vw, 40px);
+    --ui-card-shadow: 0 2px 48px rgb(205 208 223 / .4);
+    font: 400 16px/1.5 var(--ui-font);
+    letter-spacing: -.01em;
     color: var(--ui-ink);
-    background: var(--ui-white);
+    background: var(--ui-mist);
   }
   body[data-channel] {
     --accent: var(--ui-link);
     --line: var(--ui-line);
     --muted: var(--ui-muted);
     color: var(--ui-ink);
-    background: var(--ui-white);
+    background: var(--ui-mist);
   }
-  header, main { padding-inline: var(--ui-gutter); }
+  header, main { max-width: var(--ui-shell-width); padding-inline: var(--ui-gutter); }
   header {
     margin-bottom: 0;
-    padding-block: 24px 28px;
+    padding-block: 24px 32px;
     border-bottom: 1px solid var(--ui-line);
     background: var(--ui-white);
   }
@@ -503,80 +539,81 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
   header .tag::before { background: var(--ui-steel); }
   header h1, h2, h3 {
     color: var(--ui-ink);
-    font-family: var(--ui-display);
-    font-weight: 600;
-    line-height: 1.21;
+    font-family: var(--ui-font);
+    font-weight: 500;
+    line-height: 1.3;
   }
   header h1 {
     margin-block: 0 8px;
     padding: 0;
     border: 0;
     background: none;
-    font-size: clamp(28px, 4.2vw, 48px);
-    letter-spacing: -.015em;
-    line-height: 1.08;
+    font-size: clamp(32px, 4.4vw, 56px);
+    font-weight: 300;
+    letter-spacing: -.02em;
+    line-height: 1.15;
   }
   header h1 :is(.lotteon-brand, .smartstore-brand) { color: inherit; }
   header .workspace-subtitle {
     padding: 0;
-    font: 400 clamp(14px, 2.2vw, 17px)/1.47 var(--ui-font);
-    letter-spacing: -.022em;
+    font: 400 clamp(14px, 2.2vw, 16px)/1.5 var(--ui-font);
+    letter-spacing: -.01em;
     color: var(--ui-muted);
   }
-  h2 { font-size: 24px; letter-spacing: -.012em; }
-  h3 { font-size: 19px; letter-spacing: .012em; }
+  h2 { font-size: 24px; letter-spacing: -.015em; }
+  h3 { font-size: 20px; letter-spacing: -.011em; }
   h2[data-step]::before, #smartstoreWorkflow a span {
-    background: var(--ui-disabled);
+    background: var(--ui-periwinkle);
     color: var(--ui-ink);
-    font-weight: 600;
+    font-weight: 700;
   }
   p, details, small, header .release-info, .maker-credit { color: var(--ui-muted); }
-  p { font-size: 14px; line-height: 1.47; }
+  p { font-size: 14px; line-height: 1.5; }
   a { color: var(--ui-link); }
   label, #form > label { color: var(--ui-ink); font-weight: 500; }
 
-  main { padding-block: 32px 48px; gap: var(--ui-element-gap); }
+  main { padding-block: 40px var(--ui-section-gap); gap: 24px; }
   .card, dialog, #largeDetailPreview {
     background: var(--ui-white);
     color: var(--ui-ink);
     border: 1px solid var(--ui-line);
     border-radius: var(--ui-card-radius);
-    box-shadow: none;
+    box-shadow: var(--ui-card-shadow);
   }
   .card, #collectionCard, body[data-channel="smartstore"] #review > .card {
     padding: var(--ui-card-padding);
   }
   #collectionCard { min-height: 0; }
-  body[data-channel="smartstore"] #review { padding: 0; background: transparent; border: 0; }
+  body[data-channel="smartstore"] #review { padding: 0; background: transparent; border: 0; box-shadow: none; }
   body[data-channel="smartstore"] :is(main, #review), .image-workbench, .columns {
-    gap: var(--ui-element-gap);
+    gap: 24px;
   }
   body[data-channel="smartstore"] .workflow-photo-content { gap: var(--ui-element-gap); }
   :is(.channel-switcher, #smartstoreWorkflow) {
-    padding: 20px 24px;
-    background: var(--ui-frost);
+    padding: 16px 24px;
+    background: var(--ui-white);
     border: 1px solid var(--ui-line);
     border-radius: var(--ui-nav-radius);
   }
   .channel-switcher, .website-updates {
     width: calc(100% - 2 * var(--ui-gutter));
-    max-width: calc(1400px - 2 * var(--ui-gutter));
-    margin: 20px auto 0;
+    max-width: calc(var(--ui-shell-width) - 2 * var(--ui-gutter));
+    margin: 16px auto 0;
   }
-  .channel-buttons { gap: 12px; }
-  #smartstoreWorkflow { background: var(--ui-mist); }
+  .channel-buttons { gap: var(--ui-element-gap); }
+  #smartstoreWorkflow { background: var(--ui-aqua); border-radius: var(--ui-card-radius); }
   #smartstoreWorkflow ol { gap: 8px 16px; }
   #smartstoreWorkflow a {
     padding: 8px 4px;
     color: var(--ui-ink);
     border: 0;
     background: transparent;
-    font: 500 14px/1.43 var(--ui-font);
+    font: 500 14px/1.5 var(--ui-font);
   }
   #smartstoreWorkflow a:hover { color: var(--ui-link); background: var(--ui-white); }
   :is(#smartstoreWorkflow strong, .workflow-step-note, #channelSummary, #source, #categorySource,
     #form > h3, .smartstore-title-panel h3, .smartstore-panel h3, #smartstoreExtraTools > summary,
-    .two-choice-panel > summary, .large-detail-header h2) { color: var(--ui-ink); font-weight: 600; }
+    .two-choice-panel > summary, .large-detail-header h2) { color: var(--ui-ink); font-weight: 500; }
 
   :is(.website-updates, .product-summary, .registration-footer, #progressCard, aside, .fixed,
     .note, #logs, .trial-note, #productReviewNotes, .smartstore-title-panel, .smartstore-panel,
@@ -591,11 +628,16 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     .template-headline-editor, .manual-tag-picker, .notice-text-panel, .website-current-group,
     .photo-import-card) { border: 1px solid var(--ui-line); border-radius: var(--ui-card-radius); }
   .product-summary { padding: 16px 20px; }
+  .smartstore-title-panel { background: var(--ui-lavender); }
+  .template-headline-editor { background: var(--ui-periwinkle); }
   #collectionCard .workspace-moment {
     background: var(--ui-frost);
     border: 1px solid var(--ui-line);
     border-radius: var(--ui-nav-radius);
     box-shadow: none;
+  }
+  #collectionCard .workspace-moment[data-state="complete"] {
+    background: color-mix(in srgb, var(--ui-mint) 35%, var(--ui-white));
   }
   .product-summary p, .registration-footer .fixed, #logs { color: var(--ui-ink); }
   :is(.giordano-signature, .research-tag-panel, .form-section-title, #form > h3, .classification-detail,
@@ -608,7 +650,7 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
   }
   :is(.detail-preview-scroll, .notice-original-scroll, .image-workbench #main, .extra-previews img,
     .photo-import-card img, .two-choice-panel iframe, #backgroundOriginal) {
-    border-radius: var(--ui-card-radius);
+    border-radius: var(--ui-media-radius);
     border-color: var(--ui-line);
     background: var(--ui-white);
   }
@@ -616,21 +658,20 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     scrollbar-color: var(--ui-steel) var(--ui-mist);
   }
   dialog { font-family: var(--ui-font); }
-  dialog::backdrop { background: rgb(29 29 31 / .42); }
+  dialog::backdrop { background: rgb(51 51 51 / .42); }
   .notice-dialog-heading { background: var(--ui-white); }
 
   :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
-    border: 1px solid var(--ui-steel);
-    border-radius: 10px;
+    border: 1px solid var(--ui-input-line);
+    border-radius: var(--ui-nav-radius);
     background: var(--ui-white);
     color: var(--ui-ink);
     font-family: var(--ui-font);
     font-weight: 400;
   }
   :is(.search input, input[type="search"], #manualTagQuery) {
-    border-radius: 980px;
-    padding-inline: 24px;
-    font: 400 13px/1.2 Arial, 'Malgun Gothic', sans-serif;
+    padding-inline: 16px;
+    font: 400 14px/1.5 var(--ui-font);
   }
   .search { align-items: center; }
   .search input { width: 100%; min-height: 44px; }
@@ -641,15 +682,15 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
   }
   input:is([type="checkbox"], [type="radio"]) { accent-color: var(--ui-action); }
   button, .naver-api-link, .background-request-link, #openGiordanoHome {
-    min-height: 36px;
+    min-height: 40px;
     padding: 8px 16px;
-    border: 1px solid var(--ui-steel);
+    border: 1px solid var(--ui-muted);
     border-radius: var(--ui-pill-radius);
     background: transparent;
     color: var(--ui-ink);
     box-shadow: none;
-    font: 400 12px/16px var(--ui-font);
-    letter-spacing: -.12px;
+    font: 500 14px/1.5 var(--ui-font);
+    letter-spacing: -.01em;
     overflow-wrap: anywhere;
     white-space: normal;
     text-decoration: none;
@@ -660,6 +701,8 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     box-shadow: none;
   }
   :is(#collect, #run, #smartstoreStart, #continue, #photoImportApply, dialog button[type="submit"]) {
+    padding: 13px 24px;
+    font-size: 16px;
     border-color: transparent;
     background: var(--ui-action);
     color: var(--ui-white);
@@ -672,10 +715,10 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
   :is(#smartstoreStart, #run).working { background: var(--ui-action); color: var(--ui-white); padding-left: 44px; }
   :is(#smartstoreStart, #run).working::after { display: none; }
   :is(.channel-button, .template-choice)[aria-pressed="true"]:not(:disabled) {
-    background: var(--ui-disabled);
+    background: var(--ui-periwinkle);
     color: var(--ui-ink);
-    border: 1px solid var(--ui-steel);
-    font-weight: 600;
+    border: 1px solid var(--ui-action);
+    font-weight: 700;
   }
   .template-choice { padding: 16px; border-radius: var(--ui-nav-radius); }
   :is(.website-category-toggle, .tag-remove, .remove-extra) {
@@ -692,7 +735,7 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     background: transparent;
     color: var(--ui-muted);
     border: 0;
-    border-radius: 0;
+    border-radius: var(--ui-nav-radius);
     box-shadow: none;
   }
   :is(.review-badge, .website-product-label, #websiteUpdateSummary .website-update-count) { color: var(--ui-attention); }
@@ -714,7 +757,7 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     body[data-channel="lotte"] .workspace-sidebar :is(#collectionCard, #progressCard) { padding: 16px; }
   }
   @media (max-width: 650px) {
-    :root { --ui-card-padding: 20px; --ui-element-gap: 16px; }
+    :root { --ui-card-padding: 16px; --ui-section-gap: 40px; }
     main { padding-top: 24px; }
     .channel-switcher { padding: 16px; }
     h2 { font-size: 21px; }

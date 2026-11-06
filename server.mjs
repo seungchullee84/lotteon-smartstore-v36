@@ -746,6 +746,11 @@ const server=http.createServer(async(req,res)=>{
       res.writeHead(200,{'Content-Type':'text/javascript; charset=utf-8','Cache-Control':'no-store'});
       return res.end(await readFile(path.join(root,'smartstore-title.mjs')));
     }
+    if(req.method==='GET'&&/^\/fonts\/Poppins-(?:300|400|500|700)\.woff2$/.test(url.pathname)){
+      const font=await readFile(path.join(root,'public','fonts',path.basename(url.pathname)));
+      res.writeHead(200,{'Content-Type':'font/woff2','Cache-Control':'public, max-age=86400'});
+      return res.end(font);
+    }
     if(req.method==='GET'&&['/','/app.js','/smartstore-progress.js','/smartstore-template-headline.js','/website-daily.js','/detail-preview.js','/two-choice.js','/smartstore-photo-review.js','/smartstore-photo-review.css','/style.css'].includes(url.pathname)){
       const name=url.pathname==='/'?'index.html':url.pathname.slice(1);
       const types={'index.html':'text/html','app.js':'text/javascript','smartstore-progress.js':'text/javascript','smartstore-template-headline.js':'text/javascript','website-daily.js':'text/javascript','detail-preview.js':'text/javascript','two-choice.js':'text/javascript','smartstore-photo-review.js':'text/javascript','smartstore-photo-review.css':'text/css','style.css':'text/css'};
