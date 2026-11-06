@@ -7,7 +7,7 @@ import path from 'node:path';
 import {runSmartstoreAuto} from '../smartstore-auto.mjs';
 import {SmartstoreAutomation} from '../smartstore-automation.mjs';
 import {createSmartstoreRecovery} from '../smartstore-upload-recovery.mjs';
-import {fillSmartstoreOptions,applySmartstoreBulkStock,readSmartstoreOptionRows,verifySmartstoreOptions,uploadSmartstoreImageSlot} from '../smartstore-form.mjs';
+import {fillSmartstoreOptions,applySmartstoreBulkStock,readSmartstoreOptionRows,verifySmartstoreOptions,uploadSmartstoreImages,uploadSmartstoreImageSlot} from '../smartstore-form.mjs';
 
 const product={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=fixture',
  name:'남성 라운드 티셔츠',smartstoreName:'남성 지오다노 라운드 티셔츠 123456',smartstoreNameUserEdited:true,consumerPrice:19900,
@@ -191,6 +191,48 @@ test('이미지 등록 버튼의 직접 선택기와 응답 없는 내 사진 �
    assert.equal(logs.some(s=>s.includes('파일 입력란 사용')),mode==='scoped-input');
   }
  }finally{await browser.close();await unlink(file).catch(()=>{});await rmdir(root);}
+});
+
+test('화면 갱신이 멈춰도 지연된 대표사진을 확인하고 추가사진을 순서대로 한 번만 첨부한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-background-photos-'));
+ const files=['main.jpg','extra-1.jpg','extra-2.jpg'].map(name=>path.join(root,name));
+ const browser=await chromium.launch({headless:true});
+ try{
+  await Promise.all(files.map(file=>writeFile(file,'fixture')));
+  const page=await browser.newPage();
+  await page.route('**/*',route=>route.fulfill({body:''}));
+  await page.setContent(fixture());
+  await page.evaluate(()=>{
+   window.requestAnimationFrame=()=>0;
+   document.querySelector('#chosen').onchange=event=>{
+    const slot=window.slot;
+    const names=Array.from(event.target.files,file=>file.name);
+    event.target.value='';
+    event.target.parentElement.hidden=true;
+    setTimeout(()=>{
+     for(const name of names){
+      const image=document.createElement('img');
+      image.src='https://shop-phinf.pstatic.net/server-'+name;
+      slot.append(image);
+      window.files.push([slot.id,name]);
+     }
+    },500);
+   };
+  });
+  const slots={},signal=AbortSignal.timeout(7000);
+  await uploadSmartstoreImages(page,{main:files[0],extras:files.slice(1),replaceImages:true},()=>signal.throwIfAborted(),{slots});
+  assert.deepEqual(await page.evaluate(()=>window.files),[
+   ['representImage','main.jpg'],['optionalImages','extra-1.jpg'],['optionalImages','extra-2.jpg']
+  ]);
+  assert.deepEqual(slots.optionalImages.attached,[
+   'https://shop-phinf.pstatic.net/server-extra-1.jpg','https://shop-phinf.pstatic.net/server-extra-2.jpg'
+  ]);
+  assert.equal(await page.evaluate(()=>window.saved),0);
+ }finally{
+  await browser.close();
+  await Promise.all(files.map(file=>unlink(file).catch(()=>{})));
+  await rmdir(root);
+ }
 });
 
 test('한 번 시작하면 상품명 입력 지연과 상세 첨부 확인 지연을 스스로 복구하고 파일은 한 번만 보낸다',async()=>{
