@@ -65,8 +65,14 @@ async function matchResampledSection(detail,section){
  const height=last-first+1,detailHeight=original.rowInk.length;
  if(first<0||height<10||height>detailHeight)return null;
  const sampleRows=sample.rowInk.subarray(first,last+1);
- const totalInk=sampleRows.reduce((sum,value)=>sum+value,0);
- if(totalInk/(height*width)<1)return null;
+ let totalInk=0,sampleSquare=0;
+ for(let y=first;y<=last;y++)for(let x=2;x<width-2;x++){
+  const value=sample.ink[y*width+x];
+  totalInk+=value;
+  sampleSquare+=value*value;
+ }
+ const count=height*(width-4),mean=totalInk/count;
+ if(mean<1||sampleSquare/count-mean*mean<25)return null;
  const candidates=[];
  for(let top=0;top<=detailHeight-height;top++){
   let loss=0;
@@ -82,14 +88,14 @@ async function matchResampledSection(detail,section){
  for(const {top} of candidates)for(const dy of [0,-.25,.25,-.5,.5]){
   if(top+dy<0||top+dy+height>=detailHeight)continue;
   for(const dx of [0,-.5,.5,-1,1]){
-   let error=0,dot=0,originalSquare=0,sampleSquare=0;
+   let error=0,dot=0,originalSquare=0;
    const strips=Array.from({length:10},()=>({error:0,originalInk:0,sampleInk:0}));
    for(let y=0;y<height;y++){
     const strip=strips[Math.floor(y*strips.length/height)];
     for(let x=2;x<width-2;x++){
      const a=sampledInk(original.ink,x+dx,top+y+dy),b=sample.ink[(first+y)*width+x];
      const difference=Math.abs(a-b);
-     error+=difference;dot+=a*b;originalSquare+=a*a;sampleSquare+=b*b;
+     error+=difference;dot+=a*b;originalSquare+=a*a;
      strip.error+=difference;strip.originalInk+=a;strip.sampleInk+=b;
     }
    }
