@@ -244,7 +244,7 @@ test('화면 갱신이 멈춰도 이전 주소와 실제 선택된 썸네일을 
  }
 });
 
-test('판매자 주소의 대표 미리보기는 첨부 주소 일치 후 추가사진 6장 교체로 이어진다',async()=>{
+test('대표 첨부 주소와 선택 창 닫힘을 확인한 뒤 추가사진 6장 교체로 이어진다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-proxy-photos-'));
  const names=['main.jpg',...Array.from({length:6},(_,index)=>'extra-'+(index+1)+'.jpg')];
  const files=names.map(name=>path.join(root,name));
@@ -279,7 +279,9 @@ test('판매자 주소의 대표 미리보기는 첨부 주소 일치 후 추가
     window.attachEvents.push('selected:'+slot.id);
     for(const name of names)append(slot,name);
     savedNames(slot).value=names.map(name=>serverAddress('pending-'+name)).join(',');
-    event.target.value='';event.target.parentElement.hidden=true;
+    const picker=event.target.parentElement;
+    event.target.value='';
+    setTimeout(()=>{picker.hidden=true;window.attachEvents.push('closed:'+slot.id);},450);
     setTimeout(()=>{
      savedNames(slot).value=names.map(serverAddress).join(',');
      window.attachEvents.push('confirmed:'+slot.id);
@@ -289,7 +291,8 @@ test('판매자 주소의 대표 미리보기는 첨부 주소 일치 후 추가
   const signal=AbortSignal.timeout(8000);
   await uploadSmartstoreImages(page,{main:files[0],extras:files.slice(1),replaceImages:true},()=>signal.throwIfAborted(),{slots:{}});
   assert.deepEqual(await page.evaluate(()=>window.attachEvents),[
-   'selected:representImage','confirmed:representImage','selected:optionalImages','confirmed:optionalImages'
+   'selected:representImage','confirmed:representImage','closed:representImage',
+   'selected:optionalImages','confirmed:optionalImages','closed:optionalImages'
   ]);
   assert.deepEqual(await page.locator('#optionalImages img').evaluateAll(images=>images.map(img=>img.src.split('/').at(-1))),names.slice(1));
   assert.equal(await page.evaluate(()=>window.saved),0);
