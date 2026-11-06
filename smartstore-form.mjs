@@ -289,7 +289,9 @@ function confirmedImageAddress(source,registered){
 }
 
 export async function readSmartstoreImageSlot(container){
- const {sources,registered}=await container.evaluateAll(([slot])=>{
+ const {sources,registered}=await container.evaluateAll(slots=>{
+  if(slots.length>1)throw Error('사진 입력 칸을 하나로 확인하지 못했습니다.');
+  const [slot]=slots;
   const uploaded=slot?.querySelector('input[name="_hidden_uploaded_names"]');
   return {
    sources:Array.from(slot?.querySelectorAll('img')??[],image=>image.currentSrc||image.src),
