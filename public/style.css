@@ -471,8 +471,8 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     --ui-link: #0066cc;
     --ui-action: #0071e3;
     --ui-attention: #b64400;
-    --ui-font: 'SF Pro Text', Inter, 'Helvetica Neue', 'Segoe UI', Arial, 'Malgun Gothic', sans-serif;
-    --ui-display: 'SF Pro Display', Inter, 'Helvetica Neue', 'Segoe UI', Arial, 'Malgun Gothic', sans-serif;
+    --ui-font: 'SF Pro Text', Inter, 'Helvetica Neue', Arial, 'Malgun Gothic', sans-serif;
+    --ui-display: 'SF Pro Display', Inter, 'Helvetica Neue', Arial, 'Malgun Gothic', sans-serif;
     --ui-card-radius: 28px;
     --ui-nav-radius: 20px;
     --ui-pill-radius: 9999px;
@@ -516,6 +516,7 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     letter-spacing: -.015em;
     line-height: 1.08;
   }
+  header h1 :is(.lotteon-brand, .smartstore-brand) { color: inherit; }
   header .workspace-subtitle {
     padding: 0;
     font: 400 clamp(14px, 2.2vw, 17px)/1.47 var(--ui-font);
@@ -530,7 +531,7 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     font-weight: 600;
   }
   p, details, small, header .release-info, .maker-credit { color: var(--ui-muted); }
-  p { line-height: 1.47; }
+  p { font-size: 14px; line-height: 1.47; }
   a { color: var(--ui-link); }
   label, #form > label { color: var(--ui-ink); font-weight: 500; }
 
@@ -546,6 +547,7 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     padding: var(--ui-card-padding);
   }
   #collectionCard { min-height: 0; }
+  body[data-channel="smartstore"] #review { padding: 0; background: transparent; border: 0; }
   body[data-channel="smartstore"] :is(main, #review), .image-workbench, .columns {
     gap: var(--ui-element-gap);
   }
@@ -555,6 +557,11 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     background: var(--ui-frost);
     border: 1px solid var(--ui-line);
     border-radius: var(--ui-nav-radius);
+  }
+  .channel-switcher, .website-updates {
+    width: calc(100% - 2 * var(--ui-gutter));
+    max-width: calc(1400px - 2 * var(--ui-gutter));
+    margin: 20px auto 0;
   }
   .channel-buttons { gap: 12px; }
   #smartstoreWorkflow { background: var(--ui-mist); }
@@ -584,6 +591,12 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     .template-headline-editor, .manual-tag-picker, .notice-text-panel, .website-current-group,
     .photo-import-card) { border: 1px solid var(--ui-line); border-radius: var(--ui-card-radius); }
   .product-summary { padding: 16px 20px; }
+  #collectionCard .workspace-moment {
+    background: var(--ui-frost);
+    border: 1px solid var(--ui-line);
+    border-radius: var(--ui-nav-radius);
+    box-shadow: none;
+  }
   .product-summary p, .registration-footer .fixed, #logs { color: var(--ui-ink); }
   :is(.giordano-signature, .research-tag-panel, .form-section-title, #form > h3, .classification-detail,
     .website-product-card, .website-older-history, .upload-progress-metrics) { border-color: var(--ui-line); }
@@ -619,13 +632,15 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     padding-inline: 24px;
     font: 400 13px/1.2 Arial, 'Malgun Gothic', sans-serif;
   }
+  .search { align-items: center; }
+  .search input { width: 100%; min-height: 44px; }
   :is(input, select, textarea):focus { border-color: var(--ui-link); box-shadow: none; }
   :is(button, a, input, select, textarea, summary):focus-visible {
     outline: 2px solid var(--ui-link);
     outline-offset: 2px;
   }
   input:is([type="checkbox"], [type="radio"]) { accent-color: var(--ui-action); }
-  :is(button, .naver-api-link, .background-request-link, #openGiordanoHome) {
+  button, .naver-api-link, .background-request-link, #openGiordanoHome {
     min-height: 36px;
     padding: 8px 16px;
     border: 1px solid var(--ui-steel);
@@ -639,7 +654,7 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     white-space: normal;
     text-decoration: none;
   }
-  :is(button:not(:disabled), .naver-api-link, .background-request-link, #openGiordanoHome):hover {
+  button:not(:disabled):hover, .naver-api-link:hover, .background-request-link:hover, #openGiordanoHome:hover {
     background: var(--ui-mist);
     color: var(--ui-ink);
     box-shadow: none;
@@ -656,7 +671,7 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
   button:disabled { background: var(--ui-disabled); border-color: var(--ui-line); color: var(--ui-muted); opacity: 1; }
   :is(#smartstoreStart, #run).working { background: var(--ui-action); color: var(--ui-white); padding-left: 44px; }
   :is(#smartstoreStart, #run).working::after { display: none; }
-  .channel-button[aria-pressed="true"], .template-choice[aria-pressed="true"] {
+  :is(.channel-button, .template-choice)[aria-pressed="true"]:not(:disabled) {
     background: var(--ui-disabled);
     color: var(--ui-ink);
     border: 1px solid var(--ui-steel);
