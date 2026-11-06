@@ -739,7 +739,7 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
   .remove-extra { padding: 0; line-height: 26px; font-size: 20px; background: var(--ui-white); }
   .tag-remove { font-size: 16px; }
   .website-updates a { color: var(--ui-link); }
-  :is(#status, #releaseVersion, .review-badge, .website-product-label) {
+  :is(#status, .review-badge, .website-product-label) {
     background: transparent;
     color: var(--ui-muted);
     border: 0;
