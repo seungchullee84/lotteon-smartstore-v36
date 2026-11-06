@@ -1,6 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildDetailContent,officialDetailKeys} from '../detail-html.mjs';
+
+test('롯데ON 상세는 원본에 포함된 표만 제외하고 고유한 표는 남긴다',()=>{
+  const images={detail:'detail.jpg',size:'size.jpg',check:'check.jpg',info:'info.jpg'};
+  assert.deepEqual(officialDetailKeys(images,['size','info']),['detail','check']);
+  assert.deepEqual(buildDetailContent(images,[],{},null,['size','info']).sources,['detail.jpg','check.jpg']);
+  assert.deepEqual(buildDetailContent({...images,detail:null},[],{},null,['size','info']).sources,['size.jpg','check.jpg','info.jpg']);
+});
 test('기존 상세 이미지가 있으면 색상별 사진이 준비되어 있어도 원본만 사용',()=>{
   assert.deepEqual(buildDetailContent({detail:'original.jpg',main:'main.jpg',info:'info.jpg'},['블랙'],{'블랙':['black1.jpg','black2.jpg']},'original.jpg').sources,['original.jpg','info.jpg']);
 });
