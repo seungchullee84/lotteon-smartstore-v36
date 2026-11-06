@@ -11,6 +11,8 @@ test('자동 반영 범위는 소스·정제된 공식 조사자료만 포함하
  for(const file of ['data/desktop-session.json','data/product.json','data/naver-api-settings.json','data/category-secrets.json','.env','node_modules/a.js','credentials.mjs','private/password.js','../outside.mjs'])assert.equal(publishable(file),false,file);
  for(const file of ['research/official-benefits/manifest.json','research/official-benefits/shard-a.json'])assert.equal(publishable(file),true,file);
  for(const file of ['research/official-benefits/private.json','research/official-benefits/sources/a.jpg','research/official-benefits/shard-a.json/../../secret','research/other/manifest.json'])assert.equal(publishable(file),false,file);
+ for(const file of ['Poppins-300.woff2','Poppins-400.woff2','Poppins-500.woff2','Poppins-700.woff2','Poppins-OFL.txt'])assert.equal(publishable('public/fonts/'+file),true,file);
+ assert.equal(publishable('public/fonts/unrelated.woff2'),false);
 });
 test('자동 커밋과 push, 인증 문자열 차단, 원격 변경을 덮어쓰지 않음',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'github-sync-'));
