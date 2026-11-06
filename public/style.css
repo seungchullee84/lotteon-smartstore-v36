@@ -384,10 +384,10 @@ body[data-channel="smartstore"] #review>.card{width:100%;padding:24px 26px;margi
 .smartstore-workflow-step h2{margin:0 0 12px}
 body[data-channel="smartstore"] .workflow-photo-content{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
 body[data-channel="smartstore"] #smartstorePhotoStep .image-workbench{margin:0}
-body[data-channel="smartstore"] #smartstorePhotoStep #main{max-height:330px;object-fit:contain}
+body[data-channel="smartstore"] #smartstorePhotoStep #main{max-height:380px;object-fit:contain}
 body[data-channel="smartstore"] #smartstorePhotoStep #extraImages{margin:0}
 body[data-channel="smartstore"] #smartstorePhotoStep .extra-previews{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-body[data-channel="smartstore"] #smartstorePhotoStep .extra-previews img{max-height:220px;object-fit:contain}
+body[data-channel="smartstore"] #smartstorePhotoStep .extra-previews img{max-height:250px;object-fit:contain}
 body[data-channel="smartstore"] #smartstorePhotoStep #photoImportReview{grid-column:1/-1}
 body[data-channel="smartstore"] #smartstoreSellerStep .workflow-seller-actions{gap:10px;flex-wrap:wrap}
 body[data-channel="smartstore"] #smartstoreSellerStep #smartstoreOpen{background:#087c42;color:white;font-weight:700;padding:12px 20px;min-height:50px}
@@ -455,4 +455,28 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
 @media(max-width:480px){.channel-buttons{flex-wrap:wrap}.channel-buttons .channel-button{flex-basis:calc(50% - 5px)}#openGiordanoHome{margin-left:auto}}
 
 #productReviewNotes{margin:10px 0 14px;padding:9px 12px;border:1px solid #cdbd9e;border-radius:7px;background:#fff9ec}#productReviewNotes>summary{cursor:pointer;color:#6c4c20;font-size:13px;font-weight:700}#productReviewNotes #warnings{margin:10px 0 0}
+
+:root {
+  --workspace-max-width: 1520px;
+  --workspace-gutter: clamp(14px, 2vw, 24px);
+}
+header, main {
+  max-width: var(--workspace-max-width);
+  padding-inline: var(--workspace-gutter);
+}
+.channel-switcher {
+  width: calc(100% - 2 * var(--workspace-gutter));
+  max-width: calc(var(--workspace-max-width) - 2 * var(--workspace-gutter));
+  margin-inline: auto;
+}
+header .header-details .release-info {
+  min-width: 0;
+  max-width: 100%;
+  flex-shrink: 1;
+  overflow-wrap: anywhere;
+}
+.image-workbench .main-preview-column,
+.image-workbench #main {
+  max-width: 420px;
+}
 }
