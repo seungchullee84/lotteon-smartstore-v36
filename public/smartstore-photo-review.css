@@ -50,7 +50,7 @@
 
 #manualPhotoReviewGrid [data-reorderable="true"]>img{cursor:grab;user-select:none}
 #manualPhotoReviewGrid .photo-dragging{opacity:.5}
-#manualPhotoReviewGrid .photo-dragging>img{cursor:grabbing}
+#manualPhotoReviewGrid:has(.photo-dragging){cursor:grabbing}
 #manualPhotoReviewGrid>.photo-review-card[data-photo-drop="before"]{box-shadow:-4px 0 #527766}
 #manualPhotoReviewGrid>.photo-review-card[data-photo-drop="after"]{box-shadow:4px 0 #527766}
 @media(max-width:480px){
