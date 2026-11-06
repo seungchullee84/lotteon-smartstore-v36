@@ -1,7 +1,23 @@
 (()=>{
  const css=document.createElement('link');css.rel='stylesheet';css.href='/smartstore-photo-review.css';document.head.append(css);
- const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='사진 색상·구도 수정';button.id='manualPhotoReviewOpen';button.dataset.channelOnly='smartstore';
- const anchor=document.getElementById('photoPreparationStatus');if(!anchor)return;anchor.after(button);
+ const anchor=document.getElementById('photoPreparationStatus');
+ if(!anchor)return;
+ const photoAction=document.createElement('div');
+ photoAction.className='photo-review-entry';
+ photoAction.dataset.channelOnly='smartstore';
+ const button=document.createElement('button');
+ button.type='button';
+ button.id='manualPhotoReviewOpen';
+ button.textContent='사진 색상·구도 수정';
+ button.setAttribute('aria-haspopup','dialog');
+ button.setAttribute('aria-describedby','manualPhotoReviewGuide');
+ const guide=document.createElement('p');
+ guide.id='manualPhotoReviewGuide';
+ guide.textContent='대표·추가·상세에 사용할 사진의 색상과 촬영 각도를 확인하세요.';
+ photoAction.append(button,guide);
+ const preview=anchor.closest('.main-preview-column');
+ if(preview)preview.prepend(photoAction);
+ else anchor.after(photoAction);
  const dialog=document.createElement('dialog');dialog.id='manualPhotoReviewDialog';dialog.setAttribute('aria-labelledby','manualPhotoReviewTitle');
  dialog.innerHTML=`<div class="photo-selection-toolbar">
   <div class="photo-review-heading"><h2 id="manualPhotoReviewTitle">사진 색상·구도 확인</h2><span id="manualPhotoReviewSummary"></span></div>

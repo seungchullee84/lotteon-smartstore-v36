@@ -512,8 +512,8 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     --ui-card-padding: 24px;
     --ui-element-gap: 8px;
     --ui-section-gap: 64px;
-    --ui-shell-width: 1200px;
-    --ui-gutter: clamp(16px, 3vw, 40px);
+    --ui-shell-width: 1760px;
+    --ui-gutter: clamp(16px, 2vw, 24px);
     --ui-card-shadow: 0 2px 48px rgb(205 208 223 / .4);
     font: 400 16px/1.5 var(--ui-font);
     letter-spacing: -.01em;
@@ -554,7 +554,7 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
     padding: 0;
     border: 0;
     background: none;
-    font-size: clamp(32px, 4.4vw, 56px);
+    font-size: clamp(26px, 2.5vw, 34px);
     font-weight: 300;
     letter-spacing: -.02em;
     line-height: 1.15;
