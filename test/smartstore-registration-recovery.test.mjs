@@ -193,7 +193,7 @@ test('이미지 등록 버튼의 직접 선택기와 응답 없는 내 사진 �
  }finally{await browser.close();await unlink(file).catch(()=>{});await rmdir(root);}
 });
 
-test('화면 갱신이 멈춰도 지연된 대표사진을 확인하고 추가사진을 순서대로 한 번만 첨부한다',async()=>{
+test('화면 갱신이 멈춰도 이전 주소와 실제 선택된 썸네일을 확인해 사진을 순서대로 한 번만 첨부한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-background-photos-'));
  const files=['main.jpg','extra-1.jpg','extra-2.jpg'].map(name=>path.join(root,name));
  const browser=await chromium.launch({headless:true});
@@ -212,7 +212,11 @@ test('화면 갱신이 멈춰도 지연된 대표사진을 확인하고 추가�
     setTimeout(()=>{
      for(const name of names){
       const image=document.createElement('img');
-      image.src='https://shop-phinf.pstatic.net/server-'+name;
+      if(slot.id==='representImage')image.src='http://shop-phinf.pstatic.net/server-'+name;
+      else{
+       image.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+       image.srcset='https://shop-phinf.pstatic.net/server-'+name;
+      }
       slot.append(image);
       window.files.push([slot.id,name]);
      }
@@ -224,6 +228,7 @@ test('화면 갱신이 멈춰도 지연된 대표사진을 확인하고 추가�
   assert.deepEqual(await page.evaluate(()=>window.files),[
    ['representImage','main.jpg'],['optionalImages','extra-1.jpg'],['optionalImages','extra-2.jpg']
   ]);
+  assert.deepEqual(slots.representImage.attached,['http://shop-phinf.pstatic.net/server-main.jpg']);
   assert.deepEqual(slots.optionalImages.attached,[
    'https://shop-phinf.pstatic.net/server-extra-1.jpg','https://shop-phinf.pstatic.net/server-extra-2.jpg'
   ]);
