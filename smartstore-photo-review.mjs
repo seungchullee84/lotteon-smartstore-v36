@@ -28,10 +28,10 @@ export async function photoReview(product,{dataRoot,officialFolder,...options}){
  const mainSelection=await readMainSelection(product,dataRoot);let mainId=mainSelection?items.find(p=>p.hash===mainSelection.sourceHash&&p.name===mainSelection.sourceName)?.id:items.filter(p=>p.main).length===1?items.find(p=>p.main).id:null;
  const revision=hash(JSON.stringify([product.style,product.sourceUrl,product.colors,items.map(p=>[p.id,p.name])]));
  let automatic;try{automatic=JSON.parse(await readFile(path.join(dataRoot,'smartstore-photo-color-drafts',product.style+'.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
- if(automatic?.sourceUrl===product.sourceUrl&&JSON.stringify(automatic.colors)===JSON.stringify(product.colors))for(const item of items){const suggested=automatic.files.find(p=>p.hash===item.hash);if(suggested&&!item.reviewed){if(!item.color&&product.colors.includes(suggested.color)){item.color=suggested.color;item.colorSuggested=true;}if(!item.role&&suggested.careLabel)item.role='care-label';}}
+ if(automatic?.sourceUrl===product.sourceUrl&&JSON.stringify(automatic.colors)===JSON.stringify(product.colors))for(const item of items){const suggested=automatic.files.find(p=>p.hash===item.hash);if(suggested&&!item.reviewed){if(!item.color&&product.colors.includes(suggested.color)){item.color=suggested.color;item.colorSuggested=true;}if(suggested.careLabel){item.role='care-label';item.color='';item.labelSuggested=true;}}}
  let selection;try{selection=JSON.parse(await readFile(selectionFile(dataRoot,product),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  const match=selection?.sourceUrl===product.sourceUrl&&selection.revision===revision;
- if(match)for(const item of items){const saved=selection.items.find(i=>i.id===item.id);if(saved&&(saved.color===''||product.colors.includes(saved.color))&&(saved.role===''||roles.has(saved.role))){if(saved.color||saved.colorOverride){item.color=saved.color;item.colorSuggested=false;}if(saved.role)item.role=saved.role;item.colorOverride=!!saved.colorOverride;}}
+ if(match)for(const item of items){const saved=selection.items.find(i=>i.id===item.id);if(saved&&(saved.color===''||product.colors.includes(saved.color))&&(saved.role===''||roles.has(saved.role))){if(saved.color||saved.colorOverride){item.color=saved.color;item.colorSuggested=false;}if(saved.role&&(!item.labelSuggested||saved.roleOverride!==false||saved.colorOverride))item.role=saved.role;item.colorOverride=!!saved.colorOverride;item.roleOverride=saved.roleOverride??true;}}
  if(match&&selection.mainId&&items.some(p=>p.id===selection.mainId))mainId=selection.mainId;for(const item of items)item.main=item.id===mainId;
  // This is a user-requested initial choice, not a confirmed angle analysis.
  for(const item of items)if(!item.role){item.role='detail';item.roleDefaulted=true;}
@@ -49,7 +49,7 @@ export async function savePhotoReviewDraft(product,input,options){
  if(input.mainId&&!current.items.some(p=>p.id===input.mainId))throw Error('대표사진 선택을 확인해 주세요.');
  assignPhotoRolesByOrder(input.items);
  const file=selectionFile(options.dataRoot,product),temporary=file+'.'+randomUUID()+'.tmp',savedAt=new Date().toISOString();
- await mkdir(path.dirname(file),{recursive:true});await writeFile(temporary,JSON.stringify({style:product.style,sourceUrl:product.sourceUrl,revision:current.revision,savedAt,mainId:input.mainId||null,items:input.items.map(({id,color,role,colorOverride})=>({id,color,role,colorOverride:!!colorOverride}))},null,2));await rename(temporary,file);return {savedAt};
+ await mkdir(path.dirname(file),{recursive:true});await writeFile(temporary,JSON.stringify({style:product.style,sourceUrl:product.sourceUrl,revision:current.revision,savedAt,mainId:input.mainId||null,items:input.items.map(({id,color,role,colorOverride,roleOverride})=>({id,color,role,colorOverride:!!colorOverride,roleOverride:roleOverride??true}))},null,2));await rename(temporary,file);return {savedAt};
 }
 export async function photoReviewThumbnail(product,id,options){
  const key=inventoryKey(product,options);if(!inventories.has(key))await photoReview(product,options);

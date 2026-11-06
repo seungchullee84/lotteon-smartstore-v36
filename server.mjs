@@ -164,7 +164,7 @@ let colorDraftAbort=null;
 function startPhotoColorDraft(product,folder){
  colorDraftAbort?.abort();const controller=new AbortController();colorDraftAbort=controller;
  const current=()=>state.product?.style===product.style&&state.product?.sourceUrl===product.sourceUrl&&state.folder===folder;
- state.photoColorDraft={style:product.style,status:'running',message:'로컬 모델로 색상을 먼저 추정하는 중 · 수동 선택 가능'};
+ state.photoColorDraft={style:product.style,status:'running',message:'사진 색상 빠른 추정·케어라벨 자동 구분 중 · 수동 선택 가능'};
  void prefillPhotoColors(product,folder,{dataRoot,signal:controller.signal,log:message=>{if(current()){log(message);if(message.startsWith('사진 대조 '))state.photoColorDraft.message=message+' · 색상 초안 판별 중';}}}).then(result=>{
   if(!current()||controller.signal.aborted)return;
   state.photoColorDraft={style:product.style,status:'ready',...result,message:'색상 초안 '+result.filled+'장 · 미지정 '+result.remaining+'장 · 자동 추정이므로 색상을 확인해 주세요.'};

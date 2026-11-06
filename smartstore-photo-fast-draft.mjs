@@ -30,11 +30,11 @@ export async function classifyFastPhotoDraft(product,photos,{dataRoot,folder,sig
  const root=path.join(dataRoot,'smartstore-photo-fast-cache');await mkdir(root,{recursive:true});
  const identity=JSON.stringify([FAST_PHOTO_VERSION,product.style,product.sourceUrl,product.colors,kind,references]);
  const results=[];let worker,ocrCount=0,reused=0;
- const recognize=recognizePhoto||async(bytes)=>{
+ const recognize=recognizePhoto||(async(bytes)=>{
   worker||=await createWorker('kor+eng');signal?.throwIfAborted();
   await worker.setParameters({tessedit_pageseg_mode:'11'});
   return (await worker.recognize(await sharp(bytes).rotate().resize({width:1000,height:1400,fit:'inside',withoutEnlargement:true}).toBuffer())).data.text;
- };
+ });
  const abort=()=>{void worker?.terminate().catch(()=>{});};signal?.addEventListener('abort',abort,{once:true});
  try{
   for(const photo of photos){
