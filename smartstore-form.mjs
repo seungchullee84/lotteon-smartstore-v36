@@ -51,6 +51,8 @@ export async function readSmartstoreOptionRows(page,plan,check=()=>{}){
 
 // The same visible-UI driver runs in the app's Playwright browser and in CUA tests.
 // No save, temporary-save or publish action. Unspecified copied settings stay intact.
+const optionModes=[['직접 입력하기',/^직접\s*입력하기$/],['조합형',/^조합\s*형$/]];
+const optionModeRadio=(panel,label)=>panel.getByLabel(label).and(panel.locator('input[type="radio"]'));
 export async function ensureSmartstoreOptionMode(page,check=()=>{}){
  const panel=page.locator('ui-view[name="option"]');
  const enabled=panel.locator('#option_choice_type_true'),enabledLabel=panel.locator('label[for="option_choice_type_true"]');
@@ -58,12 +60,14 @@ export async function ensureSmartstoreOptionMode(page,check=()=>{}){
  if(!await enabledLabel.isVisible()){check();await panel.getByRole('button',{name:/^옵션 도움말/}).click();}
  await enabledLabel.waitFor({state:'visible'});
  if(!await enabled.isChecked()){check();await enabledLabel.click();}
- for(const name of ['직접 입력하기','조합형']){
-  const radio=panel.getByLabel(name,{exact:true});await radio.waitFor({state:'attached'});
+ for(const [name,labelText] of optionModes){
+  const radio=optionModeRadio(panel,labelText);await radio.waitFor({state:'attached'});
   if(!await radio.isChecked()){
    const id=await radio.getAttribute('id'),associated=id?panel.locator('label[for='+JSON.stringify(id)+']'):null;
    const label=associated&&await associated.count()===1?associated:radio.locator('xpath=ancestor::label[1]');
-   check();await label.click();
+   check();
+   if(!await label.isVisible()&&await radio.isVisible())await radio.check();
+   else await label.click();
   }
   if(!await radio.isChecked())throw Error('옵션 입력 방식 확인 실패: '+name);
  }
@@ -91,20 +95,28 @@ export async function fillSmartstoreValue(loc,value,check=()=>{}){
  if(actual!=='<redacted>'&&String(actual).replaceAll(',','')!==expected.replaceAll(',',''))throw Error('입력값 확인 실패: '+expected.slice(0,50));
  return true;
 }
-export async function fillSmartstoreOptions(page,plan,{check=()=>{},log=()=>{},completed=false}={}){
+export async function fillSmartstoreOptions(page,plan,{check=()=>{},log=()=>{},completed=false,receipt}={}){
   const fill=(loc,value)=>fillSmartstoreValue(loc,value,check);
   const optionName=page.locator('#choice_option_name0');
   const changed=()=>Error('완료된 옵션 또는 재고가 바뀌었습니다. 현재 입력을 보존하고 이어서 진행을 멈췄습니다.');
   if(completed){
     const panel=page.locator('ui-view[name="option"]');
-    if(!await panel.locator('#option_choice_type_true').isChecked()||!await panel.getByLabel('직접 입력하기',{exact:true}).isChecked()||!await panel.getByLabel('조합형',{exact:true}).isChecked())throw changed();
+    if(!await panel.locator('#option_choice_type_true').isChecked())throw changed();
+    for(const [,label] of optionModes)if(!await optionModeRadio(panel,label).isChecked())throw changed();
   }else await ensureSmartstoreOptionMode(page,check);
   const optionCount=page.locator('input[ng-model="vm.choiceOptionNameCount"]').locator('..');
   if((await optionCount.locator('.selectize-input').innerText()).trim()!=='2개'){
     if(completed)throw changed();
-    check();await optionCount.locator('.selectize-input').click();await optionCount.locator('.selectize-dropdown-content').getByText('2개',{exact:true}).click();
+    const two=optionCount.locator('.selectize-dropdown-content').getByText('2개',{exact:true});
+    check();if(!await two.isVisible())await optionCount.locator('.selectize-input').click();await two.click();
   }
   await page.locator('#choice_option_name1').waitFor({state:'visible'});
+  if(receipt?.listRequested&&!completed){
+    // A timed out response can leave the list still being built. Wait for it
+    // once, then verify the actual pairs; never send a second list request.
+    await page.waitForFunction(count=>Number(document.querySelector('[role="grid"]')?.getAttribute('aria-rowcount'))===count+2,plan.expectedOptions,{timeout:4000})
+     .catch(()=>{check();throw Error('이미 요청한 옵션 목록의 반영을 확인하지 못했습니다. 중복 생성하지 않았습니다.');});
+  }
   const same=await optionName.inputValue()==='컬러'&&await page.locator('#choice_option_name1').inputValue()==='사이즈'&&await page.locator('#choice_option_value0').inputValue()===plan.colors.join(',')&&await page.locator('#choice_option_value1').inputValue()===plan.sizes.join(',')&&Number(await page.getByRole('grid').getAttribute('aria-rowcount'))===plan.expectedOptions+2;
   let pairsMatch=false;
   if(same){
@@ -117,9 +129,13 @@ export async function fillSmartstoreOptions(page,plan,{check=()=>{},log=()=>{},c
     try{verifySmartstoreOptions({...plan,stockPerOption:0},rows.map(row=>({...row,stock:0})));pairsMatch=true;}catch{}
   }else if(completed)throw changed();
   if(!pairsMatch){
+    if(receipt?.listRequested)throw Error('이미 요청한 옵션 조합을 확인하지 못했습니다. 중복 생성하지 않았습니다.');
     await fill(optionName,'컬러');await fill(page.locator('#choice_option_value0'),plan.colors.join(','));
     await fill(page.locator('#choice_option_name1'),'사이즈');await fill(page.locator('#choice_option_value1'),plan.sizes.join(','));
-    check();await page.getByRole('button',{name:'옵션목록으로 적용',exact:true}).click();
+    const apply=page.getByRole('button',{name:'옵션목록으로 적용',exact:true});
+    await apply.click({trial:true});check();
+    if(receipt)receipt.listRequested=true;
+    await apply.click();
   }
   await applySmartstoreBulkStock(page,plan,check);
   const count=verifySmartstoreOptions(plan,await readSmartstoreOptionRows(page,plan,check));
@@ -157,7 +173,7 @@ export async function fillSmartstore(tab,plan,assets,log=()=>{},check=()=>{},{me
     await fill(page.locator('#prd_price2'),plan.salePrice);
     log('상품명·판매가 '+plan.salePrice+'원 확인');
   },basicFields);
-  const verifiedOptions=await phase('options',()=>fillSmartstoreOptions(page,plan,{check,log,completed:resume?.options===true}));
+  const verifiedOptions=await phase('options',()=>fillSmartstoreOptions(page,plan,{check,log,completed:resume?.options===true,receipt:resume?(resume.optionReceipt||={}):undefined}));
   if(resume)resume.options=true;
   const slots=resume?(resume.slots||={}):undefined;
   if(assets&&(assets.main||Array.isArray(assets.extras))){await uploadSmartstoreImages(page,assets,check,{measure:phase,slots,log});log(assets.main?'대표·추가 이미지 첨부 확인':'추가이미지 정리 완료 · 대표이미지 교체 제외');}
@@ -214,6 +230,46 @@ export async function uploadSmartstoreImages(page,assets,check=()=>{},{measure=(
  if(Array.isArray(assets.extras))await measure('extraImages',()=>upload('optionalImages',assets.extras));
 }
 
+// Some seller screens emit a file chooser straight from "이미지 등록";
+// others first open "내 사진". Keep the listener across both actions.
+async function selectSmartstoreImageFile(page,container,{receipt,check,fileCount,log}){
+ const dialogs=page.getByRole('dialog').filter({visible:true});
+ const picker=dialogs.filter({has:page.getByRole('button',{name:'내 사진',exact:true})});
+ let chooser,clickedAt=0;
+ const capture=value=>{chooser=value;};
+ page.on('filechooser',capture);
+ try{
+  if(!await picker.count()){
+   check();if(receipt)receipt.picker=true;
+   await container.getByRole('button',{name:'이미지 등록',exact:true}).click({timeout:5000});
+  }else if(!receipt?.picker)throw Error('열려 있는 사진 선택 창을 먼저 확인해 주세요.');
+  const openedAt=Date.now(),deadline=openedAt+10000;
+  while(Date.now()<deadline){
+   check();if(chooser)return files=>chooser.setFiles(files,{timeout:60000});
+   const count=await picker.count();
+   if(count>1)throw Error('사진 선택 창을 한 곳으로 확인하지 못했습니다.');
+   if(count===1&&!clickedAt){
+    check();await picker.getByRole('button',{name:'내 사진',exact:true}).click({timeout:4000});
+    clickedAt=Date.now();continue;
+   }
+   if(Date.now()-(clickedAt||openedAt)>=450&&await dialogs.count()===count){
+    const input=(count===1?picker:container).locator('input[type="file"]:enabled');
+    if(await input.count()===1){
+     const eligible=await input.evaluate((node,{fileCount,inDialog})=>
+      (fileCount===1||node.multiple)&&((inDialog&&!node.accept)||/image\/|\.(?:jpe?g|png|webp)\b/i.test(node.accept)),{fileCount,inDialog:count===1});
+     if(chooser)return files=>chooser.setFiles(files,{timeout:60000});
+     if(eligible){
+      log('파일 선택기 대신 현재 이미지 창의 파일 입력란 사용');
+      return files=>input.setInputFiles(files,{timeout:60000});
+     }
+    }
+   }
+   await new Promise(resolve=>setTimeout(resolve,90));
+  }
+  throw Object.assign(Error('현재 이미지 파일 선택창이 응답하지 않습니다.'),{code:'SMARTSTORE_UI_DELAY'});
+ }finally{page.off('filechooser',capture);}
+}
+
 export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=false,receipt,log=()=>{}}={},check=()=>{}){
  if(!files?.length&&!replaceImages)return;
  check();const container=page.locator('ncp-product-temp-photo-infra-image-upload#'+id);
@@ -266,15 +322,9 @@ export async function uploadSmartstoreImageSlot(page,id,files,{replaceImages=fal
   if(receipt)receipt.cleared=true;
  }else if(existing.length)throw Error('기존 '+id+' 이미지가 있어 덮어쓰지 않았습니다. 새 입력 화면에서 실행해 주세요.');
  if(!files?.length){if(receipt)receipt.attached=[];await finish();return;}
- const pick=page.getByRole('dialog').getByRole('button',{name:'내 사진',exact:true}).filter({visible:true});
- if(!await pick.count()){
-  check();if(receipt)receipt.picker=true;
-  await container.getByRole('button',{name:'이미지 등록',exact:true}).click();
- }else if(!receipt?.picker)throw Error('열려 있는 사진 선택 창을 먼저 확인해 주세요.');
- await pick.waitFor({state:'visible',timeout:15000});
- check();const [chooser]=await Promise.all([page.waitForEvent('filechooser',{timeout:10000}),pick.click()]);
+ const attach=await selectSmartstoreImageFile(page,container,{receipt,check,fileCount:files.length,log});
  check();if(receipt)receipt.submitted=true;
- try{await chooser.setFiles(files,{timeout:60000});}
+ try{await attach(files);}
  catch(error){
   check();
   try{await waitHosted(3000,files.map(file=>path.basename(file)));}catch{throw error;}

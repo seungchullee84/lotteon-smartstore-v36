@@ -96,6 +96,8 @@ export async function insertNativeBrandVideo(editor,{check=()=>{},dataRoot,video
   }
   await new Promise(resolve=>setTimeout(resolve,300));
  }
- throw Error(attached?'MP4 첨부 후 네이버 동영상 식별자를 확인하지 못했습니다. 상품은 저장하지 않았습니다.':'MP4 첨부 창을 확인하지 못했습니다. 편집기에서 동영상 첨부를 확인해 주세요. 상품은 저장하지 않았습니다.');
+ const error=Error(attached?'MP4 첨부 후 네이버 동영상 식별자를 확인하지 못했습니다. 상품은 저장하지 않았습니다.':'MP4 첨부 창을 확인하지 못했습니다. 편집기에서 동영상 첨부를 확인해 주세요. 상품은 저장하지 않았습니다.');
+ if(attached)error.code='SMARTSTORE_UI_DELAY'; // Recheck a submitted video; never submit it again.
+ throw error;
  }finally{editor.off('filechooser',captureChooser);}
 }

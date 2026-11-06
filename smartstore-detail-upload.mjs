@@ -52,7 +52,7 @@ export async function attachSmartstorePhoto(editor,file,{check=()=>{},onSubmit=(
    }
    await new Promise(resolve=>setTimeout(resolve,100));
   }
-  throw Error('현재 사진 선택 창의 내 사진 버튼과 파일 선택기를 확인하지 못했습니다.');
+  throw Object.assign(Error('현재 사진 선택 창의 내 사진 버튼과 파일 선택기를 확인하지 못했습니다.'),{code:'SMARTSTORE_UI_DELAY'});
  }finally{editor.off('filechooser',capture);}
 }
 export async function openSmartstoreEditor(page,{check=()=>{}}={}){
@@ -225,7 +225,9 @@ export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{
   return performance.now()-before.since>=200;
  },imageCount,{timeout:30000});}catch(error){
   const observed=await editor.locator('.se-component.se-image img').evaluateAll(ns=>({count:ns.length,pending:ns.flatMap((n,i)=>/^https:\/\//.test(n.src)?[]:[i+1])}));
-  throw Error('상세이미지 업로드 준비 확인 실패: 예상 '+imageCount+'장 / 현재 '+observed.count+'장 / 업로드 대기 '+(observed.pending.join(',')||'없음')+' · '+error.message);
+  const failure=Error('상세이미지 업로드 준비 확인 실패: 예상 '+imageCount+'장 / 현재 '+observed.count+'장 / 업로드 대기 '+(observed.pending.join(',')||'없음')+' · '+error.message);
+  if(error.name==='TimeoutError')failure.code='SMARTSTORE_UI_DELAY';
+  throw failure;
  }
  const images=editor.locator('.se-component.se-image img');
  const fitIndexes=Array.from({length:imageCount},(_,i)=>i);
@@ -318,24 +320,42 @@ export async function uploadSmartstoreDetail(page,parts,{check:checkForm=()=>{},
  for(const task of tasks.slice(from)){
   if(task.type==='video'){
    await measure('detailVideo',async()=>{
-    check();await focusSmartstoreEditorInput(editor,{check});
+    check();
+    if(resume?.videoSubmitted){
+     await editor.locator('.se-component.se-video').first().waitFor({state:'attached',timeout:4000})
+      .catch(()=>{check();throw Error('동영상 첨부 결과를 확인하지 못했습니다. 같은 파일을 다시 보내지 않았습니다.');});
+     await detailPrefix(editor,tasks,{parts,resume,check});
+     log('이미 첨부한 영상 확인 · 다시 올리지 않음');
+     return;
+    }
+    await focusSmartstoreEditorInput(editor,{check});
     parts.videoIdentity=await insertSmartstoreVideo(editor,{check,dataRoot:parts.dataRoot,videoOptions:parts.videoOptions,onSubmit:()=>{if(resume)resume.videoSubmitted=true;}});
     if(resume){resume.videoIdentity=parts.videoIdentity;resume.confirmedCount=(resume.confirmedCount||0)+1;}
    });
    continue;
   }
   const {file,index}=task;
+  let confirmed=false;
   await measure('detailImage'+(index+1),async()=>{
-   check();const empty=editor.locator('.se-component.se-text .se-text-paragraph').filter({visible:true}).last();
-   if(await empty.count())await focusSmartstoreEditorInput(editor,{check});
-   if(parts.bannerLink?.index===index&&index>0&&await empty.count()&&resume?.bannerSpaced!==true){
-    check();await editor.keyboard.press('End');await editor.keyboard.press('Enter');
-    if(resume)resume.bannerSpaced=true;
-    await editor.evaluate(()=>new Promise(requestAnimationFrame));log('배너 앞 빈 줄 한 칸 분리');
+   check();
+   if(confirmed||resume?.pendingImage===index){
+    await waitDetailImage(editor,index,file,4000)
+     .catch(()=>{check();throw Error('상세이미지 첨부 결과를 확인하지 못했습니다. 같은 파일을 다시 보내지 않았습니다.');});
+    log('이미 첨부한 상세이미지 확인 · 다시 올리지 않음');
+   }else{
+    const empty=editor.locator('.se-component.se-text .se-text-paragraph').filter({visible:true}).last();
+    if(await empty.count())await focusSmartstoreEditorInput(editor,{check});
+    if(parts.bannerLink?.index===index&&index>0&&await empty.count()&&resume?.bannerSpaced!==true){
+     check();await editor.keyboard.press('End');await editor.keyboard.press('Enter');
+     if(resume)resume.bannerSpaced=true;
+     await editor.evaluate(()=>new Promise(requestAnimationFrame));log('배너 앞 빈 줄 한 칸 분리');
+    }
+    await attachSmartstorePhoto(editor,file,{check,onSubmit:()=>{if(resume)resume.pendingImage=index;}});
+    await waitDetailImage(editor,index,file);
    }
-   await attachSmartstorePhoto(editor,file,{check,onSubmit:()=>{if(resume)resume.pendingImage=index;}});
-   await waitDetailImage(editor,index,file);check();
-   if(resume){delete resume.pendingImage;resume.confirmedCount=(resume.confirmedCount||0)+1;}
+   check();
+   if(resume&&!confirmed){delete resume.pendingImage;resume.confirmedCount=(resume.confirmedCount||0)+1;}
+   confirmed=true;
    // Preserve ONE's per-image placement before the next insertion. The layout
    // helper already scrolls/selects when necessary; no separate scroll.
    await applySmartstoreImageLayout(editor,editor.locator('.se-component.se-image img').nth(index),{check,layout:smartstorePartLayout(parts,index)});

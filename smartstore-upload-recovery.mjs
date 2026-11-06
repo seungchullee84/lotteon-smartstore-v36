@@ -6,6 +6,30 @@ import {readPhotoBytes} from './smartstore-photo-byte-cache.mjs';
 
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const changed=()=>Object.assign(Error('작업하던 판매자센터 화면이 바뀌었습니다. 남아 있는 입력을 먼저 확인해 주세요.'),{code:'SMARTSTORE_RESUME_CHANGED'});
+const retryable=error=>error?.name==='TimeoutError'||error?.code==='SMARTSTORE_UI_DELAY';
+const retryLabels={basic:'상품명·가격',options:'옵션·재고',mainImage:'대표사진',extraImages:'추가사진',productInfo:'상품정보·고시',careLabels:'택·케어라벨',editor:'상세 편집기',detailVideo:'상세 영상',detailFinish:'상세 배치'};
+
+// One retry per affected step, at most three during this user-initiated run.
+// A validation, login or identity error must never restart the form.
+export function createSmartstoreRecovery({check,verify,log=()=>{},limit=3}){
+ let remaining=limit;
+ return async (name,run)=>{
+  try{return await run();}
+  catch(error){
+   check();
+   const label=retryLabels[name]||(/^detailImage\d+$/.test(name)?'상세이미지 '+name.slice(11)+'장째':null);
+   if(!label||!remaining||!retryable(error))throw error;
+   remaining--;
+   log(label+' 응답 지연 · 현재 반영을 확인한 뒤 이 구간만 자동 재시도');
+   await verify();
+   check();
+   const result=await run();
+   check();
+   log(label+' 자동 복구 완료');
+   return result;
+  }
+ };
+}
 
 // Bind to this tab and this mounted form/document, not just the URL of a copy.
 export async function bindSmartstoreDraft(page,selector){

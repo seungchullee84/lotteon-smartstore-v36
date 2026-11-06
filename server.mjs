@@ -486,15 +486,18 @@ const server=http.createServer(async(req,res)=>{
                 return {...detail,path:output,parts};
               },
               upload:async(p,folder,{detail,preview,measure})=>{
+                const uploadFiles=careLabels=>[preview.main,...preview.extras,...careLabels,...detail.parts.files,...(detail.parts.video?[detail.parts.video.file]:[])];
                 const assets=await measure('uploadFiles',async()=>{
                   if(!retry)await verifySources(p,folder);
                   const careLabels=run.assets?.careLabels??await prepareCareLabelImages(p,folder,{dataRoot});
-                  const files=[preview.main,...preview.extras,...careLabels,...detail.parts.files,...(detail.parts.video?[detail.parts.video.file]:[])];
-                  const assetStamp=await smartstoreAssetStamp(files);
+                  const assetStamp=await smartstoreAssetStamp(uploadFiles(careLabels));
                   if(run.assetStamp&&run.assetStamp!==assetStamp)throw changedSmartstoreSource();
                   run.assetStamp=assetStamp;return (run.assets={main:preview.main,extras:preview.extras,careLabels});
                 });
-                return smartBot.uploadPrepared(p,folder,{...assets,detailParts:detail.parts,preserveTags:true,measure,run,checkCurrent});
+                return smartBot.uploadPrepared(p,folder,{...assets,detailParts:detail.parts,preserveTags:true,measure,run,checkCurrent,verifyRetry:async()=>{
+                  await verifySources(p,folder);
+                  if(run.assetStamp!==await smartstoreAssetStamp(uploadFiles(assets.careLabels)))throw changedSmartstoreSource();
+                }});
               }
             });
             checkCurrent();

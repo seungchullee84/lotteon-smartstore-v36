@@ -6,6 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {runSmartstoreAuto} from '../smartstore-auto.mjs';
 import {SmartstoreAutomation} from '../smartstore-automation.mjs';
+import {createSmartstoreRecovery} from '../smartstore-upload-recovery.mjs';
 import {fillSmartstoreOptions,applySmartstoreBulkStock,readSmartstoreOptionRows,verifySmartstoreOptions,uploadSmartstoreImageSlot} from '../smartstore-form.mjs';
 
 const product={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=fixture',
@@ -141,4 +142,90 @@ test('업로드 응답 오류 후 같은 이름의 첨부가 확인되면 재첨
   await assert.rejects(uploadSmartstoreImageSlot(page,'representImage',['expected.jpg'],{replaceImages:true,receipt}),/중복 첨부/);
   assert.equal(await page.evaluate(()=>window.deleted),undefined);
  }finally{await browser.close();}
+});
+
+const uiTimeout=()=>Object.assign(Error('모의 일시 지연'),{name:'TimeoutError'});
+test('일시 지연만 자동 재시도하며, 같은 구간은 한 번만 재시도하고 화면이 바뀌면 재입력하지 않는다',async()=>{
+ let calls=0;
+ const recover=createSmartstoreRecovery({check:()=>{},verify:async()=>{},limit:2});
+ const alwaysLate=async()=>{calls++;throw uiTimeout();};
+ await assert.rejects(recover('basic',alwaysLate),/일시 지연/);assert.equal(calls,2);
+ await assert.rejects(recover('options',alwaysLate),/일시 지연/);assert.equal(calls,4);
+ await assert.rejects(recover('mainImage',alwaysLate),/일시 지연/);assert.equal(calls,5);
+ const guarded=createSmartstoreRecovery({check:()=>{},verify:async()=>{throw Error('다른 판매자 화면');}});
+ await assert.rejects(guarded('extraImages',alwaysLate),/다른 판매자 화면/);assert.equal(calls,6);
+ await assert.rejects(guarded('extraImages',async()=>{throw Error('다른 품번');}),/다른 품번/);
+});
+
+test('옵션명 표기의 공백이 달라도 읽고, 이미 요청한 옵션 조합이 불명확하면 새로 생성하지 않는다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const page=await browser.newPage(),plan={...product,expectedOptions:4,stockPerOption:10};
+  await page.setContent(fixture().replace('직접 입력하기','직접입력하기'));
+  assert.equal(await fillSmartstoreOptions(page,plan),4);
+  await page.locator('[col-id=optionName1]').first().evaluate(n=>n.textContent='다른 조합');
+  await assert.rejects(fillSmartstoreOptions(page,plan,{receipt:{listRequested:true}}),/중복 생성하지 않았습니다/);
+  assert.deepEqual(await page.evaluate(()=>[window.bulk,window.rebuild]),[0,0]);
+ }finally{await browser.close();}
+});
+
+test('이미지 등록 버튼의 직접 선택기와 응답 없는 내 사진 창의 해당 파일 입력란을 모두 처리한다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-chooser-')),file=path.join(root,'expected.jpg');
+ const browser=await chromium.launch({headless:true});
+ try{
+  await writeFile(file,'fixture');
+  const page=await browser.newPage();await page.route('**/*',route=>route.fulfill({body:''}));
+  for(const mode of ['direct','scoped-input']){
+   await page.setContent(fixture()+'<input hidden type="file" accept="image/*" onchange="window.otherInput=true">');
+   await page.evaluate(mode=>{
+    if(mode==='direct')document.querySelector('#representImage button').onclick=()=>{
+     window.slot=document.querySelector('#representImage');document.querySelector('#chosen').click();
+    };
+    else document.querySelector('[role="dialog"] button').onclick=()=>{};
+   },mode);
+   const logs=[];
+   await uploadSmartstoreImageSlot(page,'representImage',[file],{replaceImages:true,receipt:{},log:x=>logs.push(x)});
+   assert.deepEqual(await page.evaluate(()=>window.files),['expected.jpg']);
+   assert.equal(await page.evaluate(()=>window.otherInput),undefined);
+   assert.equal(await page.locator('#optionalImages img').count(),0);
+   assert.equal(logs.some(s=>s.includes('파일 입력란 사용')),mode==='scoped-input');
+  }
+ }finally{await browser.close();await unlink(file).catch(()=>{});await rmdir(root);}
+});
+
+test('한 번 시작하면 상품명 입력 지연과 상세 첨부 확인 지연을 스스로 복구하고 파일은 한 번만 보낸다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-auto-retry-')),files=['main.jpg','extra.jpg','detail-1.png','detail-2.png'].map(name=>path.join(root,name));
+ const browser=await chromium.launch({headless:true});
+ try{
+  await Promise.all(files.map(file=>writeFile(file,'fixture file')));
+  const context=await browser.newContext();
+  await context.route('**/*',route=>route.fulfill({contentType:'text/html; charset=utf-8',body:route.request().url().includes('one-fixture')?editorHtml:fixture()}));
+  const page=await context.newPage();await page.goto('https://sell.smartstore.naver.com/#/products/copy/42');
+  const logs=[],bot=new SmartstoreAutomation(root,x=>logs.push(x)),run={};
+  bot.context=context;bot.connectChrome=async()=>{};await bot.preflight(product,{run});
+  await page.locator('input[name="product.name"]').evaluate(n=>n.disabled=true);
+  page.setDefaultTimeout(400);
+  let verified=0;
+  const result=await bot.uploadPrepared(product,root,{main:files[0],extras:[files[1]],detailParts:{files:files.slice(2),includeVideo:false},preserveTags:true,run,
+   verifyRetry:async()=>{verified++;await page.locator('input[name="product.name"]').evaluate(n=>n.disabled=false);},
+   measure:async(name,fn)=>{
+    if(name==='detailImage1'){
+     const editor=run.editor.binding.page,wait=editor.waitForFunction.bind(editor);
+     editor.waitForFunction=async(predicate,arg,options)=>{
+      const outcome=await wait(predicate,arg,options);
+      if(arg?.name==='detail-1.png'){editor.waitForFunction=wait;throw uiTimeout();}
+      return outcome;
+     };
+    }
+    return fn();
+   }});
+  assert.equal(verified,2);assert.equal(result.editorPrepared,true);assert.equal(result.editorApplied,false);
+  assert.deepEqual(await page.evaluate(()=>[window.files,window.saved,window.rebuild]),[['main.jpg','extra.jpg'],0,0]);
+  assert.deepEqual(await run.editor.binding.page.evaluate(()=>[window.files,window.applied]),[['detail-1.png','detail-2.png'],0]);
+  assert(logs.some(s=>s.includes('상품명·가격 자동 복구 완료')));
+  assert(logs.some(s=>s.includes('상세이미지 1장째 자동 복구 완료')));
+  run.formBinding.dispose();run.editor.binding.dispose();
+ }finally{
+  await browser.close();await Promise.all([...files,path.join(root,'smartstore-auto-result.json')].map(file=>unlink(file).catch(()=>{})));await rmdir(root);
+ }
 });

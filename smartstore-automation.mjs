@@ -8,7 +8,7 @@ import path from 'node:path';
 import {researchForProduct} from './apparel-tag-research.mjs';
 import {selectedProductTagResearch} from './smartstore-tag-selection.mjs';
 import {fillResearchTags} from './smartstore-research-tags.mjs';
-import {bindSmartstoreDraft} from './smartstore-upload-recovery.mjs';
+import {bindSmartstoreDraft,createSmartstoreRecovery} from './smartstore-upload-recovery.mjs';
 export const SMARTSTORE_HOME='https://sell.smartstore.naver.com/';
 import {uploadSmartstoreDetail} from './smartstore-detail-upload.mjs';
 import {readExistingPhotos,readIsolatedPhotoSource} from './smartstore-photo-import.mjs';
@@ -62,19 +62,36 @@ export class SmartstoreAutomation extends BrowserAutomation{
     await this.bindCopyForm(product);
     const notice=this.page.locator('.modal-content').filter({hasText:'판매상품이 안전기준 준수 대상'});
     if(await notice.isVisible())await notice.getByRole('button',{name:'확인',exact:true}).click();
-    try{await this.page.locator('input[name="product.name"]').waitFor({state:'visible',timeout:10000});}catch{throw Error('전용 크롬에서 스마트스토어 로그인 후 수정 또는 복사등록 화면을 열어 주세요.');}
+    const form=this.page,formUrl=form.url(),title=form.locator('input[name="product.name"]');
+    const notReady=()=>Error('전용 크롬에서 스마트스토어 로그인 후 수정 또는 복사등록 화면을 열어 주세요.');
+    try{await title.waitFor({state:'visible',timeout:10000});}
+    catch(error){
+      this.check();
+      if(error.name!=='TimeoutError'||form.isClosed()||form.url()!==formUrl||!isSmartstoreInputUrl(formUrl))throw notReady();
+      this.log('상품 입력 화면 표시 지연 · 같은 탭을 한 번 더 확인');
+      await title.waitFor({state:'visible',timeout:4000}).catch(()=>{this.check();throw notReady();});
+      if(form.url()!==formUrl)throw notReady();
+    }
     if(!isSmartstoreInputUrl(this.page.url()))throw Error('수정 또는 복사등록 화면에서 실행해 주세요.');
     this.log('대상 화면 확인 · '+this.copyFormUrl+' · '+await this.page.locator('input[name="product.name"]').inputValue());
     const options=await this.page.locator('#choice_option_name0, #choice_option_name1').evaluateAll(inputs=>Object.fromEntries(inputs.map(input=>[input.id,input.value])));
     this.log('기존 반영 상태 · 대표 '+await this.page.locator('ncp-product-temp-photo-infra-image-upload#representImage img').count()+'장 · 추가 '+await this.page.locator('ncp-product-temp-photo-infra-image-upload#optionalImages img').count()+'장 · 옵션 '+(options.choice_option_name0||'')+' / '+(options.choice_option_name1||''));
     if(run)run.formBinding=await bindSmartstoreDraft(this.page,'input[name="product.name"]');
   }
-  async uploadPrepared(p,folder,{main,extras,detailParts,careLabels=[],preserveTags=false,run,measure=(_,fn)=>fn(),checkCurrent=()=>{}}){
+  async uploadPrepared(p,folder,{main,extras,detailParts,careLabels=[],preserveTags=false,run,measure=(_,fn)=>fn(),checkCurrent=()=>{},verifyRetry=async()=>{}}){
     this.check();if(this.boundProductStyle&&this.boundProductStyle!==p.style)throw Error('전체 입력할 품번이 변경되었습니다.');
     const plan={...smartstorePlan(p,p.consumerPrice),tagResearch:preserveTags?undefined:selectedProductTagResearch(p,{dataRoot:this.root})};
     const page=this.page,url=this.copyFormUrl;
     const check=()=>{this.check();checkCurrent();run?.formBinding?.check();if(!page||page.isClosed()||page.url()!==url||!isSmartstoreInputUrl(url))throw Error('등록 화면이 변경되어 업로드를 중단했습니다.');};
-    const stage=(name,fn)=>measure(name,async()=>{check();await run?.formBinding?.verify();return fn();});
+    const recover=run?.formBinding?createSmartstoreRecovery({check,log:this.log,verify:async()=>{
+      await run.formBinding.verify();
+      await run.editor?.binding?.verify();
+      await verifyRetry();
+    }}):(_,fn)=>fn();
+    const stage=(name,fn)=>measure(name,async()=>{
+      check();await run?.formBinding?.verify();
+      return recover(name,fn);
+    });
     check();
     const report=await fillSmartstore({playwright:page,url:()=>page.url()},plan,{main,extras,careLabels,replaceImages:true,detail:true,preserveTags},this.log,check,{measure:stage,resume:run?(run.form||={}):undefined});
     check();const detail=await uploadSmartstoreDetail(page,detailParts,{check,log:this.log,mode:this.formMode||'copy',measure:stage,resume:run?(run.editor||={}):undefined});
