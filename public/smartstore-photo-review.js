@@ -8,7 +8,7 @@
   <div class="photo-review-actions"><button type="button" id="manualPhotoReviewApply">사진 반영</button><button type="button" class="secondary" id="manualPhotoReviewClose">닫기</button></div>
   <p id="manualPhotoSelectionStatus" role="status"></p>
  </div><div class="photo-review-body">
-  <p class="photo-order-guide">사진을 끌어 순서를 바꾸세요. 1번 정면 · 2번 옆면 · 3번부터 디테일</p>
+  <p class="photo-order-guide">색상을 바꿔도 사진 위치는 유지돼요. 같은 색상끼리 끌어 순서를 바꾸세요. 1번 정면 · 2번 옆면 · 3번부터 디테일</p>
   <div id="manualPhotoReviewLegend" aria-label="상품 색상 구분"></div>
   <div id="manualPhotoReviewGrid"></div>
   <p id="manualPhotoReviewMessage" role="status"></p>
@@ -46,30 +46,33 @@
   const old=node.querySelector(':scope > .photo-official-chip');if(old)old.remove();
   if(!node.dataset.photoId&&chip?.image&&/^data:image\/jpeg;base64,/.test(chip.image)){const image=document.createElement('img');image.className='photo-official-chip';image.src=chip.image;image.alt=color+' 공식 색상칩';image.draggable=false;node.prepend(image);}
  }
- function arrangeByRole(card){const key=dragGroup(card);if(!key){groupPhotos();return;}const members=[...grid.querySelectorAll(':scope > [data-photo-id]')].filter(c=>dragGroup(c)===key),slots=members.map(c=>Number(c.dataset.originalOrder)).sort((a,b)=>a-b),ranks=['front','side','back','detail'];members.sort((a,b)=>ranks.indexOf(a.querySelector('[data-field=role]').value)-ranks.indexOf(b.querySelector('[data-field=role]').value)||Number(a.dataset.originalOrder)-Number(b.dataset.originalOrder));members.forEach((c,index)=>c.dataset.originalOrder=String(slots[index]));groupPhotos();}
- function groupPhotos(){
+ // Keep every card mounted in its chosen slot. Color edits only change labels/counts.
+ function groupPhotos({initial=false}={}){
   if(!current)return;
   const cards=[...grid.querySelectorAll(':scope > [data-photo-id]')];
-  const group=card=>{const role=card.querySelector('[data-field=role]').value,color=card.querySelector('[data-field=color]').value,index=current.colors.indexOf(color);return role==='excluded'?current.colors.length+2:role==='care-label'?current.colors.length+1:index<0?current.colors.length:index;};
-  cards.sort((a,b)=>group(a)-group(b)||Number(a.dataset.originalOrder)-Number(b.dataset.originalOrder));
-  grid.querySelectorAll('.photo-group-heading').forEach(e=>e.remove());
-  for(let index=0;index<current.colors.length+3;index++){const members=cards.filter(c=>group(c)===index);if(index>=current.colors.length&&!members.length)continue;const heading=document.createElement('h3');heading.className='photo-group-heading';heading.classList.toggle('photo-group-empty',!members.length);heading.textContent=(current.colors[index]||(['색상 선택 필요','케어라벨','사용 안 함'][index-current.colors.length]))+' · '+(members.length?members.length+'장':'0장 · 사진 없음');decorateColor(heading,index<current.colors.length?index:-1);grid.append(heading);for(const card of members)grid.append(card);}
+  if(initial){
+   const rank=card=>{const role=card.querySelector('[data-field=role]').value,color=card.querySelector('[data-field=color]').value,index=current.colors.indexOf(color);return role==='excluded'?current.colors.length+2:role==='care-label'?current.colors.length+1:index<0?current.colors.length:index;};
+   cards.sort((a,b)=>rank(a)-rank(b)||Number(a.dataset.originalOrder)-Number(b.dataset.originalOrder));
+   const fragment=document.createDocumentFragment();for(const card of cards)fragment.append(card);grid.append(fragment);
+  }
   assignOrderedRoles();
+  const counts=new Map();for(const card of cards){const color=dragGroup(card);if(color)counts.set(color,(counts.get(color)||0)+1);}
+  for(const badge of dialog.querySelectorAll('#manualPhotoReviewLegend [data-color]')){const count=counts.get(badge.dataset.color)||0,label=count+'장'+(count?'':' · 사진 없음'),node=badge.querySelector('.photo-color-count');if(node.textContent!==label)node.textContent=label;}
  }
  const channel=()=>document.body.dataset.channel||document.querySelector('[data-channel].active')?.dataset.channel;
  function isSmartstore(){return typeof activeChannel==='function'?activeChannel()==='smartstore':channel()==='smartstore';}
  function sync(){button.hidden=!isSmartstore();if(!isSmartstore()&&dialog.open)dialog.close();}
  let openAfterCollect=false;document.addEventListener('register-state',event=>{const state=event.detail;if(!isSmartstore())return;if(state.phase==='collect'&&state.busy)openAfterCollect=true;if(openAfterCollect&&!state.busy){openAfterCollect=false;if(state.phase==='done'&&state.productStyle&&!dialog.open)button.click();}});const styleInput=document.getElementById('style');styleInput?.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.isComposing&&isSmartstore()){event.preventDefault();event.stopImmediatePropagation();document.getElementById('collect')?.click();}},true);
- let automaticStamp='';document.addEventListener('register-state',async event=>{const status=event.detail?.photoColorDraft;if(!dialog.open||loading||!current||status?.style!==current.style)return;if(['running','needs-review'].includes(status.status)){if(!draftTimer)selectionStatus.textContent=status.message;return;}if(status.status!=='ready'||automaticStamp===status.updatedAt)return;automaticStamp=status.updatedAt;try{const r=await fetch('/api/smartstore-photo-review?channel=smartstore&style='+current.style),data=await r.json();if(!r.ok||data.revision!==current.revision)return;let changed=false;const cardsById=new Map([...grid.querySelectorAll(':scope > [data-photo-id]')].map(card=>[card.dataset.photoId,card]));for(const item of data.items){const card=cardsById.get(item.id);if(!card)continue;const color=card.querySelector('[data-field=color]'),role=card.querySelector('[data-field=role]');if(card.dataset.colorOverride!=='true'&&!color.value&&item.color){color.value=item.color;changed=true;}if(card.dataset.roleOverride!=='true'&&item.role==='care-label'&&!['care-label','excluded'].includes(role.value)){role.value=item.role||'detail';changed=true;}card.refreshPhotoView?.();}if(changed){const top=dialog.scrollTop;groupPhotos();dialog.scrollTop=top;}selectionStatus.textContent=status.message;}catch{}});
+ let automaticStamp='';document.addEventListener('register-state',async event=>{const status=event.detail?.photoColorDraft;if(!dialog.open||loading||!current||status?.style!==current.style)return;if(['running','needs-review'].includes(status.status)){if(!draftTimer)selectionStatus.textContent=status.message;return;}if(status.status!=='ready'||automaticStamp===status.updatedAt)return;automaticStamp=status.updatedAt;const requested=current;try{const r=await fetch('/api/smartstore-photo-review?channel=smartstore&style='+current.style),data=await r.json();if(!r.ok||!dialog.open||current!==requested||data.revision!==current.revision)return;let changed=false;const cardsById=new Map([...grid.querySelectorAll(':scope > [data-photo-id]')].map(card=>[card.dataset.photoId,card]));for(const item of data.items){const card=cardsById.get(item.id);if(!card)continue;let cardChanged=false;const color=card.querySelector('[data-field=color]'),role=card.querySelector('[data-field=role]');if(card.dataset.colorOverride!=='true'&&!color.value&&item.color){color.value=item.color;changed=cardChanged=true;}if(card.dataset.roleOverride!=='true'&&item.role==='care-label'&&!['care-label','excluded'].includes(role.value)){role.value=item.role||'detail';changed=cardChanged=true;}if(cardChanged)card.refreshPhotoView?.();}if(changed){const top=dialog.scrollTop;groupPhotos();dialog.scrollTop=top;}selectionStatus.textContent=status.message;}catch{}});
  new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['data-channel','class']});document.addEventListener('register-state',sync);sync();
  dialog.querySelector('#manualPhotoReviewClose').onclick=()=>dialog.close();
  button.onclick=async()=>{
   if(loading||dialog.open||!isSmartstore())return;loading=true;button.disabled=true;dialog.dataset.keepPhotoOrder='false';message.textContent='사진 목록을 불러오는 중…';selectionStatus.textContent='사진 목록을 불러오는 중…';grid.replaceChildren();apply.disabled=true;dialog.showModal();
   try{const state=await(await fetch('/api/state?channel=smartstore')).json();if(state.busy)throw Error('현재 작업이 끝난 뒤 열어 주세요.');if(!state.product)throw Error('상품을 먼저 수집해 주세요.');const r=await fetch('/api/smartstore-photo-review?channel=smartstore&style='+encodeURIComponent(state.product.style));const data=await r.json();if(!r.ok)throw Error(data.error);current=data;loadPointChoices(data.style);let localSelection=null;try{localSelection=JSON.parse(localStorage.getItem('smartstore.photo-selection.v1.'+data.style));}catch{}const restoreLocal=localSelection?.sourceUrl===data.sourceUrl&&localSelection.revision===data.revision&&Date.parse(localSelection.savedAt)>Date.parse(data.selectionSavedAt||'1970-01-01');if(restoreLocal&&localSelection.mainId&&data.items.some(i=>i.id===localSelection.mainId)){data.mainId=localSelection.mainId;for(const i of data.items)i.main=i.id===data.mainId;}if(restoreLocal)for(const item of data.items){const saved=localSelection.items?.find(i=>i.id===item.id);if(saved){if(saved.color||saved.colorOverride)item.color=saved.color;if(saved.role){item.role=saved.role;item.roleDefaulted=false;}item.colorOverride=!!saved.colorOverride;}}selectionStatus.textContent=restoreLocal?'브라우저에 보관한 선택을 복원했습니다.':data.selectionSavedAt?'✓ 저장한 선택을 불러왔습니다.':'선택은 자동 저장됩니다. 확인 후 사진 반영을 눌러 주세요.';
    if(restoreLocal){const order=new Map(localSelection.items.map((item,index)=>[item.id,index]));data.items.sort((a,b)=>(order.get(a.id)??Infinity)-(order.get(b.id)??Infinity));}
-   const legend=dialog.querySelector('#manualPhotoReviewLegend');legend.replaceChildren();for(const [index,c] of data.colors.entries()){const badge=document.createElement('span');badge.className='photo-color-badge';badge.textContent=c;decorateColor(badge,index);legend.append(badge);}
+   const legend=dialog.querySelector('#manualPhotoReviewLegend');legend.replaceChildren();for(const [index,c] of data.colors.entries()){const badge=document.createElement('span');badge.className='photo-color-badge';badge.dataset.color=c;badge.textContent=c;decorateColor(badge,index);const count=document.createElement('small');count.className='photo-color-count';badge.append(count);legend.append(badge);}
    dialog.querySelector('#manualPhotoReviewSummary').textContent=data.style+' · '+data.items.length+'장';
-   for(const item of data.items){
+   const cardFragment=document.createDocumentFragment();for(const item of data.items){
     const card=document.createElement('div');
     card.className='photo-review-card';
     card.dataset.photoId=item.id;
@@ -127,7 +130,7 @@
     const colorLabel=document.createElement('label');colorLabel.append(document.createTextNode('색상'),color);
     const roleLabel=document.createElement('label');roleLabel.append(document.createTextNode('구도·사용'),role);
     fields.append(colorLabel,roleLabel);
-    card.append(cardTop,img,fields,name);grid.append(card);
+    card.append(cardTop,img,fields,name);cardFragment.append(card);
    }
    groupPhotos();
    message.textContent='확인 필요 '+data.items.filter(i=>!i.role||(!['care-label','excluded'].includes(i.role)&&!data.colors.includes(i.color))).length+'장';apply.disabled=!data.items.length;if(restoreLocal)rememberSelection();
