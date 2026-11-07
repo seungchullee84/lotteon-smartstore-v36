@@ -11,7 +11,7 @@ export function fitGuideSection(product,photo){
  const products=guide.products,current=p=>p.style===product.style;
  const label=p=>`<span class="fit-guide-code">${esc(p.style)}</span><h3>${esc(p.fit)}</h3>`;
  const marker=p=>current(p)?'<span class="fit-guide-current">지금 보고 있는 상품</span>':'<span class="fit-guide-alternative">함께 비교하는 핏</span>';
- const cards=role=>products.map((p,index)=>`<article class="fit-guide-card fit-guide-tone-${index}" data-comparison-style="${esc(p.style)}"${current(p)?' data-current-product':''}><header>${marker(p)}${label(p)}</header><figure>${photo(p[role],`${p.style} ${p.color} ${role==='front'?'정면':'측면'} 매장 촬영사진`)}</figure>${role==='front'?'<p class="fit-guide-description">'+esc(p.description)+'</p>':''}</article>`).join('');
+ const cards=role=>products.map((p,index)=>`<article class="fit-guide-card fit-guide-tone-${index}" data-comparison-style="${esc(p.style)}"${current(p)?' data-current-product':''}><header>${role==='front'?marker(p):''}${label(p)}</header><figure>${photo(p[role],`${p.style} ${p.color} ${role==='front'?'정면':'측면'} 매장 촬영사진`)}</figure>${role==='front'?'<p class="fit-guide-description">'+esc(p.description)+'</p>':''}</article>`).join('');
  return `<style>${fitGuideCss}</style><section class="fit-guide" data-fit-guide data-guide-style="${esc(product.style)}">
  <div class="fit-guide-comparison" data-fit-comparison>
   <p class="fit-guide-eyebrow">FIT COMPARISON</p>
