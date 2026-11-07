@@ -12,6 +12,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 import {createHash} from 'node:crypto';
 import {STORE_BANNER_URL} from './smartstore-store-banner.mjs';
+import {normalizeSmartstoreProductLink} from './smartstore-product-link.mjs';
 import {isSmartstoreDetailEditUrl} from './smartstore-detail-only.mjs';
 import {bindSmartstoreDraft} from './smartstore-upload-recovery.mjs';
 export async function waitForSmartstoreEditorInput(editor,{check=()=>{}}={}){
@@ -81,7 +82,18 @@ export async function openSmartstoreEditor(page,{check=()=>{}}={}){
  const [editor]=await Promise.all([page.waitForEvent('popup',{timeout:45000}),input.click({timeout:30000})]);
  await editor.bringToFront();return editor;
 }
-export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,partsCacheRoot,log=()=>{},videoOptions,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,signal}={}){
+function validateFitPhotoSections(sections,height,boundaries){
+ if(!sections.length)return;
+ const invalid=()=>Error('비교 사진의 품번·구간·구매 주소가 일치하지 않습니다. 상세 편집기를 변경하지 않았습니다.');
+ if(sections.length!==3||sections.filter(s=>s?.current===true).length!==1||new Set(sections.map(s=>s?.style)).size!==3)throw invalid();
+ for(const [i,s] of sections.entries()){
+  if(!s||!/^[0-9]{6}$/.test(s.style)||typeof s.current!=='boolean'||!Number.isInteger(s.top)||!Number.isInteger(s.bottom)||s.top<=0||s.bottom<=s.top||s.bottom>=height||(i>0&&s.top!==sections[i-1].bottom)||boundaries.some(y=>s.top<y&&y<s.bottom))throw invalid();
+  if(s.url&&(s.current||normalizeSmartstoreProductLink(s.url)!==s.url))throw invalid();
+ }
+ const urls=sections.map(s=>s.url).filter(Boolean);
+ if(!urls.length||new Set(urls).size!==urls.length)throw invalid();
+}
+export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=true,dataRoot,partsCacheRoot,log=()=>{},videoOptions,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,fitPhotoSections=[],signal}={}){
  signal?.throwIfAborted();
  const video=includeVideo?await requireBrandVideo(dataRoot,videoOptions):null;
  const meta=await sharp(png,{limitInputPixels:false}).metadata();
@@ -94,11 +106,13 @@ export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=t
  // Content-addressed sections survive a new collection/output folder. The full
  // PNG and section boundaries still determine the key; every hit is hashed.
  const dest=partsCacheRoot||path.join(folder,'smartstore-upload');await mkdir(dest,{recursive:true});
- const boundaries=[...new Set([0,firstHeight,officialTop,bannerTop,footerTop,meta.height].filter(Number.isInteger))].sort((a,b)=>a-b);
- const digest=createHash('sha256').update(await readFile(png)).update(JSON.stringify({rule:'semantic-sections-aida-3',boundaries})).digest('hex').slice(0,16);
+ const semanticBounds=[0,firstHeight,officialTop,bannerTop,footerTop,meta.height].filter(Number.isInteger);
+ validateFitPhotoSections(fitPhotoSections,meta.height,semanticBounds);
+ const boundaries=[...new Set([...semanticBounds,...fitPhotoSections.flatMap(s=>[s.top,s.bottom])])].sort((a,b)=>a-b);
+ const digest=createHash('sha256').update(await readFile(png)).update(JSON.stringify({rule:'semantic-sections-aida-3',boundaries,...(fitPhotoSections.length?{fitPhotoSections}:{})})).digest('hex').slice(0,16);
  const cacheFile=path.join(dest,digest+'-parts.json');
  let cached;try{cached=JSON.parse(await readFile(cacheFile,'utf8'));}catch{}
- const parts=[];let bannerLink=null,footerIndex,reusedCount=0;const records=[];
+ const parts=[],fitPhotoLinks=[];let bannerLink=null,footerIndex,reusedCount=0;const records=[];
  for(let index=0;index<boundaries.length-1;index++){
   signal?.throwIfAborted();
   const top=boundaries[index],height=boundaries[index+1]-top;
@@ -118,10 +132,12 @@ export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=t
   if(!reused)await writeFile(file,bytes);else reusedCount++;parts.push(file);
   if(footer)footerIndex=index;
   if(banner)bannerLink={index,file,url:STORE_BANNER_URL};
+  const comparison=fitPhotoSections.find(s=>s.top===top&&s.bottom===top+height);
+  if(comparison?.url)fitPhotoLinks.push({style:comparison.style,index,file,url:comparison.url});
  }
  await writeFile(cacheFile,JSON.stringify({files:records}));
  log('업로드용 상세 '+parts.length+'장 준비 · 원본 일치 재사용 '+reusedCount+'장');
- return {files:parts,reusedCount,bannerLink,footerIndex,videoAfterIndex:boundaries.indexOf(firstHeight)-1,video:video?{file:video.file,sha256:video.sha256}:null,includeVideo,dataRoot,videoOptions,hash:digest};
+ return {files:parts,reusedCount,bannerLink,fitPhotoLinks,footerIndex,videoAfterIndex:boundaries.indexOf(firstHeight)-1,video:video?{file:video.file,sha256:video.sha256}:null,includeVideo,dataRoot,videoOptions,hash:digest};
 }
 export async function applySmartstoreBannerLink(editor,parts,{check=()=>{},log=()=>{}}={}){
  const link=parts.bannerLink;if(!link)return;
