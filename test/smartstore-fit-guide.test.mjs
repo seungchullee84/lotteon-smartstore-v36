@@ -63,7 +63,7 @@ test('미리보기 정면 두 비교 상품만 확인한 구매 태그를 표시
  assert.equal(guide.find('a').length,2);assert.equal(guide.find('[data-comparison-style="116955"] a').length,0);assert.equal(side.find('a,button').length,0);
  assert.deepEqual(side.find('img').toArray().map(node=>$(node).attr('src')),p.smartstoreDetail.fitGuide.products.map(item=>item.side));
  const notice=guide.find('[data-product-tag-notice]'),normalized=purchaseNotice.replace(/\s+/g,'');
- assert.equal(notice.length,1);assert.equal(notice.text().replace(/\s+/g,''),normalized);assert.equal(guide.text().replace(/\s+/g,'').split(normalized).length-1,1);assert.equal(side.find('[data-product-tag-notice]').length,0);
+ assert.equal(notice.length,1);const noticeCopy=notice.clone();noticeCopy.find('[aria-hidden="true"]').remove();assert.equal(noticeCopy.text().replace(/\s+/g,''),normalized);assert.equal(guide.text().replace(/\s+/g,'').split(normalized).length-1,1);assert.equal(side.find('[data-product-tag-notice]').length,0);
  assert(guide.html().indexOf('data-product-tag-notice')<guide.html().indexOf('fit-guide-sides'));
 });
 
