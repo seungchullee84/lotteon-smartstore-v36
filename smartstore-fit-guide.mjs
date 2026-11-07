@@ -1,17 +1,25 @@
 import {resolveDetailTemplate} from './smartstore-template-choice.mjs';
+import {normalizeSmartstoreProductLink} from './smartstore-product-link.mjs';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const measurements=['허리둘레','엉덩이둘레','허벅지둘레','밑단둘레','앞밑위','안쪽 바지길이','총기장'];
 
 // The prepared pack is local to this product and selected template. These
 // comparison images must never become current-product color/photo selections.
-export function fitGuideSection(product,photo){
+export function fitGuideSection(product,photo,{interactiveProductTags=true}={}){
  const guide=product.smartstoreDetail?.fitGuide;
  if(!guide||guide.style!==product.style||guide.detailTemplate!==resolveDetailTemplate(product.detailTemplate))return '';
  const products=guide.products,current=p=>p.style===product.style;
+ const links=new Map();
+ for(const p of products){
+  if(current(p)||!p.purchaseLink)continue;
+  if(p.purchaseLink.style!==p.style||p.purchaseLink.source!=='user')throw Error('상품 태그의 연결 품번을 확인해 주세요.');
+  links.set(p.style,normalizeSmartstoreProductLink(p.purchaseLink.url));
+ }
+ const tag=p=>interactiveProductTags&&links.has(p.style)?`<a class="fit-guide-product-tag" data-product-tag="${esc(p.style)}" href="${esc(links.get(p.style))}" target="_blank" rel="noopener noreferrer" aria-label="${esc(p.fit)} ${esc(p.style)} 상품 태그 · 구매 페이지로 이동"><span aria-hidden="true">＋</span>${esc(p.fit)} 상품 보기 <span aria-hidden="true">↗</span></a>`:'';
  const label=p=>`<span class="fit-guide-code">${esc(p.style)}</span><h3>${esc(p.fit)}</h3>`;
  const marker=p=>current(p)?'<span class="fit-guide-current">지금 보고 있는 상품</span>':'<span class="fit-guide-alternative">함께 비교하는 핏</span>';
- const cards=role=>products.map((p,index)=>`<article class="fit-guide-card fit-guide-tone-${index}" data-comparison-style="${esc(p.style)}"${current(p)?' data-current-product':''}><header>${role==='front'?marker(p):''}${label(p)}</header><figure>${photo(p[role],`${p.style} ${p.color} ${role==='front'?'정면':'측면'} 매장 촬영사진`)}</figure>${role==='front'?'<p class="fit-guide-description">'+esc(p.description)+'</p>':''}</article>`).join('');
+ const cards=role=>products.map((p,index)=>`<article class="fit-guide-card fit-guide-tone-${index}" data-comparison-style="${esc(p.style)}"${current(p)?' data-current-product':''}><header>${role==='front'?marker(p):''}${label(p)}</header><figure>${photo(p[role],`${p.style} ${p.color} ${role==='front'?'정면':'측면'} 매장 촬영사진`)}${role==='front'?tag(p):''}</figure>${role==='front'?'<p class="fit-guide-description">'+esc(p.description)+'</p>':''}</article>`).join('');
  return `<style>${fitGuideCss}</style><section class="fit-guide" data-fit-guide data-guide-style="${esc(product.style)}">
  <div class="fit-guide-comparison" data-fit-comparison>
   <p class="fit-guide-eyebrow">FIT COMPARISON</p>
@@ -19,6 +27,7 @@ export function fitGuideSection(product,photo){
   <p class="fit-guide-lead">밑단 모양과 바지 폭을 나란히 살펴보세요.</p>
   <p class="fit-guide-photo-label">매장 마네킹 실제 착용사진 · 정면</p>
   <div class="fit-guide-grid">${cards('front')}</div>
+  ${interactiveProductTags&&links.size?'<p class="fit-guide-link-notice" data-product-tag-notice><span aria-hidden="true">↗</span> 사진 속 상품 태그를 누르면<br>해당 상품 구매 페이지로 이동해요.</p>':''}
   <p class="fit-guide-note">촬영 거리와 구도가 달라 사진 속 크기는 실측 비율과 다를 수 있어요.</p>
   <p class="fit-guide-photo-label fit-guide-side-label">옆모습도 함께 비교해요.</p>
   <div class="fit-guide-grid fit-guide-sides">${cards('side')}</div>
@@ -55,7 +64,10 @@ export const fitGuideCss=`
 .fit-guide-current{color:#fff;background:#52634e;border-radius:20px;padding:3px 7px;width:max-content;max-width:100%;margin-left:auto;margin-right:auto}
 .fit-guide-code{display:block;font:500 20px/1.5 Arial,sans-serif;letter-spacing:2px}
 .fit-guide-card h3{font-size:25px;line-height:1.6;margin:2px 0 0;font-weight:700}
-.fit-guide-card figure{margin:0;background:#fff}.fit-guide-card img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:contain}
+.fit-guide-card figure{margin:0;background:#fff;position:relative}.fit-guide-card img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:contain}
+.fit-guide-product-tag{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:5px;align-items:center;justify-content:center;max-width:calc(100% - 12px);width:max-content;padding:9px 12px;border:1px solid #fff9;border-radius:24px;background:#263d30f0;color:#fff;text-decoration:none;font-size:15px;font-weight:700;line-height:1.5;box-shadow:0 2px 8px #0003;white-space:nowrap}
+.fit-guide-product-tag:hover{background:#182a20}.fit-guide-product-tag:focus-visible{outline:3px solid #d6a852;outline-offset:3px}
+.fit-guide .fit-guide-link-notice{margin:24px 0 0;padding:18px 14px;background:#e6eddf;border:1px solid #c9d5be;border-radius:10px;color:#294733;text-align:center;font-size:22px;font-weight:700;line-height:1.7}
 .fit-guide .fit-guide-description{padding:18px 16px;font-size:18px;line-height:1.9;margin:0}
 .fit-guide .fit-guide-note{font-size:16px;line-height:1.85;color:#677166;margin:20px 0 0}
 .fit-guide .fit-guide-side-label{margin-top:40px}.fit-guide-sides header{padding:12px 8px}.fit-guide-sides .fit-guide-current,.fit-guide-sides .fit-guide-alternative{display:none}
@@ -68,6 +80,7 @@ export const fitGuideCss=`
 .fit-guide-manager-heading{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:15px 10px;background:#e7ece3;font-size:18px;color:#52634e}
 .fit-guide-manager-row{display:grid;grid-template-columns:1fr 32px 1fr;align-items:center;padding:18px 12px;border-top:1px solid #dedfd7;font:500 30px/1.5 Arial,sans-serif}.fit-guide-manager-row>span{font-size:20px;color:#8a9386}.fit-guide-manager-row b{color:#52634e}
 @media(max-width:600px){
+ .fit-guide-product-tag{font-size:11px;padding:7px 6px;bottom:8px;gap:2px}.fit-guide .fit-guide-link-notice{font-size:16px!important;padding:14px 8px;line-height:1.8}
  .fit-guide .fit-guide-description{font-size:13px!important}.fit-guide .fit-guide-note,.fit-guide .fit-guide-eyebrow{font-size:12px!important}.fit-guide .fit-guide-table-label{font-size:13px!important}.fit-guide .fit-guide-manager-row b{font-size:25px!important}
  .fit-guide-comparison,.fit-guide-measurements,.fit-guide-manager{padding:34px 12px}.fit-guide h2{font-size:27px}.fit-guide .fit-guide-eyebrow{font-size:12px}.fit-guide .fit-guide-lead{font-size:16px;margin-bottom:20px}.fit-guide .fit-guide-photo-label{font-size:16px}
  .fit-guide-grid{gap:6px}.fit-guide-card{border-radius:8px}.fit-guide-card header{padding:10px 3px}.fit-guide-current,.fit-guide-alternative{font-size:10px;min-height:22px;letter-spacing:-.5px;margin-bottom:6px}.fit-guide-current{padding:2px 4px}.fit-guide-code{font-size:15px;letter-spacing:1px}.fit-guide-card h3{font-size:18px}.fit-guide .fit-guide-description{font-size:13px;line-height:1.8;padding:12px 8px}.fit-guide .fit-guide-note{font-size:12px}.fit-guide table{font-size:15px}.fit-guide th,.fit-guide td{padding:12px 3px}.fit-guide tbody th{font-size:13px}.fit-guide thead small{font-size:11px}.fit-guide .fit-guide-table-label{font-size:13px}.fit-guide-manager-heading{font-size:13px;gap:8px}.fit-guide-manager-row{font-size:25px;padding:14px 8px}

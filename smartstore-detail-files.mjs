@@ -235,7 +235,9 @@ export async function renderPreparedSmartstoreDetail(p,folder,output,{signal,...
  for(const [src,file] of Object.entries(p.smartstoreDetail.photoFiles)){check();data.set(src,'data:image/jpeg;base64,'+(await readFile(path.join(folder,file))).toString('base64'));}
  const imageUrl=src=>{if(!data.has(src))throw Error('현재 상품에 연결되지 않은 상세 이미지: '+src);return data.get(src);};
  const fontUrl='data:font/ttf;base64,'+(await readFile(path.join(assetsRoot,'GowunDodum-Regular.ttf'))).toString('base64');
- const document=smartstoreDetailDocument(p,{imageUrl,fontUrl,includeVideo:false,includeNavigation:false});
+ // Native ONE product tags are added by the editor, not baked into a bitmap.
+ // Keep the functional HTML preview links out of a non-interactive PNG.
+ const document=smartstoreDetailDocument(p,{imageUrl,fontUrl,includeVideo:false,includeNavigation:false,interactiveProductTags:false});
  const cacheRoot=options.renderCacheRoot||path.join(options.renderCacheBase||path.join(options.dataRoot||path.join(appRoot,'data'),'smartstore-render-cache'),'template-'+document.templateVariant);
  const cacheKey=await renderCacheKey(document.html);let height,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,photoRegions,renderCacheHit=false;
  let browser;const close=()=>browser?.close().catch(()=>{});signal?.addEventListener('abort',close,{once:true});
