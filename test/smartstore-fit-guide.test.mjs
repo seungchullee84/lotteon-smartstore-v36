@@ -9,16 +9,16 @@ function productWithGuide(){
   {style:'116956',fit:'조거',color:'02 미드헤더그레이',description:'밑단 밴딩으로 발목을 잡아줘요.',measurements:[78.7,114.3,68.6,30.5,32.4,72.1,103.5]},
   {style:'116958',fit:'와이드',color:'03 미드헤더그레이',description:'허벅지부터 밑단까지 여유 있어요.',measurements:[80,120.7,75.2,55.9,34.3,72.4,104.1]}
  ].map(p=>({...p,front:'/smartstore-photo/guide-'+p.style+'-front',side:'/smartstore-photo/guide-'+p.style+'-side',purchaseUrl:'https://smartstore.naver.com/test/products/'+p.style}));
- return {style,detailTemplate:2,name:'기모 테리 스트레이트 스웻 팬츠',rawName:'기모 테리 스트레이트 스웻 팬츠',gender:'남성',colors:['01블랙','04미드헤더그레이'],sizes:['S','M','L','XL'],images:{main:'https://www.giordano.co.kr/main.jpg',detail:'https://www.giordano.co.kr/detail.jpg',size:'https://www.giordano.co.kr/size.jpg',info:'https://www.giordano.co.kr/info.jpg'},smartstoreDetail:{style,photoCount:3,heroImage:'/smartstore-photo/current-main',acceptAllFolderPhotos:true,colorImages:{'01블랙':['/smartstore-photo/current-black'],'04미드헤더그레이':['/smartstore-photo/current-gray-front','/smartstore-photo/current-gray-side']},paletteImages:{'01블랙':'/smartstore-photo/current-black','04미드헤더그레이':'/smartstore-photo/current-gray-front'},fitGuide:{style,detailTemplate:2,products,manager:{storeName:'동탄 롯데 지오다노',source:'user',rows:[{waist:'28',size:'S'},{waist:'29~31',size:'M'},{waist:'32~33',size:'L'},{waist:'34~36',size:'XL'}]}}}};
+ return {style,detailTemplate:1,name:'기모 테리 스트레이트 스웻 팬츠',rawName:'기모 테리 스트레이트 스웻 팬츠',gender:'남성',colors:['01블랙','04미드헤더그레이'],sizes:['S','M','L','XL'],images:{main:'https://www.giordano.co.kr/main.jpg',detail:'https://www.giordano.co.kr/detail.jpg',size:'https://www.giordano.co.kr/size.jpg',info:'https://www.giordano.co.kr/info.jpg'},smartstoreDetail:{style,photoCount:3,heroImage:'/smartstore-photo/current-main',acceptAllFolderPhotos:true,colorImages:{'01블랙':['/smartstore-photo/current-black'],'04미드헤더그레이':['/smartstore-photo/current-gray-front','/smartstore-photo/current-gray-side']},paletteImages:{'01블랙':'/smartstore-photo/current-black','04미드헤더그레이':'/smartstore-photo/current-gray-front'},fitGuide:{style,detailTemplate:1,products,manager:{storeName:'동탄 롯데 지오다노',source:'user',rows:[{waist:'28',size:'S'},{waist:'29~31',size:'M'},{waist:'32~33',size:'L'},{waist:'34~36',size:'XL'}]}}}};
 }
 const currentColorImages=$=>$('section[id^="smartstore-color-"] img').toArray().map(n=>$(n).attr('src'));
 
-test('선택한 템플릿2·현재 품번에만 가이드와 현재 상품 표식 한 개를 표시한다',()=>{
+test('선택한 템플릿1·현재 품번에만 가이드와 현재 상품 표식 한 개를 표시한다',()=>{
  const p=productWithGuide(),$=load(buildSmartstoreDetail(p).html);
  assert.equal($('[data-fit-guide]').length,1);assert.equal($('[data-guide-style]').attr('data-guide-style'),p.style);
  assert.equal($('[data-fit-guide] .fit-guide-current').length,1);assert.equal(($('[data-fit-guide]').text().match(/지금 보고 있는 상품/g)||[]).length,1);
  const wrongStyle={...p,style:'123456',smartstoreDetail:{...p.smartstoreDetail,style:'123456'}};
- for(const candidate of [{...p,detailTemplate:1},wrongStyle,{...p,smartstoreDetail:{...p.smartstoreDetail,fitGuide:undefined}},{...p,smartstoreDetail:{...p.smartstoreDetail,fitGuide:{...p.smartstoreDetail.fitGuide,detailTemplate:1}}}]){
+ for(const candidate of [{...p,detailTemplate:2},wrongStyle,{...p,smartstoreDetail:{...p.smartstoreDetail,fitGuide:undefined}},{...p,smartstoreDetail:{...p.smartstoreDetail,fitGuide:{...p.smartstoreDetail.fitGuide,detailTemplate:2}}}]){
   assert.equal(load(buildSmartstoreDetail(candidate).html)('[data-fit-guide]').length,0);
  }
 });
