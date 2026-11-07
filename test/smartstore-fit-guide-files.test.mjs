@@ -93,3 +93,22 @@ test('문구 HTML과 비정상 치수·추천 행을 렌더러로 넘기지 않�
   Object.assign(f.manifest,structuredClone(original));mutate(f.manifest);await f.save();await assert.rejects(prepareFitGuide(f.product,f.folder,{dataRoot:f.dataRoot}),failure);await noServingCopies(f);
  }
 });
+
+test('사용자가 확인한 비교 상품 링크만 보존하고 현재 품번에는 링크를 붙이지 않는다',async t=>{
+ const f=await fixture(t),wide='https://shopping.naver.com/window-products/department/13857609430',jogger='https://shopping.naver.com/window-products/department/13857522426';
+ f.manifest.products[0].purchaseLink={url:'https://smartstore.naver.com/store/products/116955',style:'116955',source:'user'};
+ f.manifest.products[1].purchaseLink={url:jogger+'?NaPm=ct%3Dtest',style:'116956',source:'user'};
+ f.manifest.products[2].purchaseLink={url:wide,style:'116958',source:'user'};await f.save();
+ const result=await prepareFitGuide(f.product,f.folder,{dataRoot:f.dataRoot});
+ assert.equal('purchaseLink' in result.products[0],false);
+ assert.deepEqual(result.products[1].purchaseLink,{url:jogger,style:'116956',source:'user'});
+ assert.deepEqual(result.products[2].purchaseLink,{url:wide,style:'116958',source:'user'});
+ assert.equal(f.manifest.products[1].purchaseLink.url,jogger+'?NaPm=ct%3Dtest');
+});
+
+test('잘못된 구매주소·확인되지 않은 링크·다른 품번 링크는 복사 전에 중단한다',async t=>{
+ const f=await fixture(t);
+ for(const purchaseLink of [null,{url:'https://example.com/products/123',style:'116956',source:'user'},{url:'https://shopping.naver.com/window-products/department/123',style:'116958',source:'user'},{url:'https://shopping.naver.com/window-products/department/123',style:'116956',source:'guessed'},{url:'https://shopping.naver.com/window-products/department/123#buy',style:'116956',source:'user'}]){
+  f.manifest.products[1].purchaseLink=purchaseLink;await f.save();await assert.rejects(prepareFitGuide(f.product,f.folder,{dataRoot:f.dataRoot}),failure);await noServingCopies(f);
+ }
+});

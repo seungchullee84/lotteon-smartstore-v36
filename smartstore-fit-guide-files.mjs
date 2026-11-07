@@ -4,6 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 import {resolveDetailTemplate} from './smartstore-template-choice.mjs';
+import {normalizeSmartstoreProductLink} from './smartstore-product-link.mjs';
 
 const appRoot=path.dirname(fileURLToPath(import.meta.url));
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -75,6 +76,12 @@ export async function prepareFitGuide(product,folder,{dataRoot=path.join(appRoot
   const manager=managerRows(manifest.manager),products=[],photos=new Map();
   for(const item of manifest.products){
    const prepared={style:item.style,fit:text(item.fit,50,'핏'),color:text(item.color,80,'색상'),description:text(item.description,400,'상품 설명')};
+   // The current product is never linked back to itself, even if an older pack
+   // includes a link. Only explicit user links for a matching alternative remain.
+   if(item.purchaseLink!==undefined&&item.style!==style){
+    requireGuide(item.purchaseLink&&typeof item.purchaseLink==='object'&&!Array.isArray(item.purchaseLink)&&item.purchaseLink.style===item.style&&item.purchaseLink.source==='user','구매 링크의 사용자 확인 품번을 확인해 주세요.');
+    prepared.purchaseLink={url:normalizeSmartstoreProductLink(item.purchaseLink.url),style:item.style,source:'user'};
+   }
    requireGuide(Array.isArray(item.measurements)&&item.measurements.length===7&&item.measurements.every(n=>typeof n==='number'&&Number.isFinite(n)&&n>0&&n<=300),'공식 L 사이즈의 일곱 치수를 확인해 주세요.');
    prepared.measurements=[...item.measurements];
    prepared.official={url:officialUrl(item.official?.url)};
