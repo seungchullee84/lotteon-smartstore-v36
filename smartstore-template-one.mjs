@@ -107,7 +107,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  if(!folderPhotos.length&&lastColorGroup)shippingStart=colorSectionBackground(lastColorGroup.index);
  if(!folderPhotos.length&&!lastColorGroup&&!points.length&&!palette)shippingStart=openingBackground;
  body+=shippingPromoSection(common(STORE_SHIPPING_PROMO_ASSET,STORE_SHIPPING_PROMO_ALT),{start:shippingStart});
- body+=`<section data-official-detail data-aida="desire"><div style="padding:var(--official-detail-top,156px) 6% var(--official-detail-bottom,144px);"><div data-section-heading style="border-left:5px solid #294c3b;padding-left:18px;"><h2 style="font-size:30px;line-height:1.5;margin:0;color:#213c2e;">${OFFICIAL_DETAIL_TITLE}</h2><p style="font-size:20px;line-height:1.65;margin:6px 0 0;color:#465149;">${OFFICIAL_DETAIL_DESCRIPTION}</p></div></div>`;
+ body+=`<section data-official-detail data-aida="desire"><div style="padding:var(--official-detail-top,156px) 6% var(--official-detail-bottom,24px);"><div data-section-heading style="border-left:5px solid #294c3b;padding-left:18px;"><h2 style="font-size:30px;line-height:1.5;margin:0;color:#213c2e;">${OFFICIAL_DETAIL_TITLE}</h2><p style="font-size:20px;line-height:1.65;margin:6px 0 0;color:#465149;">${OFFICIAL_DETAIL_DESCRIPTION}</p></div></div>`;
  // Preserve the complete original, including size/INFORMATION. Never crop or substitute it.
  const embedded=new Set(p.images.detail?(draft?.embeddedOfficialSections||[]).map(key=>p.images[key]).filter(Boolean):[]);
  const officialSources=(p.images.detail||!groups.length?original.sources:[...new Set(['size','check','info'].map(key=>p.images[key]).filter(Boolean))]).filter(src=>src===p.images.detail||!embedded.has(src));
@@ -130,7 +130,7 @@ section[id^="smartstore-color-"]+[data-shipping-promo],
 [data-attention-benefit]:empty{display:none}
 @media(max-width:600px){
  [data-shipping-promo]{--shipping-gallery-gap:134px}
- [data-official-detail]{--official-detail-top:128px;--official-detail-bottom:168px}
+ [data-official-detail]{--official-detail-top:128px;--official-detail-bottom:16px}
  [data-product-intro]{padding:28px 6% 32px!important}
  [data-product-intro-layout]{grid-template-columns:minmax(0,1fr)!important;gap:20px!important}
  [data-header-logos]{gap:12px!important;margin-bottom:22px!important}
