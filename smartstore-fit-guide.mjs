@@ -27,7 +27,7 @@ export function fitGuideSection(product,photo,{interactiveProductTags=true}={}){
   <p class="fit-guide-lead">밑단 모양과 바지 폭을 나란히 살펴보세요.</p>
   <p class="fit-guide-photo-label">매장 마네킹 실제 착용사진 · 정면</p>
   <div class="fit-guide-grid">${cards('front')}</div>
-  ${interactiveProductTags&&links.size?'<p class="fit-guide-link-notice" data-product-tag-notice><span aria-hidden="true">↗</span> 사진 속 상품 태그를 누르면<br>해당 상품 구매 페이지로 이동해요.</p>':''}
+  ${interactiveProductTags&&links.size?'<p class="fit-guide-link-notice" data-product-tag-notice><span aria-hidden="true">↗</span> 사진 속 상품 태그를 누르면 해당 상품 구매 페이지로 이동해요.</p>':''}
   <p class="fit-guide-note">촬영 거리와 구도가 달라 사진 속 크기는 실측 비율과 다를 수 있어요.</p>
   <p class="fit-guide-photo-label fit-guide-side-label">옆모습도 함께 비교해요.</p>
   <div class="fit-guide-grid fit-guide-sides">${cards('side')}</div>
