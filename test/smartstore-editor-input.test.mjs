@@ -82,3 +82,28 @@ test('사진 툴바가 파일 선택기를 바로 여는 경우에도 한 번만
   assert.equal(editor.listenerCount('filechooser'),0);
  }finally{await browser.close();}
 });
+
+test('닫히는 사진 창과 현재 창이 겹쳐도 현재 창에만 한 번 첨부한다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const editor=await browser.newPage();
+  await editor.setContent(`
+   <div role="dialog" class="in-remove in-remove-active">
+    <h4>내 사진 불러오기</h4><button onclick="window.staleClicked=true">내 사진</button>
+   </div>
+   <div role="dialog" class="in">
+    <h4>내 사진 불러오기</h4><button onclick="document.querySelector('#current').click()">내 사진</button>
+    <input id="current" type="file" hidden onchange="window.uploads=(window.uploads||0)+1">
+   </div>
+  `);
+  const file={name:'current.png',mimeType:'image/png',buffer:Buffer.from('fixture')};
+  await attachSmartstorePhoto(editor,file);
+  assert.equal(await editor.evaluate(()=>window.uploads),1);
+  assert.equal(await editor.evaluate(()=>window.staleClicked),undefined);
+
+  await editor.locator('.in-remove').evaluate(node=>node.className='in');
+  await assert.rejects(attachSmartstorePhoto(editor,file),/사진 선택 창을 한 곳으로 확인하지 못했습니다/);
+  assert.equal(await editor.evaluate(()=>window.uploads),1);
+  assert.equal(editor.listenerCount('filechooser'),0);
+ }finally{await browser.close();}
+});

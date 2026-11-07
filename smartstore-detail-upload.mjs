@@ -35,6 +35,7 @@ export async function focusSmartstoreEditorInput(editor,{check=()=>{}}={}){
 }
 export async function attachSmartstorePhoto(editor,file,{check=()=>{},onSubmit=()=>{},timeout=15000}={}){
  const picker=editor.getByRole('dialog').filter({hasText:'내 사진 불러오기'}).filter({visible:true});
+ const activePicker=picker.and(editor.locator(':not(.in-remove, .ng-leave)'));
  let chooser=null,clickedPicker=false,toolbarAttempts=0,nextToolbarAttempt=0;
  const capture=value=>{chooser=value;};
  editor.on('filechooser',capture);
@@ -43,10 +44,13 @@ export async function attachSmartstorePhoto(editor,file,{check=()=>{},onSubmit=(
   while(Date.now()<deadline){
    check();
    if(chooser){onSubmit();await chooser.setFiles(file,{timeout:60000});check();return;}
-   if(await picker.count()){
-    if(await picker.count()!==1)throw Error('사진 선택 창을 한 곳으로 확인하지 못했습니다.');
-    if(!clickedPicker){await picker.getByRole('button',{name:'내 사진',exact:true}).click({timeout:3000});clickedPicker=true;}
-   }else if(!clickedPicker&&toolbarAttempts<3&&Date.now()>=nextToolbarAttempt){
+   const count=await activePicker.count();
+   if(count>1)throw Error('사진 선택 창을 한 곳으로 확인하지 못했습니다.');
+   if(count===1){
+    if(!clickedPicker){await activePicker.getByRole('button',{name:'내 사진',exact:true}).click({timeout:3000});clickedPicker=true;}
+   // ONE keeps a closing dialog visible during its fade-out. Wait for it
+   // before opening another one, and never send a file to that old dialog.
+   }else if(!clickedPicker&&toolbarAttempts<3&&Date.now()>=nextToolbarAttempt&&!await picker.count()){
     toolbarAttempts++;nextToolbarAttempt=Date.now()+1500;
     await editor.locator('button[data-group="documentToolbar"][data-name="image"]').click({timeout:3000});
    }
