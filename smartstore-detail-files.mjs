@@ -235,26 +235,21 @@ export async function renderPreparedSmartstoreDetail(p,folder,output,{signal,...
  for(const [src,file] of Object.entries(p.smartstoreDetail.photoFiles)){check();data.set(src,'data:image/jpeg;base64,'+(await readFile(path.join(folder,file))).toString('base64'));}
  const imageUrl=src=>{if(!data.has(src))throw Error('현재 상품에 연결되지 않은 상세 이미지: '+src);return data.get(src);};
  const fontUrl='data:font/ttf;base64,'+(await readFile(path.join(assetsRoot,'GowunDodum-Regular.ttf'))).toString('base64');
- // A standalone export stays static. For ONE, each comparison photo needs
- // its own section so the uploader can attach a real link to that image.
- const independentFitPhotos=!!(options.uploadOnly||options.cacheOnly);
- const document=smartstoreDetailDocument(p,{imageUrl,fontUrl,includeVideo:false,includeNavigation:false,interactiveProductTags:false,independentFitPhotos});
+ // Native ONE product tags are added by the editor, not baked into a bitmap.
+ // Keep the functional HTML preview links out of a non-interactive PNG.
+ const document=smartstoreDetailDocument(p,{imageUrl,fontUrl,includeVideo:false,includeNavigation:false,interactiveProductTags:false});
  const cacheRoot=options.renderCacheRoot||path.join(options.renderCacheBase||path.join(options.dataRoot||path.join(appRoot,'data'),'smartstore-render-cache'),'template-'+document.templateVariant);
- const cacheKey=await renderCacheKey(document.html);let height,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,photoRegions,fitPhotoSections,renderCacheHit=false;
+ const cacheKey=await renderCacheKey(document.html);let height,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,photoRegions,renderCacheHit=false;
  let browser;const close=()=>browser?.close().catch(()=>{});signal?.addEventListener('abort',close,{once:true});
  const partial=output+'.partial';
  try{
   const cached=await restoreRenderedDetail(cacheRoot,p.style,cacheKey,output);check();
-  if(cached&&Array.isArray(cached.photoRegions)&&Array.isArray(cached.fitPhotoSections)&&Number.isFinite(cached.brandIntroHeight)&&Number.isInteger(cached.videoAfterTop)&&Number.isInteger(cached.footerTop)&&Number.isInteger(cached.bannerTop)&&Number.isInteger(cached.officialTop)){({height,photoRegions,fitPhotoSections,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop}=cached);renderCacheHit=true;options.log?.('사진·문구·템플릿 일치 · 상세이미지 재사용');}
+  if(cached&&Array.isArray(cached.photoRegions)&&Number.isFinite(cached.brandIntroHeight)&&Number.isInteger(cached.videoAfterTop)&&Number.isInteger(cached.footerTop)&&Number.isInteger(cached.bannerTop)&&Number.isInteger(cached.officialTop)){height=cached.height;photoRegions=cached.photoRegions;brandIntroHeight=cached.brandIntroHeight;videoAfterTop=cached.videoAfterTop;footerTop=cached.footerTop;bannerTop=cached.bannerTop;officialTop=cached.officialTop;renderCacheHit=true;options.log?.('사진·문구·템플릿 일치 · 상세이미지 재사용');}
   else{
   browser=await chromium.launch({headless:true});check();
   const page=await browser.newPage({viewport:{width:860,height:1200},deviceScaleFactor:1});
   await page.setContent(document.html);await page.evaluate(()=>Promise.all([document.fonts.ready,...[...document.images].map(i=>i.decode())]));check();
   height=await page.evaluate(()=>document.documentElement.scrollHeight);photoRegions=await page.evaluate(mannequinPhotoRegions);
-  fitPhotoSections=await page.locator('[data-upload-fit-photo]').evaluateAll(nodes=>nodes.map(node=>{
-   const {top,bottom}=node.getBoundingClientRect();
-   return {style:node.dataset.comparisonStyle,current:node.hasAttribute('data-current-product'),url:node.dataset.purchaseUrl||null,top:Math.round(top+scrollY),bottom:Math.round(bottom+scrollY)};
-  }));
   brandIntroHeight=0;
   videoAfterTop=await page.locator('[data-brand-video-heading]').evaluate(n=>Math.floor(n.getBoundingClientRect().bottom+scrollY));
   officialTop=await page.locator('[data-official-detail]').evaluate(n=>Math.floor(n.getBoundingClientRect().top+scrollY));
@@ -267,14 +262,14 @@ export async function renderPreparedSmartstoreDetail(p,folder,output,{signal,...
   await sharp({create:{width:860,height,channels:3,background:'#fff'},limitInputPixels:false}).composite(layers).png().toFile(partial);check();
   }
   const {rename}=await import('node:fs/promises');await rename(partial,output);
-  await cacheRenderedDetail(cacheRoot,p.style,cacheKey,output,height,{brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,photoRegions,fitPhotoSections});
+  await cacheRenderedDetail(cacheRoot,p.style,cacheKey,output,height,{brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,photoRegions});
   }
   check();
   if(!options.cacheOnly)await registerLongPhotoLayout(await readFile(output),{style:p.style,regions:photoRegions,brandIntroHeight,videoAfterTop,officialTop,dataRoot:options.dataRoot||path.join(appRoot,'data')});
   // The editor upload only needs the rendered image, section boundaries and
   // existing brand video. Avoid generating the HTML, duplicate video and
   // separate banner/footer exports used by the manual download workflow.
-  if(options.uploadOnly||options.cacheOnly)return {width:860,height,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,fitPhotoSections,photoCount:p.smartstoreDetail.photoCount,includeVideo:true,videoOptions,renderCacheHit};
+  if(options.uploadOnly||options.cacheOnly)return {width:860,height,brandIntroHeight,videoAfterTop,footerTop,bannerTop,officialTop,photoCount:p.smartstoreDetail.photoCount,includeVideo:true,videoOptions,renderCacheHit};
   const stem=output.replace(/\.[^.]+$/,'');
   const video=await exportBrandVideo(stem,options.dataRoot,videoOptions);check();
   await writeFile(stem+'.html',smartstoreDetailDocument(p,{imageUrl,fontUrl,videoUrl:encodeURIComponent(video.filename)}).html);
