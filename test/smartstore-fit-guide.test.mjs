@@ -12,7 +12,7 @@ function productWithGuide(){
  return {style,detailTemplate:1,name:'기모 테리 스트레이트 스웻 팬츠',rawName:'기모 테리 스트레이트 스웻 팬츠',gender:'남성',colors:['01블랙','04미드헤더그레이'],sizes:['S','M','L','XL'],images:{main:'https://www.giordano.co.kr/main.jpg',detail:'https://www.giordano.co.kr/detail.jpg',size:'https://www.giordano.co.kr/size.jpg',info:'https://www.giordano.co.kr/info.jpg'},smartstoreDetail:{style,photoCount:3,heroImage:'/smartstore-photo/current-main',acceptAllFolderPhotos:true,colorImages:{'01블랙':['/smartstore-photo/current-black'],'04미드헤더그레이':['/smartstore-photo/current-gray-front','/smartstore-photo/current-gray-side']},paletteImages:{'01블랙':'/smartstore-photo/current-black','04미드헤더그레이':'/smartstore-photo/current-gray-front'},fitGuide:{style,detailTemplate:1,products,manager:{storeName:'동탄 롯데 지오다노',source:'user',rows:[{waist:'28',size:'S'},{waist:'29~31',size:'M'},{waist:'32~33',size:'L'},{waist:'34~36',size:'XL'}]}}}};
 }
 const currentColorImages=$=>$('section[id^="smartstore-color-"] img').toArray().map(n=>$(n).attr('src'));
-const purchaseNotice='사진 속 상품 태그를 누르면 해당 상품 구매 페이지로 이동해요.';
+const purchaseNotice='사진 아래 상품 태그를 누르면 해당 상품 구매 페이지로 이동해요.';
 function productWithVerifiedLinks(){
  const product=productWithGuide(),urls={
   '116955':'https://shopping.naver.com/window-products/department/13857000000',
