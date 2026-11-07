@@ -127,16 +127,29 @@ export async function officialSectionMatch(detail,section){
  }
  return await matchResampledSection(detail,section)||match;
 }
-export async function embeddedOfficialSections(product,folder){
+async function verifiedInfoInsideDetail(product,dataRoot,files){
+ if(!files.info||!/^\d{6}$/.test(product.style)||!product.sourceUrl)return false;
+ try{
+  const review=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'official-info-inclusion.json'),'utf8'));
+  return review.verified===true&&review.style===product.style&&review.sourceUrl===product.sourceUrl&&review.detailSha256===files.detail&&review.infoSha256===files.info;
+ }catch{return false;}
+}
+export async function embeddedOfficialSections(product,folder,{dataRoot=path.dirname(folder)}={}){
  if(!product.images?.detail)return [];
  if(!['size','check','info'].some(key=>product.images[key]))return [];
  const detail=await readFile(path.join(folder,'detail.jpg')),files={detail:hash(detail)},sections={};
  for(const key of ['size','check','info'])if(product.images[key]){
   try{sections[key]=await readFile(path.join(folder,key+'.jpg'));files[key]=hash(sections[key]);}catch(e){if(e.code!=='ENOENT')throw e;}
  }
- const key=hash(Buffer.from(JSON.stringify({rule,files}))),cache=path.join(folder,'smartstore-official-section-inclusion.json');
+ const reviewedInfo=await verifiedInfoInsideDetail(product,dataRoot,files);
+ const key=hash(Buffer.from(JSON.stringify({rule,files,...(reviewedInfo?{reviewedInfo}: {})}))),cache=path.join(folder,'smartstore-official-section-inclusion.json');
  try{const saved=JSON.parse(await readFile(cache,'utf8'));if(saved.key===key&&Array.isArray(saved.included)&&saved.included.every(n=>['size','check','info'].includes(n)&&files[n]))return saved.included;}catch{}
- const matches={};for(const [name,bytes]of Object.entries(sections))matches[name]=await officialSectionMatch(detail,bytes);
+ const matches={};
+ for(const [name,bytes] of Object.entries(sections)){
+  matches[name]=name==='info'&&reviewedInfo
+   ?{included:true,comparison:'verified-source-pair'}
+   :await officialSectionMatch(detail,bytes);
+ }
  const included=Object.keys(matches).filter(name=>matches[name].included);
  await writeFile(cache,JSON.stringify({key,rule,style:product.style,files,included,matches},null,2));return included;
 }
