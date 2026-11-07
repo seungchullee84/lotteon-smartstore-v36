@@ -1,5 +1,6 @@
 import {load} from 'cheerio';
 import {templateMainHeadline} from './smartstore-template-headline.mjs';
+import {sellingPointIntro} from './smartstore-selling-points.mjs';
 
 // Only template 2: preserve the existing source images and seller data.
 export function templateTwoSxoBody(html,product,name,points=[]){
@@ -8,12 +9,8 @@ export function templateTwoSxoBody(html,product,name,points=[]){
  const heading=$('[data-template-main-title]');
  heading.text(title).attr('data-template-default-title',name);
  $('.ss2-kicker,.ss2-description,.ss2-product-line>span').remove();
- const labels=[...new Set(points.map(p=>String(p.shortTitle||p.title||'').trim()).filter(Boolean))].slice(0,3);
- if(labels.length){
-  const chips=$('<ul class="ss2-intro-features" data-intro-features aria-label="상품 핵심 특징"></ul>');
-  for(const label of labels)chips.append($('<li>').text(label));
-  chips.insertAfter(heading);
- }
+ const lead=sellingPointIntro(points);
+ if(lead)$('<p class="ss2-intro-lead" data-intro-lead></p>').text(lead).insertAfter(heading);
  $('.ss2-photo-signature').each((_,node)=>{
   const n=$(node);n.find('span').first().remove();
  });
@@ -29,11 +26,10 @@ export const templateTwoSxoCss=`
 .ss2{font-weight:500;-webkit-text-stroke:.24px}
 .ss2-intro{padding:28px 24px 30px;text-align:center}
 .ss2-intro h1{font-size:38px;line-height:1.6;letter-spacing:-.5px;margin:12px 0}
-.ss2-intro-features{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;list-style:none;padding:0;margin:18px 0 22px}
-.ss2-intro-features li{max-width:100%;padding:7px 14px;border:1px solid var(--border);border-radius:999px;background:var(--paper);color:var(--accent);font-size:18px;font-weight:700;line-height:1.7}
+.ss2-intro .ss2-intro-lead{margin:12px 0 14px;color:var(--accent);font-size:21px;font-weight:700;line-height:1.65}
 .ss2-product-line{border:0;margin:8px 0 24px;padding:0}
 .ss2-product-line [data-style-number]{font-size:14px}
-.ss2-intro>img{width:100%;height:auto;border-radius:10px}
+.ss2-intro>img{width:100%;max-width:520px;height:auto;margin:0 auto;border-radius:10px}
 .ss2-photo-signature{justify-content:center;font-size:18px;margin-top:16px}
 .ss2-points{margin:0;padding:36px 48px;background:var(--opening);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
 .ss2-point-grid{display:block;margin-top:14px}
@@ -60,7 +56,7 @@ export const templateTwoSxoCss=`
 .ss2-video{padding:0 6% 36px}
 @media(max-width:600px){
  .ss2-intro{padding:24px 12px}.ss2-intro h1{font-size:28px}
- .ss2-intro-features{margin:16px 0 20px}.ss2-intro-features li{font-size:14px;padding:5px 10px}
+ .ss2-intro .ss2-intro-lead{font-size:17px}
  .ss2-points,.ss2-palette{padding:28px 22px}
  .ss2-point-grid h3{font-size:22px}.ss2-point-grid p{font-size:18px}
  .ss2-palette-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 8px}

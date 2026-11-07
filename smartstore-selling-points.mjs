@@ -38,7 +38,7 @@ function benefitTitle(text){
   [/(?:탄탄)/,'탄탄한 착용감'],
   [/(?:통기|쾌적|흡습|속건|시원)/,'쾌적한 착용감'],
   [/(?:유연|신축)/,'움직임에 맞춰 유연하게'],
-  [/(?:가벼|가볍|경량)/,'가볍게 입기 좋게'],
+  [/(?:가벼|가볍|경량)/,'가벼운 착용감'],
   [/(?:편안|편하|여유|넉넉)/,'편안한 착용감'],
   [/(?:포인트|감각적|세련|입체감)/,'포인트 있게 연출'],
  ])if(pattern.test(text))return title;
@@ -217,8 +217,28 @@ export function friendlyBenefitDescription(value){
 }
 export function displaySellingPoints(points,{tone=true}={}){
  const copy=value=>String(value||'').replace(/브러쉬드|브러시드|brushed/gi,'기모');
- return points.filter(point=>completeCopy(point.description)&&cleanSource(point.description)&&(!point.evidence||cleanSource(point.evidence))).map(point=>({...point,title:copy(point.title),description:tone?friendlyBenefitDescription(copy(point.description)):copy(point.description),...(point.shortTitle?{shortTitle:copy(point.shortTitle)}:{})})).filter(point=>point.description);
+ return points.filter(point=>completeCopy(point.description)&&cleanSource(point.description)&&(!point.evidence||cleanSource(point.evidence))).map(point=>({...point,title:copy(point.title).replace(/^가볍게 입기 좋게$/,'가벼운 착용감'),description:tone?friendlyBenefitDescription(copy(point.description)):copy(point.description),...(point.shortTitle?{shortTitle:copy(point.shortTitle)}:{})})).filter(point=>point.description);
 }
+// Use the product's supported benefits to summarize the opening in one line.
+export function sellingPointIntro(points){
+ const verified=points.filter(point=>point.evidence?.trim());
+ const has=pattern=>verified.some(point=>pattern.test(point.title+' '+point.description));
+ const warmth=/보온|따뜻|포근/;
+ const lightness=/가벼|가볍|경량/;
+ if(has(warmth)&&has(lightness))return '가볍고 포근하게';
+ if(has(/단독/)&&has(/레이어드|겹쳐/))return '단독으로도, 겹쳐 입기에도 좋아요';
+ const wording=[
+  [warmth,'쌀쌀한 날에 포근하게'],
+  [lightness,'부담 없이 가볍게'],
+  [/부드|소프트/,'부드럽게 닿는 감촉'],
+  [/활동성|움직임|신축/,'움직일 때도 편안하게'],
+  [/편안|편하/,'일상에서 편하게'],
+  [/코디|매치|스타일링/,'여러 옷과 자연스럽게'],
+ ];
+ const summary=wording.find(([pattern,copy])=>has(pattern)&&verified.every(point=>point.title!==copy));
+ return summary?.[1]||verified.find(point=>point.shortTitle&&point.shortTitle!==point.title)?.shortTitle||'';
+}
+
 export function officialSellingPoints(description,{limit=4}={}){
  const points=extractOfficialSellingPoints(description,limit);
  for(const recipe of sourceBenefitRecipes(description)){

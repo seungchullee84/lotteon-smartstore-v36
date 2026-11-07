@@ -4,7 +4,8 @@ import {buildDetailContent} from './detail-html.mjs';
 import {sellingPointIcon} from './smartstore-point-icons.mjs';
 import {colorCaption} from './smartstore-color-copy.mjs';
 import {brandVideoHtml,brandVideoHeadingHtml,productVideoUrl} from './smartstore-brand-video.mjs';
-import {officialSellingPoints,displaySellingPoints} from './smartstore-selling-points.mjs';
+import {officialSellingPoints,displaySellingPoints,sellingPointIntro} from './smartstore-selling-points.mjs';
+import {officialTemplateTitle} from './smartstore-template-title.mjs';
 
 export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-aida-lower-film-20261101';
 export const STORE_SHIPPING_PROMO_ASSET='shipping-promo.png';
@@ -62,13 +63,15 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  const pointHeading='<div data-section-heading data-product-point-heading style="margin:0 0 40px;"><p style="font:16px/1.7 Arial,sans-serif;letter-spacing:1.8px;margin:0;color:#8a5a22;">PRODUCT POINT</p><div style="display:flex;align-items:center;gap:16px;margin-top:16px;"><span aria-hidden="true" style="display:flex;align-items:center;justify-content:center;flex:0 0 54px;height:60px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="60" height="60" fill="none"><g transform="rotate(-10 30 32)" stroke="#a56a20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M29 7 35 22 51 25 39 36 41 52 28 44 13 50 17 35 6 24 22 22Z" fill="#f7dfa3"/><path d="m22 31 3-1 2 2m6-2h.2M25 37q4 4 8-1"/><path d="M52 6v9m-4-5h8M7 46l-3 3m48-5 4 2"/></g></svg></span><h2 style="font-size:44px;line-height:1.4;margin:0;letter-spacing:-.5px;font-weight:700;color:#213c2e;">고를 때 <span style="color:#92551c;">확인할 포인트.</span></h2></div></div>';
  const divider='<div role="separator" style="height:0;margin:0 6%;border-top:1px solid #dce1d9;"></div>';
  const name=p.name||p.rawName||'지오다노';
- const headlineBody=String(draft?.headline||name).trim().replace(/^(?:(?:지오다노|GIORDANO)\s*)+/i,'');
+ const titleText=String(draft?.headline||name).trim().replace(/^(?:(?:지오다노|GIORDANO)\s*)+/i,'');
+ const headlineBody=titleText?officialTemplateTitle({rawName:titleText,style:p.style}):'';
  const headline='지오다노'+(headlineBody?' '+headlineBody:'');
 
  const hero=draft?.heroImage?.startsWith('/smartstore-photo/')?draft.heroImage:groups.find(g=>draft?.colorSources?.[g.color]!=='official'&&g.urls[0]?.startsWith('/smartstore-photo/'))?.urls[0];
  const heroAlt='현재 상품 '+p.style+' 매장 마네킹 착용 모습';
- const leadingPoint=points[0];
- let body=`<section data-product-intro data-aida="attention" style="padding:56px 6% 64px;background:${openingBackground};"><div data-header-logos style="display:flex;align-items:center;justify-content:space-between;gap:32px;margin:0 0 32px;"><div data-giordano-logo style="width:245px;max-width:45%;">${photo(assetBase+'giordano-official.png','지오다노 공식 로고')}</div><div data-lotte-logo style="width:220px;max-width:45%;margin-left:auto;">${photo(assetBase+'lotte-department-official.png','롯데백화점 공식 로고')}</div></div><div style="display:grid;grid-template-columns:${hero?'minmax(0,.9fr) minmax(0,1.1fr)':'minmax(0,1fr)'};gap:32px;align-items:center;"><div><h1 style="font-size:30px;line-height:1.6;margin:0 0 28px;color:#465149;">${esc(headline)}</h1><h2 data-attention-benefit data-template-main-title data-template-default-title="${esc(leadingPoint?.title||'나에게 맞는 한 벌을 만나보세요.')}" style="white-space:pre-line;overflow-wrap:anywhere;font-size:44px;line-height:1.5;margin:0 0 24px;letter-spacing:-.6px;">${esc(templateMainHeadline(p,leadingPoint?.title||'나에게 맞는 한 벌을 만나보세요.',1))}</h2></div>${hero?'<div data-product-hero>'+photo(hero,heroAlt,'border-radius:16px;')+'</div>':''}</div></section>`;
+ const introLead=sellingPointIntro(points);
+ const styleNumber=p.style?'<small data-style-number style="display:block;margin:0 0 16px;font-size:14px;letter-spacing:.07em;color:#53694d;">STYLE NO. '+esc(p.style)+'</small>':'';
+ let body=`<section data-product-intro data-aida="attention" style="padding:56px 6% 64px;background:${openingBackground};"><div data-header-logos style="display:flex;align-items:center;justify-content:space-between;gap:32px;margin:0 0 32px;"><div data-giordano-logo style="width:245px;max-width:45%;">${photo(assetBase+'giordano-official.png','지오다노 공식 로고')}</div><div data-lotte-logo style="width:220px;max-width:45%;margin-left:auto;">${photo(assetBase+'lotte-department-official.png','롯데백화점 공식 로고')}</div></div><div data-product-intro-layout style="display:grid;grid-template-columns:${hero?'minmax(0,.9fr) minmax(0,1.1fr)':'minmax(0,1fr)'};gap:32px;align-items:center;"><div><h1 style="font-size:30px;line-height:1.6;margin:0 0 6px;color:#465149;">${esc(headline)}</h1>${styleNumber}<h2 data-attention-benefit data-template-main-title data-template-default-title="${esc(introLead)}" style="white-space:pre-line;overflow-wrap:anywhere;font-size:38px;line-height:1.5;margin:0;letter-spacing:-.6px;">${esc(templateMainHeadline(p,introLead,1))}</h2></div>${hero?'<div data-product-hero>'+photo(hero,heroAlt,'border-radius:16px;')+'</div>':''}</div></section>`;
  let palette='';
  const paletteGroups=allGroups.map(g=>({...g,paletteUrl:(draft?.acceptAllFolderPhotos?draft.paletteImages?.[g.color]:g.urls[0])||draft?.paletteImages?.[g.color]}));
  if(paletteGroups.length){
@@ -102,7 +105,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  if(!folderPhotos.length&&lastColorGroup)shippingStart=colorSectionBackground(lastColorGroup.index);
  if(!folderPhotos.length&&!lastColorGroup&&!points.length&&!palette)shippingStart=openingBackground;
  body+=shippingPromoSection(common(STORE_SHIPPING_PROMO_ASSET,STORE_SHIPPING_PROMO_ALT),{start:shippingStart});
- body+=`<section data-official-detail data-aida="desire"><div style="padding:96px 6% 72px;">${header('PRODUCT DETAIL','디테일까지,<br>차근차근 살펴보세요.')}<p style="font-size:23px;margin:0;">공식 상품 이미지와 상세 정보를 원본 그대로 안내합니다.</p></div>`;
+ body+=`<section data-official-detail data-aida="desire"><div style="padding:36px 6% 24px;"><div data-section-heading style="border-left:5px solid #294c3b;padding-left:18px;"><h2 style="font-size:30px;line-height:1.5;margin:0;color:#213c2e;">공식 사진과 상품 정보</h2></div></div>`;
  // Preserve the complete original, including size/INFORMATION. Never crop or substitute it.
  const embedded=new Set(p.images.detail?(draft?.embeddedOfficialSections||[]).map(key=>p.images[key]).filter(Boolean):[]);
  const officialSources=(p.images.detail||!groups.length?original.sources:[...new Set(['size','check','info'].map(key=>p.images[key]).filter(Boolean))]).filter(src=>src===p.images.detail||!embedded.has(src));
@@ -119,5 +122,14 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
 export function smartstoreDetailDocument(p,options={}){
  const result=buildSmartstoreDetail(p,options);
  const font=options.fontUrl;
- return {...result,html:`<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(p.style)} · 스마트스토어 상세페이지</title><style>${font?`@font-face{font-family:GowunDodum;src:url('${esc(font)}') format('truetype');font-weight:400;font-display:swap}`:''}*{box-sizing:border-box}html{scrollbar-width:none}html::-webkit-scrollbar{display:none}body{margin:0;background:#ecebe7}body>div{max-width:860px!important}img{max-width:100%}h1,h2,h3,b,strong{font-weight:700}p{font-weight:500;line-height:2.1;-webkit-text-stroke:.24px currentColor}h1,h2,h3{word-break:keep-all;overflow-wrap:break-word;text-wrap:pretty}@media(max-width:600px){[data-product-points]{flex-direction:column;gap:12px!important}[data-product-points]>div{padding:18px 20px!important}[data-product-points] h3{margin:6px 0!important}h1{font-size:36px!important}h2{font-size:27px!important}h3{font-size:19px!important}p{font-size:16px!important}b{font-size:15px!important}}</style></head><body>${result.html}</body></html>`};
+ return {...result,html:`<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(p.style)} · 스마트스토어 상세페이지</title><style>${font?`@font-face{font-family:GowunDodum;src:url('${esc(font)}') format('truetype');font-weight:400;font-display:swap}`:''}*{box-sizing:border-box}html{scrollbar-width:none}html::-webkit-scrollbar{display:none}body{margin:0;background:#ecebe7}body>div{max-width:860px!important}img{max-width:100%}h1,h2,h3,b,strong{font-weight:700}p{font-weight:500;line-height:2.1;-webkit-text-stroke:.24px currentColor}h1,h2,h3{word-break:keep-all;overflow-wrap:break-word;text-wrap:pretty}@media(max-width:600px){[data-product-points]{flex-direction:column;gap:12px!important}[data-product-points]>div{padding:18px 20px!important}[data-product-points] h3{margin:6px 0!important}h1{font-size:36px!important}h2{font-size:27px!important}h3{font-size:19px!important}p{font-size:16px!important}b{font-size:15px!important}}
+[data-attention-benefit]:empty{display:none}
+@media(max-width:600px){
+ [data-product-intro]{padding:28px 6% 32px!important}
+ [data-product-intro-layout]{grid-template-columns:minmax(0,1fr)!important;gap:20px!important}
+ [data-header-logos]{gap:12px!important;margin-bottom:22px!important}
+ [data-product-intro] h1{font-size:25px!important}
+ [data-product-intro] [data-attention-benefit]{font-size:24px!important}
+}
+</style></head><body>${result.html}</body></html>`};
 }

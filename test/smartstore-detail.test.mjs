@@ -34,14 +34,14 @@ test('모든 의류의 AIDA 순서는 상품·구매 장점부터 시작하고 �
  for(const name of ['남성 맨투맨','여성 스커트','공용 경량 자켓']){
   const p={...product,name,colorImages:{'01핑크':['https://example.com/current.jpg']},smartstoreDetail:{style:product.style,sellingPoints:[point],colorImages:{'01핑크':['https://example.com/current.jpg']}}},html=buildSmartstoreDetail(p).html;
   const order=['data-product-intro','data-aida="interest"','data-color-palette','id="smartstore-color-0"','data-official-detail','data-brand-video-heading','<video ','data-store-banner','data-store-footer'].map(marker=>html.indexOf(marker));
-  assert(order.every((index,i)=>index>=0&&(!i||index>order[i-1])));assert.doesNotMatch(html,/data-product-hero/);assert.match(html,/data-attention-benefit[^>]*>편안한 움직임/);assert.doesNotMatch(html,/나의 한 벌 고르기|마음에 드는 색상과|나에게 맞는 한 벌을 선택/);assert.equal((html.match(/<video /g)||[]).length,1);assert(!html.includes('<button'));
+  assert(order.every((index,i)=>index>=0&&(!i||index>order[i-1])));assert.doesNotMatch(html,/data-product-hero/);assert.match(html,/data-attention-benefit[^>]*>움직일 때도 편안하게/);assert.doesNotMatch(html,/나의 한 벌 고르기|마음에 드는 색상과|나에게 맞는 한 벌을 선택/);assert.equal((html.match(/<video /g)||[]).length,1);assert(!html.includes('<button'));
  }
 });
 
 test('새 공통 MP4는 과거 시즌 제외 상품을 포함해 전체에 적용한다',()=>{
  const p={...product,smartstoreDetail:{style:product.style,includeBrandVideo:false}};
  assert.doesNotMatch(buildSmartstoreDetail(p).html,/youtube|<iframe|2026 F\/W FILM/);
- assert.match(buildSmartstoreDetail(p).html,/brand-intro\.jpg|PRODUCT DETAIL/);
+ assert.match(buildSmartstoreDetail(p).html,/<section data-official-detail\b/);
  assert.match(buildSmartstoreDetail(p).html,/<video /);
  assert.match(buildSmartstoreDetail(product).html,/smartstore-brand-video\.mp4/);
  assert.doesNotMatch(buildSmartstoreDetail(p,{includeVideo:false}).html,/<video/);
