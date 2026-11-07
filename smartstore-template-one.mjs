@@ -107,7 +107,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  if(!folderPhotos.length&&lastColorGroup)shippingStart=colorSectionBackground(lastColorGroup.index);
  if(!folderPhotos.length&&!lastColorGroup&&!points.length&&!palette)shippingStart=openingBackground;
  body+=shippingPromoSection(common(STORE_SHIPPING_PROMO_ASSET,STORE_SHIPPING_PROMO_ALT),{start:shippingStart});
- body+=`<section data-official-detail data-aida="desire"><div style="padding:clamp(46px, 7.5vw, 64px) 6% 24px;"><div data-section-heading style="border-left:5px solid #294c3b;padding-left:18px;"><h2 style="font-size:30px;line-height:1.5;margin:0;color:#213c2e;">${OFFICIAL_DETAIL_TITLE}</h2><p style="font-size:20px;line-height:1.65;margin:6px 0 0;color:#465149;">${OFFICIAL_DETAIL_DESCRIPTION}</p></div></div>`;
+ body+=`<section data-official-detail data-aida="desire"><div style="padding:var(--official-detail-top,156px) 6% var(--official-detail-bottom,144px);"><div data-section-heading style="border-left:5px solid #294c3b;padding-left:18px;"><h2 style="font-size:30px;line-height:1.5;margin:0;color:#213c2e;">${OFFICIAL_DETAIL_TITLE}</h2><p style="font-size:20px;line-height:1.65;margin:6px 0 0;color:#465149;">${OFFICIAL_DETAIL_DESCRIPTION}</p></div></div>`;
  // Preserve the complete original, including size/INFORMATION. Never crop or substitute it.
  const embedded=new Set(p.images.detail?(draft?.embeddedOfficialSections||[]).map(key=>p.images[key]).filter(Boolean):[]);
  const officialSources=(p.images.detail||!groups.length?original.sources:[...new Set(['size','check','info'].map(key=>p.images[key]).filter(Boolean))]).filter(src=>src===p.images.detail||!embedded.has(src));
@@ -125,8 +125,12 @@ export function smartstoreDetailDocument(p,options={}){
  const result=buildSmartstoreDetail(p,options);
  const font=options.fontUrl;
  return {...result,html:`<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(p.style)} · 스마트스토어 상세페이지</title><style>${font?`@font-face{font-family:GowunDodum;src:url('${esc(font)}') format('truetype');font-weight:400;font-display:swap}`:''}*{box-sizing:border-box}html{scrollbar-width:none}html::-webkit-scrollbar{display:none}body{margin:0;background:#ecebe7}body>div{max-width:860px!important}img{max-width:100%}h1,h2,h3,b,strong{font-weight:700}p{font-weight:500;line-height:2.1;-webkit-text-stroke:.24px currentColor}h1,h2,h3{word-break:keep-all;overflow-wrap:break-word;text-wrap:pretty}@media(max-width:600px){[data-product-points]{flex-direction:column;gap:12px!important}[data-product-points]>div{padding:18px 20px!important}[data-product-points] h3{margin:6px 0!important}h1{font-size:36px!important}h2{font-size:27px!important}h3{font-size:19px!important}p{font-size:16px!important}b{font-size:15px!important}}
+section[id^="smartstore-color-"]+[data-shipping-promo],
+[data-folder-photos]+[data-shipping-promo]{padding-top:var(--shipping-gallery-gap,150px)}
 [data-attention-benefit]:empty{display:none}
 @media(max-width:600px){
+ [data-shipping-promo]{--shipping-gallery-gap:134px}
+ [data-official-detail]{--official-detail-top:128px;--official-detail-bottom:168px}
  [data-product-intro]{padding:28px 6% 32px!important}
  [data-product-intro-layout]{grid-template-columns:minmax(0,1fr)!important;gap:20px!important}
  [data-header-logos]{gap:12px!important;margin-bottom:22px!important}
