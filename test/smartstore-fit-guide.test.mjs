@@ -12,6 +12,16 @@ function productWithGuide(){
  return {style,detailTemplate:1,name:'기모 테리 스트레이트 스웻 팬츠',rawName:'기모 테리 스트레이트 스웻 팬츠',gender:'남성',colors:['01블랙','04미드헤더그레이'],sizes:['S','M','L','XL'],images:{main:'https://www.giordano.co.kr/main.jpg',detail:'https://www.giordano.co.kr/detail.jpg',size:'https://www.giordano.co.kr/size.jpg',info:'https://www.giordano.co.kr/info.jpg'},smartstoreDetail:{style,photoCount:3,heroImage:'/smartstore-photo/current-main',acceptAllFolderPhotos:true,colorImages:{'01블랙':['/smartstore-photo/current-black'],'04미드헤더그레이':['/smartstore-photo/current-gray-front','/smartstore-photo/current-gray-side']},paletteImages:{'01블랙':'/smartstore-photo/current-black','04미드헤더그레이':'/smartstore-photo/current-gray-front'},fitGuide:{style,detailTemplate:1,products,manager:{storeName:'동탄 롯데 지오다노',source:'user',rows:[{waist:'28',size:'S'},{waist:'29~31',size:'M'},{waist:'32~33',size:'L'},{waist:'34~36',size:'XL'}]}}}};
 }
 const currentColorImages=$=>$('section[id^="smartstore-color-"] img').toArray().map(n=>$(n).attr('src'));
+const purchaseNotice='사진 속 상품 태그를 누르면 해당 상품 구매 페이지로 이동해요.';
+function productWithVerifiedLinks(){
+ const product=productWithGuide(),urls={
+  '116955':'https://shopping.naver.com/window-products/department/13857000000',
+  '116956':'https://shopping.naver.com/window-products/department/13857522426',
+  '116958':'https://shopping.naver.com/window-products/department/13857609430'
+ };
+ for(const item of product.smartstoreDetail.fitGuide.products)item.purchaseLink={style:item.style,url:urls[item.style],source:'user'};
+ return product;
+}
 
 test('선택한 템플릿1·현재 품번에만 가이드와 현재 상품 표식 한 개를 표시한다',()=>{
  const p=productWithGuide(),$=load(buildSmartstoreDetail(p).html);
@@ -40,6 +50,30 @@ test('구매URL이 준비 자료에 있어도 가이드에 구매 링크나 가�
  assert.equal(guide.find('a,button,[onclick],[role="button"]').length,0);
  for(const item of p.smartstoreDetail.fitGuide.products)assert(!guide.html().includes(item.purchaseUrl));
  assert.doesNotMatch(guide.text(),/사진을.*누르|클릭.*구매|구매하러/);
+});
+
+test('미리보기 정면 두 비교 상품만 확인한 구매 태그를 표시하고 현재 상품과 측면은 연결하지 않는다',()=>{
+ const p=productWithVerifiedLinks(),$=load(buildSmartstoreDetail(p).html),guide=$('[data-fit-guide]'),front=guide.find('.fit-guide-grid').first(),side=guide.find('.fit-guide-sides');
+ const links=front.find('a').toArray().map(node=>({style:$(node).closest('[data-comparison-style]').attr('data-comparison-style'),url:$(node).attr('href')}));
+ assert.deepEqual(links,[
+  {style:'116956',url:'https://shopping.naver.com/window-products/department/13857522426'},
+  {style:'116958',url:'https://shopping.naver.com/window-products/department/13857609430'}
+ ]);
+ assert.equal(guide.find('a').length,2);assert.equal(guide.find('[data-comparison-style="116955"] a').length,0);assert.equal(side.find('a,button').length,0);
+ assert.deepEqual(side.find('img').toArray().map(node=>$(node).attr('src')),p.smartstoreDetail.fitGuide.products.map(item=>item.side));
+ assert.equal(guide.text().split(purchaseNotice).length-1,1);assert.equal(side.text().includes(purchaseNotice),false);
+ assert(guide.html().indexOf(purchaseNotice)<guide.html().indexOf('fit-guide-sides'));
+});
+
+test('PNG용 출력은 상품 태그·클릭 안내를 굽지 않으며 비교 사진과 품번 정보를 보존한다',()=>{
+ const p=productWithVerifiedLinks(),preview=buildSmartstoreDetail(p),preview$=load(preview.html);
+ for(const result of [buildSmartstoreDetail(p,{interactiveProductTags:false}),smartstoreDetailDocument(p,{interactiveProductTags:false,includeVideo:false})]){
+  const $=load(result.html),guide=$('[data-fit-guide]');
+  assert.equal(guide.find('a,button,[onclick],[role="button"]').length,0);assert.equal(guide.text().includes(purchaseNotice),false);
+  assert.deepEqual(guide.find('img').toArray().map(node=>$(node).attr('src')),preview$('[data-fit-guide] img').toArray().map(node=>preview$(node).attr('src')));
+  assert.deepEqual(guide.find('[data-comparison-style]').toArray().map(node=>$(node).attr('data-comparison-style')),['116955','116956','116958','116955','116956','116958']);
+  assert.deepEqual(result.sources,preview.sources);
+ }
 });
 
 test('공식 L 치수와 사용자 추천 네 행을 서로 다른 표로 정확히 표시한다',()=>{
