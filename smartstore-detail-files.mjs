@@ -17,6 +17,7 @@ import {exportBrandVideo,requireBrandVideo,productVideoOptions} from './smartsto
 import {renderCacheKey,restoreRenderedDetail,cacheRenderedDetail} from './smartstore-render-cache.mjs';
 import {workingProductPhoto} from './smartstore-photo-work.mjs';
 import {embeddedOfficialSections} from './smartstore-official-sections.mjs';
+import {prepareFitGuide} from './smartstore-fit-guide-files.mjs';
 import {assertRequiredSellingPoints,displaySellingPoints} from './smartstore-selling-points.mjs';
 import * as cheerio from 'cheerio';
 import {styleFromDetail} from './product.mjs';
@@ -203,6 +204,8 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  await attachOfficialPalette(product,prepared,draft?.officialPalettePhotos,{folder,draftRoot});
  prepared.captionTones=await collectCaptionTones(product,folder);
  prepared.embeddedOfficialSections=await embeddedOfficialSections(product,folder,{dataRoot});
+ const fitGuide=await prepareFitGuide(product,folder,{dataRoot});
+ if(fitGuide){prepared.fitGuide=fitGuide;Object.assign(prepared.photoFiles,fitGuide.photoFiles);}
  const p={...product,smartstoreDetail:prepared};
  return p;
 }

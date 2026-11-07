@@ -1,4 +1,4 @@
-import {resolveDetailTemplate} from './smartstore-template-picker.mjs';
+import {resolveDetailTemplate} from './smartstore-template-choice.mjs';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const measurements=['허리둘레','엉덩이둘레','허벅지둘레','밑단둘레','앞밑위','안쪽 바지길이','총기장'];
@@ -12,7 +12,7 @@ export function fitGuideSection(product,photo){
  const label=p=>`<span class="fit-guide-code">${esc(p.style)}</span><h3>${esc(p.fit)}</h3>`;
  const marker=p=>current(p)?'<span class="fit-guide-current">지금 보고 있는 상품</span>':'<span class="fit-guide-alternative">함께 비교하는 핏</span>';
  const cards=role=>products.map((p,index)=>`<article class="fit-guide-card fit-guide-tone-${index}" data-comparison-style="${esc(p.style)}"${current(p)?' data-current-product':''}><header>${marker(p)}${label(p)}</header><figure>${photo(p[role],`${p.style} ${p.color} ${role==='front'?'정면':'측면'} 매장 촬영사진`)}</figure>${role==='front'?'<p class="fit-guide-description">'+esc(p.description)+'</p>':''}</article>`).join('');
- return `<section class="fit-guide" data-fit-guide data-guide-style="${esc(product.style)}">
+ return `<style>${fitGuideCss}</style><section class="fit-guide" data-fit-guide data-guide-style="${esc(product.style)}">
  <div class="fit-guide-comparison" data-fit-comparison>
   <p class="fit-guide-eyebrow">FIT COMPARISON</p>
   <h2>같은 기모 팬츠,<br>핏은 이렇게 달라요.</h2>
