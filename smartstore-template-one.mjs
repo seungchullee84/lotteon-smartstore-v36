@@ -107,7 +107,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  if(!folderPhotos.length&&lastColorGroup)shippingStart=colorSectionBackground(lastColorGroup.index);
  if(!folderPhotos.length&&!lastColorGroup&&!points.length&&!palette)shippingStart=openingBackground;
  body+=shippingPromoSection(common(STORE_SHIPPING_PROMO_ASSET,STORE_SHIPPING_PROMO_ALT),{start:shippingStart});
- body+=`<section data-official-detail data-aida="desire"><div style="padding:30px 6% 24px;"><div data-section-heading style="border-left:5px solid #294c3b;padding-left:18px;"><h2 style="font-size:30px;line-height:1.5;margin:0;color:#213c2e;">${OFFICIAL_DETAIL_TITLE}</h2><p style="font-size:20px;line-height:1.65;margin:6px 0 0;color:#465149;">${OFFICIAL_DETAIL_DESCRIPTION}</p></div></div>`;
+ body+=`<section data-official-detail data-aida="desire"><div style="padding:clamp(46px, 7.5vw, 64px) 6% 24px;"><div data-section-heading style="border-left:5px solid #294c3b;padding-left:18px;"><h2 style="font-size:30px;line-height:1.5;margin:0;color:#213c2e;">${OFFICIAL_DETAIL_TITLE}</h2><p style="font-size:20px;line-height:1.65;margin:6px 0 0;color:#465149;">${OFFICIAL_DETAIL_DESCRIPTION}</p></div></div>`;
  // Preserve the complete original, including size/INFORMATION. Never crop or substitute it.
  const embedded=new Set(p.images.detail?(draft?.embeddedOfficialSections||[]).map(key=>p.images[key]).filter(Boolean):[]);
  const officialSources=(p.images.detail||!groups.length?original.sources:[...new Set(['size','check','info'].map(key=>p.images[key]).filter(Boolean))]).filter(src=>src===p.images.detail||!embedded.has(src));
