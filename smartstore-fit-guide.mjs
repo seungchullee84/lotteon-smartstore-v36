@@ -40,6 +40,7 @@ export function fitGuideSection(product,photo){
 
 export const fitGuideCss=`
 .fit-guide{color:#28332d;background:#faf9f5;border-top:1px solid #dadfd6;-webkit-text-stroke:0}
+.fit-guide p{-webkit-text-stroke:0}.fit-guide *{box-sizing:border-box}
 .fit-guide-comparison,.fit-guide-measurements,.fit-guide-manager{padding:58px 34px}
 .fit-guide .fit-guide-eyebrow{font-size:15px;font-weight:700;letter-spacing:2px;color:#5b6b5a;margin:0 0 14px}
 .fit-guide h2{font-size:36px;line-height:1.5;font-weight:700;letter-spacing:-.5px;margin:0}
@@ -67,6 +68,7 @@ export const fitGuideCss=`
 .fit-guide-manager-heading{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:15px 10px;background:#e7ece3;font-size:18px;color:#52634e}
 .fit-guide-manager-row{display:grid;grid-template-columns:1fr 32px 1fr;align-items:center;padding:18px 12px;border-top:1px solid #dedfd7;font:500 30px/1.5 Arial,sans-serif}.fit-guide-manager-row>span{font-size:20px;color:#8a9386}.fit-guide-manager-row b{color:#52634e}
 @media(max-width:600px){
+ .fit-guide .fit-guide-description{font-size:13px!important}.fit-guide .fit-guide-note,.fit-guide .fit-guide-eyebrow{font-size:12px!important}.fit-guide .fit-guide-table-label{font-size:13px!important}.fit-guide .fit-guide-manager-row b{font-size:25px!important}
  .fit-guide-comparison,.fit-guide-measurements,.fit-guide-manager{padding:34px 12px}.fit-guide h2{font-size:27px}.fit-guide .fit-guide-eyebrow{font-size:12px}.fit-guide .fit-guide-lead{font-size:16px;margin-bottom:20px}.fit-guide .fit-guide-photo-label{font-size:16px}
  .fit-guide-grid{gap:6px}.fit-guide-card{border-radius:8px}.fit-guide-card header{padding:10px 3px}.fit-guide-current,.fit-guide-alternative{font-size:10px;min-height:22px;letter-spacing:-.5px;margin-bottom:6px}.fit-guide-current{padding:2px 4px}.fit-guide-code{font-size:15px;letter-spacing:1px}.fit-guide-card h3{font-size:18px}.fit-guide .fit-guide-description{font-size:13px;line-height:1.8;padding:12px 8px}.fit-guide .fit-guide-note{font-size:12px}.fit-guide table{font-size:15px}.fit-guide th,.fit-guide td{padding:12px 3px}.fit-guide tbody th{font-size:13px}.fit-guide thead small{font-size:11px}.fit-guide .fit-guide-table-label{font-size:13px}.fit-guide-manager-heading{font-size:13px;gap:8px}.fit-guide-manager-row{font-size:25px;padding:14px 8px}
 }
