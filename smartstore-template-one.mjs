@@ -61,7 +61,6 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  const heroAlt='현재 상품 '+p.style+' 매장 마네킹 착용 모습';
  const leadingPoint=points[0];
  let body=`<section data-product-intro data-aida="attention" style="padding:56px 6% 64px;background:#f4f3ec;"><div data-header-logos style="display:flex;align-items:center;justify-content:space-between;gap:32px;margin:0 0 32px;"><div data-giordano-logo style="width:245px;max-width:45%;">${photo(assetBase+'giordano-official.png','지오다노 공식 로고')}</div><div data-lotte-logo style="width:220px;max-width:45%;margin-left:auto;">${photo(assetBase+'lotte-department-official.png','롯데백화점 공식 로고')}</div></div><div style="display:grid;grid-template-columns:${hero?'minmax(0,.9fr) minmax(0,1.1fr)':'minmax(0,1fr)'};gap:32px;align-items:center;"><div><h1 style="font-size:30px;line-height:1.6;margin:0 0 28px;color:#465149;">${esc(headline)}</h1><h2 data-attention-benefit data-template-main-title data-template-default-title="${esc(leadingPoint?.title||'나에게 맞는 한 벌을 만나보세요.')}" style="white-space:pre-line;overflow-wrap:anywhere;font-size:44px;line-height:1.5;margin:0 0 24px;letter-spacing:-.6px;">${esc(templateMainHeadline(p,leadingPoint?.title||'나에게 맞는 한 벌을 만나보세요.',1))}</h2></div>${hero?'<div data-product-hero>'+photo(hero,heroAlt,'border-radius:16px;')+'</div>':''}</div></section>`;
- body+='<section data-shipping-promo>'+common(STORE_SHIPPING_PROMO_ASSET,STORE_SHIPPING_PROMO_ALT)+'</section>';
  let palette='';
  const paletteGroups=allGroups.map(g=>({...g,paletteUrl:(draft?.acceptAllFolderPhotos?draft.paletteImages?.[g.color]:g.urls[0])||draft?.paletteImages?.[g.color]}));
  if(paletteGroups.length){
@@ -89,7 +88,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
   if(!groups.length)body+='<div style="padding:56px 6% 24px;text-align:center;font-size:26px;">매장 마네킹 실제 착용사진</div>';
   body+='<div data-folder-photos>'+draft.providedImages.map(src=>photo(src,'현재 상품 '+p.style+' 착용사진')).join('')+'</div>';
  }
- body+=divider+`<section style="padding:88px 6% 96px;background:#f6f3ef;">${header('MATERIAL & SIZE','상품 정보를 확인해 주세요.')}<p style="font-size:23px;margin:0;">${esc(p.material||'소재는 아래 공식 상품고시를 확인해 주세요.')}</p><p style="font-size:21px;margin:24px 0 0;">사이즈 ${esc((p.sizes||[]).join(' · '))}</p></section>`;
+ body+=divider+'<section data-shipping-promo>'+common(STORE_SHIPPING_PROMO_ASSET,STORE_SHIPPING_PROMO_ALT)+'</section>';
  body+=divider+`<section data-official-detail data-aida="desire"><div style="padding:96px 6% 72px;">${header('PRODUCT DETAIL','디테일까지,<br>차근차근 살펴보세요.')}<p style="font-size:23px;margin:0;">공식 상품 이미지와 상세 정보를 원본 그대로 안내합니다.</p></div>`;
  // Preserve the complete original, including size/INFORMATION. Never crop or substitute it.
  const embedded=new Set(p.images.detail?(draft?.embeddedOfficialSections||[]).map(key=>p.images[key]).filter(Boolean):[]);
