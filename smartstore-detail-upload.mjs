@@ -188,7 +188,7 @@ export async function applySmartstoreFitPhotoLinks(editor,parts,{check=()=>{},lo
  const names=await images.evaluateAll(nodes=>nodes.map(n=>{
   try{const u=new URL(n.src);return u.protocol==='https:'?decodeURIComponent(u.pathname.split('/').at(-1)):null;}catch{return null;}
  }));
- if(names.length!==parts.files.length||links.some(l=>names[l.index]!==path.basename(l.file)))throw Error('비교 사진의 실제 첨부 순서가 달라 링크를 적용하지 않았습니다.');
+ if(names.length!==parts.files.length||names.some((name,i)=>name!==path.basename(parts.files[i])))throw Error('비교 사진의 실제 첨부 순서가 달라 링크를 적용하지 않았습니다.');
  const verified=[];
  const toolbar=editor.locator('button[data-name="image-link"]').filter({visible:true});
  const input=editor.locator('input.se-custom-layer-link-input').filter({visible:true});
@@ -474,7 +474,8 @@ export async function verifySmartstoreDetail(page,parts,{check=()=>{},log=()=>{}
   return verifySmartstoreDetail(page,parts,{check,log,repairAttempt:1,applyEditor});
  }
  if(mismatch.length){log('상세 대조 차이: '+mismatch.join(' · '));throw Error('상세페이지 확인 불일치: '+mismatch.join(' · ')+'. 상품은 저장하지 않았습니다.');}
+ const fitPhotoLinksVerified=await applySmartstoreFitPhotoLinks(verified,parts,{check,log,verifyOnly:true});
  await verified.close();
  log('상세페이지 이미지 '+parts.files.length+'장 반영 확인 · '+(includeVideo?'공통 MP4 포함 · 판매페이지 자동재생 미검증':'영상 제외'));
- return {detailUploaded:true,bannerLinkVerified,bannerLinkStatus,bannerLinkUrl:parts.bannerLink?.url||null,detailParts:parts.files.length,videoUploaded:includeVideo,videoSha256:parts.videoIdentity?.sha256,videoPlayback:includeVideo?'unverified':null,colorNavigation:false,imageLayout:'fit',footerImageLayout:'fit'};
+ return {detailUploaded:true,bannerLinkVerified,bannerLinkStatus,bannerLinkUrl:parts.bannerLink?.url||null,fitPhotoLinksVerified,detailParts:parts.files.length,videoUploaded:includeVideo,videoSha256:parts.videoIdentity?.sha256,videoPlayback:includeVideo?'unverified':null,colorNavigation:false,imageLayout:'fit',footerImageLayout:'fit'};
 }
