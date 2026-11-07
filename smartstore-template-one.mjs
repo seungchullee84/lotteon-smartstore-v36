@@ -14,6 +14,14 @@ export const TEMPLATE_ASSET_NAMES=['giordano-official.png','lotte-department-off
 export const TEMPLATE_ASSET_BASE='https://raw.githubusercontent.com/seungchullee84/lotteon-smartstore-v36/main/public/smartstore-template/';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const style='font-family:GowunDodum,\'Malgun Gothic\',sans-serif;color:#25372e;word-break:keep-all;overflow-wrap:break-word;line-height:2.1;';
+const openingBackground='#f4f3ec';
+const colorSectionBackground=index=>index%2?'#f6f3ef':'#fff';
+
+export function shippingPromoSection(image,{start='#fff',end='#fff'}={}){
+ const background='linear-gradient(180deg,'+start+','+end+')';
+ return '<section data-shipping-promo style="background:'+background+';"><div style="mask-image:linear-gradient(180deg,transparent,#000 8%,#000 89%,transparent);">'+image+'</div></section>';
+}
+
 export function mannequinWearingNote(p){
  const gender=String(p.gender||'').trim();
  const male=/^(남성|남자|MEN|MALE)$/i.test(gender),female=/^(여성|여자|WOMEN|FEMALE)$/i.test(gender);
@@ -60,7 +68,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  const hero=draft?.heroImage?.startsWith('/smartstore-photo/')?draft.heroImage:groups.find(g=>draft?.colorSources?.[g.color]!=='official'&&g.urls[0]?.startsWith('/smartstore-photo/'))?.urls[0];
  const heroAlt='현재 상품 '+p.style+' 매장 마네킹 착용 모습';
  const leadingPoint=points[0];
- let body=`<section data-product-intro data-aida="attention" style="padding:56px 6% 64px;background:#f4f3ec;"><div data-header-logos style="display:flex;align-items:center;justify-content:space-between;gap:32px;margin:0 0 32px;"><div data-giordano-logo style="width:245px;max-width:45%;">${photo(assetBase+'giordano-official.png','지오다노 공식 로고')}</div><div data-lotte-logo style="width:220px;max-width:45%;margin-left:auto;">${photo(assetBase+'lotte-department-official.png','롯데백화점 공식 로고')}</div></div><div style="display:grid;grid-template-columns:${hero?'minmax(0,.9fr) minmax(0,1.1fr)':'minmax(0,1fr)'};gap:32px;align-items:center;"><div><h1 style="font-size:30px;line-height:1.6;margin:0 0 28px;color:#465149;">${esc(headline)}</h1><h2 data-attention-benefit data-template-main-title data-template-default-title="${esc(leadingPoint?.title||'나에게 맞는 한 벌을 만나보세요.')}" style="white-space:pre-line;overflow-wrap:anywhere;font-size:44px;line-height:1.5;margin:0 0 24px;letter-spacing:-.6px;">${esc(templateMainHeadline(p,leadingPoint?.title||'나에게 맞는 한 벌을 만나보세요.',1))}</h2></div>${hero?'<div data-product-hero>'+photo(hero,heroAlt,'border-radius:16px;')+'</div>':''}</div></section>`;
+ let body=`<section data-product-intro data-aida="attention" style="padding:56px 6% 64px;background:${openingBackground};"><div data-header-logos style="display:flex;align-items:center;justify-content:space-between;gap:32px;margin:0 0 32px;"><div data-giordano-logo style="width:245px;max-width:45%;">${photo(assetBase+'giordano-official.png','지오다노 공식 로고')}</div><div data-lotte-logo style="width:220px;max-width:45%;margin-left:auto;">${photo(assetBase+'lotte-department-official.png','롯데백화점 공식 로고')}</div></div><div style="display:grid;grid-template-columns:${hero?'minmax(0,.9fr) minmax(0,1.1fr)':'minmax(0,1fr)'};gap:32px;align-items:center;"><div><h1 style="font-size:30px;line-height:1.6;margin:0 0 28px;color:#465149;">${esc(headline)}</h1><h2 data-attention-benefit data-template-main-title data-template-default-title="${esc(leadingPoint?.title||'나에게 맞는 한 벌을 만나보세요.')}" style="white-space:pre-line;overflow-wrap:anywhere;font-size:44px;line-height:1.5;margin:0 0 24px;letter-spacing:-.6px;">${esc(templateMainHeadline(p,leadingPoint?.title||'나에게 맞는 한 벌을 만나보세요.',1))}</h2></div>${hero?'<div data-product-hero>'+photo(hero,heroAlt,'border-radius:16px;')+'</div>':''}</div></section>`;
  let palette='';
  const paletteGroups=allGroups.map(g=>({...g,paletteUrl:(draft?.acceptAllFolderPhotos?draft.paletteImages?.[g.color]:g.urls[0])||draft?.paletteImages?.[g.color]}));
  if(paletteGroups.length){
@@ -81,15 +89,20 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
     : group.urls.length===3
     ? '<div data-photo-layout="three"><div>'+photo(group.urls[0],group.color+' 착용 모습','border-radius:14px;')+'</div><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin-top:4px;align-items:start;">'+group.urls.slice(1).map(url=>'<div>'+photo(url,group.color+' 디테일','border-radius:14px;')+'</div>').join('')+'</div></div>'
     : `<div style="display:flex;gap:4px;align-items:start;"><div style="flex:1;min-width:0;">${photo(group.urls[0],group.color+' 착용 모습','border-radius:14px;')}</div>${group.urls.length>1?`<div style="flex:1;min-width:0;">${group.urls.slice(1).map(url=>photo(url,group.color+' 디테일','margin-bottom:0;border-radius:14px;')).join('')}</div>`:''}</div>`;
-   body+=`<section id="smartstore-color-${group.index}" style="padding:52px 0;background:${group.index%2?'#f6f3ef':'#fff'};"><div style="padding:0 4%;">${header(colorCaption(group.color,{style:p.style}),esc(group.color),{emphasized:true,kickerTone:draft?.captionTones?.[group.color]})}${sourceLabel}</div>${photos}${group.urls.length>1?'<p data-photo-note style="font-size:19px;margin:16px 4% 0;line-height:1.9;">DETAIL<br>'+ (group.index===0?'제공된 상품사진과 디테일을 함께 확인해 주세요.':esc([group.color+'의 착용 모습을 사진으로 살펴보세요.',group.color+'의 전체 실루엣을 확인해 주세요.',group.color+'의 착용 모습과 세부 구성을 살펴보세요.',group.color+' 사진을 비교하며 스타일링을 확인해 주세요.'][(group.index-1)%4]))+'</p>':''}</section>`;
+   body+=`<section id="smartstore-color-${group.index}" style="padding:52px 0;background:${colorSectionBackground(group.index)};"><div style="padding:0 4%;">${header(colorCaption(group.color,{style:p.style}),esc(group.color),{emphasized:true,kickerTone:draft?.captionTones?.[group.color]})}${sourceLabel}</div>${photos}${group.urls.length>1?'<p data-photo-note style="font-size:19px;margin:16px 4% 0;line-height:1.9;">DETAIL<br>'+ (group.index===0?'제공된 상품사진과 디테일을 함께 확인해 주세요.':esc([group.color+'의 착용 모습을 사진으로 살펴보세요.',group.color+'의 전체 실루엣을 확인해 주세요.',group.color+'의 착용 모습과 세부 구성을 살펴보세요.',group.color+' 사진을 비교하며 스타일링을 확인해 주세요.'][(group.index-1)%4]))+'</p>':''}</section>`;
   }
  }
- if(draft?.acceptAllFolderPhotos&&draft.providedImages?.length){
+ const folderPhotos=draft?.acceptAllFolderPhotos?(draft.providedImages||[]):[];
+ if(folderPhotos.length){
   if(!groups.length)body+='<div style="padding:56px 6% 24px;text-align:center;font-size:26px;">매장 마네킹 실제 착용사진</div>';
-  body+='<div data-folder-photos>'+draft.providedImages.map(src=>photo(src,'현재 상품 '+p.style+' 착용사진')).join('')+'</div>';
+  body+='<div data-folder-photos>'+folderPhotos.map(src=>photo(src,'현재 상품 '+p.style+' 착용사진')).join('')+'</div>';
  }
- body+=divider+'<section data-shipping-promo>'+common(STORE_SHIPPING_PROMO_ASSET,STORE_SHIPPING_PROMO_ALT)+'</section>';
- body+=divider+`<section data-official-detail data-aida="desire"><div style="padding:96px 6% 72px;">${header('PRODUCT DETAIL','디테일까지,<br>차근차근 살펴보세요.')}<p style="font-size:23px;margin:0;">공식 상품 이미지와 상세 정보를 원본 그대로 안내합니다.</p></div>`;
+ const lastColorGroup=groups.at(-1);
+ let shippingStart='#fff';
+ if(!folderPhotos.length&&lastColorGroup)shippingStart=colorSectionBackground(lastColorGroup.index);
+ if(!folderPhotos.length&&!lastColorGroup&&!points.length&&!palette)shippingStart=openingBackground;
+ body+=shippingPromoSection(common(STORE_SHIPPING_PROMO_ASSET,STORE_SHIPPING_PROMO_ALT),{start:shippingStart});
+ body+=`<section data-official-detail data-aida="desire"><div style="padding:96px 6% 72px;">${header('PRODUCT DETAIL','디테일까지,<br>차근차근 살펴보세요.')}<p style="font-size:23px;margin:0;">공식 상품 이미지와 상세 정보를 원본 그대로 안내합니다.</p></div>`;
  // Preserve the complete original, including size/INFORMATION. Never crop or substitute it.
  const embedded=new Set(p.images.detail?(draft?.embeddedOfficialSections||[]).map(key=>p.images[key]).filter(Boolean):[]);
  const officialSources=(p.images.detail||!groups.length?original.sources:[...new Set(['size','check','info'].map(key=>p.images[key]).filter(Boolean))]).filter(src=>src===p.images.detail||!embedded.has(src));

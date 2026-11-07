@@ -2,7 +2,7 @@ import {templateMainHeadline} from './smartstore-template-headline.mjs';
 import {buildDetailContent} from './detail-html.mjs';
 import {colorCaption} from './smartstore-color-copy.mjs';
 import {displaySellingPoints} from './smartstore-selling-points.mjs';
-import {mannequinWearingNote,productSellingPoints,STORE_SHIPPING_PROMO_ASSET,STORE_SHIPPING_PROMO_ALT} from './smartstore-template-one.mjs';
+import {mannequinWearingNote,productSellingPoints,STORE_SHIPPING_PROMO_ASSET,STORE_SHIPPING_PROMO_ALT,shippingPromoSection} from './smartstore-template-one.mjs';
 import {officialTemplateTitle} from './smartstore-template-title.mjs';
 import {productVideoUrl,BRAND_VIDEO_HEADING_HEIGHT} from './smartstore-brand-video.mjs';
 import {STORE_BANNER_URL} from './smartstore-store-banner.mjs';
@@ -41,7 +41,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  }
  if(draft?.acceptAllFolderPhotos&&draft.providedImages?.length)body+='<div data-folder-photos>'+draft.providedImages.map(src=>photo(src,'현재 상품 '+p.style+' 착용사진')).join('')+'</div>';
  if(points.length)body+=`<section class="ss2-points"><h2 data-product-point-heading class="ss2-section-title">이 옷을 고르는 이유</h2><div data-product-points data-point-count="${points.length}" class="ss2-point-grid">${points.map(point=>'<div><h3>'+esc(point.title)+'</h3><p>'+esc(point.description)+'</p></div>').join('')}</div></section>`;
- body+='<section data-shipping-promo>'+common(shippingPromoAssets[theme.key],STORE_SHIPPING_PROMO_ALT)+'</section>';
+ body+=shippingPromoSection(common(shippingPromoAssets[theme.key],STORE_SHIPPING_PROMO_ALT),{start:'var(--shipping-start,var(--paper))',end:'var(--paper)'});
  body+=`<section data-official-detail-bridge class="ss2-detail-bridge"><div class="ss2-detail-bridge-logo">${common('giordano-official.png','지오다노 공식 홈페이지 로고')}</div><h2>상품을 조금 더 자세히</h2><p>공식 이미지와 상품 정보를 확인해 주세요.</p><span class="ss2-detail-bridge-rule" aria-hidden="true"></span></section>`;
  const embedded=new Set(p.images.detail?(draft?.embeddedOfficialSections||[]).map(k=>p.images[k]).filter(Boolean):[]);
  const officialSources=original.sources.filter(src=>src===p.images.detail||!embedded.has(src));

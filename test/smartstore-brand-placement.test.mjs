@@ -16,7 +16,7 @@ test('두 템플릿 모두 구매 이유와 공식 상세 다음 하단에 영�
    assert.deepEqual(footer.find('.ss2-service-grid>div>span').map((_,node)=>$(node).text()).get(),['01','02','03']);
    assert.doesNotMatch(footer.text(),/주 7일/);
   }
-  const order=['data-product-intro','data-product-point-heading','id="smartstore-color-0"','data-shipping-promo','data-official-detail','data-brand-video-heading','data-brand-video="mp4"','data-store-banner'];
+  const order=['data-product-intro','data-product-point-heading','id="smartstore-color-0"','<section data-shipping-promo','data-official-detail','data-brand-video-heading','data-brand-video="mp4"','data-store-banner'];
   for(let i=1;i<order.length;i++)assert(html.indexOf(order[i-1])<html.indexOf(order[i]));
  }
 });

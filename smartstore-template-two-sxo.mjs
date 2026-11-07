@@ -51,6 +51,8 @@ export const templateTwoSxoCss=`
 .ss2-color-photos figure:first-child,.ss2-color-photos figure:nth-child(3){grid-column:auto}
 .ss2-color-photos figure:nth-child(2){margin:0}
 .ss2-color-photos figure:only-child{grid-column:1/-1}
+.ss2-color:nth-of-type(even)+[data-shipping-promo]{--shipping-start:var(--alternate)}
+.ss2-intro+[data-shipping-promo],.ss2-points+[data-shipping-promo]{--shipping-start:var(--opening)}
 .ss2-official{padding:48px 0 0}
 .ss2-official>.ss2-section-title{padding:0 48px}
 .ss2-official figure{margin:0}
