@@ -2,7 +2,7 @@ import {templateMainHeadline} from './smartstore-template-headline.mjs';
 import {buildDetailContent} from './detail-html.mjs';
 import {colorCaption} from './smartstore-color-copy.mjs';
 import {displaySellingPoints} from './smartstore-selling-points.mjs';
-import {mannequinWearingNote,productSellingPoints} from './smartstore-template-one.mjs';
+import {mannequinWearingNote,productSellingPoints,STORE_SHIPPING_PROMO_ASSET,STORE_SHIPPING_PROMO_ALT} from './smartstore-template-one.mjs';
 import {officialTemplateTitle} from './smartstore-template-title.mjs';
 import {productVideoUrl,BRAND_VIDEO_HEADING_HEIGHT} from './smartstore-brand-video.mjs';
 import {STORE_BANNER_URL} from './smartstore-store-banner.mjs';
@@ -12,7 +12,8 @@ import {templateTwoCss} from './smartstore-template-two-style.mjs';
 import {templateTwoSxoBody,templateTwoSxoCss} from './smartstore-template-two-sxo.mjs';
 export {mannequinWearingNote,productSellingPoints};
 export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-sxo-intro-features-20261101';
-export const TEMPLATE_ASSET_NAMES=['giordano-official.png','lotte-department-official.png','store.jpg','GowunDodum-Regular.ttf'];
+const shippingPromoAssets={men:'shipping-promo-men.png',women:'shipping-promo-women.png',neutral:STORE_SHIPPING_PROMO_ASSET};
+export const TEMPLATE_ASSET_NAMES=['giordano-official.png','lotte-department-official.png','store.jpg','GowunDodum-Regular.ttf',...Object.values(shippingPromoAssets)];
 export const TEMPLATE_ASSET_BASE='https://raw.githubusercontent.com/seungchullee84/lotteon-smartstore-v36/main/public/smartstore-template/';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function safe(src){if(typeof src!=='string'||!(/^(https?:\/\/|\/image\/|\/smartstore-photo\/|\/smartstore-template\/|data:image\/(png|jpeg|webp);base64,|file:\/\/)/.test(src)))throw Error('상세페이지 이미지 주소를 확인해 주세요.');return esc(src);}
@@ -29,6 +30,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  const hero=draft?.heroImage?.startsWith('/smartstore-photo/')?draft.heroImage:groups.find(g=>draft?.colorSources?.[g.color]!=='official'&&g.urls[0]?.startsWith('/smartstore-photo/'))?.urls[0];
  let body=`<header class="ss2-header"><div class="ss2-logo" data-giordano-logo>${common('giordano-official.png','지오다노 공식 홈페이지 로고')}</div><div class="ss2-lotte-logo" data-lotte-logo>${common('lotte-department-official.png','롯데백화점 공식 로고')}</div><span class="ss2-meta">${theme.key==='women'?'WOMEN':theme.key==='men'?'MEN':''}</span><span class="ss2-store">롯데백화점 동탄점</span></header>`;
  body+=`<section data-product-intro data-intro-layout="benefit-and-mannequin" class="ss2-intro"><p class="ss2-kicker">${esc(name)}</p><h1 data-benefit-headline data-template-main-title data-template-default-title="${esc(headline.join('\n'))}" style="white-space:pre-line;overflow-wrap:anywhere;">${templateMainHeadline(p)?esc(templateMainHeadline(p)):headline.map(line=>'<span style="display:block">'+esc(line)+'</span>').join('')}</h1>${points[0]?.description?'<p class="ss2-description">'+esc(points[0].description)+'</p>':''}<div class="ss2-product-line"><span>${esc(name)}</span><small data-style-number>STYLE NO. ${esc(p.style)}</small></div>${hero?photo(hero,'현재 상품 '+p.style+' 매장 마네킹 착용 모습'):''}<div class="ss2-photo-signature"><span>GIORDANO</span><span>${hero?'매장 마네킹 실제 착용사진':''}</span></div></section>`;
+ body+='<section data-shipping-promo>'+common(shippingPromoAssets[theme.key],STORE_SHIPPING_PROMO_ALT)+'</section>';
  body+=`<section data-brand-video-heading class="ss2-video-title" style="height:${BRAND_VIDEO_HEADING_HEIGHT}px"><p>GIORDANO FILM</p><h2>지오다노가 담은 일상의 순간</h2></section>`;
  if(includeVideo){const videoSource=videoUrl||productVideoUrl(p);if(typeof videoSource!=='string'||/^(?:javascript|data):/i.test(videoSource))throw Error('브랜드 영상 주소를 확인해 주세요.');body+=`<section data-brand-video="mp4" class="ss2-video"><video src="${esc(videoSource)}" title="지오다노 브랜드 영상" controls autoplay muted loop playsinline preload="metadata"></video></section>`;}
  if(groups.length){

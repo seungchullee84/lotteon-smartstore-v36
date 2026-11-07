@@ -6,7 +6,17 @@ test('두 템플릿 모두 구매 이유와 공식 상세 다음 하단에 영�
   const p={style:'123456',name:gender+' 테스트 상의',rawName:'울 폴로 자켓',gender,detailTemplate,colors:['01블랙'],images:{detail:'https://www.giordano.co.kr/detail.jpg'},smartstoreDetail:{style:'123456',sellingPoints:[{title:'가벼운 울 원단',description:'가벼운 울 원단을 사용했어요.',evidence}],colorImages:{'01블랙':['/smartstore-photo/0123456789abcdef01234567']}}};
   const {html}=buildSmartstoreDetail(p),$=cheerio.load(html);assert.equal($('[data-brand-intro]').length,0);assert(!html.includes('일상의 기본을, 나답게.'));assert.equal($('video').length,1);assert(html.includes(detailTemplate===2?'지오다노가 담은 일상의 순간':'영상으로 만나는 지오다노'));assert.equal($('[data-brand-video-heading]').attr('style').includes('height:176px'),true);
   for(const selector of ['[data-brand-video-heading]','[data-brand-video]','[data-product-point-heading]'])assert.equal($(selector).length,1);
-  const order=['data-product-intro','data-product-point-heading','data-official-detail','data-brand-video-heading','data-brand-video="mp4"','data-store-banner'];
+  const promo=$('[data-shipping-promo]');
+  assert.equal(promo.length,1);
+  assert.equal($('[data-product-intro]').next().is('[data-shipping-promo]'),true);
+  const asset=detailTemplate===1||gender==='공용'?'shipping-promo.png':gender==='남성'?'shipping-promo-men.png':'shipping-promo-women.png';
+  assert.equal(promo.find('img').attr('src').split('/').at(-1),asset);
+  if(detailTemplate===2){
+   const footer=$('[data-store-footer]');
+   assert.deepEqual(footer.find('.ss2-service-grid>div>span').map((_,node)=>$(node).text()).get(),['01','02','03']);
+   assert.doesNotMatch(footer.text(),/주 7일/);
+  }
+  const order=['data-product-intro','data-shipping-promo','data-product-point-heading','data-official-detail','data-brand-video-heading','data-brand-video="mp4"','data-store-banner'];
   for(let i=1;i<order.length;i++)assert(html.indexOf(order[i-1])<html.indexOf(order[i]));
  }
 });

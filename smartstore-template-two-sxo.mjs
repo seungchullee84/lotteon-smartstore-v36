@@ -17,7 +17,7 @@ export function templateTwoSxoBody(html,product,name,points=[]){
  $('.ss2-photo-signature').each((_,node)=>{
   const n=$(node);n.find('span').first().remove();
  });
- $('.ss2-points').insertAfter('[data-product-intro]');
+ $('.ss2-points').insertAfter('[data-shipping-promo]');
  $('[data-brand-video-heading], [data-brand-video]').insertBefore('[data-store-banner]');
  $('.ss2-palette-grid').attr('style','--columns:4');
  $('.ss2-palette>.ss2-section-title').text('색상, 한눈에 비교해 보세요.');

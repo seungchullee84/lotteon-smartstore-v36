@@ -224,7 +224,7 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='GET'&&url.pathname.startsWith('/smartstore-template/')){
       const name=url.pathname.slice('/smartstore-template/'.length);
       if(!TEMPLATE_ASSET_NAMES.includes(name))return json(res,404,{error:'없는 템플릿 파일'});
-      res.writeHead(200,{'Content-Type':name.endsWith('.ttf')?'font/ttf':'image/jpeg','Cache-Control':'no-store'});
+      res.writeHead(200,{'Content-Type':name.endsWith('.ttf')?'font/ttf':name.endsWith('.png')?'image/png':'image/jpeg','Cache-Control':'no-store'});
       return res.end(await readFile(path.join(root,'public','smartstore-template',name)));
     }
     if(req.method==='GET'&&/^\/smartstore-photo\/[a-f0-9]{24}$/.test(url.pathname)){

@@ -49,9 +49,10 @@ test('새 공통 MP4는 과거 시즌 제외 상품을 포함해 전체에 적�
 test('스마트스토어에만 확정 템플릿·영상·공식 원본·INFORMATION 뒤 혜택 적용',()=>{
  const approved=buildSmartstoreDetail(product).html;assert.ok(approved.indexOf('data-store-banner')<approved.indexOf('data-store-footer'));assert.match(approved,/store-discovery-women(?:-[2-4])?\.jpg/);assert.equal(approved.includes('href="https://shopping.naver.com'),false);const lotte=buildDetailContent(product.images,product.colors,{},product.originalDetailUrl).html;
  assert.match(smartstorePlan(product,50000).html,/data-smartstore-template=/);
- assert.doesNotMatch(lotte,/smartstore-template|youtube|benefits/);
+ assert.doesNotMatch(lotte,/smartstore-template|youtube|benefits|data-shipping-promo/);
  assert(!approved.includes('data-brand-intro'));assert(approved.includes('영상으로 만나는 지오다노'));
- assert.ok(approved.indexOf('/info.jpg')<approved.indexOf('benefits.jpg'));
+ assert.ok(approved.indexOf('/info.jpg')<approved.indexOf('benefits-store-reasons.jpg'));
+ assert.doesNotMatch(approved,/\/benefits\.jpg/);
  assert.match(approved,/controls autoplay muted loop playsinline/);assert.doesNotMatch(approved,/youtube|클릭하면 해당 색상|href="#smartstore-color-/);assert.doesNotMatch(approved,/26920|모달|기모|CARE GUIDE/);
  assert.deepEqual(productSellingPoints(product),[]);assert.equal(productSellingPoints({...product,officialDescription:'가벼운 원단을 사용한 경량 패딩 상품입니다.'})[0].evidence,'가벼운 원단을 사용한 경량 패딩 상품입니다.');
  assert.equal((approved.match(/\/detail.jpg/g)||[]).length,1);
@@ -65,7 +66,9 @@ test('색상별 사진은 현재 상품 순서·원본 크기 유지, 중복 삽
  assert.equal(p.name,'<script>bad()</script>');
 });
 test('공통 템플릿 파일만 동기화하고 마네킨 컷과 상품 초안은 GitHub에서 제외',()=>{
- assert.equal(publishable('public/smartstore-template/benefits.jpg'),true);assert.equal(publishable('public/smartstore-template/GowunDodum-Regular.ttf'),true);
+ for(const file of ['benefits.jpg','benefits-store-reasons.jpg','shipping-promo.png','shipping-promo-men.png','shipping-promo-women.png','GowunDodum-Regular.ttf']){
+  assert.equal(publishable('public/smartstore-template/'+file),true,file);
+ }
  for(const file of ['public/smartstore-template/product.jpg','data/smartstore-details/375908/draft.json','data/375908/smartstore-photo-test.jpg'])assert.equal(publishable(file),false,file);
 });
 test('다른 품번·색상·외부 경로는 차단하고 사진 매핑과 상품별 소구점으로 저장',async()=>{

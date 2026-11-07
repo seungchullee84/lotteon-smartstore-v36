@@ -9,7 +9,7 @@ test('공식 성별 필드로 여성 로즈·남성 네이비를 고르고 이�
  assert(templateTwoTheme({}).needsGenderReview);assert(!templateTwoTheme({gender:'공용'}).needsGenderReview);
  const female=load(buildSmartstoreDetail({...product,detailTemplate:2}).html),male=load(buildSmartstoreDetail({...product,gender:'남성',detailTemplate:2}).html);
  assert.equal(female('[data-template-theme]').attr('data-template-theme'),'women');assert.equal(male('[data-template-theme]').attr('data-template-theme'),'men');assert.match(female('.ss2').attr('style'),/--button:#673247/);assert.match(male('.ss2').attr('style'),/--button:#223d60/);
- assert.deepEqual(female('img').toArray().map(n=>female(n).attr('src')),male('img').toArray().map(n=>male(n).attr('src')),'성별 배색은 원본 사진을 바꾸지 않는다');
+ assert.deepEqual(female('img').not('[data-shipping-promo] img').toArray().map(n=>female(n).attr('src')),male('img').not('[data-shipping-promo] img').toArray().map(n=>male(n).attr('src')),'성별 배색은 원본 사진을 바꾸지 않는다');
 });
 test('새 템플릿2는 상품명·공식 근거 장점·원본 전체·정면 팔레트·하단 영상·하단 링크를 보존한다',()=>{
  const {html}=buildSmartstoreDetail({...product,detailTemplate:2}),$=load(html);

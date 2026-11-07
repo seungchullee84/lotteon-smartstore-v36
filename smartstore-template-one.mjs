@@ -7,7 +7,10 @@ import {brandVideoHtml,brandVideoHeadingHtml,productVideoUrl} from './smartstore
 import {officialSellingPoints,displaySellingPoints} from './smartstore-selling-points.mjs';
 
 export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-aida-lower-film-20261101';
-export const TEMPLATE_ASSET_NAMES=['giordano-official.png','lotte-department-official.png','benefits.jpg','shipping.jpg','returns.jpg','store.jpg',...STORE_BANNER_ASSET_NAMES,'GowunDodum-Regular.ttf'];
+export const STORE_SHIPPING_PROMO_ASSET='shipping-promo.png';
+export const STORE_SHIPPING_PROMO_ALT='공휴일 포함 주 7일 배송. 주말 출고 상품은 배송 상황에 따라 월요일 수령 가능. 오전 11시 30분까지 구매 시 당일 발송. 백화점 정기휴무일 하루 제외. 매장에 재고가 없으면 발송까지 2~3일 더 걸릴 수 있어요.';
+const STORE_BENEFITS_ASSET='benefits-store-reasons.jpg';
+export const TEMPLATE_ASSET_NAMES=['giordano-official.png','lotte-department-official.png','benefits.jpg',STORE_BENEFITS_ASSET,STORE_SHIPPING_PROMO_ASSET,'shipping.jpg','returns.jpg','store.jpg',...STORE_BANNER_ASSET_NAMES,'GowunDodum-Regular.ttf'];
 export const TEMPLATE_ASSET_BASE='https://raw.githubusercontent.com/seungchullee84/lotteon-smartstore-v36/main/public/smartstore-template/';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const style='font-family:GowunDodum,\'Malgun Gothic\',sans-serif;color:#25372e;word-break:keep-all;overflow-wrap:break-word;line-height:2.1;';
@@ -58,6 +61,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  const heroAlt='현재 상품 '+p.style+' 매장 마네킹 착용 모습';
  const leadingPoint=points[0];
  let body=`<section data-product-intro data-aida="attention" style="padding:56px 6% 64px;background:#f4f3ec;"><div data-header-logos style="display:flex;align-items:center;justify-content:space-between;gap:32px;margin:0 0 32px;"><div data-giordano-logo style="width:245px;max-width:45%;">${photo(assetBase+'giordano-official.png','지오다노 공식 로고')}</div><div data-lotte-logo style="width:220px;max-width:45%;margin-left:auto;">${photo(assetBase+'lotte-department-official.png','롯데백화점 공식 로고')}</div></div><div style="display:grid;grid-template-columns:${hero?'minmax(0,.9fr) minmax(0,1.1fr)':'minmax(0,1fr)'};gap:32px;align-items:center;"><div><h1 style="font-size:30px;line-height:1.6;margin:0 0 28px;color:#465149;">${esc(headline)}</h1><h2 data-attention-benefit data-template-main-title data-template-default-title="${esc(leadingPoint?.title||'나에게 맞는 한 벌을 만나보세요.')}" style="white-space:pre-line;overflow-wrap:anywhere;font-size:44px;line-height:1.5;margin:0 0 24px;letter-spacing:-.6px;">${esc(templateMainHeadline(p,leadingPoint?.title||'나에게 맞는 한 벌을 만나보세요.',1))}</h2></div>${hero?'<div data-product-hero>'+photo(hero,heroAlt,'border-radius:16px;')+'</div>':''}</div></section>`;
+ body+='<section data-shipping-promo>'+common(STORE_SHIPPING_PROMO_ASSET,STORE_SHIPPING_PROMO_ALT)+'</section>';
  let palette='';
  const paletteGroups=allGroups.map(g=>({...g,paletteUrl:(draft?.acceptAllFolderPhotos?draft.paletteImages?.[g.color]:g.urls[0])||draft?.paletteImages?.[g.color]}));
  if(paletteGroups.length){
@@ -95,7 +99,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  // Preview, PNG boundaries and ONE insertion all use this lower film position.
  body+=divider+(includeVideo?brandVideoHtml(videoUrl||productVideoUrl(p)):brandVideoHeadingHtml());
 
- body+='<div data-store-banner style="padding:48px 0;">'+common(storeBannerAsset(p),'여길 누르면 지오다노 다른 상품을 구경할 수 있어요')+'</div><div data-store-footer>'+common('benefits.jpg','동탄롯데 지오다노 구매 혜택 · 5만명 이상 스토어 관심등록고객')+common('shipping.jpg','정품 상품 출고 안내')+'<div data-returns-guide style="position:relative;">'+common('returns.jpg','교환 및 반품 안내')+'<svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 1164" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:multiply;"><g data-return-highlight fill="#ffe14f" fill-opacity=".5"><rect x="44" y="243" width="290" height="36" rx="4"/><rect x="44" y="313" width="684" height="36" rx="4"/><rect x="44" y="370" width="132" height="36" rx="4"/><rect x="44" y="432" width="689" height="35" rx="4"/></g></svg></div>';
+ body+='<div data-store-banner style="padding:48px 0;">'+common(storeBannerAsset(p),'여길 누르면 지오다노 다른 상품을 구경할 수 있어요')+'</div><div data-store-footer>'+common(STORE_BENEFITS_ASSET,'동탄롯데 지오다노 구매 혜택 · 넉넉한 물량, 5만 명 이상 스토어 관심 등록, 문의 응대')+common('shipping.jpg','정품 상품 출고 안내')+'<div data-returns-guide style="position:relative;">'+common('returns.jpg','교환 및 반품 안내')+'<svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 1164" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:multiply;"><g data-return-highlight fill="#ffe14f" fill-opacity=".5"><rect x="44" y="243" width="290" height="36" rx="4"/><rect x="44" y="313" width="684" height="36" rx="4"/><rect x="44" y="370" width="132" height="36" rx="4"/><rect x="44" y="432" width="689" height="35" rx="4"/></g></svg></div>';
  body+=`<section style="padding:48px 6%;background:#e7ede4;">${header('GIORDANO · DONGTAN','지오다노<br>롯데백화점 동탄점')}<p style="font-size:24px;margin:0 0 28px;">경기도 화성시 동탄역로 160<br>지하 1층 지오다노</p>${common('store.jpg','매장 안내')}</section></div>`;
  return {html:`<div data-smartstore-template="${SMARTSTORE_DETAIL_TEMPLATE}" style="${style}max-width:848px;margin:0 auto;background:#fff;text-align:left;">${body}</div>`,sources:[...new Set(sources)],template:SMARTSTORE_DETAIL_TEMPLATE,points,brandIntro:null};
 }
