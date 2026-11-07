@@ -11,7 +11,6 @@ export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-aida-lower-film-20261101';
 export const STORE_SHIPPING_PROMO_ASSET='shipping-promo.png';
 export const STORE_SHIPPING_PROMO_ALT='공휴일 포함 주 7일 배송. 주말 출고 상품은 배송 상황에 따라 월요일 수령 가능. 오전 11시 30분까지 구매 시 당일 발송. 백화점 정기휴무일 하루 제외. 매장에 재고가 없으면 발송까지 2~3일 더 걸릴 수 있어요.';
 export const OFFICIAL_DETAIL_TITLE='디테일까지, 차근차근 살펴보세요.';
-export const OFFICIAL_DETAIL_DESCRIPTION='공식 상품 이미지와 상세 정보를 원본 그대로 안내합니다.';
 const STORE_BENEFITS_ASSET='benefits-store-reasons.jpg';
 export const TEMPLATE_ASSET_NAMES=['giordano-official.png','lotte-department-official.png','benefits.jpg',STORE_BENEFITS_ASSET,STORE_SHIPPING_PROMO_ASSET,'shipping.jpg','returns.jpg','store.jpg',...STORE_BANNER_ASSET_NAMES,'GowunDodum-Regular.ttf'];
 export const TEMPLATE_ASSET_BASE='https://raw.githubusercontent.com/seungchullee84/lotteon-smartstore-v36/main/public/smartstore-template/';
@@ -107,7 +106,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  if(!folderPhotos.length&&lastColorGroup)shippingStart=colorSectionBackground(lastColorGroup.index);
  if(!folderPhotos.length&&!lastColorGroup&&!points.length&&!palette)shippingStart=openingBackground;
  body+=shippingPromoSection(common(STORE_SHIPPING_PROMO_ASSET,STORE_SHIPPING_PROMO_ALT),{start:shippingStart});
- body+=`<section data-official-detail data-aida="desire"><div style="padding:var(--official-detail-top,156px) 6% var(--official-detail-bottom,24px);"><div data-section-heading style="border-left:5px solid #294c3b;padding-left:18px;"><h2 style="font-size:30px;line-height:1.5;margin:0;color:#213c2e;">${OFFICIAL_DETAIL_TITLE}</h2><p style="font-size:20px;line-height:1.65;margin:6px 0 0;color:#465149;">${OFFICIAL_DETAIL_DESCRIPTION}</p></div></div>`;
+ body+=`<section data-official-detail data-aida="desire"><div style="padding:var(--official-detail-top,156px) 6% var(--official-detail-bottom,24px);"><div data-section-heading style="border-left:5px solid #294c3b;padding-left:18px;"><h2 style="font-size:30px;line-height:1.5;margin:0;color:#213c2e;">${OFFICIAL_DETAIL_TITLE}</h2></div></div>`;
  // Preserve the complete original, including size/INFORMATION. Never crop or substitute it.
  const embedded=new Set(p.images.detail?(draft?.embeddedOfficialSections||[]).map(key=>p.images[key]).filter(Boolean):[]);
  const officialSources=(p.images.detail||!groups.length?original.sources:[...new Set(['size','check','info'].map(key=>p.images[key]).filter(Boolean))]).filter(src=>src===p.images.detail||!embedded.has(src));
