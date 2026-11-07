@@ -30,7 +30,8 @@ async function noServingCopies(f){assert.equal((await readdir(f.folder)).filter(
 
 test('자료가 없는 상품과 다른 템플릿은 기존 사진 선택을 바꾸지 않는다',async t=>{
  const f=await fixture(t),before=structuredClone(f.product);
- assert.equal(await prepareFitGuide({...f.product,style:'123456'},f.folder,{dataRoot:f.dataRoot}),null);
+ for(const style of ['12345','123456','12345678'])assert.equal(await prepareFitGuide({...f.product,style},f.folder,{dataRoot:f.dataRoot}),null);
+ await assert.rejects(prepareFitGuide({...f.product,style:'../116955'},f.folder,{dataRoot:f.dataRoot}),failure);
  assert.equal(await prepareFitGuide({...f.product,detailTemplate:2},f.folder,{dataRoot:f.dataRoot}),null);
  f.manifest.detailTemplate=2;await f.save();
  assert.equal(await prepareFitGuide(f.product,f.folder,{dataRoot:f.dataRoot}),null);

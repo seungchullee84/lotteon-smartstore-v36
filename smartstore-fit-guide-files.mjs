@@ -55,7 +55,7 @@ function managerRows(manager){
 export async function prepareFitGuide(product,folder,{dataRoot=path.join(appRoot,'data')}={}){
  const detailTemplate=resolveDetailTemplate(product?.detailTemplate);
  const style=String(product?.style||'');
- requireGuide(stylePattern.test(style),'현재 품번을 확인해 주세요.');
+ requireGuide(/^\d{5,8}$/.test(style),'현재 품번을 확인해 주세요.');
  const pack=path.join(dataRoot,'smartstore-details',style,'fit-guide');
  try{await lstat(pack);}catch(error){if(error.code==='ENOENT')return null;throw fail('자료 폴더를 읽지 못했습니다.',error);}
  try{
