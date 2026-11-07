@@ -28,12 +28,18 @@ async function fixture(t){
 }
 async function noServingCopies(f){assert.equal((await readdir(f.folder)).filter(name=>name.startsWith('smartstore-photo-')).length,0);}
 
-test('자료가 없는 상품과 템플릿2는 기존 사진 선택을 바꾸지 않는다',async t=>{
+test('자료가 없는 상품과 다른 템플릿은 기존 사진 선택을 바꾸지 않는다',async t=>{
  const f=await fixture(t),before=structuredClone(f.product);
  assert.equal(await prepareFitGuide({...f.product,style:'123456'},f.folder,{dataRoot:f.dataRoot}),null);
- await writeFile(path.join(f.pack,'manifest.json'),'broken JSON');
  assert.equal(await prepareFitGuide({...f.product,detailTemplate:2},f.folder,{dataRoot:f.dataRoot}),null);
+ f.manifest.detailTemplate=2;await f.save();
+ assert.equal(await prepareFitGuide(f.product,f.folder,{dataRoot:f.dataRoot}),null);
  assert.deepEqual(f.product,before);await noServingCopies(f);
+});
+
+test('사용자가 선택한 템플릿2와 자료의 템플릿이 같으면 그 선택을 유지한다',async t=>{
+ const f=await fixture(t);f.product.detailTemplate=2;f.manifest.detailTemplate=2;await f.save();const before=structuredClone(f.product);
+ const result=await prepareFitGuide(f.product,f.folder,{dataRoot:f.dataRoot});assert.equal(result.detailTemplate,2);assert.equal(result.products.length,3);assert.deepEqual(f.product,before);
 });
 
 test('세 상품 사진을 원바이트로 연결하고 대표·추가 사진 수는 유지한다',async t=>{

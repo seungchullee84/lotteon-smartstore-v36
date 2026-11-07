@@ -53,7 +53,7 @@ function managerRows(manager){
 }
 
 export async function prepareFitGuide(product,folder,{dataRoot=path.join(appRoot,'data')}={}){
- if(resolveDetailTemplate(product?.detailTemplate)!==1)return null;
+ const detailTemplate=resolveDetailTemplate(product?.detailTemplate);
  const style=String(product?.style||'');
  requireGuide(stylePattern.test(style),'현재 품번을 확인해 주세요.');
  const pack=path.join(dataRoot,'smartstore-details',style,'fit-guide');
@@ -62,7 +62,8 @@ export async function prepareFitGuide(product,folder,{dataRoot=path.join(appRoot
   const root=await realpath(pack),parent=await realpath(path.dirname(pack));
   requireGuide(inside(parent,root),'자료 폴더가 다른 위치로 연결되어 있습니다.');
   const manifest=JSON.parse((await boundedFile(root,'manifest.json',128*1024)).toString('utf8'));
-  requireGuide(manifest?.version===1&&manifest.detailTemplate===1&&manifest.style===style,'품번 또는 템플릿이 현재 상품과 다릅니다.');
+  requireGuide(manifest?.version===1&&[1,2].includes(manifest.detailTemplate)&&manifest.style===style,'품번 또는 템플릿 자료를 확인해 주세요.');
+  if(manifest.detailTemplate!==detailTemplate)return null;
   requireGuide(officialUrl(manifest.sourceUrl)===product.sourceUrl,'공식 주소가 현재 상품과 다릅니다.');
   requireGuide(hashPattern.test(manifest.anchor?.detailSha256)&&hashPattern.test(manifest.anchor?.sizeSha256),'현재 공식 원본의 확인 해시가 없습니다.');
   const outputRoot=await realpath(folder);
@@ -105,6 +106,6 @@ export async function prepareFitGuide(product,folder,{dataRoot=path.join(appRoot
    catch(error){if(error.code!=='ENOENT')throw error;}
    await writeFile(target,photo.bytes);photoFiles[src]=photo.name;
   }
-  return {style,detailTemplate:1,products,manager,photoFiles};
+  return {style,detailTemplate,products,manager,photoFiles};
  }catch(error){if(error.code==='FIT_GUIDE_REVERIFY')throw error;throw fail('자료 또는 이미지 파일을 다시 확인해 주세요.',error);}
 }
