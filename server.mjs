@@ -10,6 +10,7 @@ import {listTwoChoicePackages,readTwoChoicePackage,saveTwoChoicePackage,twoChoic
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {applyImportedPhotos,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail,renderPreparedSmartstoreDetail} from './smartstore-detail-files.mjs';
+import {loadSmartstoreLinkedComparison,prependSmartstoreLinkedComparison,linkedComparisonPreview} from './smartstore-linked-comparison.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
 import {resolveDetailTemplate} from './smartstore-template-choice.mjs';
 import {serveBrandVideo,WOMEN_VIDEO_HASH} from './smartstore-brand-video.mjs';
@@ -125,10 +126,12 @@ let uploadWorkRoot,uploadWarmup;
 function smartstoreUploadWorkRoot(){
  return uploadWorkRoot||=desktopDirectory().then(desktop=>path.join(desktop,'..','상품등록기 작업자료','스마트스토어')).catch(()=>path.join(dataRoot,'smartstore-upload-work'));
 }
-function prepareSmartstoreParts(output,folder,detail,workRoot,{signal,log}={}){
- return smartstoreUploadParts(output,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{
+async function prepareSmartstoreParts(output,folder,detail,workRoot,{signal,log,style}={}){
+ const comparison=await loadSmartstoreLinkedComparison(dataRoot,style);
+ const parts=await smartstoreUploadParts(output,folder,path.join(root,'public/smartstore-template/brand-intro.jpg'),{
   ...detail,dataRoot,signal,log,partsCacheRoot:path.join(workRoot,'parts')
  });
+ return prependSmartstoreLinkedComparison(parts,comparison);
 }
 function warmSmartstoreUpload(product,folder){
  const previous=uploadWarmup;previous?.controller.abort();
@@ -141,7 +144,7 @@ function warmSmartstoreUpload(product,folder){
   const temp=await mkdtemp(path.join(workRoot,'prepare-')),output=path.join(temp,'detail.png');
   try{
    const detail=await renderPreparedSmartstoreDetail(snapshot,folder,output,{signal,dataRoot,cacheOnly:true,renderCacheBase:path.join(workRoot,'render')});
-   const parts=await prepareSmartstoreParts(output,folder,detail,workRoot,{signal});
+   const parts=await prepareSmartstoreParts(output,folder,detail,workRoot,{signal,style:snapshot.style});
    if(!signal.aborted&&state.product?.style===snapshot.style&&state.folder===folder&&!state.busy)log('스마트스토어 상세 첨부 '+parts.files.length+'장 미리 준비 완료');
   }finally{
    await unlink(output).catch(()=>{});await rmdir(temp).catch(()=>{});
@@ -155,7 +158,7 @@ async function renderSmartstoreUpload(product,folder,output,{signal,prepared=fal
  const workRoot=await smartstoreUploadWorkRoot();
  const render=prepared?renderPreparedSmartstoreDetail:saveSmartstoreDetail;
  const detail=await render(product,folder,output,{signal,log,dataRoot,uploadOnly:true,renderCacheBase:path.join(workRoot,'render')});
- const parts=await prepareSmartstoreParts(output,folder,detail,workRoot,{signal,log});
+ const parts=await prepareSmartstoreParts(output,folder,detail,workRoot,{signal,log,style:product.style});
  return {detail,parts};
 }
 function json(res,status,data){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));}
@@ -256,9 +259,12 @@ const server=http.createServer(async(req,res)=>{
       const edits={};if(Object.hasOwn(fields,'templateHeadline'))edits['templateHeadline'+fields.detailTemplate]=validateTemplateHeadline(fields.templateHeadline);for(const key of ['name','gender','material'])if(typeof fields[key]==='string'&&fields[key].length<500)edits[key]=fields[key];
       for(const key of ['colors','sizes'])if(Array.isArray(fields[key])&&fields[key].length<=100&&fields[key].every(v=>typeof v==='string'&&v.length<100))edits[key]=fields[key];
       const p=await prepareSmartstoreDetail({...current,...edits,detailTemplate:fields.detailTemplate},state.folder);
+      const comparison=await loadSmartstoreLinkedComparison(dataRoot,current.style,{preview:true});
       if(state.product!==current)return json(res,409,{error:'상품이 변경되었습니다.'});
-      res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; img-src 'self'; media-src 'self'; font-src 'self'; style-src 'unsafe-inline'; frame-ancestors 'self'; base-uri 'none'"});
-      return res.end(localSmartstorePreview(p).html);
+      const imageSources=comparison?"'self' data:":"'self'";
+      res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; img-src "+imageSources+"; media-src 'self'; font-src 'self'; style-src 'unsafe-inline'; frame-ancestors 'self'; base-uri 'none'"});
+      const preview=localSmartstorePreview(p).html;
+      return res.end(comparison?preview.replace('<body>',()=>'<body>'+linkedComparisonPreview(comparison)):preview);
     }
     if(req.method==='GET'&&url.pathname.startsWith('/image/')){
       if(/^\/image\/wash-icon-[1-9]\d*$/.test(url.pathname)&&state.folder){

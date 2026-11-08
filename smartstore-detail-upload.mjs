@@ -12,6 +12,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 import {createHash} from 'node:crypto';
 import {STORE_BANNER_URL} from './smartstore-store-banner.mjs';
+import {normalizeSmartstoreProductLink} from './smartstore-product-link.mjs';
 import {isSmartstoreDetailEditUrl} from './smartstore-detail-only.mjs';
 import {bindSmartstoreDraft} from './smartstore-upload-recovery.mjs';
 export async function waitForSmartstoreEditorInput(editor,{check=()=>{}}={}){
@@ -123,20 +124,31 @@ export async function smartstoreUploadParts(png,folder,brandFile,{includeVideo=t
  log('업로드용 상세 '+parts.length+'장 준비 · 원본 일치 재사용 '+reusedCount+'장');
  return {files:parts,reusedCount,bannerLink,footerIndex,videoAfterIndex:boundaries.indexOf(firstHeight)-1,video:video?{file:video.file,sha256:video.sha256}:null,includeVideo,dataRoot,videoOptions,hash:digest};
 }
-export async function applySmartstoreBannerLink(editor,parts,{check=()=>{},log=()=>{}}={}){
- const link=parts.bannerLink;if(!link)return;
- if(link.url!==STORE_BANNER_URL||!Number.isInteger(link.index)||parts.files[link.index]!==link.file)throw Error('배너 이미지와 연결 주소를 확인해 주세요.');
- check();const image=editor.locator('.se-component.se-image img').nth(link.index);
- const expected=path.basename(link.file),actual=await image.evaluate(n=>decodeURIComponent(new URL(n.src).pathname.split('/').at(-1)));
- if(actual!==expected)throw Error('선택할 배너 이미지의 파일명이 다릅니다. 링크를 입력하지 않았습니다.');
- if(await image.evaluate((n,url)=>n.closest('a')?.href===url,link.url)){parts.bannerLinkSubmitted=true;return;}
- try{
-  await selectSmartstoreImage(editor,image,{check});
-  await editor.locator('button[data-name="image-link"]').filter({visible:true}).click();
-  const input=editor.locator('input[type="url"],input[placeholder*="URL"],input[placeholder*="주소"],input[placeholder*="http"]').filter({visible:true});
-  await input.waitFor({state:'visible',timeout:5000});
-  if(await input.count()!==1)throw Error('배너 링크 주소 입력란을 한 곳으로 확인하지 못했습니다.');
-  check();await input.fill(link.url);
+async function imageForLink(editor, link) {
+ const image=editor.locator('.se-component.se-image img').nth(link.index);
+ const actual=await image.evaluate(node=>{
+  const component=node.closest('.se-component.se-image');
+  if(component?.querySelectorAll('img').length!==1)return null;
+  return decodeURIComponent(new URL(node.src).pathname.split('/').at(-1));
+ });
+ if(actual!==path.basename(link.file))throw Error('연결할 사진의 파일명 또는 순서가 다릅니다.');
+ return image;
+}
+
+async function openImageLinkInput(editor,image,check){
+ await selectSmartstoreImage(editor,image,{check});
+ check();
+ const toolbar=editor.locator('button[data-name="image-link"]').filter({visible:true});
+ await toolbar.click();
+ const input=editor.locator('input[type="url"],input[placeholder*="URL"],input[placeholder*="주소"],input[placeholder*="http"]').filter({visible:true});
+ await input.waitFor({state:'visible',timeout:5000});
+ if(await input.count()!==1)throw Error('사진 링크 주소 입력란을 한 곳으로 확인하지 못했습니다.');
+ return {input,toolbar};
+}
+
+async function submitImageLink(editor,image,url,check){
+ const {input}=await openImageLinkInput(editor,image,check);
+ check();await input.fill(url);
   // ONE uses an icon-only check button immediately to the right of this input.
   // Resolve it inside the input's row rather than another dialog's Apply button.
   const buttonIndex=await input.evaluate(n=>{
@@ -154,9 +166,67 @@ export async function applySmartstoreBannerLink(editor,parts,{check=()=>{},log=(
   });
   if(buttonIndex<0)throw Error('링크 주소 오른쪽 체크 버튼을 확인하지 못했습니다.');
   check();await editor.locator('button,[role="button"]').nth(buttonIndex).click();
+}
+
+export async function applySmartstoreBannerLink(editor,parts,{check=()=>{},log=()=>{}}={}){
+ const link=parts.bannerLink;if(!link)return;
+ if(link.url!==STORE_BANNER_URL||!Number.isInteger(link.index)||parts.files[link.index]!==link.file)throw Error('배너 이미지와 연결 주소를 확인해 주세요.');
+ try{
+  check();const image=await imageForLink(editor,link);
+  if(await image.evaluate((n,url)=>n.closest('a')?.href===url,link.url)){parts.bannerLinkSubmitted=true;return;}
+  await submitImageLink(editor,image,link.url,check);
   parts.bannerLinkSubmitted=true;
  }catch(error){throw Error('배너 링크 연결 확인 실패: '+error.message);}
  check();log('배너 주소 입력·오른쪽 체크 완료 · 링크 검증 대기 없이 문서 너비 배치 처리 계속');
+}
+
+async function assertLinkedPhotoBytes(link){
+ const current=createHash('sha256').update(await readFile(link.file)).digest('hex');
+ if(current!==link.sha256)throw Error(link.style+' 비교 사진 파일이 변경되었습니다.');
+}
+
+export async function validateSmartstoreProductPhotoLinks(parts){
+ const links=parts.imageLinks;
+ if(links===undefined)return [];
+ if(!Array.isArray(links)||links.length!==2)throw Error('비교할 두 상품의 사진 링크를 확인해 주세요.');
+ const seen={styles:new Set(),indexes:new Set(),names:new Set(),urls:new Set()};
+ for(const link of links){
+  if(!link||typeof link.style!=='string'||!/^\d{6}$/.test(link.style)||!Number.isInteger(link.index)||link.index<0||
+     typeof link.file!=='string'||parts.files[link.index]!==link.file||typeof link.sha256!=='string'||! /^[a-f0-9]{64}$/.test(link.sha256))throw Error('상품 사진과 링크 순서가 맞지 않습니다.');
+  const name=path.basename(link.file),identity=normalizeSmartstoreProductLink(link.url);
+  if(link.index===parts.bannerLink?.index||seen.styles.has(link.style)||seen.indexes.has(link.index)||seen.names.has(name)||seen.urls.has(identity))throw Error('비교 상품의 사진이나 연결 주소가 중복되었습니다.');
+  seen.styles.add(link.style);seen.indexes.add(link.index);seen.names.add(name);seen.urls.add(identity);
+  await assertLinkedPhotoBytes(link);
+ }
+ return links;
+}
+
+function sameProductDestination(actual,expected){
+ try{return normalizeSmartstoreProductLink(actual)===normalizeSmartstoreProductLink(expected);}catch{return false;}
+}
+
+async function productPhotoLinkMatches(image,url){
+ const current=await image.evaluate(node=>node.closest('a')?.href||null);
+ return sameProductDestination(current,url);
+}
+
+export async function applySmartstoreProductPhotoLinks(editor,links,{check=()=>{},log=()=>{}}={}){
+ for(const link of links){
+  check();const image=await imageForLink(editor,link);
+  if(!await productPhotoLinkMatches(image,link.url))await submitImageLink(editor,image,link.url,check);
+ }
+ for(const link of links){
+  try{
+   check();const image=await imageForLink(editor,link);
+   if(!await productPhotoLinkMatches(image,link.url)){
+    const {input,toolbar}=await openImageLinkInput(editor,image,check);
+    const value=await input.evaluate(node=>node.value);
+    if(!sameProductDestination(value,link.url))throw Error('다시 열었을 때 주소가 일치하지 않습니다.');
+    check();await toolbar.click();await input.waitFor({state:'hidden',timeout:3000});
+   }
+   log(link.style+' 사진 구매 링크 확인');
+  }catch(error){throw Error(link.style+' 사진 구매 링크를 확인하지 못했습니다. 편집기 사진은 유지했습니다. · '+error.message);}
+ }
 }
 export const insertSmartstoreVideo=insertNativeBrandVideo;
 export async function selectSmartstoreImage(editor,image,{check=()=>{}}={}){
@@ -216,7 +286,7 @@ export async function applySmartstoreImageLayout(editor,image,{check=()=>{},layo
   }
  }
 }
-export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{},log=()=>{},bannerIndex,footerIndex,applyEditor=false}={}){
+export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{},log=()=>{},bannerIndex,footerIndex,imageLinks=[],applyEditor=false}={}){
  check();
  // ONE can render the layout before its document model has finished updating.
  // Wait for a stable, fully hosted image set once, immediately before applying.
@@ -240,6 +310,7 @@ export async function commitSmartstoreEditor(page,editor,imageCount,{check=()=>{
  for(const i of missing){check();await applySmartstoreImageLayout(editor,images.nth(i),{check,layout:fitIndexes.includes(i)?'fit':'extend'});}
  const ready=await images.evaluateAll((ns,fitIndexes)=>ns.every((n,i)=>/^https:\/\//.test(n.src)&&n.closest('.se-component.se-image')?.querySelector('.se-component-content-'+(fitIndexes.includes(i)?'fit':'extend'))),fitIndexes);
  if(await images.count()!==imageCount||!ready)throw Error('최종 반영 전 상세이미지 개수·문서 너비을 확인하지 못했습니다. 편집기 내용은 유지했습니다.');
+ if(imageLinks.length)await applySmartstoreProductPhotoLinks(editor,imageLinks,{check,log});
  check();if(!applyEditor){log('상세설명 교체 완료 · 편집기 등록 버튼 누르지 않음 · 현재 창에서 직접 확인해 주세요.');return {editorPrepared:true,editorApplied:false,detailUploaded:false,saved:false,published:false};}
  await Promise.all([editor.waitForEvent('close',{timeout:30000}),editor.getByRole('button',{name:'등록',exact:true}).click()]);
  if(await page.locator('textarea[name="editorContent"]').inputValue()!=='true')throw Error('판매자센터 상세설명 반영 결과를 확인하지 못했습니다.');
@@ -287,6 +358,8 @@ export async function uploadSmartstoreDetail(page,parts,{check:checkForm=()=>{},
  const allowed=mode==='edit'?isSmartstoreDetailEditUrl(page.url()):mode==='copy'&&/^https:\/\/sell\.smartstore\.naver\.com\/#\/products\/copy\/\d+(?:\?|$)/.test(page.url());
  if(!allowed)throw Error(mode==='edit'?'상세설명만 교체는 조회/수정 화면에서 실행해 주세요.':'상세페이지는 스마트스토어 복사등록 화면에서만 교체합니다.');
  smartstoreMediaOrder(parts); // Validate the sequence before opening the editor.
+ const imageLinks=await validateSmartstoreProductPhotoLinks(parts);
+ if(imageLinks.length&&applyEditor)throw Error('비교 사진 링크는 등록 전 편집기에서 먼저 확인해 주세요.');
  const tasks=parts.files.flatMap((file,index)=>[{type:'image',index,file},...(parts.includeVideo!==false&&index===(parts.videoAfterIndex??0)?[{type:'video'}]:[])]);
  const check=()=>{checkForm();resume?.binding?.check();};
  const {editor,from}=await measure('editor',async()=>{
@@ -354,6 +427,8 @@ export async function uploadSmartstoreDetail(page,parts,{check:checkForm=()=>{},
      if(resume)resume.bannerSpaced=true;
      await editor.evaluate(()=>new Promise(requestAnimationFrame));log('배너 앞 빈 줄 한 칸 분리');
     }
+    const photoLink=imageLinks.find(link=>link.index===index);
+    if(photoLink)await assertLinkedPhotoBytes(photoLink);
     await attachSmartstorePhoto(editor,file,{check,onSubmit:()=>{if(resume)resume.pendingImage=index;}});
     await waitDetailImage(editor,index,file);
    }
@@ -371,8 +446,8 @@ export async function uploadSmartstoreDetail(page,parts,{check:checkForm=()=>{},
   if(!parts.bannerLinkSubmitted)await applySmartstoreBannerLink(editor,parts,{check,log});
   log('상세이미지 '+parts.files.length+'장 첨부 완료 · 최종 반영 전 확인');
   // Repair only missing layouts, including an image already attached when a prior layout step failed.
-  const prepared=await commitSmartstoreEditor(page,editor,parts.files.length,{check,log,applyEditor,bannerIndex:parts.bannerLink?.index,footerIndex:parts.footerIndex});
-  if(!applyEditor)return {...prepared,detailParts:parts.files.length,bannerLinkStatus:parts.bannerLinkSubmitted?'submitted-unverified':'unverified',videoUploaded:parts.includeVideo!==false};
+  const prepared=await commitSmartstoreEditor(page,editor,parts.files.length,{check,log,applyEditor,bannerIndex:parts.bannerLink?.index,footerIndex:parts.footerIndex,imageLinks});
+  if(!applyEditor)return {...prepared,detailParts:parts.files.length,productPhotoLinksVerified:imageLinks.map(link=>link.style),bannerLinkStatus:parts.bannerLinkSubmitted?'submitted-unverified':'unverified',videoUploaded:parts.includeVideo!==false};
   return verifySmartstoreDetail(page,parts,{check:checkForm,log,applyEditor});
  });
 }
