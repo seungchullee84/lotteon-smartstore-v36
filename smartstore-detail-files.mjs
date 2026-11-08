@@ -203,7 +203,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  }
  await attachOfficialPalette(product,prepared,draft?.officialPalettePhotos,{folder,draftRoot});
  prepared.captionTones=await collectCaptionTones(product,folder);
- prepared.embeddedOfficialSections=await embeddedOfficialSections(product,folder,{dataRoot});
+ prepared.embeddedOfficialSections=await embeddedOfficialSections(product,folder,{dataRoot,smartstoreLayout:true});
  const fitGuide=await prepareFitGuide(product,folder,{dataRoot});
  if(fitGuide){prepared.fitGuide=fitGuide;Object.assign(prepared.photoFiles,fitGuide.photoFiles);}
  const p={...product,smartstoreDetail:prepared};

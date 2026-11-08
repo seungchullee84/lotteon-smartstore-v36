@@ -2,6 +2,7 @@ import {readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
+import {createOfficialLayoutMatcher} from './smartstore-official-layout.mjs';
 const width=96,rule='full-width-pixel-inclusion-5';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 async function pixels(bytes,height){return sharp(bytes,{limitInputPixels:false}).flatten({background:'#fff'}).resize(width,height,{fit:'fill'}).greyscale().raw().toBuffer();}
@@ -127,29 +128,33 @@ export async function officialSectionMatch(detail,section){
  }
  return await matchResampledSection(detail,section)||match;
 }
-async function verifiedInfoInsideDetail(product,dataRoot,files){
- if(!files.info||!/^\d{6}$/.test(product.style)||!product.sourceUrl)return false;
+async function verifiedSectionInsideDetail(name,product,dataRoot,files){
+ if(!files[name]||!/^\d{6}$/.test(product.style)||!product.sourceUrl)return false;
  try{
-  const review=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'official-info-inclusion.json'),'utf8'));
-  return review.verified===true&&review.style===product.style&&review.sourceUrl===product.sourceUrl&&review.detailSha256===files.detail&&review.infoSha256===files.info;
+  const review=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'official-'+name+'-inclusion.json'),'utf8'));
+  return review.verified===true&&review.style===product.style&&review.sourceUrl===product.sourceUrl&&review.detailSha256===files.detail&&review[name+'Sha256']===files[name];
  }catch{return false;}
 }
-export async function embeddedOfficialSections(product,folder,{dataRoot=path.dirname(folder)}={}){
+export async function embeddedOfficialSections(product,folder,{dataRoot=path.dirname(folder),smartstoreLayout=false}={}){
  if(!product.images?.detail)return [];
  if(!['size','check','info'].some(key=>product.images[key]))return [];
  const detail=await readFile(path.join(folder,'detail.jpg')),files={detail:hash(detail)},sections={};
  for(const key of ['size','check','info'])if(product.images[key]){
   try{sections[key]=await readFile(path.join(folder,key+'.jpg'));files[key]=hash(sections[key]);}catch(e){if(e.code!=='ENOENT')throw e;}
  }
- const reviewedInfo=await verifiedInfoInsideDetail(product,dataRoot,files);
- const key=hash(Buffer.from(JSON.stringify({rule,files,...(reviewedInfo?{reviewedInfo}: {})}))),cache=path.join(folder,'smartstore-official-section-inclusion.json');
+ const reviewed=await Promise.all(['size','check','info'].map(async name=>await verifiedSectionInsideDetail(name,product,dataRoot,files)?name:null));
+ const verified=reviewed.filter(Boolean);
+ const comparisonRule=smartstoreLayout?'section-layout-1':rule;
+ const key=hash(Buffer.from(JSON.stringify({rule:comparisonRule,files,...(verified.length?{verified}:{})})));
+ const cache=path.join(folder,smartstoreLayout?'smartstore-official-section-layout.json':'smartstore-official-section-inclusion.json');
  try{const saved=JSON.parse(await readFile(cache,'utf8'));if(saved.key===key&&Array.isArray(saved.included)&&saved.included.every(n=>['size','check','info'].includes(n)&&files[n]))return saved.included;}catch{}
  const matches={};
+ const compare=smartstoreLayout?createOfficialLayoutMatcher(detail):bytes=>officialSectionMatch(detail,bytes);
  for(const [name,bytes] of Object.entries(sections)){
-  matches[name]=name==='info'&&reviewedInfo
+  matches[name]=verified.includes(name)
    ?{included:true,comparison:'verified-source-pair'}
-   :await officialSectionMatch(detail,bytes);
+   :await compare(bytes);
  }
  const included=Object.keys(matches).filter(name=>matches[name].included);
- await writeFile(cache,JSON.stringify({key,rule,style:product.style,files,included,matches},null,2));return included;
+ await writeFile(cache,JSON.stringify({key,rule:comparisonRule,style:product.style,files,included,matches},null,2));return included;
 }
