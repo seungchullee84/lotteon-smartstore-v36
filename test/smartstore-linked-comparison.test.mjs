@@ -45,6 +45,20 @@ test('비교 제목과 사진을 별도 파일로 앞에 넣고 기존 영상·�
  await save();
  await assert.rejects(loadSmartstoreLinkedComparison(root,styles[0]),/같은 구매 주소/);
  parts[2].purchaseLink.url = urls[1];
+ delete parts[1].purchaseLink;
+ await save();
+ const withoutSelfLink = await loadSmartstoreLinkedComparison(root,styles[0],{preview:true});
+ const currentPage = prependSmartstoreLinkedComparison(base,withoutSelfLink);
+ assert.deepEqual((await validateSmartstoreProductPhotoLinks(currentPage)).map(({index,style,url})=>[index,style,url]),[[2,styles[1],urls[1]]]);
+ const currentPreview = linkedComparisonPreview(withoutSelfLink);
+ assert.match(currentPreview,/aria-label="지금 보고 있는 상품 326921"/);
+ assert(!currentPreview.includes('href="'+urls[0]+'"'));
+ assert(currentPreview.includes('href="'+urls[1]+'"'));
+ const alternativeLink = parts[2].purchaseLink;
+ delete parts[2].purchaseLink;
+ await save();
+ await assert.rejects(loadSmartstoreLinkedComparison(root,styles[0]),/구매 주소 확인 자료/);
+ parts[2].purchaseLink = alternativeLink;
  await save();
  await writeFile(path.join(dir,parts[2].name),'changed');
  await assert.rejects(loadSmartstoreLinkedComparison(root,styles[0]),/사진이 바뀌었습니다/);
@@ -63,8 +77,9 @@ for (const visibleHref of [true,false]) test('독립 사진 두 장의 구매 �
    ${['intro',...styles].map(name=>`<div class="se-component se-image"><div class="se-component-content-fit"><a><img id="img${name}" src="https://example.test/${name}.png" onclick="event.preventDefault();selected=this;panel.hidden=true"></a></div></div>`).join('')}
    <button onclick="window.registered=true">등록</button><script>let selected;</script>`);
   const links = styles.map((style,i)=>({style,index:i+1,file:style+'.png',url:urls[i]}));
-  const result=await commitSmartstoreEditor(editor,editor,3,{imageLinks:links});
-  assert.deepEqual(await editor.locator('img').evaluateAll(images=>images.map(img=>img.dataset.link||null)),[null,...urls]);
+  const imageLinks=visibleHref ? links : links.slice(1);
+  const result=await commitSmartstoreEditor(editor,editor,3,{imageLinks});
+  assert.deepEqual(await editor.locator('img').evaluateAll(images=>images.map(img=>img.dataset.link||null)),[null,visibleHref ? urls[0] : null,urls[1]]);
   assert.equal(result.editorPrepared,true);
   assert.equal(result.editorApplied,false);
   assert.equal(result.saved,false);

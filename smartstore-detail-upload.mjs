@@ -188,7 +188,7 @@ async function assertLinkedPhotoBytes(link){
 export async function validateSmartstoreProductPhotoLinks(parts){
  const links=parts.imageLinks;
  if(links===undefined)return [];
- if(!Array.isArray(links)||links.length!==2)throw Error('비교할 두 상품의 사진 링크를 확인해 주세요.');
+ if(!Array.isArray(links)||links.length<1||links.length>2)throw Error('비교 상품의 사진 링크를 확인해 주세요.');
  const seen={styles:new Set(),indexes:new Set(),names:new Set(),urls:new Set()};
  for(const link of links){
   if(!link||typeof link.style!=='string'||!/^\d{6}$/.test(link.style)||!Number.isInteger(link.index)||link.index<0||

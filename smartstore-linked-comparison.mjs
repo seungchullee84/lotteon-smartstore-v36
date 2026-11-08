@@ -51,12 +51,17 @@ export async function loadSmartstoreLinkedComparison(dataRoot, style, { preview 
   if (image.format !== 'png' || !image.width || image.width > 860 || !image.height) throw Error('비교 상세 이미지 크기를 확인해 주세요.');
   const part = {kind:item.kind, file, sha256:item.sha256};
   if (item.kind === 'photo') {
+   part.style = item.style;
    const link = item.purchaseLink;
-   if (link?.source !== 'user' || link.style !== item.style) throw Error('품번별 구매 주소 확인 자료가 없습니다.');
-   const identity = normalizeSmartstoreProductLink(link.url);
-   if (destinations.has(identity)) throw Error('두 상품에 같은 구매 주소가 지정되어 있습니다.');
-   destinations.add(identity);
-   Object.assign(part, {style:item.style, url:link.url.trim()});
+   if (item.style === style && link === undefined) {
+    part.current = true;
+   } else {
+    if (link?.source !== 'user' || link.style !== item.style) throw Error('품번별 구매 주소 확인 자료가 없습니다.');
+    const identity = normalizeSmartstoreProductLink(link.url);
+    if (destinations.has(identity)) throw Error('두 상품에 같은 구매 주소가 지정되어 있습니다.');
+    destinations.add(identity);
+    part.url = link.url.trim();
+   }
   }
   if (preview) part.src = 'data:image/png;base64,' + bytes.toString('base64');
   parts.push(part);
@@ -74,7 +79,7 @@ export function prependSmartstoreLinkedComparison(base, comparison) {
   footerIndex: base.footerIndex === undefined ? undefined : base.footerIndex + count,
   bannerLink: base.bannerLink ? {...base.bannerLink, index:base.bannerLink.index + count} : base.bannerLink,
   hash: sha256(JSON.stringify([base.hash, comparison.revision])),
-  imageLinks: comparison.parts.flatMap((part, index) => part.kind === 'photo' ? [{...part, index}] : [])
+  imageLinks: comparison.parts.flatMap((part, index) => part.kind === 'photo' && part.url ? [{...part, index}] : [])
  };
 }
 
@@ -82,8 +87,13 @@ export function linkedComparisonPreview(comparison) {
  if (!comparison) return '';
  const [intro, ...rest] = comparison.parts;
  const image = (part, alt) => `<img src="${part.src}" alt="${alt}" style="display:block;width:100%;height:auto">`;
- const photos = rest.slice(0, 2).map(photo =>
-  `<a href="${escape(photo.url)}" target="_blank" rel="noopener noreferrer" aria-label="${photo.style} 구매 페이지 열기">${image(photo, photo.style + ' 정면 사진과 구매 페이지 안내')}</a>`).join('');
+ const photos = rest.slice(0, 2).map(photo => {
+  if (photo.current) return `<div aria-label="지금 보고 있는 상품 ${photo.style}">${image(photo, '지금 보고 있는 상품 ' + photo.style + ' 정면 사진')}</div>`;
+  return `<a href="${escape(photo.url)}" target="_blank" rel="noopener noreferrer" aria-label="${photo.style} 구매 페이지 열기">${image(photo, photo.style + ' 정면 사진과 구매 페이지 안내')}</a>`;
+ }).join('');
+ const notice = rest.some(photo => photo.current)
+  ? '비교 상품 사진을 누르면 해당 상품의 구매 페이지로 이동되요.'
+  : '사진을 누르면 해당 상품의 구매 페이지로 이동되요.';
  const details = rest.slice(2).map(part => image(part, '두 터틀넥 비교 정보')).join('');
- return `<section aria-label="두 터틀넥 비교" style="max-width:848px;margin:auto;background:#f4f2eb">${image(intro, '같은 터틀넥, 다른 원단의 매력')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 24px 16px">${photos}</div><p style="margin:0 24px 20px;padding:15px;text-align:center;background:#e5eae2;color:#253b2f;font-size:25px;font-weight:bold">사진을 누르면 해당 상품의 구매 페이지로 이동되요.</p>${details}</section>`;
+ return `<section aria-label="두 터틀넥 비교" style="max-width:848px;margin:auto;background:#f4f2eb">${image(intro, '같은 터틀넥, 다른 원단의 매력')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 24px 16px">${photos}</div><p style="margin:0 24px 20px;padding:15px;text-align:center;background:#e5eae2;color:#253b2f;font-size:25px;font-weight:bold">${notice}</p>${details}</section>`;
 }
