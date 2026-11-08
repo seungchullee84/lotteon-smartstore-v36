@@ -36,6 +36,16 @@ test('제작 기록이 없는 구형 긴 상세도 매장 구간·색상명·사
  assert.equal(ocrPhotoSections(tsv.replace('매장 마네킹 실제 착용사진','공식 상품 사진'),{...options,width:860,height:3600}).length,0);
  }finally{await rm(root,{recursive:true,force:true});}
 });
+test('3팩 색상명이 여러 줄로 나뉘어도 정확히 일치할 때만 매장 사진 구간으로 읽는다',()=>{
+ const lines=[['STYLE NO. 01243801',30,20,20],['매장 마네킹 실제 착용사진',230,460,30],['30 화이트 +',30,550,29],['화이트 + 그레이',30,586,29],['31 블랙+블랙+화이트',30,1260,30],['지오다노 공식 상품 사진',240,1320,22],['디테일까지, 차근차근 살펴보세요.',30,2300,30]];
+ const tsv='level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n'+lines.map(([text,left,top,height],i)=>[5,1,1,1,i+1,1,left,top,320,height,96,text].join('\t')).join('\n');
+ const colors=['30화이트+화이트+그레이','31블랙+블랙+화이트'];
+ const options={style:'243801',colors,width:860,height:2900};
+ assert.deepEqual(ocrPhotoSections(tsv,options),[{color:colors[0],top:617,bottom:1260}]);
+ assert.deepEqual(ocrPhotoSections(tsv.replace('화이트 + 그레이','화이트 + 블랙'),options),[]);
+ assert.deepEqual(ocrPhotoSections(tsv,{...options,style:'243802'}),[]);
+});
+
 test('긴 상세와 업로드용 분할 이미지에서 확인된 색상별 사진만 분리하고 재압축도 대조한다',async()=>{
  const dataRoot=await mkdtemp(path.join(os.tmpdir(),'long-photos-'));try{
  const regions=[{color:'01화이트',left:0,top:1100,width:428,height:500},{color:'01화이트',left:432,top:1100,width:428,height:500},{color:'02블랙',left:0,top:1900,width:428,height:500},{color:'02블랙',left:432,top:1900,width:428,height:500}];

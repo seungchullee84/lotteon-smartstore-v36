@@ -5,21 +5,37 @@ export function ocrPhotoSections(tsv,{style,colors,width,height}){
  const grouped=new Map();
  for(const line of String(tsv||'').trim().split('\n').slice(1)){const r=line.split('\t');if(r[0]!=='5'||!r[11]?.trim())continue;const key=r.slice(1,5).join('/');const list=grouped.get(key)||[];list.push({text:r.slice(11).join('\t'),left:+r[6],top:+r[7],width:+r[8],height:+r[9]});grouped.set(key,list);}
  const lines=[...grouped.values()].map(a=>({text:compact(a.map(w=>w.text).join('')),left:Math.min(...a.map(w=>w.left)),top:Math.min(...a.map(w=>w.top)),bottom:Math.max(...a.map(w=>w.top+w.height)),height:Math.max(...a.map(w=>w.height))})).sort((a,b)=>a.top-b.top);
- const text=lines.map(l=>l.text).join(' ');const recorded=[...text.matchAll(/style(\d{6})/g)].map(m=>m[1]);if(recorded.some(v=>v!==style))return [];
+ const text=lines.map(l=>l.text).join(' ');const recorded=[...text.matchAll(/\bstyle(?:no)?\s*(\d{6}|\d{8})(?!\d)/g)].map(m=>m[1].slice(-6));if(recorded.some(v=>v!==style))return [];
  const marker=lines.find(l=>/매장.*(?:마네.*착용|직접.*촬영)/.test(l.text));if(!marker)return [];
- const end=lines.find(l=>l.top>marker.bottom&&/^(materialsize|productdetail|fabricfit|fabricandfit)$/.test(l.text))?.top||height;
+ const end=lines.find(l=>l.top>marker.bottom&&/^(materialsize|productdetail|fabricfit|fabricandfit|디테일까지.*)$/.test(l.text))?.top||height;
  const headings=[];
- for(const l of lines){if(l.top<=marker.bottom||l.top>=end||l.left>width*.2||l.height<width*.027)continue;
+ for(const [index,l] of lines.entries()){if(l.top<=marker.bottom||l.top>=end||l.left>width*.2||l.height<width*.027)continue;
   const exact=colors.filter(c=>l.text===compact(c)||l.text.endsWith(compact(c.slice(2)))&&l.text.length<=compact(c).length+2);
-  let color=exact.length===1?exact[0]:null;
+  let color=exact.length===1?exact[0]:null,bottom=l.bottom;
+  // A long package color can wrap onto the next line in the saved detail.
+  if(!color&&/^\d{2}/.test(l.text)){
+   let joined=l.text;
+   for(const next of lines.slice(index+1,index+3)){
+    if(next.top<bottom||next.top-bottom>width*.05||next.left>width*.2||next.top>=end||/^\d/.test(next.text))break;
+    joined+=next.text;bottom=next.bottom;
+    const matches=colors.filter(c=>compact(c)===joined);
+    if(matches.length===1){color=matches[0];break;}
+    if(!colors.some(c=>compact(c).startsWith(joined)))break;
+   }
+  }
   if(!color&&/^\d{2}/.test(l.text)){
    const code=l.text.slice(0,2),possible=colors.filter(c=>c.slice(0,2)===code&&text.includes(compact(c)));
    const anchor=lines.find(a=>/^color\d{2}$/.test(a.text)&&a.top<l.top&&l.top-a.top<width*.2);
-   if(possible.length===1&&anchor)color=possible[0];
+   if(possible.length===1&&anchor){color=possible[0];bottom=l.bottom;}
   }
-  if(color&&!headings.some(h=>h.color===color))headings.push({...l,color});
+  if(color&&!headings.some(h=>h.color===color))headings.push({...l,bottom,color});
  }
- return headings.map((h,i)=>{const limit=headings[i+1]?.top||end;const detail=lines.find(l=>l.top>h.bottom+width*.3&&l.top<limit&&l.text==='detail');return {color:h.color,top:h.bottom+2,bottom:detail?.top||limit};}).filter(s=>s.bottom-s.top>width*.25);
+ return headings.flatMap((h,i)=>{
+  const limit=headings[i+1]?.top||end;
+  if(lines.some(l=>l.top>=h.bottom&&l.top<h.bottom+width*.25&&l.top<limit&&/^(지오다노)?공식(몰)?상품(사진|이미지)$/.test(l.text)))return [];
+  const detail=lines.find(l=>l.top>h.bottom+width*.3&&l.top<limit&&l.text==='detail');
+  return [{color:h.color,top:h.bottom+2,bottom:detail?.top||limit}];
+ }).filter(s=>s.bottom-s.top>width*.25);
 }
 function runs(values,gap,min){const out=[];let first=-1,last=-1;for(let i=0;i<values.length;i++){if(values[i]){if(first<0)first=i;last=i;}else if(first>=0&&i-last>gap){if(last-first+1>=min)out.push([first,last+1]);first=-1;}}if(first>=0&&last-first+1>=min)out.push([first,last+1]);return out;}
 export function sectionPhotoRectangles(data,{width,height},section){
