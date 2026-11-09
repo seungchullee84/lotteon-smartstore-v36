@@ -303,13 +303,8 @@ export function applyOCR(product, text) {
   const date=clean.match(/(20\d{2})\s*[.\-/]\s*(0?[1-9]|1[0-2])\b/);
   product.ocrText=clean;
   if(material) {
-    // OCR may place the first color line before the 색상 label.
-    const isolated=material.split(/\n\s*\n|\b\d{2}(?=[가-힣])/)[0].replace(/\s+/g,' ').trim();
-    const percentages=[...isolated.matchAll(/(\d+(?:\.\d+)?)\s*%/g)].map(m=>Number(m[1]));
-    if(!percentages.length||/\d{4,}/.test(isolated)||/\d+(?![\d.])\s*(?:,|$)/.test(isolated)||percentages.some(n=>n>100)||percentages.reduce((a,b)=>a+b,0)>100.1){
-      product.material='';
-      product.warnings.push('소재 혼용률 숫자·% 인식이 불확실해 자동 입력하지 않았습니다. 원본을 확인해 주세요.');
-    }else product.material=isolated;
+    product.material=verifiedOcrMaterial(material);
+    if(!product.material)product.warnings.push('소재 혼용률 숫자·% 인식이 불확실해 자동 입력하지 않았습니다. 원본을 확인해 주세요.');
   }
   product.country=normalizeCountry(country);
   if(date) product.manufactured=`${date[1]}-${date[2].padStart(2,'0')}`;

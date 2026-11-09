@@ -2,6 +2,9 @@ import {normalizeCountry} from './country.mjs';
 import sharp from 'sharp';
 import {createWorker} from 'tesseract.js';
 import {extractWashingIcons,iconWashingResult} from './washing-icons.mjs';
+const materialNames='폴리에스터|폴리우레탄|금속성섬유|아크릴|레이온|나일론|캐시미어|리오셀|텐셀|비스코스|알파카|인조가죽|합성피혁|합성가죽|천연가죽|소가죽|양가죽|면|모|울|마|견';
+const materialPart=/^(겉감\s*표면|겉감\s*이면|겉감|안감|이면|충전재)\s*[:：]/;
+const materialPartBoundary=/(?=(?:겉감\s*표면|겉감\s*이면|겉감|안감|이면|충전재)\s*[:：])/;
 function cleanMaterialInput(text){
  const value=String(text||'').normalize('NFKC').trim();
  if(!value||!/^[가-힣A-Za-z0-9 \t\r\n%,.;:/()·&+\-]+$/.test(value)||!/[가-힣A-Za-z]/.test(value))return '';
@@ -10,31 +13,42 @@ function cleanMaterialInput(text){
 export function requireMaterialInput(text){
  const value=cleanMaterialInput(text);
  if(!value)throw Error('제품 소재에 읽을 수 없는 문자가 있거나 값이 비어 있습니다. 공식 상품정보고시를 대조해 소재를 수정해 주세요.');
- if([...value.matchAll(/(\d+(?:\.\d+)?)\s*%/g)].some(match=>+match[1]<=0||+match[1]>100))throw Error('제품 소재 혼용률이 올바르지 않습니다. 공식 상품정보고시를 확인해 주세요.');
+ const ratios=[...value.matchAll(/(-?\d+(?:\.\d+)?)\s*%/g)];
+ const parts=readMaterialParts(value);
+ if(ratios.length!==value.split('%').length-1||ratios.some(match=>+match[1]<=0||+match[1]>100)||
+    (parts&&!validMaterialTotals(parts)))throw Error('제품 소재 혼용률이 올바르지 않습니다. 공식 상품정보고시를 확인해 주세요.');
  return value;
 }
 export function verifiedOcrMaterial(text){
  const clean=cleanMaterialInput(text);
  if(!clean)return '';
- const composition=parseMaterialText(clean);
+ const composition=parseMaterialText(clean,{requirePercent:true});
  if(composition)return composition;
  return /^(?:천연가죽|합성가죽|소가죽|양가죽|인조가죽)(?:\s*\((?:소가죽|양가죽)\))?$/.test(clean)?clean:'';
 }
-export function parseMaterialText(text){
- const clean=text.replace(/\s+/g,' ').trim();
- const parts=clean.split(/(?=(?:겉감표면|겉감이면|겉감|안감|이면|충전재)\s*[:：])/).filter(Boolean);
- const output=[];
+function readMaterialParts(text,{requirePercent=false}={}){
+ const parts=text.replace(/\s+/g,' ').trim().split(materialPartBoundary).filter(Boolean);
+ const result=[];
+ const fiber=new RegExp('('+materialNames+')\\s*(\\d+(?:\\.\\d+)?)(\\s*%)?','g');
  for(const part of parts){
-  const label=part.match(/^(겉감표면|겉감이면|겉감|안감|이면|충전재)\s*[:：]/)?.[1];
-  const pattern=/(폴리에스터|폴리우레탄|아크릴|레이온|나일론|캐시미어|리오셀|텐셀|비스코스|알파카|면|모|울|마|견)\s*(\d+(?:\.\d+)?)\s*%?/g;
-  const matches=[...part.matchAll(pattern)];
-  const remainder=part.replace(/^(겉감표면|겉감이면|겉감|안감|이면|충전재)\s*[:：]/,'').replace(pattern,'').replace(/[\s,;/]/g,'');
-  if(remainder)return '';
-  if(!matches.length||Math.abs(matches.reduce((s,m)=>s+Number(m[2]),0)-100)>.1)return '';
-  if(matches.some(m=>Number(m[2])<=0||Number(m[2])>100))return '';
-  output.push((label?label+': ':'')+matches.map(m=>m[1]+' '+m[2]+'%').join(', '));
+  const label=part.match(materialPart)?.[1].replace(/\s+/g,'');
+  const fibers=[...part.matchAll(fiber)];
+  const remainder=part.replace(materialPart,'').replace(fiber,'').replace(/[\s,;/]/g,'');
+  if(remainder||!fibers.length||(requirePercent&&fibers.some(match=>!match[3])))return null;
+  result.push({label,fibers});
  }
- return output.join(' / ');
+ return result.length?result:null;
+}
+function validMaterialTotals(parts){
+ return parts.every(({fibers})=>{
+  const ratios=fibers.map(match=>Number(match[2]));
+  return ratios.every(ratio=>ratio>0&&ratio<=100)&&Math.abs(ratios.reduce((sum,ratio)=>sum+ratio,0)-100)<=.1;
+ });
+}
+export function parseMaterialText(text,options){
+ const parts=readMaterialParts(text,options);
+ if(!parts||!validMaterialTotals(parts))return '';
+ return parts.map(({label,fibers})=>(label?label+': ':'')+fibers.map(match=>match[1]+' '+match[2]+'%').join(', ')).join(' / ');
 }
 export function reviewMaterialOCR(text){
  const raw=String(text||'').trim().split(/\r?\n/).map(s=>s.trim()).filter(Boolean).join(' / ');
@@ -83,8 +97,8 @@ async function analyzeNoticeWork(file,log,signal,options,onWorker){
  const src=sharp(file);const {width,height}=await src.metadata();const raw=await src.clone().greyscale().raw().toBuffer();
  const rules=[];for(let y=0;y<height;y++){let n=0;for(let x=Math.floor(width*.06);x<width*.94;x++)if(raw[y*width+x]<245)n++;if(n>width*.68&&(rules.length===0||y-rules.at(-1)>3))rules.push(y);}
  if(signal?.aborted)throw Error('사용자가 중단했습니다.');
- const worker=await (options.createWorker||createWorker)('kor+eng');onWorker(worker);signal?.throwIfAborted();let numeric;
- const abort=()=>{void worker.terminate().catch(()=>{});if(numeric)void numeric.terminate().catch(()=>{});};
+ const worker=await (options.createWorker||createWorker)('kor+eng');onWorker(worker);signal?.throwIfAborted();
+ const abort=()=>{void worker.terminate().catch(()=>{});};
  signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted){abort();throw Error('사용자가 중단했습니다.');}
  try{
  const r=await worker.recognize(file,{}, {tsv:true});const words=wordsFromTSV(r.data.tsv);const result={ocrText:r.data.text,material:'',washing:'',fieldStatus:{}};
@@ -96,22 +110,28 @@ async function analyzeNoticeWork(file,log,signal,options,onWorker){
   if(hit){const cy=hit.top+hit.height/2,top=rules.filter(y=>y<cy).at(-1),bottom=rules.find(y=>y>cy);if(top!==undefined&&bottom!==undefined)mat={left:Math.floor(width*.28),top:top+2,width:Math.floor(width*.66),height:bottom-top-4};}
  }
  if(!mat){const styleLabel=words.find(w=>w.left<width*.25&&/^스타일/.test(w.text));if(styleLabel){const cy=styleLabel.top+styleLabel.height/2,top=rules.find(y=>y>cy),bottom=rules.find(y=>y>(top??height)+3);if(top!==undefined&&bottom!==undefined)mat={left:Math.floor(width*.28),top:top+2,width:Math.floor(width*.66),height:bottom-top-4};}}
- if(mat){result.materialBand=mat;log('소재 행 확대·혼용률 재인식');const m=(await worker.recognize(await crop(mat))).data.text;result.materialOCR=m;
- // Keep the raw transcription for review. Only a validated composition fills the field.
- const originalRow=result.ocrText.match(/제품\s*소재\s*([\s\S]*?)(?=색\s*상)/)?.[1]?.trim()||'';
- const enlarged=verifiedOcrMaterial(m),original=verifiedOcrMaterial(originalRow);
- result.material=enlarged&&original&&enlarged!==original?'':enlarged||original;
- if(!enlarged&&original)result.materialRecheck=originalRow;
- result.fieldStatus.material=result.material?'공식 고시 OCR · 혼용률 형식 확인':'확인 필요 · 고시 원본의 소재·혼용률 대조';
- }
- if(!mat){
-  const beforeColor=result.ocrText.split(/색\s*상/)[0];
-  for(const line of beforeColor.split(/\r?\n/)){
-   const index=line.search(/폴리에스터|폴리우레탄|나일론|레이온|아크릴|캐시미어|리오셀|텐셀|면/);
-   if(index<0)continue;const candidate=line.slice(index).trim();
-   if(parseMaterialText(candidate)){result.material=reviewMaterialOCR(candidate).value;result.materialOCR=candidate;result.fieldStatus.material='소재 제목 인식 실패 · 정상 소재 원문에서 추출 · 원본 확인 필요';break;}
+ const originalRow=result.ocrText.match(/제품\s*소재[\s:：]*([\s\S]*?)(?=색\s*상|치\s*수|제조자)/)?.[1]?.trim()||'';
+ const readings=[verifiedOcrMaterial(originalRow)].filter(Boolean);
+ if(mat){
+  result.materialBand=mat;log('소재 행 확대·혼용률 재인식');
+  result.materialOCR=(await worker.recognize(await crop(mat))).data.text;
+  const enlarged=verifiedOcrMaterial(result.materialOCR);
+  if(enlarged)readings.push(enlarged);
+  if(!enlarged){
+   log('소재 행 대비를 높여 문자·% 재대조');
+   await worker.setParameters({tessedit_pageseg_mode:'6'});
+   try{
+    const contrast=await sharp(file).extract(mat).resize({width:mat.width*3}).threshold(150).png().toBuffer();
+    result.materialRecheck=(await worker.recognize(contrast)).data.text;
+    const retried=verifiedOcrMaterial(result.materialRecheck);
+    if(retried)readings.push(retried);
+   }finally{await worker.setParameters({tessedit_pageseg_mode:'3'});}
   }
  }
+ const candidates=[...new Set(readings)];
+ result.material=candidates.length===1?candidates[0]:'';
+ if(candidates.length>1)result.materialCandidates=candidates;
+ result.fieldStatus.material=result.material?'공식 고시 OCR · 혼용률 형식 확인':'확인 필요 · 고시 원본의 소재·혼용률 대조';
  const countryBand=band(/제조국/);
  if(countryBand){
   log('제조국 행 확대·국가명 재인식');
@@ -129,5 +149,5 @@ async function analyzeNoticeWork(file,log,signal,options,onWorker){
   else result.fieldStatus.washing='설명 OCR 유지 · 미학습 아이콘 '+extracted.icons.filter(i=>!i.known).length+'개 확인 필요';
  }
  result.fieldStatus.material||=result.material?'자동 추출 · 원본 확인 권장':'확인 필요';result.fieldStatus.washing||='확인 필요';return result;
- }finally{signal?.removeEventListener('abort',abort);await worker.terminate().catch(()=>{});if(numeric)await numeric.terminate().catch(()=>{});}
+ }finally{signal?.removeEventListener('abort',abort);await worker.terminate().catch(()=>{});}
 }
