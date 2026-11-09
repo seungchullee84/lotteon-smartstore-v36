@@ -9,7 +9,8 @@ import {photoReview,savePhotoReview,photoReviewThumbnail,savePhotoReviewDraft} f
 import {listTwoChoicePackages,readTwoChoicePackage,saveTwoChoicePackage,twoChoiceUploadParts} from './smartstore-two-choice-store.mjs';
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {applyImportedPhotos,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
-import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail,renderPreparedSmartstoreDetail} from './smartstore-detail-files.mjs';
+import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail,renderPreparedSmartstoreDetail,prefetchSmartstoreSellingPoints} from './smartstore-detail-files.mjs';
+import {reviewNoticeMaterial} from './openmaus-notice-review.mjs';
 import {loadSmartstoreLinkedComparison,prependSmartstoreLinkedComparison,linkedComparisonPreview} from './smartstore-linked-comparison.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
 import {resolveDetailTemplate} from './smartstore-template-choice.mjs';
@@ -164,10 +165,22 @@ async function renderSmartstoreUpload(product,folder,output,{signal,prepared=fal
 function json(res,status,data){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));}
 async function body(req){let text='';for await(const chunk of req){text+=chunk;if(text.length>1600000)throw Error('요청이 너무 큽니다.');}return JSON.parse(text||'{}');}
 let activeAbort=null;
-let colorDraftAbort=null;
+let colorDraftAbort=null,noticeReviewAbort=null;
+function startNoticeMaterialReview(product,folder){
+ noticeReviewAbort?.abort();
+ const controller=new AbortController();noticeReviewAbort=controller;
+ if(product.material||product.userEditedFields?.material)return;
+ void reviewNoticeMaterial(product,folder,{dataRoot,signal:controller.signal}).then(material=>{
+  if(!material||controller.signal.aborted||state.product!==product||state.folder!==folder)return;
+  product.fieldStatus||={};
+  product.fieldStatus.material='확인 필요 · OpenMausBot 재판독 후보 · '+material;
+  state.revision++;
+ }).catch(()=>{});
+}
 function startPhotoColorDraft(product,folder){
  colorDraftAbort?.abort();const controller=new AbortController();colorDraftAbort=controller;
  const current=()=>state.product?.style===product.style&&state.product?.sourceUrl===product.sourceUrl&&state.folder===folder;
+ void prefetchSmartstoreSellingPoints(product,folder,{dataRoot,signal:controller.signal,log:message=>{if(current())log(message);}}).catch(()=>{});
  state.photoColorDraft={style:product.style,status:'running',message:'사진 색상 빠른 추정·케어라벨 자동 구분 중 · 수동 선택 가능'};
  void prefillPhotoColors(product,folder,{dataRoot,signal:controller.signal,log:message=>{if(current()){log(message);if(message.startsWith('사진 대조 '))state.photoColorDraft.message=message+' · 색상 초안 판별 중';}}}).then(result=>{
   if(!current()||controller.signal.aborted)return;
@@ -717,7 +730,7 @@ const server=http.createServer(async(req,res)=>{
       if(url.pathname==='/api/shutdown'){
         if(state.busy)return json(res,409,{error:'작업 중에는 종료할 수 없습니다. 중단 후 작업이 멈추면 다시 눌러 주세요.'});
         if(state.folder&&state.product)await writeFile(path.join(state.folder,'shutdown-draft.json'),JSON.stringify({product:state.product,form:b.form||null,savedAt:new Date().toISOString()},null,2));
-        uploadWarmup?.controller.abort();newProductResearch.stop();benefitResearch.stop();
+        uploadWarmup?.controller.abort();colorDraftAbort?.abort();noticeReviewAbort?.abort();newProductResearch.stop();benefitResearch.stop();
         res.once('finish',()=>{server.close(()=>process.exit(0));setTimeout(()=>process.exit(0),1500).unref();});
         return json(res,200,{ok:true});
       }
@@ -727,7 +740,7 @@ const server=http.createServer(async(req,res)=>{
         if(b.allowMissingDetail===true&&state.detailFallbackRequest?.input!==b.style)return json(res,400,{error:'먼저 일반 수집으로 해당 상품의 상세 원본 누락을 확인해 주세요.'});
         const input=parseProductInput(b.style);const style=input.style||"url";bot.stopped=false;state.collectionInput=b.style;state.detailFallbackRequest=null;state.photoImport=null;
         if(b.edits)await productEdits.save(b.edits,state.product?.style);
-        job('collect',async()=>{const folder=path.join(dataRoot,style+'-'+new Date().toISOString().replace(/[:.]/g,'-'));let product=await collect(b.style,folder,log,()=>bot.stopped,activeAbort.signal,{allowMissingDetail:b.allowMissingDetail===true,saveSmartstoreSource:b.channel==='smartstore',noticeCacheRoot:b.channel==='smartstore'?path.join(dataRoot,'smartstore-notice-cache'):undefined,prepareMain:b.channel!=='smartstore'});product.keywords=buildKeywords(product);product=await productEdits.apply(product);state.product=product;state.folder=folder;state.photoPreparation=null;state.revision++;if(b.channel==='smartstore'){product.photoSelectionPending=true;delete product.smartstoreDetail;state.photoPreparation={style:product.style,status:'selecting',message:'색상을 자동 추정한 뒤 직접 수정할 수 있습니다. 템플릿·추가이미지는 선택 반영 후에 만듭니다.'};await writeFile(path.join(folder,'product.json'),JSON.stringify(product,null,2));log(state.photoPreparation.message);startPhotoColorDraft(product,folder);}log('수집 완료. 고시 이미지와 입력값을 검토해 주세요.'+(Object.keys(product.userEditedFields||{}).length?' · 직접 수정한 항목 유지':''));});return json(res,202,{ok:true});
+        job('collect',async()=>{const folder=path.join(dataRoot,style+'-'+new Date().toISOString().replace(/[:.]/g,'-'));let product=await collect(b.style,folder,log,()=>bot.stopped,activeAbort.signal,{allowMissingDetail:b.allowMissingDetail===true,saveSmartstoreSource:b.channel==='smartstore',noticeCacheRoot:b.channel==='smartstore'?path.join(dataRoot,'smartstore-notice-cache'):undefined,prepareMain:b.channel!=='smartstore'});product.keywords=buildKeywords(product);product=await productEdits.apply(product);state.product=product;state.folder=folder;state.photoPreparation=null;state.revision++;startNoticeMaterialReview(product,folder);if(b.channel==='smartstore'){product.photoSelectionPending=true;delete product.smartstoreDetail;state.photoPreparation={style:product.style,status:'selecting',message:'색상을 자동 추정한 뒤 직접 수정할 수 있습니다. 템플릿·추가이미지는 선택 반영 후에 만듭니다.'};await writeFile(path.join(folder,'product.json'),JSON.stringify(product,null,2));log(state.photoPreparation.message);startPhotoColorDraft(product,folder);}log('수집 완료. 고시 이미지와 입력값을 검토해 주세요.'+(Object.keys(product.userEditedFields||{}).length?' · 직접 수정한 항목 유지':''));});return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/lotte-category-suggest'){
         if(!state.product||b.style!==state.product.style)throw Error('현재 수집한 상품의 분류만 확인할 수 있습니다.');
