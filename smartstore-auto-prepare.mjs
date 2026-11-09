@@ -102,7 +102,7 @@ async function prepareSmartstoreAutoImpl(product,folder,{dataRoot,apiKey,signal,
   const updated={...old,sourceUrl:product.sourceUrl,listingImages,careLabels:await saveCareLabelSelection(root,mapped.filter(p=>p.role==='care-label'))};
   await writeFile(path.join(root,'draft.json.tmp'),JSON.stringify(updated,null,2));await rename(path.join(root,'draft.json.tmp'),path.join(root,'draft.json'));
   log('확인된 실사 사진·소구점 재사용 · 본사 원본 변경 없음');
-  return applyGarmentReview(await prepareSmartstoreDetail(product,folder,{dataRoot}),folder,{dataRoot,photoRoots,desktop});
+  return applyGarmentReview(await prepareSmartstoreDetail(product,folder,{dataRoot,signal,log}),folder,{dataRoot,photoRoots,desktop});
  }
  if(!apiKey){const error=Error('사진 '+photos.length+'장은 확인됐습니다. 새 사진의 색상·각도 자동 분석 연결이 필요합니다. 설정에서 사진분석 연결을 완료해 주세요.');error.code='PHOTO_ANALYSIS_REQUIRED';error.photoCount=photos.length;error.unknownCount=unknown.length;throw error;}
  const content=[{type:'input_text',text:JSON.stringify({style:product.style,name:product.rawName,colors:product.colors,material:product.material,officialDescription:description,photoIds:unknown.map(f=>f.id),photoHints:unknown.filter(f=>f.colorHint||f.roleHint).map(f=>({id:f.id,color:f.colorHint,role:f.roleHint}))})}];
@@ -125,7 +125,7 @@ async function prepareSmartstoreAutoImpl(product,folder,{dataRoot,apiKey,signal,
  await savePhotoMappings(dataRoot,product,records);
  log('사진 '+mapped.length+'장 · '+groups.length+'개 색상 대조 완료 · 공식 설명 근거 소구점 '+analysis.points.length+'개');
  if(analysis.attributes)await saveGarmentReview(product,folder,analysis.attributes,{dataRoot,photoRoots,desktop});
- const prepared=await applyGarmentReview(await prepareSmartstoreDetail(product,folder,{dataRoot}),folder,{dataRoot,photoRoots,desktop});
+ const prepared=await applyGarmentReview(await prepareSmartstoreDetail(product,folder,{dataRoot,signal,log}),folder,{dataRoot,photoRoots,desktop});
  return {...prepared,officialDescription:description};
 }
 

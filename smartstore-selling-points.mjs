@@ -162,17 +162,21 @@ export function usableSellingPoints(points,source){
 
 // Preserve selected wording, then read the rest of THIS official source for
 // independent purchase reasons. Never pad the count with duplicate claims.
-export function completeSellingPoints(points,source,{limit=4}={}){
- const result=[];const norm=s=>String(s||'').replace(/[\s.!?,，]+/g,'');
+export function appendDistinctSellingPoints(points,additions,source,{limit=4}={}){
+ const result=points.slice(0,limit);
+ if(result.length>=limit)return result;const norm=s=>String(s||'').replace(/[\s.!?,，]+/g,'');
  const topics=[/부드|소프트|촉감|터치|결감/,/보온|따뜻|포근/,/편안|편하게|여유|넉넉|릴렉스/,/스타일링|코디|매치|레이어드|연출/,/내구|오래\s*입/,/통기|흡습|속건|쾌적/,/조절/,/수납|포켓/,/신축|유연|움직임|활동성/,/가벼|가볍|경량/,/수축|변형|워싱|형태/,/찬바람|바람.*차단/];
- const kinds=p=>topics.flatMap((rule,i)=>rule.test(p.title)?[i]:[]),covered=new Set();
- for(const point of [...(points||[]),...officialSellingPoints(source,{limit:12})]){
+ const kinds=p=>topics.flatMap((rule,i)=>rule.test(p.title)?[i]:[]),covered=new Set(result.flatMap(kinds));
+ for(const point of additions){
   if(!usableSellingPoints([point],source))continue;
   const keys=kinds(point);
   if(result.some(p=>norm(p.title)===norm(point.title)||norm(p.description)===norm(point.description))||(keys.length&&keys.every(k=>covered.has(k))))continue;
   result.push(point);for(const k of keys)covered.add(k);if(result.length>=limit)break;
  }
  return result;
+}
+export function completeSellingPoints(points,source,{limit=4}={}){
+ return appendDistinctSellingPoints([], [...(points||[]),...officialSellingPoints(source,{limit:12})],source,{limit});
 }
 export function assertRequiredSellingPoints(detail){
  if(detail?.sellingPointReview?.status==='needs-review'||!Array.isArray(detail?.sellingPoints)||detail.sellingPoints.length<2||detail.sellingPoints.length>4)throw Error('공식 상품 설명과 상세이미지에서 서로 다른 구매 장점 2~4개를 확인해야 합니다.');

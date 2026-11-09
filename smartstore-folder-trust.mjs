@@ -77,5 +77,5 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  await writeFile(path.join(root,'draft.json'),JSON.stringify(draft,null,2));
  await savePhotoMappings(dataRoot,product,records);
  log('품번 폴더 사진 적용 · 대표 1장 · 폴더 추가 '+extras.length+'장 · 상세 '+(groups.reduce((n,g)=>n+g.files.length,0)+providedPhotos.length)+'장 · 색상 미확인 '+providedPhotos.length+'장(모두 반영) · 케어라벨 '+reviewed.filter(p=>p.role==='care-label').length+'장 · 외부 사진분석 없이 진행');
- return prepareSmartstoreDetail({...product,officialDescription:description},folder,{dataRoot,photoRoots:[...new Set(photos.map(p=>path.dirname(p.file)))]});
+ return prepareSmartstoreDetail({...product,officialDescription:description},folder,{dataRoot,signal,log,photoRoots:[...new Set(photos.map(p=>path.dirname(p.file)))]});
 }

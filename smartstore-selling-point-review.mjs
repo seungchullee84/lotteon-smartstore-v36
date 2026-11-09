@@ -1,8 +1,9 @@
+import {supplementSellingPoints} from './openmaus-selling-points.mjs';
 import {catalogImageSource,saveRegistrationBenefits} from './official-benefit-catalog.mjs';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {officialSellingPoints,usableSellingPoints,officialImageBenefitText,completeSellingPoints} from './smartstore-selling-points.mjs';
+import {officialSellingPoints,usableSellingPoints,officialImageBenefitText,completeSellingPoints,appendDistinctSellingPoints} from './smartstore-selling-points.mjs';
 import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 const digest=text=>createHash('sha256').update(text).digest('hex');
 const sourceJobs=new Map();
@@ -38,12 +39,19 @@ export async function saveOfficialImagePointReview(product,folder,{text,points,d
  const record={version:1,method:'visual-official-detail',style:product.style,sourceUrl:product.sourceUrl,detailHash,text,points,reviewedAt:new Date().toISOString()};
  const root=path.join(dataRoot,'smartstore-details',product.style);await mkdir(root,{recursive:true});await writeFile(path.join(root,'selling-point-image-review.json'),JSON.stringify(record,null,2));return record;
 }
-export async function reviewSellingPoints(product,source,{dataRoot,detailHash=null,signal}={}){
+export async function reviewSellingPoints(product,source,{dataRoot,detailHash=null,signal,existing,supplement=false,log}={}){
  signal?.throwIfAborted();
  const identity={version:14,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
  const root=path.join(dataRoot,'smartstore-details',product.style),file=path.join(root,'selling-point-review.json');
  const finish=async(record,text=source)=>{
-  const points=record.points?.length>=3?record.points.slice(0,4):completeSellingPoints(record.points,text);
+  let points=record.points?.length>=3?record.points.slice(0,4):completeSellingPoints(record.points,text);
+  if(supplement){
+   const preserved=(record.method==='user-selected-official-points'||record.method==='visual-official-detail'?record.points:existing)||[];
+   const verified=preserved.filter(point=>usableSellingPoints([point],text));
+   points=appendDistinctSellingPoints(verified,points,text);
+   points=await supplementSellingPoints(product,points,text,{dataRoot,detailHash,signal,log});
+  }
+  signal?.throwIfAborted();
   const ready=usableSellingPoints(points,text)&&points.length>=2&&points.length<=4;
   const result={...record,points,omitted:false,status:ready?'ready':'needs-review',message:ready?'공식 근거 구매 장점 '+points.length+'개 적용':'공식 상품 설명·상세이미지에서 서로 다른 구매 장점 2~4개 확인 필요'};
   await mkdir(root,{recursive:true});await writeFile(file,JSON.stringify(result,null,2));return result;
