@@ -9,12 +9,16 @@ import {appendDistinctSellingPoints,officialSellingPoints,usableSellingPoints} f
 export function verifiedOpenMausPoints(response,input,points,source){
  if(response?.style!==input.style||response.sourceUrl!==input.sourceUrl||response.detailHash!==input.detailHash||!Array.isArray(response.quotes))return points;
  const additions=[];
+ const paragraphs=input.source.split(/\n\s*\n|[•●]/);
+ const conditional=/(?:제공|적용|차단|지원|유지|방지|가능)(?:하|되)?(?:지\s*않|지\s*못|지\s*안|\s*여부|\s*불가)|(?:일부|특정)\s*(?:색상|컬러|사이즈)|(?:대상|적용)\s*제외/;
  for(const quote of response.quotes.slice(0,8)){
-  if(typeof quote!=='string'||quote.length<8||quote.length>240||!input.source.includes(quote))continue;
-  // Generate copy with the registrar's existing rules, from the verified quote alone.
-  for(const point of officialSellingPoints(quote)){
-   if(usableSellingPoints([point],quote))additions.push({...point,evidence:quote});
-  }
+  if(typeof quote!=='string'||quote.length<8||quote.length>240||
+     !paragraphs.some(paragraph=>paragraph.includes(quote)&&!conditional.test(paragraph)))continue;
+  // Construct the wording locally from the exact quote.
+  const pilling=/보풀\s*방지\s*(?:기능|가공)(?:을|를)?\s*(?:제공|적용|더했)/.test(quote);
+  const point=pilling?{title:'보풀을 줄이는 가공',description:'보풀 방지 기능을 더한 소재.',evidence:quote}
+   :officialSellingPoints(quote,{limit:1})[0];
+  if(point&&usableSellingPoints([point],quote))additions.push({...point,evidence:quote});
  }
  return appendDistinctSellingPoints(points,additions,source);
 }

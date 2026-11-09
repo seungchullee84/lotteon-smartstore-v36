@@ -7,6 +7,7 @@ import {setTimeout as delay} from 'node:timers/promises';
 import {promisify} from 'node:util';
 const exec=promisify(execFile);
 const bot='Giordano Research';
+let reviewing=false;
 
 export const openMausCli=dataRoot=>path.join(dataRoot,'openmausbot','node_modules','openmausbot','cli.js');
 
@@ -28,10 +29,12 @@ async function stopServer(child){
 }
 
 export async function runOpenMausReview(cli,input,prompt,{signal,image}={}){
- const temporaryRoot=await realpath(os.tmpdir());
- const work=await mkdtemp(path.join(temporaryRoot,'giordano-openmaus-'));
- let child;
+ if(reviewing)return null;
+ reviewing=true;
+ let child,temporaryRoot,work;
  try{
+  temporaryRoot=await realpath(os.tmpdir());
+  work=await mkdtemp(path.join(temporaryRoot,'giordano-openmaus-'));
   const port=await availablePort();
   const env=Object.fromEntries(Object.entries(process.env).filter(([name])=>!/^(?:OMB_|OPENMAUSBOT_)/i.test(name)));
   env.OMB_DATA_DIR=path.join(work,'profile');
@@ -82,10 +85,11 @@ export async function runOpenMausReview(cli,input,prompt,{signal,image}={}){
  }finally{
   await stopServer(child);
   // Only remove the directory this request created under the resolved temp root.
-  const resolved=await realpath(work).catch(()=>null);
+  const resolved=work&&await realpath(work).catch(()=>null);
   if(resolved&&path.dirname(resolved)===temporaryRoot&&path.basename(resolved).startsWith('giordano-openmaus-')){
    await rm(resolved,{recursive:true,force:true,maxRetries:2}).catch(()=>{});
   }
+  reviewing=false;
  }
 }
 

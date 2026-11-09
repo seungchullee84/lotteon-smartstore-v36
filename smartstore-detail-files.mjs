@@ -28,6 +28,26 @@ const normalize=s=>String(s).replace(/\s+/g,'').toLowerCase();
 const imageExtension=/\.(jpe?g|png|webp)$/i;
 function validStyle(p){if(!/^\d{5,8}$/.test(p?.style||''))throw Error('현재 상품의 품번을 확인해 주세요.');return String(p.style);}
 
+async function sellingPointSource(product,folder,options){
+ let text=product.officialDetailText||product.officialDescription||'';
+ try{
+  const html=await readFile(path.join(folder,'smartstore-official.html'),'utf8');
+  if(styleFromDetail(html)!==product.style)throw Error('소구점 원문의 공식 품번이 다릅니다.');
+  text=cheerio.load(html)('.prd_detail_content_gio').first().text().trim()||text;
+ }catch(error){if(error.code!=='ENOENT')throw error;}
+ return officialPointSource(product,folder,text,options);
+}
+
+export async function prefetchSmartstoreSellingPoints(product,folder,{dataRoot,signal,log}){
+ const source=await sellingPointSource(product,folder,{dataRoot,signal,log,cachedOnly:true});
+ if(!source.imageChecked)return;
+ const file=path.join(dataRoot,'smartstore-details',product.style,'draft.json');
+ const draft=await readFile(file,'utf8').then(JSON.parse).catch(error=>{if(error.code!=='ENOENT')throw error;});
+ const existing=draft?.style===product.style&&draft.sourceUrl===product.sourceUrl&&draft.officialDetailHash===source.detailHash
+  ?draft.sellingPoints:undefined;
+ await reviewSellingPoints(product,source.text,{dataRoot,signal,log,existing,detailHash:source.detailHash,supplement:true,persist:false});
+}
+
 export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join(appRoot,'data'),mannequinRoots,photoRoots,signal,log}={}){
  const style=validStyle(product);const draftRoot=path.join(dataRoot,'smartstore-details',style);
  const configuredPhotoRoots=async()=>photoRoots||(mannequinRoots?(await Promise.all(mannequinRoots.map(root=>/^\d{6}$/.test(style)?resolveStylePhotoFolders(root,style):[path.join(root,style)]))).flat():undefined);
@@ -43,16 +63,14 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  }
  // Preview, export and upload must re-check the current official wording, too.
  const omitPoints=await sellingPointsOmitted(product,dataRoot);prepared.omitSellingPoints=omitPoints;
- let sourceText=product.officialDetailText||product.officialDescription||'';
- try{const html=await readFile(path.join(folder,'smartstore-official.html'),'utf8');if(styleFromDetail(html)!==style)throw Error('소구점 원문의 공식 품번이 다릅니다.');sourceText=cheerio.load(html)('.prd_detail_content_gio').first().text().trim()||sourceText;}catch(error){if(error.code!=='ENOENT')throw error;}
- {
-  let detailHash=null;try{detailHash=createHash('sha256').update(await readFile(path.join(folder,'detail.jpg'))).digest('hex');}catch(e){if(e.code!=='ENOENT')throw e;}
-  const checkedSource=omitPoints?{text:sourceText,imageChecked:false}:await officialPointSource(product,folder,sourceText,{dataRoot,signal,log});sourceText=[sourceText,checkedSource.text].filter(Boolean).join('\n•\n');
-  const review=await reviewSellingPoints(product,sourceText,{dataRoot,detailHash,signal,log,existing:draft?.officialDetailHash===detailHash?prepared.sellingPoints:undefined,supplement:checkedSource.imageChecked&&checkedSource.detailHash===detailHash});
-  prepared.sellingPoints=review.points;prepared.omitSellingPoints=false;prepared.sellingPointReview={status:review.status,message:review.message||''};
-  if(draft){draft.sellingPoints=review.points;await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft,null,2));}
-  prepared.sellingPointSource={style,sourceUrl:product.sourceUrl,textHash:createHash('sha256').update(sourceText).digest('hex'),detailHash,imageChecked:checkedSource.imageChecked};
- }
+ const checkedSource=await sellingPointSource(product,folder,{dataRoot,signal,log});
+ const {text:sourceText,detailHash,imageChecked}=checkedSource;
+ const review=await reviewSellingPoints(product,sourceText,{dataRoot,detailHash,signal,log,
+  existing:draft?.officialDetailHash===detailHash?prepared.sellingPoints:undefined,supplement:imageChecked});
+ prepared.sellingPoints=review.points;prepared.omitSellingPoints=false;prepared.sellingPointReview={status:review.status,message:review.message||''};
+ if(draft){draft.sellingPoints=review.points;await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft,null,2));}
+ prepared.sellingPointSource={style,sourceUrl:product.sourceUrl,textHash:createHash('sha256').update(sourceText).digest('hex'),detailHash,imageChecked};
+
  const attach=async(color,file,allowedRoot)=>{
   if(!product.colors.includes(color))throw Error('현재 상품에 없는 색상의 마네킨 컷입니다: '+color);
   const canonicalRoot=await realpath(allowedRoot),canonical=await realpath(file);

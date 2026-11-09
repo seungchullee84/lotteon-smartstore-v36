@@ -6,7 +6,7 @@ import {createWorker} from 'tesseract.js';
 import {isCareLabelPhoto,saveCareLabelSelection} from './smartstore-care-label.mjs';
 import {chooseListingPhotos,saveListingSelection} from './smartstore-listing-images.mjs';
 import {prepareSmartstoreDetail} from './smartstore-detail-files.mjs';
-import {officialSellingPoints,usableSellingPoints} from './smartstore-selling-points.mjs';
+import {appendDistinctSellingPoints,officialSellingPoints,usableSellingPoints} from './smartstore-selling-points.mjs';
 import {importedPhotoSelection} from './smartstore-imported-selection.mjs';
 import {savePhotoMappings} from './smartstore-photo-mapping-cache.mjs';
 import {selectedMainPhoto} from './smartstore-main-selection.mjs';
@@ -68,9 +68,10 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
   }else providedPhotos.push(relative);
  }
  for(const g of groups){const imported=old?.importedColorPhotos?.find(p=>p.color===g.color)?.hashes||[],rank=p=>{const i=imported.indexOf(p.hash);return i<0?100:i;};const front=g.files.find(p=>p.main)||g.files.find(p=>p.role==='front');g.files=g.files.sort((a,b)=>rank(a)-rank(b)||Number(b===front)-Number(a===front)||['side','detail','back','front'].indexOf(a.role)-['side','detail','back','front'].indexOf(b.role)).map(p=>p.file);}
- const previous=old?.sourceUrl===product.sourceUrl&&old?.officialDetailHash===detailHash?old:null;
+ const previous=old?.style===product.style&&old.sourceUrl===product.sourceUrl&&old?.officialDetailHash===detailHash?old:null;
  const officialPoints=officialSellingPoints(description);
- const points=usableSellingPoints(previous?.sellingPoints,description)&&previous.sellingPoints.length>=officialPoints.length?previous.sellingPoints:officialPoints;
+ const existing=(previous?.sellingPoints||[]).filter(point=>usableSellingPoints([point],description));
+ const points=appendDistinctSellingPoints(existing,officialPoints,description);
  const draft={officialPalettePhotos:old?.style===product.style&&old?.sourceUrl===product.sourceUrl?old.officialPalettePhotos:undefined,manualPhotoOrder:old?.style===product.style&&old?.sourceUrl===product.sourceUrl?old.manualPhotoOrder:undefined,style:product.style,sourceUrl:product.sourceUrl,headline:previous?.headline||product.name,officialDetailHash:detailHash,photos:groups,importedMainPhoto:old?.importedMainPhoto,importedColorPhotos:old?.importedColorPhotos,unmatchedPhotos:providedPhotos,listingImages,careLabels:await saveCareLabelSelection(root,reviewed.filter(p=>p.role==='care-label')),sellingPoints:points,officialPhotos:previous?.officialPhotos,trustedFolder:true,acceptAllFolderPhotos:true,photoMapping:{basis:'사용자 지시: 현재 품번 폴더 사진 신뢰 · 미확인 색상·각도는 임의 지정하지 않음',files:records,ignoredPhotos:old?.style===product.style&&old?.sourceUrl===product.sourceUrl?old.photoMapping?.ignoredPhotos||[]:[]},preparedAt:new Date().toISOString()};
  if(old?.style===product.style&&old?.sourceUrl===product.sourceUrl&&Array.isArray(old.editedPhotoReplacements))draft.editedPhotoReplacements=old.editedPhotoReplacements;
  if(old?.style===product.style&&old?.sourceUrl===product.sourceUrl&&Array.isArray(old.officialPaletteFronts))draft.officialPaletteFronts=old.officialPaletteFronts;

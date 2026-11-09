@@ -9,7 +9,7 @@ const digest=text=>createHash('sha256').update(text).digest('hex');
 const sourceJobs=new Map();
 // Legacy omission flags no longer skip official-source analysis.
 export async function sellingPointsOmitted(){return false;}
-export async function officialPointSource(product,folder,pageText,{dataRoot=path.resolve('data'),signal,log,recognize,desktop}={}){
+export async function officialPointSource(product,folder,pageText,{dataRoot=path.resolve('data'),signal,log,recognize,desktop,cachedOnly=false}={}){
  if(!product.images?.detail)return {text:pageText,imageChecked:false,detailHash:null};
  let bytes;try{bytes=await readFile(path.join(folder,'detail.jpg'));}catch(e){if(e.code==='ENOENT')return {text:pageText,imageChecked:false,detailHash:null};throw e;}
  const detailHash=digest(bytes);
@@ -22,9 +22,10 @@ export async function officialPointSource(product,folder,pageText,{dataRoot=path
  };
  const catalog=await catalogImageSource(product,detailHash,{dataRoot,desktop});
  if(catalog){
-  await saveRegistrationSource(catalog.imageText);
+  if(!cachedOnly)await saveRegistrationSource(catalog.imageText);
   return {text:[officialImageBenefitText(catalog.imageText),pageText].filter(Boolean).join('\n•\n'),imageChecked:true,detailHash,method:'official-catalog-image-cache'};
  }
+ if(cachedOnly)return {text:pageText,imageChecked:false,detailHash};
  const key=JSON.stringify([dataRoot,product.style,product.sourceUrl,detailHash]);
  let job=sourceJobs.get(key);if(!job){job=enrichOfficialProductFacts(product,folder,{dataRoot,signal,log,recognize}).then(p=>p.researchFacts);sourceJobs.set(key,job);job.finally(()=>{if(sourceJobs.get(key)===job)sourceJobs.delete(key);}).catch(()=>{});}
  const facts=await job;signal?.throwIfAborted();
@@ -39,7 +40,7 @@ export async function saveOfficialImagePointReview(product,folder,{text,points,d
  const record={version:1,method:'visual-official-detail',style:product.style,sourceUrl:product.sourceUrl,detailHash,text,points,reviewedAt:new Date().toISOString()};
  const root=path.join(dataRoot,'smartstore-details',product.style);await mkdir(root,{recursive:true});await writeFile(path.join(root,'selling-point-image-review.json'),JSON.stringify(record,null,2));return record;
 }
-export async function reviewSellingPoints(product,source,{dataRoot,detailHash=null,signal,existing,supplement=false,log}={}){
+export async function reviewSellingPoints(product,source,{dataRoot,detailHash=null,signal,existing,supplement=false,persist=true,log}={}){
  signal?.throwIfAborted();
  const identity={version:14,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
  const root=path.join(dataRoot,'smartstore-details',product.style),file=path.join(root,'selling-point-review.json');
@@ -54,7 +55,8 @@ export async function reviewSellingPoints(product,source,{dataRoot,detailHash=nu
   signal?.throwIfAborted();
   const ready=usableSellingPoints(points,text)&&points.length>=2&&points.length<=4;
   const result={...record,points,omitted:false,status:ready?'ready':'needs-review',message:ready?'공식 근거 구매 장점 '+points.length+'개 적용':'공식 상품 설명·상세이미지에서 서로 다른 구매 장점 2~4개 확인 필요'};
-  await mkdir(root,{recursive:true});await writeFile(file,JSON.stringify(result,null,2));return result;
+  if(persist){await mkdir(root,{recursive:true});await writeFile(file,JSON.stringify(result,null,2));}
+  return result;
  };
  let selection;try{selection=JSON.parse(await readFile(path.join(root,'selling-point-selection.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(selection?.style===product.style&&selection.sourceUrl===product.sourceUrl&&selection.detailHash===detailHash&&(detailHash||selection.textHash===digest(source))&&selection.points?.length>=1&&selection.points.length<=4&&usableSellingPoints(selection.points,source)){
@@ -63,8 +65,7 @@ export async function reviewSellingPoints(product,source,{dataRoot,detailHash=nu
  let imageReview;try{imageReview=JSON.parse(await readFile(path.join(root,'selling-point-image-review.json'),'utf8'));}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
  if(detailHash&&imageReview?.version===1&&imageReview.style===product.style&&imageReview.sourceUrl===product.sourceUrl&&imageReview.detailHash===detailHash&&imageReview.points?.length<=4&&usableSellingPoints(imageReview.points,imageReview.text)){
   const text=[imageReview.text,source].join('\n');
-  const points=completeSellingPoints(imageReview.points,text);
-  return finish({...identity,method:'visual-official-detail',points,reviewedAt:imageReview.reviewedAt},text);
+  return finish({...identity,method:'visual-official-detail',points:imageReview.points,reviewedAt:imageReview.reviewedAt},text);
  }
  let cached;try{cached=JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
  if(Object.entries(identity).every(([key,value])=>cached?.[key]===value)&&usableSellingPoints(cached.points,source))return finish(cached);
