@@ -10,7 +10,7 @@ import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import {analyzeNotice} from './notice.mjs';
+import {verifiedOcrMaterial,analyzeNotice} from './notice.mjs';
 import {analyzeNoticeCached} from './notice-cache.mjs';
 import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 import {readSourceImage,inspectDetailSource,sourceImageCandidates} from './source-image.mjs';
@@ -437,8 +437,9 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
   try {
     const notice=options.noticeCacheRoot?await analyzeNoticeCached(path.join(folder,'info.jpg'),{cacheRoot:options.noticeCacheRoot,log,signal}):await analyzeNotice(path.join(folder,'info.jpg'),log,signal);
     applyOCR(product,notice.ocrText);
-    Object.assign(product,{country:notice.country||product.country,material:notice.material,washing:notice.washing,fieldStatus:notice.fieldStatus,noticeAnalysis:notice});
-    if(notice.material)product.warnings=product.warnings.filter(w=>!w.startsWith('소재 혼용률')); 
+    Object.assign(product,{country:notice.country||product.country,material:verifiedOcrMaterial(notice.material),washing:notice.washing,fieldStatus:notice.fieldStatus,noticeAnalysis:notice});
+    if(!product.material)product.fieldStatus.material='확인 필요 · 고시 원본의 소재·혼용률 대조';
+    if(product.material)product.warnings=product.warnings.filter(w=>!w.startsWith('소재 혼용률')); 
   }
   catch(e){ signal?.throwIfAborted();product.warnings.push(`OCR 미완료: ${e.message}. 고시 이미지를 보고 입력해 주세요.`); }
   applyVerifiedNotice(product,await readFile(path.join(folder,'info.jpg')));

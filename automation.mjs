@@ -1,3 +1,4 @@
+import {requireMaterialInput} from './notice.mjs';
 import {resolveCatalogCategory} from './category-catalog.mjs';
 import {categoryKey,loadCategoryCache,saveCategoryMatch} from './category-cache.mjs';
 import {BrowserAutomation} from './browser-connection.mjs';
@@ -298,7 +299,7 @@ export class LotteAutomation extends BrowserAutomation {
     await mkdir(folder,{recursive:true});await this.page.screenshot({path:path.join(folder,name+'.png')});
   }
   async run(p,folder,finalize){
-    validateStyle(p.style);this.stopped=false;
+    validateStyle(p.style);p={...p,material:requireMaterialInput(p.material)};this.stopped=false;
     const catalogMatch=resolveCatalogCategory(p);if(catalogMatch.path){p.category=catalogMatch.category;this.log('실제 분류 매칭표 적용: '+p.category.commonSmall+' / '+p.category.channelMiddle+' > '+p.category.channelSmall)}
     const login=!this.page||this.page.isClosed()||this.browser&&!this.browser.isConnected()?await this.open():await this.ensureLogin();
     if(login.status==='expired')throw Error(LOTTE_SESSION_EXPIRED);

@@ -2,6 +2,24 @@ import {normalizeCountry} from './country.mjs';
 import sharp from 'sharp';
 import {createWorker} from 'tesseract.js';
 import {extractWashingIcons,iconWashingResult} from './washing-icons.mjs';
+function cleanMaterialInput(text){
+ const value=String(text||'').normalize('NFKC').trim();
+ if(!value||!/^[가-힣A-Za-z0-9 \t\r\n%,.;:/()·&+\-]+$/.test(value)||!/[가-힣A-Za-z]/.test(value))return '';
+ return value.replace(/\s+/g,' ');
+}
+export function requireMaterialInput(text){
+ const value=cleanMaterialInput(text);
+ if(!value)throw Error('제품 소재에 읽을 수 없는 문자가 있거나 값이 비어 있습니다. 공식 상품정보고시를 대조해 소재를 수정해 주세요.');
+ if([...value.matchAll(/(\d+(?:\.\d+)?)\s*%/g)].some(match=>+match[1]<=0||+match[1]>100))throw Error('제품 소재 혼용률이 올바르지 않습니다. 공식 상품정보고시를 확인해 주세요.');
+ return value;
+}
+export function verifiedOcrMaterial(text){
+ const clean=cleanMaterialInput(text);
+ if(!clean)return '';
+ const composition=parseMaterialText(clean);
+ if(composition)return composition;
+ return /^(?:천연가죽|합성가죽|소가죽|양가죽|인조가죽)(?:\s*\((?:소가죽|양가죽)\))?$/.test(clean)?clean:'';
+}
 export function parseMaterialText(text){
  const clean=text.replace(/\s+/g,' ').trim();
  const parts=clean.split(/(?=(?:겉감표면|겉감이면|겉감|안감|이면|충전재)\s*[:：])/).filter(Boolean);
@@ -79,15 +97,12 @@ async function analyzeNoticeWork(file,log,signal,options,onWorker){
  }
  if(!mat){const styleLabel=words.find(w=>w.left<width*.25&&/^스타일/.test(w.text));if(styleLabel){const cy=styleLabel.top+styleLabel.height/2,top=rules.find(y=>y>cy),bottom=rules.find(y=>y>(top??height)+3);if(top!==undefined&&bottom!==undefined)mat={left:Math.floor(width*.28),top:top+2,width:Math.floor(width*.66),height:bottom-top-4};}}
  if(mat){result.materialBand=mat;log('소재 행 확대·혼용률 재인식');const m=(await worker.recognize(await crop(mat))).data.text;result.materialOCR=m;
- // Preserve the enlarged row transcription, including uncertain percentages, for review.
- let reviewed=reviewMaterialOCR(m);
- if(reviewed.needsReview){
-  const originalRow=result.ocrText.match(/제품\s*소재\s*([\s\S]*?)(?=색\s*상)/)?.[1]?.trim()||'';
-  const fallback=reviewMaterialOCR(originalRow);
-  if(!fallback.needsReview&&parseMaterialText(originalRow)){reviewed=fallback;result.materialRecheck=originalRow;}
- }
- result.material=reviewed.value;
- result.fieldStatus.material=reviewed.corrected?'% 오인식 보정 · 혼용률 대조 · 원본 확인 필요':reviewed.needsReview?'101 이상 숫자 제외 · 혼용률 원본 확인 필요':result.material?'확대 인식 원문 · 원본 확인 필요':'확인 필요';
+ // Keep the raw transcription for review. Only a validated composition fills the field.
+ const originalRow=result.ocrText.match(/제품\s*소재\s*([\s\S]*?)(?=색\s*상)/)?.[1]?.trim()||'';
+ const enlarged=verifiedOcrMaterial(m),original=verifiedOcrMaterial(originalRow);
+ result.material=enlarged&&original&&enlarged!==original?'':enlarged||original;
+ if(!enlarged&&original)result.materialRecheck=originalRow;
+ result.fieldStatus.material=result.material?'공식 고시 OCR · 혼용률 형식 확인':'확인 필요 · 고시 원본의 소재·혼용률 대조';
  }
  if(!mat){
   const beforeColor=result.ocrText.split(/색\s*상/)[0];

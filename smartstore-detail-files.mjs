@@ -48,7 +48,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
  {
   let detailHash=null;try{detailHash=createHash('sha256').update(await readFile(path.join(folder,'detail.jpg'))).digest('hex');}catch(e){if(e.code!=='ENOENT')throw e;}
   const checkedSource=omitPoints?{text:sourceText,imageChecked:false}:await officialPointSource(product,folder,sourceText,{dataRoot,signal,log});sourceText=[sourceText,checkedSource.text].filter(Boolean).join('\n•\n');
-  const review=await reviewSellingPoints(product,sourceText,{dataRoot,detailHash,signal,log,existing:prepared.sellingPoints,supplement:checkedSource.imageChecked&&checkedSource.detailHash===detailHash});
+  const review=await reviewSellingPoints(product,sourceText,{dataRoot,detailHash,signal,log,existing:draft?.officialDetailHash===detailHash?prepared.sellingPoints:undefined,supplement:checkedSource.imageChecked&&checkedSource.detailHash===detailHash});
   prepared.sellingPoints=review.points;prepared.omitSellingPoints=false;prepared.sellingPointReview={status:review.status,message:review.message||''};
   if(draft){draft.sellingPoints=review.points;await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft,null,2));}
   prepared.sellingPointSource={style,sourceUrl:product.sourceUrl,textHash:createHash('sha256').update(sourceText).digest('hex'),detailHash,imageChecked:checkedSource.imageChecked};
