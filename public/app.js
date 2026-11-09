@@ -94,9 +94,11 @@ autoOpenSeller.checked=true;
 try{autoOpenSeller.checked=localStorage.getItem(autoSellerPreference)!=='off';}catch{}
 const autoOpenSellerLabel=document.createElement('label');
 autoOpenSellerLabel.className='collection-seller-option';
+autoOpenSellerLabel.dataset.channelOnly='lotte';
 autoOpenSellerLabel.append(autoOpenSeller,'수집 완료 후 판매자센터 열기');
 const autoOpenSellerStatus=document.createElement('p');
 autoOpenSellerStatus.id='autoOpenSellerStatus';
+autoOpenSellerStatus.dataset.channelOnly='lotte';
 autoOpenSellerStatus.setAttribute('role','status');
 $('collectionStatus').before(autoOpenSellerLabel,autoOpenSellerStatus);
 autoOpenSeller.addEventListener('change',()=>{
@@ -112,15 +114,16 @@ async function collectForReview(input,allowMissingDetail=false){
  pendingSellerOpen=null;
  autoOpenSellerStatus.textContent='';
  const channel=activeChannel(),view=channelViewId;
+ const openAfterCollect=channel==='lotte'&&autoOpenSeller.checked;
  let revision=smartstoreListingState?.revision;
- if(autoOpenSeller.checked&&revision===undefined){
+ if(openAfterCollect&&revision===undefined){
   try{
    const response=await fetch('/api/state?channel='+channel,{signal:AbortSignal.timeout(5000)});
    if(response.ok)revision=(await response.json()).revision;
   }catch{}
  }
  const result=await post('collect',{style:input,allowMissingDetail,channel,edits:currentProductEdits()});
- if(autoOpenSeller.checked&&revision!==undefined)pendingSellerOpen={input,channel,view,revision};
+ if(openAfterCollect&&autoOpenSeller.checked&&revision!==undefined)pendingSellerOpen={input,channel,view,revision};
  return result;
 }
 function sameCollectedProduct(input,product){

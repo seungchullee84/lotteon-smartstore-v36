@@ -18,7 +18,7 @@ export class LotteAutomation extends BrowserAutomation {
   async ensureLogin(waitForForm=false){return tryLotteLogin(this.page,{store:createBrowserLoginStore(this.root),log:this.log,check:()=>this.check(),waitForForm});}
   async open(){
     this.stopped=false;
-    await this.connectChrome(PORTAL);
+    await this.connectChrome(PORTAL,{restoreLastSession:false});
     const pages=this.context.pages().filter(p=>!p.isClosed());
     this.page=await selectLottePage(pages,this.page)||await this.context.newPage();
     this.page.setDefaultTimeout(8000);

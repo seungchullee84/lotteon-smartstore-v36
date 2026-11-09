@@ -14,7 +14,7 @@ export class BrowserAutomation {
     if(connection)await connection.close().catch(()=>{});
   }
   check(){if(this.stopped) throw Error('사용자가 중단했습니다.');}
-  async connectChrome(initialURL){
+  async connectChrome(initialURL,{restoreLastSession=true}={}){
     // A loopback CDP connection survives app restarts; ordinary Chrome profiles are untouched.
     const profile=path.join(this.root,'browser-profile-chrome-v2');
     await mkdir(profile,{recursive:true});
@@ -31,8 +31,11 @@ export class BrowserAutomation {
         for(const file of candidates){try{await access(file);exe=file;break;}catch{}}
         // Reuse live Chrome as-is; apply its identifying theme only on a new launch.
         await prepareRegistrarChromeAppearance(profile);
-        // Restore the dedicated profile's tabs and session cookies after Chrome exits.
-        const child=spawn(exe,['--user-data-dir='+profile,'--restore-last-session','--remote-debugging-port=0','--remote-debugging-address=127.0.0.1','--no-first-run','--no-default-browser-check',initialURL],{detached:true,stdio:'ignore'});
+        // Cookies come from the profile. Restoring old tabs is a separate choice.
+        const args=['--user-data-dir='+profile,'--remote-debugging-port=0','--remote-debugging-address=127.0.0.1','--no-first-run','--no-default-browser-check'];
+        if(restoreLastSession)args.push('--restore-last-session');
+        args.push(initialURL);
+        const child=spawn(exe,args,{detached:true,stdio:'ignore'});
         let launchError;child.on('error',e=>{launchError=e;});child.unref();
         let connected=false;
         for(let n=0;n<30;n++){if(launchError)throw Error('크롬을 실행하지 못했습니다: '+launchError.message);try{await connect();connected=true;break;}catch{await new Promise(r=>setTimeout(r,400));}}
