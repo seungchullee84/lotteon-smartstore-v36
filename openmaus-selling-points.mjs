@@ -18,7 +18,7 @@ export function verifiedOpenMausPoints(response,input,points,source){
   const pilling=/보풀\s*방지\s*(?:기능|가공)(?:을|를)?\s*(?:제공|적용|더했)/.test(quote);
   const point=pilling?{title:'보풀을 줄이는 가공',description:'보풀 방지 기능을 더한 소재.',evidence:quote}
    :officialSellingPoints(quote,{limit:1})[0];
-  if(point&&usableSellingPoints([point],quote))additions.push({...point,evidence:quote});
+  if(point&&usableSellingPoints([point],quote)&&!points.some(existing=>existing.evidence.split(/\s+\/\s+https?:\/\//)[0].trim()===quote.trim()))additions.push({...point,evidence:quote});
  }
  return appendDistinctSellingPoints(points,additions,source);
 }
@@ -28,9 +28,9 @@ const prompt=[
  '부정, 조건 생략, 다른 상품, 안내 문구, 색상 수, 깨진 OCR은 제외한다. 한 구절에는 독립된 장점 하나만 담아라.',
  'JSON 형식은 {"style":"입력값","sourceUrl":"입력값","detailHash":"입력값","quotes":["정확한 공식 구절"]}이다.',
 ].join('\n');
-let active=null;
+let active=null,retryAfter=0;
 
-export async function supplementSellingPoints(product,points,source,{dataRoot,detailHash,signal,log,start=true}){
+export async function supplementSellingPoints(product,points,source,{dataRoot,detailHash,signal,log}){
  if(points.length>=3||!source.trim()||!/^\d{6}$/.test(product.style)||
     !/^[a-f0-9]{64}$/i.test(detailHash||'')||!sameOfficialProduct(product.sourceUrl,product.sourceUrl)||
     !/^[a-f0-9]{32}$/i.test(new URL(product.sourceUrl).searchParams.get('pno')||''))return points;
@@ -41,7 +41,7 @@ export async function supplementSellingPoints(product,points,source,{dataRoot,de
  let cached;
  try{cached=JSON.parse(await readFile(cache,'utf8'));}catch{}
  if(cached)return verifiedOpenMausPoints(cached,input,points,source);
- if(!start||active||signal?.aborted)return points;
+ if(active||retryAfter>Date.now()||signal?.aborted)return points;
  const cli=openMausCli(dataRoot);
  try{await access(cli);}catch{return points;}
  if(active||signal?.aborted)return points;
@@ -49,6 +49,6 @@ export async function supplementSellingPoints(product,points,source,{dataRoot,de
  active=runOpenMausReview(cli,input,prompt,{signal}).then(async response=>{
   if(response?.style!==input.style||response.sourceUrl!==input.sourceUrl||response.detailHash!==input.detailHash||!Array.isArray(response.quotes))return;
   await atomicWrite(cache,JSON.stringify(response));
- }).catch(()=>{}).finally(()=>{active=null;});
+ }).catch(()=>{if(!signal?.aborted)retryAfter=Date.now()+60000;}).finally(()=>{active=null;});
  return points;
 }

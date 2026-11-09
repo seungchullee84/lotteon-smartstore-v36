@@ -7,9 +7,11 @@ import {setTimeout as delay} from 'node:timers/promises';
 import {promisify} from 'node:util';
 const exec=promisify(execFile);
 const bot='Giordano Research';
-let reviewing=false;
+let activeReview=null;
 
-export const openMausCli=dataRoot=>path.join(dataRoot,'openmausbot','node_modules','openmausbot','cli.js');
+export function stopOpenMausReview(){activeReview?.abort();}
+
+export const openMausCli=dataRoot=>path.resolve(dataRoot,'openmausbot','node_modules','openmausbot','cli.js');
 
 async function availablePort(){
  const server=createServer();
@@ -29,14 +31,15 @@ async function stopServer(child){
 }
 
 export async function runOpenMausReview(cli,input,prompt,{signal,image}={}){
- if(reviewing)return null;
- reviewing=true;
+ if(activeReview)return null;
+ const controller=new AbortController();activeReview=controller;
+ signal=signal?AbortSignal.any([signal,controller.signal]):controller.signal;
  let child,temporaryRoot,work;
  try{
   temporaryRoot=await realpath(os.tmpdir());
   work=await mkdtemp(path.join(temporaryRoot,'giordano-openmaus-'));
   const port=await availablePort();
-  const env=Object.fromEntries(Object.entries(process.env).filter(([name])=>!/^(?:OMB_|OPENMAUSBOT_)/i.test(name)));
+  const env=Object.fromEntries(Object.entries(process.env).filter(([name])=>!/^(?:OMB_|OPENMAUSBOT_|NAVER_|REGISTER_|LOTTE_|SMARTSTORE_|OPENAI_API_KEY$)/i.test(name)));
   env.OMB_DATA_DIR=path.join(work,'profile');
   env.OPENMAUSBOT_URL='http://127.0.0.1:'+port;
   const invoke=async(args,timeout)=> (await exec(process.execPath,[cli,...args],{
@@ -69,7 +72,7 @@ export async function runOpenMausReview(cli,input,prompt,{signal,image}={}){
   let attachment='';
   if(image){
    const uploaded=await fetch(env.OPENMAUSBOT_URL+'/api/attachments',{method:'POST',headers:{'Content-Type':'image/png'},
-    body:image,redirect:'error',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(5000)]):AbortSignal.timeout(5000)});
+    body:image,redirect:'error',signal:AbortSignal.any([signal,AbortSignal.timeout(5000)])});
    if(!uploaded.ok)throw Error('공식 고시 이미지 첨부 실패');
    const {path:location}=await uploaded.json();
    if(typeof location!=='string'||path.dirname(location)!==path.join(env.OMB_DATA_DIR,'attachments')||!(/^[a-f0-9-]{36}\.png$/i).test(path.basename(location)))throw Error('공식 고시 이미지 첨부 경로 불일치');
@@ -89,7 +92,6 @@ export async function runOpenMausReview(cli,input,prompt,{signal,image}={}){
   if(resolved&&path.dirname(resolved)===temporaryRoot&&path.basename(resolved).startsWith('giordano-openmaus-')){
    await rm(resolved,{recursive:true,force:true,maxRetries:2}).catch(()=>{});
   }
-  reviewing=false;
+  activeReview=null;
  }
 }
-

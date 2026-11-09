@@ -11,6 +11,7 @@ import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {applyImportedPhotos,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail,renderPreparedSmartstoreDetail,prefetchSmartstoreSellingPoints} from './smartstore-detail-files.mjs';
 import {reviewNoticeMaterial} from './openmaus-notice-review.mjs';
+import {stopOpenMausReview} from './openmaus-research.mjs';
 import {loadSmartstoreLinkedComparison,prependSmartstoreLinkedComparison,linkedComparisonPreview} from './smartstore-linked-comparison.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
 import {resolveDetailTemplate} from './smartstore-template-choice.mjs';
@@ -730,7 +731,7 @@ const server=http.createServer(async(req,res)=>{
       if(url.pathname==='/api/shutdown'){
         if(state.busy)return json(res,409,{error:'작업 중에는 종료할 수 없습니다. 중단 후 작업이 멈추면 다시 눌러 주세요.'});
         if(state.folder&&state.product)await writeFile(path.join(state.folder,'shutdown-draft.json'),JSON.stringify({product:state.product,form:b.form||null,savedAt:new Date().toISOString()},null,2));
-        uploadWarmup?.controller.abort();colorDraftAbort?.abort();noticeReviewAbort?.abort();newProductResearch.stop();benefitResearch.stop();
+        uploadWarmup?.controller.abort();colorDraftAbort?.abort();noticeReviewAbort?.abort();stopOpenMausReview();newProductResearch.stop();benefitResearch.stop();
         res.once('finish',()=>{server.close(()=>process.exit(0));setTimeout(()=>process.exit(0),1500).unref();});
         return json(res,200,{ok:true});
       }
