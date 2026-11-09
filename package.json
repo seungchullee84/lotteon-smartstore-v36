@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.mjs",
     "test": "node --test test/*.test.mjs",
+    "design:audit": "node .agents/skills/hallmark/scripts/sloplint.mjs",
     "setup": "playwright install chromium"
   },
   "dependencies": {
