@@ -171,7 +171,7 @@ function startNoticeMaterialReview(product,folder){
  const controller=new AbortController();noticeReviewAbort=controller;
  if(product.material||product.userEditedFields?.material)return;
  void reviewNoticeMaterial(product,folder,{dataRoot,signal:controller.signal}).then(material=>{
-  if(!material||controller.signal.aborted||state.product!==product||state.folder!==folder)return;
+  if(!material||controller.signal.aborted||state.busy||state.product!==product||state.folder!==folder)return;
   product.fieldStatus||={};
   product.fieldStatus.material='확인 필요 · OpenMausBot 재판독 후보 · '+material;
   state.revision++;

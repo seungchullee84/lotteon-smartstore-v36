@@ -3,8 +3,7 @@ import sharp from 'sharp';
 import {createWorker} from 'tesseract.js';
 import {extractWashingIcons,iconWashingResult} from './washing-icons.mjs';
 const materialNames='폴리에스터|폴리우레탄|금속성섬유|아크릴|레이온|나일론|캐시미어|리오셀|텐셀|비스코스|알파카|인조가죽|합성피혁|합성가죽|천연가죽|소가죽|양가죽|면|모|울|마|견';
-const materialPart=/^(겉감\s*표면|겉감\s*이면|겉감|안감|이면|충전재)\s*[:：]/;
-const materialPartBoundary=/(?=(?:겉감\s*표면|겉감\s*이면|겉감|안감|이면|충전재)\s*[:：])/;
+const materialPart=/(겉감\s*표면|겉감\s*이면|겉감|안감|이면|충전재)\s*[:：]/;
 function cleanMaterialInput(text){
  const value=String(text||'').normalize('NFKC').trim();
  if(!value||!/^[가-힣A-Za-z0-9 \t\r\n%,.;:/()·&+\-]+$/.test(value)||!/[가-힣A-Za-z]/.test(value))return '';
@@ -27,13 +26,15 @@ export function verifiedOcrMaterial(text){
  return /^(?:천연가죽|합성가죽|소가죽|양가죽|인조가죽)(?:\s*\((?:소가죽|양가죽)\))?$/.test(clean)?clean:'';
 }
 function readMaterialParts(text,{requirePercent=false}={}){
- const parts=text.replace(/\s+/g,' ').trim().split(materialPartBoundary).filter(Boolean);
+ const [unlabeled,...labeled]=text.replace(/\s+/g,' ').trim().split(materialPart);
+ const parts=[];
+ if(unlabeled)parts.push(['',unlabeled]);
+ for(let i=0;i<labeled.length;i+=2)parts.push([labeled[i].replace(/\s+/g,''),labeled[i+1]]);
  const result=[];
  const fiber=new RegExp('('+materialNames+')\\s*(\\d+(?:\\.\\d+)?)(\\s*%)?','g');
- for(const part of parts){
-  const label=part.match(materialPart)?.[1].replace(/\s+/g,'');
+ for(const [label,part] of parts){
   const fibers=[...part.matchAll(fiber)];
-  const remainder=part.replace(materialPart,'').replace(fiber,'').replace(/[\s,;/]/g,'');
+  const remainder=part.replace(fiber,'').replace(/[\s,;/]/g,'');
   if(remainder||!fibers.length||(requirePercent&&fibers.some(match=>!match[3])))return null;
   result.push({label,fibers});
  }

@@ -112,7 +112,7 @@ test('채팅에서 원본 바이트로 확인한 사진은 변환 해시 없이�
  const draft={style:product.style,sourceUrl:product.sourceUrl,officialDetailHash:digest(front),photos:[{color:'05블랙',files:['1.jpg','side.jpg']}],sellingPoints:[{title:'경량',description:'가벼운 원단',evidence:description}],photoMapping:{files:[{hash:digest(front),color:'05블랙',role:'front'},{hash:digest(side),color:'05블랙',role:'side'}]}};
  await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft));
  const p=await prepareSmartstoreAuto(product,folder,{trustFolder:false,dataRoot,photoRoots:[photos],fetchImpl:()=>{throw Error('API를 호출하면 안 됨');}});
- const saved=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));assert.equal(saved.listingImages.extras.length,1);assert.equal(saved.listingImages.extras[0].role,'side');assert.equal(p.smartstoreDetail.photoCount,2);assert.equal(saved.sellingPoints[0].evidence,description);assert.equal(saved.sellingPoints[0].title,'가볍게, 부담 없이');
+ const saved=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));assert.equal(saved.listingImages.extras.length,1);assert.equal(saved.listingImages.extras[0].role,'side');assert.equal(p.smartstoreDetail.photoCount,2);assert.equal(saved.sellingPoints[0].evidence,description);assert.deepEqual(saved.sellingPoints[0],draft.sellingPoints[0]);
  }finally{await rm(root,{recursive:true,force:true});}
 });
 
