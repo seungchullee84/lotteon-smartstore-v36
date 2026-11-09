@@ -11,7 +11,7 @@ import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {applyImportedPhotos,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail,renderPreparedSmartstoreDetail,prefetchSmartstoreSellingPoints} from './smartstore-detail-files.mjs';
 import {reviewNoticeMaterial} from './openmaus-notice-review.mjs';
-import {stopOpenMausReview} from './openmaus-research.mjs';
+import {openMausCli,openMausInstallRoot,stopOpenMausReview} from './openmaus-research.mjs';
 import {loadSmartstoreLinkedComparison,prependSmartstoreLinkedComparison,linkedComparisonPreview} from './smartstore-linked-comparison.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
 import {resolveDetailTemplate} from './smartstore-template-choice.mjs';
@@ -48,7 +48,7 @@ import {officialDetailKeys} from './detail-html.mjs';
 import {embeddedOfficialSections} from './smartstore-official-sections.mjs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {spawn} from 'node:child_process';
+import {execFile,spawn} from 'node:child_process';
 import {createProductEditStore} from './product-edits.mjs';
 import {validateTemplateHeadline,templateHeadlineEdits} from './smartstore-template-headline.mjs';
 import {suggestMissingLotteCategory} from './lotte-category-suggest.mjs';
@@ -787,10 +787,42 @@ const server=http.createServer(async(req,res)=>{
     json(res,404,{error:'없는 경로'});
   }catch(e){json(res,400,{error:e.message});}
 });
+function prepareStartupTools(){
+ if(process.platform!=='win32')return;
+ const powershell=path.join(process.env.SystemRoot||'C:\\Windows','System32','WindowsPowerShell','v1.0','powershell.exe');
+ const env=Object.fromEntries(Object.entries(process.env).filter(([name])=>!/^(?:REGISTER_|NAVER_|LOTTE_|SMARTSTORE_|OMB_|OPENMAUSBOT_|NPM_CONFIG_|NODE_AUTH_TOKEN$|NPM_TOKEN$|OPENAI_API_KEY$|NODE_OPTIONS$)/i.test(name)));
+ const messages={
+  'OpenMausBot:installed':'OpenMausBot 설치 완료',
+  'FFmpeg:installed':'FFmpeg 설치 완료',
+  'HyperFrames:installed':'HyperFrames 플러그인 설치 완료 · Codex에서 새 채팅을 열어 사용하세요.',
+  'OpenMausBot:node':'OpenMausBot 설치에는 Node.js 24 이상이 필요합니다.',
+  'HyperFrames:codex':'HyperFrames 설치를 위해 이 PC에 Codex를 설치해 주세요.',
+  'HyperFrames:login':'Codex 로그인 후 등록기를 다시 열면 HyperFrames 설치를 재시도합니다.',
+ };
+ const report=message=>state.busy?console.log(message):log(message);
+ execFile(powershell,['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.join(root,'tools-setup.ps1'),
+  '-NodeExe',process.execPath,'-OpenMausCli',openMausCli(dataRoot),'-OpenMausInstallRoot',openMausInstallRoot],
+ {cwd:root,env,windowsHide:true,timeout:8*60*1000},(error,stdout)=>{
+  for(const line of stdout.split(/\r?\n/)){
+   if(line.startsWith('Path:')){
+    const entry=line.slice(5);
+    const inherited=process.env.Path||'';
+    if(path.isAbsolute(entry)&&!entry.includes(';')&&!inherited.split(';').some(dir=>dir.toLowerCase()===entry.toLowerCase())){
+     process.env.Path=[inherited,entry].filter(Boolean).join(';');
+    }
+    continue;
+   }
+   if(Object.hasOwn(messages,line))report(messages[line]);
+   else if(/^(OpenMausBot|FFmpeg|HyperFrames):failed$/.test(line))report(line.split(':')[0]+' 설치를 마치지 못했습니다. 다음 실행 때 다시 확인합니다.');
+  }
+  if(error)report('도구 설치 확인을 마치지 못했습니다. 다음 실행 때 다시 확인합니다.');
+ });
+}
 server.listen(desktopSession?.port||0,'127.0.0.1',async()=>{
   if(state.product?.photoSelectionPending&&state.folder)startPhotoColorDraft(state.product,state.folder);
   const url=`http://127.0.0.1:${server.address().port}/?key=${token}`;
   await writeFile(path.join(dataRoot,'active-register-session.json'),JSON.stringify({port:server.address().port,token,pid:process.pid,startedAt:new Date().toISOString()})).catch(()=>{});
   console.log('\n지오다노 등록 도우미: '+url+'\n이 창을 닫으면 프로그램이 종료됩니다.');
   if(!desktopSession&&!process.env.NO_AUTO_OPEN){const child=spawn('cmd.exe',['/c','start','',url],{windowsHide:true,stdio:'ignore'});child.on('error',()=>{});}
+  prepareStartupTools();
 });

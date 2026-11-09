@@ -75,6 +75,8 @@ node build-portable.mjs "C:/배포/상품등록기-Windows"
 
 출력 폴더 전체를 ZIP으로 전달하고 다른 PC에서는 압축을 해제한 뒤 `상품등록기.exe`를 실행합니다. EXE만 따로 복사하지 않습니다. 첫 실행 때 네이버 API 키를 입력하고 판매자 계정에 직접 로그인합니다. 키·토큰·로그인·상품 작업 자료는 배포에 포함하지 않습니다. 배포판은 GitHub 자동 업로드를 실행하지 않으며 원본 프로젝트의 자동 반영은 유지됩니다.
 
+Windows에서 등록기 화면이 열리면 OpenMausBot, FFmpeg, HyperFrames 플러그인을 확인하고 빠진 항목만 백그라운드에서 설치합니다. OpenMausBot에는 Node.js 24 이상이 필요하고, HyperFrames 설치 전에는 이 PC의 Codex에 로그인해야 합니다. 설치가 끝난 뒤 Codex에서 새 채팅을 열어 플러그인을 사용할 수 있습니다. FFmpeg를 새로 설치했을 때 이미 열려 있던 Codex에서 FFmpeg를 찾지 못하면 Codex를 한 번 다시 여세요. 설치 중 실패하거나 준비 조건이 부족한 항목은 다음 등록기 실행 때 다시 확인합니다.
+
 ### 아이템스카우트 카테고리 조사 자료
 
 `data/category-itemscout-verified.json`은 사용자가 제공한 `itemscout-verified-categories.csv`의 320개 키워드, 411행을 원문 필드 그대로 보존합니다. 월간 검색수, 카테고리 비중, 출처 URL, 조사일 및 미확인 사항을 포함합니다.

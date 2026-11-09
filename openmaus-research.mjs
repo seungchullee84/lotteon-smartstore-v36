@@ -1,4 +1,5 @@
 import {execFile,spawn} from 'node:child_process';
+import {existsSync} from 'node:fs';
 import {mkdtemp,readFile,realpath,rm,writeFile} from 'node:fs/promises';
 import {createServer} from 'node:net';
 import os from 'node:os';
@@ -11,7 +12,13 @@ let activeReview=null;
 
 export function stopOpenMausReview(){activeReview?.abort();}
 
-export const openMausCli=dataRoot=>path.resolve(dataRoot,'openmausbot','node_modules','openmausbot','cli.js');
+const openMausEntry=path.join('node_modules','openmausbot','cli.js');
+export const openMausInstallRoot=path.join(process.env.LOCALAPPDATA||path.join(os.homedir(),'AppData','Local'),'CodexRegistrar','OpenMausBot');
+export function openMausCli(dataRoot){
+ const existing=path.resolve(dataRoot,'openmausbot',openMausEntry);
+ if(process.platform!=='win32'||existsSync(existing))return existing;
+ return path.join(openMausInstallRoot,openMausEntry);
+}
 
 async function availablePort(){
  const server=createServer();

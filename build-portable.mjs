@@ -13,7 +13,7 @@ const browserSource=process.env.PLAYWRIGHT_BROWSERS_PATH;
 if(!browserSource)throw Error('PLAYWRIGHT_BROWSERS_PATH를 지정하세요.');
 const files=execFileSync('git',['ls-files','-z'],{cwd:root,encoding:'utf8',windowsHide:true}).split('\0').filter(Boolean);
 const publicData=['category-catalog-common.json','category-catalog-standard.json','category-crosswalk.json','category-matches.json','category-itemscout-verified.json','washing-icon-library.json'].map(f=>'data/'+f);
-const safe=files.filter(f=>publicData.includes(f)||f.startsWith('public/')||(!f.includes('/')&&/\.(mjs|json|md|traineddata|ico|png)$/.test(f)&&!f.startsWith('.'))||f==='.app-release.json');
+const safe=files.filter(f=>publicData.includes(f)||f.startsWith('public/')||(!f.includes('/')&&/\.(mjs|json|md|traineddata|ico|png)$/.test(f)&&!f.startsWith('.'))||f==='.app-release.json'||f==='tools-setup.ps1');
 const app=path.join(destination,'app');await mkdir(app,{recursive:true});
 for(const file of safe)await cp(path.join(root,file),path.join(app,file),{recursive:true});
 await mkdir(path.join(destination,'runtime'));await cp(process.execPath,path.join(destination,'runtime','node.exe'));
