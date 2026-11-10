@@ -567,18 +567,19 @@ export class LotteAutomation extends BrowserAutomation {
       if(await this.readCell(grid,row,1)!==type)throw Error('롯데ON 사이즈/색상 유형 반영 실패: '+source+' / '+type);
       const raw=await this.readCell(grid,row,2);
       await this.activateGridEditor(grid,row,11,'combo');
-      await this.locator(grid+'_controlcombo_dropbutton').click();
-      const list=this.page.locator('[id$="'+grid+'_controlcombo_combolistScrollableContainerElement"]').filter({visible:true}).last();
-      await list.waitFor({state:'visible',timeout:4000});
       // Nexacro renders only the currently visible part of a combo list.
-      // Read every page before considering a similar-color fallback.
+      // Scan each type once per run. combo() still verifies the actual visible
+      // choice on every row; cached labels only avoid reopening for another scan.
       let labels=optionLabels.get(type);
       if(!labels){
-      labels=await this.scanComboLabels(list);if(labels.length)optionLabels.set(type,labels);
+        await this.locator(grid+'_controlcombo_dropbutton').click();
+        const list=this.page.locator('[id$="'+grid+'_controlcombo_combolistScrollableContainerElement"]').filter({visible:true}).last();
+        await list.waitFor({state:'visible',timeout:4000});
+        labels=await this.scanComboLabels(list);if(labels.length)optionLabels.set(type,labels);
+        await this.page.keyboard.press('Escape');
       }
       const normal=x=>x.replace(/\s/g,'').toUpperCase().replace(/^XXL$/,'2XL').replace(/^XXXL$/,'3XL');
       const selected=kind==='색상'?matchColor(raw,labels):labels.find(x=>normal(x)===normal(raw))||labels.find(x=>/^\d+인치$/.test(x)&&x===raw+'인치')||normal(raw);
-      await this.page.keyboard.press('Escape');
       if(!selected)throw Error('유사한 롯데ON 옵션값을 찾지 못했습니다: '+raw+' / 옵션유형: '+type+' / 읽은 후보: '+(labels.join(', ')||'없음 — 옵션 목록이 로딩되었는지 확인해 주세요.'));
       await this.combo(grid+'_controlcombo',selected,false,labels);await this.locator(grid+'_controlcombo_comboedit_input').press('Enter');
       const checkbox=(await this.optionCell(grid,row,12)).locator('[id$="_12_controlcheckbox"]');
