@@ -342,8 +342,10 @@ export class LotteAutomation extends BrowserAutomation {
       await this.combo('cbo_PchAgeRstCd','전체연령');await this.set('edt_SrchKwrdCont_input',p.keywords);
       await this.combo('cbo_PintfcnPrsCd','의류');await this.settle();
       this.log('상품정보고시 입력');
+      const noticeStarted=performance.now();
       // Nexacro merged grid cells use separate columns. Calibrate once rather than guessing.
       await this.fillNotices(p);
+      this.log('상품정보고시 반영 확인 · '+((performance.now()-noticeStarted)/1000).toFixed(1)+'초');
       await this.fillHTML(p,folder);
       const add=this.locator('ful_prd00_upfile0_fileitembutton');
       const imageButton=await add.count()?add:this.page.locator('[id*="ful_prd00"]').getByText('추가',{exact:true}).last();
@@ -393,19 +395,58 @@ export class LotteAutomation extends BrowserAutomation {
       const contentId=await labelLoc.evaluate(el=>{for(let p=el;p;p=p.parentElement){const m=p.id?.match(/^(.*_cell_\d+_)(\d+)$/);if(m)return m[1]+(Number(m[2])+2);}return null;});
       if(!contentId)throw Error('고시 항목의 내용 칸을 찾지 못했습니다: '+label);
       const cell=this.page.locator('[id="'+contentId+'"]');
+      const expected=String(value).replace(/\s/g,'');
       let applied=false;
       for(let attempt=0;attempt<2;attempt++){
-        await this.reveal(cell);await cell.dblclick();await this.pace();
+        this.check();await this.reveal(cell);await cell.dblclick();
+        if(attempt)await this.pace();
         // Nexacro leaves duplicate editor IDs behind. Only type into its focused editor.
         const focused=this.page.locator('input[id*="'+grid+'"][id$="controledit_input"]:focus,textarea[id*="'+grid+'"][id$="controltextarea_textarea"]:focus');
-        await focused.waitFor({state:'visible',timeout:4000});await focused.fill(value);await this.pace();
-        await labelLoc.click();await this.pace();
-        const actual=await cell.evaluate(e=>(e.querySelector('input,textarea')?.value||e.innerText).replace(/\s/g,''));
-        if(actual===String(value).replace(/\s/g,'')){applied=true;break;}
+        await focused.waitFor({state:'visible',timeout:4000});await focused.fill(value);
+        const filled=await focused.evaluateAll(inputs=>inputs.at(-1)?.value);
+        if(attempt||filled!==String(value))await this.pace();
+        this.check();await labelLoc.click();
+        applied=await this.waitNoticeCommit(contentId,expected);
+        if(attempt&&!applied){
+          // Some portal skins keep the committed value in a display input.
+          // A leftover editable control is not evidence of a commit.
+          const actual=await cell.evaluate(e=>{
+            const display=e.querySelector('input,textarea');
+            const editing=display?.matches('[id$="controledit_input"],[id$="controltextarea_textarea"]');
+            return (editing?e.innerText:display?.value||e.innerText).replace(/\s/g,'');
+          });
+          applied=actual===expected;
+        }
+        if(applied)break;
       }
       if(!applied)throw Error('고시 입력값 반영 확인 실패: '+label);
     }
     await this.completeNoticeSettings(p.manufactured);
+  }
+  async waitNoticeCommit(contentId,expected){
+    try{
+      const committed=await this.page.waitForFunction(({contentId,expected})=>{
+        if(document.activeElement?.matches('input[id*="grd_PintfcnItem"][id$="controledit_input"],textarea[id*="grd_PintfcnItem"][id$="controltextarea_textarea"]'))return false;
+        const visible=element=>{
+          const box=element.getBoundingClientRect();
+          return box.width>0&&box.height>0&&getComputedStyle(element).visibility==='visible';
+        };
+        const cells=[...document.querySelectorAll('#'+CSS.escape(contentId))].filter(visible);
+        if(cells.length!==1)return false;
+        const cell=cells[0];
+        const editor=cell.querySelector('[id$="controledit_input"],[id$="controltextarea_textarea"]');
+        if(editor&&visible(editor))return false;
+        const display=cell.querySelector('input,textarea');
+        return ((display&&visible(display)?display.value:cell.innerText)||'').replace(/\s/g,'')===expected;
+      },{contentId,expected},{polling:30,timeout:550});
+      await committed.dispose();
+      this.check();
+      return true;
+    }catch(error){
+      this.check();
+      if(error.name!=='TimeoutError')throw error;
+      return false;
+    }
   }
   async completeNoticeSettings(manufactured){
     if(!/^20\d{2}-(0[1-9]|1[0-2])$/.test(manufactured))throw Error('제조연월 형식을 확인해 주세요.');
@@ -542,12 +583,13 @@ export class LotteAutomation extends BrowserAutomation {
   async matchLotteOptions(p){
     const grid='grd_OptnDtlNew';
     const coverage=new OptionCoverage(p);const optionLabels=new Map();
-    await this.scrollOptionGrid(grid,0);
+    const sources=[...p.colors,...p.sizes];
+    await this.scrollOptionGrid(grid,0,sources);
     let stagnant=0,rewound=false;
     for(let pass=0;pass<Math.max(60,coverage.expected.size*8);pass++){
     const before=coverage.done.size;
     const rows=await this.locator(grid).locator('[id]').evaluateAll(es=>es.filter(e=>/body_gridrow_\d+_cell_\d+_0$/.test(e.id)).filter(e=>{const r=e.getBoundingClientRect(),prefix=e.id.split('_body_gridrow_')[0],body=document.getElementById(prefix+'_body')?.getBoundingClientRect(),head=document.getElementById(prefix+'_head')?.getBoundingClientRect();return body&&r.height>0&&r.y+r.height/2>Math.max(body.top,head?.bottom||0)+2&&r.y+r.height/2<body.bottom-2;}).map(e=>({row:Number(e.id.match(/gridrow_(\d+)/)[1]),kind:e.textContent.trim(),y:e.getBoundingClientRect().y})).sort((a,b)=>a.y-b.y));
-    if(!rows.length){await this.scrollOptionGrid(grid,0);await this.pace();continue;}
+    if(!rows.length){await this.scrollOptionGrid(grid,0,sources);await this.pace();continue;}
     const lower=p.sourceCategory?.includes('PANTS')||/바지|팬츠|슬랙스/.test(p.name);
     for(const {row,kind:displayKind} of rows){
       this.check();
@@ -596,7 +638,7 @@ export class LotteAutomation extends BrowserAutomation {
     if(coverage.complete){await this.auditLotteOptions(p);this.log('전체 색상·사이즈 '+coverage.done.size+'개 매칭 및 체크 확인 완료');return;}
     if(coverage.done.size>before){stagnant=0;continue;}
     stagnant++;
-    if(stagnant>=3){if(rewound)break;await this.scrollOptionGrid(grid,0);rewound=true;stagnant=0;}else await this.scrollOptionGrid(grid,null);
+    if(stagnant>=3){if(rewound)break;await this.scrollOptionGrid(grid,0,sources);rewound=true;stagnant=0;}else await this.scrollOptionGrid(grid,null);
     }
     throw Error('옵션 누락 '+coverage.missing.length+'개: '+coverage.missing.join(', ')+'. 일부 옵션만 적용하지 않고 중단합니다.');
   }
@@ -618,8 +660,11 @@ export class LotteAutomation extends BrowserAutomation {
     const bar=this.locator(g+'_vscrollbar'),thumb=this.locator(g+'_vscrollbar_trackbar');
     const move=async(mode)=>{if(!await bar.count()||!await thumb.count())return false;const t=await thumb.boundingBox(),r=await bar.boundingBox();if(!t||!r)return false;const from=t.y+t.height/2,top=r.y+13+t.height/2,bottom=r.y+r.height-13-t.height/2;const to=mode==='top'?top:mode==='bottom'?bottom:Math.min(bottom,from+Math.max(10,t.height*.85));if(Math.abs(to-from)<2)return false;await this.smoothDrag(t.x+t.width/2,from,to);await this.pace();return true;};
     for(let sweep=0;sweep<1;sweep++){
-      await move('top');
-      const up=this.locator(g+'_vscrollbar_decbutton');if(await up.count()){for(let n=0;n<12;n++){this.check();await up.click();}}
+      const sources=[...expected];
+      if(!await this.optionGridAtTop(g,sources)){
+        await move('top');
+        await this.nudgeOptionGridUp(g,sources,12);
+      }
       for(let page=0;page<Math.max(40,expected.size*2);page++){
         this.check();
         for(let attempt=0;attempt<Math.max(20,expected.size);attempt++){
@@ -643,9 +688,44 @@ export class LotteAutomation extends BrowserAutomation {
     const missing=[...expected].filter(x=>!seen.has(x));if(missing.length)throw Error('직접입력 사용여부 전체 점검 누락: '+missing.join(', '));
     this.log('작은 세로 스크롤 전체 점검: '+seen.size+'/'+expected.size+'개 직접입력 체크 확인');
   }
-  async scrollOptionGrid(grid,position){
-    const element=this.locator(grid);
+  async optionGridAtTop(grid,expectedSources){
+    this.check();
+    if(!expectedSources.length)return false;
+    const sources=expectedSources.map(value=>value.replace(/\s/g,''));
+    return this.locator(grid).evaluateAll((grids,sources)=>{
+      const grid=grids.at(-1);
+      if(!grid)return false;
+      const doc=grid.ownerDocument;
+      const rect=suffix=>{
+        const nodes=[...grid.querySelectorAll('#'+CSS.escape(grid.id+suffix))]
+          .map(el=>el.getBoundingClientRect()).filter(box=>box.width>0&&box.height>0);
+        return nodes.length===1?nodes[0]:null;
+      };
+      const bar=rect('_vscrollbar'),up=rect('_vscrollbar_decbutton'),thumb=rect('_vscrollbar_trackbar');
+      const body=rect('_body'),head=rect('_head');
+      if(!bar||!up||!thumb||!body||!head||thumb.height>=bar.height||
+        Math.abs(up.top-bar.top)>1.5||Math.abs(thumb.top-up.bottom)>1.5)return false;
+      const top=Math.max(body.top,head.bottom);
+      const rows=[...grid.querySelectorAll('#'+CSS.escape(grid.id+'_body_gridrow_0_cell_0_2'))].filter(cell=>{
+        const box=cell.getBoundingClientRect(),y=box.y+box.height/2;
+        const hit=doc.elementFromPoint(box.x+box.width/2,y);
+        return box.width>0&&box.height>0&&Math.abs(box.top-top)<=3&&y>top&&y<body.bottom&&hit&&cell.contains(hit);
+      });
+      return rows.length===1&&sources.includes(rows[0].innerText.replace(/\s/g,''));
+    },sources);
+  }
+  async nudgeOptionGridUp(grid,expectedSources,limit){
+    const up=this.locator(grid+'_vscrollbar_decbutton');
+    if(!await up.count())return;
+    for(let n=0;n<limit;n++){
+      this.check();
+      if(n%4===0&&await this.optionGridAtTop(grid,expectedSources))return;
+      await up.click();
+    }
+  }
+  async scrollOptionGrid(grid,position,expectedSources=[]){
     await this.reveal(this.locator(grid+'_head'));
+    if(position===0&&await this.optionGridAtTop(grid,expectedSources))return;
     const bar=this.locator(grid+'_vscrollbar'),thumb=this.locator(grid+'_vscrollbar_trackbar');
     if(await bar.count()&&await thumb.count()){
       await this.reveal(thumb);
@@ -653,7 +733,7 @@ export class LotteAutomation extends BrowserAutomation {
         const top=b.y+13+t.height/2,bottom=b.y+b.height-13-t.height/2;
         const target=position===0?top:Math.min(bottom,t.y+t.height/2+Math.max(12,t.height*.85));
         await this.smoothDrag(t.x+t.width/2,t.y+t.height/2,target);
-        if(position===0){const up=this.locator(grid+'_vscrollbar_decbutton');if(await up.count())for(let n=0;n<40;n++){this.check();await up.click();}}
+        if(position===0)await this.nudgeOptionGridUp(grid,expectedSources,40);
         return;
       }
     }
@@ -748,8 +828,10 @@ export class LotteAutomation extends BrowserAutomation {
     await this.editCell('grd_OptnDtl',2,1,'색상');await this.editCell('grd_OptnDtl',3,1,'사이즈');
     await this.editCell('grd_OptnDtl',2,2,p.colors.join(','));await this.editCell('grd_OptnDtl',3,2,p.sizes.join(','));await this.textClick('옵션적용',optionBlock);
     this.log('색상·사이즈 매칭');
+    const optionsStarted=performance.now();
     // Portal grid column order can change; do not silently apply to a guessed checkbox column.
     await this.matchLotteOptions(p);
+    this.log('롯데ON 옵션 전체 검증 · '+((performance.now()-optionsStarted)/1000).toFixed(1)+'초');
     await this.textClick('롯데ON옵션적용',optionBlock);await this.modalConfirm('저장하시겠습니까');
     await this.set('mae_OnlnStkQtyAllApply_input','10');await this.textClick('온라인재고일괄등록',optionBlock);await this.modalConfirm('일괄 적용');
     const limit=this.page.locator('[id$="div_ComnPrdcSleRstYn"]').filter({visible:true}).last();await this.textClick('제한',limit);
