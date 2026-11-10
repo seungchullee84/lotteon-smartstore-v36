@@ -6,7 +6,7 @@ import {createBrowserLoginStore} from './browser-login-store.mjs';
 import {tryLotteLogin,selectLottePage,lotteSessionExpired,LOTTE_SESSION_EXPIRED} from './browser-login.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import {OptionCoverage} from './option-coverage.mjs';
+import {OptionCoverage,optionKey} from './option-coverage.mjs';
 import {categoryAlternatives,similarCategory,channelCategoryPath,brushedTrainingCategory,mensTrainingCategory} from './category.mjs';
 import { matchColor, validateStyle } from './product.mjs';
 import {buildDetailContent} from './detail-html.mjs';
@@ -584,23 +584,27 @@ export class LotteAutomation extends BrowserAutomation {
     const grid='grd_OptnDtlNew';
     const coverage=new OptionCoverage(p);const optionLabels=new Map();
     const sources=[...p.colors,...p.sizes];
+    const compact=x=>String(x).replace(/\s/g,'');
     await this.scrollOptionGrid(grid,0,sources);
-    let stagnant=0,rewound=false;
+    let stagnant=0,recovering=false,recoveryOffset=null;
     for(let pass=0;pass<Math.max(60,coverage.expected.size*8);pass++){
     const before=coverage.done.size;
-    const rows=await this.locator(grid).locator('[id]').evaluateAll(es=>es.filter(e=>/body_gridrow_\d+_cell_\d+_0$/.test(e.id)).filter(e=>{const r=e.getBoundingClientRect(),prefix=e.id.split('_body_gridrow_')[0],body=document.getElementById(prefix+'_body')?.getBoundingClientRect(),head=document.getElementById(prefix+'_head')?.getBoundingClientRect();return body&&r.height>0&&r.y+r.height/2>Math.max(body.top,head?.bottom||0)+2&&r.y+r.height/2<body.bottom-2;}).map(e=>({row:Number(e.id.match(/gridrow_(\d+)/)[1]),kind:e.textContent.trim(),y:e.getBoundingClientRect().y})).sort((a,b)=>a.y-b.y));
-    if(!rows.length){await this.scrollOptionGrid(grid,0,sources);await this.pace();continue;}
+    const view=await this.optionGridSnapshot(grid);
+    // An edit can scroll a recycled table away from the rows we were checking.
+    if(recovering&&recoveryOffset!==null&&view.offset!==null&&view.offset>recoveryOffset+1){
+      if(!await this.stepLotteOptionGrid(grid,-1))break;
+      continue;
+    }
+    if(recovering)recoveryOffset=view.offset;
     const lower=p.sourceCategory?.includes('PANTS')||/바지|팬츠|슬랙스/.test(p.name);
-    for(const {row,kind:displayKind} of rows){
+    for(const {row,kind:displayKind,source} of view.rows){
       this.check();
-      const sourceCell=this.page.locator('[id$="'+grid+'_body_gridrow_'+row+'_cell_'+row+'_2"]');
-      if(!await sourceCell.count())continue;
-      const source=await this.readCell(grid,row,2);
-      if(!source.trim())continue; // Virtualized grids retain blank recycled row shells.
-      const compact=x=>String(x).replace(/\s/g,'');
       const kind=p.sizes.some(x=>compact(x)===compact(source))?'사이즈':p.colors.some(x=>compact(x)===compact(source))?'색상':displayKind;
       if(!['색상','사이즈'].includes(kind))throw Error('알 수 없는 옵션유형: '+kind);
+      if(!coverage.expected.has(optionKey(kind,source)))throw Error('수집 정보에 없는 옵션입니다: '+optionKey(kind,source));
       if(coverage.has(kind,source))continue;
+      const sameRow=async()=> (await this.optionGridSnapshot(grid)).rows.some(r=>r.row===row&&compact(r.source)===compact(source));
+      if(!await sameRow())break;
       const type=kind==='색상'?'통합색상':lower?'성인 하의 사이즈':'성인 상의 사이즈';
       for(let attempt=0;attempt<2&&await this.readCell(grid,row,1)!==type;attempt++){
         await this.gridCombo(grid,row,1,type);
@@ -608,7 +612,9 @@ export class LotteAutomation extends BrowserAutomation {
       }
       if(await this.readCell(grid,row,1)!==type)throw Error('롯데ON 사이즈/색상 유형 반영 실패: '+source+' / '+type);
       const raw=await this.readCell(grid,row,2);
+      if(compact(raw)!==compact(source))break;
       await this.activateGridEditor(grid,row,11,'combo');
+      if(!await sameRow()){await this.page.keyboard.press('Escape');break;}
       // Nexacro renders only the currently visible part of a combo list.
       // Scan each type once per run. combo() still verifies the actual visible
       // choice on every row; cached labels only avoid reopening for another scan.
@@ -624,11 +630,13 @@ export class LotteAutomation extends BrowserAutomation {
       const selected=kind==='색상'?matchColor(raw,labels):labels.find(x=>normal(x)===normal(raw))||labels.find(x=>/^\d+인치$/.test(x)&&x===raw+'인치')||normal(raw);
       if(!selected)throw Error('유사한 롯데ON 옵션값을 찾지 못했습니다: '+raw+' / 옵션유형: '+type+' / 읽은 후보: '+(labels.join(', ')||'없음 — 옵션 목록이 로딩되었는지 확인해 주세요.'));
       await this.combo(grid+'_controlcombo',selected,false,labels);await this.locator(grid+'_controlcombo_comboedit_input').press('Enter');
+      if(!await sameRow())break;
       const checkbox=(await this.optionCell(grid,row,12)).locator('[id$="_12_controlcheckbox"]');
       const image=checkbox.locator('[id$="chkimgImageElement"]');
       if(!await image.count())continue; // Row was recycled while scrolling; revisit it in the next pass.
       const checked=()=>checkbox.locator('[id$="chkimgImageElement"]').evaluate(e=>getComputedStyle(e).visibility!=='hidden'&&!!e.querySelector('img')?.getAttribute('src'));
       if(!await checked())await this.click(checkbox);
+      if(!await sameRow())break;
       if(!await image.count())continue;
       if(!await checked())throw Error('직접입력 사용 체크가 반영되지 않았습니다: '+raw);
       coverage.mark(kind,raw);
@@ -637,8 +645,19 @@ export class LotteAutomation extends BrowserAutomation {
     }
     if(coverage.complete){await this.auditLotteOptions(p);this.log('전체 색상·사이즈 '+coverage.done.size+'개 매칭 및 체크 확인 완료');return;}
     if(coverage.done.size>before){stagnant=0;continue;}
+    if(recovering){
+      const current=await this.optionGridSnapshot(grid);
+      if(recoveryOffset!==null&&current.offset!==null&&current.offset>recoveryOffset+1)continue;
+      if(!view.rows.length&&++stagnant<3){await this.pace();continue;}
+      if(!await this.stepLotteOptionGrid(grid,1))break;
+      recoveryOffset=null;stagnant=0;continue;
+    }
     stagnant++;
-    if(stagnant>=3){if(rewound)break;await this.scrollOptionGrid(grid,0,sources);rewound=true;stagnant=0;}else await this.scrollOptionGrid(grid,null);
+    if(stagnant>=3){
+      this.log('미처리 옵션 '+coverage.missing.length+'개 · 옵션 표를 한 줄씩 다시 확인');
+      await this.scrollOptionGrid(grid,0);
+      recovering=true;recoveryOffset=0;stagnant=0;
+    }else await this.scrollOptionGrid(grid,null);
     }
     throw Error('옵션 누락 '+coverage.missing.length+'개: '+coverage.missing.join(', ')+'. 일부 옵션만 적용하지 않고 중단합니다.');
   }
@@ -659,6 +678,22 @@ export class LotteAutomation extends BrowserAutomation {
     const g='grd_OptnDtlNew',expected=new Set([...p.colors,...p.sizes].map(x=>x.replace(/\s/g,''))),seen=new Set();
     const bar=this.locator(g+'_vscrollbar'),thumb=this.locator(g+'_vscrollbar_trackbar');
     const move=async(mode)=>{if(!await bar.count()||!await thumb.count())return false;const t=await thumb.boundingBox(),r=await bar.boundingBox();if(!t||!r)return false;const from=t.y+t.height/2,top=r.y+13+t.height/2,bottom=r.y+r.height-13-t.height/2;const to=mode==='top'?top:mode==='bottom'?bottom:Math.min(bottom,from+Math.max(10,t.height*.85));if(Math.abs(to-from)<2)return false;await this.smoothDrag(t.x+t.width/2,from,to);await this.pace();return true;};
+    const inspectPage=async()=>{
+      for(let attempt=0;attempt<Math.max(20,expected.size);attempt++){
+        this.check();
+        const rows=await this.auditOptionRows(g);
+        for(const r of rows){
+          const source=r.source.replace(/\s/g,'');if(!expected.has(source))continue;
+          const size=p.sizes.some(x=>x.replace(/\s/g,'')===source);
+          const lower=p.sourceCategory?.includes('PANTS')||/바지|팬츠|슬랙스/.test(p.name);
+          const required=size?(lower?'성인 하의 사이즈':'성인 상의 사이즈'):'통합색상';
+          const normalize=x=>String(x||'').replace(/\s/g,'').toUpperCase().replace(/^XXL$/,'2XL').replace(/^XXXL$/,'3XL');
+          if(r.checked&&r.type===required&&r.value&&(!size||normalize(r.value)===normalize(source)))seen.add(source);
+        }
+        const missing=rows.find(r=>expected.has(r.source.replace(/\s/g,''))&&!r.checked);
+        if(!missing)break;await this.page.locator('[id*="'+g+'_body_gridrow_"][id$="_12_controlcheckbox"]').nth(missing.index).click();await this.pace();
+      }
+    };
     for(let sweep=0;sweep<1;sweep++){
       const sources=[...expected];
       if(!await this.optionGridAtTop(g,sources)){
@@ -666,27 +701,67 @@ export class LotteAutomation extends BrowserAutomation {
         await this.nudgeOptionGridUp(g,sources,12);
       }
       for(let page=0;page<Math.max(40,expected.size*2);page++){
-        this.check();
-        for(let attempt=0;attempt<Math.max(20,expected.size);attempt++){
-          const rows=await this.auditOptionRows(g);
-          for(const r of rows){
-            const source=r.source.replace(/\s/g,'');if(!expected.has(source))continue;
-            const size=p.sizes.some(x=>x.replace(/\s/g,'')===source);
-            const lower=p.sourceCategory?.includes('PANTS')||/바지|팬츠|슬랙스/.test(p.name);
-            const required=size?(lower?'성인 하의 사이즈':'성인 상의 사이즈'):'통합색상';
-            const normalize=x=>String(x||'').replace(/\s/g,'').toUpperCase().replace(/^XXL$/,'2XL').replace(/^XXXL$/,'3XL');
-            if(r.checked&&r.type===required&&r.value&&(!size||normalize(r.value)===normalize(source)))seen.add(source);
-          }
-          const missing=rows.find(r=>expected.has(r.source.replace(/\s/g,''))&&!r.checked);
-          if(!missing)break;await this.page.locator('[id*="'+g+'_body_gridrow_"][id$="_12_controlcheckbox"]').nth(missing.index).click();await this.pace();
-        }
+        await inspectPage();
         if(!await move('next'))break;
       }
       await move('bottom');
     }
+    if(seen.size<expected.size&&(await this.optionGridSnapshot(g)).maxOffset>1){
+      await this.scrollOptionGrid(g,0);
+      for(let row=0;row<Math.max(40,expected.size*2);row++){
+        await inspectPage();
+        if(seen.size===expected.size||!await this.stepLotteOptionGrid(g,1))break;
+      }
+    }
     await move('top');
     const missing=[...expected].filter(x=>!seen.has(x));if(missing.length)throw Error('직접입력 사용여부 전체 점검 누락: '+missing.join(', '));
     this.log('작은 세로 스크롤 전체 점검: '+seen.size+'/'+expected.size+'개 직접입력 체크 확인');
+  }
+  async optionGridSnapshot(grid){
+    return this.locator(grid).evaluateAll(grids=>{
+      const table=grids.at(-1);
+      if(!table)return {offset:null,maxOffset:null,rows:[]};
+      const doc=table.ownerDocument;
+      const nodes=suffix=>[...table.querySelectorAll('#'+CSS.escape(table.id+suffix))];
+      const rect=suffix=>nodes(suffix).map(el=>el.getBoundingClientRect()).find(r=>r.width>0&&r.height>0);
+      const body=rect('_body'),head=rect('_head'),up=rect('_vscrollbar_decbutton');
+      const down=rect('_vscrollbar_incbutton'),thumb=rect('_vscrollbar_trackbar');
+      const offset=up&&thumb?thumb.top-up.bottom:null;
+      const maxOffset=up&&down&&thumb?down.top-up.bottom-thumb.height:null;
+      if(!body)return {offset,maxOffset,rows:[]};
+      const top=Math.max(body.top,head?.bottom??body.top);
+      const rows=[];
+      for(const cell of table.querySelectorAll('[id$="_2"]')){
+        const match=cell.id.match(/_body_gridrow_(\d+)_cell_\1_2$/);
+        if(!match)continue;
+        const r=cell.getBoundingClientRect(),y=r.y+r.height/2,source=cell.innerText.trim();
+        if(!source||!r.width||y<=top||y>=body.bottom||!cell.contains(doc.elementFromPoint(r.x+r.width/2,y)))continue;
+        const kindId=cell.id.slice(0,-1)+'0';
+        const kind=[...table.querySelectorAll('#'+CSS.escape(kindId))].find(e=>{
+          const box=e.getBoundingClientRect();
+          return box.width>0&&box.height>0&&Math.abs(box.y-r.y)<2;
+        })?.innerText.trim();
+        rows.push({row:Number(match[1]),source,kind,y});
+      }
+      return {offset,maxOffset,rows:rows.sort((a,b)=>a.y-b.y)};
+    });
+  }
+  async stepLotteOptionGrid(grid,direction){
+    this.check();
+    const before=await this.optionGridSnapshot(grid);
+    if(before.offset===null||before.maxOffset===null||(direction<0?before.offset<=1:before.offset>=before.maxOffset-1))return false;
+    const button=this.locator(grid+'_vscrollbar_'+(direction<0?'decbutton':'incbutton'));
+    if(!await button.count())return false;
+    await button.click({timeout:2000});
+    const signature=view=>view.rows.map(row=>row.source).join('|');
+    const previous=signature(before);
+    for(let attempt=0;attempt<12;attempt++){
+      this.check();
+      const after=await this.optionGridSnapshot(grid);
+      if(after.offset!==null&&(after.offset-before.offset)*direction>.5&&after.rows.length&&signature(after)!==previous)return true;
+      await this.page.waitForTimeout(50);
+    }
+    return false;
   }
   async optionGridAtTop(grid,expectedSources){
     this.check();
