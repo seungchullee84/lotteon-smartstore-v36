@@ -10,7 +10,7 @@ import {listTwoChoicePackages,readTwoChoicePackage,saveTwoChoicePackage,twoChoic
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {applyImportedPhotos,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail,renderPreparedSmartstoreDetail,prefetchSmartstoreSellingPoints} from './smartstore-detail-files.mjs';
-import {reviewNoticeMaterial} from './openmaus-notice-review.mjs';
+import {reviewNoticeMaterial,applyNoticeMaterialReview} from './openmaus-notice-review.mjs';
 import {openMausCli,openMausInstallRoot,stopOpenMausReview} from './openmaus-research.mjs';
 import {loadSmartstoreLinkedComparison,prependSmartstoreLinkedComparison,linkedComparisonPreview} from './smartstore-linked-comparison.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
@@ -170,13 +170,16 @@ let colorDraftAbort=null,noticeReviewAbort=null;
 function startNoticeMaterialReview(product,folder){
  noticeReviewAbort?.abort();
  const controller=new AbortController();noticeReviewAbort=controller;
- if(product.material||product.userEditedFields?.material)return;
- void reviewNoticeMaterial(product,folder,{dataRoot,signal:controller.signal}).then(material=>{
-  if(!material||controller.signal.aborted||state.busy||state.product!==product||state.folder!==folder)return;
-  product.fieldStatus||={};
-  product.fieldStatus.material='확인 필요 · OpenMausBot 재판독 후보 · '+material;
-  state.revision++;
- }).catch(()=>{});
+ if(product.material||Object.hasOwn(product.userEditedFields||{},'material'))return;
+ const current=()=>!controller.signal.aborted&&state.product===product&&state.folder===folder;
+ void reviewNoticeMaterial(product,folder,{dataRoot,signal:controller.signal}).then(async review=>{
+  if(!review||!current())return;
+  // A cached result can arrive before collection finishes. Keep it until the same product is idle.
+  while(state.busy&&current())await new Promise(resolve=>setTimeout(resolve,100));
+  if(await applyNoticeMaterialReview(product,folder,review,{signal:controller.signal,isCurrent:()=>current()&&!state.busy})){
+   state.revision++;log('공식 고시 소재 자동 재판독 반영: '+product.material);
+  }
+ }).catch(error=>{if(current())log('소재 자동 재판독 확인 필요: '+error.message);});
 }
 function startPhotoColorDraft(product,folder){
  colorDraftAbort?.abort();const controller=new AbortController();colorDraftAbort=controller;
