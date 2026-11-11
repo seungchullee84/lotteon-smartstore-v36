@@ -25,6 +25,23 @@ export function verifiedOcrMaterial(text){
  if(composition)return composition;
  return /^(?:천연가죽|합성가죽|소가죽|양가죽|인조가죽)(?:\s*\((?:소가죽|양가죽)\))?$/.test(clean)?clean:'';
 }
+export function correctOcrMaterialPercent(text){
+ const raw=String(text||''),clean=cleanMaterialInput(raw);
+ if(!clean||verifiedOcrMaterial(clean))return null;
+ const corrections=[];
+ const fiber=new RegExp('('+materialNames+')\\s*(\\d+(?:\\.\\d+)?)(\\s*%)?','g');
+ const corrected=clean.replace(fiber,(match,name,number,percent)=>{
+  // Only impossible percentages ending in OCR's common "96" reading of "%" qualify.
+  // Genuine 96%, missing ordinary percentages, and arbitrary digits are never changed.
+  if(percent||!/^\d{1,3}96$/.test(number)||Number(number)<=100)return match;
+  const ratio=Number(number.slice(0,-2));
+  if(ratio<=0||ratio>100)return match;
+  corrections.push({fiber:name,from:number,to:ratio+'%'});
+  return name+' '+ratio+'%';
+ });
+ const material=corrections.length?verifiedOcrMaterial(corrected):'';
+ return material?{material,original:raw,corrections,basis:'소재 숫자 뒤 96→% 보정 · 각 부위 혼용률 합계 100%'}:null;
+}
 function readMaterialParts(text,{requirePercent=false}={}){
  const [unlabeled,...labeled]=text.replace(/\s+/g,' ').trim().split(materialPart);
  const parts=[];
@@ -112,27 +129,35 @@ async function analyzeNoticeWork(file,log,signal,options,onWorker){
  }
  if(!mat){const styleLabel=words.find(w=>w.left<width*.25&&/^스타일/.test(w.text));if(styleLabel){const cy=styleLabel.top+styleLabel.height/2,top=rules.find(y=>y>cy),bottom=rules.find(y=>y>(top??height)+3);if(top!==undefined&&bottom!==undefined)mat={left:Math.floor(width*.28),top:top+2,width:Math.floor(width*.66),height:bottom-top-4};}}
  const originalRow=result.ocrText.match(/제품\s*소재[\s:：]*([\s\S]*?)(?=색\s*상|치\s*수|제조자)/)?.[1]?.trim()||'';
- const readings=[verifiedOcrMaterial(originalRow)].filter(Boolean);
+ const readings=[],corrections=[];
+ const readMaterial=(text,source)=>{
+  const direct=verifiedOcrMaterial(text),corrected=direct?null:correctOcrMaterialPercent(text);
+  const material=direct||corrected?.material||'';
+  if(material)readings.push(material);
+  if(corrected)corrections.push({...corrected,source});
+  return direct;
+ };
+ readMaterial(originalRow,'ocrText');
  if(mat){
   result.materialBand=mat;log('소재 행 확대·혼용률 재인식');
   result.materialOCR=(await worker.recognize(await crop(mat))).data.text;
-  const enlarged=verifiedOcrMaterial(result.materialOCR);
-  if(enlarged)readings.push(enlarged);
+  const enlarged=readMaterial(result.materialOCR,'materialOCR');
   if(!enlarged){
    log('소재 행 대비를 높여 문자·% 재대조');
    await worker.setParameters({tessedit_pageseg_mode:'6'});
    try{
     const contrast=await sharp(file).extract(mat).resize({width:mat.width*3}).threshold(150).png().toBuffer();
     result.materialRecheck=(await worker.recognize(contrast)).data.text;
-    const retried=verifiedOcrMaterial(result.materialRecheck);
-    if(retried)readings.push(retried);
+    readMaterial(result.materialRecheck,'materialRecheck');
    }finally{await worker.setParameters({tessedit_pageseg_mode:'3'});}
   }
  }
  const candidates=[...new Set(readings)];
  result.material=candidates.length===1?candidates[0]:'';
  if(candidates.length>1)result.materialCandidates=candidates;
+ if(corrections.length)result.materialCorrections=corrections;
  result.fieldStatus.material=result.material?'공식 고시 OCR · 혼용률 형식 확인':'확인 필요 · 고시 원본의 소재·혼용률 대조';
+ if(result.material&&corrections.some(item=>item.material===result.material))result.fieldStatus.material='OCR % 기호 보정 · 부위별 합계 100% 확인 · 원본 확인 권장';
  const countryBand=band(/제조국/);
  if(countryBand){
   log('제조국 행 확대·국가명 재인식');

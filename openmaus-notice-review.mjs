@@ -40,6 +40,7 @@ export async function reviewNoticeMaterial(product,folder,{dataRoot,signal,revie
  const file=path.join(dataRoot,'openmausbot','notice','v2-'+source.style+'-'+noticeHash+'.json');
  let response;
  try{response=JSON.parse(await readFile(file,'utf8'));}catch{}
+ signal?.throwIfAborted();
  const cached=verifiedNoticeMaterialReview(response,input);
  if(cached)return cached;
  try{await checkCli(cli);}catch{return null;}
