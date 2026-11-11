@@ -1,5 +1,6 @@
 import {startNewListingMonitor} from './homepage-new-list.mjs';
 import {registerCookieName,validRegisterCookie} from './register-session.mjs';
+import {createPriceChangerLauncher} from './price-changer-launcher.mjs';
 import {startNewProductResearch} from './new-product-research.mjs';
 import {reusableSmartstoreCollection} from './smartstore-resume-collection.mjs';
 import {smartstorePreparationStatus} from './smartstore-preparation-status.mjs';
@@ -65,6 +66,7 @@ const releases=createReleaseTracker(root);await releases.get();
 const githubSync=process.env.REGISTER_PORTABLE==='1'?{state:{status:'portable',message:'배포 실행판'},stop(){}}:startGithubSync(root,{beforeSync:()=>releases.get()});
 const dataRoot=path.join(root,'data');await mkdir(dataRoot,{recursive:true});
 const productEdits=createProductEditStore(dataRoot);
+const priceChanger=createPriceChangerLauncher();
 const browserLogins={lotte:createBrowserLoginStore(dataRoot),smartstore:createBrowserLoginStore(dataRoot,{channel:'smartstore'})};
 function browserLoginFor(channel='lotte'){if(!Object.hasOwn(browserLogins,channel))throw Error('자동 로그인 판매채널을 확인해 주세요.');return browserLogins[channel];}
 let naverCredentials={clientId:process.env.NAVER_CLIENT_ID?.trim()||'',clientSecret:process.env.NAVER_CLIENT_SECRET?.trim()||''};
@@ -299,6 +301,7 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='POST'){
       const b=await body(req);
       requireChannel(url.pathname.slice(5),b.channel);
+      if(url.pathname==='/api/price-changer/open')return json(res,200,await priceChanger.open());
       if(url.pathname==='/api/smartstore-template-headline'){
         if(state.busy||b.channel!=='smartstore'||!state.product||b.style!==state.product.style||b.sourceUrl!==state.product.sourceUrl)throw Error('현재 스마트스토어 상품과 작업 상태를 확인해 주세요.');
         const current=state.product,folder=state.folder,title=validateTemplateHeadline(b.title),detailTemplate=resolveDetailTemplate(b.detailTemplate??current.detailTemplate),fields=templateHeadlineEdits(current,title,detailTemplate);
