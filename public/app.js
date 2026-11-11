@@ -364,6 +364,20 @@ $('saveDetailImages').onclick=async()=>{
  catch(e){announce(e.message,'failed');}finally{button.disabled=false;}
 };
 
+$('openPriceChanger').onclick=async()=>{
+ const button=$('openPriceChanger');if(button.disabled)return;
+ const destination=window.open('about:blank','_blank');
+ if(!destination){announce('가격변경기를 열려면 이 사이트의 팝업을 허용해 주세요.','failed');return;}
+ destination.opener=null;destination.document.title='가격변경기 연결 중';destination.document.body.textContent='가격변경기를 연결하고 있습니다…';
+ button.disabled=true;button.setAttribute('aria-busy','true');
+ try{
+  const result=await post('price-changer/open'),url=new URL(result.url);
+  if(url.protocol!=='http:'||url.hostname!=='127.0.0.1'||url.username||url.password||url.pathname!=='/')throw Error('가격변경기 연결 주소를 확인해 주세요.');
+  if(!destination.closed)destination.location.replace(url.href);
+ }catch(error){destination.close();announce(error.message,'failed');}
+ finally{button.disabled=false;button.removeAttribute('aria-busy');}
+};
+
 $('shutdownApp').onclick=async()=>{
  if(serverBusy||requestLock){announce('진행 중인 작업이 있습니다. 중단 후 작업이 멈추면 종료해 주세요.','failed');return;}
  if(!window.confirm('등록기를 종료할까요? 현재 검토 내용은 작업 폴더에 보관됩니다. 다시 실행할 때는 바탕화면 전용 아이콘을 이용해 주세요.'))return;
