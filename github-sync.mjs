@@ -70,7 +70,7 @@ export function startGithubSync(root,{beforeSync=async()=>{},interval=2000,quiet
    const digest=hash.digest('hex');
    if(digest!==lastHash){lastHash=digest;changedAt=Date.now();}
    if(files.length&&Date.now()-changedAt<quietMs){state.status='pending';state.message='수정 완료 후 GitHub에 자동 반영합니다.';return;}
-   state.status='syncing';state.message='GitHub 반영 중';
+   if(files.length||state.status!=='synced'){state.status='syncing';state.message='GitHub 반영 중';}
    Object.assign(state,await syncGithub(root),{message:'GitHub 반영 완료'});
   }catch(e){state.status='error';state.message=e.message.startsWith('Command failed:')?'GitHub 반영 실패 — 네트워크 또는 Git 로그인을 확인해 주세요.':e.message;}
   finally{busy=false;}
