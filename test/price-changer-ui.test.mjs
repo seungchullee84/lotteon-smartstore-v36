@@ -7,7 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 
-const publicRoot = fileURLToPath(new URL('../public/', import.meta.url));
+const publicRoot = path.resolve(fileURLToPath(new URL('../public/', import.meta.url)));
 let browser;
 test.before(async () => { browser = await chromium.launch({ headless: true }); });
 test.after(async () => { await browser?.close(); });
