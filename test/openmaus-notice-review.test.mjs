@@ -63,15 +63,27 @@ test('changed image and current-product guards prevent a stale result from filli
  assert.equal(await applyNoticeMaterialReview(product(),folder,review),false);
 });
 
-test('existing and manually edited material, including a deliberate blank, remain unchanged',async t=>{
+test('existing and nonempty manually edited material remain unchanged',async t=>{
  const {folder,input}=await fixture(t),review={...input,material};
- for(const fields of [{material:'면 100%'},{userEditedFields:{material:'면 100%'}},{userEditedFields:{material:''}}]){
+ for(const fields of [{material:'면 100%'},{userEditedFields:{material:'면 100%'}}]){
   const p={...product(),...fields},before=structuredClone(p);
   assert.equal(await applyNoticeMaterialReview(p,folder,review),false);
   assert.deepEqual(p,before);
  }
  const controller=new AbortController();controller.abort();
  assert.equal(await applyNoticeMaterialReview(product(),folder,review,{signal:controller.signal}),false);
+});
+
+test('a saved blank material allows re-reading and actual automatic material application',async t=>{
+ const {root,folder}=await fixture(t);
+ for(const blank of ['', '  ']){
+  const p={...product(),material:blank,userEditedFields:{material:blank,name:'직접 수정한 상품명'}};
+  const review=await reviewNoticeMaterial(p,folder,{dataRoot:root,checkCli:async()=>{},review:async(_cli,input)=>({...input,material})});
+  assert.equal(review.material,material);
+  assert.equal(await applyNoticeMaterialReview(p,folder,review),true);
+  assert.equal(p.material,material);
+  assert.equal(p.userEditedFields.name,'직접 수정한 상품명');
+ }
 });
 
 test('only successful reviews from the same source and notice bytes are reused from cache',async t=>{

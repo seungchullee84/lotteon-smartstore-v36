@@ -21,7 +21,7 @@ function noticeSource(product){
     !source.noticeUrl?.startsWith('https://www.giordano.co.kr/'))return null;
  return source;
 }
-function materialAlreadySet(product){return !!product.material||Object.hasOwn(product.userEditedFields||{},'material');}
+export function materialAlreadySet(product){return !!String(product.material||'').trim()||!!String(product.userEditedFields?.material||'').trim();}
 export function verifiedNoticeMaterialReview(response,input){
  if(!input||!response||!['style','sourceUrl','noticeUrl','noticeHash'].every(key=>response[key]===input[key])||
     !/^[a-f0-9]{64}$/.test(input.noticeHash||'')||typeof response.material!=='string'||response.material.length>1000)return null;

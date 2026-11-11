@@ -28,3 +28,21 @@ test('이미지·출처·품번 등 공식 소유 필드와 잘못된 가격은 
  assert.throws(()=>validateProductEdits({style:'026981',fields:{country:'한국'}},'026982'),/품번/);
  assert.deepEqual(applyProductEdits({style:'026981'},{style:'026981',fields:{material:'',sizes:''}}).sizes,[],'직접 비운 입력칸도 공식값으로 되돌리지 않음');
 });
+
+test('빈 소재 수정 기록은 새 공식 판독값을 지우거나 소재 자동복구를 잠그지 않는다',()=>{
+ for(const blank of ['', '  ']){
+  const fresh={style:'326904',material:'아크릴 45%, 나일론 45%, 모 10%',name:'공식 상품명',country:'중국',sizes:['M']};
+  const record={style:'326904',fields:{material:blank,name:'직접 수정한 상품명',country:'',sizes:''}};
+  const result=applyProductEdits(fresh,record);
+  assert.equal(result.material,fresh.material);
+  assert.equal(Object.hasOwn(result.userEditedFields,'material'),false);
+  assert.equal(result.name,'직접 수정한 상품명');
+  assert.equal(result.country,'');
+  assert.deepEqual(result.sizes,[]);
+  assert.equal(record.fields.material,blank,'원래 수정 기록은 삭제하거나 변경하지 않음');
+  assert.equal(fresh.country,'중국','원래 수집 결과는 변경하지 않음');
+  const unreadable=applyProductEdits({...fresh,material:''},record);
+  assert.equal(unreadable.material,'');
+  assert.equal(Object.hasOwn(unreadable.userEditedFields,'material'),false);
+ }
+});

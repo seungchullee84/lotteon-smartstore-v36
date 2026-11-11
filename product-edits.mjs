@@ -22,6 +22,8 @@ export function applyProductEdits(product,record){
  const {fields}=validateProductEdits(record,product.style);
  const result={...product,category:{...product.category},userEditedFields:{...fields}};
  for(const [key,value] of Object.entries(fields)){
+  // A previous unreadable-material blank must not erase a fresh official reading or lock out recovery.
+  if(key==='material'&&!value.trim()){delete result.userEditedFields.material;continue;}
   if(categories.includes(key))result.category[key]=value;
   else if(key==='colors'||key==='sizes')result[key]=value.split(',').map(s=>s.replace(/\s+/g,'')).filter(Boolean);
   else if(key==='consumerPrice')result[key]=value===''?'':Number(value);

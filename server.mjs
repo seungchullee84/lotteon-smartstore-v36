@@ -11,7 +11,7 @@ import {listTwoChoicePackages,readTwoChoicePackage,saveTwoChoicePackage,twoChoic
 import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {applyImportedPhotos,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail,renderPreparedSmartstoreDetail,prefetchSmartstoreSellingPoints} from './smartstore-detail-files.mjs';
-import {reviewNoticeMaterial,applyNoticeMaterialReview} from './openmaus-notice-review.mjs';
+import {reviewNoticeMaterial,applyNoticeMaterialReview,materialAlreadySet} from './openmaus-notice-review.mjs';
 import {openMausCli,openMausInstallRoot,stopOpenMausReview} from './openmaus-research.mjs';
 import {loadSmartstoreLinkedComparison,prependSmartstoreLinkedComparison,linkedComparisonPreview} from './smartstore-linked-comparison.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
@@ -172,7 +172,7 @@ let colorDraftAbort=null,noticeReviewAbort=null;
 function startNoticeMaterialReview(product,folder){
  noticeReviewAbort?.abort();
  const controller=new AbortController();noticeReviewAbort=controller;
- if(product.material||Object.hasOwn(product.userEditedFields||{},'material'))return;
+ if(materialAlreadySet(product))return;
  const current=()=>!controller.signal.aborted&&state.product===product&&state.folder===folder;
  void reviewNoticeMaterial(product,folder,{dataRoot,signal:controller.signal}).then(async review=>{
   if(!review||!current())return;
