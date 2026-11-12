@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { EventEmitter } from 'node:events';
 import os from 'node:os';
@@ -32,12 +32,14 @@ test('uses the authenticated running app through read-only HTTP without launchin
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   t.after(() => new Promise(resolve => server.close(resolve)));
   const port = server.address().port;
-  const { appDir } = await fixture(t, port);
-  const launcher = createPriceChangerLauncher({ appDir, port, spawnImpl() { assert.fail('already running'); } });
+  const { appDir, data } = await fixture(t, port);
+  const registrarRoot = path.join(appDir, 'registrar fixture');
+  const launcher = createPriceChangerLauncher({ appDir, port, registrarRoot, spawnImpl() { assert.fail('already running'); } });
   const result = await launcher.open();
   assert.equal(result.reused, true);
   assert.equal(result.url, `http://127.0.0.1:${port}/?key=${key}`);
   assert.deepEqual(requests, [{ method: 'GET', url: '/api/state', cookie: `price_changer_${port}=${key}` }]);
+  assert.equal(await readFile(path.join(data, 'registrar-login-root.txt'), 'utf8'), registrarRoot);
 });
 
 test('recovers a stale launch token from the current persistent auth key', async t => {
