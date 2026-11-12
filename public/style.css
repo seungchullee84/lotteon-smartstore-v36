@@ -557,6 +557,11 @@ body[data-channel="smartstore"] #collectionCard .maker-credit { margin: 0; }
 
 body[data-channel="smartstore"] #review { order: 2; display: flex; flex-direction: column; gap: 20px; width: 100%; padding: 0; margin: 0; border: 0; background: transparent; }
 body[data-channel="smartstore"] #review > .card { width: 100%; padding: 24px 26px; margin: 0; }
+@media (min-width: 1150px) {
+  body[data-channel="smartstore"] #smartstoreReviewStep .columns {
+    grid-template-columns: minmax(0, 1.04fr) minmax(0, .96fr);
+  }
+}
 .smartstore-workflow-step { scroll-margin-top: 18px; }
 .smartstore-workflow-step h2 { margin: 0 0 12px; }
 body[data-channel="smartstore"] #review > #smartstorePhotoStep {
