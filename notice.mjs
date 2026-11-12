@@ -68,6 +68,13 @@ export function parseMaterialText(text,options){
  if(!parts||!validMaterialTotals(parts))return '';
  return parts.map(({label,fibers})=>(label?label+': ':'')+fibers.map(match=>match[1]+' '+match[2]+'%').join(', ')).join(' / ');
 }
+function readUnmarkedPureMaterial(text){
+ const clean=cleanMaterialInput(text);
+ if(!clean||clean.includes('%'))return '';
+ const parts=readMaterialParts(clean);
+ if(!parts?.every(({fibers})=>fibers.length===1&&fibers[0][2]==='100'))return '';
+ return parseMaterialText(clean);
+}
 export function reviewMaterialOCR(text){
  const raw=String(text||'').trim().split(/\r?\n/).map(s=>s.trim()).filter(Boolean).join(' / ');
  const invalid=[...raw.matchAll(/\d+(?:\.\d+)?/g)].some(m=>Number(m[0])>100);
@@ -155,8 +162,15 @@ async function analyzeNoticeWork(file,log,signal,options,onWorker){
  const candidates=[...new Set(readings)];
  result.material=candidates.length===1?candidates[0]:'';
  if(candidates.length>1)result.materialCandidates=candidates;
+ const unmarked=readUnmarkedPureMaterial(originalRow);
+ if(!candidates.length&&unmarked&&unmarked===readUnmarkedPureMaterial(result.materialOCR)&&
+    unmarked===readUnmarkedPureMaterial(result.materialRecheck)){
+  result.material=unmarked;
+  result.materialUnmarked=true;
+ }
  if(corrections.length)result.materialCorrections=corrections;
  result.fieldStatus.material=result.material?'공식 고시 OCR · 혼용률 형식 확인':'확인 필요 · 고시 원본의 소재·혼용률 대조';
+ if(result.materialUnmarked)result.fieldStatus.material='공식 고시 OCR 일치 · 부위별 100을 100%로 표기';
  if(result.material&&corrections.some(item=>item.material===result.material))result.fieldStatus.material='OCR % 기호 보정 · 부위별 합계 100% 확인 · 원본 확인 권장';
  const countryBand=band(/제조국/);
  if(countryBand){

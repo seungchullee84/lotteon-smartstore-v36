@@ -823,15 +823,18 @@ const localProductEdits=new Map();
 function editedValuesFor(p){
  if(!localProductEdits.has(p.style)){
   let saved={};try{saved=JSON.parse(localStorage.getItem('product-edits.v1.'+p.style)||'{}');}catch{}
+  if(typeof saved?.material==='string'&&!saved.material.trim())delete saved.material;
   const fields={...p.userEditedFields,...saved};
   if(p.smartstoreNameUserEdited&&!Object.hasOwn(fields,'smartstoreName'))fields.smartstoreName=p.smartstoreName;
-  localProductEdits.set(p.style,Object.fromEntries(Object.entries(fields).filter(([k,v])=>manualProductFields.has(k)&&typeof v==='string'&&v.length<=2000)));
+  localProductEdits.set(p.style,Object.fromEntries(Object.entries(fields).filter(([k,v])=>manualProductFields.has(k)&&typeof v==='string'&&v.length<=2000&&(k!=='material'||v.trim()))));
  }
  return localProductEdits.get(p.style);
 }
 function rememberProductField(key,value){
  if(!product||!manualProductFields.has(key))return;
- const fields=editedValuesFor(product);fields[key]=value;
+ const fields=editedValuesFor(product);
+ if(key==='material'&&!value.trim())delete fields.material;
+ else fields[key]=value;
  try{localStorage.setItem('product-edits.v1.'+product.style,JSON.stringify(fields));}catch{}
 }
 function currentProductEdits(){
