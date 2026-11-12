@@ -12,6 +12,7 @@ import {prepareCareLabelImages} from './smartstore-care-label.mjs';
 import {applyImportedPhotos,assertImportedPhotoCoverage} from './smartstore-photo-import.mjs';
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail,renderPreparedSmartstoreDetail,prefetchSmartstoreSellingPoints} from './smartstore-detail-files.mjs';
 import {reviewNoticeMaterial,applyNoticeMaterialReview,materialAlreadySet} from './openmaus-notice-review.mjs';
+import {recoverUnmarkedNoticeMaterial} from './notice.mjs';
 import {openMausCli,openMausInstallRoot,stopOpenMausReview} from './openmaus-research.mjs';
 import {loadSmartstoreLinkedComparison,prependSmartstoreLinkedComparison,linkedComparisonPreview} from './smartstore-linked-comparison.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
@@ -97,6 +98,12 @@ benefitResearch.state.folderResearch=newProductResearch.state;
 if(process.env.REGISTER_RESTORE){const restored=path.resolve(process.env.REGISTER_RESTORE);if(restored.startsWith(dataRoot+path.sep)){state.product=JSON.parse(await readFile(restored,'utf8'));repairCategoryFields(state.product);if(state.product.categoryMatch){state.product.fieldStatus||={};state.product.fieldStatus.category=state.product.categoryMatch.status;}state.product.keywords??=buildKeywords(state.product);state.folder=path.dirname(restored);state.phase='done';state.revision++;}}
 if(state.product){try{assertAdultProduct(state.product);}catch(error){if(error.code!=='JUNIOR_PRODUCT')throw error;state.product=null;state.folder=null;state.phase='error';state.error=error.message;state.revision++;}}
 if(state.product){state.product=await productEdits.apply(state.product);await applyExtraExclusions(state.folder,state.product);}
+if(state.product&&!materialAlreadySet(state.product)&&recoverUnmarkedNoticeMaterial(state.product.noticeAnalysis)){
+ const product=state.product;
+ product.material=product.noticeAnalysis.material;
+ product.fieldStatus={...product.fieldStatus,material:product.noticeAnalysis.fieldStatus.material};
+ product.warnings=product.warnings?.filter(w=>!w.startsWith('소재 혼용률'))||[];
+}
 if(state.product&&state.folder){
   try{const previous=JSON.parse(await readFile(path.join(state.folder,'smartstore-tags-result.json'),'utf8'));if(previous.style===state.product.style){if(previous.validationOnly)state.tagValidation=previous;else state.tagResult=previous;}}
   catch(e){if(e.code!=='ENOENT')throw e;}

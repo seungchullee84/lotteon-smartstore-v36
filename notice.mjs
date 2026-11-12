@@ -72,8 +72,21 @@ function readUnmarkedPureMaterial(text){
  const clean=cleanMaterialInput(text);
  if(!clean||clean.includes('%'))return '';
  const parts=readMaterialParts(clean);
- if(!parts?.every(({fibers})=>fibers.length===1&&fibers[0][2]==='100'))return '';
+ if(!parts||new Set(parts.map(part=>part.label)).size!==parts.length||
+    !parts.every(({fibers})=>fibers.length===1&&fibers[0][2]==='100'&&!/가죽|피혁/.test(fibers[0][1])))return '';
  return parseMaterialText(clean);
+}
+function materialRow(ocrText){
+ return ocrText?.match(/제품\s*소재[\s:：]*([\s\S]*?)(?=색\s*상|치\s*수|제조자)/)?.[1]?.trim()||'';
+}
+export function recoverUnmarkedNoticeMaterial(notice){
+ if(!notice||notice.material||notice.materialCandidates?.length)return false;
+ const unmarked=readUnmarkedPureMaterial(materialRow(notice.ocrText));
+ if(!unmarked||unmarked!==readUnmarkedPureMaterial(notice.materialOCR)||
+    unmarked!==readUnmarkedPureMaterial(notice.materialRecheck))return false;
+ notice.material=unmarked;
+ notice.fieldStatus={...notice.fieldStatus,material:'공식 고시 OCR 일치 · 부위별 100을 100%로 표기'};
+ return true;
 }
 export function reviewMaterialOCR(text){
  const raw=String(text||'').trim().split(/\r?\n/).map(s=>s.trim()).filter(Boolean).join(' / ');
@@ -135,7 +148,7 @@ async function analyzeNoticeWork(file,log,signal,options,onWorker){
   if(hit){const cy=hit.top+hit.height/2,top=rules.filter(y=>y<cy).at(-1),bottom=rules.find(y=>y>cy);if(top!==undefined&&bottom!==undefined)mat={left:Math.floor(width*.28),top:top+2,width:Math.floor(width*.66),height:bottom-top-4};}
  }
  if(!mat){const styleLabel=words.find(w=>w.left<width*.25&&/^스타일/.test(w.text));if(styleLabel){const cy=styleLabel.top+styleLabel.height/2,top=rules.find(y=>y>cy),bottom=rules.find(y=>y>(top??height)+3);if(top!==undefined&&bottom!==undefined)mat={left:Math.floor(width*.28),top:top+2,width:Math.floor(width*.66),height:bottom-top-4};}}
- const originalRow=result.ocrText.match(/제품\s*소재[\s:：]*([\s\S]*?)(?=색\s*상|치\s*수|제조자)/)?.[1]?.trim()||'';
+ const originalRow=materialRow(result.ocrText);
  const readings=[],corrections=[];
  const readMaterial=(text,source)=>{
   const direct=verifiedOcrMaterial(text),corrected=direct?null:correctOcrMaterialPercent(text);
@@ -162,16 +175,10 @@ async function analyzeNoticeWork(file,log,signal,options,onWorker){
  const candidates=[...new Set(readings)];
  result.material=candidates.length===1?candidates[0]:'';
  if(candidates.length>1)result.materialCandidates=candidates;
- const unmarked=readUnmarkedPureMaterial(originalRow);
- if(!candidates.length&&unmarked&&unmarked===readUnmarkedPureMaterial(result.materialOCR)&&
-    unmarked===readUnmarkedPureMaterial(result.materialRecheck)){
-  result.material=unmarked;
-  result.materialUnmarked=true;
- }
  if(corrections.length)result.materialCorrections=corrections;
  result.fieldStatus.material=result.material?'공식 고시 OCR · 혼용률 형식 확인':'확인 필요 · 고시 원본의 소재·혼용률 대조';
- if(result.materialUnmarked)result.fieldStatus.material='공식 고시 OCR 일치 · 부위별 100을 100%로 표기';
  if(result.material&&corrections.some(item=>item.material===result.material))result.fieldStatus.material='OCR % 기호 보정 · 부위별 합계 100% 확인 · 원본 확인 권장';
+ recoverUnmarkedNoticeMaterial(result);
  const countryBand=band(/제조국/);
  if(countryBand){
   log('제조국 행 확대·국가명 재인식');

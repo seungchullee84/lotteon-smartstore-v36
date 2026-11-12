@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {requireMaterialInput,reviewMaterialOCR,verifiedOcrMaterial,correctOcrMaterialPercent} from '../notice.mjs';
+import {requireMaterialInput,reviewMaterialOCR,verifiedOcrMaterial,correctOcrMaterialPercent,recoverUnmarkedNoticeMaterial} from '../notice.mjs';
 test('101 이상은 적지 않고 소재명과 정상 비율은 남김',()=>{
  assert.equal(reviewMaterialOCR('면 95%, 폴리우레탄 596').value,'면 95%, 폴리우레탄');
  assert.equal(reviewMaterialOCR('폴리에스터 1009%').value,'폴리에스터');
@@ -52,4 +52,13 @@ test('incomplete, ambiguous, invalid or missing percentage readings remain unfil
   '아크릴459, 나일론45%, 모1096','아크릴4596, 나일론45%, =10%',
   '면96, 폴리우레탄4%','면9696, 폴리우레탄4','면4596%, 폴리에스터55%',
   '면100096','면0096, 폴리에스터100%'])assert.equal(correctOcrMaterialPercent(raw),null,raw);
+});
+
+test('agreed bare 100 textile readings retain each garment part',()=>{
+ const row='겉감:나일론100,안감:나일론100\n충전재:폴리에스터100';
+ const notice={ocrText:'제품 소재 '+row+'\n색상 블랙',materialOCR:row,materialRecheck:row};
+ assert.equal(recoverUnmarkedNoticeMaterial({...notice,materialRecheck:'겉감:나일론100,안감:나일론100'}),false);
+ assert.equal(recoverUnmarkedNoticeMaterial({...notice,material:'면 100%'}),false);
+ assert.equal(recoverUnmarkedNoticeMaterial(notice),true);
+ assert.equal(notice.material,'겉감: 나일론 100% / 안감: 나일론 100% / 충전재: 폴리에스터 100%');
 });
