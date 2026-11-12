@@ -9,6 +9,7 @@ import * as cheerio from 'cheerio';
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
+import {collectColorImages,OFFICIAL_PRODUCT_IMAGE_SELECTOR} from './color-images.mjs';
 import { chromium } from 'playwright';
 import {verifiedOcrMaterial,analyzeNotice} from './notice.mjs';
 import {analyzeNoticeCached} from './notice-cache.mjs';
@@ -276,7 +277,8 @@ export function parseProduct(html, detailUrl, style) {
   const raw=$('title').text().split(' - ')[0].trim()||$('h3').first().clone().children('a').remove().end().text().trim();
   const text=$('body').text();
   const {gender,sourceCategory,category}=productClassification(html);
-  const images=$('img').map((_,e)=>({src:new URL($(e).attr('src')||'/',detailUrl).href.split('#')[0],alt:$(e).attr('alt')||''})).get();
+  const productImages=$(OFFICIAL_PRODUCT_IMAGE_SELECTOR).filter((_,image)=>new URL($(image).attr('src'),detailUrl).origin===OFFICIAL);
+  const images=productImages.map((_,image)=>({src:new URL($(image).attr('src'),detailUrl).href.split('#')[0],alt:$(image).attr('alt')||''})).get();
   // Older accessories include the actual notice as <style>_info.jpg alongside
   // a legacy <style>info.jpg placeholder that can return an HTML page.
   const info=images.find(x=>new RegExp(style+'_info\\.(?:jpe?g|png|webp)(?:$|\\?)','i').test(x.src))?.src
@@ -285,10 +287,11 @@ export function parseProduct(html, detailUrl, style) {
   const check=images.find(x=>x.src.includes(style+'ch.'))?.src;
   const expandedDetailPattern=new RegExp('^(?:\\d{2})?'+style+'_E\\.(?:jpe?g|png|webp)$','i');
   const detail=images.find(x=>new RegExp(style+'(?:_\\d+|_)?\\.jpg(?:$|\\?)','i').test(x.src))?.src
-    ||$('.wing-detail-more-contents img[src]').map((_,el)=>new URL($(el).attr('src'),detailUrl)).get()
+    ||productImages.filter((_,image)=>$(image).closest('.wing-detail-more-contents').length>0)
+      .map((_,image)=>new URL($(image).attr('src'),detailUrl)).get()
       .find(url=>url.origin===OFFICIAL&&expandedDetailPattern.test(path.posix.basename(url.pathname)))?.href.split('#')[0];
   const main=images.find(x=>x.src.includes('/_data/attach/'))?.src;
-  const gallery=[...new Set($('img.product_image_tooltip_image_gio[data-image_no]').map((_,e)=>new URL($(e).attr('src')||'/',detailUrl).href.split('#')[0]).get())].filter(src=>src!==main&&new URL(src).origin===OFFICIAL).slice(0,2);
+  const gallery=[...new Set(productImages.filter('.product_image_tooltip_image_gio[data-image_no]').map((_,e)=>new URL($(e).attr('src')||'/',detailUrl).href.split('#')[0]).get())].filter(src=>src!==main&&new URL(src).origin===OFFICIAL).slice(0,2);
   if(!main||(!info&&!detail)) throw Error('공식몰 상품의 고시 또는 대표이미지를 찾지 못했습니다.');
   const colors=[...new Set(images.map(x=>x.alt).filter(x=>/^\d{2}\s*\S+/.test(x)))].map(x=>x.replace(/\s+/g,'')).sort();
   const sizes=[...new Set($('a').map((_,e)=>$(e).text().trim()).get().filter(x=>/^(?:XXS|XS|S|M|L|XL|XXL|2XL|3XL|FREE|\d{2,3})$/.test(x)))];
@@ -392,10 +395,7 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
     originalDetailBytes=await inspectDetailSource(product,src=>context.request.get(src,{headers:{Referer:product.sourceUrl},timeout:20000}),true);
     if(product.detailFallbackApproved)log('상세 원본 누락 확인 · 승인된 대표·색상별 사진 구성으로 진행');
   }
-  if(!product.images.detail){
-    const {collectColorImages}=await import('./color-images.mjs');
-    await collectColorImages(page,product,log);
-  }
+  if(!product.images.detail)await collectColorImages(page,product,log);
   if(cancelled()) throw Error('사용자가 중단했습니다.');
   let infoFailure;
   const downloads=Object.entries(product.images).filter(([,src])=>!!src);

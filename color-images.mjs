@@ -1,13 +1,15 @@
+export const OFFICIAL_PRODUCT_IMAGE_SELECTOR='img[src]:not([id^="bg-campaign-overlay"] img,.bg-campaign-overlay img,.bg-campaign-image,.bg-campaign-slide-image,a[href*="/board/"][href*="db=gallery_1"] img)';
+
 export async function collectColorImages(page,product,log=()=>{}){
   product.colorImages={};
   const chips=await page.locator('a.gio_opt_img_list img[alt]').evaluateAll(es=>es.map(e=>e.alt));
   const compact=s=>s.replace(/\s/g,'');
+  const selector=OFFICIAL_PRODUCT_IMAGE_SELECTOR+'.product_image_tooltip_image_gio[data-image_no]';
   for(let i=0;i<product.colors.length;i++){
     const color=product.colors[i],alt=chips.find(x=>compact(x)===compact(color));
     if(!alt){product.warnings.push(color+': 색상별 사진을 확인하지 못했습니다.');continue;}
     const chip=page.locator('a.gio_opt_img_list').filter({has:page.getByAltText(alt,{exact:true})}).first();
     const current=await chip.evaluate(e=>e.classList.contains('selected'));
-    const selector='img.product_image_tooltip_image_gio[data-image_no]';
     const before=await page.locator(selector).evaluateAll(es=>es.map(e=>e.src).join('|'));
     if(!current){
       const close=page.locator('[id^="bg-campaign-overlay"] .bg-campaign-button.close-now').filter({visible:true});

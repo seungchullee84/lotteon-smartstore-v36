@@ -37,3 +37,23 @@ test('공식 상세 더보기의 같은 품번 _E 원본만 상세 이미지로 
  const outsideOnly=html.slice(0,html.indexOf('<div class='));
  assert.equal(parseProduct(outsideOnly,source,'375912').originalDetailUrl,null);
 });
+
+test('공식몰 행사 팝업의 이미지는 대표·추가·상세·색상 후보에서 제외한다',()=>{
+ const source='https://www.giordano.co.kr/shop/detail.php?pno=current';
+ const html=`<title>남성 경량 베스트</title>
+  <div id="bg-campaign-overlay-12175">
+   <img src="/_data/attach/event.jpg" class="product_image_tooltip_image_gio" data-image_no="1" alt="99행사">
+   <img src="/_gio_on/2025/01075915.jpg">
+  </div>
+  <a href="/board/?db=gallery_1&no=1343"><img src="/_data/attach/roulette.jpg"></a>
+  <img src="https://image.bigin.io/_data/attach/promotion.jpg">
+  <img src="/_data/attach/main.jpg" alt="04블랙">
+  <img src="/_data/attach/side.jpg" class="product_image_tooltip_image_gio" data-image_no="2">
+  <img src="/_gio_on/2025/01075915info.jpg">
+  <div class="wing-detail-more-contents"><img src="/_gio_on/2025/01075915_E.jpg"></div>`;
+ const product=parseProduct(html,source,'075915');
+ assert.deepEqual(product.colors,['04블랙']);
+ assert.equal(product.images.main,'https://www.giordano.co.kr/_data/attach/main.jpg');
+ assert.equal(product.images.extra1,'https://www.giordano.co.kr/_data/attach/side.jpg');
+ assert.equal(product.originalDetailUrl,'https://www.giordano.co.kr/_gio_on/2025/01075915_E.jpg');
+});
