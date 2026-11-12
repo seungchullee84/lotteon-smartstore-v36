@@ -8,6 +8,13 @@ import {createNaverTitleOptimizer} from '../naver-title.mjs';
 test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저장 정책을 보존',async()=>{
  const product={style:'356956',rawName:'남성 아가일 브이넥 니트',name:'남성 아가일 브이넥 니트 356956',gender:'남성',consumerPrice:59800,colors:['01블랙'],sizes:['M'],material:'면 100%',country:'베트남',washing:'손세탁',manufactured:'2026-08',keywords:'지오다노,남성니트',category:{},images:{detail:'https://www.giordano.co.kr/detail.jpg'},warnings:[]};
  let autoRequest;
+ const photoColors=['01블랙','01블랙','02그레이','03네이비'];
+ const photoListing={
+  mainColor:'01블랙',
+  extraColors:photoColors,
+  extraRoles:['official-main','side','front','front'],
+  sourceNames:['1.jpg','공식몰 대표사진','2.jpg','3.jpg','4.jpg'],
+ };
  let fail=false,settings=null,configured=false,optimizeCalls=0,revision=1,currentProduct=product,keywordMode='fail';
  const optimize=createNaverTitleOptimizer({clock:()=>new Date('2026-10-22T16:00:00Z'),fetchImpl:async(_,config)=>{
   const request=JSON.parse(config.body);return Response.json({...request,results:request.keywordGroups.map(g=>({title:g.groupName,keywords:g.keywords,data:[{period:request.endDate,ratio:({남성니트:20,남자니트:80,브이넥니트:100,아가일니트:30})[g.groupName]||10}]}))});
@@ -16,7 +23,17 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
  const server=http.createServer(async(req,res)=>{
   try{
    const url=new URL(req.url,'http://localhost');
-   if(url.pathname==='/api/state')return respond(res,{busy:false,phase:'done',logs:[],revision,product:currentProduct});
+   if(url.pathname==='/api/state')return respond(res,{
+    busy:false,phase:'done',logs:[],revision,product:currentProduct,
+    smartstoreListing:url.searchParams.get('channel')==='smartstore'&&currentProduct.style===product.style?photoListing:null,
+   });
+   if(url.pathname==='/api/smartstore-photo-review'){
+    assert.equal(url.searchParams.get('style'),product.style);
+    return respond(res,{
+     style:product.style,sourceUrl:product.images.detail,revision:'test',mainId:'primary',
+     colors:['01블랙'],items:[{id:'primary',name:'1.jpg',main:true,color:'01블랙',role:'front'}],
+    });
+   }
    if(url.pathname==='/api/branding')return respond(res,{visible:true,maker:'L.S.C',date:'2026-10-18'});
    if(url.pathname==='/api/naver-status')return respond(res,{configured});
    if(req.method==='POST'){
@@ -35,9 +52,14 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
      return respond(res,await optimize(body.product,{clientId:'fake-id',clientSecret:'fake-secret'}));
     }
    }
-   const files={'/':'public/index.html','/app.js':'public/app.js','/style.css':'public/style.css','/smartstore-title.mjs':'smartstore-title.mjs'};
+   const files={
+    '/':'public/index.html','/app.js':'public/app.js','/style.css':'public/style.css',
+    '/smartstore-title.mjs':'smartstore-title.mjs',
+    '/smartstore-photo-review.js':'public/smartstore-photo-review.js',
+    '/smartstore-photo-review.css':'public/smartstore-photo-review.css',
+   };
    if(files[url.pathname]){res.setHeader('Content-Type',url.pathname==='/'?'text/html':url.pathname.endsWith('.css')?'text/css':'text/javascript');return res.end(await readFile(new URL('../'+files[url.pathname],import.meta.url)));}
-   if(url.pathname.startsWith('/image/')||url.pathname==='/giordano-official-logo.png'){res.setHeader('Content-Type','image/png');return res.end(await readFile(new URL('../public/giordano-official-logo.png',import.meta.url)));}
+   if(/^\/(image|smartstore-listing|smartstore-review-photo)\//.test(url.pathname)||url.pathname==='/giordano-official-logo.png'){res.setHeader('Content-Type','image/png');return res.end(await readFile(new URL('../public/giordano-official-logo.png',import.meta.url)));}
    res.writeHead(404);res.end();
   }catch(e){respond(res,{error:e.message},400);}
  });
@@ -75,13 +97,34 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   assert.equal(await page.locator('#smartstoreTest,#smartstoreImages,#smartstoreAISettings,#smartstoreAIDialog').count(),0);
   assert.equal(await page.locator('#smartstoreOpen').innerText(),'스마트스토어 로그인 창 열기');
   assert.equal(await page.locator('#collect').innerText(),'공식몰 정보 가져오기');
-  assert.deepEqual(await page.locator('#smartstoreWorkflow a').allTextContents(),['1상품 수집','2사진 확인','3등록 내용 검토','4판매자 화면 준비','5입력·업로드']);
+  const workflow=page.locator('#smartstoreWorkflow');
+  const stepLabels=await workflow.locator('a').evaluateAll(links=>links.map(link=>link.getAttribute('aria-label')));
+  assert.deepEqual(stepLabels,['01 상품 수집','02 사진 확인','03 등록 내용 검토','04 판매자 화면 준비','05 입력·업로드']);
+  assert.equal(await workflow.locator('[aria-current=step]').getAttribute('href'),'#smartstorePhotoStep');
+  assert.equal(await workflow.locator('[data-collected] .workflow-step-caption').textContent(),'수집 완료');
+  assert.equal(await page.locator('#collectionCard .search #collectionStatus').isVisible(),true);
+  const photoEdit=page.locator('.workflow-photo-heading #manualPhotoReviewOpen');
+  const mainPhoto=page.locator('#smartstorePhotoStep #main');
+  const extraPhotos=page.locator('#smartstoreListingExtras img');
+  await extraPhotos.last().waitFor();
+  assert.equal(await extraPhotos.count(),4);
+  assert.equal(await page.locator('#extraImages h3').innerText(),'추가이미지 4장');
+  const primaryBox=await mainPhoto.boundingBox();
+  const extraBox=await extraPhotos.last().boundingBox();
+  assert.ok(Math.abs(primaryBox.y-extraBox.y)<1,'대표와 추가 사진이 한 줄에 정렬');
+  assert.ok((await photoEdit.boundingBox()).y<primaryBox.y,'사진 편집 버튼이 사진보다 위에 표시');
+  await photoEdit.click();
+  await page.locator('#manualPhotoReviewDialog [data-photo-id="primary"]').waitFor();
+  await page.locator('#manualPhotoReviewClose').click();
+  assert.equal(await page.locator('#manualPhotoReviewDialog').isVisible(),false);
   for(let i=0;i<2;i++){
    assert.equal(await page.locator('#smartstorePhotoStep #main').count(),1);
    assert.equal(await page.locator('#smartstoreSellerStep #smartstoreOpen').count(),1);
    assert.equal(await page.locator('#smartstoreExtraTools #smartstoreDetailOnly').count(),1);
    await page.locator('#channelLotte').click();
    assert.equal(await page.locator('#smartstoreWorkflow').isVisible(),false);
+   assert.equal(await page.locator('#manualPhotoReviewOpen').isVisible(),false);
+   assert.equal(await page.locator('#collectionCard > #collectionStatus').count(),1);
    assert.equal(await page.locator('#review .columns aside #main').count(),1,'롯데ON 사진 영역은 원래 위치로 복원');
    assert.equal(await page.locator('#collectionCard #browserLoginSettings').count(),1);
    assert.equal(await page.locator('#collect').innerText(),'2. 공식몰 정보 수집');
@@ -90,18 +133,21 @@ test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저
   }
   assert.equal(await page.locator('#smartstoreStart').innerText(),'입력·업로드 시작');
   const locationBefore=page.url();
-  await page.getByRole('link',{name:'4 판매자 화면 준비'}).click();
+  await page.getByRole('link',{name:'04 판매자 화면 준비'}).click();
+  assert.equal(await workflow.locator('[aria-current=step]').getAttribute('href'),'#smartstoreSellerStep');
   assert.equal(page.url(),locationBefore,'단계 이동은 페이지를 다시 열지 않음');
   const sellerStep=await page.locator('#smartstoreSellerStep').boundingBox();
   assert.ok(sellerStep.y>=0&&sellerStep.y<25,'해당 단계가 실제 화면 상단에 표시');
-  const login=await page.locator('#smartstoreOpen').evaluate(el=>({weight:getComputedStyle(el).fontWeight,background:getComputedStyle(el).backgroundColor}));
-  const collect=await page.locator('#collect').evaluate(el=>({weight:getComputedStyle(el).fontWeight,background:getComputedStyle(el).backgroundColor}));
-  assert.deepEqual(login,collect);
+  const background=el=>getComputedStyle(el).backgroundColor;
+  assert.equal(await page.locator('#collect').evaluate(background),'rgb(255, 255, 255)');
+  assert.equal(await photoEdit.evaluate(background),'rgb(8, 124, 66)');
   assert.equal(await page.locator('#smartstoreStart').isVisible(),true);
   assert.equal(await page.locator('#collectionCard #smartstoreStart').count(),0);
   assert.equal(await page.locator('#review .registration-footer .register-actions #smartstoreStart').count(),1);
   for(const width of [1400,800,390]){
    await page.setViewportSize({width,height:900});
+   const editBox=await photoEdit.boundingBox();
+   assert.ok(editBox.x>=0&&editBox.x+editBox.width<=width,'사진 수정 버튼이 화면 너비에 맞음');
    const smartButton=await page.locator('#smartstoreStart').boundingBox();
    assert.ok(smartButton.x>=0&&smartButton.x+smartButton.width<=width,'시작 버튼이 화면 너비에 맞음');
    await page.locator('#channelLotte').click();

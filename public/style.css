@@ -357,38 +357,328 @@ body #websiteUpdateSummary .website-category-toggle:not(:disabled):is(:hover,:fo
 .website-product-folder{font-size:12px;line-height:1.6;overflow-wrap:anywhere;color:#40584b;margin-top:6px}
 
 /* Ordered SmartStore preparation, using the existing green workspace theme. */
-body[data-channel="smartstore"] main{display:flex;flex-direction:column;gap:20px}
-body[data-channel="smartstore"] #smartstoreWorkflow{order:0;width:100%;padding:18px 22px;background:#f0f7f1;border:1px solid #a9c4b0;border-radius:12px}
-#smartstoreWorkflow strong{color:#245139;font-size:17px}
-#smartstoreWorkflow ol{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;list-style:none;padding:0;margin:14px 0 10px}
-#smartstoreWorkflow a{display:flex;align-items:center;gap:8px;padding:10px 8px;border-radius:7px;background:#fffefa;border:1px solid #c4d4c8;color:#234735;font-size:13px;font-weight:700;text-decoration:none}
-#smartstoreWorkflow a:hover,#smartstoreWorkflow a:focus-visible{background:#dceede;outline:2px solid #547c60;outline-offset:1px}
-#smartstoreWorkflow a span{display:grid;place-items:center;flex:0 0 23px;height:23px;border-radius:50%;background:#405b52;color:white;font-size:11px}
-#smartstoreWorkflow p,.workflow-step-note{font-size:13px;line-height:1.8;color:#526257;margin:8px 0 16px}
-#smartstoreWorkflow p{margin:0}
-body[data-channel="smartstore"] #collectionCard{order:1;position:static;width:100%;min-height:0;margin:0;padding:24px 26px}
-body[data-channel="smartstore"] #collectionCard>p:first-of-type{margin:10px 0 18px;line-height:1.7}
-body[data-channel="smartstore"] .collection-tools{display:block}
-body[data-channel="smartstore"] .collection-tools .search{display:flex;flex-direction:row;gap:12px}
-body[data-channel="smartstore"] .search input{flex:1;min-width:0}
-body[data-channel="smartstore"] .search #collect{width:auto;flex:0 0 auto;padding:12px 24px}
-body[data-channel="smartstore"] #collectionCard .workspace-moment{display:flex;align-items:center;gap:16px;margin:16px 0;padding:8px 16px;text-align:left}
-body[data-channel="smartstore"] #collectionCard .moment-scene{flex:0 0 160px;transform:scale(.65);margin:-18px -28px}
-body[data-channel="smartstore"] #collectionCard .workspace-moment p{margin:0}
-body[data-channel="smartstore"] #collectionCard .giordano-signature{margin:14px 0 0;padding:12px 0 0;flex-direction:row;justify-content:flex-end;gap:18px;flex-wrap:wrap}
-body[data-channel="smartstore"] #collectionCard .giordano-official-logo{width:145px}
-body[data-channel="smartstore"] #collectionCard .maker-credit{margin:0}
-body[data-channel="smartstore"] #review{order:2;display:flex;flex-direction:column;gap:20px;width:100%;padding:0;margin:0;border:0;background:transparent}
-body[data-channel="smartstore"] #review>.card{width:100%;padding:24px 26px;margin:0}
-.smartstore-workflow-step{scroll-margin-top:18px}
-.smartstore-workflow-step h2{margin:0 0 12px}
-body[data-channel="smartstore"] .workflow-photo-content{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
-body[data-channel="smartstore"] #smartstorePhotoStep .image-workbench{margin:0}
-body[data-channel="smartstore"] #smartstorePhotoStep #main{max-height:380px;object-fit:contain}
-body[data-channel="smartstore"] #smartstorePhotoStep #extraImages{margin:0}
-body[data-channel="smartstore"] #smartstorePhotoStep .extra-previews{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-body[data-channel="smartstore"] #smartstorePhotoStep .extra-previews img{max-height:250px;object-fit:contain}
-body[data-channel="smartstore"] #smartstorePhotoStep #photoImportReview{grid-column:1/-1}
+body[data-channel="smartstore"] header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px 16px;
+  padding-block: 18px 14px;
+}
+body[data-channel="smartstore"] header > :is(.bar, .header-details) {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+body[data-channel="smartstore"] header .naver-title-logo { margin: 0; }
+body[data-channel="smartstore"] header .naver-title-logo img { width: 106px; }
+body[data-channel="smartstore"] header h1 {
+  margin: 0;
+  border: 0;
+  padding: 0;
+  color: #19382a;
+  font-size: clamp(20px, 2.3vw, 28px);
+  line-height: 1.4;
+}
+body[data-channel="smartstore"] header h1 .smartstore-brand { color: inherit; }
+body[data-channel="smartstore"] header .workspace-subtitle { padding-left: 0; }
+
+body[data-channel="smartstore"] main { display: flex; flex-direction: column; gap: 20px; }
+body[data-channel="smartstore"] #smartstoreWorkflow {
+  order: 0;
+  width: 100%;
+  padding: 20px 24px;
+  background: #fff;
+  border: 1px solid #cfe1d5;
+  border-radius: 15px;
+}
+#smartstoreWorkflow > strong { color: #19382a; font-size: 22px; line-height: 1.45; }
+#smartstoreWorkflow ol {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+}
+#smartstoreWorkflow a {
+  display: flex;
+  height: 100%;
+  min-height: 74px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #cfe1d5;
+  border-radius: 11px;
+  background: #fff;
+  color: #19382a;
+  text-decoration: none;
+  word-break: keep-all;
+}
+#smartstoreWorkflow a[data-collected] { background: #f0f6f1; border-color: #b9d6c3; }
+#smartstoreWorkflow a:hover { background: #eff8f2; }
+#smartstoreWorkflow a[aria-current="step"] {
+  background: #daf0e1;
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+#smartstoreWorkflow a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.workflow-step-number {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e8f5ec;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.workflow-step-copy { display: grid; min-width: 0; gap: 3px; }
+.workflow-step-label { font-size: 17px; font-weight: 700; line-height: 1.4; }
+.workflow-step-caption { color: #4d695a; font-size: 13px; line-height: 1.45; }
+.workflow-step-note { font-size: 13px; line-height: 1.8; color: #526257; margin: 8px 0 16px; }
+
+body[data-channel="smartstore"] #collectionCard {
+  order: 1;
+  position: static;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 18px 24px;
+  border: 1px solid #cfe1d5;
+  border-radius: 15px;
+  background: #fff;
+  scroll-margin-top: 18px;
+}
+body[data-channel="smartstore"] #collectionCard > * { grid-column: 1 / -1; }
+body[data-channel="smartstore"] #collectionCard > h2 { grid-column: 1; }
+body[data-channel="smartstore"] #collectionCard > p:first-of-type {
+  grid-column: 2;
+  margin: 0;
+  color: #4d695a;
+  font-size: 14px;
+  line-height: 1.5;
+}
+body[data-channel="smartstore"] :is(#collectionCard > h2, .workflow-photo-heading > h2) {
+  gap: 12px;
+  margin: 0;
+  color: #19382a;
+  font-size: 23px;
+  line-height: 1.45;
+}
+body[data-channel="smartstore"] :is(#collectionCard > h2, .workflow-photo-heading > h2)::before {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+}
+body[data-channel="smartstore"] .collection-tools { display: block; }
+body[data-channel="smartstore"] .collection-tools .search {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 12px;
+}
+body[data-channel="smartstore"] .search #style {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 48px;
+  padding-inline: 14px;
+  border: 1px solid #bbd2c3;
+  border-radius: 9px;
+  background: #f7fbf7;
+  font-size: 16px;
+}
+body[data-channel="smartstore"] .search #collect {
+  flex: 0 0 180px;
+  width: auto;
+  min-height: 48px;
+  padding: 9px 12px;
+  border: 1px solid #a6ccb4;
+  border-radius: 10px;
+  background: #fff;
+  color: #19382a;
+  box-shadow: none;
+  font-size: 14px;
+}
+body[data-channel="smartstore"] .search #collect:not(:disabled):hover { background: #eff8f2; }
+body[data-channel="smartstore"] .search #collect.working { padding-left: 32px; }
+body[data-channel="smartstore"] .search #collect.working::before { border-color: #a6ccb4; border-top-color: var(--accent); }
+body[data-channel="smartstore"] #collectionCard #collectionStatus {
+  flex: 0 1 215px;
+  align-content: center;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid #bedac7;
+  border-radius: 9px;
+  background: #e8f5ec;
+  color: var(--accent);
+  font-size: 14px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+body[data-channel="smartstore"] #collectionCard #collectionStatus.collect-pending {
+  background: #fff3d6;
+  border-color: #c9a34e;
+  color: #654b12;
+}
+body[data-channel="smartstore"] #collectionCard #collectionStatus.collect-failed {
+  background: #ffe7e5;
+  border-color: #ba4b42;
+  color: #8b2922;
+}
+body[data-channel="smartstore"] #collectionCard .workspace-moment { display: none; }
+body[data-channel="smartstore"] #collectionCard .workspace-moment[data-state="collecting"] {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+  padding: 8px 16px;
+  text-align: left;
+}
+body[data-channel="smartstore"] #collectionCard .moment-scene { flex: 0 0 160px; transform: scale(.65); margin: -18px -28px; }
+body[data-channel="smartstore"] #collectionCard .workspace-moment p { margin: 0; }
+body[data-channel="smartstore"] #collectionCard .giordano-signature {
+  margin: 0;
+  padding: 12px 0 0;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+body[data-channel="smartstore"] #collectionCard .giordano-official-logo { width: 145px; }
+body[data-channel="smartstore"] #collectionCard .maker-credit { margin: 0; }
+
+body[data-channel="smartstore"] #review { order: 2; display: flex; flex-direction: column; gap: 20px; width: 100%; padding: 0; margin: 0; border: 0; background: transparent; }
+body[data-channel="smartstore"] #review > .card { width: 100%; padding: 24px 26px; margin: 0; }
+.smartstore-workflow-step { scroll-margin-top: 18px; }
+.smartstore-workflow-step h2 { margin: 0 0 12px; }
+body[data-channel="smartstore"] #review > #smartstorePhotoStep {
+  padding: 22px 24px;
+  border: 1.5px solid #9bc9ac;
+  border-radius: 15px;
+  background: #fff;
+}
+.workflow-photo-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "title edit" "status edit";
+  align-items: center;
+  gap: 4px 20px;
+  margin-bottom: 18px;
+}
+.workflow-photo-heading > h2 { grid-area: title; }
+.workflow-photo-heading #photoPreparationStatus {
+  grid-area: status;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #4d695a;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.workflow-photo-heading #photoPreparationStatus:empty { display: none; }
+body[data-channel="smartstore"] .workflow-photo-heading #manualPhotoReviewOpen {
+  grid-area: edit;
+  width: 241px;
+  min-height: 52px;
+  padding: 10px 16px;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+}
+body[data-channel="smartstore"] .workflow-photo-heading #manualPhotoReviewOpen:not(:disabled):hover {
+  background: #096b3b;
+  border-color: #096b3b;
+  color: #fff;
+}
+body[data-channel="smartstore"] .workflow-photo-heading #manualPhotoReviewOpen:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+body[data-channel="smartstore"][data-workflow-ready="false"] .workflow-photo-heading #manualPhotoReviewOpen { display: none; }
+
+body[data-channel="smartstore"] .workflow-photo-content {
+  --workflow-photo-height: clamp(160px, 18vw, 260px);
+  display: grid;
+  grid-template-columns: minmax(0, 296fr) minmax(0, 1108fr);
+  gap: 20px;
+  align-items: start;
+}
+body[data-channel="smartstore"] #smartstorePhotoStep :is(.image-workbench, #extraImages) { margin: 0; min-width: 0; }
+body[data-channel="smartstore"] #smartstorePhotoStep .main-preview-column { width: 100%; max-width: none; margin: 0; }
+body[data-channel="smartstore"] #smartstorePhotoStep :is(.main-image-heading h3, #extraImages h3) {
+  margin: 0 0 10px;
+  border: 0;
+  padding: 0;
+  color: #19382a;
+  font-size: 16px;
+  line-height: 1.5;
+}
+body[data-channel="smartstore"] #smartstorePhotoStep #extraImageStatus:empty { display: none; }
+body[data-channel="smartstore"] #smartstoreListingExtras {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 16px;
+}
+body[data-channel="smartstore"] #smartstorePhotoStep :is(.workflow-main-photo-card, #smartstoreListingExtras .extra-image-card) {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-width: 0;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid #cfe1d5;
+  border-radius: 12px;
+  background: #f7fbf7;
+}
+body[data-channel="smartstore"] #smartstorePhotoStep .workflow-main-photo-card { background: #f0f6f1; }
+body[data-channel="smartstore"] #smartstorePhotoStep :is(#main, #smartstoreListingExtras img) {
+  width: 100%;
+  max-width: none;
+  height: var(--workflow-photo-height);
+  max-height: none;
+  margin: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  object-fit: contain;
+}
+body[data-channel="smartstore"] #smartstorePhotoStep :is(#mainSourceNote, #smartstoreListingExtras .extra-image-card > p) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #4d695a;
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+body[data-channel="smartstore"] #smartstorePhotoStep :is(#downloadMain1500, #smartstoreListingExtras button) {
+  width: 100%;
+  min-height: 38px;
+  margin: 0;
+  padding: 7px 8px;
+  border: 1px solid #afd0bc;
+  border-radius: 8px;
+  background: #fff;
+  color: #19382a;
+  font-size: 13px;
+  line-height: 1.45;
+}
+body[data-channel="smartstore"] #smartstorePhotoStep :is(#downloadMain1500, #smartstoreListingExtras button):not(:disabled):hover {
+  background: #e8f5ec;
+}
+body[data-channel="smartstore"] #smartstorePhotoStep #photoImportReview { grid-column: 1 / -1; }
 body[data-channel="smartstore"] #smartstoreSellerStep .workflow-seller-actions{gap:10px;flex-wrap:wrap}
 body[data-channel="smartstore"] #smartstoreSellerStep #smartstoreOpen{background:#087c42;color:white;font-weight:700;padding:12px 20px;min-height:50px}
 body[data-channel="smartstore"] .registration-footer{margin:0;padding:24px 26px}
@@ -404,18 +694,44 @@ body[data-channel="smartstore"] #progressCard{order:3;width:100%;margin:0}
 body[data-channel="smartstore"][data-workflow-ready="true"] .workflow-waiting{display:none}
 body[data-channel="smartstore"][data-workflow-ready="false"] .workflow-product-content,
 body[data-channel="smartstore"][data-workflow-ready="false"] .registration-footer>.register-actions{display:none}
-@media(max-width:800px){
- #smartstoreWorkflow ol{grid-template-columns:repeat(3,minmax(0,1fr))}
- body[data-channel="smartstore"] .workflow-photo-content{grid-template-columns:minmax(0,1fr)}
- body[data-channel="smartstore"] #smartstorePhotoStep .extra-previews{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width: 1100px) {
+  #smartstoreWorkflow a { gap: 8px; padding-inline: 9px; }
+  .workflow-step-number { flex-basis: 32px; height: 32px; }
+  .workflow-step-label { font-size: 15px; }
 }
-@media(max-width:540px){
- body[data-channel="smartstore"] #smartstoreWorkflow,body[data-channel="smartstore"] #collectionCard,body[data-channel="smartstore"] #review>.card,body[data-channel="smartstore"] .registration-footer{padding:18px}
- #smartstoreWorkflow ol{grid-template-columns:minmax(0,1fr)}
- body[data-channel="smartstore"] .collection-tools .search{flex-direction:column}
- body[data-channel="smartstore"] .search #collect{width:100%}
- body[data-channel="smartstore"] #smartstorePhotoStep .extra-previews{grid-template-columns:repeat(2,minmax(0,1fr))}
- body[data-channel="smartstore"] #smartstoreSellerStep .workflow-seller-actions>button{width:100%}
+@media (max-width: 800px) {
+  #smartstoreWorkflow ol { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  body[data-channel="smartstore"] .workflow-photo-content { grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); }
+  body[data-channel="smartstore"] #smartstoreListingExtras { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  body[data-channel="smartstore"] .collection-tools .search { flex-wrap: wrap; }
+  body[data-channel="smartstore"] #collectionCard #collectionStatus { flex-basis: 100%; }
+}
+@media (max-width: 620px) {
+  body[data-channel="smartstore"] .workflow-photo-content { grid-template-columns: minmax(0, 1fr); }
+  body[data-channel="smartstore"] .workflow-photo-heading {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "title" "status" "edit";
+    gap: 8px;
+  }
+  body[data-channel="smartstore"] .workflow-photo-heading #manualPhotoReviewOpen { width: 100%; }
+  body[data-channel="smartstore"] #smartstorePhotoStep .workflow-main-photo-card { --workflow-photo-height: 240px; }
+  body[data-channel="smartstore"] #smartstoreListingExtras { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+}
+@media (max-width: 540px) {
+  body[data-channel="smartstore"] header .naver-title-logo img { width: 82px; }
+  body[data-channel="smartstore"] #smartstoreWorkflow,
+  body[data-channel="smartstore"] #collectionCard,
+  body[data-channel="smartstore"] #review > .card,
+  body[data-channel="smartstore"] #review > #smartstorePhotoStep,
+  body[data-channel="smartstore"] .registration-footer { padding: 16px; }
+  #smartstoreWorkflow ol { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  #smartstoreWorkflow a { min-height: 64px; padding-block: 8px; }
+  body[data-channel="smartstore"] #collectionCard { grid-template-columns: minmax(0, 1fr); }
+  body[data-channel="smartstore"] #collectionCard > p:first-of-type { grid-column: 1; }
+  body[data-channel="smartstore"] .collection-tools .search { flex-direction: column; flex-wrap: nowrap; }
+  body[data-channel="smartstore"] .search #collect { flex: 0 0 auto; width: 100%; }
+  body[data-channel="smartstore"] #collectionCard #collectionStatus { flex: 0 0 auto; }
+  body[data-channel="smartstore"] #smartstoreSellerStep .workflow-seller-actions > button { width: 100%; }
 }
 /* Step 5 keeps progress beside the initiating button, including after completion. */
 #smartstoreUploadProgress{margin-top:14px;padding:16px 18px;border:1px solid #b8d8c8;border-radius:10px;background:#f3faf6;color:#214d3b}
