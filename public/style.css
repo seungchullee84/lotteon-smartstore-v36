@@ -491,15 +491,58 @@ body[data-channel="smartstore"] .collection-tools .search {
   align-items: stretch;
   gap: 12px;
 }
-body[data-channel="smartstore"] .search #style {
+#collectionCard .collection-tools .search { grid-column: 1 / -1; }
+.collection-search-field {
+  --search-border: #895834;
+  --search-surface: #fff8ed;
+  --search-text: #493020;
+  --search-placeholder: #735d4c;
+  --search-focus: #89583433;
+  position: relative;
   flex: 1 1 0;
   min-width: 0;
-  min-height: 48px;
-  padding-inline: 14px;
-  border: 1px solid #bbd2c3;
-  border-radius: 9px;
-  background: #f7fbf7;
+}
+body[data-channel="smartstore"] .collection-search-field {
+  --search-border: #258052;
+  --search-surface: #eff9f2;
+  --search-text: #17462e;
+  --search-placeholder: #456650;
+  --search-focus: #25805233;
+}
+#collectionCard .collection-search-field label {
+  position: absolute;
+  inset: 9px auto auto 14px;
+  margin: 0;
+  color: var(--search-text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  cursor: text;
+}
+#collectionCard .collection-search-field #style {
+  display: block;
+  height: 100%;
+  min-height: 68px;
+  max-width: none;
+  padding: 27px 14px 8px;
+  border: 2px solid var(--search-border);
+  border-radius: 10px;
+  background: var(--search-surface);
+  color: var(--search-text);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+#collectionCard .collection-search-field #style::placeholder {
+  color: var(--search-placeholder);
   font-size: 16px;
+  font-weight: 600;
+  opacity: 1;
+}
+#collectionCard .collection-search-field #style:focus {
+  border-color: var(--search-border);
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--search-focus);
 }
 body[data-channel="smartstore"] .search #collect {
   flex: 0 0 180px;
@@ -628,7 +671,8 @@ body[data-channel="smartstore"] .workflow-photo-content {
 }
 body[data-channel="smartstore"] #smartstorePhotoStep :is(.image-workbench, #extraImages) { margin: 0; min-width: 0; }
 body[data-channel="smartstore"] #smartstorePhotoStep .main-preview-column { width: 100%; max-width: none; margin: 0; }
-body[data-channel="smartstore"] #smartstorePhotoStep :is(.main-image-heading h3, #extraImages h3) {
+body[data-channel="smartstore"] #smartstorePhotoStep .main-image-heading h3,
+body[data-channel="smartstore"] #smartstorePhotoStep #extraImages h3 {
   margin: 0 0 10px;
   border: 0;
   padding: 0;
@@ -636,13 +680,22 @@ body[data-channel="smartstore"] #smartstorePhotoStep :is(.main-image-heading h3,
   font-size: 16px;
   line-height: 1.5;
 }
+body[data-channel="smartstore"] #smartstorePhotoStep .main-image-heading h3 {
+  max-width: 100%;
+  padding-inline: 8px;
+  border-radius: 6px;
+  background: #14673d;
+  color: #fff;
+  font-weight: 700;
+}
 body[data-channel="smartstore"] #smartstorePhotoStep #extraImageStatus:empty { display: none; }
 body[data-channel="smartstore"] #smartstoreListingExtras {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: stretch;
   gap: 16px;
 }
-body[data-channel="smartstore"] #smartstorePhotoStep :is(.workflow-main-photo-card, #smartstoreListingExtras .extra-image-card) {
+body[data-channel="smartstore"] #smartstorePhotoStep .workflow-main-photo-card,
+body[data-channel="smartstore"] #smartstorePhotoStep #smartstoreListingExtras .extra-image-card {
   display: grid;
   grid-template-rows: auto 1fr auto;
   min-width: 0;
@@ -652,7 +705,11 @@ body[data-channel="smartstore"] #smartstorePhotoStep :is(.workflow-main-photo-ca
   border-radius: 12px;
   background: #f7fbf7;
 }
-body[data-channel="smartstore"] #smartstorePhotoStep .workflow-main-photo-card { background: #f0f6f1; }
+body[data-channel="smartstore"] #smartstorePhotoStep .workflow-main-photo-card {
+  border-color: #3a9564;
+  background: #e2f4e8;
+  box-shadow: inset 0 0 0 1px #3a9564;
+}
 body[data-channel="smartstore"] #smartstorePhotoStep :is(#main, #smartstoreListingExtras img) {
   width: 100%;
   max-width: none;
@@ -664,6 +721,7 @@ body[data-channel="smartstore"] #smartstorePhotoStep :is(#main, #smartstoreListi
   background: transparent;
   object-fit: contain;
 }
+body[data-channel="smartstore"] #smartstorePhotoStep #main { background: #fff; }
 body[data-channel="smartstore"] #smartstorePhotoStep :is(#mainSourceNote, #smartstoreListingExtras .extra-image-card > p) {
   margin: 0;
   padding: 0;
