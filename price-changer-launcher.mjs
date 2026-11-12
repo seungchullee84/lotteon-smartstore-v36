@@ -2,6 +2,7 @@ import { access, readFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';
+import { atomicWrite } from './atomic-file.mjs';
 import { setTimeout as delay } from 'node:timers/promises';
 
 const KEY = /^[a-f0-9]{48}$/;
@@ -20,6 +21,7 @@ function sessionUrl(text, port) {
 export function createPriceChangerLauncher({
   appDir = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'lotte-price-changer'),
   port = 49428,
+  registrarRoot,
   fetchImpl = fetch,
   spawnImpl = spawn,
   startupTimeoutMs = 15000,
@@ -35,6 +37,13 @@ export function createPriceChangerLauncher({
   async function readText(file) {
     try { return (await readFile(file, 'utf8')).trim(); }
     catch (error) { if (error.code === 'ENOENT') return ''; throw new Error('가격변경기 실행 정보를 읽지 못했습니다.'); }
+  }
+
+  async function linkRegistrar() {
+    if (!registrarRoot) return;
+    const root = path.resolve(registrarRoot);
+    const file = path.join(dataDir, 'registrar-login-root.txt');
+    if (await readText(file) !== root) await atomicWrite(file, root);
   }
 
   async function credentials() {
@@ -92,7 +101,10 @@ export function createPriceChangerLauncher({
 
   return {
     open() {
-      if (!pending) pending = launch().finally(() => { pending = null; });
+      if (!pending) pending = launch().then(async result => {
+        await linkRegistrar().catch(() => {});
+        return result;
+      }).finally(() => { pending = null; });
       return pending;
     },
   };
