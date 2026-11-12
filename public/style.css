@@ -496,7 +496,6 @@ body[data-channel="smartstore"] .collection-tools .search {
   --search-border: #895834;
   --search-surface: #fff8ed;
   --search-text: #493020;
-  --search-placeholder: #735d4c;
   --search-focus: #89583433;
   position: relative;
   flex: 1 1 0;
@@ -506,7 +505,6 @@ body[data-channel="smartstore"] .collection-search-field {
   --search-border: #258052;
   --search-surface: #eff9f2;
   --search-text: #17462e;
-  --search-placeholder: #456650;
   --search-focus: #25805233;
 }
 #collectionCard .collection-search-field label {
@@ -532,12 +530,6 @@ body[data-channel="smartstore"] .collection-search-field {
   font-size: 19px;
   font-weight: 700;
   line-height: 1.4;
-}
-#collectionCard .collection-search-field #style::placeholder {
-  color: var(--search-placeholder);
-  font-size: 16px;
-  font-weight: 600;
-  opacity: 1;
 }
 #collectionCard .collection-search-field #style:focus {
   border-color: var(--search-border);
