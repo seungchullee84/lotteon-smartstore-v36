@@ -102,7 +102,9 @@ export function createPriceChangerLauncher({
   return {
     open() {
       if (!pending) pending = launch().then(async result => {
-        await linkRegistrar().catch(() => {});
+        await linkRegistrar().catch(() => {
+          throw new Error('가격변경기에 상품등록기의 자동 로그인 설정을 연결하지 못했습니다.');
+        });
         return result;
       }).finally(() => { pending = null; });
       return pending;
