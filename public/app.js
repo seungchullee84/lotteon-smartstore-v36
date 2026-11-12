@@ -85,80 +85,11 @@ async function post(endpoint,data={}){
  catch(e){if(e.name==='TimeoutError')throw Error('서버 응답 시간이 초과됐습니다. 진행 기록에서 작업 상태를 확인해 주세요.');if(e instanceof TypeError)throw Error('등록기 서버와 연결되지 않았습니다. 잠시 후 새로고침해 주세요.');throw e;}
 }
 let requestLock=false,serverBusy=false,serverPhase='idle',smartstoreStarting=false,smartstoreDetailStarting=false,smartstoreRequestAt=0,lotteRequestEpoch=0;
-let pendingSellerOpen=null;
-const autoSellerPreference='register.auto-open-seller';
-const autoOpenSeller=document.createElement('input');
-autoOpenSeller.type='checkbox';
-autoOpenSeller.id='autoOpenSeller';
-autoOpenSeller.checked=true;
-try{autoOpenSeller.checked=localStorage.getItem(autoSellerPreference)!=='off';}catch{}
-const autoOpenSellerLabel=document.createElement('label');
-autoOpenSellerLabel.className='collection-seller-option';
-autoOpenSellerLabel.dataset.channelOnly='lotte';
-autoOpenSellerLabel.append(autoOpenSeller,'수집 완료 후 판매자센터 열기');
-const autoOpenSellerStatus=document.createElement('p');
-autoOpenSellerStatus.id='autoOpenSellerStatus';
-autoOpenSellerStatus.dataset.channelOnly='lotte';
-autoOpenSellerStatus.setAttribute('role','status');
-$('collectionStatus').before(autoOpenSellerLabel,autoOpenSellerStatus);
-autoOpenSeller.addEventListener('change',()=>{
- if(!autoOpenSeller.checked){pendingSellerOpen=null;autoOpenSellerStatus.textContent='';}
- try{localStorage.setItem(autoSellerPreference,autoOpenSeller.checked?'on':'off');}catch{}
-});
-
 function openSellerCenter(channel){
- pendingSellerOpen=null;
  return post(channel==='smartstore'?'smartstore-open':'open');
 }
-async function collectForReview(input,allowMissingDetail=false){
- pendingSellerOpen=null;
- autoOpenSellerStatus.textContent='';
- const channel=activeChannel(),view=channelViewId;
- const openAfterCollect=channel==='lotte'&&autoOpenSeller.checked;
- let revision=smartstoreListingState?.revision;
- if(openAfterCollect&&revision===undefined){
-  try{
-   const response=await fetch('/api/state?channel='+channel,{signal:AbortSignal.timeout(5000)});
-   if(response.ok)revision=(await response.json()).revision;
-  }catch{}
- }
- const result=await post('collect',{style:input,allowMissingDetail,channel,edits:currentProductEdits()});
- if(openAfterCollect&&autoOpenSeller.checked&&revision!==undefined)pendingSellerOpen={input,channel,view,revision};
- return result;
-}
-function sameCollectedProduct(input,product){
- if(!product)return false;
- if(/^\d{6}$/.test(input))return product.style===input;
- try{
-  const requested=new URL(input),actual=new URL(product.sourceUrl);
-  return requested.searchParams.get('pno')===actual.searchParams.get('pno');
- }catch{return false;}
-}
-function syncCollectedSellerOpen(state){
- const request=pendingSellerOpen;
- if(!request||requestLock||state.busy)return;
- if(request.view!==channelViewId||request.channel!==activeChannel()){pendingSellerOpen=null;return;}
- if(state.collectionInput!==request.input){
-  if(state.revision>request.revision)pendingSellerOpen=null;
-  return;
- }
- if(state.phase==='error'||state.phase==='stopped'){pendingSellerOpen=null;return;}
- if(state.phase!=='done'||state.completedJob!=='collect'||state.revision<=request.revision)return;
- pendingSellerOpen=null;
- if(!sameCollectedProduct(request.input,state.product))return;
- void openCollectedSeller(request.channel);
-}
-async function openCollectedSeller(channel){
- const label=channel==='smartstore'?'스마트스토어':'롯데ON';
- requestLock=true;
- syncButtons();
- autoOpenSellerStatus.textContent=label+' 판매자센터 여는 중…';
- try{
-  await openSellerCenter(channel);
-  autoOpenSellerStatus.textContent=label+' 판매자센터를 열었습니다.';
- }catch(error){
-  autoOpenSellerStatus.textContent=label+' 판매자센터 자동 열기 확인 필요 · '+error.message;
- }finally{requestLock=false;syncButtons();}
+function collectForReview(input,allowMissingDetail=false){
+ return post('collect',{style:input,allowMissingDetail,channel:activeChannel(),edits:currentProductEdits()});
 }
 const buttonLabels={open:'1. 크롬 로그인 창 열기',collect:'2. 공식몰 정보 수집',run:'3. 검토한 내용으로 입력 시작'};
 const busyLabels={open:'크롬 연결 중…',collect:'공식몰 정보 수집 중…',run:'작업 중 · 롯데ON 입력 준비…'};
@@ -268,7 +199,7 @@ function action(id,fn){$(id).onclick=async()=>{
  }catch(e){$('error').textContent=e.message;announce('처리하지 못했습니다: '+e.message,'failed');}
  finally{if(primary){requestLock=false;delete $(id).dataset.pending;syncButtons();if(runState)syncFeedbackWithState(runState);}}
  };}
-action('open',()=>openSellerCenter('lotte'));action('collect',()=>collectForReview($('style').value.trim()));action('stop',async()=>{const b=$('stop');if(b.disabled)return;pendingSellerOpen=null;b.disabled=true;b.textContent='중단 중…';announce('중단 요청 중 — 추가 입력을 취소합니다');try{await post('stop');announce('중단 요청을 전달했습니다','success');}finally{b.disabled=false;b.textContent='중단';}});action('continue',()=>post('continue'));
+action('open',()=>openSellerCenter('lotte'));action('collect',()=>collectForReview($('style').value.trim()));action('stop',async()=>{const b=$('stop');if(b.disabled)return;b.disabled=true;b.textContent='중단 중…';announce('중단 요청 중 — 추가 입력을 취소합니다');try{await post('stop');announce('중단 요청을 전달했습니다','success');}finally{b.disabled=false;b.textContent='중단';}});action('continue',()=>post('continue'));
 $('style').addEventListener('keydown',event=>{
  if(event.key!=='Enter'||event.isComposing||event.keyCode===229)return;
  event.preventDefault();
@@ -481,7 +412,6 @@ populate=function(p){populateWithImageButtons(p);$('saveExtra1').hidden=!p.image
 if(product){$('saveExtra1').hidden=!product.images.extra1;$('saveExtra2').hidden=!product.images.extra2;}
 
 function updateCollectionStatus(s){
- syncCollectedSellerOpen(s);
  updateCollectionAnimation(s);
  const badge=$('collectionStatus');
  if(s.phase==='collect'&&s.busy){badge.hidden=false;badge.className='collect-pending';badge.textContent='정보 수집 중… 잠시 기다려 주세요.';return;}
