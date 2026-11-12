@@ -20,3 +20,20 @@ test('밑줄로 끝나는 공식 상세·사이즈 파일을 인식하며 고시
  const product=parseProduct(html,'https://www.giordano.co.kr/shop/detail.php?pno=current','076921');
  assert(product.images.detail.endsWith('01076921_.jpg'));assert(product.images.size.endsWith('01076921size_.jpg'));assert.equal(product.images.info,undefined);
 });
+
+test('공식 상세 더보기의 같은 품번 _E 원본만 상세 이미지로 인식한다',()=>{
+ const source='https://www.giordano.co.kr/shop/detail.php?pno=current';
+ const html=`<title>여성 경량 베스트</title><img src="/_data/attach/main.jpg">
+  <img src="/_gio_on/2025/05375912info.jpg">
+  <img src="/_gio_on/2025/05375912_E.jpg">
+  <div class="wing-detail-more-contents">
+   <img src="https://example.test/05375912_E.jpg">
+   <img src="/_gio_on/2025/05375913_E.jpg">
+   <img src="/_gio_on/2025/05375912_E.jpg?updated=1#original">
+  </div>`;
+ const product=parseProduct(html,source,'375912');
+ assert.equal(product.originalDetailUrl,'https://www.giordano.co.kr/_gio_on/2025/05375912_E.jpg?updated=1');
+ assert.equal(product.images.detail,product.originalDetailUrl);
+ const outsideOnly=html.slice(0,html.indexOf('<div class='));
+ assert.equal(parseProduct(outsideOnly,source,'375912').originalDetailUrl,null);
+});
