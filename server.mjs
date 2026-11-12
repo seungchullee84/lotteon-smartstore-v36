@@ -13,6 +13,7 @@ import {applyImportedPhotos,assertImportedPhotoCoverage} from './smartstore-phot
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail,renderPreparedSmartstoreDetail,prefetchSmartstoreSellingPoints} from './smartstore-detail-files.mjs';
 import {reviewNoticeMaterial,applyNoticeMaterialReview,materialAlreadySet} from './openmaus-notice-review.mjs';
 import {recoverUnmarkedNoticeMaterial} from './notice.mjs';
+import {readNoticeRegion} from './notice-region-copy.mjs';
 import {openMausCli,openMausInstallRoot,stopOpenMausReview} from './openmaus-research.mjs';
 import {loadSmartstoreLinkedComparison,prependSmartstoreLinkedComparison,linkedComparisonPreview} from './smartstore-linked-comparison.mjs';
 import {TEMPLATE_ASSET_NAMES} from './smartstore-detail.mjs';
@@ -293,6 +294,7 @@ const server=http.createServer(async(req,res)=>{
       return res.end(comparison?preview.replace('<body>',()=>'<body>'+linkedComparisonPreview(comparison)):preview);
     }
     if(req.method==='GET'&&url.pathname.startsWith('/image/')){
+      if(url.pathname==='/image/info'&&url.searchParams.has('revision')&&url.searchParams.get('revision')!==String(state.revision))return json(res,409,{error:'원본 이미지가 바뀌었어요.'});
       if(/^\/image\/wash-icon-[1-9]\d*$/.test(url.pathname)&&state.folder){
         const key=url.pathname.slice(7);
         if(!state.product?.noticeAnalysis?.washingIcons?.some(i=>i.key===key))return json(res,404,{});
@@ -308,6 +310,23 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='POST'){
       const b=await body(req);
       requireChannel(url.pathname.slice(5),b.channel);
+      if(url.pathname==='/api/notice-region-text'){
+        const {folder,revision}=state;
+        if(!folder||b.revision!==revision)return json(res,409,{error:'원본 이미지가 바뀌었어요. 다시 드래그해 주세요.'});
+        const controller=new AbortController();
+        const cancel=()=>controller.abort();
+        res.once('close',cancel);
+        try{
+          const signal=AbortSignal.any([controller.signal,AbortSignal.timeout(15000)]);
+          const text=await readNoticeRegion(path.join(folder,'info.jpg'),b.region,signal);
+          if(res.destroyed)return;
+          if(state.folder!==folder||state.revision!==revision)return json(res,409,{error:'원본 이미지가 바뀌었어요. 다시 드래그해 주세요.'});
+          return json(res,200,{text});
+        }catch(error){
+          if(!res.destroyed)return json(res,400,{error:error.name==='TimeoutError'?'글자를 읽는 데 시간이 걸리고 있어요. 범위를 줄여 다시 드래그해 주세요.':'글자를 읽지 못했어요. 다시 드래그해 주세요.'});
+        }finally{res.off('close',cancel);}
+        return;
+      }
       if(url.pathname==='/api/price-changer/open')return json(res,200,await priceChanger.open());
       if(url.pathname==='/api/smartstore-template-headline'){
         if(state.busy||b.channel!=='smartstore'||!state.product||b.style!==state.product.style||b.sourceUrl!==state.product.sourceUrl)throw Error('현재 스마트스토어 상품과 작업 상태를 확인해 주세요.');
