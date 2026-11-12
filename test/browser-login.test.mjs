@@ -29,7 +29,7 @@ test('계정은 Windows 사용자 암호화로만 저장하고 상태 응답·�
 
 test('공식 로그인 화면에서만 한 번 입력하고 성공·실패·수동 인증을 구분한다',async()=>{
  const browser=await chromium.launch({headless:true});
- const form=`<input id="app_LoginFrame_form_div_Login_edt_LoginId_input"><input type="password" id="app_LoginFrame_form_div_Login_edt_LoginPassword_input"><button id="app_LoginFrame_form_div_Login_btn_Login">로그인</button>`;
+ const form=`<input id="app_LoginFrame_form_div_Login_edt_LoginId_input"><input type="password" id="app_LoginFrame_form_div_Login_edt_LoginPassword_input"><button id="app_LoginFrame_form_div_Login_btn_Login">로그인</button><a id="sessionEndManual">세션만료</a>`;
  let loads=0;const store={load:async()=>{loads++;return {username:'fixture-user',password:'fixture-pass',revision:'one'};}};
  try{
   const page=await browser.newPage();await page.route('**/*',route=>route.fulfill({contentType:'text/html',body:form}));

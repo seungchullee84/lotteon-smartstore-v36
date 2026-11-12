@@ -1,7 +1,7 @@
 const attempts=new WeakMap();
 const samePortal=page=>{try{const u=new URL(page.url());return u.origin==='https://together.lotteshopping.com'&&u.pathname.startsWith('/EMDV3/');}catch{return false;}};
 const idSelector='[id$="div_Login_edt_LoginId_input"]',passwordSelector='[id$="div_Login_edt_LoginPassword_input"]',buttonSelector='[id$="div_Login_btn_Login"]';
-const expiryMessage=/세션\s*(?:정보\s*)?(?:이|가)?\s*만료|로그인\s*시간\s*(?:이|가)?\s*만료/;
+const expiryMessage=/(?:세션\s*(?:정보\s*)?|로그인\s*시간\s*)(?:이|가)?\s*만료\s*(?:되|됐|된)/;
 export const LOTTE_SESSION_EXPIRED='롯데 EDI 세션이 만료됐습니다. 전용 크롬에서 안내창을 닫고 다시 로그인해 주세요.';
 export async function lotteSessionExpired(page){
  return samePortal(page)&&await page.getByText(expiryMessage).filter({visible:true}).first().isVisible().catch(()=>false);
