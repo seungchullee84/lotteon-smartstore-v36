@@ -93,11 +93,12 @@ export async function openLotteRegistration(page,{check=()=>{}}={}){
   await checkPortal();
   await search.click({timeout:4000});
   await page.locator('[id$="waitwindow"]').first().waitFor({state:'hidden',timeout:6000});
+  const exact=text=>new RegExp('^\\s*'+text+'\\s*$');
   const result=visible(frame+'[id*="_commPopup_form_div_Data_grd_List_body_gridrow_"][id$="_0"]')
-   .filter({hasText:/^\s*241142\s*$/});
+   .filter({hasText:exact(itemCode)});
   await result.first().waitFor({state:'visible',timeout:6000});
   const id=await result.getAttribute('id',{timeout:3000});
-  const item=visible('[id='+JSON.stringify(id.replace(/_0$/,'_1'))+']').filter({hasText:/^\s*지오다노\s*$/});
+  const item=visible('[id='+JSON.stringify(id.replace(/_0$/,'_1'))+']').filter({hasText:exact(itemName)});
   await checkPortal();
   await item.click({timeout:3000});
   await checkPortal();
