@@ -5,7 +5,8 @@ import {LotteAutomation} from '../automation.mjs';
 
 async function fixture(browser, product) {
   const page=await browser.newPage({viewport:{width:1000,height:700}});
-  const rows=[...product.colors.map(source=>({source,kind:'색상',type:'통합색상'})),...product.sizes.map(source=>({source,kind:'사이즈',type:'성인 하의 사이즈'}))];
+  const sizeType=/바지|팬츠|슬랙스/.test(product.name)?'성인 하의 사이즈':'성인 상의 사이즈';
+  const rows=[...product.colors.map(source=>({source,kind:'색상',type:'통합색상'})),...product.sizes.map(source=>({source,kind:'사이즈',type:sizeType}))];
   await page.setContent('<style>body{margin:0}.cell{position:absolute;box-sizing:border-box;height:34px;padding:5px;font:14px sans-serif}.checked{width:20px;height:20px}#grd_OptnDtlNew{position:absolute;left:20px;top:20px;width:830px;height:380px}#grd_OptnDtlNew_head{height:28px}#grd_OptnDtlNew_body{position:relative;height:340px}</style><div id="grd_OptnDtlNew"><div id="grd_OptnDtlNew_head">옵션</div><div id="grd_OptnDtlNew_body"></div></div><input hidden id="grd_OptnDtlNew_controlcombo_comboedit_input"><button hidden id="grd_OptnDtlNew_controlcombo_dropbutton">목록</button><div hidden id="grd_OptnDtlNew_controlcombo_combolistScrollableContainerElement"></div>');
   await page.evaluate(rows=>{
     const grid='grd_OptnDtlNew',body=document.getElementById(grid+'_body');
@@ -14,7 +15,8 @@ async function fixture(browser, product) {
     const list=document.getElementById(grid+'_controlcombo_combolistScrollableContainerElement');
     window.fixtureRows=rows;
     window.counts={opens:0,escapes:0};
-    window.options={'통합색상':['화이트','블랙','네이비'],'성인 하의 사이즈':['S','M','L']};
+    window.options={'통합색상':['화이트','블랙','네이비','베이지','차콜','버건디'],
+      '성인 하의 사이즈':['S','M','L'],'성인 상의 사이즈':['S','M','L']};
     let current=-1;
     const image='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
     rows.forEach((row,index)=>{
@@ -63,6 +65,51 @@ async function fixture(browser, product) {
   bot.auditLotteOptions=async p=>{audits++;return audit(p);};
   return {page,bot,counts:()=>({scans,audits}),read:()=>bot.auditOptionRows('grd_OptnDtlNew')};
 }
+
+test('채널 오른쪽 스크롤에 잘린 색상·사이즈를 모두 드러내 선택하고 다시 점검한다',async()=>{
+  const browser=await chromium.launch({headless:true});
+  try{
+    const product={name:'테스트 재킷',colors:['01소프트베이지','02차콜','03버건디','04블랙'],sizes:['S','M','L']};
+    const f=await fixture(browser,product);
+    await f.page.evaluate(()=>{
+      const grid=document.getElementById('grd_OptnDtlNew');
+      const panel='mock_chnlForm_form_div_Data';
+      const viewport=document.createElement('div');
+      viewport.id=panel+'ScrollableInnerContainerElement';
+      viewport.style.cssText='position:absolute;left:20px;top:130px;width:850px;height:270px;overflow:hidden';
+      const content=document.createElement('div');
+      content.style.cssText='position:absolute;width:830px;height:645px;top:0;left:0';
+      grid.style.left='0';grid.style.top='205px';
+      document.body.append(viewport);viewport.append(content);content.append(grid);
+      const bar=document.createElement('div');
+      bar.id=panel+'_vscrollbar';bar.style.cssText='position:absolute;left:870px;top:130px;width:14px;height:270px';
+      const thumb=document.createElement('div');
+      thumb.id=bar.id+'_trackbar';thumb.style.cssText='position:absolute;top:13px;left:0;width:14px;height:100px;background:#777';
+      document.body.append(bar);bar.append(thumb);
+      window.scrollMoves=0;let start;
+      thumb.onmousedown=e=>{start={pointer:e.clientY,top:parseFloat(thumb.style.top)};};
+      document.addEventListener('mousemove',e=>{
+        if(!start)return;
+        const top=Math.max(13,Math.min(157,start.top+e.clientY-start.pointer));
+        thumb.style.top=top+'px';
+        content.style.top=(-(top-13)*375/144)+'px';
+      });
+      document.addEventListener('mouseup',()=>{if(start)window.scrollMoves++;start=null;});
+    });
+    assert.deepEqual((await f.bot.optionGridSnapshot('grd_OptnDtlNew')).rows.map(row=>row.source),['01소프트베이지']);
+    await f.bot.matchLotteOptions(product);
+    const actual=await f.page.evaluate(()=>{
+      const read=(row,col)=>document.getElementById('grd_OptnDtlNew_body_gridrow_'+row+'_cell_'+row+'_'+col);
+      return window.fixtureRows.map((_,row)=>({
+        value:read(row,11).textContent,checked:!!read(row,12).querySelector('img').getAttribute('src'),
+      }));
+    });
+    assert.deepEqual(actual.map(row=>row.value),['베이지','차콜','버건디','블랙','S','M','L']);
+    assert(actual.every(row=>row.checked));
+    assert((await f.page.evaluate(()=>window.scrollMoves))>0);
+    assert.equal(f.counts().audits,1);
+  }finally{await browser.close();}
+});
 
 test('같은 유형의 반복 옵션은 전체 후보를 한 번만 읽고 실제 선택과 전체 점검은 유지',async t=>{
   const browser=await chromium.launch({headless:true});
