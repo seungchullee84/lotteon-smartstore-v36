@@ -15,6 +15,12 @@ import {embeddedOfficialSections} from './smartstore-official-sections.mjs';
 import {prepareMainImage} from './main-image.mjs';
 
 const PORTAL='https://together.lotteshopping.com/EMDV3/index.html';
+
+function normalizeLotteSize(value){
+  return String(value??'').replace(/\s/g,'').toUpperCase()
+    .replace(/^(\d+)인치$/,'$1').replace(/^XXL$/,'2XL').replace(/^XXXL$/,'3XL');
+}
+
 export class LotteAutomation extends BrowserAutomation {
   async ensureLogin(waitForForm=false){return tryLotteLogin(this.page,{store:createBrowserLoginStore(this.root),log:this.log,check:()=>this.check(),waitForForm});}
   async open(){
@@ -638,8 +644,9 @@ export class LotteAutomation extends BrowserAutomation {
         labels=await this.scanComboLabels(list);if(labels.length)optionLabels.set(type,labels);
         await this.page.keyboard.press('Escape');
       }
-      const normal=x=>x.replace(/\s/g,'').toUpperCase().replace(/^XXL$/,'2XL').replace(/^XXXL$/,'3XL');
-      const selected=kind==='색상'?matchColor(raw,labels):labels.find(x=>normal(x)===normal(raw))||labels.find(x=>/^\d+인치$/.test(x)&&x===raw+'인치')||normal(raw);
+      const size=normalizeLotteSize(raw);
+      const selected=kind==='색상'?matchColor(raw,labels):
+        labels.find(label=>label===raw)||labels.find(label=>normalizeLotteSize(label)===size)||size;
       if(!selected)throw Error('유사한 롯데ON 옵션값을 찾지 못했습니다: '+raw+' / 옵션유형: '+type+' / 읽은 후보: '+(labels.join(', ')||'없음 — 옵션 목록이 로딩되었는지 확인해 주세요.'));
       await this.combo(grid+'_controlcombo',selected,false,labels);await this.locator(grid+'_controlcombo_comboedit_input').press('Enter');
       if(!await sameRow())break;
@@ -706,8 +713,7 @@ export class LotteAutomation extends BrowserAutomation {
           const size=p.sizes.some(x=>x.replace(/\s/g,'')===source);
           const lower=p.sourceCategory?.includes('PANTS')||/바지|팬츠|슬랙스/.test(p.name);
           const required=size?(lower?'성인 하의 사이즈':'성인 상의 사이즈'):'통합색상';
-          const normalize=x=>String(x||'').replace(/\s/g,'').toUpperCase().replace(/^XXL$/,'2XL').replace(/^XXXL$/,'3XL');
-          if(r.checked&&r.type===required&&r.value&&(!size||normalize(r.value)===normalize(source)))seen.add(source);
+          if(r.checked&&r.type===required&&r.value&&(!size||normalizeLotteSize(r.value)===normalizeLotteSize(source)))seen.add(source);
         }
         const missing=rows.find(r=>expected.has(r.source.replace(/\s/g,''))&&!r.checked);
         if(!missing)break;await this.page.locator('[id*="'+g+'_body_gridrow_"][id$="_12_controlcheckbox"]').nth(missing.index).click();await this.pace();
