@@ -382,7 +382,7 @@ export class LotteAutomation extends BrowserAutomation {
       await row.waitFor({state:'attached',timeout:20000});
       await this.click(row);await row.dblclick();await this.settle();
       }
-      await this.channel(p,folder);
+      await this.channel(p,folder,{resume:channelOpen});
       if(!finalize){await this.textClick('임시저장');await this.modalConfirm('저장하시겠습니까');this.log('최종 상품확정 전에서 중단했습니다.');return;}
       await this.textClick('상품확정');await this.modalConfirm('저장하시겠습니까');
       await this.modalConfirm('온라인 상품 확정 확인','확인완료');
@@ -593,9 +593,10 @@ export class LotteAutomation extends BrowserAutomation {
   }
   async matchLotteOptions(p){
     const grid='grd_OptnDtlNew';
-    const coverage=new OptionCoverage(p);const optionLabels=new Map();
+    const coverage=new OptionCoverage(p),optionLabels=new Map();
     const sources=[...p.colors,...p.sizes];
     const compact=x=>String(x).replace(/\s/g,'');
+    const kinds=new Map([...p.colors.map(value=>[compact(value),'색상']),...p.sizes.map(value=>[compact(value),'사이즈'])]);
     await this.scrollOptionGrid(grid,0,sources);
     let stagnant=0,recovering=false,recoveryOffset=null;
     for(let pass=0;pass<Math.max(60,coverage.expected.size*8);pass++){
@@ -610,7 +611,7 @@ export class LotteAutomation extends BrowserAutomation {
     const lower=p.sourceCategory?.includes('PANTS')||/바지|팬츠|슬랙스/.test(p.name);
     for(const {row,kind:displayKind,source} of view.rows){
       this.check();
-      const kind=p.sizes.some(x=>compact(x)===compact(source))?'사이즈':p.colors.some(x=>compact(x)===compact(source))?'색상':displayKind;
+      const kind=kinds.get(compact(source))||displayKind;
       if(!['색상','사이즈'].includes(kind))throw Error('알 수 없는 옵션유형: '+kind);
       if(!coverage.expected.has(optionKey(kind,source)))throw Error('수집 정보에 없는 옵션입니다: '+optionKey(kind,source));
       if(coverage.has(kind,source))continue;
@@ -656,10 +657,10 @@ export class LotteAutomation extends BrowserAutomation {
     }
     if(coverage.complete){await this.auditLotteOptions(p);this.log('전체 색상·사이즈 '+coverage.done.size+'개 매칭 및 체크 확인 완료');return;}
     if(coverage.done.size>before){stagnant=0;continue;}
-    if(await this.revealClippedChannelOption(grid,source=>
-      sources.some(value=>compact(value)===compact(source))&&
-      !coverage.has(p.sizes.some(value=>compact(value)===compact(source))?'사이즈':'색상',source)
-    )){
+    if(await this.revealClippedChannelOption(grid,source=>{
+      const kind=kinds.get(compact(source));
+      return !!kind&&!coverage.has(kind,source);
+    })){
       stagnant=0;
       continue;
     }
@@ -914,7 +915,27 @@ export class LotteAutomation extends BrowserAutomation {
     this.log('같은 품번 채널 분류 적용: '+p.style+' · 바지 > 기모팬츠 · 신규 생성·상품 저장 안 함');
     return {category,applied:true,saved:false};
   }
-  async channel(p,folder){
+  async canResumeChannelOptions(p){
+    const options=new OptionCoverage(p);
+    const table=this.page.locator('[id*="_chnlForm_"][id$="_grd_OptnDtl"]').filter({visible:true});
+    if(await table.count()!==1)return false;
+    const read=async(row,col)=>table.locator('[id$="_body_gridrow_'+row+'_cell_'+row+'_'+col+'"]')
+      .evaluateAll(cells=>[...new Set(cells.map(cell=>cell.textContent.trim()).filter(Boolean))]);
+    const same=(found,expected)=>found.length===1&&found[0].replace(/\s/g,'')===expected.replace(/\s/g,'');
+    for(const [row,type,values] of [[2,'색상',p.colors],[3,'사이즈',p.sizes]]){
+      if(!same(await read(row,0),'직접입력'+(row-1))||
+         !same(await read(row,1),type)||!same(await read(row,2),values.join(',')))return false;
+    }
+    const selected=await this.page.locator('[id*="_chnlForm_"][id$="_grd_OptnDtlNew"]').filter({visible:true})
+      .evaluateAll(grids=>grids.some(grid=>[...grid.querySelectorAll('[id$="_2"]')].some(cell=>
+        /_body_gridrow_(\d+)_cell_\1_2$/.test(cell.id)&&!!cell.textContent.trim())));
+    return options.expected.size>0&&selected;
+  }
+  async channel(p,folder,{resume=false}={}){
+    const optionBlock=this.page.locator('[id$="div_input12_div_body"]').filter({visible:true}).last();
+    if(resume&&await this.canResumeChannelOptions(p)){
+      this.log('기존 색상·사이즈 입력을 확인했습니다. 롯데ON 옵션 선택부터 이어갑니다.');
+    }else{
     // Suffix names for channel controls vary between portal versions. Collect the actual list.
     await this.applyChannelPreset();
     if(/패딩|푸퍼|다운/.test(p.name+' '+(p.sourceCategory||[]).join(' '))&&!/코트/.test(p.name)){
@@ -934,12 +955,12 @@ export class LotteAutomation extends BrowserAutomation {
     await this.addStandardCategory(major,p.category.channelMiddle,p.category.channelSmall);
     await saveCategoryMatch(this.root,matchKey,{major,middle:p.category.channelMiddle,small:p.category.channelSmall},p.style);
     this.log('실제 선택·추가 확인된 분류 경로를 매칭표에 저장했습니다.');
-    const optionBlock=this.page.locator('[id$="div_input12_div_body"]').filter({visible:true}).last();
     if(!await optionBlock.count())throw Error('옵션등록 영역을 찾지 못했습니다.');
     await this.textClick('행추가',optionBlock);await this.textClick('행추가',optionBlock);
     await this.gridCombo('grd_OptnDtl',2,0,'직접입력1');await this.gridCombo('grd_OptnDtl',3,0,'직접입력2');
     await this.editCell('grd_OptnDtl',2,1,'색상');await this.editCell('grd_OptnDtl',3,1,'사이즈');
     await this.editCell('grd_OptnDtl',2,2,p.colors.join(','));await this.editCell('grd_OptnDtl',3,2,p.sizes.join(','));await this.textClick('옵션적용',optionBlock);
+    }
     this.log('색상·사이즈 매칭');
     const optionsStarted=performance.now();
     // Portal grid column order can change; do not silently apply to a guessed checkbox column.
