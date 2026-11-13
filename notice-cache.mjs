@@ -1,10 +1,13 @@
 import {readFile,writeFile,mkdir,copyFile,rename} from 'node:fs/promises';
 import {createHash,randomUUID} from 'node:crypto';import path from 'node:path';
 import {analyzeNotice} from './notice.mjs';
-export async function analyzeNoticeCached(file,{cacheRoot,log=()=>{},signal,analyze=analyzeNotice}={}){
- signal?.throwIfAborted();if(!cacheRoot)return analyze(file,log,signal);
+export async function analyzeNoticeCached(file,{cacheRoot,log=()=>{},signal,analyze=analyzeNotice,recognizeMaterial}={}){
+ const options={recognizeMaterial};
+ signal?.throwIfAborted();if(!cacheRoot)return analyze(file,log,signal,options);
  const hash=createHash('sha256').update(await readFile(file));
- for(const name of ['notice.mjs','washing-icons.mjs','country.mjs','data/washing-icon-library.json']){
+ const rules=['notice.mjs','washing-icons.mjs','country.mjs','data/washing-icon-library.json'];
+ if(recognizeMaterial)rules.push('rapidocr-material.mjs');
+ for(const name of rules){
   try{hash.update(await readFile(new URL('./'+name,import.meta.url)));}catch(e){if(e.code!=='ENOENT')throw e;}
  }
  const key=hash.digest('hex'),root=path.join(cacheRoot,key),manifest=path.join(root,'analysis.json');
@@ -15,8 +18,8 @@ export async function analyzeNoticeCached(file,{cacheRoot,log=()=>{},signal,anal
    signal?.throwIfAborted();log('고시 원본·분석 규칙 일치 · 확인된 글자 인식 결과 재사용');return cached.result;
   }
  }catch(e){if(signal?.aborted)throw e;}
- const result=await analyze(file,log,signal);signal?.throwIfAborted();
- if(result?.ocrText){
+ const result=await analyze(file,log,signal,options);signal?.throwIfAborted();
+ if(result?.ocrText&&!result.rapidMaterialUnavailable){
   try{
    await mkdir(root,{recursive:true});const icons=[];
    for(const icon of result.washingIcons||[]){if(!/^wash-icon-[1-9]\d*$/.test(icon.key||''))continue;const name=icon.key+'.png';await copyFile(path.join(path.dirname(file),name),path.join(root,name));icons.push(name);}

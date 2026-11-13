@@ -119,6 +119,17 @@ export function parseWashing(text){
  return {value:out.join(', '),complete:out.length>=5&&out.some(x=>/세탁|드라이/.test(x))};
 }
 function wordsFromTSV(tsv){return tsv.trim().split('\n').slice(1).map(l=>{const c=l.split('\t');return {level:+c[0],left:+c[6],top:+c[7],width:+c[8],height:+c[9],text:c[11]||''};}).filter(x=>x.level===5);}
+function narrowMaterialBand(band,words,width){
+ if(!band)return null;
+ const leftLabels=words.filter(word=>word.left<width*.25);
+ const label=leftLabels.find(word=>word.top>=band.top&&word.top<band.top+band.height&&/^(?:제품)?소[재제]$/.test(word.text.replace(/\s/g,'')));
+ if(!label)return null;
+ const next=leftLabels.filter(word=>word.top>label.top+label.height&&/^(?:색상?|치수|제조자|제조국)$/.test(word.text.replace(/\s/g,'')));
+ if(!next.length)return null;
+ // Some official notices share one ruled band between the material and color rows.
+ const bottom=Math.min(band.top+band.height,...next.map(word=>word.top-4));
+ return bottom>=label.top+label.height?{...band,height:bottom-band.top}:null;
+}
 export async function analyzeNotice(file,log=()=>{},signal,options={}){
  signal?.throwIfAborted();
  let worker,aborted=false;
@@ -157,9 +168,29 @@ async function analyzeNoticeWork(file,log,signal,options,onWorker){
   if(corrected)corrections.push({...corrected,source});
   return direct;
  };
+ let rapidMaterial='';
+ const row=options.recognizeMaterial&&narrowMaterialBand(mat,words,width);
+ if(row){
+  mat=row;
+  log('공식 고시 제품 소재 행 · RapidOCR 한글 인식');
+  try{
+   const image=await sharp(file).extract(row).resize({width:Math.min(row.width*2,1800)})
+    .extend({top:12,bottom:12,left:12,right:12,background:'white'}).png().toBuffer();
+   signal?.throwIfAborted();
+   result.rapidMaterialOCR=await options.recognizeMaterial(image,{signal});
+   signal?.throwIfAborted();
+   rapidMaterial=verifiedOcrMaterial(result.rapidMaterialOCR);
+   if(rapidMaterial)readings.push(rapidMaterial);
+  }catch(error){
+   signal?.throwIfAborted();
+   result.rapidMaterialUnavailable=true;
+   log('RapidOCR를 사용할 수 없어 기존 소재 OCR로 확인합니다.');
+  }
+ }
  readMaterial(originalRow,'ocrText');
- if(mat){
-  result.materialBand=mat;log('소재 행 확대·혼용률 재인식');
+ if(mat)result.materialBand=mat;
+ if(mat&&!rapidMaterial){
+  log('소재 행 확대·혼용률 재인식');
   result.materialOCR=(await worker.recognize(await crop(mat))).data.text;
   const enlarged=readMaterial(result.materialOCR,'materialOCR');
   if(!enlarged){
@@ -178,6 +209,7 @@ async function analyzeNoticeWork(file,log,signal,options,onWorker){
  if(corrections.length)result.materialCorrections=corrections;
  result.fieldStatus.material=result.material?'공식 고시 OCR · 혼용률 형식 확인':'확인 필요 · 고시 원본의 소재·혼용률 대조';
  if(result.material&&corrections.some(item=>item.material===result.material))result.fieldStatus.material='OCR % 기호 보정 · 부위별 합계 100% 확인 · 원본 확인 권장';
+ if(result.material&&result.material===rapidMaterial)result.fieldStatus.material='공식 고시 RapidOCR · 소재·혼용률 확인';
  recoverUnmarkedNoticeMaterial(result);
  const countryBand=band(/제조국/);
  if(countryBand){

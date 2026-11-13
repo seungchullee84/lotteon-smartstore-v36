@@ -11,7 +11,7 @@ import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {collectColorImages,OFFICIAL_PRODUCT_IMAGE_SELECTOR} from './color-images.mjs';
 import { chromium } from 'playwright';
-import {verifiedOcrMaterial,analyzeNotice} from './notice.mjs';
+import {verifiedOcrMaterial} from './notice.mjs';
 import {analyzeNoticeCached} from './notice-cache.mjs';
 import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 import {readSourceImage,inspectDetailSource,sourceImageCandidates} from './source-image.mjs';
@@ -318,6 +318,11 @@ export function applyOCR(product, text) {
   product.warnings.push('소재·제조국·제조연월 OCR과 세탁기호를 고시 이미지와 대조해 주세요.');
   return product;
 }
+export function applyCollectedMaterial(product,notice){
+  product.material=verifiedOcrMaterial(notice.material);
+  product.fieldStatus={...product.fieldStatus,material:product.material?notice.fieldStatus.material:'확인 필요 · 고시 원본의 소재·혼용률 대조'};
+  if(product.material)product.warnings=product.warnings.filter(w=>!w.startsWith('소재 혼용률'));
+}
 export function parseProductInput(value) {
   const input=String(value||'').trim();
   if(/^\d{6}$/.test(input))return {style:input,url:null};
@@ -433,11 +438,12 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
   if(product.colorImages){const available=new Set(Object.values(product.images));for(const color of Object.keys(product.colorImages))product.colorImages[color]=product.colorImages[color].filter(src=>available.has(src));}
   log('공식 고시 이미지에서 글자 인식 중 (첫 실행은 한국어 모델 다운로드)');
   try {
-    const notice=options.noticeCacheRoot?await analyzeNoticeCached(path.join(folder,'info.jpg'),{cacheRoot:options.noticeCacheRoot,log,signal}):await analyzeNotice(path.join(folder,'info.jpg'),log,signal);
+    const notice=await analyzeNoticeCached(path.join(folder,'info.jpg'),{
+      cacheRoot:options.noticeCacheRoot,recognizeMaterial:options.recognizeMaterial,log,signal,
+    });
     applyOCR(product,notice.ocrText);
-    Object.assign(product,{country:notice.country||product.country,material:verifiedOcrMaterial(notice.material),washing:notice.washing,fieldStatus:notice.fieldStatus,noticeAnalysis:notice});
-    if(!product.material)product.fieldStatus.material='확인 필요 · 고시 원본의 소재·혼용률 대조';
-    if(product.material)product.warnings=product.warnings.filter(w=>!w.startsWith('소재 혼용률'));
+    Object.assign(product,{country:notice.country||product.country,washing:notice.washing,fieldStatus:notice.fieldStatus,noticeAnalysis:notice});
+    applyCollectedMaterial(product,notice);
   }
   catch(e){ signal?.throwIfAborted();product.warnings.push(`OCR 미완료: ${e.message}. 고시 이미지를 보고 입력해 주세요.`); }
   applyVerifiedNotice(product,await readFile(path.join(folder,'info.jpg')));

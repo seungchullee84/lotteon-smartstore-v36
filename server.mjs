@@ -13,6 +13,8 @@ import {applyImportedPhotos,assertImportedPhotoCoverage} from './smartstore-phot
 import {prepareSmartstoreDetail,localSmartstorePreview,saveSmartstoreDetail,renderPreparedSmartstoreDetail,prefetchSmartstoreSellingPoints} from './smartstore-detail-files.mjs';
 import {reviewNoticeMaterial,applyNoticeMaterialReview,materialAlreadySet} from './openmaus-notice-review.mjs';
 import {recoverUnmarkedNoticeMaterial} from './notice.mjs';
+import {analyzeNoticeCached} from './notice-cache.mjs';
+import {rapidOcrInstallRoot,readRapidOcrMaterial} from './rapidocr-material.mjs';
 import {readNoticeRegion} from './notice-region-copy.mjs';
 import {openMausCli,openMausInstallRoot,stopOpenMausReview} from './openmaus-research.mjs';
 import {loadSmartstoreLinkedComparison,prependSmartstoreLinkedComparison,linkedComparisonPreview} from './smartstore-linked-comparison.mjs';
@@ -56,7 +58,7 @@ import {createProductEditStore} from './product-edits.mjs';
 import {validateTemplateHeadline,templateHeadlineEdits} from './smartstore-template-headline.mjs';
 import {suggestMissingLotteCategory} from './lotte-category-suggest.mjs';
 import {searchProductTags,saveSelectedProductTags,selectedProductTagResearch,removeProductTag} from './smartstore-tag-selection.mjs';
-import {assertAdultProduct,collect,parseProductInput,buildKeywords,repairCategoryFields} from './product.mjs';
+import {applyCollectedMaterial,assertAdultProduct,collect,parseProductInput,buildKeywords,repairCategoryFields} from './product.mjs';
 import {LotteAutomation} from './automation.mjs';
 import {createBrowserLoginStore} from './browser-login-store.mjs';
 import {LOTTE_SESSION_EXPIRED} from './browser-login.mjs';
@@ -67,6 +69,10 @@ const root=path.dirname(fileURLToPath(import.meta.url));
 const releases=createReleaseTracker(root);await releases.get();
 const githubSync=process.env.REGISTER_PORTABLE==='1'?{state:{status:'portable',message:'배포 실행판'},stop(){}}:startGithubSync(root,{beforeSync:()=>releases.get()});
 const dataRoot=path.join(root,'data');await mkdir(dataRoot,{recursive:true});
+const smartstoreCollectionOptions={
+ saveSmartstoreSource:true,noticeCacheRoot:path.join(dataRoot,'smartstore-notice-cache'),
+ recognizeMaterial:readRapidOcrMaterial,prepareMain:false,
+};
 const productEdits=createProductEditStore(dataRoot);
 const priceChanger=createPriceChangerLauncher({registrarRoot:root});
 const browserLogins={lotte:createBrowserLoginStore(dataRoot),smartstore:createBrowserLoginStore(dataRoot,{channel:'smartstore'})};
@@ -190,6 +196,19 @@ function startNoticeMaterialReview(product,folder){
    state.revision++;log('공식 고시 소재 자동 재판독 반영: '+product.material);
   }
  }).catch(error=>{if(current())log('소재 자동 재판독 확인 필요: '+error.message);});
+}
+async function recoverCollectedSmartstoreMaterial(product,folder,signal){
+ if(materialAlreadySet(product))return;
+ try{
+  const notice=await analyzeNoticeCached(path.join(folder,'info.jpg'),{
+   cacheRoot:smartstoreCollectionOptions.noticeCacheRoot,recognizeMaterial:readRapidOcrMaterial,log,signal,
+  });
+  applyCollectedMaterial(product,notice);
+  product.noticeAnalysis=notice;
+ }catch(error){
+  signal.throwIfAborted();
+  log('기존 공식 고시의 제품 소재를 다시 읽지 못했습니다. 고시 원본을 확인해 주세요.');
+ }
 }
 function startPhotoColorDraft(product,folder){
  colorDraftAbort?.abort();const controller=new AbortController();colorDraftAbort=controller;
@@ -524,7 +543,8 @@ const server=http.createServer(async(req,res)=>{
                 const reused=previous?.gender==='남성'?null:await reusableSmartstoreCollection(parsedInput,previous,previousFolder,{dataRoot});
                 const folder=reused?.folder||path.join(dataRoot,'smartstore-auto-'+Date.now());run.folder=folder;
                 if(reused)log('현재 수집 자료 이어서 사용 · 공식몰 중복 수집 생략');
-                let product=reused?.product||await collect(value,folder,log,()=>signal.aborted,signal,{saveSmartstoreSource:true,sourceUrlHint,noticeCacheRoot:path.join(dataRoot,'smartstore-notice-cache'),prepareMain:false});
+                let product=reused?.product||await collect(value,folder,log,()=>signal.aborted,signal,{...smartstoreCollectionOptions,sourceUrlHint});
+                if(reused)await recoverCollectedSmartstoreMaterial(product,folder,signal);
                 product.keywords=buildKeywords(product);
                 product=await productEdits.apply(product);product.detailTemplate=detailTemplate;
                 if(selectedTitle?.style===product.style){Object.assign(product,applySelectedSmartstoreTitle(product,selectedTitle));log('현재 전용 상품명 그대로 사용');}
@@ -611,7 +631,7 @@ const server=http.createServer(async(req,res)=>{
           let product=state.product,folder=state.folder;
           if(!product||product.style!==style||!folder){
             folder=path.join(dataRoot,style+'-photo-import-'+Date.now());
-            product=await collect(style,folder,log,()=>signal.aborted,signal,{saveSmartstoreSource:true,noticeCacheRoot:path.join(dataRoot,'smartstore-notice-cache'),prepareMain:false});signal.throwIfAborted();
+            product=await collect(style,folder,log,()=>signal.aborted,signal,smartstoreCollectionOptions);signal.throwIfAborted();
             if(product.style!==style)throw Error('공식몰에서 수집한 품번이 다릅니다.');
           }
           product=await productEdits.apply(product);state.product=product;state.folder=folder;state.photoImport=null;state.revision++;
@@ -787,7 +807,21 @@ const server=http.createServer(async(req,res)=>{
         if(b.allowMissingDetail===true&&state.detailFallbackRequest?.input!==b.style)return json(res,400,{error:'먼저 일반 수집으로 해당 상품의 상세 원본 누락을 확인해 주세요.'});
         const input=parseProductInput(b.style);const style=input.style||"url";bot.stopped=false;state.collectionInput=b.style;state.detailFallbackRequest=null;state.photoImport=null;
         if(b.edits)await productEdits.save(b.edits,state.product?.style);
-        job('collect',async()=>{const folder=path.join(dataRoot,style+'-'+new Date().toISOString().replace(/[:.]/g,'-'));let product=await collect(b.style,folder,log,()=>bot.stopped,activeAbort.signal,{allowMissingDetail:b.allowMissingDetail===true,saveSmartstoreSource:b.channel==='smartstore',noticeCacheRoot:b.channel==='smartstore'?path.join(dataRoot,'smartstore-notice-cache'):undefined,prepareMain:b.channel!=='smartstore'});product.keywords=buildKeywords(product);product=await productEdits.apply(product);state.product=product;state.folder=folder;state.photoPreparation=null;state.revision++;startNoticeMaterialReview(product,folder);if(b.channel==='smartstore'){product.photoSelectionPending=true;delete product.smartstoreDetail;state.photoPreparation={style:product.style,status:'selecting',message:'색상을 자동 추정한 뒤 직접 수정할 수 있습니다. 템플릿·추가이미지는 선택 반영 후에 만듭니다.'};await writeFile(path.join(folder,'product.json'),JSON.stringify(product,null,2));log(state.photoPreparation.message);startPhotoColorDraft(product,folder);}log('수집 완료. 고시 이미지와 입력값을 검토해 주세요.'+(Object.keys(product.userEditedFields||{}).length?' · 직접 수정한 항목 유지':''));});return json(res,202,{ok:true});
+        job('collect',async()=>{
+          const folder=path.join(dataRoot,style+'-'+new Date().toISOString().replace(/[:.]/g,'-'));
+          const options=b.channel==='smartstore'?smartstoreCollectionOptions:{};
+          let product=await collect(b.style,folder,log,()=>bot.stopped,activeAbort.signal,{...options,allowMissingDetail:b.allowMissingDetail===true});
+          product.keywords=buildKeywords(product);product=await productEdits.apply(product);
+          state.product=product;state.folder=folder;state.photoPreparation=null;state.revision++;
+          startNoticeMaterialReview(product,folder);
+          if(b.channel==='smartstore'){
+            product.photoSelectionPending=true;delete product.smartstoreDetail;
+            state.photoPreparation={style:product.style,status:'selecting',message:'색상을 자동 추정한 뒤 직접 수정할 수 있습니다. 템플릿·추가이미지는 선택 반영 후에 만듭니다.'};
+            await writeFile(path.join(folder,'product.json'),JSON.stringify(product,null,2));
+            log(state.photoPreparation.message);startPhotoColorDraft(product,folder);
+          }
+          log('수집 완료. 고시 이미지와 입력값을 검토해 주세요.'+(Object.keys(product.userEditedFields||{}).length?' · 직접 수정한 항목 유지':''));
+        });return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/lotte-category-suggest'){
         if(!state.product||b.style!==state.product.style)throw Error('현재 수집한 상품의 분류만 확인할 수 있습니다.');
@@ -839,6 +873,8 @@ function prepareStartupTools(){
  const env=Object.fromEntries(Object.entries(process.env).filter(([name])=>!/^(?:REGISTER_|NAVER_|LOTTE_|SMARTSTORE_|OMB_|OPENMAUSBOT_|NPM_CONFIG_|NODE_AUTH_TOKEN$|NPM_TOKEN$|OPENAI_API_KEY$|NODE_OPTIONS$)/i.test(name)));
  const messages={
   'OpenMausBot:installed':'OpenMausBot 설치 완료',
+  'RapidOCR:installed':'스마트스토어 소재용 RapidOCR 한글 모델 설치 완료',
+  'RapidOCR:python':'RapidOCR에는 Python 3.11 이상이 필요합니다. 기존 소재 OCR을 사용합니다.',
   'FFmpeg:installed':'FFmpeg 설치 완료',
   'HyperFrames:installed':'HyperFrames 플러그인 설치 완료 · Codex에서 새 채팅을 열어 사용하세요.',
   'OpenMausBot:node':'OpenMausBot 설치에는 Node.js 24 이상이 필요합니다.',
@@ -847,7 +883,7 @@ function prepareStartupTools(){
  };
  const report=message=>state.busy?console.log(message):log(message);
  execFile(powershell,['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.join(root,'tools-setup.ps1'),
-  '-NodeExe',process.execPath,'-OpenMausCli',openMausCli(dataRoot),'-OpenMausInstallRoot',openMausInstallRoot],
+  '-NodeExe',process.execPath,'-OpenMausCli',openMausCli(dataRoot),'-OpenMausInstallRoot',openMausInstallRoot,'-RapidOcrInstallRoot',rapidOcrInstallRoot],
  {cwd:root,env,windowsHide:true,timeout:8*60*1000},(error,stdout)=>{
   for(const line of stdout.split(/\r?\n/)){
    if(line.startsWith('Path:')){
@@ -859,7 +895,7 @@ function prepareStartupTools(){
     continue;
    }
    if(Object.hasOwn(messages,line))report(messages[line]);
-   else if(/^(OpenMausBot|FFmpeg|HyperFrames):failed$/.test(line))report(line.split(':')[0]+' 설치를 마치지 못했습니다. 다음 실행 때 다시 확인합니다.');
+   else if(/^(OpenMausBot|RapidOCR|FFmpeg|HyperFrames):failed$/.test(line))report(line.split(':')[0]+' 설치를 마치지 못했습니다. 다음 실행 때 다시 확인합니다.');
   }
   if(error)report('도구 설치 확인을 마치지 못했습니다. 다음 실행 때 다시 확인합니다.');
  });

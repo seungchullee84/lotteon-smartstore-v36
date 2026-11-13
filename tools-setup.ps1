@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory)][string]$NodeExe,
     [Parameter(Mandatory)][string]$OpenMausCli,
-    [Parameter(Mandatory)][string]$OpenMausInstallRoot
+    [Parameter(Mandatory)][string]$OpenMausInstallRoot,
+    [string]$RapidOcrInstallRoot = (Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'CodexRegistrar\RapidOCR-3.10.0')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -80,6 +81,50 @@ function Install-OpenMaus {
         }
         Publish-Directory $install $OpenMausInstallRoot $stage
         Write-Output 'OpenMausBot:installed'
+    } finally {
+        Remove-Stage $stage $parent
+    }
+}
+
+function Find-RapidOcrPython {
+    $check = 'import sys; assert sys.version_info >= (3, 11); print(sys.executable)'
+    $bundled = Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
+    $python = Get-Command python.exe -CommandType Application -ErrorAction SilentlyContinue | Where-Object { $_.Source -notlike '*\Microsoft\WindowsApps\*' } | Select-Object -First 1
+    foreach ($candidate in @($bundled, $python.Source)) {
+        if ($candidate) {
+            try { return Invoke-Tool $candidate @('-I', '-c', $check) } catch {}
+        }
+    }
+    $launcher = Get-Command py.exe -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($launcher -and $launcher.Source -notlike '*\Microsoft\WindowsApps\*') {
+        try { return Invoke-Tool $launcher.Source @('-3', '-I', '-c', $check) } catch {}
+    }
+}
+
+function Install-RapidOcr {
+    $pointer = Join-Path $RapidOcrInstallRoot 'python.txt'
+    if (Test-Path -LiteralPath $pointer -PathType Leaf) {
+        $current = [IO.File]::ReadAllText($pointer).Trim()
+        if ($current -and (Test-Path -LiteralPath $current -PathType Leaf)) { return }
+    }
+    $python = Find-RapidOcrPython
+    if (-not $python) { Write-Output 'RapidOCR:python'; return }
+    $parent = Split-Path -Parent $RapidOcrInstallRoot
+    $stage = New-Stage $parent
+    try {
+        $install = (New-Item -ItemType Directory -Path (Join-Path $stage 'runtime')).FullName
+        $packages = Join-Path $install 'packages'
+        Invoke-Tool $python @('-I', '-B', '-m', 'pip', '--isolated', 'install', '--index-url', 'https://pypi.org/simple',
+            '--no-input', '--disable-pip-version-check', '--no-cache-dir', '--only-binary=:all:', '--target', $packages,
+            'rapidocr==3.10.0', 'onnxruntime==1.31.1') | Out-Null
+        $models = Join-Path $packages 'rapidocr\models'
+        $source = 'https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.10.0/onnx/PP-OCRv5'
+        Save-Archive "$source/det/ch_PP-OCRv5_det_mobile.onnx" (Join-Path $models 'ch_PP-OCRv5_det_mobile.onnx') SHA256 '4D97C44A20D30A81AAD087D6A396B08F786C4635742AFC391F6621F5C6AE78AE'
+        Save-Archive "$source/rec/korean_PP-OCRv5_rec_mobile.onnx" (Join-Path $models 'korean_PP-OCRv5_rec_mobile.onnx') SHA256 'CD6E2EA50F6943CA7271EB8C56A877A5A90720B7047FE9C41A2E541A25773C9B'
+        Invoke-Tool $python @('-I', '-B', '-c', 'import sys; sys.path.insert(0, sys.argv[1]); import rapidocr, onnxruntime', $packages) | Out-Null
+        [IO.File]::WriteAllText((Join-Path $install 'python.txt'), $python)
+        Publish-Directory $install $RapidOcrInstallRoot $stage
+        Write-Output 'RapidOCR:installed'
     } finally {
         Remove-Stage $stage $parent
     }
@@ -165,9 +210,10 @@ try {
     try { $locked = $mutex.WaitOne(0) }
     catch [System.Threading.AbandonedMutexException] { $locked = $true }
     if (-not $locked) { return }
-    foreach ($tool in @('OpenMausBot', 'FFmpeg', 'HyperFrames')) {
+    foreach ($tool in @('RapidOCR', 'OpenMausBot', 'FFmpeg', 'HyperFrames')) {
         try {
             switch ($tool) {
+                RapidOCR { Install-RapidOcr }
                 OpenMausBot { Install-OpenMaus }
                 FFmpeg { Install-FFmpeg }
                 HyperFrames { Install-HyperFrames }
