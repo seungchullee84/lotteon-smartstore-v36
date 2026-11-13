@@ -536,6 +536,15 @@ body[data-channel="smartstore"] .collection-search-field {
   background: #fff;
   box-shadow: 0 0 0 3px var(--search-focus);
 }
+body[data-channel="smartstore"] #collectionCard .collection-search-field #style[data-numeric] {
+  background: #fff;
+  color: #14241b;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 26px;
+  font-variant-numeric: tabular-nums slashed-zero;
+  letter-spacing: .12em;
+  line-height: 1.1;
+}
 body[data-channel="smartstore"] .search #collect {
   flex: 0 0 180px;
   width: auto;

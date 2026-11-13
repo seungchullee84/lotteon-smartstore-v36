@@ -775,7 +775,13 @@ $('smartstoreStart').onclick=async()=>{
   smartstoreRequestAt=0;document.dispatchEvent(new CustomEvent('smartstore-auto-request',{detail:{status:'failed',error:e.message}}));$('error').textContent=e.message;announce('처리하지 못했습니다: '+e.message,'failed');void refresh();
  }finally{requestLock=false;smartstoreStarting=false;syncButtons();}
 };
-$('style').addEventListener('input',syncButtons);
+const styleInput=$('style');
+const updateStyleDigits=()=>styleInput.toggleAttribute('data-numeric',/^\d+$/.test(styleInput.value.trim()));
+styleInput.addEventListener('input',()=>{
+ updateStyleDigits();
+ syncButtons();
+});
+window.addEventListener('pageshow',updateStyleDigits);
 $('smartstoreDetailOnly').onclick=async()=>{
  if(requestLock||serverBusy)return;
  if(!product){$('error').textContent='먼저 상품 정보와 상세 미리보기를 준비해 주세요.';return;}
