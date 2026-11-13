@@ -3,8 +3,6 @@ import {isLottePortalPage,lotteSessionExpired,LOTTE_SESSION_EXPIRED} from './bro
 const frame='[id*="WorkFrame_OCPIPMPiMPrdcInfoRgstM_"]';
 const tab='[id*="TabFrame_form_tab_Menu_OCPIPMPiMPrdcInfoRgstM_"][id$="_tabbuttonTextBoxElement"]';
 const itemCode='241142',itemName='지오다노';
-const codeSelector=frame+'[id$="_div_Pumbun_edt_Code_input"]';
-const nameSelector=frame+'[id$="_div_Pumbun_edt_Name_input"]';
 const noticeSelector='[id*="_loginOpenPopup_"][id$="_titlebar_closebutton"]';
 
 async function closeLoginNotices(page,check){
@@ -39,7 +37,7 @@ export async function openLotteRegistration(page,{check=()=>{}}={}){
  async function clickMenu(menu){
   for(let attempt=0;attempt<2;attempt++){
    await checkPortal();
-  await closeLoginNotices(page,checkPortal);
+   await closeLoginNotices(page,checkPortal);
    try{await menu.click({timeout:3500});return;}
    catch(error){
     if(attempt||error.name!=='TimeoutError'||!await visible(noticeSelector).count())throw error;
@@ -78,7 +76,8 @@ export async function openLotteRegistration(page,{check=()=>{}}={}){
  }
 
  try{
-  const code=visible(codeSelector),name=visible(nameSelector);
+  const code=visible(frame+'[id$="_div_Pumbun_edt_Code_input"]');
+  const name=visible(frame+'[id$="_div_Pumbun_edt_Name_input"]');
   if(!await lookup.isVisible()){
    if((await code.inputValue({timeout:4000})).trim()){
     if((await name.inputValue({timeout:4000})).trim())return;
