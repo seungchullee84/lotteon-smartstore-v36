@@ -17,8 +17,11 @@ async function closeLoginNotices(page,check){
    const r=button.getBoundingClientRect();
    return button.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));
   })?.id);
-  if(id)await page.locator('[id='+JSON.stringify(id)+']').click({timeout:1200});
-  else await page.waitForTimeout(100);
+  if(id){
+   const button=page.locator('[id='+JSON.stringify(id)+']');
+   await button.click({timeout:1200});
+   await button.waitFor({state:'hidden',timeout:2500});
+  }else await page.waitForTimeout(100);
  }
 }
 
@@ -36,7 +39,7 @@ export async function openLotteRegistration(page,{check=()=>{}}={}){
  async function clickMenu(menu){
   for(let attempt=0;attempt<2;attempt++){
    await checkPortal();
-   await closeLoginNotices(page,checkPortal);
+  await closeLoginNotices(page,checkPortal);
    try{await menu.click({timeout:3500});return;}
    catch(error){
     if(attempt||error.name!=='TimeoutError'||!await visible(noticeSelector).count())throw error;
