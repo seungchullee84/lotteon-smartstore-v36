@@ -81,19 +81,25 @@ export async function openLotteRegistration(page,{check=()=>{}}={}){
   const code=visible(frame+'[id$="_div_Pumbun_edt_Code_input"]');
   const name=visible(frame+'[id$="_div_Pumbun_edt_Name_input"]');
   if(!await lookup.isVisible()){
-   if((await code.inputValue({timeout:4000})).trim()){
+   const currentCode=(await code.inputValue({timeout:4000})).trim();
+   if(currentCode){
     if((await name.inputValue({timeout:4000})).trim())return;
-    throw Error('선택된 품번명을 확인할 수 없습니다.');
+    if(currentCode!==itemCode)throw Error('선택된 품번명을 확인할 수 없습니다.');
+    // Nexacro sets the default code before opening the lookup on a new tab.
+    await lookup.waitFor({state:'visible',timeout:2500}).catch(error=>{
+     if(error.name!=='TimeoutError')throw error;
+    });
    }
-   await checkPortal();
-   await visible(frame+'[id$="_div_Pumbun_btn_CommPopup"]').click({timeout:4000});
+   if(!await lookup.isVisible()){
+    await checkPortal();
+    await visible(frame+'[id$="_div_Pumbun_btn_CommPopup"]').click({timeout:4000});
+   }
   }
   await lookup.waitFor({state:'visible',timeout:4000});
   await checkPortal();
   const entered=(await lookup.inputValue()).trim();
   if(entered&&entered!==itemCode)throw Error('입력 중인 품번을 확인해 주세요.');
-  await lookup.fill(itemCode,{timeout:3000});
-  await lookup.press('Tab',{timeout:3000});
+  if(!entered)await lookup.pressSequentially(itemCode,{timeout:3000});
   await checkPortal();
   await search.click({timeout:4000});
   await page.locator('[id$="waitwindow"]').first().waitFor({state:'hidden',timeout:6000});

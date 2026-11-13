@@ -22,7 +22,7 @@ const row=popup+'_div_Data_grd_List_body_gridrow_0_cell_0';
 const topMenu='portal_TopFrame_form_men_TopMenu_6001268';
 const leftMenu='portal_LeftFrame_form_pdv_LeftMenu_div_LeftMenu';
 
-function portalFixture({needsLogin=false,prefilled=false,noticeCount=needsLogin?1:0,noticeCloseDelay=0,existingCode='',mode='menu',rowName='지오다노'}={}){
+function portalFixture({needsLogin=false,prefilled=false,noticeCount=needsLogin?1:0,noticeCloseDelay=0,existingCode='',lookupDelay=0,mode='menu',rowName='지오다노'}={}){
  const notices=Array.from({length:noticeCount},(_,i)=>'portal_loginOpenPopup_'+(i+1)+'_titlebar_closebutton');
  return `<style>.overlay{position:fixed;inset:0;background:white}</style>
   <section id="login" ${needsLogin?'':'hidden'}>
@@ -42,7 +42,7 @@ function portalFixture({needsLogin=false,prefilled=false,noticeCount=needsLogin?
    </div>
    <button id="${tab}" ${existingCode?'':'hidden'}>상품등록</button>
    <section id="registration-form" hidden>
-    <input id="${item}_edt_Code_input" value="${existingCode}">
+    <input id="${item}_edt_Code_input" value="${existingCode||(lookupDelay?'241142':'')}">
     <input id="${item}_edt_Name_input" value="${existingCode?'기존 선택':''}" readonly>
     <button id="${item}_btn_CommPopup">품번 찾기</button>
     <input id="${frame}_cbo_PrdcClCd_comboedit_input">
@@ -50,7 +50,7 @@ function portalFixture({needsLogin=false,prefilled=false,noticeCount=needsLogin?
     <button id="create">신규</button><button id="save">임시저장</button>
    </section>
    <section id="item-popup" class="overlay" hidden>
-    <input id="${popup}_div_Search_edt_itmno_input">
+    <input id="${popup}_div_Search_edt_itmno_input" value="${lookupDelay?'241142':''}">
     <button id="${popup}_btn_Search">조회</button>
     <div id="result" hidden>
      <span id="${row}_0">241142</span>
@@ -76,7 +76,7 @@ function portalFixture({needsLogin=false,prefilled=false,noticeCount=needsLogin?
    function showRegistration(){
     el('${tab}').hidden=false;
     el('registration-form').hidden=false;
-    if('${mode}'==='shortcut')el('item-popup').hidden=false;
+    if('${mode}'==='shortcut')setTimeout(()=>el('item-popup').hidden=false,${lookupDelay});
    }
    for(const id of ['registration','shortcut','${tab}'])on(id,showRegistration);
    on('${item}_btn_CommPopup',()=>el('item-popup').hidden=false);
@@ -119,7 +119,7 @@ test('저장된 계정이 채워져 있으면 바로 로그인하고 겹친 공�
  t.after(()=>browser.close());
  const page=await browser.newPage();
  const noticeCount=19;
- const body=portalFixture({needsLogin:true,prefilled:true,noticeCount,noticeCloseDelay:390,mode:'shortcut'});
+ const body=portalFixture({needsLogin:true,prefilled:true,noticeCount,noticeCloseDelay:390,lookupDelay:400,mode:'shortcut'});
  await page.route('**/*',route=>route.fulfill({contentType:'text/html; charset=utf-8',body}));
  await page.goto(portal);
  const bot=new LotteAutomation('',()=>{});
@@ -141,7 +141,7 @@ test('저장된 계정이 채워져 있으면 바로 로그인하고 겹친 공�
 test('상품등록 바로가기와 기존 탭을 재사용하고 이미 선택된 품번은 유지한다',async t=>{
  const browser=await chromium.launch();
  t.after(()=>browser.close());
- for(const options of [{mode:'shortcut'},{existingCode:'654321'}]){
+ for(const options of [{mode:'shortcut'},{mode:'shortcut',lookupDelay:400},{existingCode:'654321'}]){
   const page=await browser.newPage();
   await page.route('**/*',route=>route.fulfill({contentType:'text/html; charset=utf-8',body:portalFixture(options)}));
   await page.goto(portal);
