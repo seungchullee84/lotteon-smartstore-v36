@@ -6,14 +6,18 @@ $nodeCommand = Get-Command node.exe -ErrorAction SilentlyContinue
 if ($nodeCommand) { $runtimeNode = $nodeCommand.Source } else { $runtimeNode = Join-Path $bundled 'node\bin\node.exe' }
 if (-not (Test-Path -LiteralPath $runtimeNode)) { throw 'Node.js LTS를 설치해 주세요: https://nodejs.org/' }
 $env:PATH = (Split-Path $runtimeNode) + ';' + $env:PATH
-if (-not (Test-Path -LiteralPath 'node_modules\playwright')) {
+$expectedPlaywright = (Get-Content -LiteralPath 'package.json' -Raw | ConvertFrom-Json).dependencies.playwright
+$installedPlaywright = if (Test-Path -LiteralPath 'node_modules\playwright\package.json') {
+  (Get-Content -LiteralPath 'node_modules\playwright\package.json' -Raw | ConvertFrom-Json).version
+}
+if ($installedPlaywright -ne $expectedPlaywright) {
   $npmCommand = Get-Command npm.cmd -ErrorAction SilentlyContinue
   if ($npmCommand) {
     & $npmCommand.Source install --no-audit --no-fund
   } else {
     $bundledPnpm = Join-Path $bundled 'bin\fallback\pnpm.cmd'
     if (-not (Test-Path -LiteralPath $bundledPnpm)) { throw 'npm이 포함된 Node.js LTS를 설치해 주세요.' }
-    & $bundledPnpm install --ignore-scripts
+    & $bundledPnpm install --frozen-lockfile --ignore-scripts
   }
   if ($LASTEXITCODE -ne 0) { throw '패키지 설치에 실패했습니다.' }
 }
