@@ -31,17 +31,20 @@ export async function tryLotteLogin(page,{store,log=()=>{},check=()=>{},timeout=
  if(attempts.get(page)===credentials.revision)return {status:'manual'};
  const captcha=page.locator('iframe[src*="captcha"], input[id*="captcha" i], input[name*="captcha" i]');
  for(let i=0;i<await captcha.count();i++)if(await captcha.nth(i).isVisible())return {status:'manual'};
- const entered=await id.inputValue();
- if((entered&&entered!==credentials.username)||await password.inputValue()){
+ const entered=await id.inputValue(),enteredPassword=await password.inputValue();
+ const matchingPrefill=entered===credentials.username&&enteredPassword===credentials.password;
+ if(!matchingPrefill&&((entered&&entered!==credentials.username)||enteredPassword)){
   log('직접 입력 중인 로그인 정보를 유지합니다. 전용 크롬에서 로그인을 완료해 주세요.');return {status:'manual'};
  }
  attempts.set(page,credentials.revision);let dialog=false;
  const onDialog=()=>{dialog=true;};page.on('dialog',onDialog);
  try{
-  check();if(!isLottePortalPage(page))return {status:'unrelated'};
-  await id.fill(credentials.username,{timeout:3000});await id.press('Tab');
-  check();if(!isLottePortalPage(page))return {status:'unrelated'};
-  await password.fill(credentials.password,{timeout:3000});await password.press('Tab');
+  if(!matchingPrefill){
+   check();if(!isLottePortalPage(page))return {status:'unrelated'};
+   await id.fill(credentials.username,{timeout:3000});await id.press('Tab');
+   check();if(!isLottePortalPage(page))return {status:'unrelated'};
+   await password.fill(credentials.password,{timeout:3000});await password.press('Tab');
+  }
   check();if(!isLottePortalPage(page))return {status:'unrelated'};
   log('저장된 계정으로 롯데 자동 로그인을 한 번 시도합니다.');
   await button.click({timeout:5000,noWaitAfter:true});

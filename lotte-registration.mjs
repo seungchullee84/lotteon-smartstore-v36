@@ -7,10 +7,11 @@ const noticeSelector='[id*="_loginOpenPopup_"][id$="_titlebar_closebutton"]';
 
 async function closeLoginNotices(page,check){
  const notices=page.locator(noticeSelector).filter({visible:true});
- const deadline=Date.now()+6000;
+ const deadline=Date.now()+30000;
+ let blockedUntil=Date.now()+6000;
  while(await notices.count()){
   await check();
-  if(Date.now()>=deadline)throw Error('전용 크롬에서 롯데 포털 공지 창을 확인해 주세요.');
+  if(Date.now()>=Math.min(deadline,blockedUntil))throw Error('전용 크롬에서 롯데 포털 공지 창을 확인해 주세요.');
   const id=await notices.evaluateAll(buttons=>buttons.find(button=>{
    const r=button.getBoundingClientRect();
    return button.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));
@@ -19,6 +20,7 @@ async function closeLoginNotices(page,check){
    const button=page.locator('[id='+JSON.stringify(id)+']');
    await button.click({timeout:1200});
    await button.waitFor({state:'hidden',timeout:2500});
+   blockedUntil=Date.now()+6000;
   }else await page.waitForTimeout(100);
  }
 }

@@ -22,11 +22,12 @@ const row=popup+'_div_Data_grd_List_body_gridrow_0_cell_0';
 const topMenu='portal_TopFrame_form_men_TopMenu_6001268';
 const leftMenu='portal_LeftFrame_form_pdv_LeftMenu_div_LeftMenu';
 
-function portalFixture({needsLogin=false,existingCode='',mode='menu',rowName='지오다노'}={}){
+function portalFixture({needsLogin=false,prefilled=false,noticeCount=needsLogin?1:0,noticeCloseDelay=0,existingCode='',mode='menu',rowName='지오다노'}={}){
+ const notices=Array.from({length:noticeCount},(_,i)=>'portal_loginOpenPopup_'+(i+1)+'_titlebar_closebutton');
  return `<style>.overlay{position:fixed;inset:0;background:white}</style>
   <section id="login" ${needsLogin?'':'hidden'}>
-   <input id="portal_div_Login_edt_LoginId_input">
-   <input id="portal_div_Login_edt_LoginPassword_input" type="password">
+   <input id="portal_div_Login_edt_LoginId_input" value="${prefilled?'fixture-user':''}">
+   <input id="portal_div_Login_edt_LoginPassword_input" type="password" value="${prefilled?'fixture-pass':''}">
    <button id="portal_div_Login_btn_Login">로그인</button>
   </section>
   <main id="portal" ${needsLogin?'hidden':''}>
@@ -57,17 +58,19 @@ function portalFixture({needsLogin=false,existingCode='',mode='menu',rowName='�
     </div>
     <button id="${popup}_btn_Confirm" disabled>확인</button>
    </section>
-   <div class="overlay" id="notice" ${needsLogin?'':'hidden'}>
-    <button id="portal_loginOpenPopup_1_titlebar_closebutton">닫기</button>
-    <button id="notice-preference">오늘 하루 그만보기</button>
-   </div>
+   ${notices.map(id=>`<div class="overlay">
+    <button id="${id}">닫기</button>
+    <button class="notice-preference">오늘 하루 그만보기</button>
+   </div>`).join('')}
   </main>
   <script>
    const el=id=>document.getElementById(id);
    window.actions=[];
    function on(id, action){el(id).onclick=()=>{actions.push(id);action?.();};}
    on('portal_div_Login_btn_Login',()=>{el('login').hidden=true;el('portal').hidden=false;});
-   on('portal_loginOpenPopup_1_titlebar_closebutton',()=>el('notice').hidden=true);
+   for(const id of ${JSON.stringify(notices)})on(id,()=>setTimeout(()=>el(id).parentElement.hidden=true,${noticeCloseDelay}));
+   for(const field of el('login').querySelectorAll('input'))field.oninput=()=>actions.push('login-input');
+   for(const button of document.querySelectorAll('.notice-preference'))button.onclick=()=>actions.push('notice-preference');
    on('${topMenu}',()=>el('${leftMenu}').hidden=false);
    on('${leftMenu}_btn_Left6001278',()=>el('registration').hidden=false);
    function showRegistration(){
@@ -84,7 +87,7 @@ function portalFixture({needsLogin=false,existingCode='',mode='menu',rowName='�
     el('${item}_edt_Name_input').value=el('${row}_1').textContent;
     el('item-popup').hidden=true;
    });
-   for(const id of ['create','save','notice-preference'])on(id);
+   for(const id of ['create','save'])on(id);
   </script>`;
 }
 
@@ -104,11 +107,35 @@ test('상품등록 화면 열기가 로그인·공지 닫기·상품등록·정�
  assert.equal(await page.locator('[id="'+item+'_edt_Code_input"]').inputValue(),'241142');
  assert.equal(await page.locator('[id="'+item+'_edt_Name_input"]').inputValue(),'지오다노');
  assert.deepEqual(await page.evaluate(()=>window.actions),[
-  'portal_div_Login_btn_Login','portal_loginOpenPopup_1_titlebar_closebutton',
+  'login-input','login-input','portal_div_Login_btn_Login','portal_loginOpenPopup_1_titlebar_closebutton',
   topMenu,leftMenu+'_btn_Left6001278','registration',item+'_btn_CommPopup',
   popup+'_btn_Search',row+'_1',popup+'_btn_Confirm'
  ]);
  assert.equal(await page.locator('#product-style').inputValue(),'기존 입력');
+});
+
+test('저장된 계정이 채워져 있으면 바로 로그인하고 겹친 공지 19개를 X로 닫는다',async t=>{
+ const browser=await chromium.launch();
+ t.after(()=>browser.close());
+ const page=await browser.newPage();
+ const noticeCount=19;
+ const body=portalFixture({needsLogin:true,prefilled:true,noticeCount,noticeCloseDelay:390,mode:'shortcut'});
+ await page.route('**/*',route=>route.fulfill({contentType:'text/html; charset=utf-8',body}));
+ await page.goto(portal);
+ const bot=new LotteAutomation('',()=>{});
+ bot.page=page;
+ bot.connectChrome=async()=>{bot.context=page.context();};
+ bot.ensureLogin=waitForForm=>tryLotteLogin(page,{store:{load:async()=>({
+  username:'fixture-user',password:'fixture-pass',revision:'one'
+ })},waitForForm,timeout:1500});
+ assert.deepEqual(await bot.openRegistration(),{status:'registration-ready'});
+ assert.deepEqual(await page.evaluate(()=>window.actions),[
+  'portal_div_Login_btn_Login',
+  ...Array.from({length:noticeCount},(_,i)=>'portal_loginOpenPopup_'+(noticeCount-i)+'_titlebar_closebutton'),
+  'shortcut',popup+'_btn_Search',row+'_1',popup+'_btn_Confirm'
+ ]);
+ assert.equal(await page.locator('[id="'+item+'_edt_Code_input"]').inputValue(),'241142');
+ assert.equal(await page.locator('[id="'+item+'_edt_Name_input"]').inputValue(),'지오다노');
 });
 
 test('상품등록 바로가기와 기존 탭을 재사용하고 이미 선택된 품번은 유지한다',async t=>{

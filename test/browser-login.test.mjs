@@ -47,6 +47,10 @@ test('공식 로그인 화면에서만 한 번 입력하고 성공·실패·수�
   await manual.locator('#captcha-code').evaluate(element=>element.remove());await manual.locator('input').first().fill('different-user');
   assert.equal((await tryLotteLogin(manual,{store})).status,'manual');assert.equal(await manual.locator('input').first().inputValue(),'different-user');
   assert.equal(await manual.locator('input[type=password]').inputValue(),'');
+  await manual.locator('input').first().fill('fixture-user');
+  await manual.locator('input[type=password]').fill('different-pass');
+  assert.equal((await tryLotteLogin(manual,{store})).status,'manual');
+  assert.equal(await manual.locator('input[type=password]').inputValue(),'different-pass');
   // A still-loading Nexacro login form is eligible after it becomes visible.
   const delayed=await browser.newPage();await delayed.route('**/*',route=>route.fulfill({contentType:'text/html',body:'<main></main>'}));await delayed.goto('https://together.lotteshopping.com/EMDV3/index.html');
   await delayed.evaluate(html=>setTimeout(()=>{document.body.innerHTML=html;document.querySelector('button').onclick=()=>{document.body.innerHTML='<button>로그아웃</button>';};},150),form);
