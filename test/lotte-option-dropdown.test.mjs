@@ -140,6 +140,32 @@ test('재사용 후보에 일치하는 색상이 없으면 체크나 전체 완�
   }finally{await browser.close();}
 });
 
+test('채널 창에 동일한 기본 옵션 두 줄이 있으면 빈 페이지용 표를 건너뛰고 기존 옵션에서 이어간다',async()=>{
+  const browser=await chromium.launch({headless:true});
+  try{
+    const page=await browser.newPage();
+    const product={name:'테스트 재킷',colors:['01소프트베이지','02차콜'],sizes:['S','M']};
+    const area='mock_chnlForm_form_div_Data_div_input12_div_body';
+    const base=area+'_grd_OptnDtl';
+    const directRows=[
+      ['직접입력1','색상',product.colors.join(',')],
+      ['직접입력2','사이즈',product.sizes.join(',')],
+    ];
+    await page.setContent('<section id="'+area+'"><div id="'+area+'_div_Page_grd_OptnDtl">페이지 정보</div><div id="'+base+'">'+
+      directRows.flatMap((values,i)=>values.map((value,col)=>'<div id="'+base+'_body_gridrow_'+(i+2)+'_cell_'+(i+2)+'_'+col+'">'+value+'</div>')).join('')+
+      '</div><div id="'+base+'New"><div id="'+base+'New_body_gridrow_0_cell_0_2">01소프트베이지</div></div></section>');
+    const bot=new LotteAutomation('',()=>{});bot.page=page;
+    bot.applyChannelPreset=async()=>assert.fail('이미 입력된 옵션의 프리셋을 다시 적용하면 안 됨');
+    const actions=[];
+    bot.matchLotteOptions=async p=>{assert.equal(p,product);actions.push('옵션 선택');};
+    bot.textClick=async label=>actions.push(label);
+    bot.modalConfirm=bot.set=bot.snapshot=async()=>{};
+    await bot.channel(product,'',{resume:true});
+    assert.deepEqual(actions,['옵션 선택','롯데ON옵션적용','온라인재고일괄등록','제한']);
+    assert.equal(await bot.canResumeChannelOptions({...product,sizes:['S','L']}),false);
+  }finally{await browser.close();}
+});
+
 test('조사 뒤 실제 목록이 바뀌면 캐시만 믿고 옵션을 완료하지 않는다',async()=>{
   const browser=await chromium.launch({headless:true});
   try{
