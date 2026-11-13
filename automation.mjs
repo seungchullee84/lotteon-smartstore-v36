@@ -916,8 +916,7 @@ export class LotteAutomation extends BrowserAutomation {
     return {category,applied:true,saved:false};
   }
   async canResumeChannelOptions(p){
-    const options=new OptionCoverage(p);
-    const table=this.page.locator('[id*="_chnlForm_"][id$="_grd_OptnDtl"]').filter({visible:true});
+    const table=this.page.locator('[id*="_chnlForm_"][id$="_div_input12_div_body_grd_OptnDtl"]').filter({visible:true});
     if(await table.count()!==1)return false;
     const read=async(row,col)=>table.locator('[id$="_body_gridrow_'+row+'_cell_'+row+'_'+col+'"]')
       .evaluateAll(cells=>[...new Set(cells.map(cell=>cell.textContent.trim()).filter(Boolean))]);
@@ -926,10 +925,9 @@ export class LotteAutomation extends BrowserAutomation {
       if(!same(await read(row,0),'직접입력'+(row-1))||
          !same(await read(row,1),type)||!same(await read(row,2),values.join(',')))return false;
     }
-    const selected=await this.page.locator('[id*="_chnlForm_"][id$="_grd_OptnDtlNew"]').filter({visible:true})
+    return this.page.locator('[id*="_chnlForm_"][id$="_div_input12_div_body_grd_OptnDtlNew"]').filter({visible:true})
       .evaluateAll(grids=>grids.some(grid=>[...grid.querySelectorAll('[id$="_2"]')].some(cell=>
         /_body_gridrow_(\d+)_cell_\1_2$/.test(cell.id)&&!!cell.textContent.trim())));
-    return options.expected.size>0&&selected;
   }
   async channel(p,folder,{resume=false}={}){
     const optionBlock=this.page.locator('[id$="div_input12_div_body"]').filter({visible:true}).last();
