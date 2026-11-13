@@ -20,12 +20,14 @@ export class LotteAutomation extends BrowserAutomation {
   async open(){
     this.stopped=false;
     await this.connectChrome(PORTAL,{restoreLastSession:false});
+    this.check();
     const pages=this.context.pages().filter(p=>!p.isClosed());
     this.page=await selectLottePage(pages,this.page)||await this.context.newPage();
     this.page.setDefaultTimeout(8000);
     if(!this.page.url().startsWith('https://together.lotteshopping.com/'))await this.page.goto(PORTAL,{waitUntil:'domcontentloaded'});
     const cdp=await this.context.newCDPSession(this.page);
     try{const {windowId}=await cdp.send('Browser.getWindowForTarget');await cdp.send('Browser.setWindowBounds',{windowId,bounds:{windowState:'normal'}});await cdp.send('Browser.setWindowBounds',{windowId,bounds:{windowState:'maximized'}});}finally{await cdp.detach();}
+    this.check();
     await this.page.bringToFront();
     const login=await this.ensureLogin(true);
     this.log(login.status==='expired'?LOTTE_SESSION_EXPIRED:'롯데 전용 크롬에 연결했습니다.');
@@ -33,6 +35,7 @@ export class LotteAutomation extends BrowserAutomation {
   }
   async openRegistration(){
     const login=await this.open();
+    this.check();
     if(login.status!=='authenticated'&&login.status!=='session')return login;
     await openLotteRegistration(this.page,{check:()=>this.check()});
     this.log('롯데ON 상품등록 화면을 열었습니다.');
