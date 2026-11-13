@@ -81,7 +81,7 @@ async function post(endpoint,data={}){
  const expected=({open:'lotte',run:'lotte','smartstore-template':'smartstore','smartstore-template-headline':'smartstore','smartstore-open':'smartstore','smartstore-plan':'smartstore','smartstore-auto':'smartstore','smartstore-extra-only':'smartstore','smartstore-detail-only':'smartstore','smartstore-tags-validate':'smartstore','smartstore-tags':'smartstore','smartstore-tags-remove':'smartstore','smartstore-tags-search':'smartstore','smartstore-tags-selection':'smartstore','smartstore-tags-selected':'smartstore','smartstore-ai-settings':'smartstore','smartstore-optimize-title':'smartstore'})[endpoint];
  if(expected&&document.body.dataset.channel!==expected)throw Error('선택한 판매채널과 실행 버튼이 다릅니다. 판매채널을 확인해 주세요.');
  if(expected)data={...data,channel:document.body.dataset.channel};
- try{const r=await fetch('/api/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:AbortSignal.timeout(['smartstore-optimize-title','smartstore-open','open'].includes(endpoint)?60000:45000)});const b=await r.json();if(!r.ok)throw Error(b.error);return b;}
+ try{const r=await fetch('/api/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:AbortSignal.timeout(endpoint==='open'?120000:['smartstore-optimize-title','smartstore-open'].includes(endpoint)?60000:45000)});const b=await r.json();if(!r.ok)throw Error(b.error);return b;}
  catch(e){if(e.name==='TimeoutError')throw Error('서버 응답 시간이 초과됐습니다. 진행 기록에서 작업 상태를 확인해 주세요.');if(e instanceof TypeError)throw Error('등록기 서버와 연결되지 않았습니다. 잠시 후 새로고침해 주세요.');throw e;}
 }
 let requestLock=false,serverBusy=false,serverPhase='idle',smartstoreStarting=false,smartstoreDetailStarting=false,smartstoreRequestAt=0,lotteRequestEpoch=0;
@@ -91,8 +91,8 @@ function openSellerCenter(channel){
 function collectForReview(input,allowMissingDetail=false){
  return post('collect',{style:input,allowMissingDetail,channel:activeChannel(),edits:currentProductEdits()});
 }
-const buttonLabels={open:'1. 크롬 로그인 창 열기',collect:'2. 공식몰 정보 수집',run:'3. 검토한 내용으로 입력 시작'};
-const busyLabels={open:'크롬 연결 중…',collect:'공식몰 정보 수집 중…',run:'작업 중 · 롯데ON 입력 준비…'};
+const buttonLabels={open:'1. 상품등록 화면 열기',collect:'2. 공식몰 정보 수집',run:'3. 검토한 내용으로 입력 시작'};
+const busyLabels={open:'롯데 로그인·상품등록 화면 여는 중…',collect:'공식몰 정보 수집 중…',run:'작업 중 · 롯데ON 입력 준비…'};
 const feedback=document.createElement('div');feedback.id='clickFeedback';feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');document.body.append(feedback);
 let feedbackTimer,feedbackJob=null,lotteMotionTimer=null,lotteMotionStartedAt=0,lotteMotionClockLabel='전체';
 function updateLotteMotionClock(){
@@ -195,7 +195,12 @@ function action(id,fn){$(id).onclick=async()=>{
   if(result===false){announce('입력 내용을 확인해 주세요.','failed');return;}
   serverBusy=true;serverPhase='register';feedbackJob='register';
  }
- if(primary){const r=await fetch('/api/state?channel='+activeChannel());if(r.ok){const state=await r.json();serverBusy=state.busy;serverPhase=state.phase;if(id==='run')runState=state;}if(id!=='run')announce(id==='open'?'✓ 크롬 창에 연결했습니다':'✓ 수집 요청 접수 — 정보를 분석하고 있습니다','success');}
+ if(primary){
+  const r=await fetch('/api/state?channel='+activeChannel());
+  if(r.ok){const state=await r.json();serverBusy=state.busy;serverPhase=state.phase;if(id==='run')runState=state;}
+  if(id==='open')announce(result.message,result.registrationReady?'success':'failed');
+  if(id==='collect')announce('✓ 수집 요청 접수 — 정보를 분석하고 있습니다','success');
+ }
  }catch(e){$('error').textContent=e.message;announce('처리하지 못했습니다: '+e.message,'failed');}
  finally{if(primary){requestLock=false;delete $(id).dataset.pending;syncButtons();if(runState)syncFeedbackWithState(runState);}}
  };}

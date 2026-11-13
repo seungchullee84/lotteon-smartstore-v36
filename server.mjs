@@ -767,7 +767,21 @@ const server=http.createServer(async(req,res)=>{
         res.once('finish',()=>{server.close(()=>process.exit(0));setTimeout(()=>process.exit(0),1500).unref();});
         return json(res,200,{ok:true});
       }
-      if(url.pathname==='/api/open'){if(state.busy)throw Error('작업 중에는 브라우저를 다시 열 수 없습니다.');const login=await bot.open();if(login.status==='expired')return json(res,409,{error:LOTTE_SESSION_EXPIRED});state.error=null;return json(res,200,{ok:true});}
+      if(url.pathname==='/api/open'){
+        if(state.busy)throw Error('작업 중에는 브라우저를 다시 열 수 없습니다.');
+        const previousPhase=state.phase;
+        state.busy=true;state.phase='lotte-open';
+        try{
+          const {status}=await bot.openRegistration();
+          if(status==='expired')return json(res,409,{error:LOTTE_SESSION_EXPIRED});
+          const registrationReady=status==='registration-ready';
+          const message=registrationReady?'롯데ON 상품등록 화면을 열었습니다.':
+            ['unconfigured','unavailable'].includes(status)?'롯데 자동 로그인 설정을 확인하거나 전용 크롬에서 로그인해 주세요.':
+            '전용 크롬에서 로그인이나 추가 인증을 완료한 뒤 상품등록 화면 열기를 다시 눌러 주세요.';
+          state.error=null;
+          return json(res,200,{ok:true,registrationReady,message});
+        }finally{state.busy=false;state.phase=previousPhase;}
+      }
       if(url.pathname==='/api/collect'){
         if(state.busy)return json(res,409,{error:'진행 중인 작업이 있습니다.'});
         if(b.allowMissingDetail===true&&state.detailFallbackRequest?.input!==b.style)return json(res,400,{error:'먼저 일반 수집으로 해당 상품의 상세 원본 누락을 확인해 주세요.'});
@@ -795,7 +809,7 @@ const server=http.createServer(async(req,res)=>{
         state.product=p;job('register',()=>bot.run(p,state.folder,b.finalize===true));return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/continue'){state.paused=null;bot.resume();return json(res,200,{ok:true});}
-      if(url.pathname==='/api/stop'){if(state.busy){const phase=state.phase;state.phase='stopping';state.paused=null;activeAbort?.abort();if(phase==='register')await bot.stop();if(phase==='smartstore'||phase==='smartstore-auto'||phase==='smartstore-detail-only'||phase==='smartstore-extra-only')await smartBot.stop();}return json(res,200,{ok:true});}
+      if(url.pathname==='/api/stop'){if(state.busy){const phase=state.phase;state.phase='stopping';state.paused=null;activeAbort?.abort();if(phase==='register'||phase==='lotte-open')await bot.stop();if(phase==='smartstore'||phase==='smartstore-auto'||phase==='smartstore-detail-only'||phase==='smartstore-extra-only')await smartBot.stop();}return json(res,200,{ok:true});}
     }
     if(req.method==='GET'&&url.pathname==='/detail-preview.html'){
       res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; img-src https://www.giordano.co.kr; style-src 'unsafe-inline'; frame-ancestors 'none'"});

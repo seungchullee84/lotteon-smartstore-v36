@@ -4,6 +4,7 @@ import {categoryKey,loadCategoryCache,saveCategoryMatch} from './category-cache.
 import {BrowserAutomation} from './browser-connection.mjs';
 import {createBrowserLoginStore} from './browser-login-store.mjs';
 import {tryLotteLogin,selectLottePage,lotteSessionExpired,LOTTE_SESSION_EXPIRED} from './browser-login.mjs';
+import {openLotteRegistration} from './lotte-registration.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {OptionCoverage,optionKey} from './option-coverage.mjs';
@@ -27,8 +28,15 @@ export class LotteAutomation extends BrowserAutomation {
     try{const {windowId}=await cdp.send('Browser.getWindowForTarget');await cdp.send('Browser.setWindowBounds',{windowId,bounds:{windowState:'normal'}});await cdp.send('Browser.setWindowBounds',{windowId,bounds:{windowState:'maximized'}});}finally{await cdp.detach();}
     await this.page.bringToFront();
     const login=await this.ensureLogin(true);
-    this.log(login.status==='expired'?LOTTE_SESSION_EXPIRED:'전용 크롬에 연결했습니다. 로그인 후 상품등록 화면을 열어 주세요.');
+    this.log(login.status==='expired'?LOTTE_SESSION_EXPIRED:'롯데 전용 크롬에 연결했습니다.');
     return login;
+  }
+  async openRegistration(){
+    const login=await this.open();
+    if(login.status!=='authenticated'&&login.status!=='session')return login;
+    await openLotteRegistration(this.page,{check:()=>this.check()});
+    this.log('롯데ON 상품등록 화면을 열었습니다.');
+    return {status:'registration-ready'};
   }
   async wait(message){
     this.log(message); this.onPause?.(message);

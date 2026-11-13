@@ -1,19 +1,19 @@
 const attempts=new WeakMap();
-const samePortal=page=>{try{const u=new URL(page.url());return u.origin==='https://together.lotteshopping.com'&&u.pathname.startsWith('/EMDV3/');}catch{return false;}};
+export const isLottePortalPage=page=>{try{const u=new URL(page.url());return u.origin==='https://together.lotteshopping.com'&&u.pathname.startsWith('/EMDV3/');}catch{return false;}};
 const idSelector='[id$="div_Login_edt_LoginId_input"]',passwordSelector='[id$="div_Login_edt_LoginPassword_input"]',buttonSelector='[id$="div_Login_btn_Login"]';
 const expiryMessage=/(?:세션\s*(?:정보\s*)?|로그인\s*시간\s*)(?:이|가)?\s*만료\s*(?:되|됐|된)/;
 export const LOTTE_SESSION_EXPIRED='롯데 EDI 세션이 만료됐습니다. 전용 크롬에서 안내창을 닫고 다시 로그인해 주세요.';
 export async function lotteSessionExpired(page){
- return samePortal(page)&&await page.getByText(expiryMessage).filter({visible:true}).first().isVisible().catch(()=>false);
+ return isLottePortalPage(page)&&await page.getByText(expiryMessage).filter({visible:true}).first().isVisible().catch(()=>false);
 }
 export async function selectLottePage(pages,previous){
- const eligible=pages.filter(page=>!page.isClosed()&&samePortal(page));
+ const eligible=pages.filter(page=>!page.isClosed()&&isLottePortalPage(page));
  if(eligible.includes(previous))return previous;
  for(const page of [...eligible].reverse())if(await page.getByText('로그아웃',{exact:true}).first().isVisible().catch(()=>false))return page;
  return eligible.at(-1)||null;
 }
 export async function tryLotteLogin(page,{store,log=()=>{},check=()=>{},timeout=12000,waitForForm=false}={}){
- if(!samePortal(page))return {status:'unrelated'};
+ if(!isLottePortalPage(page))return {status:'unrelated'};
  const id=page.locator(idSelector),password=page.locator(passwordSelector),button=page.locator(buttonSelector);
  if(await lotteSessionExpired(page))return {status:'expired'};
  if(waitForForm&&!await id.isVisible().catch(()=>false)&&!await page.getByText('로그아웃',{exact:true}).first().isVisible().catch(()=>false)){
@@ -38,16 +38,16 @@ export async function tryLotteLogin(page,{store,log=()=>{},check=()=>{},timeout=
  attempts.set(page,credentials.revision);let dialog=false;
  const onDialog=()=>{dialog=true;};page.on('dialog',onDialog);
  try{
-  check();if(!samePortal(page))return {status:'unrelated'};
+  check();if(!isLottePortalPage(page))return {status:'unrelated'};
   await id.fill(credentials.username,{timeout:3000});await id.press('Tab');
-  check();if(!samePortal(page))return {status:'unrelated'};
+  check();if(!isLottePortalPage(page))return {status:'unrelated'};
   await password.fill(credentials.password,{timeout:3000});await password.press('Tab');
-  check();if(!samePortal(page))return {status:'unrelated'};
+  check();if(!isLottePortalPage(page))return {status:'unrelated'};
   log('저장된 계정으로 롯데 자동 로그인을 한 번 시도합니다.');
   await button.click({timeout:5000,noWaitAfter:true});
   const until=Date.now()+timeout;
   while(Date.now()<until&&!dialog){
-   check();if(!samePortal(page))break;
+   check();if(!isLottePortalPage(page))break;
    if(await lotteSessionExpired(page))return {status:'expired'};
    if(!await id.isVisible()){
     const logout=page.getByText('로그아웃',{exact:true});
