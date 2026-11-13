@@ -109,3 +109,9 @@ test('사용자 확정 라즈베리는 자주 대신 루비로 매칭',()=>{
   assert.equal(matchColor('02 RASPBERRY',labels),'루비');
   assert.equal(matchColor('02라즈베리',['자주','핑크','레드']),null);
 });
+
+test('체리래커는 롯데ON 통합색상 체리로 매칭',()=>{
+  assert.equal(matchColor('04체리래커',['레드','와인','루비','체리']),'체리');
+  assert.equal(matchColor('04 체리 래커',['루비','체리']),'체리');
+  assert.equal(matchColor('04체리래커',['레드','와인','루비']),null);
+});

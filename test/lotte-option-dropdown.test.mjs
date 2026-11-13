@@ -112,13 +112,13 @@ async function readAllOptions(page){
 test('채널 오른쪽 스크롤에 잘린 색상·사이즈를 모두 드러내 선택하고 다시 점검한다',async()=>{
   const browser=await chromium.launch({headless:true});
   try{
-    const product={name:'테스트 재킷',colors:['01소프트베이지','02차콜','03버건디','04블랙'],sizes:['S','M','L']};
-    const f=await fixture(browser,product);
+    const product={name:'테스트 재킷',colors:['01소프트베이지','02차콜','03버건디','04체리래커','05블랙'],sizes:['S','M','L']};
+    const f=await fixture(browser,product,{'통합색상':['베이지','차콜','버건디','블랙','레드','체리']});
     await placeOptionsInChannel(f.page);
     assert.deepEqual((await f.bot.optionGridSnapshot('grd_OptnDtlNew')).rows.map(row=>row.source),['01소프트베이지']);
     await f.bot.matchLotteOptions(product);
     const actual=await readAllOptions(f.page);
-    assert.deepEqual(actual.map(row=>row.value),['베이지','차콜','버건디','블랙','S','M','L']);
+    assert.deepEqual(actual.map(row=>row.value),['베이지','차콜','버건디','체리','블랙','S','M','L']);
     assert(actual.every(row=>row.checked));
     assert((await f.page.evaluate(()=>window.scrollMoves))>0);
     assert.equal(f.counts().audits,1);
