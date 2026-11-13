@@ -259,7 +259,7 @@ export class LotteAutomation extends BrowserAutomation {
     await editor.waitFor({state:'visible',timeout:4000});return editor;
   }
   async revealOptionCell(grid,cell){
-    await this.reveal(this.locator(grid+'_head'));
+    if(grid!=='grd_OptnDtlNew')await this.reveal(this.locator(grid+'_head'));
     const bar=this.locator(grid+'_vscrollbar'),thumb=this.locator(grid+'_vscrollbar_trackbar');
     for(let attempt=0;attempt<40;attempt++){
       this.check();
@@ -656,6 +656,13 @@ export class LotteAutomation extends BrowserAutomation {
     }
     if(coverage.complete){await this.auditLotteOptions(p);this.log('전체 색상·사이즈 '+coverage.done.size+'개 매칭 및 체크 확인 완료');return;}
     if(coverage.done.size>before){stagnant=0;continue;}
+    if(await this.revealClippedChannelOption(grid,source=>
+      sources.some(value=>compact(value)===compact(source))&&
+      !coverage.has(p.sizes.some(value=>compact(value)===compact(source))?'사이즈':'색상',source)
+    )){
+      stagnant=0;
+      continue;
+    }
     if(recovering){
       const current=await this.optionGridSnapshot(grid);
       if(recoveryOffset!==null&&current.offset!==null&&current.offset>recoveryOffset+1)continue;
@@ -713,6 +720,9 @@ export class LotteAutomation extends BrowserAutomation {
       }
       for(let page=0;page<Math.max(40,expected.size*2);page++){
         await inspectPage();
+        if(seen.size<expected.size&&await this.revealClippedChannelOption(g,source=>
+          expected.has(source.replace(/\s/g,''))&&!seen.has(source.replace(/\s/g,''))
+        ))continue;
         if(!await move('next'))break;
       }
       await move('bottom');
@@ -731,7 +741,7 @@ export class LotteAutomation extends BrowserAutomation {
   async optionGridSnapshot(grid){
     return this.locator(grid).evaluateAll(grids=>{
       const table=grids.at(-1);
-      if(!table)return {offset:null,maxOffset:null,rows:[]};
+      if(!table)return {offset:null,maxOffset:null,rows:[],clippedRows:[]};
       const doc=table.ownerDocument;
       const nodes=suffix=>[...table.querySelectorAll('#'+CSS.escape(table.id+suffix))];
       const rect=suffix=>nodes(suffix).map(el=>el.getBoundingClientRect()).find(r=>r.width>0&&r.height>0);
@@ -739,23 +749,40 @@ export class LotteAutomation extends BrowserAutomation {
       const down=rect('_vscrollbar_incbutton'),thumb=rect('_vscrollbar_trackbar');
       const offset=up&&thumb?thumb.top-up.bottom:null;
       const maxOffset=up&&down&&thumb?down.top-up.bottom-thumb.height:null;
-      if(!body)return {offset,maxOffset,rows:[]};
+      if(!body)return {offset,maxOffset,rows:[],clippedRows:[]};
       const top=Math.max(body.top,head?.bottom??body.top);
-      const rows=[];
+      const panel=table.closest('[id$="_chnlForm_form_div_DataScrollableInnerContainerElement"]')?.getBoundingClientRect();
+      const rows=[],clippedRows=[];
       for(const cell of table.querySelectorAll('[id$="_2"]')){
         const match=cell.id.match(/_body_gridrow_(\d+)_cell_\1_2$/);
         if(!match)continue;
         const r=cell.getBoundingClientRect(),y=r.y+r.height/2,source=cell.innerText.trim();
-        if(!source||!r.width||y<=top||y>=body.bottom||!cell.contains(doc.elementFromPoint(r.x+r.width/2,y)))continue;
+        if(!source||!r.width||!r.height||y<=top||y>=body.bottom)continue;
+        const row=Number(match[1]);
+        if(panel&&(y<=Math.max(0,panel.top)||y>=Math.min(doc.defaultView.innerHeight,panel.bottom))){
+          clippedRows.push({row,source,y});
+          continue;
+        }
+        if(!cell.contains(doc.elementFromPoint(r.x+r.width/2,y)))continue;
         const kindId=cell.id.slice(0,-1)+'0';
         const kind=[...table.querySelectorAll('#'+CSS.escape(kindId))].find(e=>{
           const box=e.getBoundingClientRect();
           return box.width>0&&box.height>0&&Math.abs(box.y-r.y)<2;
         })?.innerText.trim();
-        rows.push({row:Number(match[1]),source,kind,y});
+        rows.push({row,source,kind,y});
       }
-      return {offset,maxOffset,rows:rows.sort((a,b)=>a.y-b.y)};
+      return {offset,maxOffset,rows:rows.sort((a,b)=>a.y-b.y),clippedRows:clippedRows.sort((a,b)=>a.y-b.y)};
     });
+  }
+  async revealClippedChannelOption(grid,needsOption){
+    const {clippedRows}=await this.optionGridSnapshot(grid);
+    const option=clippedRows.find(row=>needsOption(row.source));
+    if(!option)return false;
+    // The row exists inside the grid. Move the enclosing channel window's scrollbar.
+    const cell=await this.optionCell(grid,option.row,2);
+    if((await cell.innerText()).trim()!==option.source)return false;
+    await this.reveal(cell);
+    return (await this.optionGridSnapshot(grid)).rows.some(row=>row.row===option.row&&row.source===option.source);
   }
   async stepLotteOptionGrid(grid,direction){
     this.check();
