@@ -105,7 +105,10 @@ function Install-RapidOcr {
     $pointer = Join-Path $RapidOcrInstallRoot 'python.txt'
     if (Test-Path -LiteralPath $pointer -PathType Leaf) {
         $current = [IO.File]::ReadAllText($pointer).Trim()
-        if ($current -and (Test-Path -LiteralPath $current -PathType Leaf)) { return }
+        $currentModels = Join-Path $RapidOcrInstallRoot 'packages\rapidocr\models'
+        if ($current -and (Test-Path -LiteralPath $current -PathType Leaf) -and
+            (Test-Path -LiteralPath (Join-Path $currentModels 'ch_PP-OCRv5_det_mobile.onnx') -PathType Leaf) -and
+            (Test-Path -LiteralPath (Join-Path $currentModels 'korean_PP-OCRv5_rec_mobile.onnx') -PathType Leaf)) { return }
     }
     $python = Find-RapidOcrPython
     if (-not $python) { Write-Output 'RapidOCR:python'; return }
