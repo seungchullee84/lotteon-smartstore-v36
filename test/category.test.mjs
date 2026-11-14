@@ -58,3 +58,9 @@ test('남성 기모 스웻 팬츠만 바지/기모팬츠로 연결하고 비기�
  for(const rawName of ['테리 스웻 팬츠','기모 없는 트레이닝 바지','무기모 조거 팬츠','브러시드 데님 팬츠'])assert.equal(brushedTrainingCategory({...p,rawName}),null,rawName);
  const c=productClassification('<div class="navi"><a>Home</a><a class="prdpath1">MEN</a><a>PANTS</a><a>트레이닝/스웻팬츠</a><a>NEW 브러시드 테리 스트레이트 스웻 팬츠</a></div>');assert.equal(c.category.channelMiddle,'바지');assert.equal(c.category.channelSmall,'기모팬츠');
 });
+
+test('롯데 공통 여성셔츠를 여성남방셔츠 항목에 연결한다',()=>{
+  const portalLabel='00844 : 여성남방셔츠';
+  assert.equal(similarCategory('여성셔츠',['00843 : 여성티셔츠/탑',portalLabel]),portalLabel);
+  assert.equal(similarCategory('여성셔츠',['남성남방셔츠','여성티셔츠/탑','여성블라우스']),null);
+});
