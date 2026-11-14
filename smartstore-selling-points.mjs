@@ -213,6 +213,7 @@ export function friendlyBenefitDescription(value){
   if(/(?:편안하게|따뜻하게|포근하게|가볍게|부드럽게|탄탄하게|유연하게)$/.test(text))return text+' 입어요.';
   if(/(?:깔끔하게|자연스럽게|멋스럽게|감각적으로|고급스럽게|스포티하게)$/.test(text))return text+' 연출할 수 있어요.';
   if(/가능$/.test(text))return text+'해요.';
+  if(/밴드.*스트링.*허리.*조절\s*용이$/.test(text))return '허리 밴드와 스트링으로 둘레를 조절할 수 있어요.';
   const action=text.match(/^(.+?)\s+(제공|유지|조절|연출|구현|확보|완성|강화|최소화|지지|활용|수납|커버)$/);
   if(action){const [,subject,verb]=action,object=/(?:으로|로|을|를|게|에|에서|에도|없이)$/.test(subject)?subject:subject+(hasFinalConsonant(subject)?'을':'를');return object+' '+({제공:'제공해요',유지:'유지해요',조절:'조절할 수 있어요',연출:'연출할 수 있어요',구현:'구현했어요',확보:'확보했어요',완성:'완성해요',강화:'강화했어요',최소화:'최소화했어요',지지:'받쳐줘요',활용:'활용할 수 있어요',수납:'수납할 수 있어요',커버:'커버해줘요'}[verb])+'.';}
   if(/(?:습니다|니다)$/.test(text))return '';
