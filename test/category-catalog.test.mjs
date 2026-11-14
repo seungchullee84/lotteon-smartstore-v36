@@ -50,3 +50,12 @@ test('남성 트레이닝 전 상품은 사용자 확인 공통·채널 분류�
   assert.equal(r.category.channelMiddle,'바지');assert.equal(r.category.channelSmall,'기모팬츠');assert.equal(r.path.small.code,'BC31050100');
  }
 });
+
+test('여성 데님 셔츠는 롯데 공통 소분류와 채널 중·소분류를 함께 보정한다',()=>{
+ const p={gender:'여성',rawName:'데님 레귤러핏 긴팔 셔츠',sourceCategory:['WOMEN','TOP','셔츠'],category:{commonSmall:'여성셔츠',channelMiddle:'셔츠/남방',channelSmall:'셔츠'}};
+ const {category}=resolveCatalogCategory(p,catalog,common);
+ assert.equal(category.commonSmall,'00844 : 여성남방셔츠');
+ assert.equal(category.channelMiddle,'블라우스/셔츠');
+ assert.equal(category.channelSmall,'데님셔츠');
+ assert.equal(category.channelCodes.small,'BC34060100');
+});

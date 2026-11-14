@@ -68,7 +68,7 @@ export function resolveCatalogCategory(p,catalog=loadCatalog(),common=null){
   prefer(/바지|팬츠|PANTS|슬랙스/.test(text),...(/데님|청바지/.test(text)?['청바지']:/슬랙스/.test(text)?['슬랙스']:/트레이닝|스웻|스웨트|조거/.test(text)?['트레이닝하의','트레이닝바지']:['면바지/밴딩팬츠','치노면바지','면바지']));
   prefer(/가디건|카디건/.test(text),/집업/.test(text)?'집업가디건':/브이|V넥/i.test(text)?'브이넥가디건':/라운드/.test(text)?'라운드넥가디건':'가디건');
   prefer(/데님|청바지/.test(text)&&/바지|팬츠|PANTS|청바지/.test(text),/와이드|부츠컷/.test(text)?'부츠컷/와이드핏':/스키니|슬림/.test(text)?'스키니/슬림핏':/스트레이트|일자/.test(text)?'스트레이트핏':'청바지');
-  prefer(/셔츠|남방/.test(text)&&!/티셔츠|스웨트셔츠/.test(text),/체크/.test(text)?'체크셔츠':/스트라이프/.test(text)?'스트라이프셔츠':/솔리드/.test(text)?'솔리드셔츠':'셔츠');
+  prefer(/셔츠|남방/.test(text)&&!/티셔츠|스웨트셔츠/.test(text),/데님|\bDENIM\b/i.test(text)?'데님셔츠':/체크/.test(text)?'체크셔츠':/스트라이프/.test(text)?'스트라이프셔츠':/솔리드/.test(text)?'솔리드셔츠':'셔츠');
   prefer(/재킷|자켓/.test(text)&&!/무스탕|가죽|패딩|다운/.test(text),'캐주얼자켓');
   prefer(/후드/.test(text)&&!/패딩|다운|코트|니트|스웨터/.test(text),...(/집업|지퍼/.test(text)?['후드집업','후드티/후드집업']:['후드티셔츠','후드티/후드집업']));
   prefer(/맨투맨|스웨트셔츠/.test(text)&&!/후드/.test(text),'맨투맨티셔츠','맨투맨');
