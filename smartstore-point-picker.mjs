@@ -19,9 +19,9 @@ export async function pointPicker(product,folder,{dataRoot,sourceOverride}={}){
  }
  const defaults=valid&&selected.points.length>=3?selected.points:completeSellingPoints(seed,text);
  const pool=[...defaults];
- for(const p of seed)if(!pool.some(q=>q.title===p.title||q.description===p.description||q.evidence===p.evidence))pool.push(p);
+ for(const p of seed)if(!pool.some(q=>q.title===p.title||q.description===p.description))pool.push(p);
  for(const p of officialSellingPoints(text,{limit:5})){
-  if(pool.some(q=>q.title===p.title||q.description===p.description||q.evidence===p.evidence))continue;
+  if(pool.some(q=>q.title===p.title||q.description===p.description))continue;
   const kinds=topics(p),covered=new Set(seed.flatMap(topics));
   if(kinds.length&&kinds.every(kind=>covered.has(kind)))continue;
   pool.push(p);
@@ -39,7 +39,7 @@ export async function savePointSelection(product,folder,input,options){
  const points=[...chosen];
  if(points.length===2){
   const covered=new Set(points.flatMap(topics));
-  const extra=current.candidates.find(p=>!ids.includes(p.id)&&!points.some(q=>q.evidence===p.evidence||q.title===p.title)&&topics(p).some(topic=>!covered.has(topic)));
+  const extra=current.candidates.find(p=>!ids.includes(p.id)&&!points.some(q=>q.title===p.title)&&topics(p).some(topic=>!covered.has(topic)));
   if(extra){const {id:_,displayDescription:__,...point}=extra;points.push(point);}
  }
  const root=path.join(options.dataRoot,'smartstore-details',product.style),file=path.join(root,'selling-point-selection.json'),temporary=file+'.'+randomUUID()+'.tmp';await mkdir(root,{recursive:true});
