@@ -586,7 +586,8 @@ let backgroundRequest=null,backgroundEpoch=0,backgroundPreparing=false,backgroun
 let backgroundCancellation=Promise.resolve(),backgroundStyleInput=$('style').value;
 let backgroundProgress=null;
 const cancelledBackgroundRequests=new Set();
-const backgroundStageLabels={preparing:'원본 확인',waiting:'시작 대기',generating:'배경 생성',processing:'원본 합성',review:'완성본 검수',complete:'합성 완료',error:'합성 확인 필요',cancelled:'합성 취소'};
+const backgroundActiveStatuses=['preparing','waiting','generating','processing','review','applying-wait'];
+const backgroundStageLabels={preparing:'원본 확인',waiting:'시작 대기',generating:'배경 생성',processing:'원본 합성',review:'완성본 검수','applying-wait':'적용 대기',complete:'합성 완료',error:'합성 확인 필요',cancelled:'합성 취소'};
 function showBackgroundProgress(work){
  backgroundProgress={...work};
  syncBackgroundProgress();
@@ -595,14 +596,15 @@ function syncBackgroundProgress(){
  const panel=$('backgroundProgress');
  panel.hidden=!backgroundProgress;
  if(!backgroundProgress)return;
- const work=backgroundProgress,active=['preparing','waiting','generating','processing','review'].includes(work.status);
+ const work=backgroundProgress,active=backgroundActiveStatuses.includes(work.status);
  panel.dataset.status=work.status;panel.classList.toggle('active',active);
  const retry=work.status==='generating'&&Number.isInteger(work.attempt)&&work.attempt>1;
- const heading=retry?'합성 보정 재시도 중 · '+work.attempt+(Number.isInteger(work.maxAttempts)?'/'+work.maxAttempts:'')+'회':
+ const heading=work.status==='applying-wait'?'합성 완료 · 적용 대기':retry?'합성 보정 재시도 중 · '+work.attempt+(Number.isInteger(work.maxAttempts)?'/'+work.maxAttempts:'')+'회':
   active?'합성 진행 중 · '+backgroundStageLabels[work.status]:backgroundStageLabels[work.status]||'합성 상태';
  setText($('backgroundProgressHeading'),heading);
  setText($('backgroundProgressMessage'),(work.style?'품번 '+work.style+' · ':'')+(work.message||''));
  $('backgroundProgressHint').hidden=!active;
+ $('backgroundProgressOpen').hidden=activeChannel()!=='lotte';
  const startedAt=typeof work.startedAt==='number'?work.startedAt:Date.parse(work.startedAt);
  const elapsed=active&&Number.isFinite(startedAt)?Date.now()-startedAt:work.elapsedMs;
  const seconds=typeof elapsed==='number'&&Number.isFinite(elapsed)?Math.max(0,Math.floor(elapsed/1000)):null;
@@ -616,6 +618,7 @@ function syncBackgroundControls(){
  $('openBackgroundRequest').setAttribute('aria-busy',String(active));
  setText($('openBackgroundRequest'),active?'합성 진행 중':'합성 진행');
  setText($('extendBackground'),active?'🖼 합성 진행 중':'🖼 배경 늘리기·합성');
+ setText($('closeBackground'),active?'닫고 다른 작업하기':'닫기');
  $('extendBackground').classList.toggle('background-working',active);
 }
 function cancelBackgroundRequest(){
@@ -640,7 +643,7 @@ function cancelBackgroundRequest(){
 function backgroundRequestIsCurrent(request){
  return backgroundRequest===request&&request.epoch===backgroundEpoch&&activeChannel()==='lotte'&&
   product?.style===request.style&&product?.sourceUrl===request.sourceUrl&&
-  selectedBackgroundImage===request.key&&$('style').value===request.input&&!serverBusy&&!requestLock;
+  selectedBackgroundImage===request.key&&$('style').value===request.input;
 }
 function backgroundInputMatchesProduct(current=product){
  const input=$('style').value.trim();
@@ -677,18 +680,18 @@ function syncBackgroundImage(s){
  if(backgroundRequest&&!backgroundPreparing&&work?.jobId&&work.requestId&&!cancelledBackgroundRequests.has(work.requestId)&&
   work.jobId!==backgroundRequest.jobId&&Number.isFinite(work.startedAt)&&work.startedAt>(backgroundRequest.startedAt||backgroundRequest.createdAt||Infinity)&&
   work.style===s.product?.style&&work.sourceUrl===s.product?.sourceUrl&&work.key===selectedBackgroundImage&&
-  ['waiting','generating','processing','review','complete','error','cancelled'].includes(work.status)){
+  [...backgroundActiveStatuses,'complete','error','cancelled'].includes(work.status)){
   backgroundRequest={requestId:work.requestId,jobId:work.jobId,epoch:++backgroundEpoch,style:work.style,key:work.key,sourceUrl:work.sourceUrl,startedAt:work.startedAt,input:$('style').value};
  }
  if(!backgroundRequest&&!backgroundSelectionPending&&work?.jobId&&work.requestId&&!cancelledBackgroundRequests.has(work.requestId)&&
-  ['waiting','generating','processing','review'].includes(work.status)){
+  backgroundActiveStatuses.includes(work.status)){
   backgroundRequest={requestId:work.requestId,jobId:work.jobId,epoch:backgroundEpoch,style:work.style,key:work.key,sourceUrl:work.sourceUrl,startedAt:work.startedAt,input:$('style').value};
   backgroundStyleInput=backgroundRequest.input;
   if(work.style!==s.product?.style||work.sourceUrl!==s.product?.sourceUrl||work.key!==selectedBackgroundImage||!backgroundInputMatchesProduct(s.product))void cancelBackgroundRequest();
  }
  if(backgroundRequest&&!backgroundPreparing&&work?.jobId===backgroundRequest.jobId&&work.requestId===backgroundRequest.requestId&&
-  work.style===backgroundRequest.style&&work.sourceUrl===backgroundRequest.sourceUrl&&work.key===backgroundRequest.key&&['waiting','generating','processing','review','complete','error','cancelled'].includes(work.status)){
-  backgroundWorkActive=['waiting','generating','processing','review'].includes(work.status);
+  work.style===backgroundRequest.style&&work.sourceUrl===backgroundRequest.sourceUrl&&work.key===backgroundRequest.key&&[...backgroundActiveStatuses,'complete','error','cancelled'].includes(work.status)){
+  backgroundWorkActive=backgroundActiveStatuses.includes(work.status);
   backgroundRequest.startedAt=work.startedAt;
   backgroundRequest.message=work.message||'합성 작업 상태: '+work.status;
   $('backgroundStatus').textContent=backgroundRequest.message;
@@ -709,12 +712,13 @@ function showBackgroundChoice(){
 }
 $('extendBackground').onclick=()=>{
  if(!product){announce('먼저 상품을 수집해 주세요.','failed');return;}
- if(activeChannel()!=='lotte'||serverBusy||requestLock){announce('롯데ON 작업이 끝난 뒤 사진을 선택해 주세요.','failed');return;}
+ if(activeChannel()!=='lotte'||(serverBusy||requestLock)&&!backgroundWorkActive&&!backgroundPreparing){announce('롯데ON 작업이 끝난 뒤 사진을 선택해 주세요.','failed');return;}
  const choice=$('backgroundImageChoice');choice.replaceChildren();
  for(const key of ['main','extra1','extra2']){const option=document.createElement('option');option.value=key;option.textContent=backgroundLabels[key]+(product.images[key]?'':' (사진 없음)');option.disabled=!product.images[key];choice.append(option);}
  if(!product.images[selectedBackgroundImage])selectedBackgroundImage='main';
  choice.value=selectedBackgroundImage;showBackgroundChoice();syncBackgroundControls();$('backgroundDialog').showModal();
 };
+$('backgroundProgressOpen').onclick=()=>$('extendBackground').click();
 $('backgroundImageChoice').onchange=async()=>{
  const choice=$('backgroundImageChoice'),previous=selectedBackgroundImage,key=choice.value;
  if(key===previous)return;

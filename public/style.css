@@ -3,11 +3,12 @@
 #backgroundProgress{position:sticky;top:8px;z-index:90;display:flex;align-items:flex-start;gap:12px;max-width:1168px;margin:8px auto;padding:14px 18px;border:2px solid #496e9c;border-radius:12px;background:#eaf3ff;color:#163e6b;box-shadow:0 4px 18px #183d6524;pointer-events:none}
 #backgroundProgress[hidden]{display:none}
 .background-progress-body{min-width:0;flex:1}.background-progress-heading{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.background-progress-heading strong{font-size:17px;line-height:1.5}.background-progress-heading>span{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+#backgroundProgressOpen{flex:none;pointer-events:auto;min-height:36px;padding:6px 10px;border-color:currentColor;background:transparent;color:inherit;font-size:12px}
 #backgroundProgress p{margin:4px 0 0;color:inherit;font-size:13px;line-height:1.55;overflow-wrap:anywhere}#backgroundProgress #backgroundProgressHint{font-size:12px}
 .background-progress-indicator{width:17px;height:17px;margin-top:4px;flex:none;border:3px solid currentColor;border-radius:50%}#backgroundProgress.active .background-progress-indicator{border-right-color:transparent;animation:buttonSpin 1s linear infinite}
 #backgroundProgress[data-status="complete"]{background:#e4f7eb;border-color:#27804c;color:#175c35}#backgroundProgress[data-status="error"]{background:#fff1e8;border-color:#bd5d2d;color:#853715}#backgroundProgress[data-status="cancelled"]{background:#f1f2f4;border-color:#8a909b;color:#4d5564}
 #extendBackground.background-working{border:2px solid #3d6a9a;background:#eaf3ff;color:#163e6b;font-weight:800}#openBackgroundRequest[aria-busy="true"]{opacity:1;background:#315f8f;color:#fff;cursor:progress}
-@media(max-width:1239px){#backgroundProgress{margin:8px 16px}}@media(max-width:480px){#backgroundProgress{gap:9px;padding:11px 12px}.background-progress-heading{gap:4px 10px}.background-progress-heading strong{font-size:15px}}
+@media(max-width:1239px){#backgroundProgress{margin:8px 16px}}@media(max-width:480px){#backgroundProgress{gap:9px;padding:11px 12px;flex-wrap:wrap}.background-progress-heading{gap:4px 10px}.background-progress-heading strong{font-size:15px}#backgroundProgressOpen{margin-left:26px}}
 @media(prefers-reduced-motion:reduce){#backgroundProgress.active .background-progress-indicator{animation:none}}
 
 @layer registrar-base {
