@@ -584,13 +584,39 @@ $('openNoticeText').onclick=()=>{syncNoticeCopy();$('noticeCopyStatus').textCont
 const backgroundLabels={main:'대표이미지',extra1:'추가이미지 1',extra2:'추가이미지 2'};
 let backgroundRequest=null,backgroundEpoch=0,backgroundPreparing=false,backgroundSelectionPending=false,backgroundWorkActive=false;
 let backgroundCancellation=Promise.resolve(),backgroundStyleInput=$('style').value;
+let backgroundProgress=null;
 const cancelledBackgroundRequests=new Set();
+const backgroundStageLabels={preparing:'원본 확인',waiting:'시작 대기',generating:'배경 생성',processing:'원본 합성',review:'완성본 검수',complete:'합성 완료',error:'합성 확인 필요',cancelled:'합성 취소'};
+function showBackgroundProgress(work){
+ backgroundProgress={...work};
+ syncBackgroundProgress();
+}
+function syncBackgroundProgress(){
+ const panel=$('backgroundProgress');
+ panel.hidden=!backgroundProgress;
+ if(!backgroundProgress)return;
+ const work=backgroundProgress,active=['preparing','waiting','generating','processing','review'].includes(work.status);
+ panel.dataset.status=work.status;panel.classList.toggle('active',active);
+ setText($('backgroundProgressHeading'),active?'합성 진행 중 · '+backgroundStageLabels[work.status]:backgroundStageLabels[work.status]||'합성 상태');
+ setText($('backgroundProgressMessage'),(work.style?'품번 '+work.style+' · ':'')+(work.message||''));
+ $('backgroundProgressHint').hidden=!active;
+ const startedAt=typeof work.startedAt==='number'?work.startedAt:Date.parse(work.startedAt);
+ const elapsed=active&&Number.isFinite(startedAt)?Date.now()-startedAt:work.elapsedMs;
+ const seconds=typeof elapsed==='number'&&Number.isFinite(elapsed)?Math.max(0,Math.floor(elapsed/1000)):null;
+ $('backgroundProgressElapsed').hidden=seconds===null;
+ setText($('backgroundProgressElapsed'),seconds===null?'':(active?'경과 ':'소요 ')+(seconds>=60?Math.floor(seconds/60)+'분 ':'')+seconds%60+'초');
+}
+setInterval(syncBackgroundProgress,1000);
 function syncBackgroundControls(){
+ const active=backgroundPreparing||backgroundWorkActive;
  $('openBackgroundRequest').disabled=backgroundPreparing||backgroundSelectionPending||backgroundWorkActive||serverBusy||requestLock;
- $('openBackgroundRequest').setAttribute('aria-busy',String(backgroundPreparing||backgroundWorkActive));
+ $('openBackgroundRequest').setAttribute('aria-busy',String(active));
+ setText($('openBackgroundRequest'),active?'합성 진행 중':'합성 진행');
+ setText($('extendBackground'),active?'🖼 합성 진행 중':'🖼 배경 늘리기·합성');
+ $('extendBackground').classList.toggle('background-working',active);
 }
 function cancelBackgroundRequest(){
- const request=backgroundRequest;
+ const request=backgroundRequest,wasActive=backgroundPreparing||backgroundWorkActive;
  backgroundEpoch++;
  backgroundRequest=null;
  backgroundPreparing=false;
@@ -598,9 +624,13 @@ function cancelBackgroundRequest(){
  syncBackgroundControls();
  if(!request)return backgroundCancellation;
  cancelledBackgroundRequests.add(request.requestId);
+ if(wasActive)showBackgroundProgress({...backgroundProgress,status:'cancelled',style:request.style,message:'상품·사진 또는 작업 조건이 바뀌어 합성 취소를 요청했습니다.'});
  backgroundCancellation=post('background-cancel',{requestId:request.requestId});
  backgroundCancellation.catch(error=>{
-  if(!backgroundRequest)$('backgroundStatus').textContent='이전 합성 요청 취소 확인이 필요합니다. '+error.message;
+  if(!backgroundRequest){
+   const message='이전 합성 요청 취소 확인이 필요합니다. '+error.message;
+   $('backgroundStatus').textContent=message;showBackgroundProgress({status:'error',style:request.style,message});
+  }
  });
  return backgroundCancellation;
 }
@@ -652,6 +682,12 @@ function syncBackgroundImage(s){
   backgroundWorkActive=['waiting','generating','processing','review'].includes(work.status);
   backgroundRequest.message=work.message||'합성 작업 상태: '+work.status;
   $('backgroundStatus').textContent=backgroundRequest.message;
+  showBackgroundProgress(work);
+ }
+ if(!backgroundRequest&&!backgroundSelectionPending&&work?.jobId&&work.requestId&&!cancelledBackgroundRequests.has(work.requestId)&&
+  work.style===s.product?.style&&work.sourceUrl===s.product?.sourceUrl&&work.key===selectedBackgroundImage&&
+  ['complete','error','cancelled'].includes(work.status)){
+  showBackgroundProgress(work);
  }
  syncBackgroundControls();
 }
@@ -697,6 +733,7 @@ $('openBackgroundRequest').onclick=async()=>{
   style:product.style,key:selectedBackgroundImage,sourceUrl:product.sourceUrl,revision:lastRevision>=0?lastRevision:undefined,input:$('style').value};
  backgroundStyleInput=request.input;backgroundRequest=request;backgroundPreparing=true;syncBackgroundControls();
  $('backgroundStatus').textContent='선택한 원본과 이전 합성 결과를 확인하고 있습니다…';
+ showBackgroundProgress({status:'preparing',style:request.style,message:$('backgroundStatus').textContent});
  try{
   await cancellation;
   if(!backgroundRequestIsCurrent(request))return;
@@ -712,6 +749,7 @@ $('openBackgroundRequest').onclick=async()=>{
    if(completed.ok!==true)throw Error(completed.message||'이전 합성 결과를 적용하지 못했습니다.');
    request.message=completed.message||'동일 원본의 완료된 합성을 대표이미지에 적용했습니다.';
    $('backgroundStatus').textContent=request.message;
+   showBackgroundProgress({status:'complete',style:request.style,message:request.message,elapsedMs:completed.elapsedMs});
    announce($('backgroundStatus').textContent,'success');await refresh();return;
   }
   if(typeof result.jobId!=='string'||!result.jobId)throw Error('합성 작업 정보를 받지 못했습니다. 다시 눌러 주세요.');
@@ -721,8 +759,9 @@ $('openBackgroundRequest').onclick=async()=>{
   if(dispatched.ok!==true||dispatched.started!==true)throw Error(dispatched.message||'합성을 시작하지 못했습니다. 다시 눌러 주세요.');
   backgroundWorkActive=true;backgroundPreparing=false;
   request.message=dispatched.message||'합성을 시작했습니다. 생성·검수 후 대표이미지에 자동 적용합니다.';
+  showBackgroundProgress({status:'waiting',style:request.style,message:request.message,startedAt:dispatched.startedAt});
   $('backgroundStatus').textContent=request.message;syncBackgroundControls();await refresh();
- }catch(error){if(backgroundRequestIsCurrent(request)){void cancelBackgroundRequest();$('backgroundStatus').textContent=error.message;}}
+ }catch(error){if(backgroundRequestIsCurrent(request)){void cancelBackgroundRequest();$('backgroundStatus').textContent=error.message;showBackgroundProgress({status:'error',style:request.style,message:error.message});}}
  finally{
   if(backgroundRequest===request){
    if(!backgroundRequestIsCurrent(request))void cancelBackgroundRequest();
