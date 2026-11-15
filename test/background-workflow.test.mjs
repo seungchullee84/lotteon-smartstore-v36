@@ -224,13 +224,17 @@ test('duplicate stage is rejected while processing and after the preview is read
  await f.unapplied();
 });
 
-test('invalidating during asynchronous composition discards the result before preview or manifest writes',async t=>{
+test('invalidating during asynchronous composition discards the result and preserves cancellation after stage and worker exit',async t=>{
  let release,entered;
  const blocked=new Promise(resolve=>{release=resolve;}),started=new Promise(resolve=>{entered=resolve;});
  const f=await fixture(t,{compose:async()=>{entered();return blocked;}}),request=await f.prepare();
  const stage=f.stage(request);await started;
  f.workflow.invalidate();release(f.output);
  await assert.rejects(stage,stale);
+ assert.equal(f.workflow.status().status,'cancelled');
+ const cancelled=f.workflow.status();
+ f.workflow.fail({jobId:request.jobId,message:'worker exited after cancellation'});
+ assert.deepEqual(f.workflow.status(),cancelled);
  assert.equal((await readdir(f.folder)).some(name=>name.startsWith('background-preview-')),false);
  await f.unapplied();
 });
