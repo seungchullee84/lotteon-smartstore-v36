@@ -139,8 +139,8 @@ test('busy and photo preparation block requests and invalidate completion, inclu
   if(mode==='photoPreparation')f.state.photoPreparation={status:'preparing'};
   else f.state.busy=true;
   if(mode==='busyRoundTrip'){f.workflow.invalidate();f.state.busy=false;}
-  else await assert.rejects(f.prepare(),/진행 중인 작업/);
   assert.throws(()=>f.complete(request),stale);
+  if(mode!=='busyRoundTrip')await assert.rejects(f.prepare(),/진행 중인 작업/);
   await f.unapplied();
  });
 });
