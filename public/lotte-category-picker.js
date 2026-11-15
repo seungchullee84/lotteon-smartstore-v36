@@ -132,4 +132,12 @@
  byId('lotteCategoryReconnect').onclick=()=>void recommend();byId('lotteCategoryPickerApply').onclick=()=>void apply();
  dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
  document.addEventListener('register-state',()=>{openButton.disabled=serverBusy||!product;});
+ // The summary paths and picker are the visible category controls. Retain
+ // these values for FormData, saved edits and seller input, without duplicate
+ // fields or native validation trying to focus an invisible text input.
+ for(const key of lotteCategoryFields){
+  const field=byId('form').elements[key];if(!field)continue;
+  field.type='hidden';
+  const label=field.closest('label');if(label){label.hidden=true;label.style.display='none';}
+ }
 })();
