@@ -8,6 +8,10 @@ async function waitForPending(pending){
  assert.ok(pending.length,'준비 응답 대기 상태에 도달해야 한다');
 }
 
+function failedWork(work){
+ return {...work,status:'error',attempt:3,maxAttempts:3,manualAvailable:true,message:'3차까지 보정했지만 배경 연결선이 남았습니다.',previews:[1,2,3].map(attempt=>({attempt,url:'/api/background-preview?jobId='+work.jobId+'&attempt='+attempt,reason:attempt+'차: 배경 연결선을 확인해 주세요.'}))};
+}
+
 async function fixture(browser,options={}){
  const page=await browser.newPage();page.setDefaultTimeout(5000);
  if(options.clock)await page.clock.install({time:new Date()});
@@ -412,6 +416,90 @@ test('같은 상품의 판매처를 바꿔도 합성과 상태 확인을 이어�
   await page.evaluate(()=>selectRegistrationChannel('lotte'));
   await page.waitForFunction(()=>!document.querySelector('#openBackgroundRequest').disabled);
   assert.equal(posts.filter(item=>item.path==='/api/background-cancel').length,0);
+  assert.deepEqual(errors,[]);
+ }finally{await browser.close();}
+});
+
+test('종료 알림은 첫 표시 4초 후 사라지고 폴링·새로고침으로 다시 나타나지 않는다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const {page,control,errors}=await fixture(browser,{clock:true});
+  await page.locator('#openBackgroundRequest').click();
+  await page.waitForFunction(()=>document.querySelector('#backgroundStatus').textContent.includes('합성을 시작했습니다'));
+  await page.locator('#closeBackground').click();
+  for(const status of ['error','complete','cancelled']){
+   control.backgroundWork={...control.backgroundWork,status,message:status+' 종료'};
+   await page.evaluate(()=>refresh());
+   assert.equal(await page.locator('#backgroundProgress').isVisible(),true,status);
+   await page.clock.fastForward(3000);await page.evaluate(()=>refresh());
+   assert.equal(await page.locator('#backgroundProgress').isVisible(),true,'폴링해도 최초 표시 시간을 유지한다');
+   await page.clock.fastForward(1100);
+   assert.equal(await page.locator('#backgroundProgress').isVisible(),false,status);
+   await page.evaluate(()=>refresh());await page.evaluate(()=>refresh());
+   assert.equal(await page.locator('#backgroundProgress').isVisible(),false,'같은 종료 상태를 다시 표시하지 않는다');
+   await page.reload();await page.waitForFunction(()=>document.querySelector('#source').textContent.includes('123456'));
+   assert.equal(await page.locator('#backgroundProgress').isVisible(),false,'새로고침해도 알림을 되살리지 않는다');
+  }
+  assert.deepEqual(errors,[]);
+ }finally{await browser.close();}
+});
+
+test('실패 회차의 이미지와 사유를 볼 수 있고 직접 선택한 결과만 대표이미지에 적용한다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const {page,posts,control,errors}=await fixture(browser,{clock:true});
+  await page.locator('#openBackgroundRequest').click();
+  await page.waitForFunction(()=>document.querySelector('#backgroundStatus').textContent.includes('합성을 시작했습니다'));
+  await page.locator('#closeBackground').click();
+  const main=await page.locator('#main').getAttribute('src');
+  control.backgroundWork=failedWork(control.backgroundWork);await page.evaluate(()=>refresh());
+  assert.equal(await page.locator('#backgroundDialog').isVisible(),false,'실패가 다른 작업 중 모달을 강제로 열지 않는다');
+  assert.equal(await page.locator('#backgroundFailureCard').isVisible(),true);
+  await page.waitForFunction(()=>document.querySelector('#backgroundFailureThumbnail').naturalWidth>0);
+  await page.clock.fastForward(4100);await page.evaluate(()=>refresh());
+  assert.equal(await page.locator('#backgroundProgress').isVisible(),false);
+  assert.equal(await page.locator('#backgroundFailureCard').isVisible(),true,'알림이 사라져도 실패 결과를 볼 수 있다');
+  await page.locator('#viewBackgroundFailure').click();
+  assert.equal(await page.locator('#backgroundFailureReview').isVisible(),true);
+  assert.equal(await page.locator('#backgroundFailureAttempt').inputValue(),'3');
+  assert.equal(await page.locator('#backgroundFailedImage').getAttribute('src'),'/api/background-preview?jobId=test-job&attempt=3');
+  assert.match(await page.locator('#backgroundFailureReason').textContent(),/3차/);
+  await page.locator('#backgroundFailureAttempt').selectOption('2');
+  assert.match(await page.locator('#backgroundFailedImage').getAttribute('src'),/attempt=2$/);
+  assert.match(await page.locator('#backgroundFailureReason').textContent(),/2차/);
+  assert.equal(await page.locator('#main').getAttribute('src'),main,'실패 결과 조회는 현재 대표이미지를 바꾸지 않는다');
+  assert.equal(posts.filter(item=>item.path==='/api/background-apply-preview').length,0);
+  await page.locator('#applyBackgroundFailure').evaluate(button=>{button.click();button.click();});
+  await page.waitForFunction(()=>document.querySelector('#backgroundProgress').dataset.status==='complete');
+  await page.waitForFunction(()=>document.querySelector('#backgroundFailureCard').hidden);
+  assert.deepEqual(posts.filter(item=>item.path==='/api/background-apply-preview').map(item=>item.body),[{jobId:'test-job',attempt:2,userApproved:true}]);
+  assert.equal(posts.filter(item=>item.path==='/api/background-dispatch').length,1,'수동 적용은 새 이미지를 생성하지 않는다');
+  assert.deepEqual(errors,[]);
+ }finally{await browser.close();}
+});
+
+test('실패 결과 수동 적용도 다른 작업 중에는 대기하고 이미지 없는 실패는 사유만 보여준다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const {page,posts,control,errors}=await fixture(browser);
+  await page.locator('#openBackgroundRequest').click();
+  await page.waitForFunction(()=>document.querySelector('#backgroundStatus').textContent.includes('합성을 시작했습니다'));
+  control.backgroundWork=failedWork(control.backgroundWork);await page.evaluate(()=>refresh());
+  control.busy=true;control.manualWaiting=true;await page.evaluate(()=>refresh());
+  await page.locator('#applyBackgroundFailure').click();
+  await page.waitForFunction(()=>document.querySelector('#backgroundProgress').dataset.status==='applying-wait');
+  assert.equal(await page.locator('#applyBackgroundFailure').isDisabled(),true);
+  assert.equal(posts.filter(item=>item.path==='/api/background-cancel').length,0);
+  control.busy=false;control.backgroundWork={...control.backgroundWork,status:'complete',message:'선택한 결과를 적용했습니다.'};
+  await page.evaluate(()=>refresh());
+  assert.equal(await page.locator('#backgroundFailureCard').isVisible(),false);
+  assert.equal(posts.filter(item=>item.path==='/api/background-apply-preview').length,1);
+  control.backgroundWork={...control.backgroundWork,status:'error',previews:[],manualAvailable:false,message:'이미지 생성 전에 작업이 종료되었습니다.'};
+  await page.evaluate(()=>refresh());
+  assert.equal(await page.locator('#backgroundFailureNoImage').isVisible(),true);
+  assert.equal(await page.locator('#backgroundFailedImage').isVisible(),false);
+  assert.equal(await page.locator('#applyBackgroundFailure').isVisible(),false);
+  assert.match(await page.locator('#backgroundFailureReason').textContent(),/이미지 생성 전에/);
   assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });
