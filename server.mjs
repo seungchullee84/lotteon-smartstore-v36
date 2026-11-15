@@ -26,6 +26,7 @@ import {smartstoreAssetStamp,smartstoreSourceStamp} from './smartstore-upload-re
 import {startSmartstoreProgress,advanceSmartstoreProgress,finishSmartstoreProgress} from './smartstore-job-progress.mjs';
 import {runSmartstoreDetailOnly} from './smartstore-detail-only.mjs';
 import {prepareSmartstoreAuto} from './smartstore-auto-prepare.mjs';
+import {readSmartstorePhoto} from './smartstore-photo-response.mjs';
 import {prepareSmartstoreWithColorRecovery,importSmartstoreColorPhotos} from './smartstore-color-recovery.mjs';
 import {loadSmartstoreAIKey,saveSmartstoreAIKey} from './smartstore-ai-settings.mjs';
 import {smartstoreUploadParts} from './smartstore-detail-upload.mjs';
@@ -297,11 +298,10 @@ const server=http.createServer(async(req,res)=>{
     }
     if(req.method==='GET'&&/^\/smartstore-photo\/[a-f0-9]{24}$/.test(url.pathname)){
       if(!state.folder)return json(res,404,{});
-      const photoId=url.pathname.split('/').at(-1),photoFile=state.product?.smartstoreDetail?.photoFiles?.[url.pathname]||'smartstore-photo-'+photoId+'.jpg';
-      if(!new RegExp('^smartstore-photo-'+photoId+'\\.(jpg|png|webp)$').test(photoFile))return json(res,404,{});
-      const mime=({'.png':'image/png','.webp':'image/webp'})[path.extname(photoFile)]||'image/jpeg';
-      res.writeHead(200,{'Content-Type':mime,'Cache-Control':'no-store'});
-      return res.end(await readFile(path.join(state.folder,photoFile)));
+      const photoId=url.pathname.split('/').at(-1),photo=await readSmartstorePhoto(state.folder,photoId,state.product?.smartstoreDetail?.photoFiles);
+      if(!photo)return json(res,404,{});
+      res.writeHead(200,{'Content-Type':photo.mime,'Cache-Control':'no-store'});
+      return res.end(photo.bytes);
     }
     if(req.method==='GET'&&url.pathname==='/api/smartstore-two-choice')return json(res,200,{packages:await listTwoChoicePackages(dataRoot)});
     const twoChoiceFile=url.pathname.match(/^\/smartstore-two-choice\/([a-z0-9-]+)\/(preview\.html|[a-zA-Z0-9_-]+\.png|brand\.mp4)$/);
@@ -916,7 +916,7 @@ const server=http.createServer(async(req,res)=>{
       res.writeHead(200,{'Content-Type':types[name]+'; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'none'"});return res.end(await readFile(path.join(root,'public',name)));
     }
     json(res,404,{error:'없는 경로'});
-  }catch(e){json(res,400,{error:e.message});}
+  }catch(e){if(res.headersSent){res.destroy();return;}json(res,400,{error:e.message});}
   finally{if(backgroundMutation){backgroundMutations--;if(backgroundSourceChange)backgroundWorkflow.invalidate();}}
 });
 function prepareStartupTools(){
