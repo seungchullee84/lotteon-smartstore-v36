@@ -13,8 +13,8 @@ test('first category supplies the second without a confidence stop, and stale re
  const fields=['name','gender','commonMiddle','commonSmall','channelMiddle','channelSmall'];
  const ids=['lotteCategoryValidation','lotteCategoryValidationSummary','lotteCategoryValidationMessage','lotteCategoryCommonPath','lotteCategoryChannelPath','lotteCategoryValidationScope','lotteCategorySuggestionStatus'];
  await page.setContent('<input id="style" value="416972"><form id="form">'+fields.map(n=>'<input name="'+n+'">').join('')+'</form><button id="lotteCategorySuggest"></button>'+ids.map(id=>'<div id="'+id+'"></div>').join('')+'<ul id="lotteCategoryValidationIssues"></ul>');
- let delay=false,release,requests=0;
- await page.exposeFunction('categoryRequest',async body=>{requests++;if(delay){delay=false;await new Promise(r=>release=r);}const p={...base,...body},bridge=bridgeLotteCategory(p);return {category:bridge.category,bridge,validation:validateLotteCategory({...p,category:bridge.category})};});
+ let delay=false,legacy=false,release,requests=0;
+ await page.exposeFunction('categoryRequest',async body=>{requests++;if(delay){delay=false;await new Promise(r=>release=r);}const p={...base,...body},bridge=bridgeLotteCategory(p);return legacy?{category:body.category}:{category:bridge.category,bridge,validation:validateLotteCategory({...p,category:bridge.category})};});
  await page.addScriptTag({content:'const $=id=>document.getElementById(id);let product='+JSON.stringify(base)+';const activeChannel=()=>"lotte",setText=(e,t)=>e.textContent=t;const post=(route,body)=>window.categoryRequest(body);'+code});
  await page.evaluate(fields=>{for(const n of fields)document.querySelector('[name="'+n+'"]').value=product.category[n]||product[n];},fields);
  assert.equal(await page.evaluate(()=>fillMissingLotteCategory()),true);assert.ok(requests>=1,'complete fields must still reach validation');
@@ -27,5 +27,6 @@ test('first category supplies the second without a confidence stop, and stale re
  await page.locator('[name="channelSmall"]').fill('직접 수정');release();await pending;
  assert.equal(await page.locator('[name="channelSmall"]').inputValue(),'직접 수정');
  assert.notEqual(await page.locator('#lotteCategoryValidation').getAttribute('data-status'),'ready');
+ legacy=true;assert.equal(await page.evaluate(()=>fillMissingLotteCategory()),true);assert.match(await page.locator('#lotteCategoryValidationMessage').innerText(),/서버 재시작/);
  assert.deepEqual(errors,[]);
 });

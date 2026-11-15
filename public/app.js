@@ -258,7 +258,15 @@ async function checkLotteCategory({fillMissing=false}={}){
   const {input,...body}=snapshot;
   const result=await post('lotte-category-suggest',{...body,validateOnly:!fillMissing});
   if(!current())return false;
-  if(!result.bridge||typeof result.bridge.complete!=='boolean')throw Error('분류 연결 결과를 받지 못했습니다. 다시 확인해 주세요.');
+  if(!result.bridge){
+   // Static files can update before the running server is restarted. Preserve
+   // the previously working input flow while that older response is in use.
+   const legacyCategory={...snapshot.category,...result.category};
+   result.category=legacyCategory;
+   result.bridge={complete:lotteCategoryFields.every(key=>String(legacyCategory[key]||'').trim()),review:true,message:'기존 입력 분류로 진행 · 새 연결 규칙은 서버 재시작 후 적용됩니다.'};
+   result.validation=result.validation||{ready:false,issues:[]};
+  }
+  if(typeof result.bridge.complete!=='boolean')throw Error('분류 연결 결과를 받지 못했습니다. 다시 확인해 주세요.');
   if(fillMissing&&result.category){
    const category={...result.category};
    for(const key of lotteCategoryFields){
