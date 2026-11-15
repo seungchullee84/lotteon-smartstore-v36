@@ -86,3 +86,38 @@ test('different official URLs with identical bytes cannot mark two colors comple
   assert.equal(prepared.paletteImages['02라떼'],'/smartstore-photo/latte');
  });
 });
+
+test('includeGallery reuses palette sources and adds two distinct originals only beneath unphotographed colors',async t=>{
+ const f=await fixture(t),prepared=f.makePrepared(),store=structuredClone(prepared),second=new Map();
+ for(const [color,background] of [['01그레이','#789'],['04블랙','#321']])second.set(color,await sharp({create:{width:120,height:160,channels:3,background}}).webp().toBuffer());
+ const secondUrl=color=>'https://www.giordano.co.kr/_data/attach/'+color.slice(0,2)+'-second.webp';let downloads=0;
+ const collectSources=async(...args)=>{const source=await f.collectSources(...args);for(const entry of source.colors)entry.images.push({url:secondUrl(entry.color),imageId:'2',productCut:''});return source;};
+ const fetchImpl=async(url,options)=>{downloads++;const color=f.product.colors.find(color=>url===secondUrl(color));return color?new Response(second.get(color)):f.fetchImpl(url,options);};
+ const options={...f.options,includeGallery:true,collectSources,fetchImpl},result=await prepareOfficialPalette(f.product,prepared,options);
+ assert.equal(f.calls,1);assert.equal(downloads,4);assert.deepEqual(result.gallery.filled,['01그레이','04블랙']);assert.deepEqual(result.gallery.pending,[]);
+ for(const color of ['01그레이','04블랙']){assert.equal(prepared.colorImages[color].length,2);assert.equal(prepared.paletteImages[color],prepared.colorImages[color][0]);assert.equal(prepared.colorSources[color],'official');const [first,next]=prepared.colorImages[color];assert.deepEqual(await readFile(path.join(f.folder,prepared.photoFiles[first])),f.images.get(color));assert.deepEqual(await readFile(path.join(f.folder,prepared.photoFiles[next])),second.get(color));assert.equal(prepared.photoMimeTypes[next],'image/webp');}
+ for(const color of ['02라떼','03초콜렛'])assert.deepEqual(prepared.colorImages[color],store.colorImages[color]);assert.equal(prepared.photoCount,store.photoCount);assert.equal(prepared.heroImage,store.heroImage);
+ const cached=await prepareOfficialPalette(f.product,f.makePrepared(),options);assert.deepEqual(cached.gallery.reused,['01그레이','04블랙']);assert.equal(f.calls,1);assert.equal(downloads,4);
+});
+
+test('gallery best effort skips zero images, retains one available original, and never duplicates an image to reach two',async t=>{
+ const f=await fixture(t),prepared=f.makePrepared();
+ const collectSources=async(...args)=>{const source=await f.collectSources(...args);source.colors=source.colors.filter(entry=>entry.color!=='01그레이');source.failures.push({color:'01그레이',message:'공식 색상 원본 없음'});source.colors[0].images.push({url:'https://www.giordano.co.kr/_data/attach/duplicate.jpg',imageId:'2'});return source;};
+ const fetchImpl=async(url,options)=>url.endsWith('duplicate.jpg')?new Response(f.images.get('04블랙')):f.fetchImpl(url,options);
+ const result=await prepareOfficialPalette(f.product,prepared,{...f.options,includeGallery:true,collectSources,fetchImpl});assert.equal(prepared.colorImages['01그레이'],undefined);assert.equal(prepared.colorImages['04블랙'].length,1);assert.equal(result.gallery.pending.length,2);assert.equal(f.calls,1);assert.deepEqual(prepared.colorImages['02라떼'],['/smartstore-photo/latte']);
+});
+
+test('gallery skips duplicate bytes then uses the next distinct source, and a changed detail aborts second-image attachment',async t=>{
+ for(const change of [false,true])await t.test(String(change),async sub=>{
+  const f=await fixture(sub),prepared=f.makePrepared(),second=await sharp({create:{width:120,height:160,channels:3,background:'#f99'}}).jpeg().toBuffer();
+  const collectSources=async(...args)=>{const source=await f.collectSources(...args);for(const entry of source.colors)entry.images.push({url:entry.mainImageUrl+'?copy=1',imageId:'2'},{url:entry.mainImageUrl+'?second=1',imageId:'3'});return source;};
+  const fetchImpl=async(url,options)=>{if(url.includes('?copy'))return new Response(f.images.get(f.product.colors.find(color=>url.startsWith(f.urlFor(color)))));if(url.includes('?second')){if(change)await writeFile(path.join(f.folder,'detail.jpg'),'changed');return new Response(second);}return f.fetchImpl(url,options);};
+  if(change){await assert.rejects(prepareOfficialPalette(f.product,prepared,{...f.options,includeGallery:true,collectSources,fetchImpl}),{code:'OFFICIAL_PALETTE_SOURCE_CHANGED'});assert.equal(prepared.colorImages['01그레이'],undefined);}
+  else{await prepareOfficialPalette(f.product,prepared,{...f.options,includeGallery:true,collectSources,fetchImpl});assert.equal(prepared.colorImages['01그레이'].length,2);assert.equal(prepared.colorImages['04블랙'].length,1,'same additional bytes cannot label another color');}
+ });
+});
+
+test('non-folder mode regards existing color galleries as palette images and preserves every populated gallery',async t=>{
+ const f=await fixture(t),prepared=f.makePrepared();prepared.acceptAllFolderPhotos=false;prepared.colorImages['01그레이']=['/smartstore-photo/existing-gray'];prepared.colorImages['04블랙']=['/smartstore-photo/existing-black'];const before=structuredClone(prepared);
+ const result=await prepareOfficialPalette(f.product,prepared,{...f.options,includeGallery:true,collectSources:()=>assert.fail('existing galleries need no source request')});assert.deepEqual(result,{filled:[],reused:[],pending:[],gallery:{filled:[],reused:[],pending:[]}});assert.deepEqual(prepared,before);
+});
