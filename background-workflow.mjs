@@ -77,7 +77,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   assertCurrent(s);
   atomic(path.join(s.folder,'background-image.json'),JSON.stringify({file,style:s.style,sourceUrl:s.sourceUrl,sourceKey:s.key,sourceHash:s.sourceHash,outputHash,cacheKey:s.cacheKey,settings:cacheSettings,reviewed:true,createdAt:new Date().toISOString()}));
   const result={ok:true,cached:reused,file,elapsedMs:Math.round(performance.now()-s.started),message:reused?'같은 원본의 검수된 합성 결과를 대표이미지에 적용했습니다.':'원본을 보존한 1500×1500 합성 결과를 대표이미지에 적용했습니다.'};
-  view={status:'complete',style:s.style,key:s.key,...result};active=null;
+  view={status:'complete',style:s.style,key:s.key,jobId:s.jobId,requestId:s.requestId,...result};active=null;
   return result;
  }
  async function prepare(input){
@@ -90,7 +90,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
    if(bytes){s.cachedBytes=bytes;view={status:'checking',style:s.style,key:s.key,message:'같은 원본의 검수된 결과를 찾았습니다. 현재 화면을 재확인합니다.'};return {ok:true,cached:true,applied:false,jobId:s.jobId,message:view.message};}
    view={status:'waiting',style:s.style,key:s.key,message:'채팅에서 배경 생성 후 검수된 결과를 자동 처리합니다.'};
    return {ok:true,cached:false,jobId:s.jobId,sourcePath:s.sourcePath,style:s.style,key:s.key,sourceHash:s.sourceHash};
-  }catch(error){if(active===s){view={status:'cancelled',style:s.style,key:s.key,message:error.message};active=null;}throw error;}
+  }catch(error){if(active===s){view={status:'cancelled',style:s.style,key:s.key,jobId:s.jobId,requestId:s.requestId,message:error.message};active=null;}throw error;}
  }
  function job(jobId){if(!active||active.jobId!==jobId)throw changed();assertCurrent(active);return active;}
  async function stage({jobId,generatedPath}){
@@ -135,6 +135,6 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
  }
  function inspect({jobId}){const s=job(jobId);return {ok:true,jobId,style:s.style,key:s.key,sourcePath:s.sourcePath,sourceHash:s.sourceHash,previewPath:s.staged?.previewPath};}
  function dispatch({jobId}){const s=job(jobId);if(s.dispatched||s.cachedBytes)throw Error('이미 진행 중이거나 재사용할 수 있는 합성 요청입니다.');s.dispatched=true;view={status:'generating',style:s.style,key:s.key,message:'Codex가 원본을 확인하고 배경 합성을 진행합니다.'};return inspect({jobId});}
- function fail({jobId,message}){if(active?.jobId!==jobId)return;active.invalid=true;view={status:'error',style:active.style,key:active.key,message};active=null;}
- return {prepare,stage,complete,select,cancel,invalidate,inspect,dispatch,fail,status:()=>view};
+ function fail({jobId,message}){if(active?.jobId!==jobId)return;active.invalid=true;view={status:'error',style:active.style,key:active.key,jobId:active.jobId,requestId:active.requestId,message};active=null;}
+ return {prepare,stage,complete,select,cancel,invalidate,inspect,dispatch,fail,status:()=>view?{...view,jobId:view.jobId||active?.jobId,requestId:view.requestId||active?.requestId}:null};
 }
