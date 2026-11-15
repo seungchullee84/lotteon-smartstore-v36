@@ -11,6 +11,22 @@ export function standardPaths(catalog,gender){
 }
 export function commonNameFor(path,gender){
  const middle=path.middle.name,leaf=path.small.name,all=middle+' '+leaf;
+ if(path.major.name==='브랜드언더웨어'){
+  if(middle==='남성내의')return gender==='남성'?'남성내의':null;
+  if(middle==='남성런닝')return gender==='남성'?'남성런닝셔츠':null;
+  if(middle==='남성팬티')return gender==='남성'?(/세트/.test(leaf)?'남성속옷세트':'남성팬티'):null;
+  if(middle==='여성내의')return gender==='여성'?'여성내의':null;
+  if(middle==='여성팬티')return gender==='여성'?'여성팬티':null;
+  if(middle==='여성런닝/속바지')return gender==='여성'?(leaf==='슬립'?'슬립':'여성런닝셔츠/캐미솔'):null;
+  if(middle==='브라')return gender==='여성'?'브래지어':null;
+  if(middle==='브라팬티세트')return gender==='여성'?'여성속옷세트':null;
+  if(middle==='보정속옷')return gender==='여성'?(/거들/.test(leaf)?'거들':/니퍼/.test(leaf)?'코르셋':'올인원'):null;
+  if(middle==='커플속옷')return '남여속옷세트';
+  if(middle==='잠옷')return gender+'잠옷';
+  if(middle==='홈웨어/이지웨어')return leaf==='가운'?gender+'가운':gender==='여성'&&leaf==='홈웨어세트'?'홈웨어세트':gender+'실내복';
+  if(middle==='기타')return gender==='여성'?'기타여성속옷':null;
+  return null;
+ }
  if(middle==='정장'){
   if(/세트/.test(leaf))return gender+'정장세트';
   if(/원피스/.test(leaf))return gender+'원피스';
