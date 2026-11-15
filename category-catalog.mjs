@@ -93,7 +93,7 @@ export function resolveCatalogCategory(p,catalog=loadCatalog(),common=null){
  }
  if(isMensUnderwear(p))return {category:{...p.category,...MENS_UNDERWEAR_CATEGORY,channelCodes:undefined},status:'사용자 확인 공통·채널 분류 · 남성의류 → 남성속옷 → 남성내의'};
  if(['잡화','브랜드잡화/넥타이','브랜드가방'].includes(p.category?.channelMajor))return {category:{...p.category},status:'개별 확인 잡화 경로 · 의류 목록 대조 제외'};
- if(/양말|장갑|벨트|머플러|볼캡|버킷햇|비니|백팩|숄더백|토트백|브라|드로즈|팬티/.test(p.rawName||p.name||''))return {category:{...p.category},status:'확인 필요 · 잡화·속옷은 의류 소재 분류로 대체하지 않음'};
+ if(/양말|장갑|벨트|머플러|볼캡|버킷햇|비니|백팩|숄더백|토트백|(?:^|\s)브라(?:렛|탑)?(?:$|\s)|드로즈|팬티/.test(p.rawName||p.name||''))return {category:{...p.category},status:'확인 필요 · 잡화·속옷은 의류 소재 분류로 대체하지 않음'};
  if(!catalog)return {category:{...p.category},status:'목록 미수집'};
  if(!common)try{common=JSON.parse(readFileSync(new URL('./data/category-catalog-common.json',import.meta.url),'utf8'));}catch{}
  const text=[p.rawName||p.name,...(p.sourceCategory||[])].join(' ').replace(/버튼\s*다운|button[-\s]*down/gi,'버튼셔츠').replace(/트리코트/g,'');
