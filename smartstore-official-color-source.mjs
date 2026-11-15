@@ -29,7 +29,10 @@ export function parseOfficialColorOptions(product,html){
  const sourceProductHash=oneValue('pno'),parentHash=oneValue('ppno');
  if(!hashPattern.test(sourceProductHash)||sourceProductHash.toLowerCase()!==url.searchParams.get('pno').toLowerCase()||(parentHash&&!hashPattern.test(parentHash)))throw fail('현재 상품과 공식 페이지의 상품 번호가 다릅니다.');
  const named=$('.style_code_gio[data-clipboard-text]').map((_,node)=>$(node).attr('data-clipboard-text')).get();
- const styles=(named.length?named:[...$('body').text().matchAll(/\bSTYLE\s*[.:]\s*((?:\d{2})?\d{6})(?!\d)/gi)].map(match=>match[1])).map(value=>/^(?:\d{2})?\d{6}$/.test(value)?value.slice(-6):null);
+ const body=$('body').clone();body.find('script,style').remove();
+ const displayed=body.find('*').addBack().contents().filter((_,node)=>node.type==='text').map((_,node)=>$(node).text()).get().join(' ');
+ const declared=[...displayed.matchAll(/\bSTYLE\s*[.:]\s*((?:\d{2})?\d{6})(?!\d)/gi)].map(match=>match[1]);
+ const styles=[...named,...declared].map(value=>/^(?:\d{2})?\d{6}$/.test(value)?value.slice(-6):null);
  if(!styles.length||styles.some(style=>style!==product.style))throw fail('현재 품번과 공식 페이지의 STYLE 번호가 다릅니다.');
  const colorMap=new Map();
  for(const color of product.colors||[]){const key=compact(color);if(!key||colorMap.has(key))throw fail('공식 상품 색상 목록을 확인해 주세요.');colorMap.set(key,color);}
