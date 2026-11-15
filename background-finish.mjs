@@ -9,11 +9,12 @@ async function main(){
  const [action,...args]=process.argv.slice(2);
  const take=flag=>{const i=args.indexOf(flag);return i<0?undefined:args[i+1];};
  const jobId=take('--job');
- if(!['inspect','stage','apply'].includes(action)||!jobId)throw Error('사용법: node background-finish.mjs inspect|stage|apply --job 요청번호 [--image 생성이미지절대경로] [--reviewed]');
- const endpoint={inspect:'background-inspect',stage:'background-result',apply:'background-complete'}[action];
+ if(!['inspect','stage','apply','retry','fail'].includes(action)||!jobId)throw Error('사용법: node background-finish.mjs inspect|stage|apply|retry|fail --job 요청번호 [--image 생성이미지절대경로] [--reviewed --attempt 회차] [--reason 사유]');
+ const endpoint={inspect:'background-inspect',stage:'background-result',apply:'background-complete',retry:'background-retry',fail:'background-fail'}[action];
  const payload={jobId};
  if(action==='stage'){payload.generatedPath=take('--image');if(!payload.generatedPath)throw Error('--image 생성이미지절대경로가 필요합니다.');}
- if(action==='apply'){if(!args.includes('--reviewed'))throw Error('최종 합성 이미지를 직접 확인한 뒤 --reviewed를 지정해 주세요.');payload.reviewed=true;}
+ if(action==='apply'){if(!args.includes('--reviewed'))throw Error('최종 합성 이미지를 직접 확인한 뒤 --reviewed를 지정해 주세요.');payload.reviewed=true;if(take('--attempt')!==undefined)payload.attempt=Number(take('--attempt'));}
+ if(action==='retry'||action==='fail'){payload.reason=take('--reason');if(!payload.reason?.trim())throw Error('--reason에 실제 확인한 문제를 적어 주세요.');}
  const session=JSON.parse(await readFile(path.join(root,'data','active-register-session.json'),'utf8'));
  const origin='http://127.0.0.1:'+session.port;
  const response=await fetch(origin+'/api/'+endpoint,{method:'POST',headers:{origin,cookie:'register_session_'+session.port+'='+session.token,'content-type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(30000)});
