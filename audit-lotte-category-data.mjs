@@ -4,6 +4,7 @@ import {pathToFileURL} from 'node:url';
 import {allLotteStandardPaths,validateLotteCategory} from './lotte-category-validation.mjs';
 import {commonFor} from './category-catalog.mjs';
 import {productClassification,repairCategoryFields} from './product.mjs';
+import {bridgeLotteCategory} from './lotte-category-bridge.mjs';
 const read=name=>JSON.parse(readFileSync(new URL(name,import.meta.url),'utf8'));
 const escape=s=>String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 export function auditLotteCategoryData(){
@@ -22,7 +23,8 @@ export function auditLotteCategoryData(){
     const html='<div class="navi"><a>Home</a>'+(r.sourceCategory||[]).map((x,i)=>'<a'+(i===0?' class="prdpath1"':'')+'>'+escape(x)+'</a>').join('')+'<a>'+escape(r.rawName)+'</a></div>';
     const p={style:r.style,rawName:r.rawName,name:r.rawName,sourceUrl:r.sourceUrl,...productClassification(html)};
     repairCategoryFields(p);const v=validateLotteCategory(p);
-    products.push({style:r.style,name:r.rawName,gender:r.gender,sourceCategory:r.sourceCategory,ready:v.ready,commonPath:v.commonPath,channelPath:v.channelPath,issues:v.issues});
+    const bridge=bridgeLotteCategory(p);
+    products.push({style:r.style,name:r.rawName,gender:r.gender,sourceCategory:r.sourceCategory,ready:v.ready,commonPath:v.commonPath,channelPath:v.channelPath,issues:v.issues,bridge});
   }
   const issueCounts={};for(const p of products.filter(p=>!p.ready))for(const i of p.issues)issueCounts[i.code]=(issueCounts[i.code]||0)+1;
   return {checkedAt:new Date().toISOString(),mode:'offline-catalogue-and-official-records',sellerActions:false,liveTaxonomyRechecked:false,catalogueDate:standard.completedAt,scope:standard.scope,summary:{commonLeaves:(common.genders||[]).reduce((n,g)=>n+g.middles.reduce((n,m)=>n+m.children.length,0),0),standardPaths:paths.length,apparelPaths:paths.filter(p=>p.gender).length,mappedApparelPaths:paths.filter(p=>p.gender&&p.common).length,unmappedApparelPaths:paths.filter(p=>p.gender&&!p.common).length,products:products.length,ready:products.filter(p=>p.ready).length,review:products.filter(p=>!p.ready).length,issueCounts},paths,products};

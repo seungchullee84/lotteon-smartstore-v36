@@ -7,6 +7,7 @@ import path from 'node:path';
 import os from 'node:os';
 import {suggestMissingLotteCategory} from '../lotte-category-suggest.mjs';
 import {validateLotteCategory} from '../lotte-category-validation.mjs';
+import {bridgeLotteCategory} from '../lotte-category-bridge.mjs';
 
 async function botPage(browser){
  const page=await browser.newPage();page.setDefaultTimeout(1000);
@@ -147,4 +148,15 @@ test('ambiguous Add is never repeated and never learned as success',async t=>{
  const bot=new LotteAutomation(root,()=>{});bot.page={waitForTimeout:async()=>{}};bot.settle=async()=>{};bot.assertChannelStyle=async()=>{};bot.similarCategoryClick=async()=>{};let adds=0;
  bot.addStandardCategory=async()=>{adds++;throw Error('추가 반영 확인 실패');};
  await assert.rejects(bot.selectMatchedChannelCategory(p),/추가 반영/);assert.equal(adds,1);await assert.rejects(readFile(path.join(root,'category-matches.json')),e=>e.code==='ENOENT');
+});
+
+test('first-category broader matches still select and add a second category without a semantic-confidence stop',async t=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'lotte-first-'));t.after(()=>rm(root,{recursive:true,force:true}));
+ const p={style:'540902',gender:'여성',rawName:'지워머 브라 티셔츠',category:{commonMajor:'L0011 : 여성의류',commonMiddle:'M0205 : 여성속옷',commonSmall:'00709 : 여성내의'}};
+ const planned=bridgeLotteCategory(p);assert.equal(planned.complete,true);assert.equal(planned.review,true);
+ const bot=new LotteAutomation(root,()=>{}),selected=[];bot.page={waitForTimeout:async()=>{}};bot.settle=bot.assertChannelStyle=async()=>{};
+ bot.similarCategoryClick=async(name,level,{code})=>{assert.ok(code);selected.push(name);};
+ let additions=0;bot.addStandardCategory=async()=>{additions++;};
+ await bot.selectMatchedChannelCategory(p);
+ assert.deepEqual(selected,[planned.category.channelMajor,planned.category.channelMiddle,planned.category.channelSmall]);assert.equal(additions,1);
 });
