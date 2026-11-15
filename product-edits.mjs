@@ -2,10 +2,11 @@ import {readFile,writeFile,mkdir,rename} from 'node:fs/promises';
 import path from 'node:path';
 import {channelCategoryPath} from './category.mjs';
 import {validateTemplateHeadline} from './smartstore-template-headline.mjs';
+import {readManualLotteCategory} from './lotte-category-choice.mjs';
 
 const strings=['name','gender','material','country','washing','manufactured','keywords','smartstoreName','templateHeadline','templateHeadline1','templateHeadline2'];
 const categories=['commonMiddle','commonSmall','channelMiddle','channelSmall'];
-const allowed=new Set([...strings,...categories,'consumerPrice','colors','sizes']);
+const allowed=new Set([...strings,...categories,'consumerPrice','colors','sizes','lotteCategorySelection']);
 export function validateProductEdits(record,expectedStyle=record?.style){
  if(!/^\d{6}$/.test(record?.style||'')||record.style!==expectedStyle)throw Error('수정 정보의 품번이 현재 상품과 다릅니다.');
  if(!record.fields||typeof record.fields!=='object'||Array.isArray(record.fields))throw Error('수정 항목을 확인해 주세요.');
@@ -13,6 +14,7 @@ export function validateProductEdits(record,expectedStyle=record?.style){
  for(const [key,value] of Object.entries(record.fields)){
   if(!allowed.has(key)||typeof value!=='string'||value.length>2000)throw Error('저장할 수 없는 수정 항목입니다: '+key);
   if(key==='consumerPrice'&&value!==''&&(!Number.isSafeInteger(Number(value))||Number(value)<0||Number(value)>100000000))throw Error('소비자가 수정값을 확인해 주세요.');
+  if(key==='lotteCategorySelection'&&value){const selection=JSON.parse(value);if(selection.version!==1||selection.style!==record.style||!selection.category)throw Error('직접 선택한 분류의 품번을 확인해 주세요.');}
   fields[key]=/^templateHeadline[12]?$/.test(key)?validateTemplateHeadline(value):value;
  }
  return {style:record.style,fields};
@@ -21,7 +23,11 @@ export function applyProductEdits(product,record){
  if(!record)return product;
  const {fields}=validateProductEdits(record,product.style);
  const result={...product,category:{...product.category},userEditedFields:{...fields}};
+ let manual=null,invalidManual=false;
+ if(fields.lotteCategorySelection){try{manual=readManualLotteCategory({...product,gender:fields.gender||product.gender},JSON.parse(fields.lotteCategorySelection),{checkCurrent:false});}catch{invalidManual=true;delete result.userEditedFields.lotteCategorySelection;}}
  for(const [key,value] of Object.entries(fields)){
+  if(key==='lotteCategorySelection')continue;
+  if(invalidManual&&categories.includes(key)){delete result.userEditedFields[key];continue;}
   // A previous unreadable-material blank must not erase a fresh official reading or lock out recovery.
   if(key==='material'&&!value.trim()){delete result.userEditedFields.material;continue;}
   if(categories.includes(key))result.category[key]=value;
@@ -30,7 +36,11 @@ export function applyProductEdits(product,record){
   else result[key]=value;
  }
  if(Object.hasOwn(fields,'smartstoreName'))result.smartstoreNameUserEdited=true;
- if(['니트머플러','남성내의','머플러'].includes(result.category.channelSmall?.trim()))result.category=channelCategoryPath(result.category);
+ if(manual)result.category=manual;
+ else{
+  if(Object.hasOwn(fields,'lotteCategorySelection')||Object.keys(fields).some(key=>categories.includes(key)))delete result.category.manualSelection;
+  if(['니트머플러','남성내의','머플러'].includes(result.category.channelSmall?.trim()))result.category=channelCategoryPath(result.category);
+ }
  return result;
 }
 export function createProductEditStore(dataRoot){

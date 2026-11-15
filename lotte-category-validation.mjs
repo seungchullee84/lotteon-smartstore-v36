@@ -19,13 +19,13 @@ const nodeMatches=(input,node)=>sameCategoryLabel(input,node.code+' : '+node.nam
 export function allLotteStandardPaths(catalog=data('category-catalog-standard.json')){
   return (catalog?.majors||[]).flatMap(major=>(major.middles||[]).flatMap(middle=>(middle.smalls||[]).flatMap(small=>(small.details?.length?small.details:[null]).map(detail=>({major,middle,small,detail})))));
 }
-function accessoryCommon(c){
-  const paths=[
+export const LOTTE_ACCESSORY_COMMON_PATHS=[
     ['L0001 : 패션/장신','M0357 : 패션액세서리','01068 : 머플러'],
     ['L0022 : 가방/피혁잡화','M0307 : 벨트','01033 : 남성벨트'],
     ['L0022 : 가방/피혁잡화','M0307 : 벨트','01032 : 여성벨트'],
-  ];
-  return paths.find(p=>(!c.commonMajor||sameCategoryLabel(c.commonMajor,p[0]))&&sameCategoryLabel(c.commonMiddle,p[1])&&sameCategoryLabel(c.commonSmall,p[2]));
+];
+function accessoryCommon(c){
+  return LOTTE_ACCESSORY_COMMON_PATHS.find(p=>(!c.commonMajor||sameCategoryLabel(c.commonMajor,p[0]))&&sameCategoryLabel(c.commonMiddle,p[1])&&sameCategoryLabel(c.commonSmall,p[2]));
 }
 function verifiedAccessory(product,c,matches){
   if(!['잡화','브랜드가방'].includes(c.channelMajor)||c.channelDetail)return null;

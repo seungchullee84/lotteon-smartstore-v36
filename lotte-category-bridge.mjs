@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {commonFor,loadCatalog,standardPaths} from './category-catalog.mjs';
 import {categoryAlternatives,MENS_UNDERWEAR_CATEGORY} from './category.mjs';
 import {sameCategoryLabel,validateLotteCategory,allLotteStandardPaths} from './lotte-category-validation.mjs';
+import {readManualLotteCategory} from './lotte-category-choice.mjs';
 
 const read=name=>JSON.parse(readFileSync(new URL('./data/'+name,import.meta.url),'utf8'));
 const label=s=>String(s||'').replace(/^[A-Z0-9]+\s*[:：]\s*/i,'').replace(/\s/g,'');
@@ -55,6 +56,13 @@ function broaderCandidates(common,paths,gender){
 }
 export function bridgeLotteCategory(product,{standard=loadCatalog(),common=read('category-catalog-common.json')}={}){
  const before={...product.category},first=commonPath(product,common);
+ if(before.manualSelection){
+  try{
+   const category=readManualLotteCategory(product,before.manualSelection,{standard,common});
+   const validation=validateLotteCategory({...product,category},{standard,common});
+   return {complete:true,manual:true,review:!validation.ready,category,message:'직접 선택한 1차·2차 분류를 유지합니다.'};
+  }catch(error){return {complete:false,review:true,category:before,message:error.message};}
+ }
  if(!before.commonMiddle?.trim()||!before.commonSmall?.trim())return {complete:false,review:true,category:before,message:'1차 공통분류를 먼저 채워 주세요.'};
  if(!first){
   const requested=label(before.commonSmall),allPaths=allLotteStandardPaths(standard);
