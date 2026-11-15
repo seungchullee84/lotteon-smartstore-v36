@@ -20,7 +20,9 @@
    const select=document.createElement('select');select.id='lotteCategory'+(kind==='common'?'Common':'Channel')+index;
    select.className='lotte-category-inline-select';select.setAttribute('aria-label',(kind==='common'?'1차 ':'2차 ')+labels[index]);
    select.setAttribute('aria-describedby',hint.id);select.addEventListener('change',()=>change(kind,index,select.value));
-   field.append(label,select);container.append(field);controls[kind].push(select);
+   const choice=document.createElement('span');choice.className='lotte-category-inline-choice';
+   const value=document.createElement('span');value.className='lotte-category-inline-value';value.setAttribute('aria-hidden','true');
+   choice.append(value,select);field.append(label,choice);container.append(field);controls[kind].push(select);
   }
  }
  function editable(){
@@ -35,7 +37,7 @@
   return commonKeys.every((key,i)=>(String(now.category[key]||'').match(/^([A-Z0-9]+)\s*[:：]/i)?.[1]||'')===draft.common[i])&&
    levels.every((key,i)=>(now.category.channelCodes?.[key]||'')===(draft.channel[i]||''));
  }
- function stopAutomaticCheck(){clearTimeout(lotteCategoryTimer);++lotteCategoryRequest;lotteCategoryPending=false;byId('lotteCategorySuggest').disabled=false;}
+ function stopAutomaticCheck(){clearTimeout(lotteCategoryTimer);++lotteCategoryRequest;lotteCategoryPending=false;}
  function selectedNodes(kind){
   const nodes=[];let siblings=catalog?.[kind]||[];
   for(const code of draft[kind]){const node=siblings.find(item=>item.code===code);if(!node)break;nodes.push(node);siblings=node.children||[];}
@@ -61,14 +63,15 @@
     if(select.dataset.options!==optionKey){select.replaceChildren(new Option(labels[index]+' 선택',''),...siblings.map(node=>new Option(node.name,node.code)));select.dataset.options=optionKey;}
     const value=selected?.code||'';if(select.value!==value)select.value=value;
     select.title=selected?selected.code+' : '+selected.name:labels[index]+' 선택';
+    select.previousElementSibling.textContent=selected?.name||labels[index]+' 선택';
     select.disabled=!editable()||!catalog||saving||!siblings.length||(kind==='channel'&&pending);
-    select.parentElement.hidden=kind==='channel'&&index===3&&!siblings.length;
+    select.parentElement.classList.toggle('is-disabled',select.disabled);
+    select.closest('.lotte-category-level').hidden=kind==='channel'&&index===3&&!siblings.length;
     siblings=selected?.children||[];
    }
   }
   cancel.hidden=!dirty;cancel.disabled=saving;
   retry.hidden=!loadError&&!saveError;retry.disabled=loading||pending||saving||(!loadError&&!editable());retry.textContent=loadError?'목록 다시 불러오기':'다시 반영';
-  byId('lotteCategorySuggest').disabled=dirty||pending||saving||lotteCategoryPending;
   panel.setAttribute('aria-busy',String(pending||saving));
  }
  function message(text,error=false){hint.textContent=text;hint.classList.toggle('is-error',error);}

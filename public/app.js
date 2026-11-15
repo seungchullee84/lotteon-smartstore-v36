@@ -271,16 +271,13 @@ function renderLotteCategoryValidation(validation,status=validation?.status||'pe
   list.replaceChildren(...issues.map(issue=>{const item=document.createElement('li');item.textContent=issue.message;return item;}));list.dataset.issues=JSON.stringify(issues);
  }
  list.hidden=!issues.length;
- const catalogDate=String(validation?.catalogDate||'').match(/^\d{4}-\d{2}-\d{2}/)?.[0];
- setText($('lotteCategoryValidationScope'),(catalogDate?'목록 기준일 '+catalogDate.replaceAll('-','.')+' · ':'')+(validation?.scope?validation.scope+' · ':'')+'판매처의 실제 선택 결과는 입력 단계에서 다시 확인합니다.');
- if($('lotteCategoryCodes'))setText($('lotteCategoryCodes'),'1차 코드 포함 경로: '+commonPath.map(value=>value||'미지정').join(' → '));
 }
 async function checkLotteCategory({fillMissing=false}={}){
  clearTimeout(lotteCategoryTimer);
  if(!product||activeChannel()!=='lotte'||window.lotteCategoryInline?.isEditing())return false;
  const snapshot=lotteCategorySnapshot(),signature=JSON.stringify(snapshot),request=++lotteCategoryRequest;
  const current=()=>request===lotteCategoryRequest&&activeChannel()==='lotte'&&JSON.stringify(lotteCategorySnapshot())===signature;
- lotteCategoryPending=true;$('lotteCategorySuggest').disabled=true;renderLotteCategoryValidation(null,'loading');
+ lotteCategoryPending=true;renderLotteCategoryValidation(null,'loading');
  try{
   const {input,...body}=snapshot;
   const result=await post('lotte-category-suggest',{...body,validateOnly:!fillMissing});
@@ -309,23 +306,21 @@ async function checkLotteCategory({fillMissing=false}={}){
   window.lotteCategoryInline?.showAutomatic(result.category);
   const display={...result.validation,summary:result.bridge.message,commonPath:[result.category.commonMajor,result.category.commonMiddle,result.category.commonSmall],channelPath:[result.category.channelMajor,result.category.channelMiddle,result.category.channelSmall,...(result.category.channelDetail?[result.category.channelDetail]:[])]};
   renderLotteCategoryValidation(display,result.bridge.complete?(result.bridge.manual?'manual':result.bridge.review||!result.validation.ready?'review':'ready'):'blocked');
-  setText($('lotteCategorySuggestionStatus'),fillMissing?result.bridge.message||'':'');
   return result.bridge.complete;
  }catch(error){
   if(current()){lotteCategoryChecked=signature;renderLotteCategoryValidation({summary:error.message,issues:[{code:'CHECK_FAILED',message:'분류 연결을 다시 시도해 주세요.'}]},'error');}
   return false;
- }finally{if(request===lotteCategoryRequest){lotteCategoryPending=false;$('lotteCategorySuggest').disabled=false;}}
+ }finally{if(request===lotteCategoryRequest)lotteCategoryPending=false;}
 }
 function scheduleLotteCategoryCheck(){
  if(!product||activeChannel()!=='lotte'||window.lotteCategoryInline?.isEditing())return;
  const signature=JSON.stringify(lotteCategorySnapshot());
  if(signature===lotteCategoryChecked)return;
- clearTimeout(lotteCategoryTimer);lotteCategoryRequest++;lotteCategoryPending=false;$('lotteCategorySuggest').disabled=false;
+ clearTimeout(lotteCategoryTimer);lotteCategoryRequest++;lotteCategoryPending=false;
  renderLotteCategoryValidation(null,'pending');
  lotteCategoryTimer=setTimeout(()=>void checkLotteCategory(),350);
 }
 async function fillMissingLotteCategory(){if(window.lotteCategoryInline&&!await window.lotteCategoryInline.beforeInput())return false;return checkLotteCategory({fillMissing:true});}
-$('lotteCategorySuggest').onclick=()=>{if(!lotteCategoryPending)void fillMissingLotteCategory();};
 $('form').addEventListener('input',event=>{
  if(!product||!['name','gender',...lotteCategoryFields].includes(event.target.name))return;
  const key=event.target.name;
