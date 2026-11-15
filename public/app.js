@@ -239,20 +239,33 @@ function lotteCategorySnapshot(){
  const form=$('form');
  return {style:product.style,sourceUrl:product.sourceUrl,input:$('style').value,gender:form.elements.gender.value,name:form.elements.name.value.trim(),category:{...product.category,...Object.fromEntries(lotteCategoryFields.map(key=>[key,form.elements[key].value.trim()]))}};
 }
+function renderLotteCategoryPath(element,values){
+ const path=values.map(value=>String(value||'미지정')),signature=JSON.stringify(path);
+ if(element.dataset.path===signature)return;
+ const names=path.map(value=>value.replace(/^[A-Z0-9]+\s*[:：]\s*/i,''));
+ const parents=document.createElement('span');parents.className='lotte-category-parents';parents.textContent=names.slice(0,-1).join(' › ');
+ const selected=document.createElement('strong');selected.className='lotte-category-selected';selected.textContent=names.at(-1)||'미지정';
+ element.replaceChildren(parents,selected);element.title=path.join(' → ');element.dataset.path=signature;
+}
 function renderLotteCategoryValidation(validation,status=validation?.status||'pending'){
  const panel=$('lotteCategoryValidation'),snapshot=lotteCategorySnapshot(),category=snapshot?.category||{};
  panel.dataset.status=status;
- const label=status==='manual'?'직접 선택한 분류 유지':status==='ready'?'1차 기준 2차 연결 완료':status==='review'?'2차 연결 완료 · 세부 수정 가능':status==='loading'?'상품분류 연결 중…':status==='pending'?'입력값 변경 · 다시 연결 중':status==='error'?'분류 연결 확인 실패':'1차 상품분류 확인 필요';
+ const label=status==='manual'?'직접 선택한 분류 유지':status==='ready'?'자동 연결 완료':status==='review'?'연결 완료 · 세부 확인':status==='loading'||status==='pending'?'분류 연결 중…':status==='error'?'연결 확인 필요':'1차 분류 선택 필요';
  setText($('lotteCategoryValidationSummary'),label);
- setText($('lotteCategoryValidationMessage'),validation?.summary||'현재 공통·채널 분류를 저장된 롯데 목록과 대조합니다.');
- setText($('lotteCategoryCommonPath'),(validation?.commonPath||[category.commonMajor,category.commonMiddle,category.commonSmall]).map(value=>value||'미지정').join(' → '));
- setText($('lotteCategoryChannelPath'),(validation?.channelPath||[category.channelMajor,category.channelMiddle,category.channelSmall,...(category.channelDetail?[category.channelDetail]:[])]).map(value=>value||'미지정').join(' → '));
+ const message=$('lotteCategoryValidationMessage');
+ setText(message,validation?.summary||'분류 수정에서 1차 분류를 선택해 주세요.');message.hidden=['ready','manual','loading','pending'].includes(status);
+ const commonPath=validation?.commonPath||[category.commonMajor,category.commonMiddle,category.commonSmall];
+ const channelPath=validation?.channelPath||[category.channelMajor,category.channelMiddle,category.channelSmall,...(category.channelDetail?[category.channelDetail]:[])];
+ renderLotteCategoryPath($('lotteCategoryCommonPath'),commonPath);
+ renderLotteCategoryPath($('lotteCategoryChannelPath'),channelPath);
  const issues=validation?.issues||[],list=$('lotteCategoryValidationIssues');
  if(list.dataset.issues!==JSON.stringify(issues)){
   list.replaceChildren(...issues.map(issue=>{const item=document.createElement('li');item.textContent=issue.message;return item;}));list.dataset.issues=JSON.stringify(issues);
  }
  list.hidden=!issues.length;
- setText($('lotteCategoryValidationScope'),(validation?.catalogDate?'목록 기준일 '+validation.catalogDate+' · ':'')+(validation?.scope?validation.scope+' · ':'')+'판매처의 실제 선택 결과는 입력 단계에서 다시 확인합니다.');
+ const catalogDate=String(validation?.catalogDate||'').match(/^\d{4}-\d{2}-\d{2}/)?.[0];
+ setText($('lotteCategoryValidationScope'),(catalogDate?'목록 기준일 '+catalogDate.replaceAll('-','.')+' · ':'')+(validation?.scope?validation.scope+' · ':'')+'판매처의 실제 선택 결과는 입력 단계에서 다시 확인합니다.');
+ if($('lotteCategoryCodes'))setText($('lotteCategoryCodes'),'1차 코드 포함 경로: '+commonPath.map(value=>value||'미지정').join(' → '));
 }
 async function checkLotteCategory({fillMissing=false}={}){
  clearTimeout(lotteCategoryTimer);

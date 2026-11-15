@@ -18,7 +18,7 @@ test('first category supplies the second without a confidence stop, and stale re
  await page.addScriptTag({content:'const $=id=>document.getElementById(id);let product='+JSON.stringify(base)+';const activeChannel=()=>"lotte",setText=(e,t)=>e.textContent=t;const post=(route,body)=>window.categoryRequest(body);'+code});
  await page.evaluate(fields=>{for(const n of fields)document.querySelector('[name="'+n+'"]').value=product.category[n]||product[n];},fields);
  assert.equal(await page.evaluate(()=>fillMissingLotteCategory()),true);assert.ok(requests>=1,'complete fields must still reach validation');
- assert.equal(await page.locator('#lotteCategoryValidationSummary').innerText(),'1차 기준 2차 연결 완료');
+ assert.equal(await page.locator('#lotteCategoryValidationSummary').innerText(),'자동 연결 완료');
  await page.locator('[name="channelMiddle"]').fill('없는 중분류');
  assert.equal(await page.evaluate(()=>fillMissingLotteCategory()),true);
  assert.equal(await page.locator('[name="channelMiddle"]').inputValue(),'트레이닝복');

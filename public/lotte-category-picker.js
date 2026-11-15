@@ -6,7 +6,9 @@
  const clean=value=>String(value||'').replace(/^[A-Z0-9]+\s*[:：]\s*/i,'').replace(/\s/g,'');
  const tools=document.createElement('div');tools.className='lotte-category-picker-tools';tools.dataset.channelOnly='lotte';
  const openButton=document.createElement('button');openButton.id='lotteCategoryEdit';openButton.type='button';openButton.className='secondary';openButton.textContent='분류 수정';
- const hint=document.createElement('span');hint.textContent='자동으로 연결해 두었어요. 다르면 목록에서 수정하세요.';tools.append(openButton,hint);panel.before(tools);
+ openButton.setAttribute('title','자동으로 연결된 분류를 직접 수정합니다.');
+ tools.append(openButton);
+ const actions=byId('lotteCategoryActions');if(actions)actions.append(tools);else panel.before(tools);
  const dialog=document.createElement('dialog');dialog.id='lotteCategoryPicker';dialog.className='lotte-category-dialog';dialog.setAttribute('aria-labelledby','lotteCategoryPickerTitle');
  dialog.innerHTML='<header><div><small id="lotteCategoryPickerStyle"></small><h2 id="lotteCategoryPickerTitle">상품분류 선택</h2><p>대분류부터 순서대로 선택하세요. 1차를 바꾸면 2차가 자동으로 연결돼요.</p></div><button type="button" class="secondary" id="lotteCategoryPickerClose" aria-label="분류 선택 닫기">×</button></header><div class="lotte-category-modal-body"><section><div class="lotte-category-picker-heading"><h3>1차 공통분류</h3><span>상품의 기본 종류</span></div><div id="lotteCommonColumns" class="lotte-category-columns common"></div><p id="lotteCommonChoice" class="lotte-category-choice-path"></p></section><section><div class="lotte-category-picker-heading"><h3>2차 채널분류</h3><button id="lotteCategoryReconnect" type="button" class="secondary">1차 기준으로 다시 연결</button></div><div id="lotteChannelColumns" class="lotte-category-columns"></div><p id="lotteChannelChoice" class="lotte-category-choice-path"></p></section><p id="lotteCategoryPickerMessage" role="status" aria-live="polite"></p><p id="lotteCategoryPickerScope" class="note"></p></div><footer><span>등록기 분류에만 반영돼요.</span><div><button type="button" class="secondary" id="lotteCategoryPickerCancel">취소</button><button type="button" id="lotteCategoryPickerApply">선택한 분류 적용</button></div></footer>';
  document.body.append(dialog);
