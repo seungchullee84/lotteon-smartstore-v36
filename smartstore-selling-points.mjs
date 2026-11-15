@@ -183,6 +183,12 @@ export function completeSellingPoints(points,source,{limit=4}={}){
 }
 export function assertRequiredSellingPoints(detail){
  if(detail?.sellingPointReview?.status==='needs-review'||!Array.isArray(detail?.sellingPoints)||detail.sellingPoints.length<2||detail.sellingPoints.length>4)throw Error('공식 상품 설명과 상세이미지에서 서로 다른 구매 장점 2~4개를 확인해야 합니다.');
+ assertSellingPointDisplay(detail.sellingPoints);
+}
+
+export function assertSellingPointDisplay(points){
+ const missing=points.filter(point=>displaySellingPoints([point]).length!==1);
+ if(missing.length)throw Error('선택한 소구점의 표시 문구를 확인해야 합니다: '+missing.map(point=>point.title).join(', ')+' · 일부만 적용하지 않았습니다.');
 }
 
 // Normalize customer-facing benefit copy only; preserve official evidence verbatim.
@@ -190,6 +196,9 @@ const hasFinalConsonant=text=>{const c=text.charCodeAt(text.length-1);return c>=
 export function friendlyBenefitDescription(value){
  const sentence=part=>{
   let text=part.trim().replace(/[.!?]+$/,'');if(!text||!completeCopy(text)||!cleanSource(text))return '';
+  // Keep the evidence untouched. Omit an unreadable weight unit instead of
+  // guessing its exponent, and correct this unambiguous OCR phrase in copy only.
+  text=text.replace(/^\d+(?:\.\d+)?\s*g\s*\/\s*m[*?]\s*(?:중량의\s*)?/i,'').replace(/피부에\s*당는/g,'피부에 닿는').replace(/폴리ㆍ레이온/g,'폴리·레이온');
   // Repair old display copy too. A verb/adjective stem is never a noun predicate.
   text=text.replace(/(포근|따뜻|편안|탄탄|쾌적|유연|시원|지지|제공|유지|조절|연출|구현|확보|완성|강화|최소화|활용|수납|커버|가능)(?:이에요|예요)$/,'$1');
   if(/요$/.test(text))return text+'.';
@@ -214,8 +223,8 @@ export function friendlyBenefitDescription(value){
   if(/(?:깔끔하게|자연스럽게|멋스럽게|감각적으로|고급스럽게|스포티하게)$/.test(text))return text+' 연출할 수 있어요.';
   if(/가능$/.test(text))return text+'해요.';
   if(/밴드.*스트링.*허리.*조절\s*용이$/.test(text))return '허리 밴드와 스트링으로 둘레를 조절할 수 있어요.';
-  const action=text.match(/^(.+?)\s+(제공|유지|조절|연출|구현|확보|완성|강화|최소화|지지|활용|수납|커버)$/);
-  if(action){const [,subject,verb]=action,object=/(?:으로|로|을|를|게|에|에서|에도|없이)$/.test(subject)?subject:subject+(hasFinalConsonant(subject)?'을':'를');return object+' '+({제공:'제공해요',유지:'유지해요',조절:'조절할 수 있어요',연출:'연출할 수 있어요',구현:'구현했어요',확보:'확보했어요',완성:'완성해요',강화:'강화했어요',최소화:'최소화했어요',지지:'받쳐줘요',활용:'활용할 수 있어요',수납:'수납할 수 있어요',커버:'커버해줘요'}[verb])+'.';}
+  const action=text.match(/^(.+?)\s+(제공|유지|조절|연출|구현|확보|완성|강화|최소화|지지|활용|수납|커버|사용|선사)$/);
+  if(action){const [,subject,verb]=action,object=/(?:으로|로|을|를|게|에|에서|에도|없이)$/.test(subject)?subject:subject+(hasFinalConsonant(subject)?'을':'를');return object+' '+({제공:'제공해요',유지:'유지해요',조절:'조절할 수 있어요',연출:'연출할 수 있어요',구현:'구현했어요',확보:'확보했어요',완성:'완성해요',강화:'강화했어요',최소화:'최소화했어요',지지:'받쳐줘요',활용:'활용할 수 있어요',수납:'수납할 수 있어요',커버:'커버해줘요',사용:'사용했어요',선사:'선사해요'}[verb])+'.';}
   if(/(?:습니다|니다)$/.test(text))return '';
   // Only known noun phrases take 이에요/예요; unknown fragments stay out of copy.
   if(/(?:착용감|촉감|터치감|감촉|보온성|복원력|신축성|내구성|활동성|두께감|실루엣|디자인|원단|소재|스판|충전재|외피|겉감|안감|텍스처|짜임|패턴|기장|핏|아이템|스웨터|가디건|머플러|디테일|포인트|컬러|색감|구조)$/.test(text))return text+(hasFinalConsonant(text)?'이에요.':'예요.');
@@ -224,7 +233,7 @@ export function friendlyBenefitDescription(value){
  return String(value||'').split(/(?<=[.!?])\s+/).map(sentence).filter(Boolean).join(' ');
 }
 export function displaySellingPoints(points,{tone=true}={}){
- const copy=value=>String(value||'').replace(/브러쉬드|브러시드|brushed/gi,'기모');
+ const copy=value=>String(value||'').replace(/브러쉬드|브러시드|brushed|브러쉬(?=\s*표면\s*가공)|브러시(?=\s*표면\s*가공)/gi,'기모');
  return points.filter(point=>completeCopy(point.description)&&cleanSource(point.description)&&(!point.evidence||cleanSource(point.evidence))).map(point=>({...point,title:copy(point.title).replace(/^가볍게 입기 좋게$/,'가벼운 착용감'),description:tone?friendlyBenefitDescription(copy(point.description)):copy(point.description),...(point.shortTitle?{shortTitle:copy(point.shortTitle)}:{})})).filter(point=>point.description);
 }
 // Use the product's supported benefits to summarize the opening in one line.

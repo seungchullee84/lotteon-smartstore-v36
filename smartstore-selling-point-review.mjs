@@ -3,7 +3,7 @@ import {catalogImageSource,saveRegistrationBenefits} from './official-benefit-ca
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {officialSellingPoints,usableSellingPoints,officialImageBenefitText,completeSellingPoints,appendDistinctSellingPoints} from './smartstore-selling-points.mjs';
+import {officialSellingPoints,usableSellingPoints,officialImageBenefitText,completeSellingPoints,appendDistinctSellingPoints,displaySellingPoints} from './smartstore-selling-points.mjs';
 import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 const digest=text=>createHash('sha256').update(text).digest('hex');
 const sourceJobs=new Map();
@@ -44,23 +44,24 @@ export async function reviewSellingPoints(product,source,{dataRoot,detailHash=nu
  signal?.throwIfAborted();
  const identity={version:14,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
  const root=path.join(dataRoot,'smartstore-details',product.style),file=path.join(root,'selling-point-review.json');
- const finish=async(record,text=source)=>{
-  let points=record.points?.length>=3?record.points.slice(0,4):completeSellingPoints(record.points,text);
-  if(supplement){
+ const finish=async(record,text=source,{preserveSelection=false}={})=>{
+  let points=preserveSelection||record.points?.length>=3?record.points.slice(0,4):completeSellingPoints(record.points,text);
+  if(supplement&&!preserveSelection){
    const preserved=(record.method==='user-selected-official-points'||record.method==='visual-official-detail'?record.points:existing)||[];
    const verified=preserved.filter(point=>usableSellingPoints([point],text));
    points=appendDistinctSellingPoints(verified,points,text);
    points=await supplementSellingPoints(product,points,text,{dataRoot,detailHash,signal,log});
   }
   signal?.throwIfAborted();
-  const ready=usableSellingPoints(points,text)&&points.length>=2&&points.length<=4;
-  const result={...record,points,omitted:false,status:ready?'ready':'needs-review',message:ready?'공식 근거 구매 장점 '+points.length+'개 적용':'공식 상품 설명·상세이미지에서 서로 다른 구매 장점 2~4개 확인 필요'};
+  const displayed=displaySellingPoints(points),missing=points.filter(point=>!displayed.some(shown=>shown.evidence===point.evidence&&shown.description));
+  const ready=usableSellingPoints(points,text)&&points.length>=2&&points.length<=4&&!missing.length;
+  const result={...record,points,omitted:false,status:ready?'ready':'needs-review',message:ready?'공식 근거 구매 장점 '+points.length+'개 적용':missing.length?'소구점 표시 문구 확인 필요: '+missing.map(point=>point.title).join(', '):'공식 상품 설명·상세이미지에서 서로 다른 구매 장점 2~4개 확인 필요'};
   if(persist){await mkdir(root,{recursive:true});await writeFile(file,JSON.stringify(result,null,2));}
   return result;
  };
  let selection;try{selection=JSON.parse(await readFile(path.join(root,'selling-point-selection.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(selection?.style===product.style&&selection.sourceUrl===product.sourceUrl&&selection.detailHash===detailHash&&(detailHash||selection.textHash===digest(source))&&selection.points?.length>=1&&selection.points.length<=4&&usableSellingPoints(selection.points,source)){
-  return finish({...identity,method:'user-selected-official-points',points:selection.points,reviewedAt:selection.selectedAt});
+  return finish({...identity,method:'user-selected-official-points',points:selection.points,reviewedAt:selection.selectedAt},source,{preserveSelection:selection.method==='user-selected-official-points'&&selection.points.length>=2});
  }
  let imageReview;try{imageReview=JSON.parse(await readFile(path.join(root,'selling-point-image-review.json'),'utf8'));}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
  if(detailHash&&imageReview?.version===1&&imageReview.style===product.style&&imageReview.sourceUrl===product.sourceUrl&&imageReview.detailHash===detailHash&&imageReview.points?.length<=4&&usableSellingPoints(imageReview.points,imageReview.text)){

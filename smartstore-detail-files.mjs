@@ -245,7 +245,7 @@ export async function saveSmartstoreDetail(product,folder,output,options={}){
 export async function renderPreparedSmartstoreDetail(p,folder,output,{signal,...options}={}){
  const videoOptions={...productVideoOptions(p),...options.videoOptions};
  await requireBrandVideo(options.dataRoot,videoOptions);
- assertRequiredSellingPoints({...p.smartstoreDetail,sellingPoints:displaySellingPoints(p.smartstoreDetail.sellingPoints)});const data=new Map();
+ assertRequiredSellingPoints(p.smartstoreDetail);const data=new Map();
  const check=()=>{if(signal?.aborted)throw Error('상세페이지 만들기를 중단했습니다.');};check();
  for(const name of TEMPLATE_ASSET_NAMES.filter(n=>!n.endsWith('.ttf'))){check();data.set(TEMPLATE_ASSET_BASE+name,'data:image/'+(name.endsWith('.png')?'png':'jpeg')+';base64,'+(await readFile(path.join(assetsRoot,name))).toString('base64'));}
  for(const [key,src] of Object.entries(p.images)){
