@@ -17,6 +17,12 @@ test('모든 품번은 구매 장점 2~4개와 사진 연결을 모두 확인한
  }
 });
 
+test('상세사진 개수에는 하단 공식 보완 컷을 포함하고 팔레트 중복은 세지 않는다',()=>{
+ const detail={photoCount:3,sellingPoints:[{},{}],colorImages:{'01화이트':['a','b','c'],'02블랙':['d','e']},paletteImages:{'01화이트':'a','02블랙':'d'}};
+ const status=smartstorePreparationStatus({style:'123456',smartstoreDetail:detail},{extras:[],manifest:{photoReview:{status:'ready'}}});
+ assert.equal(status.detailCount,5);assert.equal(status.templateReady,true);assert.equal(detail.photoCount,3);
+});
+
 test('선택적 공식 사진이 없어도 나머지 준비는 계속하고 누락 사유만 보관한다',()=>{
  const detail={photoCount:5,sellingPoints:[{},{},{}],paletteImages:{},palettePendingReasons:{'04블랙':'공식 사진 조회 시간이 초과되었습니다.'},galleryPendingReasons:{'04블랙':'공식 사진이 없습니다.'}};
  const listing={extras:[],manifest:{photoReview:{status:'ready'}}};

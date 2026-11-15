@@ -149,7 +149,7 @@ async function publishPhotoPreview(product,folder){
  if(!product.smartstoreDetail?.photoCount&&!product.images?.detail&&!product.detailFallbackApproved)throw Error('상세사진 또는 공식 상세 원본을 확인해 주세요.');
  state.product=product;state.folder=folder;
  state.photoPreparation=smartstorePreparationStatus(product,listing);state.revision++;
- log('미리보기 갱신 · 대표 1장 · 추가 '+listing.extras.length+'장 · 상세사진 '+(product.smartstoreDetail?.photoCount||0)+'장 · '+(state.photoPreparation.templateReady?'사진·템플릿 준비 완료':state.photoPreparation.message));
+ log('미리보기 갱신 · 대표 1장 · 추가 '+listing.extras.length+'장 · 상세사진 '+state.photoPreparation.detailCount+'장 · '+(state.photoPreparation.templateReady?'사진·템플릿 준비 완료':state.photoPreparation.message));
  if(state.phase!=='smartstore-auto')warmSmartstoreUpload(product,folder);
  return listing;
 }
