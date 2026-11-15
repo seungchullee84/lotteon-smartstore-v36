@@ -160,7 +160,7 @@ test('manual preview guard failure ends the pending job without trying automatic
  assert.deepEqual(f.failed,f.manualFailCalls);assert.equal(f.failCalls.length,0);assert.equal(f.calls.length,0);assert.equal(f.completed.length,0);assert.equal(f.clock.count(),0);
 });
 
-async function actualFixture(t){
+async function actualFixture(t,{manual=false}={}){
  const root=await mkdtemp(path.join(os.tmpdir(),'pending-background-'));
  t.after(()=>rm(root,{recursive:true,force:true}));
  const folder=path.join(root,'product');await mkdir(folder);
@@ -170,15 +170,24 @@ async function actualFixture(t){
  const state={product,folder,revision:1,busy:false};
  const generatedPath=path.join(root,'generated.jpg');
  await Promise.all([writeFile(path.join(folder,'product.json'),JSON.stringify(product)),writeFile(path.join(folder,'background-selection.json'),JSON.stringify({style:product.style,key:'main'})),writeFile(path.join(folder,'main.jpg'),original),writeFile(generatedPath,output)]);
- const workflow=createBackgroundWorkflow({getState:()=>state,cacheRoot:path.join(root,'cache'),compose:async()=>output});
+ const alternate=manual?await sharp({create:{width:1500,height:1500,channels:3,background:'#9b4433'}}).jpeg().toBuffer():output;
+ let compositions=0;
+ const workflow=createBackgroundWorkflow({getState:()=>state,cacheRoot:path.join(root,'cache'),compose:async()=>compositions++===0?output:alternate});
  const job=await workflow.prepare({style:product.style,key:'main',requestId:'request-pending-001'});
- await workflow.stage({jobId:job.jobId,generatedPath});
- const payload={jobId:job.jobId,reviewed:true,attempt:1};state.busy=true;
- assert.equal(workflow.complete(payload).waiting,true);
+ const first=await workflow.stage({jobId:job.jobId,generatedPath});
+ if(manual){
+  for(let attempt=2;attempt<=3;attempt++){
+   workflow.retry({jobId:job.jobId,reason:'background seam needs review'});
+   await workflow.stage({jobId:job.jobId,generatedPath});
+  }
+  workflow.fail({jobId:job.jobId,message:'quality review failed'});
+ }
+ const payload=manual?{jobId:job.jobId,userApproved:true,attempt:1}:{jobId:job.jobId,reviewed:true,attempt:1};state.busy=true;
+ assert.equal((manual?workflow.manualApply(payload):workflow.complete(payload)).waiting,true);
  const clock=fakeClock(),completed=[],failed=[];
  const pending=createPendingBackgroundApply({workflow,...clock,onComplete:value=>completed.push(value),onFailure:value=>failed.push(value)});
  pending.schedule(payload);
- return {folder,original,state,workflow,clock,pending,completed,failed,job};
+ return {folder,original,output,first,state,workflow,clock,pending,completed,failed,job};
 }
 
 test('real workflow queues through same-product edits and publishes only after idle without a worker',async t=>{
@@ -199,5 +208,31 @@ test('real workflow rechecks changed original bytes before a deferred applicatio
  f.state.busy=false;f.clock.tick();
  await assert.rejects(readFile(path.join(f.folder,'background-image.json')),{code:'ENOENT'});
  assert.equal(f.workflow.status().status,'error');assert.equal(f.failed.length,1);assert.equal(f.completed.length,0);
+ assert.equal(f.clock.count(),0);
+});
+
+test('real manual queue applies approved attempt one after three failed previews and ignores the retired worker',async t=>{
+ const f=await actualFixture(t,{manual:true});
+ assert.equal(f.workflow.status().attempt,1);
+ assert.equal(f.pending.has(f.job.jobId),true);
+ f.workflow.fail({jobId:f.job.jobId,message:'late retired worker exit'});
+ assert.equal(f.workflow.status().status,'applying-wait');
+ assert.throws(()=>f.workflow.complete({jobId:f.job.jobId,reviewed:true,attempt:3}),/변경되어 합성을 적용하지 않았습니다/);
+ f.clock.tick();await assert.rejects(readFile(path.join(f.folder,'background-image.json')),{code:'ENOENT'});
+ f.state.busy=false;f.clock.tick();
+ const manifest=JSON.parse(await readFile(path.join(f.folder,'background-image.json'),'utf8'));
+ assert.equal(manifest.manual,true);assert.equal(manifest.selectedAttempt,1);
+ assert.deepEqual(await readFile(path.join(f.folder,manifest.file)),f.output);
+ assert.deepEqual(await readFile(path.join(f.folder,'main.jpg')),f.original);
+ assert.equal(f.completed.length,1);assert.equal(f.failed.length,0);assert.equal(f.clock.count(),0);
+});
+
+test('real manual queue rejects changed approved preview bytes and persists manual failure',async t=>{
+ const f=await actualFixture(t,{manual:true});
+ await writeFile(f.first.previewPath,Buffer.from('selected preview was changed'));
+ f.state.busy=false;f.clock.tick();
+ await assert.rejects(readFile(path.join(f.folder,'background-image.json')),{code:'ENOENT'});
+ assert.equal(f.workflow.status().status,'error');assert.equal(f.failed.length,1);assert.equal(f.completed.length,0);
+ assert.equal(JSON.parse(await readFile(path.join(f.folder,'background-review.json'),'utf8')).allowed,false);
  assert.equal(f.clock.count(),0);
 });
