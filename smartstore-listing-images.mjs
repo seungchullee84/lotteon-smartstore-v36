@@ -3,8 +3,8 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {findPhotos} from './smartstore-photo-files.mjs';
 import {selectedMainPhoto} from './smartstore-main-selection.mjs';
-import {workingProductPhoto,PHOTO_WORK_VERSION} from './smartstore-photo-work.mjs';
-const LISTING_IMAGE_VERSION=PHOTO_WORK_VERSION;
+import {workingProductPhoto} from './smartstore-photo-work.mjs';
+import {readListingDraft} from './smartstore-listing-draft-cache.mjs';
 const hash=b=>createHash('sha256').update(b).digest('hex');
 function withOfficialMain(product,manifest){
  if(!Array.isArray(manifest.extras))throw Error('추가이미지 선택 자료를 확인해 주세요.');
@@ -31,7 +31,8 @@ export async function saveListingSelection(root,selection){
  return {main:await save(selection.main,'main'),extras:await Promise.all(selection.extras.map((p,i)=>save(p,'extra-'+(i+1))))};
 }
 export async function listingManifest(product,{dataRoot}){
- let draft;try{draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'draft.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return null;throw e;}
+ const snapshot=await readListingDraft(path.join(dataRoot,'smartstore-details',product.style,'draft.json'));if(!snapshot)return null;
+ const {draft,detailRevision}=snapshot;
  if(String(draft.style)!==String(product.style)||draft.sourceUrl!==product.sourceUrl)return null;
  if(!draft.listingImages)return null;
  const records=draft.photoMapping?.files||[],unclassified=records.filter(r=>r.role!=='care-label'&&(!product.colors?.includes(r.color)||r.role==='provided')).length;
@@ -40,11 +41,11 @@ export async function listingManifest(product,{dataRoot}){
  const automatic=records.filter(r=>r.automatic===true&&r.reviewed!==true&&r.autoValidated!==true).length;
  const needsReview=unclassified>0||missingFrontColors.length>0||automatic>0;
  const photoReview={status:needsReview?'needs-review':'ready',unclassified,missingFrontColors,automatic,message:needsReview?'폴더 사진은 모두 상세에 보존했습니다. 색상·정면·옆면 연결 확인 필요'+(unclassified?' · 미분류 '+unclassified+'장':'')+(missingFrontColors.length?' · 정면 미확인 '+missingFrontColors.join(', '):'')+(automatic?' · 자동 판별 확인 필요 '+automatic+'장':''):''};
- return withOfficialMain(product,{...draft.listingImages,photoReview,detailRevision:hash(Buffer.from(JSON.stringify(draft)+'|'+LISTING_IMAGE_VERSION))});
+ return withOfficialMain(product,{...structuredClone(draft.listingImages),photoReview,detailRevision});
 }
 export async function listingPreview(product,options){
  const manifest=await listingManifest(product,options);if(manifest)return manifest;
- const photos=await findPhotos(product,options),main=photos.filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name));
+ const main=await findPhotos(product,{...options,acceptName:name=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(name)});
  if(main.length!==1)return null;
  return {main:{sourceName:main[0].name,color:'색상 대조 전'},extras:[],previewOnly:true};
 }
