@@ -23,7 +23,7 @@ async function fixture(browser){
   if(route.request().method()==='POST')posts.push({path:url.pathname,body:route.request().postDataJSON()});
   if(url.pathname==='/api/state'){
    control.stateReads++;
-   body={busy:control.busy,phase:control.busy?'collect':'idle',logs:[],revision:1,product,backgroundSelection:control.selection,imageVersions:{},backgroundWork:control.backgroundWork};
+   body={busy:control.busy,phase:control.busy?'collect':'idle',logs:[],revision:1,product,backgroundSelection:control.selection,imageVersions:control.imageVersions||{},backgroundWork:control.backgroundWork};
   }else if(url.pathname==='/api/branding')body={visible:false};
   else if(url.pathname==='/api/naver-status')body={configured:false};
   else if(url.pathname==='/api/smartstore-two-choice')body={packages:[]};
@@ -122,17 +122,16 @@ test('합성 진행은 준비·실행·작업 중 중복 클릭을 막고 완료
  }finally{await browser.close();}
 });
 
-test('품번·채널·선택 사진 변경 후 되돌아와도 이전 합성 응답을 폐기한다',async()=>{
+test('품번·선택 사진 변경 후 되돌아와도 이전 합성 응답을 폐기한다',async()=>{
  const browser=await chromium.launch({headless:true});
  try{
-  for(const [change,cached] of [['style',false],['channel',false],['image',false],['style',true],['channel',true],['image',true]]){
+  for(const [change,cached] of [['style',false],['image',false],['style',true],['image',true]]){
    const {page,posts,pending,control,errors}=await fixture(browser);control.defer=true;control.cached=cached;
    const started=page.waitForRequest(request=>request.url().endsWith('/api/background-prepare'));
    await page.locator('#openBackgroundRequest').click();await started;await waitForPending(pending);
    const oldId=posts.find(item=>item.path==='/api/background-prepare').body.requestId;
    const cancelled=page.waitForRequest(request=>request.url().endsWith('/api/background-cancel'));
    if(change==='style')await page.locator('#style').evaluate(field=>{field.value='654321';field.dispatchEvent(new Event('input',{bubbles:true}));field.value='123456';field.dispatchEvent(new Event('input',{bubbles:true}));});
-   if(change==='channel')await page.evaluate(()=>{selectRegistrationChannel('smartstore');selectRegistrationChannel('lotte');});
    if(change==='image'){
     await page.locator('#backgroundImageChoice').selectOption('extra1');
     await page.waitForFunction(()=>!document.querySelector('#backgroundImageChoice').disabled);
@@ -274,7 +273,7 @@ test('합성 창을 닫아도 단계·경과 시간과 완료·실패 상태가 
   assert.equal(await page.locator('#extendBackground').isDisabled(),false);
   assert.equal(await page.locator('#downloadMain1500').isDisabled(),false);
   assert.equal(await page.locator('#style').isDisabled(),false);
-  assert.match(await page.locator('#backgroundProgressHint').textContent(),/품번·판매처·합성 사진.*취소/);
+  assert.match(await page.locator('#backgroundProgressHint').textContent(),/품번이나 합성 사진.*취소/);
   assert.equal(await page.locator('#backgroundProgressElapsed').isVisible(),false,'시작 시각이 없으면 경과 시간을 만들지 않는다');
   control.defer=false;pending.shift()();
   await page.waitForFunction(()=>document.querySelector('#backgroundStatus').textContent.includes('합성을 시작했습니다'));
