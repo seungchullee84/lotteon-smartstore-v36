@@ -113,6 +113,8 @@ test('current product identity and stored official identity must still match at 
  const changes={
   style:async f=>{f.state.product.style='416971';},
   sourceUrl:async f=>{f.state.product.sourceUrl='https://example.test/other';},
+  selectedImageUrl:async f=>{f.state.product.images.main='different-main-source';},
+  selectedImageExcluded:async f=>{f.state.product.images.main=null;},
   productInstance:async f=>{f.state.product={...f.state.product};},
   folder:async f=>{const next=path.join(f.root,'other');await f.seedFolder(next);f.state.folder=next;},
   revision:async f=>{f.state.revision++;},
