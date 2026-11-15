@@ -671,15 +671,22 @@ function syncBackgroundImage(s){
   if(version){$(key).src='/image/'+key+'?t='+Date.now();$('backgroundStatus').textContent='합성 완료 — '+backgroundLabels[key]+'를 변경했습니다.';announce(backgroundLabels[key]+'를 변경했습니다.','success');}
  }
  const work=s.backgroundWork;
+ if(backgroundRequest&&!backgroundPreparing&&work?.jobId&&work.requestId&&!cancelledBackgroundRequests.has(work.requestId)&&
+  work.jobId!==backgroundRequest.jobId&&Number.isFinite(work.startedAt)&&work.startedAt>(backgroundRequest.startedAt||backgroundRequest.createdAt||Infinity)&&
+  work.style===s.product?.style&&work.sourceUrl===s.product?.sourceUrl&&work.key===selectedBackgroundImage&&
+  ['waiting','generating','processing','review','complete','error','cancelled'].includes(work.status)){
+  backgroundRequest={requestId:work.requestId,jobId:work.jobId,epoch:++backgroundEpoch,style:work.style,key:work.key,sourceUrl:work.sourceUrl,startedAt:work.startedAt,input:$('style').value};
+ }
  if(!backgroundRequest&&!backgroundSelectionPending&&work?.jobId&&work.requestId&&!cancelledBackgroundRequests.has(work.requestId)&&
   ['waiting','generating','processing','review'].includes(work.status)){
-  backgroundRequest={requestId:work.requestId,jobId:work.jobId,epoch:backgroundEpoch,style:work.style,key:work.key,sourceUrl:work.sourceUrl,input:$('style').value};
+  backgroundRequest={requestId:work.requestId,jobId:work.jobId,epoch:backgroundEpoch,style:work.style,key:work.key,sourceUrl:work.sourceUrl,startedAt:work.startedAt,input:$('style').value};
   backgroundStyleInput=backgroundRequest.input;
   if(work.style!==s.product?.style||work.sourceUrl!==s.product?.sourceUrl||work.key!==selectedBackgroundImage||!backgroundInputMatchesProduct(s.product))void cancelBackgroundRequest();
  }
  if(backgroundRequest&&!backgroundPreparing&&work?.jobId===backgroundRequest.jobId&&work.requestId===backgroundRequest.requestId&&
   work.style===backgroundRequest.style&&work.sourceUrl===backgroundRequest.sourceUrl&&work.key===backgroundRequest.key&&['waiting','generating','processing','review','complete','error','cancelled'].includes(work.status)){
   backgroundWorkActive=['waiting','generating','processing','review'].includes(work.status);
+  backgroundRequest.startedAt=work.startedAt;
   backgroundRequest.message=work.message||'합성 작업 상태: '+work.status;
   $('backgroundStatus').textContent=backgroundRequest.message;
   showBackgroundProgress(work);
@@ -730,7 +737,7 @@ $('openBackgroundRequest').onclick=async()=>{
  }
  const cancellation=cancelBackgroundRequest();
  const request={requestId:globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),epoch:backgroundEpoch,
-  style:product.style,key:selectedBackgroundImage,sourceUrl:product.sourceUrl,revision:lastRevision>=0?lastRevision:undefined,input:$('style').value};
+  style:product.style,key:selectedBackgroundImage,sourceUrl:product.sourceUrl,revision:lastRevision>=0?lastRevision:undefined,input:$('style').value,createdAt:Date.now()};
  backgroundStyleInput=request.input;backgroundRequest=request;backgroundPreparing=true;syncBackgroundControls();
  $('backgroundStatus').textContent='선택한 원본과 이전 합성 결과를 확인하고 있습니다…';
  showBackgroundProgress({status:'preparing',style:request.style,message:$('backgroundStatus').textContent});

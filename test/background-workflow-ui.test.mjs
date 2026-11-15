@@ -39,7 +39,7 @@ async function fixture(browser){
   }else if(url.pathname==='/api/background-dispatch'){
    if(control.deferDispatch)await new Promise(resolve=>pendingDispatch.push(resolve));
    const prepared=posts.filter(item=>item.path==='/api/background-prepare').at(-1).body;
-   control.backgroundWork={jobId:'test-job',requestId:prepared.requestId,style:prepared.style,sourceUrl:prepared.sourceUrl,key:prepared.key,status:'waiting',message:'합성을 시작했습니다.'};
+   control.backgroundWork={jobId:'test-job',requestId:prepared.requestId,style:prepared.style,sourceUrl:prepared.sourceUrl,key:prepared.key,status:'waiting',message:'합성을 시작했습니다.',startedAt:Date.now()};
    body=control.dispatchResult||{ok:true,started:true,message:'합성을 시작했습니다.'};
   }else if(url.pathname==='/api/background-complete'){
    if(control.deferComplete)await new Promise(resolve=>pendingComplete.push(resolve));
@@ -254,6 +254,72 @@ test('실행 응답을 기다리는 동안 사진을 변경하면 늦은 응답�
   assert.doesNotMatch(await page.locator('#backgroundStatus').textContent(),/합성을 시작했습니다/);
   assert.equal(posts.filter(item=>item.path==='/api/background-dispatch').length,1);
   assert.equal(posts.filter(item=>item.path==='/api/background-cancel').length,1);
+  assert.deepEqual(errors,[]);
+ }finally{await browser.close();}
+});
+
+test('합성 창을 닫아도 단계·경과 시간과 완료·실패 상태가 계속 보이고 다른 보기 작업을 막지 않는다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const {page,pending,control,errors}=await fixture(browser);control.defer=true;
+  await page.locator('#openBackgroundRequest').click();await waitForPending(pending);
+  await page.locator('#closeBackground').click();
+  assert.equal(await page.locator('#backgroundProgress').isVisible(),true);
+  assert.match(await page.locator('#backgroundProgressHeading').textContent(),/합성 진행 중.*원본 확인/);
+  assert.match(await page.locator('#extendBackground').textContent(),/합성 진행 중/);
+  assert.equal(await page.locator('#extendBackground').isDisabled(),false);
+  assert.equal(await page.locator('#downloadMain1500').isDisabled(),false);
+  assert.equal(await page.locator('#style').isDisabled(),false);
+  assert.match(await page.locator('#backgroundProgressHint').textContent(),/품번·판매처·합성 사진.*취소/);
+  assert.equal(await page.locator('#backgroundProgressElapsed').isVisible(),false,'시작 시각이 없으면 경과 시간을 만들지 않는다');
+  control.defer=false;pending.shift()();
+  await page.waitForFunction(()=>document.querySelector('#backgroundStatus').textContent.includes('합성을 시작했습니다'));
+  const startedAt=Date.now()-61000;
+  control.backgroundWork={...control.backgroundWork,status:'generating',message:'배경 생성 중',startedAt};
+  await page.evaluate(()=>refresh());
+  assert.match(await page.locator('#backgroundProgressHeading').textContent(),/배경 생성/);
+  assert.match(await page.locator('#backgroundProgressElapsed').textContent(),/경과 1분 [12]초/);
+  assert.doesNotMatch(await page.locator('#backgroundProgress').textContent(),/%/);
+  await page.setViewportSize({width:390,height:700});
+  await page.evaluate(()=>window.scrollTo(0,document.body.scrollHeight));
+  const visible=await page.locator('#backgroundProgress').boundingBox();
+  assert.ok(visible.y>=0&&visible.y<20&&visible.x>=0&&visible.x+visible.width<=390,'좁은 화면에서도 상단에 남고 가로로 넘치지 않는다');
+  assert.equal(await page.locator('#backgroundProgress').evaluate(el=>getComputedStyle(el).pointerEvents),'none');
+  for(const status of ['review','complete','error','cancelled']){
+   control.backgroundWork={...control.backgroundWork,status,message:status+' 결과',elapsedMs:65000};
+   await page.evaluate(()=>refresh());
+   assert.equal(await page.locator('#backgroundProgress').isVisible(),true);
+   assert.match(await page.locator('#backgroundProgressMessage').textContent(),new RegExp(status+' 결과'));
+   if(status!=='review'){
+    assert.equal(await page.locator('#openBackgroundRequest').isDisabled(),false);
+    assert.equal(await page.locator('#backgroundProgressElapsed').textContent(),'소요 1분 5초');
+   }
+  }
+  assert.deepEqual(errors,[]);
+ }finally{await browser.close();}
+});
+
+test('현재 상품의 완료·실패 상태는 새로고침 후에도 표시하고 다른 탭의 최신 종료 작업으로 잠금을 해제한다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const {page,posts,control,errors}=await fixture(browser);
+  await page.locator('#openBackgroundRequest').click();
+  await page.waitForFunction(()=>document.querySelector('#backgroundStatus').textContent.includes('합성을 시작했습니다'));
+  const older=control.backgroundWork;
+  control.backgroundWork={...older,jobId:'other-tab-job',requestId:'other-tab-request',startedAt:older.startedAt+1,status:'error',message:'최종 검수에서 배경 연결부를 확인해 주세요.',elapsedMs:32000};
+  await page.evaluate(()=>refresh());
+  assert.equal(await page.locator('#openBackgroundRequest').isDisabled(),false);
+  assert.equal(await page.locator('#backgroundProgress').getAttribute('data-status'),'error');
+  assert.match(await page.locator('#backgroundProgressMessage').textContent(),/배경 연결부/);
+  assert.equal(posts.filter(item=>item.path==='/api/background-cancel').length,0,'다른 탭의 최신 종료 상태를 읽으며 취소 요청을 보내지 않는다');
+  for(const status of ['error','complete']){
+   control.backgroundWork={...control.backgroundWork,status,message:status+' 확인'};
+   await page.reload();
+   await page.waitForFunction(()=>document.querySelector('#source').textContent.includes('123456'));
+   assert.equal(await page.locator('#backgroundProgress').getAttribute('data-status'),status);
+   assert.equal(await page.locator('#backgroundProgress').isVisible(),true);
+   assert.equal(await page.locator('#openBackgroundRequest').isDisabled(),false);
+  }
   assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });
