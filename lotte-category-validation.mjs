@@ -67,6 +67,11 @@ export function validateLotteCategory(product,{standard=data('category-catalog-s
       for(const level of ['major','middle','small','detail'])if(c.channelCodes?.[level]&&c.channelCodes[level]!==String(exactStandard[level]?.code||''))add('channel-code-'+level,'롯데ON '+({major:'대',middle:'중',small:'소',detail:'세'}[level])+'분류 이름과 코드가 다릅니다. 분류를 다시 확인해 주세요.');
       const expected=commonFor(exactStandard,gender,common||{genders:[]});
       if(expected&&exactCommon&&!sameCategoryLabel(exactCommon[2],expected.small))add('crosswalk','공통분류와 롯데ON 분류의 상품 유형이 다릅니다. 권장 공통분류: '+expected.small);
+      if(!expected){
+        if(exactStandard.small.code==='BC35100100'){
+          if(!exactCommon||!sameCategoryLabel(exactCommon[2],'01068 : 머플러'))add('crosswalk','머플러 채널분류에 맞는 공통분류는 01068 : 머플러입니다.');
+        }else add('crosswalk-unmapped','이 롯데ON 경로에 대응하는 공통분류는 아직 확인되지 않았습니다. 임의의 기타 분류로 대체하지 않습니다.');
+      }
     }else if(isMensUnderwear(product)&&['commonMajor','commonMiddle','commonSmall','channelMajor','channelMiddle','channelSmall'].every(k=>sameCategoryLabel(c[k]||(k==='commonMajor'?commonMajor:k==='channelMajor'?channelMajor:''),MENS_UNDERWEAR_CATEGORY[k]))&&!c.channelDetail&&!Object.values(c.channelCodes||{}).some(Boolean)){
       channelPath=['남성의류','남성속옷','남성내의'];evidence='사용자가 확인한 남성내의 경로';
     }else if(exactCommon&&verifiedAccessory(product,{...c,channelMajor},matches)){
