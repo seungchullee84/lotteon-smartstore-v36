@@ -19,7 +19,7 @@ export function createPendingBackgroundApply({workflow,onComplete=()=>{},onFailu
   if(pending!==record)return;
   cancel();
   const result={jobId:record.payload.jobId,message:error?.message||'합성 결과를 적용하지 못했습니다.'};
-  try{workflow.fail(result);}catch{}
+  try{if(record.manual)workflow.manualFail(result);else workflow.fail(result);}catch{}
   notify(onFailure,result);
  }
  function arm(record){
@@ -46,7 +46,7 @@ export function createPendingBackgroundApply({workflow,onComplete=()=>{},onFailu
   const manual=userApproved===true;
   if(typeof jobId!=='string'||!jobId||(userApproved!==undefined&&!manual)||
    (!manual&&reviewed!==true&&reuse!==true)||
-   (manual&&(typeof workflow.manualApply!=='function'||!Number.isInteger(attempt)))||
+   (manual&&(typeof workflow.manualApply!=='function'||typeof workflow.manualFail!=='function'||!Number.isInteger(attempt)))||
    (attempt!==undefined&&(!Number.isInteger(attempt)||attempt<1)))throw Error('검수한 합성 적용 요청을 확인해 주세요.');
   const payload=manual?{jobId,attempt,userApproved:true}:{jobId,reviewed,reuse,attempt};
   const record={payload:Object.freeze(payload),manual,expectedAttempt:attempt??workflow.status()?.attempt,timer:null};
