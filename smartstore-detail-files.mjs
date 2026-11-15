@@ -1,6 +1,7 @@
 import {originalListingMain} from './smartstore-listing-images.mjs';
 import {readMainSelection} from './smartstore-main-selection.mjs';
 import {attachOfficialPalette} from './smartstore-official-palette.mjs';
+import {prepareOfficialPalette} from './smartstore-official-palette-auto.mjs';
 import {findPhotos,resolveStylePhotoFolders} from './smartstore-photo-files.mjs';
 import {mannequinPhotoRegions,registerLongPhotoLayout} from './smartstore-long-photo-import.mjs';
 import {collectCaptionTones} from './smartstore-caption-tone.mjs';
@@ -49,7 +50,7 @@ export async function prefetchSmartstoreSellingPoints(product,folder,{dataRoot,s
  await reviewSellingPoints(product,source.text,{dataRoot,signal,log,existing,detailHash:source.detailHash,supplement:true,persist:false});
 }
 
-export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join(appRoot,'data'),mannequinRoots,photoRoots,signal,log}={}){
+export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join(appRoot,'data'),mannequinRoots,photoRoots,signal,log,officialPaletteOptions={}}={}){
  const style=validStyle(product);const draftRoot=path.join(dataRoot,'smartstore-details',style);
  const configuredPhotoRoots=async()=>photoRoots||(mannequinRoots?(await Promise.all(mannequinRoots.map(root=>/^\d{6}$/.test(style)?resolveStylePhotoFolders(root,style):[path.join(root,style)]))).flat():undefined);
  let draft=null;try{draft=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
@@ -219,6 +220,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
   }
  }
  await attachOfficialPalette(product,prepared,draft?.officialPalettePhotos,{folder,draftRoot});
+ if(prepared.acceptAllFolderPhotos)await prepareOfficialPalette(product,prepared,{...officialPaletteOptions,folder,dataRoot,signal,log});
  prepared.captionTones=await collectCaptionTones(product,folder);
  prepared.embeddedOfficialSections=await embeddedOfficialSections(product,folder,{dataRoot,smartstoreLayout:true});
  const fitGuide=await prepareFitGuide(product,folder,{dataRoot});
@@ -249,7 +251,7 @@ export async function renderPreparedSmartstoreDetail(p,folder,output,{signal,...
   if(!/^(detail|size|check|info|main|extra[12]|color[1-9]\d*_[123])$/.test(key))continue;
   try{const bytes=await readFile(path.join(folder,key+'.jpg'));data.set(src,'data:image/jpeg;base64,'+(await sharp(bytes).rotate().resize({width:860,withoutEnlargement:true}).jpeg({quality:96}).toBuffer()).toString('base64'));}catch(e){if(e.code==='ENOENT')throw Error('현재 상품의 '+key+' 원본 파일을 확인해 주세요.');throw e;}
  }
- for(const [src,file] of Object.entries(p.smartstoreDetail.photoFiles)){check();data.set(src,'data:image/jpeg;base64,'+(await readFile(path.join(folder,file))).toString('base64'));}
+ for(const [src,file] of Object.entries(p.smartstoreDetail.photoFiles)){check();const mime=({'.png':'image/png','.webp':'image/webp'})[path.extname(file).toLowerCase()]||'image/jpeg';data.set(src,'data:'+mime+';base64,'+(await readFile(path.join(folder,file))).toString('base64'));}
  const imageUrl=src=>{if(!data.has(src))throw Error('현재 상품에 연결되지 않은 상세 이미지: '+src);return data.get(src);};
  const fontUrl='data:font/ttf;base64,'+(await readFile(path.join(assetsRoot,'GowunDodum-Regular.ttf'))).toString('base64');
  // Native ONE product tags are added by the editor, not baked into a bitmap.

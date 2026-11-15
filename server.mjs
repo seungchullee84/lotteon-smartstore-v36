@@ -297,8 +297,11 @@ const server=http.createServer(async(req,res)=>{
     }
     if(req.method==='GET'&&/^\/smartstore-photo\/[a-f0-9]{24}$/.test(url.pathname)){
       if(!state.folder)return json(res,404,{});
-      res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'no-store'});
-      return res.end(await readFile(path.join(state.folder,'smartstore-photo-'+url.pathname.split('/').at(-1)+'.jpg')));
+      const photoId=url.pathname.split('/').at(-1),photoFile=state.product?.smartstoreDetail?.photoFiles?.[url.pathname]||'smartstore-photo-'+photoId+'.jpg';
+      if(!new RegExp('^smartstore-photo-'+photoId+'\\.(jpg|png|webp)$').test(photoFile))return json(res,404,{});
+      const mime=({'.png':'image/png','.webp':'image/webp'})[path.extname(photoFile)]||'image/jpeg';
+      res.writeHead(200,{'Content-Type':mime,'Cache-Control':'no-store'});
+      return res.end(await readFile(path.join(state.folder,photoFile)));
     }
     if(req.method==='GET'&&url.pathname==='/api/smartstore-two-choice')return json(res,200,{packages:await listTwoChoicePackages(dataRoot)});
     const twoChoiceFile=url.pathname.match(/^\/smartstore-two-choice\/([a-z0-9-]+)\/(preview\.html|[a-zA-Z0-9_-]+\.png|brand\.mp4)$/);
