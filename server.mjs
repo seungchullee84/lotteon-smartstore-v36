@@ -100,8 +100,9 @@ const token=desktopSession?.token||randomBytes(24).toString('hex');
 let backgroundApiKey=await loadSmartstoreAIKey(dataRoot);
 const protectedBranding=brandingLock(dataRoot);
 const state={busy:false,phase:'idle',logs:[],product:null,folder:null,error:null,paused:null,revision:Date.now(),collectionInput:null,detailFallbackRequest:null,photoPreparation:null};
-const backgroundWorkflow=createBackgroundWorkflow({getState:()=>state,cacheRoot:path.join(dataRoot,'background-cache')});
-const backgroundWorkflowEndpoints=new Set(['/api/background-prepare','/api/background-inspect','/api/background-result','/api/background-complete','/api/background-cancel']);
+let backgroundMutations=0;
+const backgroundWorkflow=createBackgroundWorkflow({getState:()=>({...state,busy:state.busy||backgroundMutations>0}),cacheRoot:path.join(dataRoot,'background-cache')});
+const backgroundWorkflowEndpoints=new Set(['/api/background-selection','/api/background-prepare','/api/background-inspect','/api/background-result','/api/background-complete','/api/background-cancel']);
 const newProductResearch=startNewProductResearch(root,{isBusy:()=>state.busy||state.photoPreparation?.status==='preparing'});
 const benefitResearch=startNewListingMonitor(root,{onSnapshot:website=>{void newProductResearch.observe(website);}});
 benefitResearch.state.folderResearch=newProductResearch.state;
@@ -226,6 +227,7 @@ function startPhotoColorDraft(product,folder){
 }
 function job(phase,fn){if(state.busy)throw Error('진행 중인 작업이 있습니다.');newProductResearch.pause();const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase=phase;state.error=null;state.completedJob=null;if(phase==='smartstore-auto'){state.autoStep='collect';state.autoProgress=startSmartstoreProgress();}Promise.resolve().then(fn).then(()=>{state.phase=controller.signal.aborted?'stopped':'done';if(!controller.signal.aborted){state.completedJob=phase;if(phase==='smartstore-detail-only')log('상세설명 교체 완료 · 편집기에서 확인해 주세요. 상품 저장·등록은 하지 않았습니다.');}}).catch(e=>{state.error=controller.signal.aborted?null:e.message;if(state.photoPreparation?.status==='preparing')state.photoPreparation={...state.photoPreparation,status:controller.signal.aborted?'stopped':'needs-review',message:controller.signal.aborted?'사진 준비를 중단했습니다.':e.message};if(['PHOTO_ANALYSIS_REQUIRED','PHOTO_FOLDER_EMPTY'].includes(e.code)&&!controller.signal.aborted)state.photoPreparation={style:state.product?.style,status:e.code==='PHOTO_ANALYSIS_REQUIRED'?'needs-analysis':'missing',photoCount:e.photoCount||0,unknownCount:e.unknownCount||0,message:e.message};if(e.code==='DETAIL_SOURCE_MISSING'&&!controller.signal.aborted)state.detailFallbackRequest={input:state.collectionInput};state.phase=controller.signal.aborted?'stopped':'error';log(controller.signal.aborted?'작업을 중단했습니다.':e.message);}).finally(()=>{if(phase==='smartstore-auto')finishSmartstoreProgress(state.autoProgress,state.phase,state.error);state.busy=false;state.paused=null;activeAbort=null;});}
 const server=http.createServer(async(req,res)=>{
+  let backgroundMutation=false;
   try{
     const url=new URL(req.url,'http://localhost');
     if(req.headers.host!==`127.0.0.1:${server.address().port}`){res.writeHead(403);return res.end();}
@@ -332,7 +334,7 @@ const server=http.createServer(async(req,res)=>{
     if(req.method==='POST'){
       // Invalidate as soon as any other action starts, even before its body is
       // read. A job that finishes before the AI response must still cancel it.
-      if(!backgroundWorkflowEndpoints.has(url.pathname))backgroundWorkflow.invalidate();
+      if(!backgroundWorkflowEndpoints.has(url.pathname)){backgroundMutation=true;backgroundMutations++;backgroundWorkflow.invalidate();}
       const b=await body(req);
       if(url.pathname==='/api/background-cancel')return json(res,200,backgroundWorkflow.cancel(b));
       if(url.pathname==='/api/background-inspect')return json(res,200,backgroundWorkflow.inspect(b));
@@ -868,6 +870,7 @@ const server=http.createServer(async(req,res)=>{
     }
     json(res,404,{error:'없는 경로'});
   }catch(e){json(res,400,{error:e.message});}
+  finally{if(backgroundMutation){backgroundMutations--;backgroundWorkflow.invalidate();}}
 });
 function prepareStartupTools(){
  if(process.platform!=='win32')return;

@@ -197,7 +197,7 @@ function smartstoreRetry(){
  const input=$('style').value.trim()||product.style;
  return input===retry.style||input===retry.sourceUrl?retry:null;
 }
-function syncButtons(){if($('smartstoreDetailOnly')){const active=smartstoreDetailStarting||serverBusy&&serverPhase==='smartstore-detail-only';setText($('smartstoreDetailOnly'),active?'상세설명 교체 진행 중…':'상세설명만 교체 · 조회/수정');$('smartstoreDetailOnly').setAttribute('aria-busy',String(active));}if($('smartstoreStart')){const button=$('smartstoreStart'),active=smartstoreStarting||serverBusy&&serverPhase==='smartstore-auto';setText(button,smartstoreStarting?'작업 중 · 시작 준비…':active?'작업 중 · 입력·업로드…':smartstoreRetry()?'실패한 곳부터 이어서':'입력·업로드 시작');button.classList.toggle('working',active);button.setAttribute('aria-busy',String(active));}for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='open'&&serverPhase==='lotte-open')||(id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));setText(el,active?busyLabels[id]:buttonLabels[id]);}for(const id of ['smartstoreTemplate1','smartstoreTemplate2','smartstoreOpen','smartstoreOptimizeTitle','naverSettings','browserLoginSettings','smartstoreStart','smartstoreDetailOnly','smartstoreImportPhotos','smartstoreCombinePhotos','photoImportApply','smartstoreAutoTags'])if($(id))$(id).disabled=requestLock||serverBusy||['smartstoreAutoTags'].includes(id)&&!tagResearchReady||['smartstoreDetailOnly','smartstoreTemplate1','smartstoreTemplate2'].includes(id)&&!product;}
+function syncButtons(){if($('smartstoreDetailOnly')){const active=smartstoreDetailStarting||serverBusy&&serverPhase==='smartstore-detail-only';setText($('smartstoreDetailOnly'),active?'상세설명 교체 진행 중…':'상세설명만 교체 · 조회/수정');$('smartstoreDetailOnly').setAttribute('aria-busy',String(active));}if($('smartstoreStart')){const button=$('smartstoreStart'),active=smartstoreStarting||serverBusy&&serverPhase==='smartstore-auto';setText(button,smartstoreStarting?'작업 중 · 시작 준비…':active?'작업 중 · 입력·업로드…':smartstoreRetry()?'실패한 곳부터 이어서':'입력·업로드 시작');button.classList.toggle('working',active);button.setAttribute('aria-busy',String(active));}for(const id of ['open','collect','run']){const el=$(id);const active=el.dataset.pending==='true'||serverBusy&&((id==='open'&&serverPhase==='lotte-open')||(id==='collect'&&serverPhase==='collect')||(id==='run'&&serverPhase==='register'));el.disabled=requestLock||serverBusy;el.classList.toggle('working',active);el.setAttribute('aria-busy',String(active));setText(el,active?busyLabels[id]:buttonLabels[id]);}for(const id of ['smartstoreTemplate1','smartstoreTemplate2','smartstoreOpen','smartstoreOptimizeTitle','naverSettings','browserLoginSettings','smartstoreStart','smartstoreDetailOnly','smartstoreImportPhotos','smartstoreCombinePhotos','photoImportApply','smartstoreAutoTags'])if($(id))$(id).disabled=requestLock||serverBusy||['smartstoreAutoTags'].includes(id)&&!tagResearchReady||['smartstoreDetailOnly','smartstoreTemplate1','smartstoreTemplate2'].includes(id)&&!product;syncBackgroundControls();}
 function action(id,fn){$(id).onclick=async()=>{
  const primary=id in buttonLabels;if(primary&&(requestLock||serverBusy))return;
  if(id==='run'&&!$('form').reportValidity())return;
@@ -582,11 +582,54 @@ for(const button of document.querySelectorAll('.notice-copy'))button.onclick=()=
 $('openNoticeText').onclick=()=>{syncNoticeCopy();$('noticeCopyStatus').textContent='';$('noticeTextDialog').showModal();};$('closeNoticeText').onclick=()=>$('noticeTextDialog').close();
 
 const backgroundLabels={main:'대표이미지',extra1:'추가이미지 1',extra2:'추가이미지 2'};
+let backgroundRequest=null,backgroundEpoch=0,backgroundPreparing=false,backgroundSelectionPending=false;
+let backgroundCancellation=Promise.resolve(),backgroundStyleInput=$('style').value;
+function syncBackgroundControls(){
+ $('openBackgroundRequest').disabled=backgroundPreparing||backgroundSelectionPending||serverBusy||requestLock;
+ $('openBackgroundRequest').setAttribute('aria-busy',String(backgroundPreparing));
+}
+function cancelBackgroundRequest(){
+ const request=backgroundRequest;
+ backgroundEpoch++;
+ backgroundRequest=null;
+ backgroundPreparing=false;
+ $('backgroundChatFallback')?.remove();
+ syncBackgroundControls();
+ if(!request)return backgroundCancellation;
+ backgroundCancellation=post('background-cancel',{requestId:request.requestId});
+ backgroundCancellation.catch(error=>{
+  if(!backgroundRequest)$('backgroundStatus').textContent='이전 합성 요청 취소 확인이 필요합니다. '+error.message;
+ });
+ return backgroundCancellation;
+}
+function backgroundRequestIsCurrent(request){
+ return backgroundRequest===request&&request.epoch===backgroundEpoch&&activeChannel()==='lotte'&&
+  product?.style===request.style&&product?.sourceUrl===request.sourceUrl&&
+  selectedBackgroundImage===request.key&&$('style').value===request.input&&!serverBusy&&!requestLock;
+}
+function backgroundInputMatchesProduct(){
+ const input=$('style').value.trim();
+ if(!input||input===product?.style)return true;
+ try{return new URL(input).href===new URL(product.sourceUrl).href;}catch{return false;}
+}
+$('style').addEventListener('input',()=>{
+ const value=$('style').value;
+ if(value===backgroundStyleInput)return;
+ backgroundStyleInput=value;
+ void cancelBackgroundRequest();
+});
+document.addEventListener('register-state',event=>{
+ if(backgroundRequest&&event.detail.productStyle!==backgroundRequest.style)void cancelBackgroundRequest();
+ syncBackgroundControls();
+});
 function syncBackgroundImage(s){
  if(activeChannel()!=='lotte')return;
  const chip=s.colorChipStatus;
  $('colorChipStatus').textContent=chip?(chip.position?'색상칩 자동 배치: 오른쪽 '+(chip.position==='bottom-right'?'하단':'중단'):'여백 부족으로 색상칩 생략'):'공식 색상칩은 수집 후 여백이 있을 때 자동 배치합니다.';
- if(!$('backgroundDialog').open)selectedBackgroundImage=s.backgroundSelection||'main';
+ if(!$('backgroundDialog').open){
+  const next=s.backgroundSelection||'main';
+  if(next!==selectedBackgroundImage){void cancelBackgroundRequest();selectedBackgroundImage=next;}
+ }
  const versions=s.imageVersions||{main:s.mainImageVersion||null};
  for(const key of ['main','extra1','extra2']){
   const version=versions[key]||null;
@@ -594,8 +637,13 @@ function syncBackgroundImage(s){
   lastImageVersions[key]=version;
   if(version){$(key).src='/image/'+key+'?t='+Date.now();$('backgroundStatus').textContent='합성 완료 — '+backgroundLabels[key]+'를 변경했습니다.';announce(backgroundLabels[key]+'를 변경했습니다.','success');}
  }
+ const work=s.backgroundWork;
+ if(backgroundRequest&&work?.style===backgroundRequest.style&&work.key===backgroundRequest.key&&['processing','complete','error','cancelled'].includes(work.status)){
+  $('backgroundStatus').textContent=work.message;
+ }
+ syncBackgroundControls();
 }
-function backgroundGuide(){return '선택한 사진: '+backgroundLabels[selectedBackgroundImage]+'. 합성하기 복사 버튼을 누른 뒤 이 채팅에 붙여넣어 보내 주세요.';}
+function backgroundGuide(){return '선택한 사진: '+backgroundLabels[selectedBackgroundImage]+'. 합성하기 복사 버튼으로 동일 원본의 완료된 결과를 확인하고 새 합성 요청을 준비합니다.';}
 function showBackgroundChoice(){
  $('backgroundChatFallback')?.remove();
  $('backgroundOriginal').src='/image/'+selectedBackgroundImage+'-original?t='+Date.now();
@@ -604,38 +652,75 @@ function showBackgroundChoice(){
 }
 $('extendBackground').onclick=()=>{
  if(!product){announce('먼저 상품을 수집해 주세요.','failed');return;}
+ if(activeChannel()!=='lotte'||serverBusy||requestLock){announce('롯데ON 작업이 끝난 뒤 사진을 선택해 주세요.','failed');return;}
  const choice=$('backgroundImageChoice');choice.replaceChildren();
  for(const key of ['main','extra1','extra2']){const option=document.createElement('option');option.value=key;option.textContent=backgroundLabels[key]+(product.images[key]?'':' (사진 없음)');option.disabled=!product.images[key];choice.append(option);}
  if(!product.images[selectedBackgroundImage])selectedBackgroundImage='main';
- choice.value=selectedBackgroundImage;showBackgroundChoice();$('backgroundDialog').showModal();
+ choice.value=selectedBackgroundImage;showBackgroundChoice();syncBackgroundControls();$('backgroundDialog').showModal();
 };
 $('backgroundImageChoice').onchange=async()=>{
  const choice=$('backgroundImageChoice'),previous=selectedBackgroundImage,key=choice.value;
- choice.disabled=true;$('openBackgroundRequest').disabled=true;
- try{await post('background-selection',{style:product.style,key});selectedBackgroundImage=key;showBackgroundChoice();}
- catch(e){choice.value=previous;$('backgroundStatus').textContent=e.message;}
- finally{choice.disabled=false;$('openBackgroundRequest').disabled=false;}
+ if(key===previous)return;
+ const cancellation=cancelBackgroundRequest(),epoch=backgroundEpoch,style=product?.style;
+ backgroundSelectionPending=true;choice.disabled=true;syncBackgroundControls();
+ try{
+  await cancellation;
+  if(epoch!==backgroundEpoch||product?.style!==style||activeChannel()!=='lotte')return;
+  await post('background-selection',{style,key});
+  if(epoch!==backgroundEpoch||product?.style!==style||activeChannel()!=='lotte')return;
+  selectedBackgroundImage=key;showBackgroundChoice();
+ }catch(error){if(epoch===backgroundEpoch){choice.value=previous;$('backgroundStatus').textContent=error.message;}}
+ finally{backgroundSelectionPending=false;choice.value=selectedBackgroundImage;choice.disabled=false;syncBackgroundControls();}
 };
 $('closeBackground').onclick=()=>$('backgroundDialog').close();
 $('openBackgroundRequest').onclick=async()=>{
- const button=$('openBackgroundRequest');button.disabled=true;
- const style=product?.style,key=selectedBackgroundImage;
+ if(backgroundPreparing||backgroundSelectionPending||requestLock||serverBusy)return;
+ if(activeChannel()!=='lotte'||!product||!product.images[selectedBackgroundImage]){
+  $('backgroundStatus').textContent='롯데ON에서 현재 상품의 원본 사진을 선택해 주세요.';return;
+ }
+ if(!backgroundInputMatchesProduct()){
+  $('backgroundStatus').textContent='입력한 품번 또는 공식 URL의 상품을 먼저 수집해 주세요.';return;
+ }
+ const button=$('openBackgroundRequest');
+ const cancellation=cancelBackgroundRequest();
+ const request={requestId:globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),epoch:backgroundEpoch,
+  style:product.style,key:selectedBackgroundImage,sourceUrl:product.sourceUrl,revision:lastRevision>=0?lastRevision:undefined,input:$('style').value};
+ backgroundStyleInput=request.input;backgroundRequest=request;backgroundPreparing=true;syncBackgroundControls();
+ $('backgroundStatus').textContent='선택한 원본과 이전 합성 결과를 확인하고 있습니다…';
  try{
-  await post('background-selection',{style,key});
-  if(product?.style!==style||selectedBackgroundImage!==key)throw Error('상품 또는 선택 사진이 변경됐습니다. 다시 확인해 주세요.');
-  const prompt='품번 '+style+'의 '+backgroundLabels[key]+'('+key+') 원본으로 배경 늘리기·합성을 진행해줘. 프로젝트의 현재 등록기 상태와 해당 상품 폴더 background-selection.json을 먼저 확인하고, 선택한 원본 사진을 직접 확인해줘. 품번 또는 선택이 달라졌거나 진행 중이면 적용하지 말고 중단해줘. 인물·옷·색상·비율과 보이는 전체 영역을 보존하면서 배경을 자연스럽게 늘려 1500×1500 JPEG로 만들어줘. 완성본은 선택한 자리와 관계없이 현재 상품 대표이미지에 적용하고 원본은 보존해줘. 판매처 저장·등록은 누르지 마.';
+  await cancellation;
+  if(!backgroundRequestIsCurrent(request))return;
+  await post('background-selection',{style:request.style,key:request.key});
+  if(!backgroundRequestIsCurrent(request))return;
+  const result=await post('background-prepare',{style:request.style,key:request.key,sourceUrl:request.sourceUrl,revision:request.revision,requestId:request.requestId});
+  if(!backgroundRequestIsCurrent(request))return;
+  if(result.cached){
+   if(result.applied!==false||typeof result.jobId!=='string'||!result.jobId)throw Error('이전 합성 결과의 적용 정보를 확인하지 못했습니다. 다시 눌러 주세요.');
+   const completed=await post('background-complete',{jobId:result.jobId,reuse:true});
+   if(!backgroundRequestIsCurrent(request))return;
+   if(completed.ok!==true)throw Error(completed.message||'이전 합성 결과를 적용하지 못했습니다.');
+   $('backgroundStatus').textContent=completed.message||'동일 원본의 완료된 합성을 대표이미지에 적용했습니다.';
+   announce($('backgroundStatus').textContent,'success');await refresh();return;
+  }
+  if(typeof result.prompt!=='string'||!result.prompt.trim())throw Error('합성 요청 문구를 받지 못했습니다. 다시 눌러 주세요.');
   try{
-   await navigator.clipboard.writeText(prompt);
-   $('backgroundStatus').textContent='✓ 합성 요청을 복사했습니다. 이 채팅에 붙여넣어 보내 주세요.';
+   await navigator.clipboard.writeText(result.prompt);
+   if(backgroundRequestIsCurrent(request))$('backgroundStatus').textContent='✓ 합성 요청을 복사했습니다. 이 채팅에 붙여넣어 보내 주세요.';
   }catch{
+   if(!backgroundRequestIsCurrent(request))return;
    let fallback=$('backgroundChatFallback');
    if(!fallback){fallback=document.createElement('textarea');fallback.id='backgroundChatFallback';fallback.readOnly=true;fallback.setAttribute('aria-label','복사할 합성 요청');button.after(fallback);}
-   fallback.value=prompt;fallback.focus();fallback.select();
+   fallback.value=result.prompt;fallback.focus();fallback.select();
    $('backgroundStatus').textContent='자동 복사가 제한되었습니다. 선택된 요청 문구를 Ctrl+C로 복사해 주세요.';
   }
+ }catch(error){if(backgroundRequestIsCurrent(request))$('backgroundStatus').textContent=error.message;}
+ finally{
+  if(backgroundRequest===request){
+   if(!backgroundRequestIsCurrent(request))void cancelBackgroundRequest();
+   else backgroundPreparing=false;
+   syncBackgroundControls();
+  }
  }
- catch(e){$('backgroundStatus').textContent=e.message;}
- finally{button.disabled=false;}
 };
 
 // SmartStore is a separate no-save path; Lotte controls retain their behavior.
@@ -749,6 +834,7 @@ function populateSmartstoreFields(p){$('smartstorePrice').value=p.consumerPrice|
 // Entering SmartStore may suggest a title; Lotte registration handlers stay unchanged.
 function selectRegistrationChannel(channel){
  if(requestLock||serverBusy){announce('진행 중인 작업이 끝난 뒤 채널을 전환해 주세요.','failed');return;}
+ if(channel!==activeChannel())void cancelBackgroundRequest();
  const smart=channel==='smartstore';channelViewId++;
  buttonLabels.collect=smart?'공식몰 정보 가져오기':'2. 공식몰 정보 수집';
  busyLabels.collect='공식몰 정보 수집 중…';
