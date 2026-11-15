@@ -67,6 +67,15 @@ test('selection mismatch is viewable but disables approval persistently, includi
  });
 });
 
+test('cancelling an active staged preview persists view-only history across restart',async t=>{
+ const f=await fixture(t);await f.stage();assert.equal(JSON.parse(await readFile(f.reviewFile)).allowed,true);
+ f.workflow.cancel({requestId:'request_manual_fixture'});assert.equal(JSON.parse(await readFile(f.reviewFile)).allowed,false);
+ const restored=createBackgroundWorkflow(f.options);assert.equal(restored.restoreReview().restored,true);assert.equal(restored.status().manualAvailable,false);
+ assert.deepEqual(restored.preview({jobId:f.jobId,attempt:1}),f.outputs[0]);
+ assert.throws(()=>restored.manualApply({jobId:f.jobId,attempt:1,userApproved:true}),/변경/);
+ assert.throws(()=>restored.complete({jobId:f.jobId,attempt:1,reviewed:true}),/변경/);await f.unapplied();
+});
+
 test('manual pending approval binds the selected attempt, retires old worker events, and applies after idle',async t=>{
  const f=await fixture(t);await f.stage();f.workflow.retry({jobId:f.jobId,reason:'보완'});await f.stage();f.state.busy=true;
  const payload={jobId:f.jobId,attempt:1,userApproved:true},waiting=f.workflow.manualApply(payload);assert.equal(waiting.waiting,true);assert.equal(waiting.attempt,1);assert.equal(waiting.manual,true);assert.equal(f.workflow.status().attempt,1);assert.equal(f.workflow.status().status,'applying-wait');
