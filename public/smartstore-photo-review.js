@@ -7,22 +7,29 @@
   <div class="photo-review-heading"><h2 id="manualPhotoReviewTitle">사진 색상·구도 확인</h2><span id="manualPhotoReviewSummary"></span></div>
   <div class="photo-review-actions"><button type="button" id="manualPhotoReviewApply">사진 반영</button><button type="button" class="secondary" id="manualPhotoReviewClose">닫기</button></div>
   <p id="manualPhotoSelectionStatus" role="status"></p>
+  <div class="photo-bulk-tools"><strong id="manualPhotoSelectedCount">함께 선택 0장</strong><span>체크한 사진에 색상을 한 번에 지정 · Shift로 범위 선택</span><button type="button" class="secondary" id="manualPhotoSelectionClear">선택 해제</button></div>
+  <div id="manualPhotoReviewLegend" aria-label="선택한 사진에 적용할 상품 색상"></div>
  </div><div class="photo-review-body">
   <div class="photo-review-order">
-   <p class="photo-order-guide">같은 색상끼리 끌어 순서를 바꾸세요. 1번 정면 · 2번 옆면 · 3번부터 디테일</p>
+   <p class="photo-order-guide">사진을 끌어 순서 변경 · 기본은 1번 정면, 2번 옆면, 나머지 디테일 · 직접 고른 구도는 유지</p>
    <button type="button" class="secondary" id="manualPhotoReviewSort" title="수정한 색상에 맞춰 사진을 다시 모아요">색상별 정렬</button>
   </div>
-  <div id="manualPhotoReviewLegend" aria-label="상품 색상 구분"></div>
   <div id="manualPhotoReviewGrid"></div>
   <p id="manualPhotoReviewMessage" role="status"></p>
   <details id="photoPointPicker"><summary>소구점 선택</summary><p>공식 근거에서 구매 장점 2~4개를 고르세요.</p><div id="photoPointCandidates"></div><p id="photoPointMessage" role="status"></p><button id="photoPointApply" type="button">소구점 반영</button></details>
  </div>`;
- document.body.append(dialog);let current=null,loading=false;const grid=dialog.querySelector('#manualPhotoReviewGrid'),message=dialog.querySelector('#manualPhotoReviewMessage'),apply=dialog.querySelector('#manualPhotoReviewApply');
+ document.body.append(dialog);let current=null,loading=false,stale=false,openSequence=0,selectionAnchor=null,manualLayout=false;const grid=dialog.querySelector('#manualPhotoReviewGrid'),message=dialog.querySelector('#manualPhotoReviewMessage'),apply=dialog.querySelector('#manualPhotoReviewApply');
  const sortButton=dialog.querySelector('#manualPhotoReviewSort');
  let draftTimer=null,draftQueue=Promise.resolve(),pendingDraft=null,draftVersion=0;
  let photoDrag=null;
  const dragGroup=card=>{const role=card?.querySelector('[data-field=role]')?.value,color=card?.querySelector('[data-field=color]')?.value;return color&&!['care-label','excluded'].includes(role)?color:null;};
- function assignOrderedRoles(){const counts=new Map();for(const card of grid.querySelectorAll(':scope > [data-photo-id]')){const color=dragGroup(card);if(!color)continue;const index=counts.get(color)||0;counts.set(color,index+1);const role=card.querySelector('[data-field=role]'),value=index===0?'front':index===1?'side':'detail';if(role.value!==value){role.value=value;card.refreshPhotoView?.();}}}
+ function assignOrderedRoles(){const counts=new Map();for(const card of grid.querySelectorAll(':scope > [data-photo-id]')){const color=dragGroup(card);if(!color)continue;const index=counts.get(color)||0;counts.set(color,index+1);if(card.dataset.roleMode==='manual')continue;const role=card.querySelector('[data-field=role]'),value=index===0?'front':index===1?'side':'detail';if(role.value!==value){role.value=value;card.refreshPhotoView?.();}}}
+ const photoCards=()=>[...grid.querySelectorAll(':scope > [data-photo-id]')];
+ const checkedCards=()=>photoCards().filter(card=>card.querySelector('[data-select-photo]')?.checked);
+ function updateBulkSelection(){const cards=photoCards(),selected=checkedCards();for(const card of cards)card.dataset.selected=String(selected.includes(card));dialog.querySelector('#manualPhotoSelectedCount').textContent='함께 선택 '+selected.length+'장';dialog.querySelector('#manualPhotoSelectionClear').disabled=loading||stale||!selected.length;for(const badge of dialog.querySelectorAll('#manualPhotoReviewLegend button'))badge.disabled=loading||stale||!!photoDrag||!selected.length;sortButton.disabled=loading||stale||!!photoDrag;}
+ function markUnsorted(){manualLayout=true;for(const heading of grid.querySelectorAll('.photo-group-heading')){heading.replaceChildren(document.createTextNode('색상 정리 전 · 각 사진의 색상 확인'));heading.classList.add('photo-group-pending');}}
+ function setSelectedColor(color){if(loading||stale||photoDrag||!current?.colors.includes(color))return;const usable=checkedCards().filter(card=>!['care-label','excluded'].includes(card.querySelector('[data-field=role]').value));if(!usable.length){message.textContent='케어라벨·사용 안 함 사진은 색상을 지정하지 않습니다.';return;}for(const card of usable){card.querySelector('[data-field=color]').value=color;card.dataset.colorOverride='true';card.refreshPhotoView?.();}markUnsorted();updatePhotoSummary();rememberSelection();message.textContent=usable.length+'장에 '+color+' 지정 · 위치는 그대로입니다. 색상별 정렬로 모아 보세요.';}
+ dialog.querySelector('#manualPhotoSelectionClear').onclick=()=>{if(loading||stale)return;for(const card of photoCards())card.querySelector('[data-select-photo]').checked=false;selectionAnchor=null;updateBulkSelection();};
  function photoDropAt(x,y,drag){
   const hit=document.elementFromPoint(x,y);
   if(!grid.contains(hit))return null;
