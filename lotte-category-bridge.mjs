@@ -11,6 +11,8 @@ const aliases=s=>new Set(categoryAlternatives(String(s||'')).map(label));
 function commonPath(product,common){
  const c=product.category||{},group=common.genders.find(g=>g.gender===product.gender);
  if(!group||c.commonMajor&&!sameCategoryLabel(c.commonMajor,group.major))return null;
+ const exact=group.middles.flatMap(m=>sameCategoryLabel(c.commonMiddle,m.middle)?m.children.filter(s=>sameCategoryLabel(c.commonSmall,s)).map(s=>({major:group.major,middle:m.middle,small:s})):[]);
+ if(exact.length===1)return exact[0];
  const middleAliases=aliases(c.commonMiddle),smallAliases=aliases(c.commonSmall);
  const found=group.middles.flatMap(m=>middleAliases.has(label(m.middle))?m.children.filter(s=>smallAliases.has(label(s))).map(s=>({major:group.major,middle:m.middle,small:s})):[]);
  return found.length===1?found[0]:null;
