@@ -29,8 +29,9 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   cancelled.add(requestId);
   // Keep all cancellations for this process: a delayed HTTP request must not
   // become valid again merely because other requests were made afterwards.
-  if(active?.requestId===requestId)invalidate();
-  return {ok:true};
+  const matches=active?.requestId===requestId;
+  if(matches)invalidate();
+  return {ok:true,cancelled:matches};
  }
  function stateMatches(s){
   const now=getState();

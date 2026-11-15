@@ -339,7 +339,11 @@ const server=http.createServer(async(req,res)=>{
       // read. A job that finishes before the AI response must still cancel it.
       if(!backgroundWorkflowEndpoints.has(url.pathname)){backgroundMutation=true;backgroundMutations++;backgroundWorkflow.invalidate();}
       const b=await body(req);
-      if(url.pathname==='/api/background-cancel')return json(res,200,backgroundWorkflow.cancel(b));
+      if(url.pathname==='/api/background-cancel'){
+        const result=backgroundWorkflow.cancel(b);
+        if(result.cancelled)await backgroundRunner.cancel();
+        return json(res,200,result);
+      }
       if(url.pathname==='/api/background-inspect')return json(res,200,backgroundWorkflow.inspect(b));
       if(url.pathname==='/api/background-prepare'){
         const result=await backgroundWorkflow.prepare(b);
