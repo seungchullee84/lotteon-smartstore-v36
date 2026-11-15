@@ -14,6 +14,7 @@ test('롯데ON 입력 버튼은 응답 전부터 움직이고 접수 후에도 �
   await page.addStyleTag({content:await readFile(new URL('../public/style.css',import.meta.url),'utf8')});
   await page.addScriptTag({content:`const $=id=>document.getElementById(id),feedback=$('clickFeedback');
    let requestLock=false,serverBusy=false,serverPhase='idle',lotteRequestEpoch=0;
+   const setText=(element,value)=>{if(element.textContent!==value)element.textContent=value;},syncBackgroundControls=()=>{};
    const buttonLabels={open:'열기',collect:'수집',run:'검토한 내용으로 입력 시작'},busyLabels={run:'작업 중 · 롯데ON 입력 준비…'},activeChannel=()=>'lotte';
    window.requests=0;window.observedState={busy:true,phase:'register'};
    window.fetch=async()=>({ok:true,json:async()=>window.observedState});

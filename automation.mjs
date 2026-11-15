@@ -962,14 +962,10 @@ export class LotteAutomation extends BrowserAutomation {
     const grid=this.locator('div_input05_div_body_grd_Dspctgr');
     const rows=await grid.locator('[id]').evaluateAll(es=>es.filter(e=>/body_gridrow_\d+GridAreaContainerElement_inner$/.test(e.id)).length);
     if(rows){
-      const text=await grid.innerText();if([category.channelMajor,category.channelMiddle,category.channelSmall].every(label=>text.includes(label)))return {category,alreadyApplied:true};
+      if(await this.hasStandardCategory(category.channelMajor,category.channelMiddle,category.channelSmall,category.channelDetail,category.channelCodes))return {category,alreadyApplied:true};
       throw Error('기존 표준카테고리가 있어 그대로 유지했습니다. 중복 추가 전 기존 분류를 확인해 주세요.');
     }
-    await this.similarCategoryClick(category.channelMajor,'L');await this.settle();
-    await this.similarCategoryClick(category.channelMiddle,'M');await this.settle();
-    await this.similarCategoryClick(category.channelSmall,'S');await this.settle();
-    await this.addStandardCategory(category.channelMajor,category.channelMiddle,category.channelSmall);
-    await saveCategoryMatch(this.root,categoryKey({...p,category}),{major:category.channelMajor,middle:category.channelMiddle,small:category.channelSmall},p.style);
+    await this.selectMatchedChannelCategory({...p,category});
     this.log('같은 품번 채널 분류 적용: '+p.style+' · 바지 > 기모팬츠 · 신규 생성·상품 저장 안 함');
     return {category,applied:true,saved:false};
   }

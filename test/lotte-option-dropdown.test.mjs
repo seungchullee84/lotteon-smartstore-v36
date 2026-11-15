@@ -188,7 +188,7 @@ test('채널 창에 동일한 기본 옵션 두 줄이 있으면 빈 페이지�
   const browser=await chromium.launch({headless:true});
   try{
     const page=await browser.newPage();
-    const product={name:'테스트 재킷',colors:['01소프트베이지','02차콜'],sizes:['S','M']};
+    const product={style:'123456',gender:'남성',name:'테스트 재킷',category:{commonMiddle:'남성의류아우터',commonSmall:'남성점퍼',channelMiddle:'점퍼/패딩/야상',channelSmall:'집업점퍼'},colors:['01소프트베이지','02차콜'],sizes:['S','M']};
     const area='mock_chnlForm_form_div_Data_div_input12_div_body';
     const base=area+'_grd_OptnDtl';
     const directRows=[
@@ -199,9 +199,10 @@ test('채널 창에 동일한 기본 옵션 두 줄이 있으면 빈 페이지�
       directRows.flatMap((values,i)=>values.map((value,col)=>'<div id="'+base+'_body_gridrow_'+(i+2)+'_cell_'+(i+2)+'_'+col+'">'+value+'</div>')).join('')+
       '</div><div id="'+base+'New"><div id="'+base+'New_body_gridrow_0_cell_0_2">01소프트베이지</div></div></section>');
     const bot=new LotteAutomation('',()=>{});bot.page=page;
+    bot.waitChannelReady=bot.assertChannelStyle=async()=>{};bot.hasStandardCategory=async()=>true;
     bot.applyChannelPreset=async()=>assert.fail('이미 입력된 옵션의 프리셋을 다시 적용하면 안 됨');
     const actions=[];
-    bot.matchLotteOptions=async p=>{assert.equal(p,product);actions.push('옵션 선택');};
+    bot.matchLotteOptions=async p=>{assert.equal(p.style,product.style);assert.deepEqual(p.colors,product.colors);assert.deepEqual(p.sizes,product.sizes);actions.push('옵션 선택');};
     bot.textClick=async label=>actions.push(label);
     bot.modalConfirm=bot.set=bot.snapshot=async()=>{};
     await bot.channel(product,'',{resume:true});
