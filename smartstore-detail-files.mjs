@@ -191,15 +191,17 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
   for(const group of draft.officialPhotos){
    if(prepared.colorImages[group.color]?.length)continue;
    if(!/^\d{2}\S+/.test(group.color)||group.sourceUrl!==product.sourceUrl||group.sourceImageUrl!==product.images.detail||group.sourceImageHash!==detailHash)throw Error('공식 보완 사진의 품번·색상·출처를 다시 확인해 주세요.');
-   if(group.files?.length!==2||group.files[0].role!=='front')throw Error('공식 보완 사진은 정면을 첫 번째로 2장 준비해 주세요.');
+   if(!group.files?.length)continue;
+   if(!Array.isArray(group.files))throw Error('공식 보완 사진 목록을 확인해 주세요.');
    prepared.displayColors.push(group.color);prepared.displayColors=[...new Set(prepared.displayColors)].sort();
    for(const entry of group.files){
+    if(prepared.colorImages[group.color]?.length>=2)break;
     if(typeof entry.file!=='string'||path.isAbsolute(entry.file)||entry.file.split(/[\\/]/).includes('..'))throw Error('공식 사진 파일 경로를 확인해 주세요.');
     const file=await realpath(path.join(draftRoot,entry.file)),canonicalRoot=await realpath(draftRoot);
     if(!inside(canonicalRoot,file))throw Error('공식 사진이 자료 폴더 밖에 있습니다.');
     const bytes=await readFile(file),hash=createHash('sha256').update(bytes).digest('hex');if(hash!==entry.sha256)throw Error('확인된 공식 사진 원본과 다릅니다.');
     const id=hash.slice(0,24),name='smartstore-photo-'+id+'.jpg',src='/smartstore-photo/'+id;
-    await writeFile(path.join(folder,name),bytes);prepared.photoFiles[src]=name;prepared.colorImages[group.color]||=[];prepared.colorImages[group.color].push(src);
+    await writeFile(path.join(folder,name),bytes);prepared.photoFiles[src]=name;prepared.colorImages[group.color]||=[];if(!prepared.colorImages[group.color].includes(src))prepared.colorImages[group.color].push(src);
    }
    prepared.colorSources[group.color]='official';
    if(prepared.paletteImages&&prepared.colorImages[group.color]?.length)prepared.paletteImages[group.color]=prepared.colorImages[group.color][0];
