@@ -54,11 +54,28 @@ function explicitGarmentLeaves(p){
  if(/조끼|베스트|\bvest\b/i.test(title))return /패딩|다운|푸퍼/.test(title)?['패딩조끼']:/니트|스웨터/.test(title)?['니트조끼']:/테일러드|정장/.test(title)?['테일러드조끼']:/퍼|모피/.test(title)?['퍼베스트']:['캐쥬얼조끼'];
  if(/레깅스|\bleggings\b/i.test(title))return women&&!/INNERWEAR|내의|내복/i.test(text)?['레깅스']:[];
  if(/반바지|치마바지|쇼츠|하프\s*팬츠|\bshorts\b/i.test(title))return /데님|청반바지|\bdenim\b/i.test(text)?['청반바지']:women?['반바지/치마바지']:/코튼|린넨|(?:^|\s)면(?:\s|$)|\bcotton\b|\blinen\b/i.test(title)?['면/린넨반바지']:[];
- if(/셔츠|남방/.test(title)&&!/티셔츠|스웨트셔츠/.test(title))return /데님|\bdenim\b/i.test(title)?['데님셔츠']:/체크/.test(title)?['체크셔츠']:/스트라이프/.test(title)?['스트라이프셔츠']:/솔리드|무지/.test(title)?['솔리드셔츠']:[];
+ if(/코트/.test(title))return /트렌치/.test(title)?['트렌치코트']:/레인/.test(title)?['레인코트']:/패딩|다운/.test(title)?['패딩/다운코트']:/하프|숏|쇼트/.test(title)?['하프코트']:/롱/.test(title)?['롱코트']:[];
+ if(/패딩|다운|푸퍼/.test(title))return ['패딩/다운점퍼'];
+ if(/재킷|자켓|셔켓|블레이저/.test(title)){
+  if(/바람막이|윈드브레이커/.test(text))return ['바람막이점퍼'];
+  if(/데님|청자켓/.test(title)&&!/라이크/.test(title))return [women?'청자켓':'데님자켓'];
+  if(/가죽|레더|무스탕/.test(title))return [women?'무스탕/가죽자켓':'가죽자켓'];
+  if(/블레이저|테일러드/.test(title))return ['테일러드자켓'];
+  if(/집업|풀\s*집/.test(title)&&!/하프|반\s*집/.test(title))return [women?'집업/야구/항공점퍼':'집업점퍼'];
+  if(!women&&/울|모직/.test(title))return ['모직자켓'];
+  return women?['캐주얼자켓']:[];
+ }
+ if(/가디건|카디건/.test(title))return /집업|풀\s*집/.test(title)?['집업가디건']:/브이|V\s*넥/i.test(title)?['브이넥가디건']:/라운드|크루/.test(title)?['라운드넥가디건']:[];
+ if(/니트|스웨터/.test(title)&&!/머플러/.test(title))return /집업|풀\s*집|하프\s*집/.test(title)?['집업니트']:/터틀|폴라/.test(title)?['터틀넥/폴라니트']:/브이|V\s*넥/i.test(title)?['브이넥니트']:/라운드|크루/.test(title)?['라운드넥니트']:null;
+ if(/셔츠|남방/.test(title)&&!/티셔츠|스웨트셔츠|스웻셔츠/.test(title)){
+  const names=[];if(/데님|\bdenim\b/i.test(title))names.push('데님셔츠');if(/체크/.test(title))names.push('체크셔츠');if(/스트라이프/.test(title))names.push('스트라이프셔츠');if(/솔리드|무지/.test(title))names.push('솔리드셔츠');
+  return names.length===1?names:[];
+ }
+ if(women&&/플리스|후리스/.test(title)&&/집업|풀\s*집/.test(title)&&!/후드|후디|하프|반\s*집|팬츠|바지|니트|가디건/.test(title))return ['집업/야구/항공점퍼'];
  if(/후드|후디/.test(title)&&!/패딩|다운|코트|니트|스웨터|가디건|카디건|재킷|자켓|점퍼|바람막이/.test(title))return women?['후드티/후드집업']:/집업|지퍼/.test(title)?['후드집업']:['후드티셔츠'];
- if(/티셔츠|긴팔티|반팔티|민소매|나시/.test(title)&&!/니트|스웨터|후드|맨투맨|스웨트셔츠/.test(title)){
+ if(/티셔츠|긴팔티|반팔티|카라티|민소매|나시|탱크탑|머슬티/.test(title)&&!/니트|스웨터|후드|맨투맨|스웨트셔츠/.test(title)){
   const short=/반팔/.test(text)&&!women;
-  if(/민소매|나시/.test(title))return ['민소매티셔츠'];
+  if(/민소매|나시|탱크탑|머슬티/.test(title))return ['민소매티셔츠'];
   if(/카라|폴로|피케|피케이/.test(title))return [short?'카라반팔티':'카라넥티셔츠'];
   if(/폴라|터틀/.test(title))return short?[]:['폴라티셔츠'];
   if(/브이|V\s*넥/i.test(title))return [short?'브이넥반팔티':'브이넥티셔츠'];
@@ -70,7 +87,7 @@ function explicitGarmentLeaves(p){
 export function resolveCatalogCategory(p,catalog=loadCatalog(),common=null){
  const trainingCategory=mensTrainingCategory(p);
  if(trainingCategory)return {category:trainingCategory,status:'사용자 확인 · 남성 트레이닝 바지 → 바지 / 기모팬츠',path:{major:{code:'BC31000000',name:'브랜드남성의류'},middle:{code:'BC31050000',name:'바지'},small:{code:'BC31050100',name:'기모팬츠'},detail:null}};
- if(/머플러/.test(p.rawName||p.name||'')&&!p.category?.channelSmall?.trim()){
+ if(/머플러/.test(p.rawName||p.name||'')&&(!p.category?.channelSmall?.trim()||['니트/스웨터','라운드넥니트'].includes(p.category.channelSmall))){
   const major=catalog?.majors.find(m=>m.code==='BC35000000'),middle=major?.middles.find(m=>m.code==='BC35100000'),small=middle?.smalls.find(s=>s.code==='BC35100100');
   if(small)return {category:channelCategoryPath({...p.category,commonMajor:'L0001 : 패션/장신',commonMiddle:'M0357 : 패션액세서리',commonSmall:'01068 : 머플러',channelMiddle:middle.name,channelSmall:small.name}),status:'실제 롯데 목록 확인 · 소재 제한 없는 머플러 분류',path:{major:{code:major.code,name:major.name},middle:{code:middle.code,name:middle.name},small:{code:small.code,name:small.name},detail:null}};
  }
@@ -79,7 +96,7 @@ export function resolveCatalogCategory(p,catalog=loadCatalog(),common=null){
  if(!catalog)return {category:{...p.category},status:'목록 미수집'};
  if(!common)try{common=JSON.parse(readFileSync(new URL('./data/category-catalog-common.json',import.meta.url),'utf8'));}catch{}
  const text=[p.rawName||p.name,...(p.sourceCategory||[])].join(' ').replace(/버튼\s*다운|button[-\s]*down/gi,'버튼셔츠').replace(/트리코트/g,'');
- const denim=/데님|청바지|\bDENIM\b/i.test(text)&&/바지|팬츠|PANTS|청바지/i.test(text);
+ const denim=/데님|청바지|\bDENIM\b/i.test(text)&&!/셔츠|재킷|자켓|셔켓|원피스|스커트|치마|조끼|베스트/.test(text);
  const training=!denim&&/바지|팬츠|PANTS/i.test(text)&&/트레이닝|스웻|스웨트|조거/.test(text);
  const denimFit=/와이드|부츠컷|배럴|벌룬/.test(text)?'부츠컷/와이드핏':/스키니|슬림/.test(text)?'스키니/슬림핏':'스트레이트핏';
  const paths=standardPaths(catalog,p.gender),wanted=denim?denimFit:training?(p.gender==='여성'?'트레이닝하의':'트레이닝바지'):strip(p.category?.channelSmall);

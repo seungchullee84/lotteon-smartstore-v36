@@ -22,7 +22,7 @@ export function suggestMissingLotteCategory(product){
  const conflicts=['commonMajor','commonMiddle','commonSmall','channelMajor','channelMiddle','channelSmall','channelDetail'].some(key=>label(before[key])&&label(proposed[key])!==label(before[key]));
  if(conflicts)return {category:before,filled:[],missing:LOTTE_CATEGORY_FIELDS.filter(key=>!before[key]?.trim()),message:'입력된 분류와 상품 추천 경로가 달라 기존 값을 유지했습니다. 남은 공란을 확인해 주세요.'};
  const category={...before};
- for(const [key,value] of Object.entries(proposed))if(!category[key]&&typeof value==='string')category[key]=value;
+ for(const [key,value] of Object.entries(proposed))if(typeof value==='string'&&!String(category[key]||'').trim())category[key]=value;
  if(proposed.channelCodes)category.channelCodes={...proposed.channelCodes};
  const missing=LOTTE_CATEGORY_FIELDS.filter(key=>!category[key]?.trim());
  const filled=LOTTE_CATEGORY_FIELDS.filter(key=>!before[key]?.trim()&&category[key]?.trim());
