@@ -600,15 +600,6 @@ export class LotteAutomation extends BrowserAutomation {
     }
     // A validated category must never silently become a merely similar garment.
     throw Error('정확한 채널분류 이름·코드를 찾지 못했습니다: '+choice+(code?' ('+code+')':'')+' · 판매처 목록을 다시 확인해 주세요.');
-    const selected=similarCategory(choice,[...labels]);
-    if(!selected)throw Error('같거나 유사한 채널분류를 찾지 못했습니다: '+choice+' (목록: '+[...labels].join(', ')+')');
-    await move(true);previous='';stagnant=0;
-    for(let scan=0;scan<40;scan++){
-      this.check();if(await clickVisible(selected)){this.log('유사 채널분류 선택: '+choice+' → '+selected);return selected;}
-      const signature=(await scope.allTextContents()).join('|');stagnant=signature===previous?stagnant+1:0;previous=signature;
-      if(stagnant>=2||!await move(false))break;
-    }
-    throw Error('채널분류 목록에서 선택 항목으로 이동하지 못했습니다: '+selected);
   }
   async matchLotteOptions(p){
     const grid='grd_OptnDtlNew';
@@ -872,13 +863,57 @@ export class LotteAutomation extends BrowserAutomation {
     }
     this.check(); // No page-wheel fallback: only the option table's vertical scrollbar is used.
   }
-  async addStandardCategory(major,middle,small){
+  async hasStandardCategory(major,middle,small,detail=''){
     const grid=this.locator('div_input05_div_body_grd_Dspctgr');
-    const contains=async()=>{const text=await grid.innerText();return [major,middle,small].every(x=>text.includes(x));};
+    return grid.evaluate((element,expected)=>{
+      const rows=[...element.querySelectorAll('[id]')].filter(e=>/body_gridrow_\d+(?:GridAreaContainerElement_inner)?$/.test(e.id));
+      return rows.some(row=>{
+        const values=[...row.querySelectorAll('[id$="GridCellTextContainerElement"]')].map(e=>e.textContent.trim());
+        for(let i=0;i<values.length-2;i++)if(expected.slice(0,3).every((v,j)=>values[i+j]===v)&&String(values[i+3]||'')===expected[3])return true;
+        return false;
+      });
+    },[major,middle,small,detail||'']);
+  }
+  async addStandardCategory(major,middle,small,detail=''){
+    const contains=()=>this.hasStandardCategory(major,middle,small,detail);
     if(await contains()){this.log('표준카테고리가 이미 추가되어 있습니다. 중복 추가를 건너뜁니다.');return;}
     await this.click(this.locator('div_input05_div_body_btn_Dspctgr_AddRow'));await this.settle();
-    for(let n=0;n<20;n++){this.check();if(await contains()){this.log('표준카테고리 자동 추가 확인: '+major+' > '+middle+' > '+small);return;}await this.page.waitForTimeout(200);}
+    for(let n=0;n<40;n++){this.check();if(await contains()){this.log('표준카테고리 자동 추가 확인: '+[major,middle,small,detail].filter(Boolean).join(' > '));return;}await this.page.waitForTimeout(200);}
     throw Error('표준카테고리 추가가 아래 목록에 반영되지 않았습니다. 중복 추가하지 않고 중단합니다.');
+  }
+  async assertChannelStyle(p){
+    const fields=this.page.locator('[id$="edt_style_input"]').filter({visible:true});
+    const values=await fields.evaluateAll(es=>es.map(e=>e.value.replace(/\s/g,'')));
+    if(!values.length||values.some(v=>v!==p.style+'(DT)'))throw Error('2차 채널 창의 품번이 다릅니다. 현재 상품 '+p.style+'의 창을 확인해 주세요.');
+  }
+  async openCategoryChannel(row,p){
+    // The double click opens another form asynchronously. Re-check identity there.
+    await this.click(row);await row.dblclick();await this.settle();
+    await this.waitChannelReady();await this.assertChannelStyle(p);
+    this.log('더블클릭 후 동일 품번의 2차 채널 창 확인: '+p.style);
+  }
+  async selectMatchedChannelCategory(p){
+    p.category=assertLotteCategory(p);
+    const c=p.category;
+    for(let attempt=1;attempt<=3;attempt++){
+      this.check();await this.assertChannelStyle(p);
+      try{
+        for(const [level,key] of [['L','major'],['M','middle'],['S','small'],['D','detail']]){
+          const field='channel'+key[0].toUpperCase()+key.slice(1);
+          if(!c[field])continue;
+          await this.similarCategoryClick(c[field],level,{code:c.channelCodes?.[key]||'',timeout:5000});await this.settle();
+        }
+        await this.assertChannelStyle(p);break;
+      }catch(error){
+        this.check();if(attempt===3||/품번|중복|로그인/.test(error.message))throw error;
+        this.log('2차 분류 목록 다시 확인 '+(attempt+1)+'/3 · '+error.message);
+        await this.page.waitForTimeout(350*attempt);await this.settle();
+      }
+    }
+    // Only selection is retried. Never repeat Add after an ambiguous response.
+    await this.addStandardCategory(c.channelMajor,c.channelMiddle,c.channelSmall,c.channelDetail);
+    await saveCategoryMatch(this.root,categoryKey(p),{major:c.channelMajor,middle:c.channelMiddle,small:c.channelSmall,detail:c.channelDetail||'',codes:c.channelCodes||{}},p.style);
+    this.log('1차·2차 분류 매칭 및 실제 추가 확인 완료');
   }
   async waitChannelReady(){
     this.log('채널 화면과 즐겨찾기 입력란 준비 확인 중');
@@ -949,29 +984,20 @@ export class LotteAutomation extends BrowserAutomation {
         /_body_gridrow_(\d+)_cell_\1_2$/.test(cell.id)&&!!cell.textContent.trim())));
   }
   async channel(p,folder,{resume=false}={}){
+    p={...p,category:assertLotteCategory(p)};await this.waitChannelReady();await this.assertChannelStyle(p);
     const optionBlock=this.page.locator('[id$="div_input12_div_body"]').filter({visible:true}).last();
     if(resume&&await this.canResumeChannelOptions(p)){
+      const c=p.category;
+      if(!await this.hasStandardCategory(c.channelMajor,c.channelMiddle,c.channelSmall,c.channelDetail)){
+        const rows=await this.locator('div_input05_div_body_grd_Dspctgr').locator('[id]').evaluateAll(es=>es.filter(e=>/body_gridrow_\d+GridAreaContainerElement_inner$/.test(e.id)).length);
+        if(rows)throw Error('기존 2차 분류가 현재 1차와 매칭되지 않습니다. 기존 입력을 보존했으니 분류를 확인해 주세요.');
+        await this.selectMatchedChannelCategory(p);
+      }
       this.log('기존 색상·사이즈 입력을 확인했습니다. 롯데ON 옵션 선택부터 이어갑니다.');
     }else{
     // Suffix names for channel controls vary between portal versions. Collect the actual list.
     await this.applyChannelPreset();
-    if(/패딩|푸퍼|다운/.test(p.name+' '+(p.sourceCategory||[]).join(' '))&&!/코트/.test(p.name)){
-      p.category.channelMiddle='점퍼/패딩/야상';p.category.channelSmall='패딩/다운점퍼';
-    }
-    const correctedPath=channelCategoryPath(p.category);
-    if(correctedPath.channelMiddle!==p.category.channelMiddle)this.log('하위 분류에 맞춰 상위 분류 보정: '+p.category.channelMiddle+' → '+correctedPath.channelMiddle);
-    p.category=correctedPath;
-    const verifiedPath=resolveCatalogCategory(p);if(verifiedPath.path)p.category=verifiedPath.category;
-    const major=p.category.channelMajor||(p.gender==='여성'?'브랜드여성의류':'브랜드남성의류');
-    const matchKey=categoryKey(p);
-    const known=(await loadCategoryCache(this.root)).matches.find(m=>m.key===matchKey&&m.actual.major===major);
-    if(known&&!mensTrainingCategory(p)){p.category.channelMiddle=known.actual.middle;p.category.channelSmall=known.actual.small;this.log('검증된 분류 매칭표 사용: '+major+' > '+known.actual.middle+' > '+known.actual.small);}
-    await this.similarCategoryClick(major,'L');p.category.channelMiddle=await this.similarCategoryClick(p.category.channelMiddle,'M');await this.settle();p.category.channelSmall=await this.similarCategoryClick(p.category.channelSmall,'S');await this.settle();
-    if(p.category.channelDetail)p.category.channelDetail=await this.similarCategoryClick(p.category.channelDetail,'D');
-    // Select category's own add button by its visible enclosing block.
-    await this.addStandardCategory(major,p.category.channelMiddle,p.category.channelSmall);
-    await saveCategoryMatch(this.root,matchKey,{major,middle:p.category.channelMiddle,small:p.category.channelSmall},p.style);
-    this.log('실제 선택·추가 확인된 분류 경로를 매칭표에 저장했습니다.');
+    await this.selectMatchedChannelCategory(p);
     if(!await optionBlock.count())throw Error('옵션등록 영역을 찾지 못했습니다.');
     await this.textClick('행추가',optionBlock);await this.textClick('행추가',optionBlock);
     await this.gridCombo('grd_OptnDtl',2,0,'직접입력1');await this.gridCombo('grd_OptnDtl',3,0,'직접입력2');
