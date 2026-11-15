@@ -584,12 +584,29 @@ $('openNoticeText').onclick=()=>{syncNoticeCopy();$('noticeCopyStatus').textCont
 const backgroundLabels={main:'대표이미지',extra1:'추가이미지 1',extra2:'추가이미지 2'};
 let backgroundRequest=null,backgroundEpoch=0,backgroundPreparing=false,backgroundSelectionPending=false,backgroundWorkActive=false;
 let backgroundCancellation=Promise.resolve(),backgroundStyleInput=$('style').value;
-let backgroundProgress=null;
+let backgroundProgress=null,backgroundFailure=null,backgroundFailureApplying=false,backgroundTerminalNotice=null,backgroundTerminalTimer=null;
+try{backgroundTerminalNotice=JSON.parse(sessionStorage.getItem('backgroundTerminalNotice')||'null');}catch{}
 const cancelledBackgroundRequests=new Set();
 const backgroundActiveStatuses=['preparing','waiting','generating','processing','review','applying-wait'];
 const backgroundStageLabels={preparing:'원본 확인',waiting:'시작 대기',generating:'배경 생성',processing:'원본 합성',review:'완성본 검수','applying-wait':'적용 대기',complete:'합성 완료',error:'합성 확인 필요',cancelled:'합성 취소'};
 function showBackgroundProgress(work){
- backgroundProgress={...work};
+ backgroundProgress={requestId:backgroundRequest?.requestId,jobId:backgroundRequest?.jobId,...work};
+ if(!backgroundActiveStatuses.includes(work.status)){
+  const key=(backgroundProgress.requestId||backgroundProgress.jobId||work.style||'local')+':'+work.status;
+  if(backgroundTerminalNotice?.key!==key){
+   backgroundTerminalNotice={key,expiresAt:Date.now()+4000};
+   try{sessionStorage.setItem('backgroundTerminalNotice',JSON.stringify(backgroundTerminalNotice));}catch{}
+  }
+  clearTimeout(backgroundTerminalTimer);
+  backgroundTerminalTimer=setTimeout(syncBackgroundProgress,Math.max(0,backgroundTerminalNotice.expiresAt-Date.now()));
+ }
+ if(work.status==='error')syncBackgroundFailure(work);
+ else if(!backgroundFailureApplying){backgroundFailure=null;syncBackgroundFailure();}
+ syncBackgroundProgress();
+}
+function dismissBackgroundTerminalNotice(){
+ if(!backgroundProgress||backgroundActiveStatuses.includes(backgroundProgress.status))return;
+ if(backgroundTerminalNotice){backgroundTerminalNotice.expiresAt=Date.now();try{sessionStorage.setItem('backgroundTerminalNotice',JSON.stringify(backgroundTerminalNotice));}catch{}}
  syncBackgroundProgress();
 }
 function syncBackgroundProgress(){
@@ -597,6 +614,7 @@ function syncBackgroundProgress(){
  panel.hidden=!backgroundProgress;
  if(!backgroundProgress)return;
  const work=backgroundProgress,active=backgroundActiveStatuses.includes(work.status);
+ panel.hidden=!active&&Date.now()>=(backgroundTerminalNotice?.expiresAt||0);
  panel.dataset.status=work.status;panel.classList.toggle('active',active);
  const retry=work.status==='generating'&&Number.isInteger(work.attempt)&&work.attempt>1;
  const heading=work.status==='applying-wait'?'합성 완료 · 적용 대기':retry?'합성 보정 재시도 중 · '+work.attempt+(Number.isInteger(work.maxAttempts)?'/'+work.maxAttempts:'')+'회':
@@ -611,6 +629,36 @@ function syncBackgroundProgress(){
  setText($('backgroundProgressElapsed'),seconds===null?'':(active?'경과 ':'소요 ')+(seconds>=60?Math.floor(seconds/60)+'분 ':'')+seconds%60+'초');
 }
 setInterval(syncBackgroundProgress,1000);
+function syncBackgroundFailure(work){
+ if(work){
+  const previews=(Array.isArray(work.previews)?work.previews:work.previewUrl?[{attempt:work.attempt,url:work.previewUrl}]:[]).filter(preview=>{
+   try{const url=new URL(preview.url,location.href);return url.origin===location.origin&&url.pathname==='/api/background-preview'&&Number.isInteger(preview.attempt);}catch{return false;}
+  });
+  const previous=backgroundFailure;
+  backgroundFailure={...work,previews,selectedAttempt:previous?.jobId===work.jobId&&previews.some(preview=>preview.attempt===previous.selectedAttempt)?previous.selectedAttempt:previews.at(-1)?.attempt};
+ }
+ $('backgroundFailureCard').hidden=!backgroundFailure;$('backgroundFailureReview').hidden=!backgroundFailure;
+ if(!backgroundFailure)return;
+ const failure=backgroundFailure,select=$('backgroundFailureAttempt'),preview=failure.previews.find(item=>item.attempt===failure.selectedAttempt);
+ const options=failure.previews.map(item=>({value:String(item.attempt),label:item.attempt+'차 합성 결과'}));
+ if(select.dataset.options!==JSON.stringify(options)){
+  select.replaceChildren(...options.map(item=>{const option=document.createElement('option');option.value=item.value;option.textContent=item.label;return option;}));
+  select.dataset.options=JSON.stringify(options);
+ }
+ select.value=String(failure.selectedAttempt||'');select.disabled=backgroundFailureApplying||options.length<2;
+ const reason=preview?.reason||failure.message||'실패 사유를 확인해 주세요.';
+ setText($('backgroundFailureReason'),reason);setText($('backgroundFailureSummary'),(preview?preview.attempt+'차 · ':'')+(failure.message||reason));
+ setText($('backgroundFailureLabel'),preview?'실패 결과 보기':'실패 사유 보기');
+ for(const id of ['backgroundFailedImage','backgroundFailureThumbnail']){
+  const img=$(id);img.hidden=!preview;
+  if(preview&&img.getAttribute('src')!==preview.url){img.src=preview.url;img.alt=preview.attempt+'차 검수에 실패한 합성 결과';}
+  else if(!preview)img.removeAttribute('src');
+ }
+ $('backgroundFailureNoImage').hidden=!!preview;
+ $('applyBackgroundFailure').hidden=!preview;
+ $('applyBackgroundFailure').disabled=backgroundFailureApplying;
+ setText($('applyBackgroundFailure'),backgroundFailureApplying?'선택한 결과 적용 중…':'선택한 결과를 대표이미지에 적용');
+}
 function syncBackgroundControls(){
  const active=backgroundPreparing||backgroundWorkActive;
  $('openBackgroundRequest').disabled=activeChannel()!=='lotte'||backgroundPreparing||backgroundSelectionPending||backgroundWorkActive||serverBusy||requestLock;
