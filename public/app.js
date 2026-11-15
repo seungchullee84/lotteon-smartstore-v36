@@ -271,7 +271,7 @@ async function checkLotteCategory({fillMissing=false}={}){
   if(fillMissing&&result.bridge.complete)product.category={...product.category,...result.category};
   lotteCategoryChecked=JSON.stringify(lotteCategorySnapshot());
   const display={...result.validation,summary:result.bridge.message,commonPath:[result.category.commonMajor,result.category.commonMiddle,result.category.commonSmall],channelPath:[result.category.channelMajor,result.category.channelMiddle,result.category.channelSmall,...(result.category.channelDetail?[result.category.channelDetail]:[])]};
-  renderLotteCategoryValidation(display,result.bridge.complete?(result.bridge.review?'review':'ready'):'blocked');
+  renderLotteCategoryValidation(display,result.bridge.complete?(result.bridge.review||!result.validation.ready?'review':'ready'):'blocked');
   setText($('lotteCategorySuggestionStatus'),fillMissing?result.bridge.message||'':'');
   return result.bridge.complete;
  }catch(error){

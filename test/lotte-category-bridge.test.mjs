@@ -13,7 +13,6 @@ test('every one of the 83 first-category leaves produces a non-empty selectable 
   const result=bridgeLotteCategory(p),c=result.category;total++;
   assert.equal(result.complete,true,small);assert.equal(c.commonSmall,small);assert.equal(c.commonMiddle,middle.middle);
   for(const key of ['channelMajor','channelMiddle','channelSmall'])assert.ok(c[key],small+' '+key);
-  if(small==='00715 : 남성내의'){assert.deepEqual([c.channelMajor,c.channelMiddle,c.channelSmall],['남성의류','남성속옷','남성내의']);continue;}
   assert.ok(paths.some(path=>path.major.code===c.channelCodes.major&&path.middle.code===c.channelCodes.middle&&path.small.code===c.channelCodes.small&&path.small.name===c.channelSmall),small+' must refer to a real stored leaf');
   assert.deepEqual(requireLotteCategoryBridge({...p,category:c}),c,'second-stage repetition must retain the chosen pair');
  }
@@ -32,7 +31,7 @@ test('first category wins over conflicting product-name guesses and stale second
  assert.equal(result.complete,true);assert.equal(result.category.commonSmall,p.category.commonSmall);assert.equal(result.category.channelMiddle,'가디건/조끼');assert.notEqual(result.category.channelCodes.small,'OLD');assert.equal(result.category.channelDetail,'');
 });
 test('broader paths are labelled editable rather than falsely claiming exact subtype verification',()=>{
- const result=bridgeLotteCategory({gender:'여성',rawName:'내의',category:{commonMiddle:'M0205 : 여성속옷',commonSmall:'00709 : 여성내의'}});
+ const result=bridgeLotteCategory({gender:'여성',rawName:'임부복',category:{commonMiddle:'M0355 : 여성특수목적의류',commonSmall:'00870 : 여성임부복'}});
  assert.equal(result.complete,true);assert.equal(result.review,true);assert.equal(result.broad,true);assert.equal(result.category.channelSmall,'기타');assert.match(result.message,/수정 가능/);
 });
 test('missing first category is not disguised as a completed bridge',()=>{
@@ -50,4 +49,20 @@ test('server product validation preserves the first-derived pair instead of recl
  const p={style:'000000',name:'여성 라운드 반팔티 000000',rawName:'라운드 반팔티',sourceCategory:['WOMEN','TOP'],gender:'여성',material:'면 100%',country:'베트남',washing:'손세탁',manufactured:'2026-08',consumerPrice:59800,colors:['01블랙'],sizes:['M'],keywords:'지오다노,가디건',category:{commonMiddle:'M0210 : 여성의류상의',commonSmall:'00847 : 여성가디건'}};
  p.category=requireLotteCategoryBridge(p);const before=structuredClone(p.category);
  assert.doesNotThrow(()=>validateProduct(p,{preserveCategory:true}));assert.deepEqual(p.category,before);
+});
+
+test('live observed underwear, homewear and accessories use their dedicated roots and codes',()=>{
+ const cases=[
+  ['남성','지워머 레깅스','남성속옷','남성내의','브랜드언더웨어','남성내의','타이즈'],
+  ['여성','발열 내의','여성속옷','여성내의','브랜드언더웨어','여성내의','발열내의'],
+  ['남성','드로즈','남성속옷','남성팬티','브랜드언더웨어','남성팬티','드로즈'],
+  ['여성','브라탑','여성속옷','여성런닝셔츠/캐미솔','브랜드언더웨어','여성런닝/속바지','브라탑'],
+  ['여성','잠옷 상하세트','여성홈웨어','여성잠옷','브랜드언더웨어','잠옷','상하세트잠옷'],
+  ['남성','홈웨어','남성홈웨어','남성실내복','브랜드언더웨어','홈웨어/이지웨어','홈웨어세트'],
+  ['남성','볼캡','패션액세서리','모자','브랜드잡화/넥타이','모자','야구모자'],
+  ['여성','울 양말','패션액세서리','양말','브랜드잡화/넥타이','양말','여성양말'],
+  ['남성','장갑','패션액세서리','장갑','브랜드잡화/넥타이','패션장갑','남성장갑'],
+  ['여성','백팩','가방','여성가방','브랜드가방','여성가방','백팩'],
+ ];
+ for(const [gender,rawName,commonMiddle,commonSmall,major,middle,small] of cases){const v=bridgeLotteCategory({gender,rawName,category:{commonMiddle,commonSmall}});assert.equal(v.complete,true,rawName);assert.deepEqual([v.category.channelMajor,v.category.channelMiddle,v.category.channelSmall],[major,middle,small],rawName);assert.ok(v.category.channelCodes.small);}
 });

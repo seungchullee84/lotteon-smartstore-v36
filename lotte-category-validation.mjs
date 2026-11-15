@@ -48,7 +48,7 @@ export function validateLotteCategory(product,{standard=data('category-catalog-s
   const title=String(product.rawName||product.name||'');
   if(gender==='남성'&&/반팔/.test([title,...(product.sourceCategory||[])].join(' '))&&/긴팔/.test(c.channelMiddle||''))add('sleeve-conflict','반팔 상품이 긴팔 채널분류로 연결되어 있습니다. 반팔티셔츠 경로를 확인해 주세요.');
   if(/조끼|베스트/.test(title)&&/패딩|다운|푸퍼/.test(title)&&c.channelSmall==='패딩/다운점퍼')add('vest-conflict','패딩 조끼가 점퍼로 연결되어 있습니다. 패딩조끼 경로를 확인해 주세요.');
-  if(isMensUnderwear(product)&&c.channelSmall!=='남성내의')add('underwear-conflict','확인된 남성 내의는 남성의류 → 남성속옷 → 남성내의 경로를 사용합니다.');
+  if(isMensUnderwear(product)&&c.channelSmall!=='남성내의'&&!(c.channelMajor==='브랜드언더웨어'&&c.channelMiddle==='남성내의'))add('underwear-conflict','확인된 남성 내의는 남성내의 상품군의 2차 경로를 사용합니다.');
   if(/양말|장갑|벨트|머플러|볼캡|버킷햇|비니|백팩|숄더백|토트백|(?:^|\s)브라(?:렛|탑)?(?:$|\s)|드로즈|팬티/.test(title)&&(!c.channelMajor||/^브랜드(?:남성|여성)의류$/.test(c.channelMajor)))add('accessory-conflict','잡화·속옷을 일반 의류의 소재 분류로 연결할 수 없습니다. 해당 상품군의 실제 경로를 확인해 주세요.');
   const required={commonMiddle:'공통 중분류',commonSmall:'공통 소분류',channelMiddle:'롯데ON 중분류',channelSmall:'롯데ON 소분류'};
   for(const [key,title] of Object.entries(required))if(!String(c[key]||'').trim())add('missing-'+key,title+'가 비어 있습니다.');
@@ -75,7 +75,10 @@ export function validateLotteCategory(product,{standard=data('category-catalog-s
       if(!expected){
         if(exactStandard.small.code==='BC35100100'){
           if(!exactCommon||!sameCategoryLabel(exactCommon[2],'01068 : 머플러'))add('crosswalk','머플러 채널분류에 맞는 공통분류는 01068 : 머플러입니다.');
-        }else add('crosswalk-unmapped','이 롯데ON 경로에 대응하는 공통분류는 아직 확인되지 않았습니다. 임의의 기타 분류로 대체하지 않습니다.');
+        }else if(['BC30040100','BC30040200'].includes(exactStandard.small.code)){
+          const desired=exactStandard.small.code==='BC30040100'?'01033 : 남성벨트':'01032 : 여성벨트';
+          if(!exactCommon||!sameCategoryLabel(exactCommon[2],desired))add('crosswalk','벨트 채널분류에 맞는 공통분류를 확인해 주세요: '+desired);
+        }else add('crosswalk-unmapped','이 롯데ON 경로는 세부 분류를 확인하고 필요하면 직접 수정할 수 있습니다.');
       }
     }else if(isMensUnderwear(product)&&['commonMajor','commonMiddle','commonSmall','channelMajor','channelMiddle','channelSmall'].every(k=>sameCategoryLabel(c[k]||(k==='commonMajor'?commonMajor:k==='channelMajor'?channelMajor:''),MENS_UNDERWEAR_CATEGORY[k]))&&!c.channelDetail&&!Object.values(c.channelCodes||{}).some(Boolean)){
       channelPath=['남성의류','남성속옷','남성내의'];evidence='사용자가 확인한 남성내의 경로';
