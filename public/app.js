@@ -758,11 +758,19 @@ $('openBackgroundRequest').onclick=async()=>{
   if(result.ok!==true)throw Error(result.message||'합성 작업을 준비하지 못했습니다. 다시 눌러 주세요.');
   if(result.cached){
    if(result.applied!==false||typeof result.jobId!=='string'||!result.jobId)throw Error('이전 합성 결과의 적용 정보를 확인하지 못했습니다. 다시 눌러 주세요.');
+   request.jobId=result.jobId;
    const completed=await post('background-complete',{jobId:result.jobId,reuse:true});
    if(!backgroundRequestIsCurrent(request))return;
    if(completed.ok!==true)throw Error(completed.message||'이전 합성 결과를 적용하지 못했습니다.');
    request.message=completed.message||'동일 원본의 완료된 합성을 대표이미지에 적용했습니다.';
    $('backgroundStatus').textContent=request.message;
+   if(completed.waiting){
+    backgroundWorkActive=true;backgroundPreparing=false;
+    request.message=completed.message||'합성 완료 · 다른 작업이 끝나면 대표이미지에 적용합니다.';
+    $('backgroundStatus').textContent=request.message;
+    showBackgroundProgress({status:'applying-wait',style:request.style,message:request.message,startedAt:completed.startedAt});
+    syncBackgroundControls();await refresh();return;
+   }
    showBackgroundProgress({status:'complete',style:request.style,message:request.message,elapsedMs:completed.elapsedMs});
    announce($('backgroundStatus').textContent,'success');await refresh();return;
   }

@@ -43,7 +43,11 @@ async function fixture(browser){
    body=control.dispatchResult||{ok:true,started:true,message:'합성을 시작했습니다.'};
   }else if(url.pathname==='/api/background-complete'){
    if(control.deferComplete)await new Promise(resolve=>pendingComplete.push(resolve));
-   body={ok:true,cached:true,file:'main-composite.jpg',elapsedMs:12,message:'동일 원본의 완료된 합성을 대표이미지에 적용했습니다.'};
+   if(control.completeWaiting){
+    const prepared=posts.filter(item=>item.path==='/api/background-prepare').at(-1).body;
+    control.backgroundWork={jobId:'cached-job',requestId:prepared.requestId,style:prepared.style,sourceUrl:prepared.sourceUrl,key:prepared.key,status:'applying-wait',message:'합성 완료 · 다른 작업이 끝나면 대표이미지에 적용합니다.',startedAt:Date.now()};
+    body={ok:true,waiting:true,jobId:'cached-job',message:control.backgroundWork.message};
+   }else body={ok:true,cached:true,file:'main-composite.jpg',elapsedMs:12,message:'동일 원본의 완료된 합성을 대표이미지에 적용했습니다.'};
   }else if(!url.pathname.startsWith('/api/')){
    const name=url.pathname==='/'?'index.html':url.pathname.slice(1);
    if(/^[a-z0-9-]+\.(html|js|mjs|css|png)$/.test(name)){
@@ -325,6 +329,50 @@ test('현재 상품의 완료·실패 상태는 새로고침 후에도 표시하
    assert.equal(await page.locator('#backgroundProgress').isVisible(),true);
    assert.equal(await page.locator('#openBackgroundRequest').isDisabled(),false);
   }
+  assert.deepEqual(errors,[]);
+ }finally{await browser.close();}
+});
+
+test('합성 중 다른 작업이 시작되어도 취소하지 않고 적용 대기 상태에서 완료를 기다린다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const {page,posts,pendingDispatch,control,errors}=await fixture(browser);control.deferDispatch=true;
+  await page.locator('#openBackgroundRequest').click();await waitForPending(pendingDispatch);
+  control.busy=true;await page.evaluate(()=>{requestLock=true;return refresh();});
+  pendingDispatch.shift()();
+  await page.waitForFunction(()=>document.querySelector('#backgroundStatus').textContent.includes('합성을 시작했습니다'));
+  assert.equal(posts.filter(item=>item.path==='/api/background-cancel').length,0);
+  assert.equal(await page.locator('#closeBackground').textContent(),'닫고 다른 작업하기');
+  await page.locator('#closeBackground').click();
+  await page.locator('#backgroundProgressOpen').click();
+  assert.equal(await page.locator('#backgroundDialog').isVisible(),true,'다른 작업 중에도 진행 상황을 다시 볼 수 있다');
+  control.backgroundWork={...control.backgroundWork,status:'applying-wait',message:'합성 완료 · 다른 작업이 끝나면 대표이미지에 적용합니다.'};
+  await page.evaluate(()=>refresh());
+  assert.equal(await page.locator('#backgroundProgressHeading').textContent(),'합성 완료 · 적용 대기');
+  assert.equal(await page.locator('#openBackgroundRequest').isDisabled(),true);
+  assert.equal(posts.filter(item=>item.path==='/api/background-cancel').length,0);
+  control.busy=false;control.backgroundWork={...control.backgroundWork,status:'complete',message:'대표이미지에 적용했습니다.',elapsedMs:10000};
+  await page.evaluate(()=>{requestLock=false;return refresh();});
+  assert.equal(await page.locator('#openBackgroundRequest').isDisabled(),false);
+  assert.equal(await page.locator('#backgroundProgressHeading').textContent(),'합성 완료');
+  assert.deepEqual(errors,[]);
+ }finally{await browser.close();}
+});
+
+test('캐시 결과도 다른 작업이 끝날 때까지 적용 대기로 표시하고 서버 상태로 완료한다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const {page,posts,control,errors}=await fixture(browser);control.cached=true;control.completeWaiting=true;
+  await page.locator('#openBackgroundRequest').click();
+  await page.waitForFunction(()=>document.querySelector('#backgroundProgress').dataset.status==='applying-wait');
+  assert.equal(await page.locator('#openBackgroundRequest').isDisabled(),true);
+  assert.doesNotMatch(await page.locator('#backgroundStatus').textContent(),/적용했습니다/);
+  assert.equal(posts.filter(item=>item.path==='/api/background-dispatch').length,0);
+  control.backgroundWork={...control.backgroundWork,status:'complete',message:'완료된 합성을 대표이미지에 적용했습니다.',elapsedMs:2300};
+  await page.evaluate(()=>refresh());
+  assert.equal(await page.locator('#openBackgroundRequest').isDisabled(),false);
+  assert.equal(await page.locator('#backgroundProgressHeading').textContent(),'합성 완료');
+  assert.equal(posts.filter(item=>item.path==='/api/background-complete').length,1,'적용 대기는 서버가 처리하고 브라우저는 반복 적용하지 않는다');
   assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });
