@@ -320,7 +320,7 @@ function renderWashingIcons(p){
  }
 }
 
-populate=function(p){renderProduct(p);$('categorySource').textContent='공식몰 상품 경로: '+(p.sourceCategory?.join(' → ')||'확인 필요')+(p.category?.commonMajor&&p.category?.commonMiddle&&p.category?.commonSmall?' / 롯데 공통분류: '+[p.category.commonMajor,p.category.commonMiddle,p.category.commonSmall].map(value=>value.replace(/^[^:：]*[:：]\s*/,'')).join(' → '):p.gender?' / 롯데 대분류: '+p.gender+'의류 · 브랜드'+p.gender+'의류':'');};
+populate=function(p){renderProduct(p);$('categorySource').textContent='공식몰 상품 경로: '+(p.sourceCategory?.join(' → ')||'확인 필요');};
 $('form').elements.gender.onchange=()=>{const f=$('form');const gender=f.elements.gender.value;f.elements.name.value=f.elements.name.value.replace(/^(남성|여성)\s+/,'');if(gender)f.elements.name.value=gender+' '+f.elements.name.value;for(const key of ['commonMiddle','commonSmall','channelMiddle','channelSmall'])f.elements[key].value='';};
 function updateDetailOnlyCompletion(state){
  let banner=document.getElementById('detailOnlyCompletion');
@@ -1093,6 +1093,7 @@ function selectRegistrationChannel(channel){
  for(const key of ['main','extra1','extra2'])$(key).removeAttribute('src');
  if(product){if(smart){populateSmartstoreFields(product);$('detailPreviewStatus').textContent='스마트스토어 화면을 불러오는 중…';}else{renderExtraImages(product,true);$('main').hidden=false;$('main').src='/image/main?t='+Date.now();renderDetailPreview(product);}}
  if(smartstoreListingState){const view={...smartstoreListingState,smartstoreListing:null,tagResearch:null};syncListingImages(view);}
+ scheduleLotteCategoryCheck();
  void refresh();
 }
 $('channelLotte').onclick=()=>selectRegistrationChannel('lotte');
@@ -1323,7 +1324,7 @@ populate=function(p){
   const field=key==='smartstoreName'?$('smartstoreName'):$('form').elements[key];if(field)setProductInput(field,value,p);
  }
  for(const key of Object.keys(fields))reviewedFields.add(key);
- highlightReviewFields();syncNoticeCopy();renderDetailPreview(reviewed);
+ highlightReviewFields();syncNoticeCopy();renderDetailPreview(reviewed);scheduleLotteCategoryCheck();
 };
 
 // Secure, optional photo-analysis setup.
