@@ -65,7 +65,8 @@ export function parseOfficialColorResponse(option,payload){
 
 async function fetchText(url,{fetchImpl,signal,timeoutMs,sourceUrl}){
  signal?.throwIfAborted();
- const timeout=AbortSignal.timeout(timeoutMs),requestSignal=signal?AbortSignal.any([signal,timeout]):timeout;
+ const timeout=new AbortController(),timer=setTimeout(()=>timeout.abort(new DOMException('공식 색상 조회 시간 초과','TimeoutError')),timeoutMs);
+ const requestSignal=signal?AbortSignal.any([signal,timeout.signal]):timeout.signal;
  let onAbort;
  const aborted=new Promise((_,reject)=>{onAbort=()=>reject(requestSignal.reason);requestSignal.addEventListener('abort',onAbort,{once:true});});
  try{
@@ -78,7 +79,7 @@ async function fetchText(url,{fetchImpl,signal,timeoutMs,sourceUrl}){
    if(text.length>4_000_000)throw fail('공식 색상 조회 응답이 너무 큽니다.','OFFICIAL_COLOR_RESPONSE_INVALID');
    return text;
   })()]);
- }finally{requestSignal.removeEventListener('abort',onAbort);}
+ }finally{clearTimeout(timer);requestSignal.removeEventListener('abort',onAbort);}
 }
 
 export async function collectOfficialColorSources(product,{html,colors=product.colors,fetchImpl=fetch,signal,timeoutMs=15000}={}){
