@@ -1325,6 +1325,10 @@ populate=function(p){
  const fields=editedValuesFor(p),reviewed={...p,category:{...p.category}};
  let manual=null,invalidManual=false;
  if(fields.lotteCategorySelection){try{const choice=JSON.parse(fields.lotteCategorySelection);if(choice.version!==1||choice.style!==p.style||choice.sourceUrl!==(p.sourceUrl||'')||choice.gender!==(fields.gender||p.gender)||!choice.category)throw Error('changed product');manual=choice;}catch{invalidManual=true;}}
+ if(invalidManual){
+  for(const key of [...lotteCategoryFields,'lotteCategorySelection'])delete fields[key];
+  try{localStorage.setItem('product-edits.v1.'+p.style,JSON.stringify(fields));}catch{}
+ }
  for(const [key,value] of Object.entries(fields)){
   if(key==='lotteCategorySelection'||invalidManual&&lotteCategoryFields.includes(key))continue;
   if(['commonMiddle','commonSmall','channelMiddle','channelSmall'].includes(key))reviewed.category[key]=value;
