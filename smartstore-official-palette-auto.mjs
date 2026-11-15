@@ -20,10 +20,10 @@ function productIdentity(product){
 }
 function validImageUrl(value){const url=officialUrl(value);return !!url&&url.pathname.startsWith('/_data/attach/')&&/\.(?:jpe?g|png|webp)$/i.test(url.pathname);}
 function associatedEntry(source,entry,identity,color){
- if(source?.style!==identity.style||source?.sourceUrl!==identity.sourceUrl||String(source.productHash).toLowerCase()!==identity.productHash.toLowerCase())return false;
+ if(source?.style!==identity.style||source?.sourceUrl!==identity.sourceUrl||String(source.sourceProductHash).toLowerCase()!==identity.productHash.toLowerCase()||!(/^[a-f\d]{32}$/i.test(source.productHash||'')))return false;
  if(entry?.color!==color||compact(entry.label)!==compact(color)||!/^\d+$/.test(String(entry.optionNo))||!/^\d+$/.test(String(entry.optionId))||!validImageUrl(entry.mainImageUrl)||!entry.images?.some(image=>image.url===entry.mainImageUrl))return false;
  const request=officialUrl(entry.requestUrl);
- return request?.pathname==='/main/exec.php'&&request.searchParams.get('exec_file')==='shop/getAjaxData.php'&&request.searchParams.get('exec')==='getAddImgList'&&request.searchParams.get('hash')?.toLowerCase()===identity.productHash.toLowerCase()&&request.searchParams.get('ino')===String(entry.optionId)&&request.searchParams.get('opt_no')===String(entry.optionNo);
+ return request?.pathname==='/main/exec.php'&&request.searchParams.get('exec_file')==='shop/getAjaxData.php'&&request.searchParams.get('exec')==='getAddImgList'&&request.searchParams.get('hash')?.toLowerCase()===source.productHash.toLowerCase()&&request.searchParams.get('ino')===String(entry.optionId)&&request.searchParams.get('opt_no')===String(entry.optionNo);
 }
 async function imageFormat(bytes){
  if(!bytes.length||bytes.length>MAX_BYTES)throw Error('공식 사진 파일 크기를 확인해 주세요.');
@@ -64,7 +64,7 @@ export async function prepareOfficialPalette(product,prepared,{folder,dataRoot,s
   try{const saved=JSON.parse(await readFile(manifestFile,'utf8'));if(JSON.stringify(saved.identity)===JSON.stringify(snapshot)&&saved.entries&&saved.failures)cache=saved;}catch(error){if(error.code!=='ENOENT'&&!(error instanceof SyntaxError))throw error;}
   const attach=async(color,bytes,format,reused)=>{
    await current();if(prepared.paletteImages?.[color])return;
-   const hash=digest(bytes),src='/smartstore-photo/'+hash.slice(0,24),file='smartstore-official-palette-'+hash.slice(0,24)+'.'+format.extension;
+   const hash=digest(bytes),src='/smartstore-photo/'+hash.slice(0,24),file='smartstore-photo-'+hash.slice(0,24)+'.'+format.extension;
    await writeOriginal(path.join(folder,file),bytes);await current();
    prepared.paletteImages||={};prepared.paletteSources||={};prepared.photoFiles||={};prepared.photoMimeTypes||={};
    prepared.paletteImages[color]=src;prepared.paletteSources[color]='official';prepared.photoFiles[src]=file;prepared.photoMimeTypes[src]=format.mime;delete prepared.palettePendingReasons[color];
@@ -96,7 +96,7 @@ export async function prepareOfficialPalette(product,prepared,{folder,dataRoot,s
      if(Number(response.headers.get('content-length'))>MAX_BYTES)throw Error('공식 사진 파일 크기를 확인해 주세요.');
      const bytes=Buffer.from(await response.arrayBuffer()),format=await imageFormat(bytes);await current();
      const hash=digest(bytes),file=hash+'.'+format.extension;await writeOriginal(path.join(cacheRoot,file),bytes);
-     cache.entries[color]={file,hash,source:{style:source.style,sourceUrl:source.sourceUrl,productHash:source.productHash},evidence:entry};delete cache.failures[color];
+     cache.entries[color]={file,hash,source:{style:source.style,sourceUrl:source.sourceUrl,sourceProductHash:source.sourceProductHash,productHash:source.productHash},evidence:entry};delete cache.failures[color];
      await attach(color,bytes,format,false);log('공식 팔레트 원본 보완: '+color+' 1장');
     }catch(error){await current();defer(color,error);cache.failures[color]={at:Date.now(),message:message(error)};}
    }
