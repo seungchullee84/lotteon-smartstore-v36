@@ -632,7 +632,7 @@ setInterval(syncBackgroundProgress,1000);
 function syncBackgroundFailure(work){
  if(work){
   const previews=(Array.isArray(work.previews)?work.previews:work.previewUrl?[{attempt:work.attempt,url:work.previewUrl}]:[]).filter(preview=>{
-   try{const url=new URL(preview.url,location.href);return url.origin===location.origin&&url.pathname==='/api/background-preview'&&Number.isInteger(preview.attempt);}catch{return false;}
+   try{const url=new URL(preview.url,location.href);return url.origin===location.origin&&url.pathname==='/api/background-preview'&&url.searchParams.get('jobId')===work.jobId&&Number.isInteger(preview.attempt)&&preview.attempt>0&&url.searchParams.get('attempt')===String(preview.attempt);}catch{return false;}
   });
   const previous=backgroundFailure;
   backgroundFailure={...work,previews,selectedAttempt:previous?.jobId===work.jobId&&previews.some(preview=>preview.attempt===previous.selectedAttempt)?previous.selectedAttempt:previews.at(-1)?.attempt};
@@ -656,7 +656,7 @@ function syncBackgroundFailure(work){
  }
  $('backgroundFailureNoImage').hidden=!!preview;
  $('applyBackgroundFailure').hidden=!preview||!failure.manualAvailable;
- $('applyBackgroundFailure').disabled=backgroundFailureApplying||backgroundWorkActive||backgroundPreparing;
+ $('applyBackgroundFailure').disabled=backgroundFailureApplying||backgroundWorkActive||backgroundPreparing||!backgroundFailureIsCurrent(failure);
  setText($('applyBackgroundFailure'),backgroundFailureApplying?'선택한 결과 적용 중…':'선택한 결과를 대표이미지에 적용');
 }
 function syncBackgroundControls(){
@@ -679,6 +679,7 @@ function cancelBackgroundRequest(){
  syncBackgroundControls();
  if(!request)return backgroundCancellation;
  cancelledBackgroundRequests.add(request.requestId);
+ if(backgroundFailure?.jobId===request.jobId){backgroundFailure=null;syncBackgroundFailure();}
  if(wasActive)showBackgroundProgress({...backgroundProgress,status:'cancelled',style:request.style,message:'상품·사진 또는 작업 조건이 바뀌어 합성 취소를 요청했습니다.'});
  backgroundCancellation=post('background-cancel',{requestId:request.requestId});
  backgroundCancellation.catch(error=>{

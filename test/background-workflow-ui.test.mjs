@@ -15,7 +15,7 @@ function failedWork(work){
 async function fixture(browser,options={}){
  const page=await browser.newPage();page.setDefaultTimeout(5000);
  if(options.clock)await page.clock.install({time:new Date()});
- const errors=[],posts=[],pending=[],pendingComplete=[],pendingDispatch=[];
+ const errors=[],posts=[],pending=[],pendingComplete=[],pendingDispatch=[],pendingManual=[];
  page.on('pageerror',error=>errors.push(error.message));
  const product={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=background',rawName:'공식 상품',name:'남성 공식 상품',gender:'남성',consumerPrice:29900,colors:['01검정'],sizes:['M'],material:'면',country:'대한민국',manufactured:'2026-01',washing:'손세탁',keywords:'지오다노,티셔츠',category:{},images:{main:'main.jpg',extra1:'extra1.jpg',extra2:'extra2.jpg'},warnings:[]};
  const control={defer:false,deferComplete:false,deferDispatch:false,cached:false,selection:'main',busy:false,stateReads:0,backgroundWork:null,dispatchResult:null};
@@ -56,6 +56,7 @@ async function fixture(browser,options={}){
   }else if(url.pathname==='/api/background-preview'){
    body=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aOt0AAAAASUVORK5CYII=','base64');contentType='image/png';
   }else if(url.pathname==='/api/background-apply-preview'){
+   if(control.deferManual)await new Promise(resolve=>pendingManual.push(resolve));
    const selected=route.request().postDataJSON();
    control.backgroundWork={...control.backgroundWork,status:control.manualWaiting?'applying-wait':'complete',manual:true,selectedAttempt:selected.attempt,message:control.manualWaiting?'합성 완료 · 다른 작업이 끝나면 대표이미지에 적용합니다.':'선택한 결과를 대표이미지에 적용했습니다.'};
    body={ok:true,waiting:!!control.manualWaiting,message:control.backgroundWork.message};
@@ -75,7 +76,7 @@ async function fixture(browser,options={}){
  await page.waitForFunction(()=>document.querySelector('#source').textContent.includes('123456'));
  await page.locator('#style').fill(product.style);
  await page.locator('#extendBackground').click();
- return {page,posts,pending,pendingComplete,pendingDispatch,control,errors,product};
+ return {page,posts,pending,pendingComplete,pendingDispatch,pendingManual,control,errors,product};
 }
 
 test('합성 진행은 준비·실행·작업 중 중복 클릭을 막고 완료된 결과만 다시 실행할 수 있다',async()=>{
@@ -500,6 +501,28 @@ test('실패 결과 수동 적용도 다른 작업 중에는 대기하고 이미
   assert.equal(await page.locator('#backgroundFailedImage').isVisible(),false);
   assert.equal(await page.locator('#applyBackgroundFailure').isVisible(),false);
   assert.match(await page.locator('#backgroundFailureReason').textContent(),/이미지 생성 전에/);
+  assert.deepEqual(errors,[]);
+ }finally{await browser.close();}
+});
+
+test('실패 결과 적용 응답을 기다리는 동안 품번이 바뀌면 이전 완료를 표시하거나 새로고침하지 않는다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const {page,posts,pendingManual,control,errors}=await fixture(browser);
+  await page.locator('#openBackgroundRequest').click();
+  await page.waitForFunction(()=>document.querySelector('#backgroundStatus').textContent.includes('합성을 시작했습니다'));
+  control.backgroundWork=failedWork(control.backgroundWork);await page.evaluate(()=>refresh());control.deferManual=true;
+  await page.locator('#applyBackgroundFailure').click();await waitForPending(pendingManual);
+  const cancelled=page.waitForRequest(request=>request.url().endsWith('/api/background-cancel'));
+  await page.locator('#style').evaluate(field=>{field.value='654321';field.dispatchEvent(new Event('input',{bubbles:true}));});
+  await cancelled;
+  const reads=control.stateReads,received=page.waitForResponse(response=>response.url().endsWith('/api/background-apply-preview'));
+  pendingManual.shift()();await received;await page.evaluate(()=>new Promise(resolve=>setTimeout(resolve,50)));
+  assert.equal(control.stateReads,reads);
+  assert.notEqual(await page.locator('#backgroundProgress').getAttribute('data-status'),'complete');
+  assert.equal(await page.locator('#backgroundFailureCard').isVisible(),false);
+  assert.equal(posts.filter(item=>item.path==='/api/background-apply-preview').length,1);
+  assert.equal(posts.filter(item=>item.path==='/api/background-cancel').length,1);
   assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });
