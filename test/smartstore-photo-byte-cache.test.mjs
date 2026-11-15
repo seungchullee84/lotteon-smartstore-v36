@@ -2,9 +2,10 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp,writeFile,rm,utimes} from 'node:fs/promises';
 import path from 'node:path';
+import os from 'node:os';
 import {readPhotoBytes} from '../smartstore-photo-byte-cache.mjs';
 test('unchanged photos reuse bytes; same-size replacements and deletion are detected',async()=>{
- const dir=await mkdtemp('D:/photo-cache-test-');const file=path.join(dir,'photo.jpg');
+ const dir=await mkdtemp(path.join(os.tmpdir(),'photo-cache-test-'));const file=path.join(dir,'photo.jpg');
  try{
   await writeFile(file,'first');const first=await readPhotoBytes(file);
   assert.equal(await readPhotoBytes(file),first);
@@ -14,7 +15,7 @@ test('unchanged photos reuse bytes; same-size replacements and deletion are dete
  }finally{await rm(dir,{recursive:true,force:true});}
 });
 test('concurrent reads of one large photo do not double-count or exhaust cache entries',async()=>{
- const dir=await mkdtemp('D:/photo-cache-concurrent-');const file=path.join(dir,'large.jpg');
+ const dir=await mkdtemp(path.join(os.tmpdir(),'photo-cache-concurrent-'));const file=path.join(dir,'large.jpg');
  try{
   await writeFile(file,Buffer.alloc(8*1024*1024,7));
   const results=await Promise.allSettled(Array.from({length:8},()=>readPhotoBytes(file)));
