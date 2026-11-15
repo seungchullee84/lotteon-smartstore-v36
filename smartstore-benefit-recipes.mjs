@@ -1,5 +1,5 @@
 // Reusable wording recipes. Each requires matching evidence in THIS product.
-export const BENEFIT_RECIPE_VERSION='official-benefit-recipes-3';
+export const BENEFIT_RECIPE_VERSION='official-benefit-recipes-4';
 export function sourceBenefitRecipes(source){
  const text=String(source||'').replace(/\s+/g,' '),points=[];
  const rules=[
@@ -13,6 +13,8 @@ export function sourceBenefitRecipes(source){
   {id:'wind-entry',pattern:/내부\s*인\s*플라켓과\s*소매\s*안쪽\s*이밴드로\s*찬바람\s*유입을\s*차단/,title:'찬바람 유입을 줄여 따뜻하게',description:'내부 플라켓과 소매 안쪽 밴드로 찬바람을 차단해요.',covered:/찬바람|바람.*차단/},
 
   {id:'soft-touch',pattern:/(?:부드러운\s*(?:촉감|터치감)|부드럽고\s*(?:실키한|쾌적한)\s*(?:촉감|터치감)|소프트한\s*(?:촉감|터치감|텍스처))[^.]{0,60}?(?:제공|선사|특징|느껴|우수합니다|우수하며|더했|살렸|갖추)/,title:'부드럽게 닿는 촉감',description:'부드러운 촉감이 느껴지는 원단.',covered:/부드|소프트|실키/},
+  {id:'bare-skin-soft',pattern:/맨살에\s*입어도\s*될\s*만큼(?:의)?\s*부드러운\s*(?:촉감|감촉)/,title:'맨살에도 부드러운 촉감',description:'맨살에 닿아도 부드러운 촉감이에요.',covered:/부드|소프트|실키/},
+  {id:'double-knit-shape',pattern:/더블\s*니트\s*조직으로\s*짜여져\s*실루엣이\s*무너지지\s*않고\s*형태감을\s*잘\s*살려줍니다/,title:'실루엣은 탄탄하게',description:'더블니트 조직이 실루엣과 형태감을 잘 살려줘요.',covered:/탄탄|형태감|실루엣.*유지/},
   {id:'durable',pattern:/(?:우수한|뛰어난|높은)\s*내구성|내구성(?:이|도)?\s*(?:뛰어나|우수|높)/,title:'오래 입기 좋은 내구성',description:'우수한 내구성을 갖췄어요.',covered:/내구|오래\s*입/},
   {id:'daily-styling',pattern:/다양한\s*스타일링(?:이|에)?\s*가능|단독\s*(?:및|과)\s*레이어드\s*착용에?\s*(?:용이|좋|적합)/,title:'다양한 스타일링에 활용',description:'다양한 스타일링에 활용하기 좋아요.',covered:/코디|매치|스타일링|활용|레이어드/},
   {id:'breathable',pattern:/통기성(?:이|을)?\s*(?:뛰어나|우수|좋|높)[^.]{0,45}?(?:착용감|쾌적|시원)|통기성이\s*뛰어나/,title:'통기성을 살린 쾌적함',description:'우수한 통기성으로 쾌적하게 입어요.',covered:/통기|쾌적|흡습|속건/},

@@ -1,7 +1,7 @@
 import {sourceBenefitRecipes} from './smartstore-benefit-recipes.mjs';
 export function officialImageBenefitText(text){return String(text||'').split(/(?:^|\n)\s*(?:DETAIL\s*SIZE|CHECK\s*UP|INFORMATION)\b/i)[0];}
 // Only purchase benefits belong on these cards. Tables and feature names are not benefits.
-const benefitPattern=/(?:보풀\s*(?:방지|을\s*줄)|깃털.{0,35}빠짐.{0,15}최소|고급스러|차가운\s*공기.{0,20}차단|내구|볼륨감.{0,15}유지|찬바람|부드|소프트|탄탄|보온|따뜻|포근|가벼|가볍|경량|쾌적|유연|신축|사방\s*스판|가로\s*\/\s*세로\s*양방향|통기|흡습|속건|시원|편안|편하|여유|넉넉|부담.{0,8}(?:적|덜|줄|않)|활동성|움직임|조절|수납|실용|활용|매치|코디|레이어드|연출|어우러|어울|포인트|감각적|세련|입체감|(?:수축|변형).{0,12}(?:최소|방지|줄)|환경.{0,15}줄)/;
+const benefitPattern=/(?:보풀\s*(?:방지|을\s*줄)|깃털.{0,35}빠짐.{0,15}최소|고급스러|차가운\s*공기.{0,20}차단|내구|볼륨감.{0,15}유지|실루엣.{0,20}무너지지\s*않|형태감.{0,12}살려|찬바람|부드|소프트|탄탄|보온|따뜻|포근|가벼|가볍|경량|쾌적|유연|신축|사방\s*스판|가로\s*\/\s*세로\s*양방향|통기|흡습|속건|시원|편안|편하|여유|넉넉|부담.{0,8}(?:적|덜|줄|않)|활동성|움직임|조절|수납|실용|활용|매치|코디|레이어드|연출|어우러|어울|포인트|감각적|세련|입체감|(?:수축|변형).{0,12}(?:최소|방지|줄)|환경.{0,15}줄)/;
 const genericTitle=/^(?:원단|소재|핏과 실루엣|여밈 디테일|디자인 포인트|가공 포인트|스타일링|상품정보|제품정보)$/;
 function cleanSource(text){
  const value=String(text||'');
@@ -10,7 +10,7 @@ function cleanSource(text){
  const brokenNumber=/[가-힣]\s+\d+(?:\s+\d+)+\s+[가-힣]|[가-힣]\s+\d{2,}\s+[가-힣]/.test(value);
  return !brokenNumber&&!/^\s*(?:유지하며|더하며|살리며|제공하며|높이며)\s*[,，]/.test(value)&&!unknownAcronym&&!/[\uFFFD\[\]{}=|\\]/.test(value)&&!/[A-Za-z][A-Za-z0-9]*\]/.test(value)&&new Set(fits.map(s=>s.replace(/\s/g,''))).size<2;
 }
-function completeCopy(text){const value=String(text).replace(/[.!?]+$/,'').trim();return !/[,，;:]$/.test(value)&&!/(?:부터|으로|위한|통해|이며|으며|하며|하고|하지만|더해진|경량|로|며|좋|했|였|렸|췄|줬|뒀|웠|었|았|있|없|한|된|되는|있는|없는|하는|좋은|위해|살린|높인|할|될|을|를|수|및|거나)$/.test(value);}
+function completeCopy(text){const value=String(text).replace(/[.!?]+$/,'').trim();return !/[,，;:]$/.test(value)&&!/(?:부터|으로|위한|통해|이며|으며|하며|하고|하지만|(?:어|아|해|여)도|더해진|경량|로|며|좋|했|였|렸|췄|줬|뒀|웠|었|았|있|없|한|된|되는|있는|없는|하는|좋은|위해|살린|높인|할|될|을|를|수|및|거나)$/.test(value);}
 function finishSourceClause(text){
  // Splitting "강화했으며" leaves "강화했". Finish only the past-tense
  // ending; the claim and its full original evidence remain unchanged.

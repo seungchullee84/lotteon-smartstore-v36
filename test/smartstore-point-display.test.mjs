@@ -6,7 +6,7 @@ import os from 'node:os';
 import {load} from 'cheerio';
 import {pointPicker,savePointSelection} from '../smartstore-point-picker.mjs';
 import {reviewSellingPoints} from '../smartstore-selling-point-review.mjs';
-import {displaySellingPoints,assertRequiredSellingPoints} from '../smartstore-selling-points.mjs';
+import {displaySellingPoints,assertRequiredSellingPoints,officialSellingPoints,friendlyBenefitDescription,usableSellingPoints} from '../smartstore-selling-points.mjs';
 import {buildSmartstoreDetail,smartstoreDetailDocument} from '../smartstore-detail.mjs';
 import {smartstorePreparationStatus} from '../smartstore-preparation-status.mjs';
 
@@ -17,6 +17,7 @@ const points=[
  {title:'세탁 후에도 깔끔하게',description:'세탁 후 변형 부담을 줄여 깔끔하게.',evidence:'세탁 후에도 형태 변형 최소화'},
 ];
 const source=points.map(point=>point.evidence).join('\n');
+const doubleKnitText='적당한 여유감이 있는 레귤러 핏의 12gg 더블니트 크루넥 스웨터입니다. 소매와 밑단 부분 스판사를 넣은 립조직으로 마감하였으며, 목에 잘 맞는 네크라인과 립 폭으로 제작되었습니다. 탄탄하면서 유연한 12gg 더블니트 조직으로 맨살에 입어도 될 만큼의 부드러운 촉감이 인상적이며, 더블니트 조직으로 짜여져 실루엣이 무너지지 않고 형태감을 잘 살려줍니다.';
 const base={style:'326924',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=test',name:'여성 기모 헨리넥 긴팔티',gender:'여성',images:{},colors:[],sizes:['S','M','L']};
 async function fixture(run){
  const dataRoot=await mkdtemp(path.join(os.tmpdir(),'point-display-'));
@@ -36,6 +37,18 @@ test('사용·선사로 끝나는 선택 문구 세 개를 같은 순서와 근�
  assert.equal(display[1].description,'기모 표면 가공을 거쳐 피부에 닿는 감촉이 부드럽고 따뜻한 착용감을 선사해요.');
  assert(display.every(point=>point.description.endsWith('요.')));
  assert.deepEqual(displaySellingPoints(display),display);
+});
+
+test('055910의 긴 공식 설명도 여유감·부드러운 촉감·형태감의 세 근거를 놓치지 않는다',()=>{
+ const extracted=officialSellingPoints(doubleKnitText),display=displaySellingPoints(extracted);
+ assert.equal(extracted.length,3);assert.equal(display.length,3);assert(usableSellingPoints(extracted,doubleKnitText));
+ assert.deepEqual(display.map(point=>point.title),['편안한 착용감','맨살에도 부드러운 촉감','실루엣은 탄탄하게']);
+ for(const detailTemplate of [1,2]){
+  const $=load(buildSmartstoreDetail({...base,style:'055910',detailTemplate,smartstoreDetail:{style:'055910',sellingPoints:extracted}},{includeVideo:false}).html);
+  assert.equal($('[data-product-points] h3').length,3);
+ }
+ assert.equal(friendlyBenefitDescription('탄탄하면서 유연한 더블니트 조직으로 맨살에 입어도.'),'');
+ assert.equal(officialSellingPoints('더블니트 조직입니다. 촉감과 형태감은 미확인입니다.').length,0);
 });
 
 test('선택·저장·재열기·재검토·두 템플릿의 화면과 PNG 문서에 같은 세 소구점이 나온다',async()=>fixture(async({dataRoot,options,selection})=>{
