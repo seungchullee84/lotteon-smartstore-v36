@@ -53,7 +53,7 @@ export async function reviewSellingPoints(product,source,{dataRoot,detailHash=nu
    points=await supplementSellingPoints(product,points,text,{dataRoot,detailHash,signal,log});
   }
   signal?.throwIfAborted();
-  const displayed=displaySellingPoints(points),missing=points.filter(point=>!displayed.some(shown=>shown.evidence===point.evidence&&shown.description));
+  const missing=points.filter(point=>displaySellingPoints([point]).length!==1);
   const ready=usableSellingPoints(points,text)&&points.length>=2&&points.length<=4&&!missing.length;
   const result={...record,points,omitted:false,status:ready?'ready':'needs-review',message:ready?'공식 근거 구매 장점 '+points.length+'개 적용':missing.length?'소구점 표시 문구 확인 필요: '+missing.map(point=>point.title).join(', '):'공식 상품 설명·상세이미지에서 서로 다른 구매 장점 2~4개 확인 필요'};
   if(persist){await mkdir(root,{recursive:true});await writeFile(file,JSON.stringify(result,null,2));}

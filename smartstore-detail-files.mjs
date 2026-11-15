@@ -20,7 +20,7 @@ import {renderCacheKey,restoreRenderedDetail,cacheRenderedDetail} from './smarts
 import {workingProductPhoto} from './smartstore-photo-work.mjs';
 import {embeddedOfficialSections} from './smartstore-official-sections.mjs';
 import {prepareFitGuide} from './smartstore-fit-guide-files.mjs';
-import {assertRequiredSellingPoints,displaySellingPoints} from './smartstore-selling-points.mjs';
+import {assertRequiredSellingPoints} from './smartstore-selling-points.mjs';
 import * as cheerio from 'cheerio';
 import {styleFromDetail} from './product.mjs';
 const appRoot=path.dirname(fileURLToPath(import.meta.url));

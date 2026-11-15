@@ -487,7 +487,7 @@ function renderDetailPreview(p){
      for(const point of selected){
       const item=document.createElement('li'),title=document.createElement('strong');
       title.textContent=point.title;
-      item.append(title,' · '+point.description);
+      item.append(title,' · '+(point.displayReady===false?'표시 문구 확인이 필요합니다.':point.displayDescription??point.description));
       list.append(item);
      }
      points.replaceChildren(heading,list);
