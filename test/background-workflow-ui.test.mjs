@@ -495,12 +495,16 @@ test('실패 결과 수동 적용도 다른 작업 중에는 대기하고 이미
   await page.evaluate(()=>refresh());
   assert.equal(await page.locator('#backgroundFailureCard').isVisible(),false);
   assert.equal(posts.filter(item=>item.path==='/api/background-apply-preview').length,1);
-  control.backgroundWork={...control.backgroundWork,status:'error',previews:[],manualAvailable:false,message:'이미지 생성 전에 작업이 종료되었습니다.'};
+  const launchFailure='합성 작업의 Windows 실행환경을 시작하지 못했습니다(Codex 앱 실행 연결 오류). 현재 대표이미지는 유지했습니다.';
+  control.backgroundWork={...control.backgroundWork,status:'error',previews:[],manualAvailable:false,message:launchFailure};
   await page.evaluate(()=>refresh());
   assert.equal(await page.locator('#backgroundFailureNoImage').isVisible(),true);
   assert.equal(await page.locator('#backgroundFailedImage').isVisible(),false);
   assert.equal(await page.locator('#applyBackgroundFailure').isVisible(),false);
-  assert.match(await page.locator('#backgroundFailureReason').textContent(),/이미지 생성 전에/);
+  assert.equal(await page.locator('#backgroundFailureReason').textContent(),launchFailure);
+  await page.evaluate(()=>refresh());
+  assert.equal(await page.locator('#backgroundFailureReason').textContent(),launchFailure,'상태 재조회에서도 구체적인 실행 실패 사유를 유지한다');
+  assert.equal(await page.locator('#openBackgroundRequest').isDisabled(),false,'실행 실패 후 다시 시도할 수 있다');
   assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });
