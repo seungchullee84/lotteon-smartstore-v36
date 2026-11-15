@@ -251,6 +251,52 @@ test('duplicate stage is rejected while processing and after the preview is read
  await f.unapplied();
 });
 
+test('quality retry keeps the source and start time, retains prior previews and applies only a newly reviewed attempt',async t=>{
+ const outputs=await Promise.all(['#112233','#667788','#aabbcc'].map(background=>sharp({create:{width:1500,height:1500,channels:3,background}}).jpeg().toBuffer()));let index=0;
+ const f=await fixture(t,{compose:async()=>outputs[index++]}),request=await f.prepare(),startedAt=f.workflow.status().startedAt;
+ assert.equal(f.workflow.status().attempt,1);assert.equal(f.workflow.inspect({jobId:request.jobId}).maxAttempts,3);
+ const first=await f.stage(request),priorBytes=await readFile(first.previewPath);
+ const retried=f.workflow.retry({jobId:request.jobId,reason:'  오른쪽\n경계 밝기 차이\u0000 보완  '});
+ assert.equal(retried.attempt,2);assert.equal(retried.maxAttempts,3);assert.equal(retried.reason,'오른쪽 경계 밝기 차이 보완');assert.equal(retried.previewPath,undefined);
+ assert.equal(f.workflow.status().startedAt,startedAt);assert.equal(f.workflow.status().status,'generating');assert.match(f.workflow.status().message,/2\/3회.*경계 밝기/);
+ assert.throws(()=>f.complete(request),/시각 검수/);await f.unapplied();assert.deepEqual(await readFile(first.previewPath),priorBytes);
+ const second=await f.stage(request);assert.notEqual(second.previewPath,first.previewPath);assert.equal(second.attempt,2);
+ assert.throws(()=>f.workflow.complete({jobId:request.jobId,reviewed:false}),/시각 검수/);
+ f.complete(request);const entry=await f.manifest();assert.equal(entry.outputHash,digest(outputs[1]));assert.notEqual(entry.outputHash,digest(outputs[0]));
+ assert.equal(f.workflow.status().attempt,2);assert.equal(f.workflow.status().startedAt,startedAt);assert.deepEqual(await readFile(path.join(f.folder,'main.jpg')),f.original);assert.deepEqual(await readFile(first.previewPath),priorBytes);
+});
+
+test('quality retry allows at most three attempts and requires a bounded meaningful reason',async t=>{
+ const f=await fixture(t),request=await f.prepare(),previews=[];await f.stage(request);
+ for(const reason of [undefined,null,{},'', ' \n\u0000 '])assert.throws(()=>f.workflow.retry({jobId:request.jobId,reason}),/품질 문제/);
+ assert.equal(f.workflow.status().attempt,1);
+ previews.push(f.workflow.inspect({jobId:request.jobId}).previewPath);
+ for(const attempt of [2,3]){
+  const result=f.workflow.retry({jobId:request.jobId,reason:'색상과 경계 보완 '.repeat(100)});assert.equal(result.reason.length,160);assert.equal(result.attempt,attempt);assert.equal(result.maxAttempts,3);
+  assert.throws(()=>f.workflow.retry({jobId:request.jobId,reason:'아직 새 결과 없음'}),/검수를 마친 뒤/);
+  previews.push((await f.stage(request)).previewPath);
+ }
+ assert.equal(new Set(previews).size,3);for(const preview of previews)assert((await readFile(preview)).length);
+ assert.throws(()=>f.workflow.retry({jobId:request.jobId,reason:'바닥 연결 부자연스러움'}),e=>e.code==='BACKGROUND_QUALITY_RETRY_LIMIT'&&/3회.*바닥 연결/.test(e.message));
+ assert.equal(f.workflow.status().attempt,3);assert.equal(f.calls(),3);await f.unapplied();assert.deepEqual(await readFile(path.join(f.folder,'main.jpg')),f.original);
+});
+
+test('retry is unavailable before review, during composition and after original or job guards change',async t=>{
+ const f=await fixture(t),request=await f.prepare();assert.throws(()=>f.workflow.retry({jobId:request.jobId,reason:'검수 전'}),/검수를 마친 뒤/);
+ for(const mode of ['busy','source','selection','revision','cancelled','completed'])await t.test(mode,async sub=>{
+  const f=await fixture(sub),request=await f.prepare();await f.stage(request);
+  if(mode==='busy')f.state.busy=true;
+  if(mode==='source')await writeFile(path.join(f.folder,'main.jpg'),f.extra);
+  if(mode==='selection')f.workflow.select({style:f.state.product.style,key:'extra1'});
+  if(mode==='revision')f.state.revision++;
+  if(mode==='cancelled')f.workflow.cancel({requestId:f.workflow.status().requestId});
+  if(mode==='completed')f.complete(request);
+  assert.throws(()=>f.workflow.retry({jobId:request.jobId,reason:'경계 보완'}),stale);
+ });
+ let release;const blocked=await fixture(t,{compose:()=>new Promise(resolve=>{release=()=>resolve(blocked.output);})}),pending=await blocked.prepare(),staging=blocked.stage(pending);
+ assert.throws(()=>blocked.workflow.retry({jobId:pending.jobId,reason:'합성 중'}),/검수를 마친 뒤/);await assert.rejects(blocked.stage(pending),/이미 준비 중/);release();await staging;
+});
+
 test('invalidating during asynchronous composition discards the result and preserves cancellation after stage and worker exit',async t=>{
  let release,entered;
  const blocked=new Promise(resolve=>{release=resolve;}),started=new Promise(resolve=>{entered=resolve;});

@@ -6,6 +6,7 @@ import sharp from 'sharp';
 import {composeBackground,BACKGROUND_COMPOSITE_VERSION} from './background-composite.mjs';
 
 const keys=['main','extra1','extra2'];
+const maxAttempts=3;
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const id=()=>randomBytes(12).toString('hex');
 const changed=()=>Error('품번·사진 선택·원본 또는 작업 상태가 변경되어 합성을 적용하지 않았습니다. 새로 요청해 주세요.');
@@ -20,7 +21,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
  let epoch=0,active=null,view=null;
  const cancelled=new Set();
  const cacheSettings={version:1,composition:BACKGROUND_COMPOSITE_VERSION,generation:'builtin-reviewed-background-v1',width:1500,height:1500,format:'jpeg',quality:95};
- const timing=(s,terminal=false)=>({startedAt:s.startedAt,...(terminal?{elapsedMs:Math.round(performance.now()-s.started)}:{})});
+ const timing=(s,terminal=false)=>({startedAt:s.startedAt,attempt:s.attempt,maxAttempts,...(terminal?{elapsedMs:Math.round(performance.now()-s.started)}:{})});
  function invalidate(message='상품 또는 작업이 변경되어 이전 합성 요청을 취소했습니다.'){
   epoch++;
   if(active){active.invalid=true;view={...timing(active,true),status:'cancelled',style:active.style,key:active.key,message};onInvalidate({jobId:active.jobId});}
@@ -55,7 +56,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   const selection=fs.readFileSync(selectionPath),selected=JSON.parse(selection);
   if(selected.key!==key||selected.style!==style)throw changed();
   const original=fs.readFileSync(sourcePath),sourceHash=hash(original);
-  const s={epoch,requestId,jobId:id(),style,key,sourceUrl:current.product.sourceUrl,sourceImageUrl:current.product.images[key],product:current.product,folder,revision:current.revision,sourcePath,sourceHash,original,sourceStamp:stamp(sourcePath),selectionPath,selectionHash:hash(selection),selectionStamp:stamp(selectionPath),started:performance.now(),startedAt:Date.now()};
+  const s={epoch,requestId,jobId:id(),style,key,sourceUrl:current.product.sourceUrl,sourceImageUrl:current.product.images[key],product:current.product,folder,revision:current.revision,sourcePath,sourceHash,original,sourceStamp:stamp(sourcePath),selectionPath,selectionHash:hash(selection),selectionStamp:stamp(selectionPath),started:performance.now(),startedAt:Date.now(),attempt:1};
   s.cacheKey=hash(JSON.stringify({style,key,sourceUrl:s.sourceUrl,sourceHash,settings:cacheSettings}));
   assertCurrent(s);return s;
  }
@@ -106,12 +107,22 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
    assertCurrent(s);
    const m=await picture(bytes);assertCurrent(s);
    if(m.width!==1500||m.height!==1500||m.format!=='jpeg')throw Error('합성 결과 규격이 올바르지 않습니다.');
-   const previewPath=path.join(s.folder,'background-preview-'+s.jobId+'.jpg');
-   fs.writeFileSync(previewPath,bytes,{flag:'wx'});s.staged={bytes,hash:hash(bytes),previewPath};
+   const previewPath=path.join(s.folder,'background-preview-'+s.jobId+'-attempt-'+s.attempt+'.jpg');
+   fs.writeFileSync(previewPath,bytes,{flag:'wx'});s.staged={bytes,hash:hash(bytes),previewPath,attempt:s.attempt};
    view={...timing(s),status:'review',style:s.style,key:s.key,message:'원본 합성을 마쳤습니다. 최종 이미지 검수 후 자동 적용합니다.'};
-   return {ok:true,jobId,previewPath,width:1500,height:1500,originalPreserved:true};
+   return {ok:true,jobId,attempt:s.attempt,maxAttempts,previewPath,width:1500,height:1500,originalPreserved:true};
   }catch(error){if(active===s&&!s.invalid){view={...timing(s,true),status:'error',style:s.style,key:s.key,message:error.message};}throw error;}
   finally{s.processing=false;}
+ }
+ function retry({jobId,reason}){
+  const s=job(jobId);
+  if(s.processing||!s.staged||view?.status!=='review')throw Error('현재 합성 결과의 검수를 마친 뒤 품질 보완을 요청해 주세요.');
+  const qualityReason=typeof reason==='string'?reason.replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,160):'';
+  if(!qualityReason)throw Error('보완할 이미지 품질 문제를 구체적으로 입력해 주세요.');
+  if(s.attempt>=maxAttempts)throw Object.assign(Error('총 '+maxAttempts+'회 합성 후에도 품질 보완이 필요합니다: '+qualityReason+'. 원본 대표이미지는 유지됩니다.'),{code:'BACKGROUND_QUALITY_RETRY_LIMIT'});
+  s.attempt++;s.staged=null;s.retryReason=qualityReason;
+  view={...timing(s),status:'generating',style:s.style,key:s.key,message:'배경 합성 '+s.attempt+'/'+maxAttempts+'회 · 보완: '+qualityReason};
+  return {...inspect({jobId}),reason:qualityReason,message:view.message};
  }
  function complete({jobId,reviewed,reuse}){
   const s=job(jobId);
@@ -135,8 +146,8 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   atomic(path.join(current.folder,'background-selection.json'),JSON.stringify({style,key,selectionId:id()}));
   return {ok:true,key};
  }
- function inspect({jobId}){const s=job(jobId);return {ok:true,jobId,style:s.style,key:s.key,sourcePath:s.sourcePath,sourceHash:s.sourceHash,previewPath:s.staged?.previewPath};}
+ function inspect({jobId}){const s=job(jobId);return {ok:true,jobId,style:s.style,key:s.key,sourcePath:s.sourcePath,sourceHash:s.sourceHash,attempt:s.attempt,maxAttempts,previewPath:s.staged?.previewPath};}
  function dispatch({jobId}){const s=job(jobId);if(s.dispatched||s.cachedBytes)throw Error('이미 진행 중이거나 재사용할 수 있는 합성 요청입니다.');s.dispatched=true;view={...timing(s),status:'generating',style:s.style,key:s.key,message:'Codex가 원본을 확인하고 배경 합성을 진행합니다.'};return inspect({jobId});}
  function fail({jobId,message}){if(active?.jobId!==jobId||active.invalid)return;active.invalid=true;view={...timing(active,true),status:'error',style:active.style,key:active.key,sourceUrl:active.sourceUrl,jobId:active.jobId,requestId:active.requestId,message};active=null;}
- return {prepare,stage,complete,select,cancel,invalidate,inspect,dispatch,fail,status:()=>view?{...view,jobId:view.jobId||active?.jobId,requestId:view.requestId||active?.requestId,sourceUrl:view.sourceUrl||active?.sourceUrl}:null};
+ return {prepare,stage,retry,complete,select,cancel,invalidate,inspect,dispatch,fail,status:()=>view?{...view,jobId:view.jobId||active?.jobId,requestId:view.requestId||active?.requestId,sourceUrl:view.sourceUrl||active?.sourceUrl}:null};
 }
