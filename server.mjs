@@ -103,7 +103,7 @@ const protectedBranding=brandingLock(dataRoot);
 const state={busy:false,phase:'idle',logs:[],product:null,folder:null,error:null,paused:null,revision:Date.now(),collectionInput:null,detailFallbackRequest:null,photoPreparation:null};
 let backgroundMutations=0;
 let backgroundRunner;
-const backgroundWorkflow=createBackgroundWorkflow({getState:()=>({...state,busy:state.busy||backgroundMutations>0}),cacheRoot:path.join(dataRoot,'background-cache'),onInvalidate:()=>{void backgroundRunner?.cancel();}});
+const backgroundWorkflow=createBackgroundWorkflow({getState:()=>({...state,busy:state.busy||backgroundMutations>0}),cacheRoot:path.join(dataRoot,'background-cache'),onInvalidate:()=>{void backgroundRunner?.cancel().catch(()=>{});}});
 backgroundRunner=createBackgroundRunner({root,nodePath:process.execPath,onFailure:failure=>backgroundWorkflow.fail(failure),onExit:({jobId})=>backgroundWorkflow.fail({jobId,message:'Codex 합성이 적용 완료 전에 종료되었습니다. 현재 대표이미지는 유지됩니다. 다시 확인해 주세요.'})});
 const backgroundWorkflowEndpoints=new Set(['/api/background-selection','/api/background-prepare','/api/background-dispatch','/api/background-inspect','/api/background-result','/api/background-complete','/api/background-cancel']);
 const newProductResearch=startNewProductResearch(root,{isBusy:()=>state.busy||state.photoPreparation?.status==='preparing'});
