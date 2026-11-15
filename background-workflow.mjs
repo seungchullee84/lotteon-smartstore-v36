@@ -34,7 +34,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
  }
  function stateMatches(s){
   const now=getState();
-  return !now.busy&&now.photoPreparation?.status!=='preparing'&&now.product===s.product&&now.folder===s.folder&&now.revision===s.revision&&now.product?.style===s.style&&now.product?.sourceUrl===s.sourceUrl;
+  return !now.busy&&now.photoPreparation?.status!=='preparing'&&now.product===s.product&&now.folder===s.folder&&now.revision===s.revision&&now.product?.style===s.style&&now.product?.sourceUrl===s.sourceUrl&&now.product.images?.[s.key]===s.sourceImageUrl;
  }
  function assertCurrent(s){
   if(s.invalid||s.epoch!==epoch||cancelled.has(s.requestId)||!stateMatches(s))throw changed();
@@ -53,7 +53,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   const selection=fs.readFileSync(selectionPath),selected=JSON.parse(selection);
   if(selected.key!==key||selected.style!==style)throw changed();
   const original=fs.readFileSync(sourcePath),sourceHash=hash(original);
-  const s={epoch,requestId,jobId:id(),style,key,sourceUrl:current.product.sourceUrl,product:current.product,folder,revision:current.revision,sourcePath,sourceHash,original,sourceStamp:stamp(sourcePath),selectionPath,selectionHash:hash(selection),selectionStamp:stamp(selectionPath),started:performance.now()};
+  const s={epoch,requestId,jobId:id(),style,key,sourceUrl:current.product.sourceUrl,sourceImageUrl:current.product.images[key],product:current.product,folder,revision:current.revision,sourcePath,sourceHash,original,sourceStamp:stamp(sourcePath),selectionPath,selectionHash:hash(selection),selectionStamp:stamp(selectionPath),started:performance.now()};
   s.cacheKey=hash(JSON.stringify({style,key,sourceUrl:s.sourceUrl,sourceHash,settings:cacheSettings}));
   assertCurrent(s);return s;
  }
@@ -132,5 +132,6 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   atomic(path.join(current.folder,'background-selection.json'),JSON.stringify({style,key,selectionId:id()}));
   return {ok:true,key};
  }
- return {prepare,stage,complete,select,cancel,invalidate,status:()=>view};
+ function inspect({jobId}){const s=job(jobId);return {ok:true,jobId,style:s.style,key:s.key,sourcePath:s.sourcePath,sourceHash:s.sourceHash,previewPath:s.staged?.previewPath};}
+ return {prepare,stage,complete,select,cancel,invalidate,inspect,status:()=>view};
 }

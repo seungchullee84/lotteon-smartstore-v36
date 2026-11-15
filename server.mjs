@@ -33,7 +33,8 @@ import {listingPreview,originalListingMain,prepareListingImages} from './smartst
 import {validateProduct} from './product-validation.mjs';
 import {requireChannel} from './channel-routing.mjs';
 import {verifyNaver,createKeywordOptimizer} from './naver-keywords.mjs';
-import {generateBackground} from './background-image.mjs';
+import {createBackgroundWorkflow} from './background-workflow.mjs';
+import {backgroundPrompt} from './background-prompt.mjs';
 import {createReleaseTracker} from './app-release.mjs';
 import {startGithubSync} from './github-sync.mjs';
 import {startBenefitResearch} from './benefit-research.mjs';
@@ -99,6 +100,8 @@ const token=desktopSession?.token||randomBytes(24).toString('hex');
 let backgroundApiKey=await loadSmartstoreAIKey(dataRoot);
 const protectedBranding=brandingLock(dataRoot);
 const state={busy:false,phase:'idle',logs:[],product:null,folder:null,error:null,paused:null,revision:Date.now(),collectionInput:null,detailFallbackRequest:null,photoPreparation:null};
+const backgroundWorkflow=createBackgroundWorkflow({getState:()=>state,cacheRoot:path.join(dataRoot,'background-cache')});
+const backgroundWorkflowEndpoints=new Set(['/api/background-prepare','/api/background-inspect','/api/background-result','/api/background-complete','/api/background-cancel']);
 const newProductResearch=startNewProductResearch(root,{isBusy:()=>state.busy||state.photoPreparation?.status==='preparing'});
 const benefitResearch=startNewListingMonitor(root,{onSnapshot:website=>{void newProductResearch.observe(website);}});
 benefitResearch.state.folderResearch=newProductResearch.state;
@@ -246,7 +249,7 @@ const server=http.createServer(async(req,res)=>{
       ]);
       const versions=Object.fromEntries(imageStates);
       if(colorChipStatus)versions.main=(versions.main||'original')+':'+colorChipStatus.hash;
-      return json(res,200,{...state,folder:undefined,capabilities:{manualTags:true,photoAnalysisSettings:true},tagResearch:includeSmartstore&&state.product?selectedProductTagResearch(state.product,{dataRoot}):null,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,photoReview:listing.photoReview,detailRevision:listing.detailRevision,mainColor:listing.main.color||'품번 폴더 사진',extraColors:listing.extras.map(p=>p.color||'제공한 상품사진'),extraRoles:listing.extras.map(p=>p.role),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state,benefitResearch:benefitResearchView(benefitResearch.state)});
+      return json(res,200,{...state,folder:undefined,capabilities:{manualTags:true,photoAnalysisSettings:true},tagResearch:includeSmartstore&&state.product?selectedProductTagResearch(state.product,{dataRoot}):null,smartstoreListing:listing?{previewOnly:!!listing.previewOnly,photoReview:listing.photoReview,detailRevision:listing.detailRevision,mainColor:listing.main.color||'품번 폴더 사진',extraColors:listing.extras.map(p=>p.color||'제공한 상품사진'),extraRoles:listing.extras.map(p=>p.role),sourceNames:[listing.main,...listing.extras].map(p=>p.sourceName)}:null,mainImageVersion:versions.main,imageVersions:versions,colorChipStatus,backgroundSelection:selected,backgroundWork:backgroundWorkflow.status(),backgroundConfigured:!!backgroundApiKey,release:await releases.get(),githubSync:githubSync.state,benefitResearch:benefitResearchView(benefitResearch.state)});
     }
     if(req.method==='GET'&&url.pathname==='/api/smartstore-point-picker'){
       if(url.searchParams.get('channel')!=='smartstore'||!state.product||url.searchParams.get('style')!==state.product.style)throw Error('현재 스마트스토어 상품을 확인해 주세요.');
@@ -327,7 +330,20 @@ const server=http.createServer(async(req,res)=>{
       res.writeHead(200,{'Content-Type':png?'image/png':'image/jpeg','Cache-Control':'no-store'});return res.end(bytes);
     }
     if(req.method==='POST'){
+      // Invalidate as soon as any other action starts, even before its body is
+      // read. A job that finishes before the AI response must still cancel it.
+      if(!backgroundWorkflowEndpoints.has(url.pathname))backgroundWorkflow.invalidate();
       const b=await body(req);
+      if(url.pathname==='/api/background-cancel')return json(res,200,backgroundWorkflow.cancel(b));
+      if(url.pathname==='/api/background-inspect')return json(res,200,backgroundWorkflow.inspect(b));
+      if(url.pathname==='/api/background-prepare'){
+        const result=await backgroundWorkflow.prepare(b);
+        return json(res,200,result.cached?result:{...result,prompt:backgroundPrompt(result,{root,nodePath:process.execPath})});
+      }
+      if(url.pathname==='/api/background-result')return json(res,200,await backgroundWorkflow.stage(b));
+      if(url.pathname==='/api/background-complete'){
+        const result=backgroundWorkflow.complete(b);log(result.message);return json(res,200,result);
+      }
       requireChannel(url.pathname.slice(5),b.channel);
       if(url.pathname==='/api/notice-region-text'){
         const {folder,revision}=state;
@@ -458,11 +474,7 @@ const server=http.createServer(async(req,res)=>{
         return json(res,200,{ok:true,images:await edit});
       }
       if(url.pathname==='/api/background-selection'){
-        if(!state.product||!state.folder||b.style!==state.product.style)throw Error('현재 상품을 다시 확인해 주세요.');
-        if(!['main','extra1','extra2'].includes(b.key)||!state.product.images[b.key])throw Error('선택할 이미지가 없습니다.');
-        await readFile(path.join(state.folder,b.key+'.jpg'));
-        await writeFile(path.join(state.folder,'background-selection.json'),JSON.stringify({key:b.key,style:state.product.style}));
-        return json(res,200,{ok:true,key:b.key});
+        return json(res,200,backgroundWorkflow.select(b));
       }
       if(url.pathname==='/api/background-settings'){
         if(state.busy)throw Error('작업이 끝난 뒤 합성 설정을 변경해 주세요.');
@@ -687,17 +699,7 @@ const server=http.createServer(async(req,res)=>{
         });return json(res,202,{ok:true});
       }
       if(url.pathname==='/api/background-request'){
-        if(state.busy)throw Error('진행 중인 작업이 끝난 뒤 합성을 요청해 주세요.');
-        if(!state.product||!state.folder)throw Error('먼저 상품을 수집해 주세요.');
-        if(!backgroundApiKey)throw Error('합성 설정에서 OpenAI API 키를 먼저 연결해 주세요.');
-        const folder=state.folder,key=backgroundApiKey;
-        bot.stopped=false;smartBot.stopped=false;
-        job('background',async()=>{
-          log('대표사진 배경 합성을 시작합니다.');
-          await generateBackground({folder,apiKey:key,signal:activeAbort.signal});
-          log('합성 완료. 대표이미지를 변경했습니다.');
-        });
-        return json(res,202,{ok:true});
+        return json(res,409,{error:'배경 늘리기 버튼에서 현재 원본을 확인한 뒤 요청해 주세요. 검수된 결과만 안전하게 적용합니다.'});
       }
       if(url.pathname==='/api/smartstore-open'){
         if(state.busy)throw Error('진행 중인 작업이 있습니다.');
