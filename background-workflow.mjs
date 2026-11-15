@@ -87,7 +87,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   view={status:'checking',style:s.style,key:s.key,message:'원본과 재사용 가능한 결과를 확인합니다.'};
   try{
    const bytes=await cached(s);assertCurrent(s);
-   if(bytes)return activate(s,bytes,{reused:true});
+   if(bytes){s.cachedBytes=bytes;view={status:'checking',style:s.style,key:s.key,message:'같은 원본의 검수된 결과를 찾았습니다. 현재 화면을 재확인합니다.'};return {ok:true,cached:true,applied:false,jobId:s.jobId,message:view.message};}
    view={status:'waiting',style:s.style,key:s.key,message:'채팅에서 배경 생성 후 검수된 결과를 자동 처리합니다.'};
    return {ok:true,cached:false,jobId:s.jobId,sourcePath:s.sourcePath,style:s.style,key:s.key,sourceHash:s.sourceHash};
   }catch(error){if(active===s){view={status:'cancelled',style:s.style,key:s.key,message:error.message};active=null;}throw error;}
@@ -111,8 +111,9 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   }catch(error){if(active===s){view={status:'error',style:s.style,key:s.key,message:error.message};}throw error;}
   finally{s.processing=false;}
  }
- function complete({jobId,reviewed}){
+ function complete({jobId,reviewed,reuse}){
   const s=job(jobId);
+  if(reuse===true){if(!s.cachedBytes)throw Error('재사용할 검수 결과가 없습니다.');return activate(s,s.cachedBytes,{reused:true});}
   if(reviewed!==true||!s.staged)throw Error('최종 합성 이미지의 시각 검수 후 적용해 주세요.');
   if(hash(fs.readFileSync(s.staged.previewPath))!==s.staged.hash)throw changed();
   assertCurrent(s);
