@@ -1,5 +1,6 @@
 import {requireMaterialInput} from './notice.mjs';
 import {resolveCatalogCategory} from './category-catalog.mjs';
+import {assertLotteCategory,sameCategoryLabel} from './lotte-category-validation.mjs';
 import {categoryKey,loadCategoryCache,saveCategoryMatch} from './category-cache.mjs';
 import {BrowserAutomation} from './browser-connection.mjs';
 import {createBrowserLoginStore} from './browser-login-store.mjs';
@@ -124,20 +125,24 @@ export class LotteAutomation extends BrowserAutomation {
   async set(suffix,value){const loc=this.locator(suffix);await this.click(loc);await loc.fill(String(value));await this.pace();await loc.press('Tab');await this.pace();}
   async textClick(text,scope=this.page){await this.click(scope.getByText(text,{exact:true}).filter({visible:true}).last());}
   async settle(){await this.page.locator('[id$="waitwindow"]').waitFor({state:'hidden',timeout:45000}).catch(()=>{});this.check();if(await lotteSessionExpired(this.page))throw Error(LOTTE_SESSION_EXPIRED);}
-  async combo(suffix,choice,allowSimilar=false,knownLabels=null){
+  async combo(suffix,choice,allowSimilar=false,knownLabels=null,{timeout=4000}={}){
     const input=this.locator(suffix+'_comboedit_input');
     await this.reveal(input);
     const list=this.page.locator('[id$="'+suffix+'_combolistScrollableContainerElement"]').filter({visible:true}).last();
     if(!await list.count()){const arrow=this.locator(suffix+'_dropbutton');await arrow.click();}
     await list.waitFor({state:'visible',timeout:4000});
     const clickMatch=async()=>{
-      const label=choice.replace(/^[^:：]*[:：]\s*/,'');
+      const category=/^cobPrdcClsf/.test(suffix),coded=/^[A-Z0-9]+\s*[:：]/i.test(choice);
+      const label=coded&&category?choice:choice.replace(/^[^:：]*[:：]\s*/,'');
       const escaped=label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-      const targets=list.getByText(new RegExp('^\\s*(?:[^:：]+[:：]\\s*)?'+escaped+'\\s*$'));
+      const targets=list.getByText(new RegExp('^\\s*'+(coded&&category?'':'(?:[^:：]+[:：]\\s*)?')+escaped+'\\s*$'));
+      if(category&&await targets.count()>1)throw Error('같은 이름의 분류가 여러 개입니다. 전체 코드를 확인해 주세요: '+choice);
       for(let i=0;i<await targets.count();i++){
         const target=targets.nth(i);
         const ready=await target.evaluate(e=>{const r=e.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2,hit=e.ownerDocument.elementFromPoint(x,y);return r.width>0&&r.height>0&&!!hit&&(e===hit||e.contains(hit));});
-        if(ready){await target.click();await this.settle();await this.pace();return true;}
+        if(ready){await target.click();await this.settle();await this.pace();
+          if(category){const deadline=Date.now()+timeout;while(Date.now()<deadline){this.check();if(sameCategoryLabel(choice,await input.inputValue()))return true;await this.page.waitForTimeout(80);}throw Error('공통분류 선택값 반영 확인 실패: '+choice);}
+          return true;}
       }
       return false;
     };
@@ -158,7 +163,7 @@ export class LotteAutomation extends BrowserAutomation {
       if(!await this.scrollComboList(list))break;
     }
     await this.page.keyboard.press('Escape');
-    if(allowSimilar){const selected=similarCategory(choice,[...seen]);if(selected){this.log('유사 분류 선택: '+choice+' → '+selected);return this.combo(suffix,selected,false);}}
+    if(allowSimilar&&!/^cobPrdcClsf/.test(suffix)){const selected=similarCategory(choice,[...seen]);if(selected){this.log('유사 분류 선택: '+choice+' → '+selected);return this.combo(suffix,selected,false);}}
     throw Error('같거나 유사한 분류를 찾지 못했습니다: '+choice);
   }
   async comboLabels(list){
@@ -317,7 +322,8 @@ export class LotteAutomation extends BrowserAutomation {
   }
   async run(p,folder,finalize){
     validateStyle(p.style);this.stopped=false;
-    const catalogMatch=resolveCatalogCategory(p);if(catalogMatch.path){p.category=catalogMatch.category;this.log('실제 분류 매칭표 적용: '+p.category.commonSmall+' / '+p.category.channelMiddle+' > '+p.category.channelSmall)}
+    p={...p,category:assertLotteCategory(p)};
+    this.log('1차·2차 분류 매칭 확인: '+p.category.commonSmall+' / '+p.category.channelMiddle+' > '+p.category.channelSmall);
     const login=!this.page||this.page.isClosed()||this.browser&&!this.browser.isConnected()?await this.open():await this.ensureLogin();
     if(login.status==='expired')throw Error(LOTTE_SESSION_EXPIRED);
     p={...p,material:requireMaterialInput(p.material)};
@@ -386,7 +392,7 @@ export class LotteAutomation extends BrowserAutomation {
       const stylePattern=new RegExp(String.raw`^\s*${p.style}\s*\(DT\)\s*$`);
       const row=this.page.locator('[id*="grd_rpplu_body_gridrow_"][id$="GridCellTextContainerElement"]').filter({hasText:stylePattern}).last();
       await row.waitFor({state:'attached',timeout:20000});
-      await this.click(row);await row.dblclick();await this.settle();
+      await this.openCategoryChannel(row,p);
       }
       await this.channel(p,folder,{resume:channelOpen});
       if(!finalize){await this.textClick('임시저장');await this.modalConfirm('저장하시겠습니까');this.log('최종 상품확정 전에서 중단했습니다.');return;}
@@ -547,7 +553,7 @@ export class LotteAutomation extends BrowserAutomation {
     if(await area.inputValue()!==html)throw Error('상세 HTML 입력 내용이 반영되지 않았습니다.');
     await frame.locator('button.se2_to_editor').click();await this.pace();
   }
-  async similarCategoryClick(choice,level){
+  async similarCategoryClick(choice,level,{code='',timeout=4000}={}){
     if(!level)throw Error('채널분류 단계가 지정되지 않았습니다.');
     await this.reveal(this.locator('grd_Dspctgr'+level+'_head')); // Bring category panel into the popup viewport before using its own scrollbar.
     const scope=this.page.locator('[id*="grd_Dspctgr'+level+'_body_gridrow_"][id$="GridCellTextContainerElement"]');
@@ -569,14 +575,19 @@ export class LotteAutomation extends BrowserAutomation {
       return true;
     };
     await this.settle();await this.pace();await move(true);
+    const deadline=Date.now()+timeout;
+    while(!(await scope.count())&&Date.now()<deadline){this.check();await this.page.waitForTimeout(80);}
     const labels=new Set();let previous='',stagnant=0;
     const clickVisible=async(value)=>{
       const candidates=scope.getByText(value,{exact:true});
+      const matches=[];
       for(let i=0;i<await candidates.count();i++){
         const target=candidates.nth(i);
-        const ready=await target.evaluate(e=>{const r=e.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return r.width>0&&r.height>0&&!!hit&&(hit===e||e.contains(hit)||hit.contains(e));});
-        if(ready){await target.click({timeout:1500});await this.settle();await this.pace();return true;}
+        const ready=await target.evaluate((e,code)=>{const r=e.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);let row=e;while(row&&!/body_gridrow_\d+(?:GridAreaContainerElement_inner)?$/.test(row.id))row=row.parentElement;const cells=row?[...row.querySelectorAll('[id$="GridCellTextContainerElement"]')].map(x=>x.textContent.trim()):[];return (!code||cells.includes(code))&&r.width>0&&r.height>0&&!!hit&&(hit===e||e.contains(hit)||hit.contains(e));},code);
+        if(ready)matches.push(target);
       }
+      if(matches.length>1)throw Error('채널분류 이름이 중복되어 하나로 선택할 수 없습니다: '+value);
+      if(matches.length===1){await matches[0].click({timeout:1500});await this.settle();await this.pace();return true;}
       return false;
     };
     for(let scan=0;scan<40;scan++){
@@ -587,6 +598,8 @@ export class LotteAutomation extends BrowserAutomation {
       const signature=texts.join('|');stagnant=signature===previous?stagnant+1:0;previous=signature;
       if(stagnant>=2||!await move(false))break;
     }
+    // A validated category must never silently become a merely similar garment.
+    throw Error('정확한 채널분류 이름·코드를 찾지 못했습니다: '+choice+(code?' ('+code+')':'')+' · 판매처 목록을 다시 확인해 주세요.');
     const selected=similarCategory(choice,[...labels]);
     if(!selected)throw Error('같거나 유사한 채널분류를 찾지 못했습니다: '+choice+' (목록: '+[...labels].join(', ')+')');
     await move(true);previous='';stagnant=0;
