@@ -155,11 +155,11 @@ export class LotteAutomation extends BrowserAutomation {
       if(await clickMatch())return;
     }
     await this.scrollComboList(list,true);
-    const seen=new Set();
+    const seen=new Set(),deadline=Date.now()+timeout;
     for(let n=0;n<120;n++){
       for(const label of (await list.innerText()).split('\n').map(x=>x.trim()).filter(Boolean))seen.add(label);
       this.check();if(await clickMatch())return;
-      if(!await this.scrollComboList(list))break;
+      if(!await this.scrollComboList(list)){if(/^cobPrdcClsf/.test(suffix)&&Date.now()<deadline){await this.page.waitForTimeout(100);continue;}break;}
     }
     await this.page.keyboard.press('Escape');
     if(allowSimilar&&!/^cobPrdcClsf/.test(suffix)){const selected=similarCategory(choice,[...seen]);if(selected){this.log('유사 분류 선택: '+choice+' → '+selected);return this.combo(suffix,selected,false);}}
@@ -595,7 +595,8 @@ export class LotteAutomation extends BrowserAutomation {
       // Prefer an exact visible match without first scrolling to the bottom.
       if(await clickVisible(choice)){this.log('채널분류 선택: '+choice);return choice;}
       const signature=texts.join('|');stagnant=signature===previous?stagnant+1:0;previous=signature;
-      if(stagnant>=2||!await move(false))break;
+      if(stagnant>=2&&Date.now()>=deadline)break;
+      if(!await move(false)){if(Date.now()<deadline){await this.page.waitForTimeout(100);continue;}break;}
     }
     // A validated category must never silently become a merely similar garment.
     throw Error('정확한 채널분류 이름·코드를 찾지 못했습니다: '+choice+(code?' ('+code+')':'')+' · 판매처 목록을 다시 확인해 주세요.');

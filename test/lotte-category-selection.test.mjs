@@ -75,6 +75,15 @@ test('channel category rejects duplicate names when no code disambiguates them',
  assert.deepEqual(await page.evaluate(()=>window.chosen),[]);
 });
 
+test('old parent rows stay visible while the requested child list is loading',async t=>{
+ const browser=await chromium.launch({headless:true});t.after(()=>browser.close());const {page,bot}=await channelFixture(browser);
+ await page.evaluate(()=>{
+  const rows=document.querySelectorAll('[id$="GridAreaContainerElement_inner"]');rows[1].remove();
+  setTimeout(()=>{const row=rows[0].cloneNode(true);row.id='grd_DspctgrS_body_gridrow_1GridAreaContainerElement_inner';row.children[0].textContent='BC31050200';row.onclick=()=>window.chosen.push('BC31050200');document.getElementById('grd_DspctgrS_body').append(row);},300);
+ });
+ await bot.similarCategoryClick('동일소분류','S',{code:'BC31050200',timeout:1000});assert.deepEqual(await page.evaluate(()=>window.chosen),['BC31050200']);
+});
+
 test('added standard categories must match all levels in one row, including detail',async t=>{
  const browser=await chromium.launch({headless:true});t.after(()=>browser.close());
  const {page,bot}=await botPage(browser);
