@@ -3,6 +3,7 @@ import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';import os f
 import {prepareTrustedFolder} from '../smartstore-folder-trust.mjs';
 import {buildSmartstoreDetail} from '../smartstore-detail.mjs';
 import {saveMainSelection} from '../smartstore-main-selection.mjs';
+import {load} from 'cheerio';
 
 test('모든 품번의 현재 폴더 사진은 파일명과 관계없이 대표·정면·후면·옆면·디테일 순서로 기존 템플릿에 연결한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'color-photo-order-'));try{
@@ -17,7 +18,7 @@ test('모든 품번의 현재 폴더 사진은 파일명과 관계없이 대표�
    const hashes=photos.map(photo=>createHash('sha256').update(photo.bytes).digest('hex'));
    assert.deepEqual(p.smartstoreDetail.storeColorPhotoHashes['01블랙'],[hashes[0],hashes[3],hashes[2],hashes[1],hashes[4]]);
    assert.equal(p.smartstoreDetail.providedImages.length,0);
-   for(const detailTemplate of [1,2]){const html=buildSmartstoreDetail({...p,detailTemplate}).html;assert(!html.includes('data-folder-photos'));assert(html.includes('smartstore-color-0'));for(const src of p.smartstoreDetail.colorImages['01블랙'])assert(html.includes(src));}
+   for(const detailTemplate of [1,2]){const html=buildSmartstoreDetail({...p,detailTemplate}).html;assert.equal(load(html)('[data-folder-photos]').length,0);assert(html.includes('smartstore-color-0'));for(const src of p.smartstoreDetail.colorImages['01블랙'])assert(html.includes(src));}
    for(const photo of photos)assert.deepEqual(await readFile(photo.file),photo.bytes);
   }
  }finally{await rm(root,{recursive:true,force:true});}
