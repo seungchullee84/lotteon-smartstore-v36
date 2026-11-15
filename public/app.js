@@ -590,7 +590,7 @@ const cancelledBackgroundRequests=new Set();
 const backgroundActiveStatuses=['preparing','waiting','generating','processing','review','applying-wait'];
 const backgroundStageLabels={preparing:'원본 확인',waiting:'시작 대기',generating:'배경 생성',processing:'원본 합성',review:'완성본 검수','applying-wait':'적용 대기',complete:'합성 완료',error:'합성 확인 필요',cancelled:'합성 취소'};
 function showBackgroundProgress(work){
- backgroundProgress={requestId:backgroundRequest?.requestId,jobId:backgroundRequest?.jobId,...work};
+ backgroundProgress={requestId:backgroundRequest?.requestId,jobId:backgroundRequest?.jobId,sourceUrl:backgroundRequest?.sourceUrl||backgroundProgress?.sourceUrl,key:backgroundRequest?.key||backgroundProgress?.key,...work};
  if(!backgroundActiveStatuses.includes(work.status)){
   const key=(backgroundProgress.requestId||backgroundProgress.jobId||work.style||'local')+':'+work.status;
   if(backgroundTerminalNotice?.key!==key){
@@ -600,7 +600,7 @@ function showBackgroundProgress(work){
   clearTimeout(backgroundTerminalTimer);
   backgroundTerminalTimer=setTimeout(syncBackgroundProgress,Math.max(0,backgroundTerminalNotice.expiresAt-Date.now()));
  }
- if(work.status==='error')syncBackgroundFailure(work);
+ if(work.status==='error')syncBackgroundFailure(backgroundProgress);
  else if(work.status==='complete'&&work.manual&&backgroundFailure?.jobId===work.jobId){backgroundFailure=null;syncBackgroundFailure();}
  else if(backgroundFailure&&work.jobId&&backgroundFailure.jobId!==work.jobId){
   backgroundFailure.manualAvailable=false;backgroundFailure.manualUnavailableReason='새 합성 작업이 시작되어 이전 결과는 미리보기만 가능합니다.';syncBackgroundFailure();

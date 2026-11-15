@@ -520,9 +520,43 @@ test('실패 결과 적용 응답을 기다리는 동안 품번이 바뀌면 이
   pendingManual.shift()();await received;await page.evaluate(()=>new Promise(resolve=>setTimeout(resolve,50)));
   assert.equal(control.stateReads,reads);
   assert.notEqual(await page.locator('#backgroundProgress').getAttribute('data-status'),'complete');
-  assert.equal(await page.locator('#backgroundFailureCard').isVisible(),false);
+  assert.equal(await page.locator('#backgroundFailureCard').isVisible(),true,'같은 수집 상품의 이전 실패 결과는 조회할 수 있다');
+  assert.equal(await page.locator('#applyBackgroundFailure').isDisabled(),true);
   assert.equal(posts.filter(item=>item.path==='/api/background-apply-preview').length,1);
   assert.equal(posts.filter(item=>item.path==='/api/background-cancel').length,1);
+  assert.deepEqual(errors,[]);
+ }finally{await browser.close();}
+});
+
+test('같은 상품에서 선택 사진을 바꿔도 이전 실패 결과는 보이며 적용은 막는다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const {page,posts,control,errors}=await fixture(browser);
+  await page.locator('#openBackgroundRequest').click();
+  await page.waitForFunction(()=>document.querySelector('#backgroundStatus').textContent.includes('합성을 시작했습니다'));
+  control.backgroundWork=failedWork(control.backgroundWork);await page.evaluate(()=>refresh());
+  const main=await page.locator('#main').getAttribute('src');
+  await page.locator('#backgroundImageChoice').selectOption('extra2');
+  await page.waitForFunction(()=>!document.querySelector('#backgroundImageChoice').disabled);
+  control.backgroundWork={...control.backgroundWork,status:'error',manualAvailable:false,manualUnavailableReason:'사진 선택이나 원본 상태가 바뀌어 이 결과는 미리보기만 가능합니다.'};
+  await page.evaluate(()=>refresh());
+  await page.locator('#closeBackground').click();
+  assert.equal(await page.locator('#backgroundFailureCard').isVisible(),true);
+  await page.locator('#viewBackgroundFailure').click();
+  assert.equal(await page.locator('#backgroundImageChoice').inputValue(),'extra2','실패 결과 조회가 현재 선택 사진을 바꾸지 않는다');
+  assert.match(await page.locator('#backgroundOriginalHeading').textContent(),/추가이미지 2/);
+  assert.match(await page.locator('#backgroundFailureSource').textContent(),/대표이미지/);
+  assert.match(await page.locator('#backgroundFailedImage').getAttribute('src'),/attempt=3$/);
+  assert.equal(await page.locator('#applyBackgroundFailure').isVisible(),true);
+  assert.equal(await page.locator('#applyBackgroundFailure').isDisabled(),true);
+  assert.match(await page.locator('#backgroundFailureApplyStatus').textContent(),/미리보기만/);
+  await page.locator('#applyBackgroundFailure').evaluate(button=>button.click());
+  assert.equal(posts.filter(item=>item.path==='/api/background-apply-preview').length,0);
+  assert.equal(await page.locator('#main').getAttribute('src'),main);
+  await page.reload();await page.waitForFunction(()=>document.querySelector('#source').textContent.includes('123456'));
+  assert.equal(await page.locator('#backgroundFailureCard').isVisible(),true,'새로고침 후에도 같은 상품의 이전 실패 결과를 볼 수 있다');
+  await page.locator('#viewBackgroundFailure').click();
+  assert.equal(await page.locator('#applyBackgroundFailure').isDisabled(),true);
   assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });
