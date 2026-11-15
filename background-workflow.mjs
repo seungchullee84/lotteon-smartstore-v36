@@ -37,7 +37,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
  }
  function stateMatches(s){
   const now=getState();
-  return !now.busy&&now.photoPreparation?.status!=='preparing'&&now.product===s.product&&now.folder===s.folder&&now.revision===s.revision&&now.product?.style===s.style&&now.product?.sourceUrl===s.sourceUrl&&now.product.images?.[s.key]===s.sourceImageUrl;
+  return now.folder===s.folder&&now.product?.style===s.style&&now.product?.sourceUrl===s.sourceUrl&&now.product.images?.[s.key]===s.sourceImageUrl;
  }
  function assertCurrent(s){
   if(s.invalid||s.epoch!==epoch||cancelled.has(s.requestId)||!stateMatches(s))throw changed();
@@ -124,13 +124,21 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   view={...timing(s),status:'generating',style:s.style,key:s.key,message:'배경 합성 '+s.attempt+'/'+maxAttempts+'회 · 보완: '+qualityReason};
   return {...inspect({jobId}),reason:qualityReason,message:view.message};
  }
+ function applicationWait(s){
+  const current=getState();
+  if(!current.busy&&current.photoPreparation?.status!=='preparing')return null;
+  const result={ok:true,waiting:true,jobId:s.jobId,attempt:s.attempt,message:'합성 완료 · 다른 작업이 끝나면 대표이미지에 적용합니다.'};
+  view={...timing(s),status:'applying-wait',style:s.style,key:s.key,sourceUrl:s.sourceUrl,jobId:s.jobId,requestId:s.requestId,message:result.message};
+  return result;
+ }
  function complete({jobId,reviewed,reuse,attempt}){
   const s=job(jobId);
-  if(reuse===true){if(!s.cachedBytes)throw Error('재사용할 검수 결과가 없습니다.');return activate(s,s.cachedBytes,{reused:true});}
+  if(reuse===true){if(!s.cachedBytes)throw Error('재사용할 검수 결과가 없습니다.');return applicationWait(s)||activate(s,s.cachedBytes,{reused:true});}
   if(reviewed!==true||!s.staged)throw Error('최종 합성 이미지의 시각 검수 후 적용해 주세요.');
   if((s.attempt>1||attempt!==undefined)&&(!Number.isInteger(attempt)||attempt!==s.staged.attempt))throw Object.assign(Error('검수한 합성 차수가 현재 결과와 다릅니다. '+s.attempt+'회차 이미지를 확인한 뒤 적용해 주세요.'),{code:'BACKGROUND_REVIEW_ATTEMPT_CHANGED'});
   if(hash(fs.readFileSync(s.staged.previewPath))!==s.staged.hash)throw changed();
   assertCurrent(s);
+  const waiting=applicationWait(s);if(waiting)return waiting;
   const bytes=s.staged.bytes;
   // Only a reviewed result is cached. The cache is independent of collection
   // folders, but tied to product identity, exact source bytes and recipe.

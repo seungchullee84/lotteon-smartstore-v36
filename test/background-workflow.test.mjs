@@ -143,9 +143,7 @@ test('current product identity and stored official identity must still match at 
   sourceUrl:async f=>{f.state.product.sourceUrl='https://example.test/other';},
   selectedImageUrl:async f=>{f.state.product.images.main='different-main-source';},
   selectedImageExcluded:async f=>{f.state.product.images.main=null;},
-  productInstance:async f=>{f.state.product={...f.state.product};},
   folder:async f=>{const next=path.join(f.root,'other');await f.seedFolder(next);f.state.folder=next;},
-  revision:async f=>{f.state.revision++;},
   storedStyle:async f=>writeFile(path.join(f.folder,'product.json'),JSON.stringify({...f.state.product,style:'416971'})),
   storedSourceUrl:async f=>writeFile(path.join(f.folder,'product.json'),JSON.stringify({...f.state.product,sourceUrl:'https://example.test/other'}))
  };
@@ -186,15 +184,45 @@ test('changed source bytes, replaced selection file and edited preview cannot be
  });
 });
 
-test('busy and photo preparation block requests and invalidate completion, including a completed busy episode',async t=>{
- for(const mode of ['busy','photoPreparation','busyRoundTrip'])await t.test(mode,async t=>{
-  const f=await fixture(t),request=await f.prepare();await f.stage(request);
-  if(mode==='photoPreparation')f.state.photoPreparation={status:'preparing'};
-  else f.state.busy=true;
-  if(mode==='busyRoundTrip'){f.workflow.invalidate();f.state.busy=false;}
-  assert.throws(()=>f.complete(request),stale);
-  if(mode!=='busyRoundTrip')await assert.rejects(f.prepare(),/진행 중인 작업/);
-  await f.unapplied();
+test('initial busy or preparing state blocks a new request and initial revision still must match',async t=>{
+ for(const mode of ['busy','photoPreparation'])await t.test(mode,async sub=>{
+  const f=await fixture(sub);if(mode==='busy')f.state.busy=true;else f.state.photoPreparation={status:'preparing'};
+  await assert.rejects(f.prepare(),/진행 중인 작업/);await f.unapplied();
+ });
+ const f=await fixture(t);await assert.rejects(f.prepare({revision:f.state.revision-1}),stale);
+});
+
+test('ongoing composition survives unrelated busy work and applies only after idle without early cache or manifest writes',async t=>{
+ for(const mode of ['busy','photoPreparation'])await t.test(mode,async sub=>{
+  const f=await fixture(sub),request=await f.prepare(),startedAt=f.workflow.status().startedAt;
+  const prior=JSON.stringify({file:'previous-approved-main.jpg'});await writeFile(path.join(f.folder,'background-image.json'),prior);
+  if(mode==='busy')f.state.busy=true;else f.state.photoPreparation={status:'preparing'};
+  f.state.product={...f.state.product,name:'무관한 제목 수정'};f.state.revision++;
+  f.workflow.dispatch({jobId:request.jobId});assert.equal(f.workflow.inspect({jobId:request.jobId}).sourceHash,digest(f.original));
+  await f.stage(request);f.workflow.retry({jobId:request.jobId,reason:'경계 밝기 보완'});await f.stage(request);
+  const waiting=f.complete(request);assert.equal(waiting.ok,true);assert.equal(waiting.waiting,true);assert.equal(waiting.jobId,request.jobId);assert.equal(waiting.attempt,2);
+  assert.equal(f.workflow.status().status,'applying-wait');assert.equal(f.workflow.status().startedAt,startedAt);assert.equal(f.workflow.status().elapsedMs,undefined);
+  assert.equal(await readFile(path.join(f.folder,'background-image.json'),'utf8'),prior);await assert.rejects(readdir(f.cacheRoot),{code:'ENOENT'});assert.equal(f.complete(request).waiting,true);
+  f.state.busy=false;f.state.photoPreparation=null;const applied=f.complete(request);assert.equal(applied.ok,true);assert.equal(applied.waiting,undefined);assert.equal(f.workflow.status().status,'complete');assert.equal(f.workflow.status().startedAt,startedAt);
+  assert.notEqual(await readFile(path.join(f.folder,'background-image.json'),'utf8'),prior);assert((await readdir(f.cacheRoot)).length>0);assert.deepEqual(await readFile(path.join(f.folder,'main.jpg')),f.original);
+ });
+});
+
+test('busy episodes and product object/revision refreshes do not cancel an unchanged source',async t=>{
+ const f=await fixture(t),request=await f.prepare();f.state.busy=true;f.state.product={...f.state.product};f.state.revision++;
+ await f.stage(request);f.state.busy=false;f.complete(request);assert.equal(f.workflow.status().status,'complete');
+});
+
+test('cached applications also wait, while changed selection or preview still invalidates pending approval',async t=>{
+ const f=await fixture(t),first=await f.prepare();await f.stage(first);f.complete(first);const prior=await readFile(path.join(f.folder,'background-image.json'),'utf8');
+ const cached=await f.prepare();assert.equal(cached.cached,true);f.state.busy=true;
+ assert.equal(f.workflow.complete({jobId:cached.jobId,reuse:true}).waiting,true);assert.equal(await readFile(path.join(f.folder,'background-image.json'),'utf8'),prior);
+ f.state.busy=false;assert.equal(f.workflow.complete({jobId:cached.jobId,reuse:true}).cached,true);
+ for(const mode of ['selection','preview'])await t.test(mode,async sub=>{
+  const f=await fixture(sub),request=await f.prepare(),preview=await f.stage(request);f.state.busy=true;assert.equal(f.complete(request).waiting,true);
+  f.state.busy=false;
+  if(mode==='selection')f.workflow.select({style:f.state.product.style,key:'extra1'});else await writeFile(preview.previewPath,f.extra);
+  assert.throws(()=>f.complete(request),stale);await f.unapplied();
  });
 });
 
@@ -285,12 +313,10 @@ test('quality retry allows at most three attempts and requires a bounded meaning
 
 test('retry is unavailable before review, during composition and after original or job guards change',async t=>{
  const f=await fixture(t),request=await f.prepare();assert.throws(()=>f.workflow.retry({jobId:request.jobId,reason:'검수 전'}),/검수를 마친 뒤/);
- for(const mode of ['busy','source','selection','revision','cancelled','completed'])await t.test(mode,async sub=>{
+ for(const mode of ['source','selection','cancelled','completed'])await t.test(mode,async sub=>{
   const f=await fixture(sub),request=await f.prepare();await f.stage(request);
-  if(mode==='busy')f.state.busy=true;
   if(mode==='source')await writeFile(path.join(f.folder,'main.jpg'),f.extra);
   if(mode==='selection')f.workflow.select({style:f.state.product.style,key:'extra1'});
-  if(mode==='revision')f.state.revision++;
   if(mode==='cancelled')f.workflow.cancel({requestId:f.workflow.status().requestId});
   if(mode==='completed')f.complete(request);
   assert.throws(()=>f.workflow.retry({jobId:request.jobId,reason:'경계 보완'}),stale);
