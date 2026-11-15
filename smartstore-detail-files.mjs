@@ -220,7 +220,7 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
   }
  }
  await attachOfficialPalette(product,prepared,draft?.officialPalettePhotos,{folder,draftRoot});
- if(prepared.acceptAllFolderPhotos)await prepareOfficialPalette(product,prepared,{...officialPaletteOptions,folder,dataRoot,signal,log});
+ await prepareOfficialPalette(product,prepared,{...officialPaletteOptions,folder,dataRoot,signal,log,includeGallery:true});
  prepared.captionTones=await collectCaptionTones(product,folder);
  prepared.embeddedOfficialSections=await embeddedOfficialSections(product,folder,{dataRoot,smartstoreLayout:true});
  const fitGuide=await prepareFitGuide(product,folder,{dataRoot});
