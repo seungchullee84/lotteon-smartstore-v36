@@ -1,0 +1,90 @@
+import {readFileSync,statSync} from 'node:fs';
+import {commonFor} from './category-catalog.mjs';
+import {isMensUnderwear,MENS_UNDERWEAR_CATEGORY} from './category.mjs';
+
+const cache=new Map();
+function data(name){
+  try{
+    const url=new URL('./data/'+name,import.meta.url),stamp=statSync(url).mtimeMs;
+    if(cache.get(name)?.stamp===stamp)return cache.get(name).value;
+    const value=JSON.parse(readFileSync(url,'utf8'));cache.set(name,{stamp,value});return value;
+  }catch{return null;}
+}
+const compact=value=>String(value||'').replace(/\s/g,'');
+const label=value=>compact(String(value||'').replace(/^[A-Z0-9]+\s*[:：]\s*/i,''));
+const code=value=>String(value||'').match(/^([A-Z0-9]+)\s*[:：]/i)?.[1]||'';
+// A supplied code and its label must both match; a name-only entry may be canonicalised.
+export const sameCategoryLabel=(input,stored)=>label(input)===label(stored)&&(!code(input)||code(input)===code(stored));
+const nodeMatches=(input,node)=>sameCategoryLabel(input,node.code+' : '+node.name);
+export function allLotteStandardPaths(catalog=data('category-catalog-standard.json')){
+  return (catalog?.majors||[]).flatMap(major=>(major.middles||[]).flatMap(middle=>(middle.smalls||[]).flatMap(small=>(small.details?.length?small.details:[null]).map(detail=>({major,middle,small,detail})))));
+}
+function accessoryCommon(c){
+  const paths=[
+    ['L0001 : 패션/장신','M0357 : 패션액세서리','01068 : 머플러'],
+    ['L0022 : 가방/피혁잡화','M0307 : 벨트','01033 : 남성벨트'],
+    ['L0022 : 가방/피혁잡화','M0307 : 벨트','01032 : 여성벨트'],
+  ];
+  return paths.find(p=>(!c.commonMajor||sameCategoryLabel(c.commonMajor,p[0]))&&sameCategoryLabel(c.commonMiddle,p[1])&&sameCategoryLabel(c.commonSmall,p[2]));
+}
+function verifiedAccessory(product,c,matches){
+  if(!['잡화','브랜드가방'].includes(c.channelMajor)||c.channelDetail)return null;
+  for(const match of matches?.matches||[]){
+    let key;try{key=JSON.parse(match.key);}catch{continue;}
+    const a=match.actual;
+    if(!match.verification||!match.verifiedAt||!a||a.detail||key[0]!==product.gender)continue;
+    if(!sameCategoryLabel(c.commonMiddle,key[1])||!sameCategoryLabel(c.commonSmall,key[2]))continue;
+    if(a.major===c.channelMajor&&a.middle===c.channelMiddle&&a.small===c.channelSmall)return a;
+  }
+  return null;
+}
+export function validateLotteCategory(product,{standard=data('category-catalog-standard.json'),common=data('category-catalog-common.json'),matches=data('category-matches.json')}={}){
+  const c={...product.category},issues=[];
+  const add=(code,message)=>issues.push({code,message});
+  const gender=product.gender;
+  const sourceGender=(product.sourceCategory||[]).some(x=>/^(WOMEN|여성)$/i.test(x))?'여성':(product.sourceCategory||[]).some(x=>/^(MEN|남성)$/i.test(x))?'남성':'';
+  if(!['남성','여성'].includes(gender))add('gender','성별을 확인해 주세요.');
+  if(sourceGender&&sourceGender!==gender)add('source-gender','공식 상품 경로와 입력한 성별이 다릅니다.');
+  const required={commonMiddle:'공통 중분류',commonSmall:'공통 소분류',channelMiddle:'롯데ON 중분류',channelSmall:'롯데ON 소분류'};
+  for(const [key,title] of Object.entries(required))if(!String(c[key]||'').trim())add('missing-'+key,title+'가 비어 있습니다.');
+  const commonMajor=c.commonMajor||gender+'의류',channelMajor=c.channelMajor||'브랜드'+gender+'의류';
+  let commonPath=[commonMajor,c.commonMiddle,c.commonSmall].filter(Boolean),channelPath=[channelMajor,c.channelMiddle,c.channelSmall,c.channelDetail].filter(Boolean);
+  let exactCommon=null,exactStandard=null,evidence='저장된 실제 목록';
+  if(!common||common.incomplete)add('common-catalog','공통분류 목록이 없거나 수집이 끝나지 않았습니다.');
+  else{
+    const groups=(common.genders||[]).filter(g=>g.gender===gender&&sameCategoryLabel(commonMajor,g.major));
+    const found=groups.flatMap(g=>(g.middles||[]).filter(m=>sameCategoryLabel(c.commonMiddle,m.middle)).flatMap(m=>(m.children||[]).filter(s=>sameCategoryLabel(c.commonSmall,s)).map(s=>[g.major,m.middle,s])));
+    exactCommon=found.length===1?found[0]:accessoryCommon(c);
+    if(!exactCommon)add('common-path','공통 대·중·소분류의 이름·코드·부모 경로가 저장 목록과 일치하지 않습니다.');
+    else commonPath=exactCommon;
+  }
+  if(!standard?.complete)add('standard-catalog','롯데ON 표준분류 목록 수집이 완료되지 않았습니다.');
+  else{
+    const paths=allLotteStandardPaths(standard).filter(p=>nodeMatches(channelMajor,p.major)&&nodeMatches(c.channelMiddle,p.middle)&&nodeMatches(c.channelSmall,p.small));
+    const found=paths.filter(p=>p.detail?nodeMatches(c.channelDetail,p.detail):!c.channelDetail);
+    if(found.length===1){
+      exactStandard=found[0];channelPath=[exactStandard.major.name,exactStandard.middle.name,exactStandard.small.name,exactStandard.detail?.name].filter(Boolean);
+      for(const level of ['major','middle','small','detail'])if(c.channelCodes?.[level]&&c.channelCodes[level]!==String(exactStandard[level]?.code||''))add('channel-code-'+level,'롯데ON '+({major:'대',middle:'중',small:'소',detail:'세'}[level])+'분류 이름과 코드가 다릅니다. 분류를 다시 확인해 주세요.');
+      const expected=commonFor(exactStandard,gender,common||{genders:[]});
+      if(expected&&exactCommon&&!sameCategoryLabel(exactCommon[2],expected.small))add('crosswalk','공통분류와 롯데ON 분류의 상품 유형이 다릅니다. 권장 공통분류: '+expected.small);
+    }else if(isMensUnderwear(product)&&['commonMajor','commonMiddle','commonSmall','channelMajor','channelMiddle','channelSmall'].every(k=>sameCategoryLabel(c[k]||(k==='commonMajor'?commonMajor:k==='channelMajor'?channelMajor:''),MENS_UNDERWEAR_CATEGORY[k]))&&!c.channelDetail&&!Object.values(c.channelCodes||{}).some(Boolean)){
+      channelPath=['남성의류','남성속옷','남성내의'];evidence='사용자가 확인한 남성내의 경로';
+    }else if(exactCommon&&verifiedAccessory(product,{...c,channelMajor},matches)){
+      if(Object.values(c.channelCodes||{}).some(Boolean))add('accessory-code','잡화의 저장된 선택 기록에는 코드 검증 근거가 없습니다. 분류 코드를 다시 확인해 주세요.');
+      evidence='판매처 선택 확인 기록';
+    }else if(paths.length&&!c.channelDetail&&paths.some(p=>p.detail))add('channel-detail','롯데ON 세분류가 필요한 경로입니다. 세분류를 선택해 주세요.');
+    else add('channel-path','롯데ON 대·중·소·세분류가 하나의 저장 경로와 일치하지 않습니다.');
+  }
+  const ready=issues.length===0;
+  const category={...c};
+  if(exactCommon)[category.commonMajor,category.commonMiddle,category.commonSmall]=exactCommon;
+  if(exactStandard){
+    Object.assign(category,{channelMajor:exactStandard.major.name,channelMiddle:exactStandard.middle.name,channelSmall:exactStandard.small.name,channelDetail:exactStandard.detail?.name||'',channelCodes:Object.fromEntries(['major','middle','small','detail'].map(k=>[k,exactStandard[k]?.code||'']))});
+  }
+  return {status:ready?'ready':'blocked',ready,summary:ready?'저장 목록 대조 통과 · 판매처에서 실제 선택 시 다시 확인합니다.':'상품분류 확인이 필요합니다.',issues,commonPath,channelPath,category,catalogDate:standard?.completedAt||standard?.collectedAt||'',scope:'성인 남녀 의류 및 개별 확인된 잡화 경로',evidence};
+}
+export function assertLotteCategory(product){
+  const result=validateLotteCategory(product);
+  if(!result.ready)throw Error(result.summary+' '+result.issues.map(x=>x.message).join(' '));
+  return result.category;
+}
