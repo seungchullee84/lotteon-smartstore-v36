@@ -375,3 +375,35 @@ test('캐시 결과도 다른 작업이 끝날 때까지 적용 대기로 표시
   assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });
+
+test('같은 상품의 판매처를 바꿔도 합성과 상태 확인을 이어가며 스마트스토어 사진을 교체하지 않는다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const {page,posts,pending,control,errors}=await fixture(browser);control.defer=true;
+  await page.locator('#openBackgroundRequest').click();await waitForPending(pending);
+  await page.locator('#closeBackground').click();
+  await page.evaluate(()=>selectRegistrationChannel('smartstore'));
+  control.defer=false;pending.shift()();
+  await page.waitForFunction(()=>document.querySelector('#backgroundStatus').textContent.includes('합성을 시작했습니다'));
+  assert.equal(posts.filter(item=>item.path==='/api/background-dispatch').length,1);
+  assert.equal(posts.filter(item=>item.path==='/api/background-cancel').length,0);
+  assert.equal(await page.locator('#backgroundProgress').isVisible(),true);
+  control.backgroundWork={...control.backgroundWork,status:'review',message:'완성본 검수 중'};
+  await page.evaluate(()=>refresh());
+  assert.match(await page.locator('#backgroundProgressHeading').textContent(),/완성본 검수/);
+  await page.locator('#backgroundProgressOpen').click();
+  assert.equal(await page.locator('#backgroundDialog').isVisible(),true);
+  assert.equal(await page.locator('#backgroundImageChoice').isDisabled(),true);
+  await page.locator('#closeBackground').click();
+  control.imageVersions={main:'new-lotte-composite'};
+  control.backgroundWork={...control.backgroundWork,status:'complete',message:'롯데 대표이미지에 적용했습니다.',elapsedMs:1000};
+  await page.evaluate(()=>refresh());
+  assert.equal(await page.locator('#backgroundProgressHeading').textContent(),'합성 완료');
+  assert.equal(await page.locator('#main').getAttribute('src'),null,'스마트스토어 화면에 롯데 대표사진 src를 쓰지 않는다');
+  assert.equal(await page.locator('#openBackgroundRequest').isDisabled(),true,'새 배경 합성은 롯데에서만 시작한다');
+  await page.evaluate(()=>selectRegistrationChannel('lotte'));
+  await page.waitForFunction(()=>!document.querySelector('#openBackgroundRequest').disabled);
+  assert.equal(posts.filter(item=>item.path==='/api/background-cancel').length,0);
+  assert.deepEqual(errors,[]);
+ }finally{await browser.close();}
+});

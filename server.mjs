@@ -36,6 +36,8 @@ import {verifyNaver,createKeywordOptimizer} from './naver-keywords.mjs';
 import {createBackgroundWorkflow} from './background-workflow.mjs';
 import {backgroundPrompt} from './background-prompt.mjs';
 import {createBackgroundRunner} from './background-runner.mjs';
+import {backgroundActionKind} from './background-action-policy.mjs';
+import {createPendingBackgroundApply} from './background-pending-apply.mjs';
 import {createReleaseTracker} from './app-release.mjs';
 import {startGithubSync} from './github-sync.mjs';
 import {startBenefitResearch} from './benefit-research.mjs';
@@ -102,11 +104,11 @@ let backgroundApiKey=await loadSmartstoreAIKey(dataRoot);
 const protectedBranding=brandingLock(dataRoot);
 const state={busy:false,phase:'idle',logs:[],product:null,folder:null,error:null,paused:null,revision:Date.now(),collectionInput:null,detailFallbackRequest:null,photoPreparation:null};
 let backgroundMutations=0;
-let backgroundRunner;
+let backgroundRunner,backgroundPendingApply;
 const backgroundRunnerSettings=await readFile(path.join(dataRoot,'background-runner-settings.json'),'utf8').then(JSON.parse).catch(error=>{if(error.code==='ENOENT')return {};throw error;});
-const backgroundWorkflow=createBackgroundWorkflow({getState:()=>({...state,busy:state.busy||backgroundMutations>0}),cacheRoot:path.join(dataRoot,'background-cache'),onInvalidate:()=>{void backgroundRunner?.cancel().catch(()=>{});}});
-backgroundRunner=createBackgroundRunner({root,nodePath:process.execPath,sandboxMode:backgroundRunnerSettings.sandboxMode||'workspace-write',onFailure:failure=>backgroundWorkflow.fail(failure),onExit:({jobId})=>backgroundWorkflow.fail({jobId,message:'Codex 합성이 적용 완료 전에 종료되었습니다. 현재 대표이미지는 유지됩니다. 다시 확인해 주세요.'})});
-const backgroundWorkflowEndpoints=new Set(['/api/background-selection','/api/background-prepare','/api/background-dispatch','/api/background-inspect','/api/background-result','/api/background-complete','/api/background-cancel']);
+const backgroundWorkflow=createBackgroundWorkflow({getState:()=>({...state,busy:state.busy||backgroundMutations>0}),cacheRoot:path.join(dataRoot,'background-cache'),onInvalidate:()=>{backgroundPendingApply?.cancel();void backgroundRunner?.cancel().catch(()=>{});}});
+backgroundPendingApply=createPendingBackgroundApply({workflow:backgroundWorkflow,onComplete:result=>log(result.message),onFailure:failure=>log(failure.message)});
+backgroundRunner=createBackgroundRunner({root,nodePath:process.execPath,sandboxMode:backgroundRunnerSettings.sandboxMode||'workspace-write',onFailure:failure=>{if(!backgroundPendingApply.has(failure.jobId))backgroundWorkflow.fail(failure);},onExit:({jobId})=>{if(!backgroundPendingApply.has(jobId))backgroundWorkflow.fail({jobId,message:'합성 작업 연결이 완료 전에 종료되었습니다. 현재 대표이미지는 유지했습니다. 다시 시도해 주세요.'});}});
 const newProductResearch=startNewProductResearch(root,{isBusy:()=>state.busy||state.photoPreparation?.status==='preparing'});
 const benefitResearch=startNewListingMonitor(root,{onSnapshot:website=>{void newProductResearch.observe(website);}});
 benefitResearch.state.folderResearch=newProductResearch.state;
@@ -200,9 +202,10 @@ function startNoticeMaterialReview(product,folder){
   if(!review||!current())return;
   // A cached result can arrive before collection finishes. Keep it until the same product is idle.
   while(state.busy&&current())await new Promise(resolve=>setTimeout(resolve,100));
-  if(await applyNoticeMaterialReview(product,folder,review,{signal:controller.signal,isCurrent:()=>current()&&!state.busy})){
+  backgroundMutations++;
+  try{if(await applyNoticeMaterialReview(product,folder,review,{signal:controller.signal,isCurrent:()=>current()&&!state.busy})){
    state.revision++;log('공식 고시 소재 자동 재판독 반영: '+product.material);
-  }
+  }}finally{backgroundMutations--;}
  }).catch(error=>{if(current())log('소재 자동 재판독 확인 필요: '+error.message);});
 }
 async function recoverCollectedSmartstoreMaterial(product,folder,signal){
@@ -231,7 +234,7 @@ function startPhotoColorDraft(product,folder){
 }
 function job(phase,fn){if(state.busy)throw Error('진행 중인 작업이 있습니다.');newProductResearch.pause();const controller=new AbortController();activeAbort=controller;state.busy=true;state.phase=phase;state.error=null;state.completedJob=null;if(phase==='smartstore-auto'){state.autoStep='collect';state.autoProgress=startSmartstoreProgress();}Promise.resolve().then(fn).then(()=>{state.phase=controller.signal.aborted?'stopped':'done';if(!controller.signal.aborted){state.completedJob=phase;if(phase==='smartstore-detail-only')log('상세설명 교체 완료 · 편집기에서 확인해 주세요. 상품 저장·등록은 하지 않았습니다.');}}).catch(e=>{state.error=controller.signal.aborted?null:e.message;if(state.photoPreparation?.status==='preparing')state.photoPreparation={...state.photoPreparation,status:controller.signal.aborted?'stopped':'needs-review',message:controller.signal.aborted?'사진 준비를 중단했습니다.':e.message};if(['PHOTO_ANALYSIS_REQUIRED','PHOTO_FOLDER_EMPTY'].includes(e.code)&&!controller.signal.aborted)state.photoPreparation={style:state.product?.style,status:e.code==='PHOTO_ANALYSIS_REQUIRED'?'needs-analysis':'missing',photoCount:e.photoCount||0,unknownCount:e.unknownCount||0,message:e.message};if(e.code==='DETAIL_SOURCE_MISSING'&&!controller.signal.aborted)state.detailFallbackRequest={input:state.collectionInput};state.phase=controller.signal.aborted?'stopped':'error';log(controller.signal.aborted?'작업을 중단했습니다.':e.message);}).finally(()=>{if(phase==='smartstore-auto')finishSmartstoreProgress(state.autoProgress,state.phase,state.error);state.busy=false;state.paused=null;activeAbort=null;});}
 const server=http.createServer(async(req,res)=>{
-  let backgroundMutation=false;
+  let backgroundMutation=false,backgroundSourceChange=false;
   try{
     const url=new URL(req.url,'http://localhost');
     if(req.headers.host!==`127.0.0.1:${server.address().port}`){res.writeHead(403);return res.end();}
@@ -336,9 +339,10 @@ const server=http.createServer(async(req,res)=>{
       res.writeHead(200,{'Content-Type':png?'image/png':'image/jpeg','Cache-Control':'no-store'});return res.end(bytes);
     }
     if(req.method==='POST'){
-      // Invalidate as soon as any other action starts, even before its body is
-      // read. A job that finishes before the AI response must still cancel it.
-      if(!backgroundWorkflowEndpoints.has(url.pathname)){backgroundMutation=true;backgroundMutations++;backgroundWorkflow.invalidate();}
+      // Other work only holds publication. Actual source-changing actions still
+      // invalidate before reading the body, including change-away-and-back.
+      const backgroundAction=backgroundActionKind(url.pathname);
+      if(backgroundAction!=='workflow'){backgroundMutation=true;backgroundMutations++;backgroundSourceChange=backgroundAction==='source-change';if(backgroundSourceChange)backgroundWorkflow.invalidate('품번 또는 사진을 변경하는 작업이 시작되어 이전 합성을 취소했습니다.');}
       const b=await body(req);
       if(url.pathname==='/api/background-cancel'){
         const result=backgroundWorkflow.cancel(b);
@@ -346,6 +350,14 @@ const server=http.createServer(async(req,res)=>{
         return json(res,200,result);
       }
       if(url.pathname==='/api/background-inspect')return json(res,200,backgroundWorkflow.inspect(b));
+      if(url.pathname==='/api/background-retry')return json(res,200,backgroundWorkflow.retry(b));
+      if(url.pathname==='/api/background-fail'){
+        backgroundWorkflow.inspect(b);
+        const reason=typeof b.reason==='string'?b.reason.replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,300):'';
+        if(!reason)throw Error('합성을 마치지 못한 구체적인 이유가 필요합니다.');
+        const message='합성 확인 필요: '+reason+' 원본과 현재 대표이미지는 유지했습니다.';
+        backgroundWorkflow.fail({jobId:b.jobId,message});log(message);return json(res,200,{ok:true,message});
+      }
       if(url.pathname==='/api/background-prepare'){
         const result=await backgroundWorkflow.prepare(b);
         return json(res,200,result.cached?result:{...result,prompt:backgroundPrompt(result,{root,nodePath:process.execPath})});
@@ -360,7 +372,7 @@ const server=http.createServer(async(req,res)=>{
         }catch(error){backgroundWorkflow.fail({jobId:b.jobId,message:error.message});throw error;}
       }
       if(url.pathname==='/api/background-complete'){
-        const result=backgroundWorkflow.complete(b);log(result.message);return json(res,200,result);
+        const result=backgroundWorkflow.complete(b);if(result.waiting)backgroundPendingApply.schedule(b);log(result.message);return json(res,200,result);
       }
       requireChannel(url.pathname.slice(5),b.channel);
       if(url.pathname==='/api/notice-region-text'){
@@ -886,7 +898,7 @@ const server=http.createServer(async(req,res)=>{
     }
     json(res,404,{error:'없는 경로'});
   }catch(e){json(res,400,{error:e.message});}
-  finally{if(backgroundMutation){backgroundMutations--;backgroundWorkflow.invalidate();}}
+  finally{if(backgroundMutation){backgroundMutations--;if(backgroundSourceChange)backgroundWorkflow.invalidate();}}
 });
 function prepareStartupTools(){
  if(process.platform!=='win32')return;
