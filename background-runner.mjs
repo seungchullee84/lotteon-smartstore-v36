@@ -38,8 +38,9 @@ async function killTree(child){
 }
 
 // Process exit is deliberately not an image-application success signal.
-export function createBackgroundRunner({root,nodePath,executable,resolveExecutableImpl=resolveExecutable,spawnImpl=spawn,killTreeImpl=killTree,onFailure=()=>{},onProgress=()=>{},onExit=()=>{},timeoutMs=600000,logLimitBytes=1048576}={}){
+export function createBackgroundRunner({root,nodePath,executable,resolveExecutableImpl=resolveExecutable,sandboxMode='workspace-write',spawnImpl=spawn,killTreeImpl=killTree,onFailure=()=>{},onProgress=()=>{},onExit=()=>{},timeoutMs=600000,logLimitBytes=1048576}={}){
  if(typeof root!=='string'||!root)throw Error('합성 작업 경로를 확인해 주세요.');
+ if(!['workspace-write','read-only','danger-full-access'].includes(sandboxMode))throw Error('허용된 Codex 실행 환경을 확인해 주세요.');
  if(!Number.isFinite(timeoutMs)||timeoutMs<=0||!Number.isSafeInteger(logLimitBytes)||logLimitBytes<1)throw Error('합성 작업 제한값을 확인해 주세요.');
  const jobsRoot=path.resolve(root,'data','background-jobs');
  let active=null,view={running:false,jobId:null,phase:'idle',message:''};
@@ -105,7 +106,7 @@ export function createBackgroundRunner({root,nodePath,executable,resolveExecutab
    const command=executable===undefined?await resolveExecutableImpl():executable;if(job.finished)throw Error('합성 작업이 취소되었습니다.');
    await mkdir(directory,{recursive:true});if(job.finished)throw Error('합성 작업이 취소되었습니다.');
    for(const name of ['stdout.jsonl','stderr.log'])job.logs.push(fs.openSync(path.join(directory,name),'w'));
-   const args=['exec','--ephemeral','--skip-git-repo-check','--sandbox','workspace-write','-c','sandbox_workspace_write.network_access=true','--json','--output-last-message',path.join(directory,'result.txt'),'-'];
+   const args=['exec','--ephemeral','--skip-git-repo-check','--sandbox',sandboxMode,...(sandboxMode==='workspace-write'?['-c','sandbox_workspace_write.network_access=true']:[]),'--json','--output-last-message',path.join(directory,'result.txt'),'-'];
    const env={...process.env};delete env.CODEX_THREAD_ID;
    const child=spawnImpl(command,args,{cwd:directory,env,windowsHide:true,shell:false,stdio:['pipe','pipe','pipe']});job.child=child;
    await new Promise((resolve,reject)=>{
