@@ -45,6 +45,10 @@ export function validateLotteCategory(product,{standard=data('category-catalog-s
   const sourceGender=(product.sourceCategory||[]).some(x=>/^(WOMEN|여성)$/i.test(x))?'여성':(product.sourceCategory||[]).some(x=>/^(MEN|남성)$/i.test(x))?'남성':'';
   if(!['남성','여성'].includes(gender))add('gender','성별을 확인해 주세요.');
   if(sourceGender&&sourceGender!==gender)add('source-gender','공식 상품 경로와 입력한 성별이 다릅니다.');
+  const title=String(product.rawName||product.name||'');
+  if(gender==='남성'&&/반팔/.test([title,...(product.sourceCategory||[])].join(' '))&&/긴팔/.test(c.channelMiddle||''))add('sleeve-conflict','반팔 상품이 긴팔 채널분류로 연결되어 있습니다. 반팔티셔츠 경로를 확인해 주세요.');
+  if(/조끼|베스트/.test(title)&&/패딩|다운|푸퍼/.test(title)&&c.channelSmall==='패딩/다운점퍼')add('vest-conflict','패딩 조끼가 점퍼로 연결되어 있습니다. 패딩조끼 경로를 확인해 주세요.');
+  if(isMensUnderwear(product)&&c.channelSmall!=='남성내의')add('underwear-conflict','확인된 남성 내의는 남성의류 → 남성속옷 → 남성내의 경로를 사용합니다.');
   const required={commonMiddle:'공통 중분류',commonSmall:'공통 소분류',channelMiddle:'롯데ON 중분류',channelSmall:'롯데ON 소분류'};
   for(const [key,title] of Object.entries(required))if(!String(c[key]||'').trim())add('missing-'+key,title+'가 비어 있습니다.');
   const commonMajor=c.commonMajor||gender+'의류',channelMajor=c.channelMajor||'브랜드'+gender+'의류';
