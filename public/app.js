@@ -225,18 +225,79 @@ $('style').addEventListener('keydown',event=>{
  event.preventDefault();
  if(!event.repeat)$('collect').click();
 });
-action('run',async()=>{await fillMissingLotteCategory();if(!$('form').reportValidity())return false;const f=new FormData($('form'));const p={...product};for(const key of ['name','gender','material','country','washing','manufactured','keywords'])p[key]=f.get(key).trim();p.consumerPrice=Number(f.get('consumerPrice'));p.colors=f.get('colors').split(',').map(x=>x.replace(/\s+/g,'')).filter(Boolean);p.sizes=f.get('sizes').split(',').map(x=>x.replace(/\s+/g,'')).filter(Boolean);p.category={...product.category,...Object.fromEntries(['commonMiddle','commonSmall','channelMiddle','channelSmall'].map(k=>[k,f.get(k).trim()]))};return post('run',{product:p,finalize:$('finalize').checked});});
-async function fillMissingLotteCategory(){
- if(!product||document.body.dataset.channel==='smartstore')return;
- const fields=['commonMiddle','commonSmall','channelMiddle','channelSmall'];
- const category=Object.fromEntries(fields.map(key=>[key,$('form').elements[key].value.trim()]));
- if(fields.every(key=>category[key]))return;
- const result=await post('lotte-category-suggest',{style:product.style,category});
- product.category={...product.category,...result.category};
- for(const key of fields){$('form').elements[key].value=result.category[key]||'';$('form').elements[key].classList.toggle('field-missing',!result.category[key]);}
- $('lotteCategorySuggestionStatus').textContent=result.message;
+action('run',async()=>{if(!await fillMissingLotteCategory()){$('lotteCategoryValidation').focus();return false;}if(!$('form').reportValidity())return false;const f=new FormData($('form'));const p={...product};for(const key of ['name','gender','material','country','washing','manufactured','keywords'])p[key]=f.get(key).trim();p.consumerPrice=Number(f.get('consumerPrice'));p.colors=f.get('colors').split(',').map(x=>x.replace(/\s+/g,'')).filter(Boolean);p.sizes=f.get('sizes').split(',').map(x=>x.replace(/\s+/g,'')).filter(Boolean);p.category={...product.category,...Object.fromEntries(['commonMiddle','commonSmall','channelMiddle','channelSmall'].map(k=>[k,f.get(k).trim()]))};return post('run',{product:p,finalize:$('finalize').checked});});
+const lotteCategoryFields=['commonMiddle','commonSmall','channelMiddle','channelSmall'];
+let lotteCategoryTimer=null,lotteCategoryRequest=0,lotteCategoryPending=false,lotteCategoryChecked='';
+function lotteCategorySnapshot(){
+ if(!product)return null;
+ const form=$('form');
+ return {style:product.style,sourceUrl:product.sourceUrl,input:$('style').value,gender:form.elements.gender.value,name:form.elements.name.value.trim(),category:{...product.category,...Object.fromEntries(lotteCategoryFields.map(key=>[key,form.elements[key].value.trim()]))}};
 }
-$('lotteCategorySuggest').onclick=async()=>{try{await fillMissingLotteCategory();}catch(error){$('lotteCategorySuggestionStatus').textContent=error.message;}};
+function renderLotteCategoryValidation(validation,status=validation?.status||'pending'){
+ const panel=$('lotteCategoryValidation'),snapshot=lotteCategorySnapshot(),category=snapshot?.category||{};
+ panel.dataset.status=status;
+ const label=status==='ready'?'저장 목록 대조 통과':status==='loading'?'상품분류 확인 중…':status==='pending'?'입력값 변경 · 다시 확인 중':status==='error'?'분류 확인 실패':'상품분류 확인 필요';
+ setText($('lotteCategoryValidationSummary'),label);
+ setText($('lotteCategoryValidationMessage'),validation?.summary||'현재 공통·채널 분류를 저장된 롯데 목록과 대조합니다.');
+ setText($('lotteCategoryCommonPath'),(validation?.commonPath||[category.commonMajor,category.commonMiddle,category.commonSmall]).map(value=>value||'미지정').join(' → '));
+ setText($('lotteCategoryChannelPath'),(validation?.channelPath||[category.channelMajor,category.channelMiddle,category.channelSmall,...(category.channelDetail?[category.channelDetail]:[])]).map(value=>value||'미지정').join(' → '));
+ const issues=validation?.issues||[],list=$('lotteCategoryValidationIssues');
+ if(list.dataset.issues!==JSON.stringify(issues)){
+  list.replaceChildren(...issues.map(issue=>{const item=document.createElement('li');item.textContent=issue.message;return item;}));list.dataset.issues=JSON.stringify(issues);
+ }
+ list.hidden=!issues.length;
+ setText($('lotteCategoryValidationScope'),(validation?.catalogDate?'목록 기준일 '+validation.catalogDate+' · ':'')+(validation?.scope?validation.scope+' · ':'')+'판매처의 실제 선택 결과는 입력 단계에서 다시 확인합니다.');
+}
+async function checkLotteCategory({fillMissing=false}={}){
+ clearTimeout(lotteCategoryTimer);
+ if(!product||activeChannel()!=='lotte')return false;
+ const snapshot=lotteCategorySnapshot(),signature=JSON.stringify(snapshot),request=++lotteCategoryRequest;
+ const current=()=>request===lotteCategoryRequest&&activeChannel()==='lotte'&&JSON.stringify(lotteCategorySnapshot())===signature;
+ lotteCategoryPending=true;$('lotteCategorySuggest').disabled=true;renderLotteCategoryValidation(null,'loading');
+ try{
+  const {input,...body}=snapshot;
+  const result=await post('lotte-category-suggest',{...body,validateOnly:!fillMissing});
+  if(!current())return false;
+  if(!result.validation||typeof result.validation.ready!=='boolean')throw Error('분류 사전 확인 결과를 받지 못했습니다. 다시 확인해 주세요.');
+  if(fillMissing&&result.category){
+   const category={...result.category};
+   for(const key of lotteCategoryFields){
+    category[key]=snapshot.category[key]||category[key]||'';
+    const field=$('form').elements[key];if(field.value!==category[key])field.value=category[key];
+    field.classList.toggle('field-missing',!category[key]);
+   }
+   product.category={...product.category,...category};
+   if(lotteCategoryFields.some(key=>category[key]!==result.category[key]))return await checkLotteCategory();
+  }
+  if(result.validation.ready&&result.validation.category)product.category={...product.category,...result.validation.category};
+  lotteCategoryChecked=JSON.stringify(lotteCategorySnapshot());
+  renderLotteCategoryValidation(result.validation);
+  setText($('lotteCategorySuggestionStatus'),fillMissing?result.message||'':'');
+  return result.validation.ready&&result.validation.status==='ready';
+ }catch(error){
+  if(current()){lotteCategoryChecked=signature;renderLotteCategoryValidation({summary:error.message,issues:[{code:'CHECK_FAILED',message:'분류 확인에 실패하여 상품 입력을 시작하지 않습니다. 다시 확인해 주세요.'}]},'error');}
+  return false;
+ }finally{if(request===lotteCategoryRequest){lotteCategoryPending=false;$('lotteCategorySuggest').disabled=false;}}
+}
+function scheduleLotteCategoryCheck(){
+ if(!product||activeChannel()!=='lotte')return;
+ const signature=JSON.stringify(lotteCategorySnapshot());
+ if(signature===lotteCategoryChecked)return;
+ clearTimeout(lotteCategoryTimer);lotteCategoryRequest++;lotteCategoryPending=false;$('lotteCategorySuggest').disabled=false;
+ renderLotteCategoryValidation(null,'pending');
+ lotteCategoryTimer=setTimeout(()=>void checkLotteCategory(),350);
+}
+async function fillMissingLotteCategory(){return checkLotteCategory({fillMissing:true});}
+$('lotteCategorySuggest').onclick=()=>{if(!lotteCategoryPending)void fillMissingLotteCategory();};
+$('form').addEventListener('input',event=>{
+ if(!product||!['name','gender',...lotteCategoryFields].includes(event.target.name))return;
+ const key=event.target.name;
+ if(key==='gender'||key.startsWith('common'))product.category={...product.category,commonMajor:''};
+ if(key==='gender'||key.startsWith('channel'))product.category={...product.category,channelMajor:'',channelDetail:'',channelCodes:{}};
+ scheduleLotteCategoryCheck();
+});
+$('form').addEventListener('change',event=>{if(event.target.name==='gender')scheduleLotteCategoryCheck();});
+$('style').addEventListener('input',()=>scheduleLotteCategoryCheck());
 function populate(p){p.country=['대한민국','한국','중국','베트남','방글라데시','미얀마','인도네시아','캄보디아','인도','태국','필리핀','파키스탄','스리랑카','말레이시아','일본','이탈리아','포르투갈','튀르키예','터키','미국','프랑스','대만','네팔','라오스'].includes(p.country)?p.country:'';product=p;const form=$('form');for(const key of ['name','gender','consumerPrice','material','country','washing','manufactured','keywords','templateHeadline'])setProductInput(form.elements[key],p[key]||'',p);setProductInput(form.elements.colors,p.colors.join(','),p);setProductInput(form.elements.sizes,p.sizes.join(','),p);for(const key of ['commonMiddle','commonSmall','channelMiddle','channelSmall'])setProductInput(form.elements[key],p.category[key]||'',p);$('source').textContent='품번 '+p.style+' · '+p.rawName.replace(/\[[^\]]*\]/g,'').replace(/변우석|문가영|박현지/g,'').trim();$('warnings').textContent=(p.fieldStatus?Object.entries(p.fieldStatus).map(([k,v])=>({material:'소재',country:'제조국',washing:'세탁방법',category:'상품분류'}[k]||k)+': '+v).join(' / ')+' — ':'')+p.warnings.join(' ');for(const k of ['material','washing'])form.elements[k].placeholder='확인 필요 — 공식 고시 원본과 대조';$('ocr').textContent=p.ocrText;if(activeChannel()==='lotte'){$('main').src='/image/main?t='+Date.now();renderExtraImages(p,true);}$('review').hidden=false;syncNoticeCopy();}
 const renderProduct=populate;
 function renderWashingIcons(p){
