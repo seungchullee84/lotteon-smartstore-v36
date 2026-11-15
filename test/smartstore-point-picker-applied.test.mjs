@@ -41,7 +41,7 @@ test('다른 품번·출처·상세해시 또는 원문 근거가 없는 적용 
   product.smartstoreDetail={...applied(),sellingPointSource:invalid};
   await writeFile(path.join(root,'selling-point-review.json'),JSON.stringify({...invalid,points}));
   await writeFile(path.join(root,'draft.json'),JSON.stringify({...invalid,officialDetailHash:invalid.detailHash,sellingPoints:points}));
-  const picker=await pointPicker(product,dataRoot,options);assert.equal(picker.candidates.some(point=>point.title==='탄탄한 착용감'),false,field);
+  const picker=await pointPicker(product,dataRoot,options);assert.equal(picker.candidates.some(point=>point.title==='포인트 있게 연출'),false,field);
  }
  product.smartstoreDetail=applied();product.smartstoreDetail.sellingPoints[2].evidence='현재 공식 원문에 없는 장점';
  const picker=await pointPicker(product,dataRoot,options);assert.equal(picker.candidates.some(point=>point.evidence==='현재 공식 원문에 없는 장점'),false);
@@ -51,7 +51,7 @@ test('상세이미지가 없는 상품은 텍스트 해시까지 일치할 때�
  options.sourceOverride.detailHash=null;product.smartstoreDetail.sellingPointSource.detailHash=null;
  assert.deepEqual(selectedTitles(await pointPicker(product,dataRoot,options)),points.map(point=>point.title));
  product.smartstoreDetail.sellingPointSource.textHash='old-text';
- const picker=await pointPicker(product,dataRoot,options);assert.equal(picker.candidates.some(point=>point.title==='탄탄한 착용감'),false);
+ const picker=await pointPicker(product,dataRoot,options);assert.equal(picker.candidates.some(point=>point.title==='포인트 있게 연출'),false);
 }));
 
 test('명시적으로 저장한 선택 순서를 유지하고 2~4개 제한도 그대로 검증한다',async()=>fixture(async({root,product,options,dataRoot})=>{

@@ -5,19 +5,34 @@ import {completeSellingPoints,officialSellingPoints,usableSellingPoints,friendly
 const hash=value=>createHash('sha256').update(value).digest('hex');
 const benefitTopics=[/부드|소프트|촉감|터치/,/편안|편하게|여유|넉넉/,/스타일링|코디|매치|레이어드/,/내구|오래\s*입/,/흡습|속건|통기|쾌적/,/보온|따뜻|포근/,/조절/,/수납|포켓/,/신축|유연|움직임/,/가벼|가볍|경량/,/수축|변형|워싱/];
 const topics=point=>benefitTopics.flatMap((pattern,index)=>pattern.test(point.title+' '+point.description)?[index]:[]);
+async function appliedPointSelection(product,identity,text,dataRoot){
+ const matches=record=>record?.style===identity.style&&record.sourceUrl===identity.sourceUrl&&record.detailHash===identity.detailHash&&(identity.detailHash||record.textHash===identity.textHash);
+ const usable=points=>Array.isArray(points)&&points.length>=2&&points.length<=4&&usableSellingPoints(points,text);
+ const detail=product.smartstoreDetail;
+ if(detail?.style===identity.style&&detail.sourceUrl===identity.sourceUrl&&matches(detail.sellingPointSource)&&usable(detail.sellingPoints))return detail.sellingPoints;
+ const root=path.join(dataRoot,'smartstore-details',identity.style);
+ const read=async name=>{try{return JSON.parse(await readFile(path.join(root,name),'utf8'));}catch(error){if(error.code==='ENOENT'||error instanceof SyntaxError)return null;throw error;}};
+ const review=await read('selling-point-review.json');
+ if(review?.status==='ready'&&matches(review)&&usable(review.points))return review.points;
+ const draft=await read('draft.json');
+ if(identity.detailHash&&matches({...draft,detailHash:draft?.officialDetailHash})&&usable(draft?.sellingPoints))return draft.sellingPoints;
+ return null;
+}
 export async function pointPicker(product,folder,{dataRoot,sourceOverride}={}){
  const source=sourceOverride||await officialPointSource(product,folder,product.officialDescription||'',{dataRoot});
  const text=source.text,detailHash=source.detailHash||null;
  const identity={style:product.style,sourceUrl:product.sourceUrl,detailHash,textHash:hash(text)};
  let selected;try{selected=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'selling-point-selection.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  const valid=selected?.style===product.style&&selected.sourceUrl===product.sourceUrl&&selected.detailHash===detailHash&&(detailHash||selected.textHash===identity.textHash)&&usableSellingPoints(selected.points,text);
+ const applied=await appliedPointSelection(product,identity,text,dataRoot);
  const seed=[];
  if(valid)seed.push(...selected.points);
+ if(applied)seed.push(...applied);
  for(const name of ['selling-point-candidates-reviewed.json','selling-point-image-review.json']){
   let reviewed;try{reviewed=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,name),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
   if(reviewed?.style===product.style&&reviewed.sourceUrl===product.sourceUrl&&reviewed.detailHash===detailHash&&usableSellingPoints(reviewed.points,text))seed.push(...reviewed.points);
  }
- const defaults=valid&&selected.points.length>=3?selected.points:completeSellingPoints(seed,text);
+ const defaults=valid&&selected.points.length>=3?selected.points:!valid&&applied?applied:completeSellingPoints(seed,text);
  const pool=[...defaults];
  for(const p of seed)if(!pool.some(q=>q.title===p.title||q.description===p.description))pool.push(p);
  for(const p of officialSellingPoints(text,{limit:5})){
