@@ -64,6 +64,7 @@ import {validateTemplateHeadline,templateHeadlineEdits} from './smartstore-templ
 import {suggestMissingLotteCategory} from './lotte-category-suggest.mjs';
 import {validateLotteCategory} from './lotte-category-validation.mjs';
 import {bridgeLotteCategory,requireLotteCategoryBridge} from './lotte-category-bridge.mjs';
+import {lotteCategoryChoices,createManualLotteCategory} from './lotte-category-choice.mjs';
 import {searchProductTags,saveSelectedProductTags,selectedProductTagResearch,removeProductTag} from './smartstore-tag-selection.mjs';
 import {applyCollectedMaterial,assertAdultProduct,collect,parseProductInput,buildKeywords,repairCategoryFields} from './product.mjs';
 import {LotteAutomation} from './automation.mjs';
@@ -249,6 +250,7 @@ const server=http.createServer(async(req,res)=>{
     if(!cookie)return json(res,403,{error:'시작 화면의 전용 링크로 접속해 주세요.'});
     if(['GET','HEAD'].includes(req.method)&&url.pathname==='/smartstore-brand-video.mp4')return await serveBrandVideo(req,res,dataRoot,url.searchParams.get('variant')==='women'?{filename:'women.mp4',expectedHash:WOMEN_VIDEO_HASH}:undefined);
     if(req.method==='GET'&&url.pathname==='/api/branding')return json(res,200,await protectedBranding.get());
+    if(req.method==='GET'&&url.pathname==='/api/lotte-category-choices')return json(res,200,lotteCategoryChoices());
     if(req.method==='GET'&&url.pathname==='/api/background-preview'){
       const bytes=backgroundWorkflow.preview({jobId:url.searchParams.get('jobId'),attempt:Number(url.searchParams.get('attempt'))});
       res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'no-store'});return res.end(bytes);
@@ -870,14 +872,17 @@ const server=http.createServer(async(req,res)=>{
       }
       if(url.pathname==='/api/lotte-category-suggest'){
         if(!state.product||b.style!==state.product.style)throw Error('현재 수집한 상품의 분류만 확인할 수 있습니다.');
+        if(b.sourceUrl!==undefined&&b.sourceUrl!==state.product.sourceUrl)throw Error('공식 상품 주소가 변경됐습니다. 현재 상품에서 분류를 다시 열어 주세요.');
         const category={...state.product.category};for(const key of ['commonMajor','commonMiddle','commonSmall','channelMajor','channelMiddle','channelSmall','channelDetail'])if(typeof b.category?.[key]==='string')category[key]=b.category[key].slice(0,200);
         if(b.category&&Object.hasOwn(b.category,'channelCodes'))category.channelCodes=b.category.channelCodes&&typeof b.category.channelCodes==='object'?Object.fromEntries(['major','middle','small','detail'].map(key=>[key,String(b.category.channelCodes[key]||'').slice(0,40)])):undefined;
+        if(b.category&&Object.hasOwn(b.category,'manualSelection'))category.manualSelection=b.category.manualSelection;
         const current={...state.product,category,...(typeof b.gender==='string'?{gender:b.gender.slice(0,20)}:{}),...(typeof b.name==='string'?{name:b.name.slice(0,300)}:{})};
-        const result=b.validateOnly===true?{category,filled:[],missing:[],message:'현재 입력한 분류를 확인했습니다.'}:suggestMissingLotteCategory(current);
+        if(b.manualChoice){if(b.sourceUrl!==state.product.sourceUrl)throw Error('현재 상품의 공식 주소를 확인해 주세요.');current.category=createManualLotteCategory(current,b.manualChoice);}
+        const result=b.manualChoice||b.validateOnly===true?{category:current.category,filled:[],missing:[],message:'현재 입력한 분류를 확인했습니다.'}:suggestMissingLotteCategory(current);
         const bridge=bridgeLotteCategory({...current,category:result.category});
         result.category=bridge.category;
         const validation=validateLotteCategory({...current,category:result.category});
-        return json(res,200,{...result,validation,bridge});
+        return json(res,200,{...result,validation,bridge,manualSupported:true});
       }
       if(url.pathname==='/api/lotte-current-brushed-category'){
         if(state.busy||!state.product||b.style!==state.product.style)throw Error('현재 상품과 작업 상태를 확인해 주세요.');
@@ -910,9 +915,9 @@ const server=http.createServer(async(req,res)=>{
       res.writeHead(200,{'Content-Type':'font/woff2','Cache-Control':'public, max-age=86400'});
       return res.end(font);
     }
-    if(req.method==='GET'&&['/','/app.js','/smartstore-progress.js','/smartstore-template-headline.js','/website-daily.js','/detail-preview.js','/two-choice.js','/smartstore-photo-review.js','/smartstore-photo-review.css','/style.css'].includes(url.pathname)){
+    if(req.method==='GET'&&['/','/app.js','/smartstore-progress.js','/smartstore-template-headline.js','/website-daily.js','/detail-preview.js','/two-choice.js','/smartstore-photo-review.js','/smartstore-photo-review.css','/lotte-category-picker.js','/style.css'].includes(url.pathname)){
       const name=url.pathname==='/'?'index.html':url.pathname.slice(1);
-      const types={'index.html':'text/html','app.js':'text/javascript','smartstore-progress.js':'text/javascript','smartstore-template-headline.js':'text/javascript','website-daily.js':'text/javascript','detail-preview.js':'text/javascript','two-choice.js':'text/javascript','smartstore-photo-review.js':'text/javascript','smartstore-photo-review.css':'text/css','style.css':'text/css'};
+      const types={'index.html':'text/html','app.js':'text/javascript','smartstore-progress.js':'text/javascript','smartstore-template-headline.js':'text/javascript','website-daily.js':'text/javascript','detail-preview.js':'text/javascript','two-choice.js':'text/javascript','smartstore-photo-review.js':'text/javascript','smartstore-photo-review.css':'text/css','lotte-category-picker.js':'text/javascript','style.css':'text/css'};
       res.writeHead(200,{'Content-Type':types[name]+'; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'none'"});return res.end(await readFile(path.join(root,'public',name)));
     }
     json(res,404,{error:'없는 경로'});

@@ -236,7 +236,7 @@ function lotteCategorySnapshot(){
 function renderLotteCategoryValidation(validation,status=validation?.status||'pending'){
  const panel=$('lotteCategoryValidation'),snapshot=lotteCategorySnapshot(),category=snapshot?.category||{};
  panel.dataset.status=status;
- const label=status==='ready'?'1차 기준 2차 연결 완료':status==='review'?'2차 연결 완료 · 세부 수정 가능':status==='loading'?'상품분류 연결 중…':status==='pending'?'입력값 변경 · 다시 연결 중':status==='error'?'분류 연결 확인 실패':'1차 상품분류 확인 필요';
+ const label=status==='manual'?'직접 선택한 분류 유지':status==='ready'?'1차 기준 2차 연결 완료':status==='review'?'2차 연결 완료 · 세부 수정 가능':status==='loading'?'상품분류 연결 중…':status==='pending'?'입력값 변경 · 다시 연결 중':status==='error'?'분류 연결 확인 실패':'1차 상품분류 확인 필요';
  setText($('lotteCategoryValidationSummary'),label);
  setText($('lotteCategoryValidationMessage'),validation?.summary||'현재 공통·채널 분류를 저장된 롯데 목록과 대조합니다.');
  setText($('lotteCategoryCommonPath'),(validation?.commonPath||[category.commonMajor,category.commonMiddle,category.commonSmall]).map(value=>value||'미지정').join(' → '));
@@ -258,6 +258,7 @@ async function checkLotteCategory({fillMissing=false}={}){
   const {input,...body}=snapshot;
   const result=await post('lotte-category-suggest',{...body,validateOnly:!fillMissing});
   if(!current())return false;
+  if(snapshot.category.manualSelection&&!result.manualSupported)throw Error('직접 선택한 분류를 유지하려면 최신 등록기 서버를 실행해 주세요. 현재 선택은 그대로 보관했습니다.');
   if(!result.bridge){
    // Static files can update before the running server is restarted. Preserve
    // the previously working input flow while that older response is in use.
@@ -279,7 +280,7 @@ async function checkLotteCategory({fillMissing=false}={}){
   if(fillMissing&&result.bridge.complete)product.category={...product.category,...result.category};
   lotteCategoryChecked=JSON.stringify(lotteCategorySnapshot());
   const display={...result.validation,summary:result.bridge.message,commonPath:[result.category.commonMajor,result.category.commonMiddle,result.category.commonSmall],channelPath:[result.category.channelMajor,result.category.channelMiddle,result.category.channelSmall,...(result.category.channelDetail?[result.category.channelDetail]:[])]};
-  renderLotteCategoryValidation(display,result.bridge.complete?(result.bridge.review||!result.validation.ready?'review':'ready'):'blocked');
+  renderLotteCategoryValidation(display,result.bridge.complete?(result.bridge.manual?'manual':result.bridge.review||!result.validation.ready?'review':'ready'):'blocked');
   setText($('lotteCategorySuggestionStatus'),fillMissing?result.bridge.message||'':'');
   return result.bridge.complete;
  }catch(error){
@@ -300,6 +301,7 @@ $('lotteCategorySuggest').onclick=()=>{if(!lotteCategoryPending)void fillMissing
 $('form').addEventListener('input',event=>{
  if(!product||!['name','gender',...lotteCategoryFields].includes(event.target.name))return;
  const key=event.target.name;
+ if(key==='gender'||lotteCategoryFields.includes(key)){delete product.category.manualSelection;if(typeof rememberProductField==='function')rememberProductField('lotteCategorySelection','');}
  if(key==='gender')product.category={...product.category,commonMajor:'',channelMajor:''};
  if(key==='gender'||key.startsWith('channel'))product.category={...product.category,channelDetail:'',channelCodes:{}};
  scheduleLotteCategoryCheck();
@@ -1271,7 +1273,7 @@ $('smartstoreAutoTags').onclick=async()=>{
 
 
 // Preserve deliberate edits per style; newly collected source images stay server-owned.
-const manualProductFields=new Set(['name','gender','consumerPrice','colors','sizes','material','country','manufactured','washing','keywords','commonMiddle','commonSmall','channelMiddle','channelSmall','smartstoreName','templateHeadline','templateHeadline1','templateHeadline2']);
+const manualProductFields=new Set(['name','gender','consumerPrice','colors','sizes','material','country','manufactured','washing','keywords','commonMiddle','commonSmall','channelMiddle','channelSmall','lotteCategorySelection','smartstoreName','templateHeadline','templateHeadline1','templateHeadline2']);
 const localProductEdits=new Map();
 let productInputComposition=null;
 for(const control of [$('form'),$('smartstoreName')]){
@@ -1321,14 +1323,20 @@ const populateWithManualEdits=populate;
 populate=function(p){
  if(product?.style!==p.style)productInputComposition=null;
  const fields=editedValuesFor(p),reviewed={...p,category:{...p.category}};
+ let manual=null,invalidManual=false;
+ if(fields.lotteCategorySelection){try{const choice=JSON.parse(fields.lotteCategorySelection);if(choice.version!==1||choice.style!==p.style||choice.sourceUrl!==(p.sourceUrl||'')||choice.gender!==(fields.gender||p.gender)||!choice.category)throw Error('changed product');manual=choice;}catch{invalidManual=true;}}
  for(const [key,value] of Object.entries(fields)){
+  if(key==='lotteCategorySelection'||invalidManual&&lotteCategoryFields.includes(key))continue;
   if(['commonMiddle','commonSmall','channelMiddle','channelSmall'].includes(key))reviewed.category[key]=value;
   else if(key==='colors'||key==='sizes')reviewed[key]=value.split(',').map(s=>s.replace(/\s+/g,'')).filter(Boolean);
   else reviewed[key]=key==='consumerPrice'&&value!==''?Number(value):value;
  }
+ if(manual)reviewed.category={...reviewed.category,...manual.category,manualSelection:manual};
+ else if(Object.hasOwn(fields,'lotteCategorySelection'))delete reviewed.category.manualSelection;
  if(Object.hasOwn(fields,'smartstoreName'))reviewed.smartstoreNameUserEdited=true;
  populateWithManualEdits(reviewed);
  for(const [key,value] of Object.entries(fields)){
+  if(key==='lotteCategorySelection'||invalidManual&&lotteCategoryFields.includes(key))continue;
   const field=key==='smartstoreName'?$('smartstoreName'):$('form').elements[key];if(field)setProductInput(field,value,p);
  }
  for(const key of Object.keys(fields))reviewedFields.add(key);
