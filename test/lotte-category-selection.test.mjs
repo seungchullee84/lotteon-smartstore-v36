@@ -2,6 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {LotteAutomation} from '../automation.mjs';
+import {mkdtemp,rm,readFile} from 'node:fs/promises';
+import path from 'node:path';
+import os from 'node:os';
+import {suggestMissingLotteCategory} from '../lotte-category-suggest.mjs';
+import {validateLotteCategory} from '../lotte-category-validation.mjs';
 
 async function botPage(browser){
  const page=await browser.newPage();page.setDefaultTimeout(1000);
@@ -89,4 +94,48 @@ test('added standard categories must match all levels in one row, including deta
  assert.equal(await page.evaluate(()=>window.adds),1,'labels spread across different rows are not an added path');
  await bot.addStandardCategory('브랜드여성의류','티셔츠/맨투맨','후드티셔츠','선택세분류');
  assert.equal(await page.evaluate(()=>window.adds),1,'the exact existing row is not added twice');
+});
+
+test('the real portal column layout matches names at 6/8/10/12 and checks leaf code',async t=>{
+ const browser=await chromium.launch({headless:true});t.after(()=>browser.close());const {page,bot}=await botPage(browser);
+ await page.setContent('<div id="div_input05_div_body_grd_Dspctgr"></div>');
+ await page.evaluate(()=>{
+  const grid=document.querySelector('div'),heads={4:'카테고리코드',6:'대분류',8:'중분류',10:'소분류',12:'세분류'};
+  for(const [i,label]of Object.entries(heads)){const h=document.createElement('div');h.id=grid.id+'_head_gridrow_-1_cell_-1_'+i;h.textContent=label;grid.append(h);}
+  const row=document.createElement('div');row.id=grid.id+'_body_gridrow_0';grid.append(row);
+  for(const [i,value]of Object.entries({4:'BC31030100',6:'브랜드남성의류',8:'긴팔티셔츠/맨투맨',10:'라운드넥티셔츠',12:''})){const c=document.createElement('div');c.id=row.id+'_cell_0_'+i;c.textContent=value;row.append(c);}
+ });
+ assert.equal(await bot.hasStandardCategory('브랜드남성의류','긴팔티셔츠/맨투맨','라운드넥티셔츠','',{small:'BC31030100'}),true);
+ assert.equal(await bot.hasStandardCategory('브랜드남성의류','반팔티셔츠','라운드넥반팔티'),false);
+ assert.equal(await bot.hasStandardCategory('브랜드남성의류','긴팔티셔츠/맨투맨','라운드넥티셔츠','',{small:'BC_WRONG'}),false);
+});
+
+test('double click waits for the channel form and refuses a different style',async t=>{
+ const browser=await chromium.launch({headless:true});t.after(()=>browser.close());const {page,bot}=await botPage(browser);
+ await page.setContent('<div id="row">123456(DT)</div><input id="edt_style_input" value="123456(DT)">');
+ await page.evaluate(()=>document.querySelector('#row').ondblclick=()=>setTimeout(()=>{const input=document.createElement('input');input.id='cbo_preSet_comboedit_input';input.value='신규 26년';document.body.append(input);},120));
+ await bot.openCategoryChannel(page.locator('#row'),{style:'123456'});
+ await page.locator('#edt_style_input').fill('654321(DT)');
+ await assert.rejects(bot.assertChannelStyle({style:'123456'}),/품번/);
+});
+
+test('243801 short sleeves retain the matching second category after retry, never stale long sleeves',async t=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'lotte-pair-'));t.after(()=>rm(root,{recursive:true,force:true}));
+ const p={style:'243801',gender:'남성',rawName:'면 라운드 3팩 반팔 기본 티셔츠',sourceCategory:['MEN','TOP','반팔티'],category:{}};
+ p.category=suggestMissingLotteCategory(p).category;const before=structuredClone(p.category);
+ assert.equal(validateLotteCategory(p).ready,true);assert.equal(p.category.channelSmall,'라운드넥반팔티');assert.notEqual(p.category.channelMiddle,'긴팔티셔츠/맨투맨');
+ const bot=new LotteAutomation(root,()=>{}),calls=[];let failures=0,adds=0;
+ bot.page={waitForTimeout:async()=>{}};bot.settle=async()=>{};bot.assertChannelStyle=async()=>{};
+ bot.similarCategoryClick=async(name,level,options)=>{calls.push({name,level,...options});if(level==='M'&&failures++===0)throw Error('목록 로딩 중');return name;};
+ bot.addStandardCategory=async(major,middle,small)=>{adds++;assert.equal(small,'라운드넥반팔티');assert.equal(middle,before.channelMiddle);};
+ await bot.selectMatchedChannelCategory(p);assert.equal(adds,1);assert.equal(calls.filter(x=>x.level==='L').length,2);assert.deepEqual(p.category,before);assert.ok(calls.every(x=>x.code));
+ const cache=JSON.parse(await readFile(path.join(root,'category-matches.json'),'utf8'));assert.equal(cache.matches[0].actual.small,'라운드넥반팔티');
+});
+
+test('ambiguous Add is never repeated and never learned as success',async t=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'lotte-pair-'));t.after(()=>rm(root,{recursive:true,force:true}));
+ const p={style:'243801',gender:'남성',rawName:'면 라운드 3팩 반팔 티셔츠',sourceCategory:['MEN','TOP','반팔티'],category:{}};p.category=suggestMissingLotteCategory(p).category;
+ const bot=new LotteAutomation(root,()=>{});bot.page={waitForTimeout:async()=>{}};bot.settle=async()=>{};bot.assertChannelStyle=async()=>{};bot.similarCategoryClick=async()=>{};let adds=0;
+ bot.addStandardCategory=async()=>{adds++;throw Error('추가 반영 확인 실패');};
+ await assert.rejects(bot.selectMatchedChannelCategory(p),/추가 반영/);assert.equal(adds,1);await assert.rejects(readFile(path.join(root,'category-matches.json')),e=>e.code==='ENOENT');
 });
