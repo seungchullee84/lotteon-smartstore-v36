@@ -292,8 +292,8 @@ $('lotteCategorySuggest').onclick=()=>{if(!lotteCategoryPending)void fillMissing
 $('form').addEventListener('input',event=>{
  if(!product||!['name','gender',...lotteCategoryFields].includes(event.target.name))return;
  const key=event.target.name;
- if(key==='gender'||key.startsWith('common'))product.category={...product.category,commonMajor:''};
- if(key==='gender'||key.startsWith('channel'))product.category={...product.category,channelMajor:'',channelDetail:'',channelCodes:{}};
+ if(key==='gender')product.category={...product.category,commonMajor:'',channelMajor:''};
+ if(key==='gender'||key.startsWith('channel'))product.category={...product.category,channelDetail:'',channelCodes:{}};
  scheduleLotteCategoryCheck();
 });
 $('form').addEventListener('change',event=>{if(event.target.name==='gender')scheduleLotteCategoryCheck();});

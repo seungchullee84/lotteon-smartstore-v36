@@ -1,7 +1,6 @@
 import {requireMaterialInput} from './notice.mjs';
-import {resolveCatalogCategory} from './category-catalog.mjs';
 import {assertLotteCategory,sameCategoryLabel} from './lotte-category-validation.mjs';
-import {categoryKey,loadCategoryCache,saveCategoryMatch} from './category-cache.mjs';
+import {categoryKey,saveCategoryMatch} from './category-cache.mjs';
 import {BrowserAutomation} from './browser-connection.mjs';
 import {createBrowserLoginStore} from './browser-login-store.mjs';
 import {tryLotteLogin,selectLottePage,lotteSessionExpired,LOTTE_SESSION_EXPIRED} from './browser-login.mjs';
@@ -9,7 +8,7 @@ import {openLotteRegistration} from './lotte-registration.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {OptionCoverage,optionKey} from './option-coverage.mjs';
-import {categoryAlternatives,similarCategory,channelCategoryPath,brushedTrainingCategory,mensTrainingCategory} from './category.mjs';
+import {similarCategory,brushedTrainingCategory} from './category.mjs';
 import { matchColor, validateStyle } from './product.mjs';
 import {buildDetailContent} from './detail-html.mjs';
 import {embeddedOfficialSections} from './smartstore-official-sections.mjs';
@@ -863,19 +862,24 @@ export class LotteAutomation extends BrowserAutomation {
     }
     this.check(); // No page-wheel fallback: only the option table's vertical scrollbar is used.
   }
-  async hasStandardCategory(major,middle,small,detail=''){
+  async hasStandardCategory(major,middle,small,detail='',codes={}){
     const grid=this.locator('div_input05_div_body_grd_Dspctgr');
-    return grid.evaluate((element,expected)=>{
+    return grid.evaluate((element,{expected,codes})=>{
+      const headers=new Map();
+      for(const el of element.querySelectorAll('[id]')){const m=el.id.match(/head_gridrow_-1_cell_-1_(\d+)$/);if(m)headers.set(el.textContent.trim(),Number(m[1]));}
+      const columns=['대분류','중분류','소분류','세분류'].map((name,i)=>headers.get(name)??i);
       const rows=[...element.querySelectorAll('[id]')].filter(e=>/body_gridrow_\d+(?:GridAreaContainerElement_inner)?$/.test(e.id));
       return rows.some(row=>{
-        const values=[...row.querySelectorAll('[id$="GridCellTextContainerElement"]')].map(e=>e.textContent.trim());
-        for(let i=0;i<values.length-2;i++)if(expected.slice(0,3).every((v,j)=>values[i+j]===v)&&String(values[i+3]||'')===expected[3])return true;
-        return false;
+        const values=new Map();
+        for(const cell of row.querySelectorAll('[id]')){const m=cell.id.match(/body_gridrow_\d+_cell_\d+_(\d+)(?:_GridCellTextContainerElement)?$/);if(m)values.set(Number(m[1]),cell.textContent.trim());}
+        if(!expected.every((v,i)=>String(values.get(columns[i])||'')===v))return false;
+        const terminalCode=codes.detail||codes.small,codeColumn=headers.get('카테고리코드');
+        return !terminalCode||codeColumn===undefined||values.get(codeColumn)===terminalCode;
       });
-    },[major,middle,small,detail||'']);
+    },{expected:[major,middle,small,detail||''],codes});
   }
-  async addStandardCategory(major,middle,small,detail=''){
-    const contains=()=>this.hasStandardCategory(major,middle,small,detail);
+  async addStandardCategory(major,middle,small,detail='',codes={}){
+    const contains=()=>this.hasStandardCategory(major,middle,small,detail,codes);
     if(await contains()){this.log('표준카테고리가 이미 추가되어 있습니다. 중복 추가를 건너뜁니다.');return;}
     await this.click(this.locator('div_input05_div_body_btn_Dspctgr_AddRow'));await this.settle();
     for(let n=0;n<40;n++){this.check();if(await contains()){this.log('표준카테고리 자동 추가 확인: '+[major,middle,small,detail].filter(Boolean).join(' > '));return;}await this.page.waitForTimeout(200);}
@@ -911,7 +915,7 @@ export class LotteAutomation extends BrowserAutomation {
       }
     }
     // Only selection is retried. Never repeat Add after an ambiguous response.
-    await this.addStandardCategory(c.channelMajor,c.channelMiddle,c.channelSmall,c.channelDetail);
+    await this.addStandardCategory(c.channelMajor,c.channelMiddle,c.channelSmall,c.channelDetail,c.channelCodes);
     await saveCategoryMatch(this.root,categoryKey(p),{major:c.channelMajor,middle:c.channelMiddle,small:c.channelSmall,detail:c.channelDetail||'',codes:c.channelCodes||{}},p.style);
     this.log('1차·2차 분류 매칭 및 실제 추가 확인 완료');
   }
@@ -988,7 +992,7 @@ export class LotteAutomation extends BrowserAutomation {
     const optionBlock=this.page.locator('[id$="div_input12_div_body"]').filter({visible:true}).last();
     if(resume&&await this.canResumeChannelOptions(p)){
       const c=p.category;
-      if(!await this.hasStandardCategory(c.channelMajor,c.channelMiddle,c.channelSmall,c.channelDetail)){
+      if(!await this.hasStandardCategory(c.channelMajor,c.channelMiddle,c.channelSmall,c.channelDetail,c.channelCodes)){
         const rows=await this.locator('div_input05_div_body_grd_Dspctgr').locator('[id]').evaluateAll(es=>es.filter(e=>/body_gridrow_\d+GridAreaContainerElement_inner$/.test(e.id)).length);
         if(rows)throw Error('기존 2차 분류가 현재 1차와 매칭되지 않습니다. 기존 입력을 보존했으니 분류를 확인해 주세요.');
         await this.selectMatchedChannelCategory(p);
