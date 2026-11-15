@@ -65,7 +65,7 @@ export function bridgeLotteCategory(product,{standard=loadCatalog(),common=read(
  if(!candidates.length){candidates=broaderCandidates(first,paths,product.gender);broad=true;}
  if(!candidates.length)return {complete:false,review:true,category,message:'2차 분류표가 없습니다. 분류표를 다시 불러와 주세요.'};
  candidates.sort((a,b)=>rank(b,product)-rank(a,product)||String(a.small.code).localeCompare(String(b.small.code)));
- const path=candidates[0],result=withPath(category,path),review=broad||candidates.length>1;
+ const path=candidates[0],result=withPath(category,path),review=broad||candidates.length>1&&!(sameCategoryLabel(before.channelMiddle,path.middle.name)&&sameCategoryLabel(before.channelSmall,path.small.name));
  return {complete:true,review,broad,category:result,message:broad?'1차 상품군의 기본 2차 분류 연결 · 세부 분류 수정 가능':review?'1차 기준 2차 분류 연결 · 세부 분류 수정 가능':'1차 기준 2차 분류 연결 완료'};
 }
 export function requireLotteCategoryBridge(product){

@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {validateLotteCategory} from '../lotte-category-validation.mjs';
+import {bridgeLotteCategory} from '../lotte-category-bridge.mjs';
 const base={style:'416972',sourceUrl:'https://example.invalid/416972',rawName:'여성 스웨트 팬츠',sourceCategory:['WOMEN','PANTS'],gender:'여성',name:'여성 스웨트 팬츠',category:{commonMiddle:'여성특수목적의류',commonSmall:'여성패션트레이닝복',channelMiddle:'트레이닝복',channelSmall:'트레이닝하의'}};
-test('complete categories are checked, blocked fields show reasons, and stale responses cannot overwrite changes',async t=>{
+test('first category supplies the second without a confidence stop, and stale responses cannot overwrite changes',async t=>{
  const browser=await chromium.launch({headless:true});t.after(()=>browser.close());const page=await browser.newPage();page.setDefaultTimeout(5000);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  const source=await readFile(new URL('../public/app.js',import.meta.url),'utf8');
@@ -13,13 +14,14 @@ test('complete categories are checked, blocked fields show reasons, and stale re
  const ids=['lotteCategoryValidation','lotteCategoryValidationSummary','lotteCategoryValidationMessage','lotteCategoryCommonPath','lotteCategoryChannelPath','lotteCategoryValidationScope','lotteCategorySuggestionStatus'];
  await page.setContent('<input id="style" value="416972"><form id="form">'+fields.map(n=>'<input name="'+n+'">').join('')+'</form><button id="lotteCategorySuggest"></button>'+ids.map(id=>'<div id="'+id+'"></div>').join('')+'<ul id="lotteCategoryValidationIssues"></ul>');
  let delay=false,release,requests=0;
- await page.exposeFunction('categoryRequest',async body=>{requests++;if(delay){delay=false;await new Promise(r=>release=r);}const p={...base,...body};return {category:body.category,validation:validateLotteCategory(p)};});
+ await page.exposeFunction('categoryRequest',async body=>{requests++;if(delay){delay=false;await new Promise(r=>release=r);}const p={...base,...body},bridge=bridgeLotteCategory(p);return {category:bridge.category,bridge,validation:validateLotteCategory({...p,category:bridge.category})};});
  await page.addScriptTag({content:'const $=id=>document.getElementById(id);let product='+JSON.stringify(base)+';const activeChannel=()=>"lotte",setText=(e,t)=>e.textContent=t;const post=(route,body)=>window.categoryRequest(body);'+code});
  await page.evaluate(fields=>{for(const n of fields)document.querySelector('[name="'+n+'"]').value=product.category[n]||product[n];},fields);
  assert.equal(await page.evaluate(()=>fillMissingLotteCategory()),true);assert.ok(requests>=1,'complete fields must still reach validation');
- assert.equal(await page.locator('#lotteCategoryValidationSummary').innerText(),'저장 목록 대조 통과');
- await page.locator('[name="channelMiddle"]').fill('없는 중분류');await page.waitForFunction(()=>document.getElementById('lotteCategoryValidation').dataset.status==='blocked');
- assert.match(await page.locator('#lotteCategoryValidationIssues').innerText(),/경로/);
+ assert.equal(await page.locator('#lotteCategoryValidationSummary').innerText(),'1차 기준 2차 연결 완료');
+ await page.locator('[name="channelMiddle"]').fill('없는 중분류');
+ assert.equal(await page.evaluate(()=>fillMissingLotteCategory()),true);
+ assert.equal(await page.locator('[name="channelMiddle"]').inputValue(),'트레이닝복');
  delay=true;const pending=page.evaluate(()=>checkLotteCategory({fillMissing:true}));
  await new Promise(resolve=>{const poll=()=>release?resolve():setTimeout(poll,10);poll();});
  await page.locator('[name="channelSmall"]').fill('직접 수정');release();await pending;
