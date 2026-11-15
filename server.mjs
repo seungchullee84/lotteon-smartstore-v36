@@ -115,6 +115,7 @@ benefitResearch.state.folderResearch=newProductResearch.state;
 if(process.env.REGISTER_RESTORE){const restored=path.resolve(process.env.REGISTER_RESTORE);if(restored.startsWith(dataRoot+path.sep)){state.product=JSON.parse(await readFile(restored,'utf8'));repairCategoryFields(state.product);if(state.product.categoryMatch){state.product.fieldStatus||={};state.product.fieldStatus.category=state.product.categoryMatch.status;}state.product.keywords??=buildKeywords(state.product);state.folder=path.dirname(restored);state.phase='done';state.revision++;}}
 if(state.product){try{assertAdultProduct(state.product);}catch(error){if(error.code!=='JUNIOR_PRODUCT')throw error;state.product=null;state.folder=null;state.phase='error';state.error=error.message;state.revision++;}}
 if(state.product){state.product=await productEdits.apply(state.product);await applyExtraExclusions(state.folder,state.product);}
+if(state.product)await backgroundWorkflow.restoreReview();
 if(state.product&&!materialAlreadySet(state.product)&&recoverUnmarkedNoticeMaterial(state.product.noticeAnalysis)){
  const product=state.product;
  product.material=product.noticeAnalysis.material;
@@ -245,6 +246,10 @@ const server=http.createServer(async(req,res)=>{
     if(!cookie)return json(res,403,{error:'시작 화면의 전용 링크로 접속해 주세요.'});
     if(['GET','HEAD'].includes(req.method)&&url.pathname==='/smartstore-brand-video.mp4')return await serveBrandVideo(req,res,dataRoot,url.searchParams.get('variant')==='women'?{filename:'women.mp4',expectedHash:WOMEN_VIDEO_HASH}:undefined);
     if(req.method==='GET'&&url.pathname==='/api/branding')return json(res,200,await protectedBranding.get());
+    if(req.method==='GET'&&url.pathname==='/api/background-preview'){
+      const bytes=backgroundWorkflow.preview({jobId:url.searchParams.get('jobId'),attempt:Number(url.searchParams.get('attempt'))});
+      res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'no-store'});return res.end(bytes);
+    }
     if(req.method==='GET'&&url.pathname==='/api/browser-login-status')return json(res,200,await browserLoginFor(url.searchParams.get('channel')||'lotte').status());
     if(req.method==='GET'&&url.pathname==='/api/naver-status')return json(res,200,{configured:!!(naverCredentials.clientId&&naverCredentials.clientSecret),...naverVerification,researchConfigured:state.product?researchForProduct(state.product).configured:false,lastAttempt:naverLastAttempt});
     if(req.method==='GET'&&url.pathname==='/api/state'){
@@ -351,6 +356,9 @@ const server=http.createServer(async(req,res)=>{
       }
       if(url.pathname==='/api/background-inspect')return json(res,200,backgroundWorkflow.inspect(b));
       if(url.pathname==='/api/background-retry')return json(res,200,backgroundWorkflow.retry(b));
+      if(url.pathname==='/api/background-apply-preview'){
+        const result=backgroundWorkflow.manualApply(b);if(result.waiting)backgroundPendingApply.schedule(b);log(result.message);return json(res,200,result);
+      }
       if(url.pathname==='/api/background-fail'){
         backgroundWorkflow.inspect(b);
         const reason=typeof b.reason==='string'?b.reason.replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,300):'';

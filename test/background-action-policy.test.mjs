@@ -10,7 +10,7 @@ test('product/photo changes, shutdown and unknown mutations invalidate old work 
  for(const action of ['collect','smartstore-auto','smartstore-import-photos','smartstore-import-photos-apply','smartstore-photo-review','smartstore-combine-photos','exclude-extra-image','shutdown','future-photo-replacement'])assert.equal(backgroundActionKind('/api/'+action),'source-change',action);
 });
 test('retry, explicit failure and completion use the guarded workflow path',()=>{
- for(const action of ['background-prepare','background-dispatch','background-inspect','background-result','background-retry','background-fail','background-complete','background-cancel','background-selection'])assert.equal(backgroundActionKind('/api/'+action),'workflow',action);
+ for(const action of ['background-prepare','background-dispatch','background-inspect','background-result','background-retry','background-fail','background-complete','background-cancel','background-selection','background-apply-preview'])assert.equal(backgroundActionKind('/api/'+action),'workflow',action);
 });
 test('worker instructions require corrective retries, current-attempt review and explicit failure reason',()=>{
  const prompt=backgroundPrompt({jobId:'job-123456',style:'416972',key:'main',sourcePath:'C:/source/main.jpg'},{root:"C:/folder's app",nodePath:'C:/node.exe'});
