@@ -23,11 +23,11 @@ async function fixture(t,{initial=base,catalogs}={}){
   return route.fulfill({contentType:'text/html',body:'<html><body data-channel="lotte"><input id="style" value="375908"><input id="smartstoreName"><form id="form">'+fields.map(n=>'<label>'+n+'<input name="'+n+'"></label>').join('')+section+'</form></body></html>'});
  });
  await page.goto('http://register.test/');
- let gate=null,release=null,legacy=false,failure=false;
+ let gate=null,release=null,legacy=false,failure=false,wrongSelection=false;
  await page.exposeFunction('categoryRequest',async (route,body)=>{
   requests.push({route,body});if(gate===route){gate=null;await new Promise(r=>release=r);}
   if(failure&&route==='lotte-category-selection')throw Error('연결이 끊어졌어요.');
-  let p={...base,...body};if(body.manualChoice)p.category=createManualLotteCategory(p,body.manualChoice,catalogs);
+  let p={...base,...body};if(body.manualChoice)p.category=createManualLotteCategory(p,wrongSelection?{common:['L0011','M0066','00856'],channel:['major','middle','small','detail'].map(key=>base.category.channelCodes[key]||'')}:body.manualChoice,catalogs);
   const bridge=bridgeLotteCategory(p,catalogs);return {category:bridge.category,bridge,validation:validateLotteCategory({...p,category:bridge.category},catalogs),manualSupported:!legacy,selectionSaved:!!body.manualChoice&&!legacy};
  });
  const source=await readFile(new URL('../public/app.js',import.meta.url),'utf8');
@@ -42,7 +42,7 @@ async function fixture(t,{initial=base,catalogs}={}){
  await page.evaluate(()=>checkLotteCategory({fillMissing:true}));
  const waitSaved=()=>page.waitForFunction(()=>!window.lotteCategoryInline.isEditing()&&!!product.category.manualSelection);
  const waitGate=async()=>{for(let i=0;i<100&&!release;i++)await new Promise(r=>setTimeout(r,10));assert.ok(release);};
- return {page,errors,requests,waitSaved,delay:(route='lotte-category-suggest')=>{gate=route;release=null;},waitGate,release:async()=>{await waitGate();release();},legacy:value=>legacy=value,fail:value=>failure=value,catalogFailure:value=>catalogFailure=value};
+ return {page,errors,requests,waitSaved,delay:(route='lotte-category-suggest')=>{gate=route;release=null;},waitGate,release:async()=>{await waitGate();release();},legacy:value=>legacy=value,fail:value=>failure=value,wrongSelection:value=>wrongSelection=value,catalogFailure:value=>catalogFailure=value};
 }
 const select=(page,label)=>page.getByLabel(label,{exact:true});
 const saves=f=>f.requests.filter(r=>r.route==='lotte-category-selection');
@@ -52,7 +52,7 @@ test('automatic defaults appear inline without any edit button or manual-save re
  assert.equal(await select(page,'1차 대분류').inputValue(),'L0011');
  assert.equal(await select(page,'1차 소분류').inputValue(),'00856');
  assert.equal(await select(page,'2차 소분류').inputValue(),base.category.channelCodes.small);
- assert.equal(await page.locator('#lotteCategoryEdit,#lotteCategoryPicker').count(),0);
+ assert.equal(await page.locator('#lotteCategoryEdit,#lotteCategoryPicker,.lotte-category-summary-footer,#lotteCategorySuggest,#lotteCategoryCodes,#lotteCategoryValidationScope').count(),0);
  assert.equal(await page.locator('.lotte-category-inline-select:visible').count(),6);
  assert.equal(saves(f).length,0,'showing defaults must not mark them as a user override');
  assert.equal(await page.evaluate(()=>product.category.manualSelection),undefined);
@@ -127,8 +127,21 @@ test('failure or missing acknowledgement keeps the old values and allows retry o
  await page.getByRole('button',{name:'다시 반영',exact:true}).click();
  await page.getByText('연결이 끊어졌어요.',{exact:true}).waitFor();
  assert.equal(await page.evaluate(()=>product.category.manualSelection),undefined);
- f.fail(false);await page.getByRole('button',{name:'다시 반영',exact:true}).click();await f.waitSaved();
+ f.fail(false);f.wrongSelection(true);await page.getByRole('button',{name:'다시 반영',exact:true}).click();
+ await page.getByText('선택한 분류와 응답이 달라 반영하지 않았어요. 다시 반영해 주세요.',{exact:true}).waitFor();
+ assert.equal(await page.evaluate(()=>product.category.manualSelection),undefined);
+ f.wrongSelection(false);await page.getByRole('button',{name:'다시 반영',exact:true}).click();await f.waitSaved();
  assert.equal(await select(page,'2차 소분류').inputValue(),alternate.small.code);
+});
+
+test('the full-name control supports direct clicks and keyboard selection',async t=>{
+ const f=await fixture(t),{page}=f,control=select(page,'2차 소분류');
+ const index=await control.evaluate((el,code)=>[...el.options].findIndex(option=>option.value===code),alternate.small.code);
+ await control.click();await page.keyboard.press('Home');
+ for(let i=0;i<index;i++)await page.keyboard.press('ArrowDown');
+ await page.keyboard.press('Enter');await f.waitSaved();
+ assert.equal(await page.locator('[name=channelSmall]').inputValue(),alternate.small.name);
+ assert.equal(await control.locator('..').locator('.lotte-category-inline-value').innerText(),alternate.small.name);
 });
 
 test('Start waits for selection acknowledgement and accepts the matching state-poll echo',async t=>{
