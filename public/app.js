@@ -688,7 +688,7 @@ function cancelBackgroundRequest(){
  syncBackgroundControls();
  if(!request)return backgroundCancellation;
  cancelledBackgroundRequests.add(request.requestId);
- if(backgroundFailure?.jobId===request.jobId){backgroundFailure.manualAvailable=false;syncBackgroundFailure();}
+ if(backgroundFailure&&backgroundFailure.jobId===request.jobId){backgroundFailure.manualAvailable=false;syncBackgroundFailure();}
  if(wasActive)showBackgroundProgress({...backgroundProgress,status:'cancelled',style:request.style,message:'상품·사진 또는 작업 조건이 바뀌어 합성 취소를 요청했습니다.'});
  backgroundCancellation=post('background-cancel',{requestId:request.requestId});
  backgroundCancellation.catch(error=>{
