@@ -240,6 +240,7 @@ function lotteCategorySnapshot(){
  return {style:product.style,sourceUrl:product.sourceUrl,input:$('style').value,gender:form.elements.gender.value,name:form.elements.name.value.trim(),category:{...product.category,...Object.fromEntries(lotteCategoryFields.map(key=>[key,form.elements[key].value.trim()]))}};
 }
 function renderLotteCategoryPath(element,values){
+ if(element.dataset.inlineCategory==='true')return;
  const path=values.map(value=>String(value||'미지정')),signature=JSON.stringify(path);
  if(element.dataset.path===signature)return;
  const names=path.map(value=>value.replace(/^[A-Z0-9]+\s*[:：]\s*/i,''));
@@ -254,12 +255,13 @@ function renderLotteCategoryPath(element,values){
  element.title=path.join(' → ');element.dataset.path=signature;
 }
 function renderLotteCategoryValidation(validation,status=validation?.status||'pending'){
+ if(window.lotteCategoryInline?.isEditing())return;
  const panel=$('lotteCategoryValidation'),snapshot=lotteCategorySnapshot(),category=snapshot?.category||{};
  panel.dataset.status=status;
  const label=status==='manual'?'직접 선택한 분류 유지':status==='ready'?'자동 연결 완료':status==='review'?'연결 완료 · 세부 확인':status==='loading'||status==='pending'?'분류 연결 중…':status==='error'?'연결 확인 필요':'1차 분류 선택 필요';
  setText($('lotteCategoryValidationSummary'),label);
  const message=$('lotteCategoryValidationMessage');
- setText(message,validation?.summary||'분류 수정에서 1차 분류를 선택해 주세요.');message.hidden=['ready','manual','loading','pending'].includes(status);
+ setText(message,validation?.summary||'대분류부터 소분류까지 화면에서 선택해 주세요.');message.hidden=['ready','manual','loading','pending'].includes(status);
  const commonPath=validation?.commonPath||[category.commonMajor,category.commonMiddle,category.commonSmall];
  const channelPath=validation?.channelPath||[category.channelMajor,category.channelMiddle,category.channelSmall,...(category.channelDetail?[category.channelDetail]:[])];
  renderLotteCategoryPath($('lotteCategoryCommonPath'),commonPath);
@@ -275,7 +277,7 @@ function renderLotteCategoryValidation(validation,status=validation?.status||'pe
 }
 async function checkLotteCategory({fillMissing=false}={}){
  clearTimeout(lotteCategoryTimer);
- if(!product||activeChannel()!=='lotte')return false;
+ if(!product||activeChannel()!=='lotte'||window.lotteCategoryInline?.isEditing())return false;
  const snapshot=lotteCategorySnapshot(),signature=JSON.stringify(snapshot),request=++lotteCategoryRequest;
  const current=()=>request===lotteCategoryRequest&&activeChannel()==='lotte'&&JSON.stringify(lotteCategorySnapshot())===signature;
  lotteCategoryPending=true;$('lotteCategorySuggest').disabled=true;renderLotteCategoryValidation(null,'loading');
@@ -304,6 +306,7 @@ async function checkLotteCategory({fillMissing=false}={}){
   }
   if(fillMissing&&result.bridge.complete)product.category={...product.category,...result.category};
   lotteCategoryChecked=JSON.stringify(lotteCategorySnapshot());
+  window.lotteCategoryInline?.showAutomatic(result.category);
   const display={...result.validation,summary:result.bridge.message,commonPath:[result.category.commonMajor,result.category.commonMiddle,result.category.commonSmall],channelPath:[result.category.channelMajor,result.category.channelMiddle,result.category.channelSmall,...(result.category.channelDetail?[result.category.channelDetail]:[])]};
   renderLotteCategoryValidation(display,result.bridge.complete?(result.bridge.manual?'manual':result.bridge.review||!result.validation.ready?'review':'ready'):'blocked');
   setText($('lotteCategorySuggestionStatus'),fillMissing?result.bridge.message||'':'');
@@ -314,14 +317,14 @@ async function checkLotteCategory({fillMissing=false}={}){
  }finally{if(request===lotteCategoryRequest){lotteCategoryPending=false;$('lotteCategorySuggest').disabled=false;}}
 }
 function scheduleLotteCategoryCheck(){
- if(!product||activeChannel()!=='lotte')return;
+ if(!product||activeChannel()!=='lotte'||window.lotteCategoryInline?.isEditing())return;
  const signature=JSON.stringify(lotteCategorySnapshot());
  if(signature===lotteCategoryChecked)return;
  clearTimeout(lotteCategoryTimer);lotteCategoryRequest++;lotteCategoryPending=false;$('lotteCategorySuggest').disabled=false;
  renderLotteCategoryValidation(null,'pending');
  lotteCategoryTimer=setTimeout(()=>void checkLotteCategory(),350);
 }
-async function fillMissingLotteCategory(){return checkLotteCategory({fillMissing:true});}
+async function fillMissingLotteCategory(){if(window.lotteCategoryInline&&!await window.lotteCategoryInline.beforeInput())return false;return checkLotteCategory({fillMissing:true});}
 $('lotteCategorySuggest').onclick=()=>{if(!lotteCategoryPending)void fillMissingLotteCategory();};
 $('form').addEventListener('input',event=>{
  if(!product||!['name','gender',...lotteCategoryFields].includes(event.target.name))return;
