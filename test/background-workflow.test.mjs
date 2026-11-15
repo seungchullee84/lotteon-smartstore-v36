@@ -213,6 +213,27 @@ test('busy episodes and product object/revision refreshes do not cancel an uncha
  await f.stage(request);f.state.busy=false;f.complete(request);assert.equal(f.workflow.status().status,'complete');
 });
 
+test('concurrent metadata writes may temporarily leave product.json blank, but idle identity is verified before applying',async t=>{
+ for(const mode of ['busy','photoPreparation'])await t.test(mode,async sub=>{
+  const f=await fixture(sub),request=await f.prepare(),file=path.join(f.folder,'product.json'),saved=await readFile(file);
+  if(mode==='busy')f.state.busy=true;else f.state.photoPreparation={status:'preparing'};
+  await writeFile(file,'');assert.equal(f.workflow.inspect({jobId:request.jobId}).sourceHash,digest(f.original));await f.stage(request);
+  assert.equal(f.complete(request).waiting,true);await f.unapplied();await assert.rejects(readdir(f.cacheRoot),{code:'ENOENT'});
+  await writeFile(file,saved);f.state.busy=false;f.state.photoPreparation=null;assert.equal(f.complete(request).ok,true);
+ });
+ const f=await fixture(t),request=await f.prepare(),file=path.join(f.folder,'product.json');f.state.busy=true;await writeFile(file,'');await f.stage(request);assert.equal(f.complete(request).waiting,true);
+ await writeFile(file,JSON.stringify({...f.state.product,sourceUrl:'https://example.test/changed'}));f.state.busy=false;assert.throws(()=>f.complete(request),stale);await f.unapplied();
+});
+
+test('busy metadata tolerance never bypasses original image or selection stamps and hashes',async t=>{
+ for(const mode of ['source','selection'])await t.test(mode,async sub=>{
+  const f=await fixture(sub),request=await f.prepare();f.state.busy=true;
+  if(mode==='source')await writeFile(path.join(f.folder,'main.jpg'),f.extra);
+  else await writeFile(path.join(f.folder,'background-selection.json'),JSON.stringify({style:f.state.product.style,key:'extra1'}));
+  assert.throws(()=>f.workflow.inspect({jobId:request.jobId}),stale);await assert.rejects(f.stage(request),stale);await f.unapplied();
+ });
+});
+
 test('cached applications also wait, while changed selection or preview still invalidates pending approval',async t=>{
  const f=await fixture(t),first=await f.prepare();await f.stage(first);f.complete(first);const prior=await readFile(path.join(f.folder,'background-image.json'),'utf8');
  const cached=await f.prepare();assert.equal(cached.cached,true);f.state.busy=true;

@@ -43,8 +43,13 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   if(s.invalid||s.epoch!==epoch||cancelled.has(s.requestId)||!stateMatches(s))throw changed();
   try{
    if(stamp(s.sourcePath)!==s.sourceStamp||hash(fs.readFileSync(s.sourcePath))!==s.sourceHash||stamp(s.selectionPath)!==s.selectionStamp||hash(fs.readFileSync(s.selectionPath))!==s.selectionHash)throw changed();
-   const disk=JSON.parse(fs.readFileSync(path.join(s.folder,'product.json'),'utf8'));
-   if(disk.style!==s.style||disk.sourceUrl!==s.sourceUrl)throw changed();
+   const current=getState();
+   // Other product metadata writes can briefly truncate this file. Applying
+   // always waits for idle, when the stored identity is checked strictly again.
+   if(!current.busy&&current.photoPreparation?.status!=='preparing'){
+    const disk=JSON.parse(fs.readFileSync(path.join(s.folder,'product.json'),'utf8'));
+    if(disk.style!==s.style||disk.sourceUrl!==s.sourceUrl)throw changed();
+   }
   }catch{throw changed();}
  }
  function snapshot({style,key,sourceUrl,revision,requestId}){
