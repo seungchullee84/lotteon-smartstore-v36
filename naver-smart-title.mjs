@@ -73,7 +73,9 @@ export function expandedTitleCandidates(product){
   words.push(alias,...sexes.map(sex=>sex+alias));
   for(const feature of featureWords)if(normalized.includes(feature)&&!alias.includes(feature))words.push(feature+alias);
  }
- const variantPairs=features.filter(f=>f.variants.length>1).flatMap(f=>f.variants.flatMap(v=>featureQueryForms(v).flatMap(form=>{
+ // Single-spelling facts such as 헨리넥 must also be queried; the optional
+ // candidate budget must not remove an evidenced product feature.
+ const variantPairs=features.flatMap(f=>f.variants.flatMap(v=>featureQueryForms(v).flatMap(form=>{
   const term=form+(aliases[0]||basic.kind);
   return sexes.length?[sexes[0]+term,term]:[term];
  })));
