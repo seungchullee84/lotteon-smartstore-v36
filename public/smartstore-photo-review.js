@@ -78,7 +78,7 @@
   if(grid.hasPointerCapture(pointerId))grid.releasePointerCapture(pointerId);
  }
  grid.addEventListener('pointerdown',event=>{
-  if(photoDrag||loading||event.button!==0||event.pointerType==='touch'||event.target.closest('label,input,select,button'))return;
+  if(photoDrag||loading||stale||event.button!==0||event.pointerType==='touch'||event.target.closest('label,input,select,button'))return;
   const card=event.target.closest('[data-photo-id]');
   const color=dragGroup(card);
   if(!color||card.querySelector('[data-field=role]').disabled)return;
@@ -86,6 +86,7 @@
   grid.setPointerCapture(event.pointerId);
   const {columnGap,rowGap}=getComputedStyle(grid);
   photoDrag={card,color,pointerId:event.pointerId,x:event.clientX,y:event.clientY,columnGap:(parseFloat(columnGap)||0)/2+1,rowGap:(parseFloat(rowGap)||0)/2+1};
+  updateBulkSelection();
  });
  grid.addEventListener('pointermove',event=>{
   const drag=photoDrag;
@@ -115,13 +116,15 @@
  grid.addEventListener('pointerup',event=>{
   const drag=photoDrag;
   if(drag?.pointerId!==event.pointerId)return;
-  const drop=drag.preview&&!loading?photoDropAt(event.clientX,event.clientY,drag):null;
+  const drop=drag.preview&&!loading&&!stale?photoDropAt(event.clientX,event.clientY,drag):null;
   clearPhotoDrag();
+  updateBulkSelection();
   if(!drop)return;
   const before=drop.after?drop.target.nextSibling:drop.target;
   if(before===drag.card||before===drag.card.nextSibling)return;
   const top=dialog.scrollTop;
   grid.insertBefore(drag.card,before);
+  manualLayout=true;
   updatePhotoSummary();
   dialog.scrollTop=top;
   rememberSelection();
@@ -130,14 +133,14 @@
  for(const type of ['pointercancel','lostpointercapture'])grid.addEventListener(type,event=>{
   if(photoDrag?.pointerId===event.pointerId)clearPhotoDrag();
  });
- dialog.addEventListener('close',clearPhotoDrag);
+ dialog.addEventListener('close',()=>{clearPhotoDrag();openSequence++;selectionAnchor=null;});
 
  const selectionStatus=dialog.querySelector('#manualPhotoSelectionStatus');
- function selectionSnapshot(){return {style:current.style,sourceUrl:current.sourceUrl,revision:current.revision,mainSelectionVersion:2,mainId:current.mainId,channel:'smartstore',items:[...grid.querySelectorAll(':scope > [data-photo-id]')].map(c=>({id:c.dataset.photoId,color:c.querySelector('[data-field=color]').value,role:c.querySelector('[data-field=role]').value,colorOverride:c.dataset.colorOverride==='true',roleOverride:c.dataset.roleOverride==='true'}))};}
- function queueDraft(payload){const version=++draftVersion;draftQueue=draftQueue.catch(()=>{}).then(async()=>{const r=await fetch('/api/smartstore-photo-review-draft',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const result=await r.json();if(!r.ok)throw Error(result.error);return result;});draftQueue.then(()=>{if(current?.style===payload.style&&version===draftVersion)selectionStatus.textContent='✓ 선택 저장됨 · 사진 반영을 눌러 주세요.';},e=>{if(current?.style===payload.style&&version===draftVersion)selectionStatus.textContent='선택 저장 확인 필요: '+e.message+' · 이 브라우저에는 임시 보관했습니다.';});return draftQueue;}
- function rememberSelection(){pendingDraft=selectionSnapshot();try{localStorage.setItem('smartstore.photo-selection.v1.'+current.style,JSON.stringify({...pendingDraft,savedAt:new Date().toISOString()}));}catch{}selectionStatus.textContent='선택 저장 중…';clearTimeout(draftTimer);draftTimer=setTimeout(()=>{draftTimer=null;const payload=pendingDraft;pendingDraft=null;queueDraft(payload);},400);}
+ function selectionSnapshot(){return {style:current.style,sourceUrl:current.sourceUrl,revision:current.revision,mainSelectionVersion:2,roleSelectionVersion:2,mainId:current.mainId,channel:'smartstore',items:photoCards().map(c=>({id:c.dataset.photoId,color:c.querySelector('[data-field=color]').value,role:c.querySelector('[data-field=role]').value,roleMode:c.dataset.roleMode==='manual'?'manual':'order',colorOverride:c.dataset.colorOverride==='true',roleOverride:c.dataset.roleOverride==='true'}))};}
+ function queueDraft(payload){const version=++draftVersion,session=openSequence;draftQueue=draftQueue.catch(()=>{}).then(async()=>{const r=await fetch('/api/smartstore-photo-review-draft',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const result=await r.json();if(!r.ok)throw Error(result.error);return result;});const active=()=>!stale&&dialog.open&&session===openSequence&&current?.style===payload.style&&current?.sourceUrl===payload.sourceUrl&&current?.revision===payload.revision&&version===draftVersion;draftQueue.then(()=>{if(active())selectionStatus.textContent='✓ 선택 저장됨 · 사진 반영을 눌러 주세요.';},e=>{if(active())selectionStatus.textContent='선택 저장 확인 필요: '+e.message+' · 이 브라우저에는 임시 보관했습니다.';});return draftQueue;}
+ function rememberSelection(){if(!current||stale)return;pendingDraft=selectionSnapshot();try{localStorage.setItem('smartstore.photo-selection.v1.'+current.style,JSON.stringify({...pendingDraft,savedAt:new Date().toISOString()}));}catch{}selectionStatus.textContent='선택 저장 중…';clearTimeout(draftTimer);draftTimer=setTimeout(()=>{draftTimer=null;const payload=pendingDraft;pendingDraft=null;if(payload&&!stale)queueDraft(payload);},400);}
  async function flushSelection(){if(draftTimer){clearTimeout(draftTimer);draftTimer=null;}if(pendingDraft){const payload=pendingDraft;pendingDraft=null;queueDraft(payload);}await draftQueue;}
- function editingDisabled(disabled){apply.disabled=disabled;for(const c of grid.querySelectorAll(':scope > [data-photo-id]')){const role=c.querySelector('[data-field=role]');role.disabled=disabled;const radio=c.querySelector('input[type=radio]');if(radio)radio.disabled=disabled||['care-label','excluded'].includes(role.value);c.querySelector('[data-field=color]').disabled=disabled||['care-label','excluded'].includes(role.value);}}
+ function editingDisabled(disabled){apply.disabled=disabled;for(const c of photoCards()){const role=c.querySelector('[data-field=role]');role.disabled=disabled;const radio=c.querySelector('input[type=radio]');if(radio)radio.disabled=disabled||['care-label','excluded'].includes(role.value);c.querySelector('[data-field=color]').disabled=disabled||['care-label','excluded'].includes(role.value);c.querySelector('[data-select-photo]').disabled=disabled;for(const b of c.querySelectorAll('[data-role-choice]'))b.disabled=disabled||current?.roleSelectionVersion!==2;}updateBulkSelection();}
 
  let pointData=null,pointRequest=0;
  async function loadPointChoices(style){
@@ -181,22 +184,24 @@
   grid.replaceChildren(fragment);
   updatePhotoSummary();
  }
- sortButton.onclick=()=>{if(!loading&&current)arrangePhotoGroups();};
+ sortButton.onclick=()=>{if(!loading&&!stale&&!photoDrag&&current){manualLayout=true;arrangePhotoGroups();rememberSelection();}};
 
  function updatePhotoSummary(){
   const cards=grid.querySelectorAll(':scope > [data-photo-id]');
   assignOrderedRoles();
   const counts=new Map();for(const card of cards){const color=dragGroup(card);if(color)counts.set(color,(counts.get(color)||0)+1);}
   for(const badge of dialog.querySelectorAll('#manualPhotoReviewLegend [data-color]')){const count=counts.get(badge.dataset.color)||0,label=count+'장'+(count?'':' · 사진 없음'),node=badge.querySelector('.photo-color-count');if(node.textContent!==label)node.textContent=label;}
+  updateBulkSelection();
  }
  const channel=()=>document.body.dataset.channel||document.querySelector('[data-channel].active')?.dataset.channel;
  function isSmartstore(){return typeof activeChannel==='function'?activeChannel()==='smartstore':channel()==='smartstore';}
  function sync(){button.hidden=!isSmartstore();if(!isSmartstore()&&dialog.open)dialog.close();}
+ document.addEventListener('register-state',event=>{const style=event.detail?.productStyle||event.detail?.product?.style;if(dialog.open&&current&&style&&style!==current.style){stale=true;clearPhotoDrag();clearTimeout(draftTimer);draftTimer=null;pendingDraft=null;editingDisabled(true);message.textContent=selectionStatus.textContent='품번이 변경됐습니다. 창을 닫고 현재 상품의 사진을 다시 열어 주세요.';}});
  let openAfterCollect=false;document.addEventListener('register-state',event=>{const state=event.detail;if(!isSmartstore())return;if(state.phase==='collect'&&state.busy)openAfterCollect=true;if(openAfterCollect&&!state.busy){openAfterCollect=false;if(state.phase==='done'&&state.productStyle&&!dialog.open)button.click();}});const styleInput=document.getElementById('style');styleInput?.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.isComposing&&isSmartstore()){event.preventDefault();event.stopImmediatePropagation();document.getElementById('collect')?.click();}},true);
  let automaticStamp='',automaticRequest=false;
  document.addEventListener('register-state',async event=>{
   const status=event.detail?.photoColorDraft;
-  if(!dialog.open||loading||!current||status?.style!==current.style)return;
+  if(!dialog.open||loading||stale||!current||status?.style!==current.style)return;
   if(['running','needs-review'].includes(status.status)){
    if(!draftTimer)selectionStatus.textContent=status.message;
    return;
@@ -207,7 +212,7 @@
   try{
    const response=await fetch('/api/smartstore-photo-review?channel=smartstore&style='+current.style);
    const data=await response.json();
-   if(!response.ok||!dialog.open||loading||photoDrag||current!==requested||data.revision!==current.revision)return;
+   if(!response.ok||!dialog.open||loading||stale||photoDrag||current!==requested||data.style!==current.style||data.sourceUrl!==current.sourceUrl||data.revision!==current.revision)return;
    automaticStamp=status.updatedAt;
    let changed=false;
    const cardsById=new Map([...grid.querySelectorAll(':scope > [data-photo-id]')].map(card=>[card.dataset.photoId,card]));
@@ -215,7 +220,7 @@
     const card=cardsById.get(item.id);
     if(!card||card.dataset.colorOverride==='true')continue;
     const color=card.querySelector('[data-field=color]'),role=card.querySelector('[data-field=role]');
-    if(card.dataset.roleOverride!=='true'&&item.role==='care-label'&&!['care-label','excluded'].includes(role.value)){
+    if(card.dataset.roleMode!=='manual'&&card.dataset.roleOverride!=='true'&&item.role==='care-label'&&!['care-label','excluded'].includes(role.value)){
      role.value='care-label';
      color.value='';
     }else if(!color.value&&item.color){
@@ -226,7 +231,7 @@
    }
    if(changed){
     const top=dialog.scrollTop;
-    arrangePhotoGroups();
+    if(manualLayout){markUnsorted();updatePhotoSummary();}else arrangePhotoGroups();
     dialog.scrollTop=top;
    }
    selectionStatus.textContent=status.message;
