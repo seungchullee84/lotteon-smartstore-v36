@@ -1,4 +1,15 @@
-export function assignPhotoRolesByOrder(items){const counts=new Map();for(const item of items){if(!item.color||['care-label','excluded'].includes(item.role))continue;const index=counts.get(item.color)||0;item.role=index===0?'front':index===1?'side':'detail';item.roleDefaulted=true;counts.set(item.color,index+1);}return items;}
+export function assignPhotoRolesByOrder(items){
+ const counts=new Map();
+ for(const item of items){
+  const manual=item.roleMode==='manual'&&roles.has(item.role);item.roleMode=manual?'manual':'order';
+  if(manual)item.roleDefaulted=false;
+  if(!item.color||['care-label','excluded'].includes(item.role))continue;
+  const index=counts.get(item.color)||0;
+  if(!manual){item.role=index===0?'front':index===1?'side':'detail';item.roleDefaulted=true;}
+  counts.set(item.color,index+1);
+ }
+ return items;
+}
 import {readFile,writeFile,mkdir,stat,rename} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash,randomUUID} from 'node:crypto';
@@ -15,6 +26,7 @@ const inventories=new Map(),thumbnails=new Map();
 const inventoryKey=(p,{dataRoot,photoRoots,desktop})=>JSON.stringify([path.resolve(dataRoot),p.style,p.sourceUrl,p.colors,photoRoots,desktop]);
 const stamp=s=>s.size+':'+s.mtimeMs+':'+s.ctimeMs;
 const roles=new Set(['front','back','side','detail','care-label','excluded']);
+const validRoleMode=item=>(item.roleMode===undefined||['manual','order'].includes(item.roleMode))&&(item.roleMode!=='manual'||roles.has(item.role));
 export function numberedPhotoColors(colors){const number=c=>{const n=Number(String(c).match(/^\s*(\d{1,2})(?!\d)/)?.[1]);return n>=1&&n<=99?n:100;};return [...colors].sort((a,b)=>number(a)-number(b));}
 const selectionFile=(dataRoot,p)=>{if(!/^\d{6}$/.test(p.style))throw Error('사진 품번을 확인해 주세요.');return path.join(dataRoot,'smartstore-photo-review-drafts',p.style+'.json');};
 async function draftFor(dataRoot,p){try{const d=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',p.style,'draft.json'),'utf8'));return d.sourceUrl===p.sourceUrl?d:{};}catch(e){if(e.code!=='ENOENT')throw e;return {};}}
@@ -24,7 +36,7 @@ export async function photoReview(product,{dataRoot,officialFolder,...options}){
  inventories.delete(key);inventories.set(key,inventory);while(inventories.size>3)inventories.delete(inventories.keys().next().value);
  const items=photos.map(p=>{const id=photoDigest(p.bytes),mapping=saved.find(r=>r.hash===id&&r.reviewed)||draft.photoMapping?.files?.find(r=>r.hash===id);const care=draft.careLabels?.some(r=>r.sourceHash===id);return {id:p.id,hash:id,name:p.name,main:false,color:mapping?.color||'',role:care?'care-label':roles.has(mapping?.role)?mapping.role:'',reviewed:!!mapping?.reviewed};});
  const applied=new Map((await readPhotoFileSelection(dataRoot,product)).map(item=>[item.id,item]));
- for(const item of items){const choice=applied.get(item.id);if(choice?.hash===item.hash){item.role=choice.role;item.color=choice.color;item.reviewed=true;}}
+ for(const item of items){const choice=applied.get(item.id);if(choice?.hash===item.hash){item.role=choice.role;item.color=choice.color;item.roleMode=choice.roleMode;item.reviewed=true;}}
  let mainId=null;
  try{mainId=(await selectedMainPhoto(photos,product,dataRoot)).id;}
  catch(error){if(!['MAIN_PHOTO_SELECTION_REQUIRED','MAIN_PHOTO_SELECTION_CHANGED'].includes(error.code))throw error;}
@@ -33,7 +45,7 @@ export async function photoReview(product,{dataRoot,officialFolder,...options}){
  if(automatic?.sourceUrl===product.sourceUrl&&JSON.stringify(automatic.colors)===JSON.stringify(product.colors))for(const item of items){const suggested=automatic.files.find(p=>p.hash===item.hash);if(suggested&&!item.reviewed){if(!item.color&&product.colors.includes(suggested.color)){item.color=suggested.color;item.colorSuggested=true;}if(suggested.careLabel){item.role='care-label';item.color='';item.labelSuggested=true;}}}
  let selection;try{selection=JSON.parse(await readFile(selectionFile(dataRoot,product),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  const match=selection?.sourceUrl===product.sourceUrl&&selection.revision===revision;
- if(match)for(const item of items){const saved=selection.items.find(i=>i.id===item.id);if(saved&&(saved.color===''||product.colors.includes(saved.color))&&(saved.role===''||roles.has(saved.role))){if(saved.color||saved.colorOverride){item.color=saved.color;item.colorSuggested=false;}if(saved.role&&(!item.labelSuggested||saved.roleOverride!==false||saved.colorOverride))item.role=saved.role;item.colorOverride=!!saved.colorOverride;item.roleOverride=saved.roleOverride??true;}}
+ if(match)for(const item of items){const saved=selection.items.find(i=>i.id===item.id);if(saved&&(saved.color===''||product.colors.includes(saved.color))&&(saved.role===''||roles.has(saved.role))){const manual=selection.roleSelectionVersion===2&&saved.roleMode==='manual'&&roles.has(saved.role);if(saved.color||saved.colorOverride){item.color=saved.color;item.colorSuggested=false;}if(saved.role&&(manual||!item.labelSuggested||saved.roleOverride!==false||saved.colorOverride))item.role=saved.role;item.roleMode=manual?'manual':'order';item.colorOverride=!!saved.colorOverride;item.roleOverride=saved.roleOverride??true;}}
  // Older drafts could contain an automatic filename-based choice. Only explicit drafts override an applied selection.
  if(match&&selection.mainSelectionVersion===2&&Object.hasOwn(selection,'mainId')&&(selection.mainId===null||items.some(p=>p.id===selection.mainId)))mainId=selection.mainId;for(const item of items)item.main=item.id===mainId;
  // This is a user-requested initial choice, not a confirmed angle analysis.
@@ -42,18 +54,18 @@ export async function photoReview(product,{dataRoot,officialFolder,...options}){
  const appliedOrder=draft.manualPhotoOrder?.style===product.style&&draft.manualPhotoOrder?.sourceUrl===product.sourceUrl?draft.manualPhotoOrder.groups.flatMap(group=>group.hashes):[];
  if(savedOrder||appliedOrder.length){const ranks=new Map((savedOrder||appliedOrder).map((id,index)=>[id,index]));items.sort((a,b)=>(ranks.get(savedOrder?a.id:a.hash)??Infinity)-(ranks.get(savedOrder?b.id:b.hash)??Infinity));}
  assignPhotoRolesByOrder(items);
- const result={mainId,style:product.style,sourceUrl:product.sourceUrl,colors:numberedPhotoColors(product.colors),colorChips:await photoReviewChips(product,officialFolder),revision,items,selectionSavedAt:match?selection.savedAt:null};inventory.review=result;return result;
+ const result={mainId,roleSelectionVersion:2,style:product.style,sourceUrl:product.sourceUrl,colors:numberedPhotoColors(product.colors),colorChips:await photoReviewChips(product,officialFolder),revision,items,selectionSavedAt:match?selection.savedAt:null};inventory.review=result;return result;
 }
 export async function savePhotoReviewDraft(product,input,options){
  const current=inventories.get(inventoryKey(product,options))?.review||await photoReview(product,options);
  if(input.channel!=='smartstore'||input.style!==current.style||input.sourceUrl!==current.sourceUrl||input.revision!==current.revision)throw Error('상품 또는 사진 폴더가 변경됐습니다. 다시 열어 주세요.');
  if(!Array.isArray(input.items)||input.items.length!==current.items.length)throw Error('사진 선택 목록을 다시 확인해 주세요.');
- const ids=new Set();for(const i of input.items){if(ids.has(i.id)||!current.items.some(p=>p.id===i.id)||(i.color!==''&&!current.colors.includes(i.color))||(i.role!==''&&!roles.has(i.role)))throw Error('사진 선택 값을 확인해 주세요.');ids.add(i.id);}
+ const ids=new Set();for(const i of input.items){if(ids.has(i.id)||!current.items.some(p=>p.id===i.id)||(i.color!==''&&!current.colors.includes(i.color))||(i.role!==''&&!roles.has(i.role))||!validRoleMode(i))throw Error('사진 선택 값을 확인해 주세요.');ids.add(i.id);}
  const mainId=Object.hasOwn(input,'mainId')?input.mainId:current.mainId;
  if(mainId!==null&&!current.items.some(p=>p.id===mainId))throw Error('대표사진 선택을 확인해 주세요.');
  assignPhotoRolesByOrder(input.items);
  const file=selectionFile(options.dataRoot,product),temporary=file+'.'+randomUUID()+'.tmp',savedAt=new Date().toISOString();
- await mkdir(path.dirname(file),{recursive:true});await writeFile(temporary,JSON.stringify({style:product.style,sourceUrl:product.sourceUrl,revision:current.revision,savedAt,mainSelectionVersion:2,mainId,items:input.items.map(({id,color,role,colorOverride,roleOverride})=>({id,color,role,colorOverride:!!colorOverride,roleOverride:roleOverride??true}))},null,2));await rename(temporary,file);current.mainId=mainId;for(const item of current.items)item.main=item.id===mainId;return {savedAt};
+ await mkdir(path.dirname(file),{recursive:true});await writeFile(temporary,JSON.stringify({style:product.style,sourceUrl:product.sourceUrl,revision:current.revision,savedAt,mainSelectionVersion:2,roleSelectionVersion:2,mainId,items:input.items.map(({id,color,role,roleMode,colorOverride,roleOverride})=>({id,color,role,roleMode,colorOverride:!!colorOverride,roleOverride:roleOverride??true}))},null,2));await rename(temporary,file);current.mainId=mainId;for(const item of current.items)item.main=item.id===mainId;return {savedAt};
 }
 export async function photoReviewThumbnail(product,id,options){
  const key=inventoryKey(product,options);if(!inventories.has(key))await photoReview(product,options);
@@ -68,7 +80,7 @@ export async function photoReviewThumbnail(product,id,options){
 export function validatePhotoReview(current,input){
  if(input.channel!=='smartstore'||input.style!==current.style||input.sourceUrl!==current.sourceUrl||input.revision!==current.revision)throw Error('상품 또는 사진 폴더가 변경됐습니다. 사진 목록을 다시 열어 주세요.');
  if(!Array.isArray(input.items)||input.items.length!==current.items.length)throw Error('모든 사진의 색상과 구도를 확인해 주세요.');
- const seen=new Set();for(const item of input.items){if(seen.has(item.id)||!current.items.some(p=>p.id===item.id)||!roles.has(item.role)||(!['care-label','excluded'].includes(item.role)&&!current.colors.includes(item.color)))throw Error('사진별 색상과 구도를 모두 선택해 주세요.');seen.add(item.id);}
+ const seen=new Set();for(const item of input.items){if(seen.has(item.id)||!current.items.some(p=>p.id===item.id)||!roles.has(item.role)||!validRoleMode(item)||(!['care-label','excluded'].includes(item.role)&&!current.colors.includes(item.color)))throw Error('사진별 색상과 구도를 모두 선택해 주세요.');seen.add(item.id);}
  assignPhotoRolesByOrder(input.items);
  const duplicates=new Map();for(const item of input.items){
   if(item.role==='excluded')continue;
