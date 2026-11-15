@@ -601,7 +601,10 @@ function showBackgroundProgress(work){
   backgroundTerminalTimer=setTimeout(syncBackgroundProgress,Math.max(0,backgroundTerminalNotice.expiresAt-Date.now()));
  }
  if(work.status==='error')syncBackgroundFailure(work);
- else if(!backgroundFailureApplying){backgroundFailure=null;syncBackgroundFailure();}
+ else if(work.status==='complete'&&work.manual&&backgroundFailure?.jobId===work.jobId){backgroundFailure=null;syncBackgroundFailure();}
+ else if(backgroundFailure&&work.jobId&&backgroundFailure.jobId!==work.jobId){
+  backgroundFailure.manualAvailable=false;backgroundFailure.manualUnavailableReason='새 합성 작업이 시작되어 이전 결과는 미리보기만 가능합니다.';syncBackgroundFailure();
+ }
  syncBackgroundProgress();
 }
 function dismissBackgroundTerminalNotice(){
@@ -635,7 +638,7 @@ function syncBackgroundFailure(work){
    try{const url=new URL(preview.url,location.href);return url.origin===location.origin&&url.pathname==='/api/background-preview'&&url.searchParams.get('jobId')===work.jobId&&Number.isInteger(preview.attempt)&&preview.attempt>0&&url.searchParams.get('attempt')===String(preview.attempt);}catch{return false;}
   });
   const previous=backgroundFailure;
-  backgroundFailure={...work,previews,selectedAttempt:previous?.jobId===work.jobId&&previews.some(preview=>preview.attempt===previous.selectedAttempt)?previous.selectedAttempt:previews.at(-1)?.attempt};
+  backgroundFailure={...work,previews,unavailableUrls:previous?.jobId===work.jobId?previous.unavailableUrls||[]:[],selectedAttempt:previous?.jobId===work.jobId&&previews.some(preview=>preview.attempt===previous.selectedAttempt)?previous.selectedAttempt:previews.at(-1)?.attempt};
  }
  $('backgroundFailureCard').hidden=!backgroundFailure;$('backgroundFailureReview').hidden=!backgroundFailure;
  if(!backgroundFailure)return;
@@ -647,16 +650,22 @@ function syncBackgroundFailure(work){
  }
  select.value=String(failure.selectedAttempt||'');select.disabled=backgroundFailureApplying||options.length<2;
  const reason=preview?.reason||failure.message||'실패 사유를 확인해 주세요.';
+ const unavailable=preview&&failure.unavailableUrls?.includes(preview.url);
+ setText($('backgroundFailureSource'),'실패 결과에 사용한 사진: '+(backgroundLabels[failure.key]||'원본 사진'));
  setText($('backgroundFailureReason'),reason);setText($('backgroundFailureSummary'),(preview?preview.attempt+'차 · ':'')+(failure.message||reason));
  setText($('backgroundFailureLabel'),preview?'실패 결과 보기':'실패 사유 보기');
  for(const id of ['backgroundFailedImage','backgroundFailureThumbnail']){
-  const img=$(id);img.hidden=!preview;
+  const img=$(id);img.hidden=!preview||!!unavailable;
   if(preview&&img.getAttribute('src')!==preview.url){img.src=preview.url;img.alt=preview.attempt+'차 검수에 실패한 합성 결과';}
   else if(!preview)img.removeAttribute('src');
  }
- $('backgroundFailureNoImage').hidden=!!preview;
- $('applyBackgroundFailure').hidden=!preview||!failure.manualAvailable;
- $('applyBackgroundFailure').disabled=backgroundFailureApplying||backgroundWorkActive||backgroundPreparing||!backgroundFailureIsCurrent(failure);
+ $('backgroundFailureNoImage').hidden=!!preview&&!unavailable;
+ setText($('backgroundFailureNoImage'),unavailable?'이 실패 결과의 미리보기를 더 이상 불러올 수 없습니다. 현재 원본으로 다시 합성해 주세요.':'이미지가 생성되기 전에 실패하여 표시할 결과가 없습니다.');
+ $('applyBackgroundFailure').hidden=!preview;
+ const canApply=failure.manualAvailable&&backgroundFailureIsCurrent(failure)&&!unavailable;
+ $('applyBackgroundFailure').disabled=backgroundFailureApplying||backgroundWorkActive||backgroundPreparing||!canApply;
+ $('backgroundFailureApplyStatus').hidden=!preview||!!canApply;
+ setText($('backgroundFailureApplyStatus'),unavailable?'미리보기를 불러올 수 없어 이 결과를 적용할 수 없습니다.':failure.manualUnavailableReason||'품번 또는 선택 사진이 달라져 적용할 수 없습니다. 현재 원본으로 다시 합성해 주세요.');
  setText($('applyBackgroundFailure'),backgroundFailureApplying?'선택한 결과 적용 중…':'선택한 결과를 대표이미지에 적용');
 }
 function syncBackgroundControls(){
@@ -679,7 +688,7 @@ function cancelBackgroundRequest(){
  syncBackgroundControls();
  if(!request)return backgroundCancellation;
  cancelledBackgroundRequests.add(request.requestId);
- if(backgroundFailure?.jobId===request.jobId){backgroundFailure=null;syncBackgroundFailure();}
+ if(backgroundFailure?.jobId===request.jobId){backgroundFailure.manualAvailable=false;syncBackgroundFailure();}
  if(wasActive)showBackgroundProgress({...backgroundProgress,status:'cancelled',style:request.style,message:'상품·사진 또는 작업 조건이 바뀌어 합성 취소를 요청했습니다.'});
  backgroundCancellation=post('background-cancel',{requestId:request.requestId});
  backgroundCancellation.catch(error=>{
@@ -723,13 +732,14 @@ function syncBackgroundImage(s){
  }
 }
 function syncBackgroundWork(s){
- if(backgroundFailure&&(backgroundFailure.style!==s.product?.style||backgroundFailure.sourceUrl!==s.product?.sourceUrl||s.backgroundSelection&&backgroundFailure.key!==s.backgroundSelection)){backgroundFailure=null;syncBackgroundFailure();}
+ if(backgroundFailure&&(backgroundFailure.style!==s.product?.style||backgroundFailure.sourceUrl!==s.product?.sourceUrl)){backgroundFailure=null;syncBackgroundFailure();}
  if(backgroundRequest&&(s.product?.sourceUrl!==backgroundRequest.sourceUrl||s.backgroundSelection&&s.backgroundSelection!==backgroundRequest.key))void cancelBackgroundRequest();
  if(!$('backgroundDialog').open){
   const next=s.backgroundSelection||'main';
   if(next!==selectedBackgroundImage){void cancelBackgroundRequest();selectedBackgroundImage=next;}
  }
  const work=s.backgroundWork;
+ if(work?.status==='error'&&work.style===s.product?.style&&work.sourceUrl===s.product?.sourceUrl)syncBackgroundFailure(work);
  if(backgroundRequest&&!backgroundPreparing&&work?.jobId&&work.requestId&&!cancelledBackgroundRequests.has(work.requestId)&&
   work.jobId!==backgroundRequest.jobId&&Number.isFinite(work.startedAt)&&work.startedAt>(backgroundRequest.startedAt||backgroundRequest.createdAt||Infinity)&&
   work.style===s.product?.style&&work.sourceUrl===s.product?.sourceUrl&&work.key===selectedBackgroundImage&&
@@ -759,6 +769,7 @@ function syncBackgroundWork(s){
 }
 function backgroundGuide(){return '선택한 사진: '+backgroundLabels[selectedBackgroundImage]+'. 합성 진행을 누르면 동일 원본의 완료된 결과를 확인하고, 새 합성이 필요하면 자동으로 진행합니다.';}
 function showBackgroundChoice(){
+ setText($('backgroundOriginalHeading'),'현재 선택 원본 · '+backgroundLabels[selectedBackgroundImage]);
  $('backgroundOriginal').src='/image/'+selectedBackgroundImage+'-original?t='+Date.now();
  $('backgroundOriginal').alt='합성할 '+backgroundLabels[selectedBackgroundImage]+' 원본';
  $('backgroundStatus').textContent=backgroundRequest?.message||backgroundProgress?.message||backgroundGuide();
@@ -776,9 +787,16 @@ function backgroundFailureIsCurrent(failure){
  return !!failure&&backgroundFailure===failure&&failure.style===product?.style&&failure.sourceUrl===product?.sourceUrl&&failure.key===selectedBackgroundImage&&backgroundInputMatchesProduct();
 }
 $('viewBackgroundFailure').onclick=()=>{
- if(!backgroundFailureIsCurrent(backgroundFailure))return;
+ if(!backgroundFailure||backgroundFailure.style!==product?.style||backgroundFailure.sourceUrl!==product?.sourceUrl)return;
  showBackgroundChoice();syncBackgroundControls();$('backgroundDialog').showModal();dismissBackgroundTerminalNotice();
  $('backgroundFailureReview').scrollIntoView({block:'start'});
+};
+for(const id of ['backgroundFailedImage','backgroundFailureThumbnail'])$(id).onerror=()=>{
+ if(!backgroundFailure)return;
+ const url=$(id).getAttribute('src');
+ if(!backgroundFailure.previews.some(preview=>preview.url===url))return;
+ if(!backgroundFailure.unavailableUrls.includes(url))backgroundFailure.unavailableUrls.push(url);
+ syncBackgroundFailure();
 };
 $('backgroundFailureAttempt').onchange=()=>{
  if(!backgroundFailure||backgroundFailureApplying)return;
