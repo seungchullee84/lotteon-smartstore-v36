@@ -1,10 +1,12 @@
 import * as one from './smartstore-template-one.mjs';
 import * as two from './smartstore-template-two.mjs';
 import {resolveDetailTemplate} from './smartstore-template-choice.mjs';
+import {assertSellingPointDisplay} from './smartstore-selling-points.mjs';
 export {TEMPLATE_ASSET_BASE,mannequinWearingNote,productSellingPoints} from './smartstore-template-one.mjs';
 export const TEMPLATE_ASSET_NAMES=[...new Set([...one.TEMPLATE_ASSET_NAMES,...two.TEMPLATE_ASSET_NAMES])];
 export const SMARTSTORE_DETAIL_TEMPLATE=one.SMARTSTORE_DETAIL_TEMPLATE;
 function selected(product,options){
+ if(product.smartstoreDetail?.sellingPoints?.length)assertSellingPointDisplay(product.smartstoreDetail.sellingPoints);
  const variant=resolveDetailTemplate(options.detailTemplate??product.detailTemplate);
  return {renderer:variant===1?one:two,variant,label:'템플릿 '+variant};
 }

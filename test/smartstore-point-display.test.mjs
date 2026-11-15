@@ -83,6 +83,7 @@ test('표시할 수 없는 선택 문구는 일부만 성공 처리하거나 기
  assert.equal(await readFile(path.join(root,'selling-point-selection.json'),'utf8'),before);
  const detail={sellingPoints:selection.points,photoCount:1};
  assert.throws(()=>assertRequiredSellingPoints(detail),/표시 문구/);
+ for(const detailTemplate of [1,2])for(const build of [buildSmartstoreDetail,smartstoreDetailDocument])assert.throws(()=>build({...base,detailTemplate,smartstoreDetail:{...detail,style:base.style}},{includeVideo:false}),/표시 문구.*일부만 적용하지 않았습니다/);
  const status=smartstorePreparationStatus({...base,smartstoreDetail:detail},{extras:[]});
  assert.equal(status.templateReady,false);assert.equal(status.sellingPointCount,2);assert.match(status.message,/3개 중 1개 표시 문구/);
  const reviewed=await reviewSellingPoints(base,options.sourceOverride.text,{dataRoot,detailHash:selection.detailHash,supplement:true});
