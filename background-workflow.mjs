@@ -6,7 +6,9 @@ import sharp from 'sharp';
 import {composeBackground,BACKGROUND_COMPOSITE_VERSION} from './background-composite.mjs';
 
 const keys=['main','extra1','extra2'];
-const maxAttempts=3;
+const maxAttempts=2;
+// Existing three-attempt results remain available for manual review.
+const maxHistoricalAttempts=3;
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const id=()=>randomBytes(12).toString('hex');
 const changed=()=>Error('품번·사진 선택·원본 또는 작업 상태가 변경되어 합성을 적용하지 않았습니다. 새로 요청해 주세요.');
@@ -21,7 +23,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
  let epoch=0,active=null,manualReview=null,view=null;
  const cancelled=new Set();
  const cacheSettings={version:1,composition:BACKGROUND_COMPOSITE_VERSION,generation:'builtin-reviewed-background-v1',width:1500,height:1500,format:'jpeg',quality:95};
- const timing=(s,terminal=false)=>({startedAt:s.startedAt,attempt:s.attempt,maxAttempts,...(terminal?{elapsedMs:Math.round(performance.now()-s.started)}:{})});
+ const timing=(s,terminal=false)=>({startedAt:s.startedAt,attempt:s.attempt,maxAttempts:Math.max(maxAttempts,s.attempt),...(terminal?{elapsedMs:Math.round(performance.now()-s.started)}:{})});
  const previewFile=(jobId,attempt,file)=>file==='background-preview-'+jobId+'-attempt-'+attempt+'.jpg'||attempt===1&&file==='background-preview-'+jobId+'.jpg';
  function persistReview(s,{allowed=!s.invalid,status=view?.status,message=view?.message}={}){
   if(!s.previews?.length)return;
@@ -180,7 +182,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   const current=getState();if(!current.busy&&current.photoPreparation?.status!=='preparing'){const disk=JSON.parse(fs.readFileSync(path.join(s.folder,'product.json'),'utf8'));if(disk.style!==s.style||disk.sourceUrl!==s.sourceUrl)throw changed();}
  }
  function previewBytes(s,attempt){
-  if(!Number.isInteger(attempt)||attempt<1||attempt>maxAttempts)throw Error('확인할 합성 회차를 선택해 주세요.');
+  if(!Number.isInteger(attempt)||attempt<1||attempt>maxHistoricalAttempts)throw Error('확인할 합성 회차를 선택해 주세요.');
   const entry=s.previews?.find(p=>p.attempt===attempt);
   if(!entry||!previewFile(s.jobId,attempt,entry.file)||!/^[a-f0-9]{64}$/.test(entry.hash))throw Error('저장된 합성 미리보기를 확인해 주세요.');
   const file=path.join(s.folder,entry.file),details=fs.lstatSync(file);
@@ -207,8 +209,8 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   const current=getState();if(!current.folder||!current.product)return {ok:true,restored:false};
   try{
    const record=JSON.parse(fs.readFileSync(path.join(current.folder,'background-review.json'),'utf8'));
-   if(record.version!==1||typeof record.allowed!=='boolean'||!validId(record.jobId)||!validId(record.requestId)||record.folder!==current.folder||!keys.includes(record.key)||!Number.isFinite(record.startedAt)||!Number.isInteger(record.attempt)||record.attempt<1||record.attempt>maxAttempts||!Array.isArray(record.previews)||!record.previews.length||record.previews.length>maxAttempts||!/^[a-f0-9]{64}$/.test(record.sourceHash)||!/^[a-f0-9]{64}$/.test(record.selectionHash)||typeof record.sourceStamp!=='string'||typeof record.selectionStamp!=='string')return {ok:true,restored:false};
-   const seen=new Set();for(const p of record.previews){if(!Number.isInteger(p.attempt)||p.attempt<1||p.attempt>maxAttempts||seen.has(p.attempt)||!previewFile(record.jobId,p.attempt,p.file)||!/^[a-f0-9]{64}$/.test(p.hash))return {ok:true,restored:false};seen.add(p.attempt);}
+   if(record.version!==1||typeof record.allowed!=='boolean'||!validId(record.jobId)||!validId(record.requestId)||record.folder!==current.folder||!keys.includes(record.key)||!Number.isFinite(record.startedAt)||!Number.isInteger(record.attempt)||record.attempt<1||record.attempt>maxHistoricalAttempts||!Array.isArray(record.previews)||!record.previews.length||record.previews.length>maxHistoricalAttempts||!/^[a-f0-9]{64}$/.test(record.sourceHash)||!/^[a-f0-9]{64}$/.test(record.selectionHash)||typeof record.sourceStamp!=='string'||typeof record.selectionStamp!=='string')return {ok:true,restored:false};
+   const seen=new Set();for(const p of record.previews){if(!Number.isInteger(p.attempt)||p.attempt<1||p.attempt>maxHistoricalAttempts||seen.has(p.attempt)||!previewFile(record.jobId,p.attempt,p.file)||!/^[a-f0-9]{64}$/.test(p.hash))return {ok:true,restored:false};seen.add(p.attempt);}
    const s={...record,epoch,invalid:!record.allowed,sourcePath:path.join(current.folder,record.key+'.jpg'),selectionPath:path.join(current.folder,'background-selection.json'),started:performance.now()-Math.max(0,Date.now()-record.startedAt)};
    assertPreviewContext(s);for(const p of s.previews)previewBytes(s,p.attempt);
    if(record.allowed)try{assertCurrent(s);}catch{s.invalid=true;persistReview(s,{allowed:false,status:record.status,message:record.message});}
