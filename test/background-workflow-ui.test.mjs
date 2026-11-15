@@ -296,9 +296,9 @@ test('합성 창을 닫아도 단계·경과 시간과 완료·실패 상태가 
   assert.match(await page.locator('#backgroundProgressHeading').textContent(),/배경 생성/);
   assert.match(await page.locator('#backgroundProgressElapsed').textContent(),/경과 1분 [12]초/);
   assert.doesNotMatch(await page.locator('#backgroundProgress').textContent(),/%/);
-  control.backgroundWork={...control.backgroundWork,attempt:2,maxAttempts:3,message:'배경 경계선을 보정하고 다시 생성합니다.'};
+  control.backgroundWork={...control.backgroundWork,attempt:2,maxAttempts:2,message:'배경 경계선을 보정하고 다시 생성합니다.'};
   await page.evaluate(()=>refresh());
-  assert.equal(await page.locator('#backgroundProgressHeading').textContent(),'합성 보정 재시도 중 · 2/3회');
+  assert.equal(await page.locator('#backgroundProgressHeading').textContent(),'합성 보정 재시도 중 · 2/2회');
   assert.match(await page.locator('#backgroundProgressMessage').textContent(),/배경 경계선/);
   assert.match(await page.locator('#backgroundProgressElapsed').textContent(),/경과 1분 [12]초/,'재시도에도 같은 시작 시각을 사용한다');
   await page.setViewportSize({width:390,height:700});

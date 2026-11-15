@@ -79,11 +79,28 @@ for(const [label,width,height] of [['portrait',1200,1500],['landscape',1500,1200
  assert.deepEqual(original,before);
 });
 
-test('invalid inputs, non-JPEG originals and non-square generated backgrounds are rejected',async()=>{
+for(const format of ['png','webp'])test(`${format} originals preserve the full source and input bytes`,async()=>{
+ const original=await sharp(await sourcePhoto(120,200)).toFormat(format,{lossless:true}).toBuffer(),before=Buffer.from(original);
+ const result=await composeBackground({original,generated:await background('#888888')}),meta=await sharp(result).metadata(),actual=await pixels(result);
+ assert.equal(meta.format,'jpeg');assert.equal(meta.width,1500);assert.equal(meta.height,1500);
+ const expected=await sharp(original).resize(1500,1500,{fit:'inside'}).raw().toBuffer({resolveWithObject:true});
+ const left=Math.floor((1500-expected.info.width)/2);
+ for(const [x,y] of [[20,20],[879,20],[20,1479],[879,1479],[450,750]])close(pixel(actual,left+x,y),pixel(expected,x,y));
+ assert.deepEqual(original,before);
+});
+
+test('transparent PNG is flattened onto white without black transparent regions',async()=>{
+ const original=await sharp({create:{width:120,height:200,channels:4,background:'#00000000'}}).png().toBuffer();
+ const actual=await pixels(await composeBackground({original,generated:await background('#888888')}));
+ close(pixel(actual,750,750),[255,255,255],2);
+});
+
+test('invalid inputs, unsupported originals and non-square generated backgrounds are rejected',async()=>{
  const original=await sourcePhoto(120,200),generated=await background('#888888');
- await assert.rejects(composeBackground({original:null,generated}),/JPEG 원본/);
+ await assert.rejects(composeBackground({original:null,generated}),/원본 사진/);
  await assert.rejects(composeBackground({original,generated:Buffer.alloc(0)}),/배경 이미지/);
- await assert.rejects(composeBackground({original:generated,generated}),/JPEG 사진/);
+ const unsupported=await sharp(original).tiff().toBuffer();
+ await assert.rejects(composeBackground({original:unsupported,generated}),/JPEG·PNG·WebP/);
  await assert.rejects(composeBackground({original:Buffer.from('broken JPEG'),generated}));
  await assert.rejects(composeBackground({original,generated:Buffer.from('broken PNG')}));
  const rectangle=await sharp({create:{width:120,height:200,channels:3,background:'#fff'}}).png().toBuffer();

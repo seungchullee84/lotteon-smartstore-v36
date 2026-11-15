@@ -22,14 +22,14 @@ async function fixture(t){
  const stage=()=>workflow.stage({jobId,generatedPath});
  const fail=()=>workflow.fail({jobId,message:'경계 품질을 확인해 주세요.'});
  const reviewFile=path.join(folder,'background-review.json');
- const three=async()=>{for(let n=1;n<=3;n++){await stage();if(n<3)workflow.retry({jobId,reason:n+'회차 경계 보완'});}fail();};
+ const two=async()=>{for(let n=1;n<=2;n++){await stage();if(n<2)workflow.retry({jobId,reason:n+'회차 경계 보완'});}fail();};
  const unapplied=()=>assert.rejects(readFile(path.join(folder,'background-image.json')),{code:'ENOENT'});
- return {root,folder,cacheRoot,source,outputs,state,options,workflow,jobId,stage,fail,three,reviewFile,unapplied};
+ return {root,folder,cacheRoot,source,outputs,state,options,workflow,jobId,stage,fail,two,reviewFile,unapplied};
 }
 
 test('failed attempts remain viewable with reasons; explicit approval applies the selected extra-source attempt only to main without automatic cache',async t=>{
- const f=await fixture(t);await f.three();const view=f.workflow.status();assert.equal(view.status,'error');assert.equal(view.manualAvailable,true);assert.deepEqual(view.previews.map(p=>p.attempt),[1,2,3]);assert(view.previews.every(p=>p.url.startsWith('/api/background-preview?')&&p.reason));
- for(let attempt=1;attempt<=3;attempt++)assert.deepEqual(f.workflow.preview({jobId:f.jobId,attempt}),f.outputs[attempt-1]);
+ const f=await fixture(t);await f.two();const view=f.workflow.status();assert.equal(view.status,'error');assert.equal(view.manualAvailable,true);assert.deepEqual(view.previews.map(p=>p.attempt),[1,2]);assert(view.previews.every(p=>p.url.startsWith('/api/background-preview?')&&p.reason));
+ for(let attempt=1;attempt<=2;attempt++)assert.deepEqual(f.workflow.preview({jobId:f.jobId,attempt}),f.outputs[attempt-1]);
  await f.unapplied();
  for(const userApproved of [undefined,false,'true',1])assert.throws(()=>f.workflow.manualApply({jobId:f.jobId,attempt:1,userApproved}),/승인/);
  const result=f.workflow.manualApply({jobId:f.jobId,attempt:1,userApproved:true}),entry=JSON.parse(await readFile(path.join(f.folder,'background-image.json')));
@@ -39,7 +39,7 @@ test('failed attempts remain viewable with reasons; explicit approval applies th
 });
 
 test('restart restores manual-only history, accepts old recipe previews, and never resurrects automatic completion or failure',async t=>{
- const f=await fixture(t);await f.three();const saved=JSON.parse(await readFile(f.reviewFile));saved.previews[1].recipe='old-preserved-recipe-v2';await writeFile(f.reviewFile,JSON.stringify(saved));
+ const f=await fixture(t);await f.two();const saved=JSON.parse(await readFile(f.reviewFile));saved.previews[1].recipe='old-preserved-recipe-v2';await writeFile(f.reviewFile,JSON.stringify(saved));
  const restored=createBackgroundWorkflow(f.options);assert.deepEqual(restored.restoreReview(),{ok:true,restored:true,jobId:f.jobId});assert.equal(restored.status().manualAvailable,true);
  assert.throws(()=>restored.inspect({jobId:f.jobId}),/변경/);assert.throws(()=>restored.complete({jobId:f.jobId,attempt:3,reviewed:true}),/변경/);
  const before=restored.status();restored.fail({jobId:f.jobId,message:'late old worker failure'});assert.deepEqual(restored.status(),before);

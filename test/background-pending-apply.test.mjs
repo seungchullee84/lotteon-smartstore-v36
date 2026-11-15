@@ -176,7 +176,7 @@ async function actualFixture(t,{manual=false}={}){
  const job=await workflow.prepare({style:product.style,key:'main',requestId:'request-pending-001'});
  const first=await workflow.stage({jobId:job.jobId,generatedPath});
  if(manual){
-  for(let attempt=2;attempt<=3;attempt++){
+  for(let attempt=2;attempt<=2;attempt++){
    workflow.retry({jobId:job.jobId,reason:'background seam needs review'});
    await workflow.stage({jobId:job.jobId,generatedPath});
   }
@@ -211,7 +211,7 @@ test('real workflow rechecks changed original bytes before a deferred applicatio
  assert.equal(f.clock.count(),0);
 });
 
-test('real manual queue applies approved attempt one after three failed previews and ignores the retired worker',async t=>{
+test('real manual queue applies approved attempt one after two failed previews and ignores the retired worker',async t=>{
  const f=await actualFixture(t,{manual:true});
  assert.equal(f.workflow.status().attempt,1);
  assert.equal(f.pending.has(f.job.jobId),true);
