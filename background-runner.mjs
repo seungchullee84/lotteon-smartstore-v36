@@ -1,0 +1,101 @@
+import fs from 'node:fs';
+import {mkdir} from 'node:fs/promises';
+import path from 'node:path';
+import {spawn,execFile} from 'node:child_process';
+
+const jobIdPattern=/^[a-zA-Z0-9_-]{8,100}$/;
+const failureMessage='배경 합성 작업을 마치지 못했습니다. 현재 상품을 확인한 뒤 다시 시도해 주세요.';
+async function killTree(child){
+ if(process.platform==='win32'&&Number.isInteger(child.pid)&&child.pid>0){
+  await new Promise((resolve,reject)=>execFile('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true},error=>error?reject(error):resolve()));
+ }else if(!child.kill('SIGTERM'))throw Error('작업 프로세스를 중단하지 못했습니다.');
+}
+
+// Process exit is deliberately not an image-application success signal.
+export function createBackgroundRunner({root,nodePath,executable='codex.exe',spawnImpl=spawn,killTreeImpl=killTree,onFailure=()=>{},onProgress=()=>{},onExit=()=>{},timeoutMs=600000,logLimitBytes=1048576}={}){
+ if(typeof root!=='string'||!root)throw Error('합성 작업 경로를 확인해 주세요.');
+ if(!Number.isFinite(timeoutMs)||timeoutMs<=0||!Number.isSafeInteger(logLimitBytes)||logLimitBytes<1)throw Error('합성 작업 제한값을 확인해 주세요.');
+ const jobsRoot=path.resolve(root,'data','background-jobs');
+ let active=null,view={running:false,jobId:null,phase:'idle',message:''};
+ const notify=(callback,value)=>{try{const result=callback(value);result?.catch?.(()=>{});}catch{}};
+ function update(job,phase,message){
+  if(active!==job||job.finished)return;
+  view={running:true,jobId:job.jobId,phase,message};
+  if(message!==job.lastProgress){job.lastProgress=message;notify(onProgress,{jobId:job.jobId,message});}
+ }
+ function finish(job,{code=null,signal=null,error=false}={}){
+  if(job.finished)return;
+  job.finished=true;clearTimeout(job.timer);
+  for(const fd of job.logs)try{fs.closeSync(fd);}catch{}
+  let phase=job.stopReason||((error||code!==0)?'failed':'exited');
+  const message=phase==='cancelled'?'배경 합성 작업을 중단했습니다.':phase==='timed-out'?'배경 합성 작업 시간이 초과되어 중단했습니다.':phase==='failed'?failureMessage:'생성 작업이 종료되었습니다. 적용 결과를 확인합니다.';
+  if(active===job){active=null;view={running:false,jobId:job.jobId,phase,code,message};}
+  if(phase==='failed'||phase==='timed-out')notify(onFailure,{jobId:job.jobId,code,message});
+  notify(onExit,{jobId:job.jobId,code,signal});job.resolveDone();
+ }
+ function progressLine(job,line){
+  if(job.finished||job.stopReason)return;
+  let event;try{event=JSON.parse(line);}catch{return;}
+  const item=event.item||{},kind=String(item.type||event.type||''),tool=String(item.name||item.tool||item.tool_name||'');
+  if(/image_generation|image_gen\.imagegen|imagegen/.test(kind+' '+tool))update(job,'running','배경 이미지를 생성하고 있습니다.');
+  else if(event.type==='turn.started')update(job,'running','배경 합성 작업을 시작했습니다.');
+  else if(event.type==='item.started'&&kind==='command_execution')update(job,'running','원본 보존과 적용을 위한 로컬 처리를 진행하고 있습니다.');
+ }
+ function consume(job,fd,kind,chunk){
+  if(job.finished)return;
+  const bytes=Buffer.isBuffer(chunk)?chunk:Buffer.from(chunk);
+  const count=Math.min(bytes.length,Math.max(0,logLimitBytes-job.written[kind]));
+  if(count){try{fs.writeSync(fd,bytes,0,count);job.written[kind]+=count;}catch{void stop(job,'failed');}}
+  if(kind!=='stdout')return;
+  const parts=bytes.toString('utf8').split('\n');
+  for(let i=0;i<parts.length;i++){
+   if(!job.skipLine){if(job.line.length+parts[i].length>65536){job.line='';job.skipLine=true;}else job.line+=parts[i];}
+   if(i<parts.length-1){if(!job.skipLine)progressLine(job,job.line);job.line='';job.skipLine=false;}
+  }
+ }
+ async function stop(job,reason){
+  if(job.finished)return {cancelled:false};
+  if(job.stopping)return job.stopping;
+  job.stopReason=reason;update(job,'cancelling',reason==='timed-out'?'시간이 초과되어 합성 작업을 중단합니다.':'배경 합성 작업을 중단하고 있습니다.');
+  if(!job.child){finish(job);return {cancelled:true};}
+  job.stopping=(async()=>{
+   try{await killTreeImpl(job.child);}catch{
+    if(!job.finished){notify(onFailure,{jobId:job.jobId,code:null,message:'합성 작업의 중단을 확인하지 못했습니다. 새 작업을 시작하지 않았습니다.'});throw Error('합성 작업의 중단을 확인하지 못했습니다.');}
+   }
+   let timer;
+   try{await Promise.race([job.done,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('합성 작업의 종료를 기다리고 있습니다.')),5000);timer.unref?.();})]);}
+   finally{clearTimeout(timer);}
+   return {cancelled:true};
+  })();
+  return job.stopping;
+ }
+ async function start({jobId,prompt}={}){
+  if(active)throw Error('이미 배경 합성 작업이 진행 중입니다.');
+  if(typeof jobId!=='string'||!jobIdPattern.test(jobId)||typeof prompt!=='string'||!prompt.trim())throw Error('합성 요청 번호와 내용을 확인해 주세요.');
+  const job={jobId,logs:[],written:{stdout:0,stderr:0},line:'',skipLine:false,finished:false};
+  job.done=new Promise(resolve=>{job.resolveDone=resolve;});active=job;update(job,'starting','배경 합성 작업을 준비하고 있습니다.');
+  const directory=path.join(jobsRoot,jobId);
+  try{
+   await mkdir(directory,{recursive:true});if(job.finished)throw Error('합성 작업이 취소되었습니다.');
+   for(const name of ['stdout.jsonl','stderr.log'])job.logs.push(fs.openSync(path.join(directory,name),'w'));
+   const args=['exec','--ephemeral','--skip-git-repo-check','--sandbox','workspace-write','-c','sandbox_workspace_write.network_access=true','--json','--output-last-message',path.join(directory,'result.txt'),'-'];
+   const env={...process.env};delete env.CODEX_THREAD_ID;
+   const child=spawnImpl(executable,args,{cwd:directory,env,windowsHide:true,shell:false,stdio:['pipe','pipe','pipe']});job.child=child;
+   await new Promise((resolve,reject)=>{
+    child.stdout?.on('data',chunk=>consume(job,job.logs[0],'stdout',chunk));
+    child.stderr?.on('data',chunk=>consume(job,job.logs[1],'stderr',chunk));
+    child.once('error',()=>{finish(job,{error:true});reject(Error('합성 작업 프로세스를 시작하지 못했습니다.'));});
+    child.once('close',(code,signal)=>{if(job.line&&!job.skipLine)progressLine(job,job.line);finish(job,{code,signal});});
+    child.stdin?.on('error',()=>{if(!job.finished)void stop(job,'failed').catch(()=>{});});
+    child.once('spawn',()=>{
+     if(job.stopReason){reject(Error('합성 작업이 취소되었습니다.'));return;}
+     update(job,'running','배경 합성 작업을 시작했습니다.');
+     try{child.stdin.end(prompt);resolve();}catch{void stop(job,'failed').catch(()=>{});reject(Error('합성 요청을 전달하지 못했습니다.'));}
+    });
+    job.timer=setTimeout(()=>{void stop(job,'timed-out').catch(()=>{});},timeoutMs);job.timer.unref?.();
+   });
+   return {started:true};
+  }catch(error){if(!job.child||job.finished)finish(job,{error:true});throw Error(job.stopReason==='cancelled'?'합성 작업이 취소되었습니다.':'합성 작업 프로세스를 시작하지 못했습니다.');}
+ }
+ return {start,cancel:()=>active?stop(active,'cancelled'):Promise.resolve({cancelled:false}),status:()=>({...view})};
+}
