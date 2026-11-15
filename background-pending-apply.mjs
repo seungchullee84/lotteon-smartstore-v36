@@ -8,7 +8,7 @@ export function createPendingBackgroundApply({workflow,onComplete=()=>{},onFailu
  function matches(record){
   const status=workflow.status();
   return status?.jobId===record.payload.jobId&&status.status==='applying-wait'&&
-   (record.payload.attempt===undefined||status.attempt===undefined||status.attempt===record.payload.attempt);
+   (record.expectedAttempt===undefined||status.attempt===record.expectedAttempt);
  }
  function cancel(){
   const record=pending;pending=null;
@@ -45,12 +45,12 @@ export function createPendingBackgroundApply({workflow,onComplete=()=>{},onFailu
  function schedule({jobId,reviewed,reuse,attempt}={}){
   if(typeof jobId!=='string'||!jobId||(reviewed!==true&&reuse!==true)||
    (attempt!==undefined&&(!Number.isInteger(attempt)||attempt<1)))throw Error('검수한 합성 적용 요청을 확인해 주세요.');
-  const record={payload:Object.freeze({jobId,reviewed,reuse,attempt}),timer:null};
+  const record={payload:Object.freeze({jobId,reviewed,reuse,attempt}),expectedAttempt:attempt??workflow.status()?.attempt,timer:null};
   if(!matches(record))return false;
   cancel();pending=record;
   try{arm(record);}catch(error){failure(record,error);return false;}
   return true;
  }
- function has(jobId){return pending?.payload.jobId===jobId&&matches(pending);}
+ function has(jobId){return !!pending&&pending.payload.jobId===jobId&&matches(pending);}
  return {schedule,cancel,has};
 }

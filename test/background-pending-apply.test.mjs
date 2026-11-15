@@ -62,8 +62,16 @@ test('cancel prevents an already queued callback from invoking the workflow',()=
  const f=mockFixture();f.pending.schedule({jobId:'job-old-001',reviewed:true});
  const oldCallback=f.clock.history[0].callback;
  assert.equal(f.pending.cancel(),true);assert.equal(f.pending.cancel(),false);
+ assert.equal(f.pending.has(),false);
  oldCallback();assert.equal(f.calls.length,0);assert.equal(f.clock.count(),0);
  assert.equal(f.completed.length,0);assert.equal(f.failed.length,0);
+});
+
+test('an omitted first-attempt field still binds approval to the attempt present when scheduled',()=>{
+ const f=mockFixture();f.pending.schedule({jobId:'job-old-001',reviewed:true});
+ f.setStatus({jobId:'job-old-001',status:'applying-wait',attempt:2});
+ f.clock.tick();
+ assert.equal(f.calls.length,0);assert.equal(f.clock.count(),0);assert.equal(f.failed.length,0);
 });
 
 test('superseded job callbacks cannot apply, clear or report failure for the new job',()=>{
