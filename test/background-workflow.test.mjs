@@ -80,10 +80,33 @@ test('reviewed cache survives a new workflow and collection folder without compo
  const restarted=createBackgroundWorkflow(f.options);
  const result=await restarted.prepare({style:f.state.product.style,key:'main',requestId:'request_restart_01'});
  assert.equal(result.cached,true);
- assert.equal(result.jobId,undefined);
+ assert.equal(result.applied,false);
+ assert.ok(result.jobId);
  assert.equal(f.calls(),1);
+ await f.unapplied();
+ const applied=restarted.complete({jobId:result.jobId,reuse:true});
+ assert.equal(applied.cached,true);
  assert.equal((await f.manifest()).outputHash,previous.outputHash);
  assert.deepEqual(await readFile(path.join(nextFolder,'main.jpg')),f.original);
+});
+
+test('a prepared cache hit stays unapplied if product or selection changes before reuse completion',async t=>{
+ for(const mode of ['style','selection','selectionRoundTrip'])await t.test(mode,async t=>{
+  const f=await fixture(t),request=await f.prepare();
+  await f.stage(request);f.complete(request);
+  const previous=await readFile(path.join(f.folder,'background-image.json'),'utf8');
+  const cached=await f.prepare();
+  assert.equal(cached.cached,true);assert.equal(cached.applied,false);
+  assert.equal(await readFile(path.join(f.folder,'background-image.json'),'utf8'),previous);
+  if(mode==='style')f.state.product.style='416971';
+  else{
+   f.workflow.select({style:f.state.product.style,key:'extra1'});
+   if(mode==='selectionRoundTrip')f.workflow.select({style:f.state.product.style,key:'main'});
+  }
+  assert.throws(()=>f.workflow.complete({jobId:cached.jobId,reuse:true}),stale);
+  assert.equal(await readFile(path.join(f.folder,'background-image.json'),'utf8'),previous);
+  assert.equal(f.calls(),1);
+ });
 });
 
 test('current product identity and stored official identity must still match at completion',async t=>{
@@ -176,6 +199,7 @@ test('cache corruption and identity tampering cause cache misses without changin
 
 test('review approval and a staged preview are required before completion',async t=>{
  const f=await fixture(t),request=await f.prepare();
+ assert.throws(()=>f.workflow.complete({jobId:request.jobId,reuse:true}),/재사용할 검수 결과가 없습니다/);
  assert.throws(()=>f.complete(request),/시각 검수/);
  await f.stage(request);
  for(const reviewed of [false,undefined,'true',1])assert.throws(()=>f.workflow.complete({jobId:request.jobId,reviewed}),/시각 검수/);
