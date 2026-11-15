@@ -63,6 +63,22 @@ for(const [label,width,height] of [['portrait',120,200],['landscape',200,120]])t
  assert.deepEqual(original,before);
 });
 
+for(const [label,width,height] of [['portrait',1200,1500],['landscape',1500,1200]])test(`${label}: source edge texture is not stretched into stripes across the new background`,async()=>{
+ const data=Buffer.alloc(width*height*3);
+ for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+  const shade=200+((width<height?y:x)%2?18:-18);
+  data.fill(shade,(y*width+x)*3,(y*width+x+1)*3);
+ }
+ const original=await sharp(data,{raw:{width,height,channels:3}}).jpeg({quality:100,chromaSubsampling:'4:4:4'}).toBuffer(),before=Buffer.from(original);
+ const result=await pixels(await composeBackground({original,generated:await background('#c8c8c8')}));
+ const values=[];
+ for(let offset=300;offset<1200;offset++)values.push(pixel(result,width<height?110:offset,width<height?offset:110)[0]);
+ assert(Math.max(...values)-Math.min(...values)<6,'fine source texture must not become long horizontal/vertical bands in otherwise smooth generated background');
+ const expected=await pixels(original);
+ close(pixel(result,750,750),pixel(expected,width<height?600:750,width<height?750:600),3);
+ assert.deepEqual(original,before);
+});
+
 test('invalid inputs, non-JPEG originals and non-square generated backgrounds are rejected',async()=>{
  const original=await sourcePhoto(120,200),generated=await background('#888888');
  await assert.rejects(composeBackground({original:null,generated}),/JPEG 원본/);
