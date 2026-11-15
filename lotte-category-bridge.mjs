@@ -30,6 +30,7 @@ function rank(path,product){
  for(const [input,target] of cues)if(input.test(text)&&target.test(leaf+' '+path.middle.name))score+=30;
  for(const [input,target] of [[/지워머|발열/,/발열내의/],[/타이즈|레깅스/,/타이즈/],[/드로즈/,/드로즈/],[/브라탑/,/브라탑/],[/브라렛/,/브라렛/],[/세트/,/세트/],[/백팩|배낭/,/백팩/],[/볼캡|야구/,/야구모자/],[/비니/,/비니/],[/버킷|벙거지/,/버킷/]])if(input.test(text)&&target.test(leaf))score+=40;
  if(/^(내의|드로즈|민소매|런닝\/나시|노와이어|삼각팬티|상하세트잠옷|홈웨어세트)$/.test(leaf))score+=4;
+ if(/타이즈|레깅스/.test(text)&&leaf==='타이즈')score+=15;
  if(/\(19\)/.test(leaf))score-=100;
  if(product.gender==='남성'&&/반팔/.test(text)&&/긴팔/.test(path.middle.name))score-=200;
  if(/조끼|베스트/.test(text)&&/점퍼/.test(leaf))score-=150;
