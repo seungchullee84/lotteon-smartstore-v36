@@ -68,7 +68,7 @@ test('invalid product identity, missing detail and cancellation do not trigger f
 });
 
 test('concurrent callers serialize the same identity and share verified originals',async t=>{
- const f=await fixture(t);const results=await Promise.all([prepareOfficialPalette(f.product,f.makePrepared(),f.options),prepareOfficialPalette(f.product,f.makePrepared(),f.options)]);assert.equal(f.calls,1);assert.equal(f.downloads,2);assert.equal(results[0].filled.length,2);assert.equal(results[1].reused.length,2);
+ const f=await fixture(t);const results=await Promise.all([prepareOfficialPalette(f.product,f.makePrepared(),f.options),prepareOfficialPalette(f.product,f.makePrepared(),f.options)]);assert.equal(f.calls,1);assert.equal(f.downloads,2);assert.deepEqual(results.map(result=>[result.filled.length,result.reused.length]).sort((a,b)=>a[0]-b[0]),[[0,2],[2,0]]);assert(results.every(result=>result.pending.length===0));
 });
 
 test('different official URLs with identical bytes cannot mark two colors complete, including an already reused cache image',async t=>{
