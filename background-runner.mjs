@@ -5,6 +5,32 @@ import {spawn,execFile} from 'node:child_process';
 
 const jobIdPattern=/^[a-zA-Z0-9_-]{8,100}$/;
 const failureMessage='배경 합성 작업을 마치지 못했습니다. 현재 상품을 확인한 뒤 다시 시도해 주세요.';
+const executableMessage='Codex 실행 파일을 찾지 못했습니다. Codex 앱 설치와 실행 경로를 확인해 주세요.';
+const missingExecutable=()=>Object.assign(Error(executableMessage),{code:'CODEX_EXECUTABLE_NOT_FOUND'});
+const isFile=file=>{try{return fs.statSync(file).isFile();}catch{return false;}};
+export function createExecutableResolver({platform=process.platform,execFileImpl=execFile,isFileImpl=isFile}={}){
+ let cached=null,pending=null;
+ const read=(file,args)=>new Promise((resolve,reject)=>execFileImpl(file,args,{windowsHide:true,shell:false,encoding:'utf8',timeout:10000,maxBuffer:65536},(error,stdout)=>error?reject(error):resolve(String(stdout||''))));
+ async function discover(){
+  try{
+   const output=await read('where.exe',['codex.exe']);
+   for(const line of output.split(/\r?\n/)){const file=line.trim().replace(/^"|"$/g,'');if(path.win32.isAbsolute(file)&&isFileImpl(file))return cached=file;}
+  }catch{}
+  try{
+   const output=await read('powershell.exe',['-NoProfile','-NonInteractive','-Command','(Get-AppxPackage -Name OpenAI.Codex | Select-Object -First 1 -ExpandProperty InstallLocation)']);
+   const location=output.trim();
+   if(path.win32.isAbsolute(location)){const file=path.win32.join(location,'app','resources','codex.exe');if(isFileImpl(file))return cached=file;}
+  }catch{}
+  throw missingExecutable();
+ }
+ return async()=>{
+  if(platform!=='win32')return 'codex';
+  if(cached&&isFileImpl(cached))return cached;
+  if(pending)return pending;
+  pending=discover();try{return await pending;}finally{pending=null;}
+ };
+}
+export const resolveExecutable=createExecutableResolver();
 async function killTree(child){
  if(process.platform==='win32'&&Number.isInteger(child.pid)&&child.pid>0){
   await new Promise((resolve,reject)=>execFile('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true},error=>error?reject(error):resolve()));
@@ -12,7 +38,7 @@ async function killTree(child){
 }
 
 // Process exit is deliberately not an image-application success signal.
-export function createBackgroundRunner({root,nodePath,executable='codex.exe',spawnImpl=spawn,killTreeImpl=killTree,onFailure=()=>{},onProgress=()=>{},onExit=()=>{},timeoutMs=600000,logLimitBytes=1048576}={}){
+export function createBackgroundRunner({root,nodePath,executable,resolveExecutableImpl=resolveExecutable,spawnImpl=spawn,killTreeImpl=killTree,onFailure=()=>{},onProgress=()=>{},onExit=()=>{},timeoutMs=600000,logLimitBytes=1048576}={}){
  if(typeof root!=='string'||!root)throw Error('합성 작업 경로를 확인해 주세요.');
  if(!Number.isFinite(timeoutMs)||timeoutMs<=0||!Number.isSafeInteger(logLimitBytes)||logLimitBytes<1)throw Error('합성 작업 제한값을 확인해 주세요.');
  const jobsRoot=path.resolve(root,'data','background-jobs');
@@ -28,7 +54,7 @@ export function createBackgroundRunner({root,nodePath,executable='codex.exe',spa
   job.finished=true;clearTimeout(job.timer);
   for(const fd of job.logs)try{fs.closeSync(fd);}catch{}
   let phase=job.stopReason||((error||code!==0)?'failed':'exited');
-  const message=phase==='cancelled'?'배경 합성 작업을 중단했습니다.':phase==='timed-out'?'배경 합성 작업 시간이 초과되어 중단했습니다.':phase==='failed'?failureMessage:'생성 작업이 종료되었습니다. 적용 결과를 확인합니다.';
+  const message=phase==='cancelled'?'배경 합성 작업을 중단했습니다.':phase==='timed-out'?'배경 합성 작업 시간이 초과되어 중단했습니다.':phase==='failed'?(job.failureMessage||failureMessage):'생성 작업이 종료되었습니다. 적용 결과를 확인합니다.';
   if(active===job){active=null;view={running:false,jobId:job.jobId,phase,code,message};}
   if(phase==='failed'||phase==='timed-out')notify(onFailure,{jobId:job.jobId,code,message});
   notify(onExit,{jobId:job.jobId,code,signal});job.resolveDone();
@@ -76,15 +102,16 @@ export function createBackgroundRunner({root,nodePath,executable='codex.exe',spa
   job.done=new Promise(resolve=>{job.resolveDone=resolve;});active=job;update(job,'starting','배경 합성 작업을 준비하고 있습니다.');
   const directory=path.join(jobsRoot,jobId);
   try{
+   const command=executable===undefined?await resolveExecutableImpl():executable;if(job.finished)throw Error('합성 작업이 취소되었습니다.');
    await mkdir(directory,{recursive:true});if(job.finished)throw Error('합성 작업이 취소되었습니다.');
    for(const name of ['stdout.jsonl','stderr.log'])job.logs.push(fs.openSync(path.join(directory,name),'w'));
    const args=['exec','--ephemeral','--skip-git-repo-check','--sandbox','workspace-write','-c','sandbox_workspace_write.network_access=true','--json','--output-last-message',path.join(directory,'result.txt'),'-'];
    const env={...process.env};delete env.CODEX_THREAD_ID;
-   const child=spawnImpl(executable,args,{cwd:directory,env,windowsHide:true,shell:false,stdio:['pipe','pipe','pipe']});job.child=child;
+   const child=spawnImpl(command,args,{cwd:directory,env,windowsHide:true,shell:false,stdio:['pipe','pipe','pipe']});job.child=child;
    await new Promise((resolve,reject)=>{
     child.stdout?.on('data',chunk=>consume(job,job.logs[0],'stdout',chunk));
     child.stderr?.on('data',chunk=>consume(job,job.logs[1],'stderr',chunk));
-    child.once('error',()=>{finish(job,{error:true});reject(Error('합성 작업 프로세스를 시작하지 못했습니다.'));});
+    child.once('error',error=>{if(error.code==='ENOENT')job.failureMessage=executableMessage;finish(job,{error:true});reject(error.code==='ENOENT'?missingExecutable():Error('합성 작업 프로세스를 시작하지 못했습니다.'));});
     child.once('close',(code,signal)=>{if(job.line&&!job.skipLine)progressLine(job,job.line);finish(job,{code,signal});});
     child.stdin?.on('error',()=>{if(!job.finished)void stop(job,'failed').catch(()=>{});});
     child.once('spawn',()=>{
@@ -95,7 +122,7 @@ export function createBackgroundRunner({root,nodePath,executable='codex.exe',spa
     job.timer=setTimeout(()=>{void stop(job,'timed-out').catch(()=>{});},timeoutMs);job.timer.unref?.();
    });
    return {started:true};
-  }catch(error){if(!job.child||job.finished)finish(job,{error:true});throw Error(job.stopReason==='cancelled'?'합성 작업이 취소되었습니다.':'합성 작업 프로세스를 시작하지 못했습니다.');}
+  }catch(error){if(error.code==='CODEX_EXECUTABLE_NOT_FOUND'||error.code==='ENOENT')job.failureMessage=executableMessage;if(!job.child||job.finished)finish(job,{error:true});if(job.stopReason==='cancelled')throw Error('합성 작업이 취소되었습니다.');if(job.failureMessage===executableMessage)throw missingExecutable();throw Error('합성 작업 프로세스를 시작하지 못했습니다.');}
  }
  return {start,cancel:()=>active?stop(active,'cancelled'):Promise.resolve({cancelled:false}),status:()=>({...view})};
 }

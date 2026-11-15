@@ -5,7 +5,7 @@ import {PassThrough,Writable} from 'node:stream';
 import {mkdtemp,readFile,stat,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
-import {createBackgroundRunner} from '../background-runner.mjs';
+import {createBackgroundRunner,createExecutableResolver} from '../background-runner.mjs';
 
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 async function fixture(t,options={}){
@@ -93,4 +93,34 @@ test('invalid job ids cannot escape the job directory',async t=>{
  const f=await fixture(t);
  for(const jobId of ['../outside','short','name/123456','a'.repeat(101)])await assert.rejects(f.runner.start({jobId,prompt:'request'}),/요청 번호/);
  assert.equal(f.calls.length,0);
+});
+
+test('Windows resolver finds an existing PATH file, caches it, and discovers the new path after an app update',async()=>{
+ const first='C:\\Program Files\\Codex old\\codex.exe',second='C:\\Program Files\\Codex new\\codex.exe',files=new Set([first]),calls=[];
+ const resolve=createExecutableResolver({platform:'win32',isFileImpl:file=>files.has(file),execFileImpl:(file,args,options,done)=>{calls.push({file,args,options});done(null,'C:\\missing\\codex.exe\r\n'+(files.has(first)?first:second)+'\r\n');}});
+ assert.equal(await resolve(),first);assert.equal(await resolve(),first);assert.equal(calls.length,1);
+ files.delete(first);files.add(second);assert.equal(await resolve(),second);assert.equal(calls.length,2);
+ assert(calls.every(c=>c.file==='where.exe'&&c.options.shell===false&&c.options.windowsHide===true));assert.deepEqual(calls[0].args,['codex.exe']);
+});
+
+test('Windows resolver uses only the official Appx install query when PATH discovery fails',async()=>{
+ const location='C:\\Program Files\\WindowsApps\\OpenAI.Codex_test',expected=path.win32.join(location,'app','resources','codex.exe'),calls=[];
+ const resolve=createExecutableResolver({platform:'win32',isFileImpl:file=>file===expected,execFileImpl:(file,args,options,done)=>{calls.push({file,args,options});if(file==='where.exe')done(Error('not found'));else done(null,location+'\r\n');}});
+ assert.equal(await resolve(),expected);assert.equal(calls.length,2);assert.equal(calls[1].file,'powershell.exe');
+ assert.deepEqual(calls[1].args,['-NoProfile','-NonInteractive','-Command','(Get-AppxPackage -Name OpenAI.Codex | Select-Object -First 1 -ExpandProperty InstallLocation)']);assert.equal(calls[1].options.shell,false);
+});
+
+test('missing executable gives an actionable sanitized error, while macOS/Linux use codex without OS queries',async()=>{
+ const resolve=createExecutableResolver({platform:'win32',isFileImpl:()=>false,execFileImpl:(_,args,options,done)=>done(Error('private discovery details'))});
+ await assert.rejects(resolve(),e=>e.code==='CODEX_EXECUTABLE_NOT_FOUND'&&/Codex 앱 설치와 실행 경로/.test(e.message)&&!e.message.includes('private'));
+ for(const platform of ['darwin','linux'])assert.equal(await createExecutableResolver({platform,execFileImpl:()=>assert.fail('no Windows discovery')})(),'codex');
+});
+
+test('runner resolves only when executable is omitted and surfaces missing Codex before spawning',async t=>{
+ let searches=0;
+ const f=await fixture(t,{executable:undefined,resolveExecutableImpl:async()=>{searches++;return 'C:/resolved/codex.exe';}});await f.runner.start({jobId:'job_resolv',prompt:'request'});
+ assert.equal(searches,1);assert.equal(f.calls[0].executable,'C:/resolved/codex.exe');f.children[0].emit('close',0,null);
+ const explicit=await fixture(t,{resolveExecutableImpl:()=>assert.fail('explicit executable is authoritative')});await explicit.runner.start({jobId:'job_explic',prompt:'request'});explicit.children[0].emit('close',0,null);
+ const missing=await fixture(t,{executable:undefined,resolveExecutableImpl:async()=>{throw Object.assign(Error('Codex missing'),{code:'CODEX_EXECUTABLE_NOT_FOUND'});}});
+ await assert.rejects(missing.runner.start({jobId:'job_miss12',prompt:'request'}),/Codex 앱 설치와 실행 경로/);assert.equal(missing.calls.length,0);assert.match(missing.failures[0].message,/Codex 앱 설치와 실행 경로/);assert.equal(missing.runner.status().running,false);
 });
