@@ -46,6 +46,20 @@ test('restart restores manual-only history, accepts old recipe previews, and nev
  restored.manualApply({jobId:f.jobId,attempt:2,userApproved:true});const entry=JSON.parse(await readFile(path.join(f.folder,'background-image.json')));assert.equal(entry.outputHash,hash(f.outputs[1]));assert.equal(entry.settings.composition,'old-preserved-recipe-v2');await assert.rejects(readdir(f.cacheRoot),{code:'ENOENT'});
 });
 
+test('legacy third-attempt history remains viewable and manually applicable after the new two-attempt limit',async t=>{
+ const f=await fixture(t);await f.two();
+ const record=JSON.parse(await readFile(f.reviewFile)),file='background-preview-'+f.jobId+'-attempt-3.jpg';
+ await writeFile(path.join(f.folder,file),f.outputs[2]);
+ record.attempt=3;record.maxAttempts=3;record.previews.push({...record.previews[1],attempt:3,file,hash:hash(f.outputs[2])});
+ await writeFile(f.reviewFile,JSON.stringify(record));
+ const restored=createBackgroundWorkflow(f.options);assert.equal(restored.restoreReview().restored,true);
+ assert.equal(restored.status().maxAttempts,3);assert.deepEqual(restored.preview({jobId:f.jobId,attempt:3}),f.outputs[2]);
+ assert.throws(()=>restored.retry({jobId:f.jobId,reason:'old automatic job'}),/변경/);
+ restored.manualApply({jobId:f.jobId,attempt:3,userApproved:true});
+ assert.equal(JSON.parse(await readFile(path.join(f.folder,'background-image.json'))).outputHash,hash(f.outputs[2]));
+ assert.deepEqual(await readFile(path.join(f.folder,'extra1.jpg')),f.source);
+});
+
 test('selection and product round trips remain permanently view-only after restart',async t=>{
  for(const mode of ['selection','product','new-request','cancel'])await t.test(mode,async sub=>{
   const f=await fixture(sub);await f.stage();f.fail();

@@ -48,6 +48,20 @@ async function fixture(t,{compose,realCompose=false,onInvalidate}={}){
  return {root,folder,cacheRoot,generatedPath,original,extra,output,state,workflow,options,prepare,stage,complete,manifest,unapplied,seedFolder,calls:()=>calls};
 }
 
+test('PNG bytes stored as extra1.jpg complete and cache without rewriting the selected official original',async t=>{
+ const f=await fixture(t,{realCompose:true}),source=await sharp(f.extra).png().toBuffer();
+ await writeFile(path.join(f.folder,'extra1.jpg'),source);
+ f.workflow.select({style:f.state.product.style,key:'extra1'});
+ const request=await f.prepare({key:'extra1'}),staged=await f.stage(request);
+ assert.equal(staged.maxAttempts,2);f.complete(request);
+ const entry=await f.manifest();assert.equal(entry.sourceHash,digest(source));
+ const meta=await sharp(await readFile(path.join(f.folder,entry.file))).metadata();
+ assert.equal(meta.format,'jpeg');assert.equal(meta.width,1500);assert.equal(meta.height,1500);
+ assert.deepEqual(await readFile(path.join(f.folder,'extra1.jpg')),source);
+ assert.deepEqual(await readFile(path.join(f.folder,'main.jpg')),f.original);
+ const cached=await f.prepare({key:'extra1'});assert.equal(cached.cached,true);
+});
+
 test('original wall-clock start survives every phase while terminal elapsed time uses the monotonic clock',async t=>{
  let now=1800000000000,release;t.mock.method(Date,'now',()=>now);
  const f=await fixture(t,{compose:()=>new Promise(resolve=>{release=()=>resolve(f.output);})});
