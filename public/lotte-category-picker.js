@@ -43,6 +43,22 @@
   for(const code of draft[kind]){const node=siblings.find(item=>item.code===code);if(!node)break;nodes.push(node);siblings=node.children||[];}
   return nodes;
  }
+ function compatible(node){const sex=node.name.match(/^(?:브랜드)?(남성|여성)/)?.[1];return !sex||!snapshot?.gender||sex===snapshot.gender;}
+ function automaticCategory(currentSnapshot){
+  let category={...currentSnapshot.category};
+  if(lotteCategoryGenderConflict(category,currentSnapshot.gender))category={...category,manualSelection:null,channelMajor:'',channelMiddle:'',channelSmall:'',channelDetail:'',channelCodes:{}};
+  if(category.manualSelection)return category;
+  // The current catalog supplies the first-path codes. This also supports an
+  // already-running server whose original MEN / ALL coat lookup was empty.
+  const title=String(product?.rawName||currentSnapshot.name||'').replace(/트리코트/g,'');
+  const sourceSex=[...new Set((product?.sourceCategory||[]).map(value=>({MEN:'남성',WOMEN:'여성',남성:'남성',여성:'여성'}[String(value).trim().toUpperCase()])).filter(Boolean))];
+  if(!category.commonSmall&&!category.commonMiddle&&sourceSex.length===1&&sourceSex[0]===currentSnapshot.gender&&/코트/.test(title)&&!/머플러|스카프|벨트|가방/.test(title)){
+   const leaf=currentSnapshot.gender+(/트렌치/.test(title)?'트렌치코트':'코트');
+   const major=catalog?.common.find(n=>n.name===currentSnapshot.gender+'의류');
+   for(const middle of major?.children||[]){const small=middle.children?.find(n=>n.name===leaf);if(small){category={...category,commonMajor:major.code+' : '+major.name,commonMiddle:middle.code+' : '+middle.name,commonSmall:small.code+' : '+small.name};break;}}
+  }
+  return category;
+ }
  function complete(kind){const nodes=selectedNodes(kind);return kind==='common'?nodes.length===3:nodes.length>=3&&!(nodes.at(-1)?.children||[]).length;}
  function matchesChoice(category){
   if(!category)return false;
@@ -61,7 +77,7 @@
  }
  function render(){
   for(const kind of ['common','channel']){
-   let siblings=catalog?.[kind]||[];
+   let siblings=(catalog?.[kind]||[]).filter(compatible);
    for(const [index,select] of controls[kind].entries()){
     const selected=siblings.find(node=>node.code===draft[kind][index]);
     const optionKey=JSON.stringify(siblings.map(node=>[node.code,node.name]));
@@ -73,7 +89,7 @@
     select.disabled=!editable()||!catalog||saving||!siblings.length||(kind==='channel'&&pending);
     select.parentElement.classList.toggle('is-disabled',select.disabled);
     select.closest('.lotte-category-level').hidden=kind==='channel'&&index===3&&!siblings.length;
-    siblings=selected?.children||[];
+    siblings=(selected?.children||[]).filter(compatible);
    }
   }
   cancel.hidden=!dirty;cancel.disabled=saving;
@@ -116,6 +132,7 @@
    if(id!==epoch||!current()){sync();return false;}
    if(!result.manualSupported||!result.selectionSaved||!result.bridge?.complete||!result.category?.manualSelection)throw Error('선택한 분류의 반영을 확인하지 못했어요. 다시 반영해 주세요.');
    const saved=result.category.manualSelection;
+   const genderConflict=lotteCategoryGenderConflict(result.category,snapshot.gender);if(genderConflict)throw Error(genderConflict);
    if(saved.version!==1||saved.style!==snapshot.style||saved.sourceUrl!==(snapshot.sourceUrl||'')||saved.gender!==snapshot.gender||!matchesChoice(result.category)||!matchesChoice(saved.category))throw Error('선택한 분류와 응답이 달라 반영하지 않았어요. 다시 반영해 주세요.');
    product.category={...product.category,...result.category};
    for(const key of lotteCategoryFields){byId('form').elements[key].value=result.category[key]||'';rememberProductField(key,result.category[key]||'');}
@@ -171,7 +188,7 @@
   message(saveError||'수정 중인 분류를 끝까지 선택하거나 선택 취소를 눌러 주세요.',true);
   return false;
  }
- window.lotteCategoryInline={sync,showAutomatic,beforeInput,isEditing:()=>dirty||pending||saving};
+ window.lotteCategoryInline={sync,showAutomatic,automaticCategory,beforeInput,isEditing:()=>dirty||pending||saving};
  async function load(){
   if(loading)return;loading=true;loadError='';idleMessage();render();
   try{

@@ -239,6 +239,16 @@ function lotteCategorySnapshot(){
  const form=$('form');
  return {style:product.style,sourceUrl:product.sourceUrl,input:$('style').value,gender:form.elements.gender.value,name:form.elements.name.value.trim(),category:{...product.category,...Object.fromEntries(lotteCategoryFields.map(key=>[key,form.elements[key].value.trim()]))}};
 }
+function lotteCategoryGenderConflict(category,gender,sourceCategory=product?.sourceCategory||[]){
+ const source=[...new Set(sourceCategory.map(value=>({MEN:'남성',WOMEN:'여성',남성:'남성',여성:'여성'}[String(value).trim().toUpperCase()])).filter(Boolean))];
+ if(source.length===1&&source[0]!==gender)return '공식 상품 경로와 입력한 성별이 다릅니다.';
+ if(!['남성','여성'].includes(gender))return '';
+ for(const key of ['commonMajor','commonMiddle','commonSmall','channelMajor','channelMiddle','channelSmall','channelDetail']){
+  const sex=String(category?.[key]||'').replace(/^[A-Z0-9]+\s*[:：]\s*/i,'').match(/^(?:브랜드)?(남성|여성)/)?.[1];
+  if(sex&&sex!==gender)return gender+' 상품에는 '+sex+' 분류를 연결할 수 없습니다.';
+ }
+ return '';
+}
 function renderLotteCategoryPath(element,values){
  if(element.dataset.inlineCategory==='true')return;
  const path=values.map(value=>String(value||'미지정')),signature=JSON.stringify(path);
@@ -280,6 +290,8 @@ async function checkLotteCategory({fillMissing=false}={}){
  lotteCategoryPending=true;renderLotteCategoryValidation(null,'loading');
  try{
   const {input,...body}=snapshot;
+  body.category=window.lotteCategoryInline?.automaticCategory(snapshot)||body.category;
+  const automaticChanged=JSON.stringify(body.category)!==JSON.stringify(snapshot.category);
   const result=await post('lotte-category-suggest',{...body,validateOnly:!fillMissing});
   if(!current())return false;
   if(snapshot.category.manualSelection&&!result.manualSupported)throw Error('직접 선택한 분류를 유지하려면 최신 등록기 서버를 실행해 주세요. 현재 선택은 그대로 보관했습니다.');
@@ -292,7 +304,8 @@ async function checkLotteCategory({fillMissing=false}={}){
    result.validation=result.validation||{ready:false,issues:[]};
   }
   if(typeof result.bridge.complete!=='boolean')throw Error('분류 연결 결과를 받지 못했습니다. 다시 확인해 주세요.');
-  if(fillMissing&&result.category){
+  const genderConflict=lotteCategoryGenderConflict(result.category,snapshot.gender);if(genderConflict)throw Error(genderConflict);
+  if((fillMissing||automaticChanged&&result.bridge.complete)&&result.category){
    const category={...result.category};
    for(const key of lotteCategoryFields){
     category[key]=category[key]||snapshot.category[key]||'';
@@ -1347,9 +1360,10 @@ populate=function(p){
  if(product?.style!==p.style)productInputComposition=null;
  const fields=editedValuesFor(p),reviewed={...p,category:{...p.category}};
  let manual=null,invalidManual=false;
- if(fields.lotteCategorySelection){try{const choice=JSON.parse(fields.lotteCategorySelection);if(choice.version!==1||choice.style!==p.style||choice.sourceUrl!==(p.sourceUrl||'')||choice.gender!==(fields.gender||p.gender)||!choice.category)throw Error('changed product');manual=choice;}catch{invalidManual=true;}}
+ if(fields.lotteCategorySelection){try{const choice=JSON.parse(fields.lotteCategorySelection);if(choice.version!==1||choice.style!==p.style||choice.sourceUrl!==(p.sourceUrl||'')||choice.gender!==(fields.gender||p.gender)||!choice.category||lotteCategoryGenderConflict(choice.category,fields.gender||p.gender,p.sourceCategory||[]))throw Error('changed product');manual=choice;}catch{invalidManual=true;}}
  if(invalidManual){
   for(const key of [...lotteCategoryFields,'lotteCategorySelection'])delete fields[key];
+  if(lotteCategoryGenderConflict(reviewed.category,fields.gender||p.gender,p.sourceCategory||[]))reviewed.category={...reviewed.category,manualSelection:null,channelMajor:'',channelMiddle:'',channelSmall:'',channelDetail:'',channelCodes:{}};
   try{localStorage.setItem('product-edits.v1.'+p.style,JSON.stringify(fields));}catch{}
  }
  for(const [key,value] of Object.entries(fields)){

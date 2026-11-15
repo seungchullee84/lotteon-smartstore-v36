@@ -24,6 +24,17 @@ export const LOTTE_ACCESSORY_COMMON_PATHS=[
     ['L0022 : 가방/피혁잡화','M0307 : 벨트','01033 : 남성벨트'],
     ['L0022 : 가방/피혁잡화','M0307 : 벨트','01032 : 여성벨트'],
 ];
+export function lotteCategoryGenderIssues(product,category=product.category||{}){
+  const gender=product.gender,issues=[];
+  const source=[...new Set((product.sourceCategory||[]).map(value=>({MEN:'남성',WOMEN:'여성',남성:'남성',여성:'여성'}[String(value).trim().toUpperCase()])).filter(Boolean))];
+  if(!['남성','여성'].includes(gender))issues.push({code:'gender',message:'성별을 확인해 주세요.'});
+  if(source.length===1&&source[0]!==gender)issues.push({code:'source-gender',message:'공식 상품 경로와 입력한 성별이 다릅니다.'});
+  for(const [prefix,keys] of [['common',['commonMajor','commonMiddle','commonSmall']],['channel',['channelMajor','channelMiddle','channelSmall','channelDetail']]]){
+    const opposite=keys.map(key=>label(category[key]).match(/^(?:브랜드)?(남성|여성)/)?.[1]).find(value=>value&&value!==gender);
+    if(opposite)issues.push({code:prefix+'-gender',message:(prefix==='common'?'1차 공통분류':'2차 채널분류')+'의 성별이 '+gender+' 상품과 다릅니다. '+gender+' 분류를 선택해 주세요.'});
+  }
+  return issues;
+}
 function accessoryCommon(c){
   return LOTTE_ACCESSORY_COMMON_PATHS.find(p=>(!c.commonMajor||sameCategoryLabel(c.commonMajor,p[0]))&&sameCategoryLabel(c.commonMiddle,p[1])&&sameCategoryLabel(c.commonSmall,p[2]));
 }
@@ -42,9 +53,7 @@ export function validateLotteCategory(product,{standard=data('category-catalog-s
   const c={...product.category},issues=[];
   const add=(code,message)=>issues.push({code,message});
   const gender=product.gender;
-  const sourceGender=(product.sourceCategory||[]).some(x=>/^(WOMEN|여성)$/i.test(x))?'여성':(product.sourceCategory||[]).some(x=>/^(MEN|남성)$/i.test(x))?'남성':'';
-  if(!['남성','여성'].includes(gender))add('gender','성별을 확인해 주세요.');
-  if(sourceGender&&sourceGender!==gender)add('source-gender','공식 상품 경로와 입력한 성별이 다릅니다.');
+  issues.push(...lotteCategoryGenderIssues(product,c));
   const title=String(product.rawName||product.name||'');
   if(gender==='남성'&&/반팔/.test([title,...(product.sourceCategory||[])].join(' '))&&/긴팔/.test(c.channelMiddle||''))add('sleeve-conflict','반팔 상품이 긴팔 채널분류로 연결되어 있습니다. 반팔티셔츠 경로를 확인해 주세요.');
   if(/조끼|베스트/.test(title)&&/패딩|다운|푸퍼/.test(title)&&c.channelSmall==='패딩/다운점퍼')add('vest-conflict','패딩 조끼가 점퍼로 연결되어 있습니다. 패딩조끼 경로를 확인해 주세요.');

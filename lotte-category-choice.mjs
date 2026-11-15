@@ -1,5 +1,5 @@
 import {readFileSync} from 'node:fs';
-import {allLotteStandardPaths,LOTTE_ACCESSORY_COMMON_PATHS,sameCategoryLabel} from './lotte-category-validation.mjs';
+import {allLotteStandardPaths,LOTTE_ACCESSORY_COMMON_PATHS,sameCategoryLabel,lotteCategoryGenderIssues} from './lotte-category-validation.mjs';
 
 const read=name=>JSON.parse(readFileSync(new URL('./data/'+name,import.meta.url),'utf8'));
 const defaults=()=>({common:read('category-catalog-common.json'),standard:read('category-catalog-standard.json')});
@@ -30,6 +30,8 @@ export function createManualLotteCategory(product,choice,{common,standard}=defau
  if(first.length!==1)throw Error('1차 대·중·소분류를 같은 경로에서 모두 선택해 주세요.');
  if(second.length!==1)throw Error('2차 대·중·소·세분류를 같은 경로에서 끝까지 선택해 주세요.');
  const category={...Object.fromEntries(commonKeys.map((key,i)=>[key,full(first[0][i])])),...Object.fromEntries(channelKeys.map((key,i)=>[key,second[0][levels[i]]?.name||''])),channelCodes:Object.fromEntries(levels.map(level=>[level,second[0][level]?.code||'']))};
+ const genderIssue=lotteCategoryGenderIssues(product,category)[0];
+ if(genderIssue)throw Object.assign(Error(genderIssue.message),{code:'LOTTE_CATEGORY_GENDER_CONFLICT'});
  const selection={version:1,style:product.style,sourceUrl:product.sourceUrl||'',gender:product.gender,category};
  return {...category,manualSelection:selection};
 }

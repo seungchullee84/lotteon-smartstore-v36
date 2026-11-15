@@ -1,6 +1,7 @@
 import {productClassification,assertAdultProduct} from './product.mjs';
 import {resolveCatalogCategory} from './category-catalog.mjs';
 import {isMensUnderwear} from './category.mjs';
+import {bridgeLotteCategory} from './lotte-category-bridge.mjs';
 
 export const LOTTE_CATEGORY_FIELDS=['commonMiddle','commonSmall','channelMiddle','channelSmall'];
 export function suggestMissingLotteCategory(product){
@@ -15,8 +16,11 @@ export function suggestMissingLotteCategory(product){
  const resolved=resolveCatalogCategory({...product,category:suggested.category});
  // These two special paths were confirmed separately from the apparel catalog.
  const knownSpecial=isMensUnderwear(product)||(suggested.category.channelMajor==='브랜드가방'&&/벨트/.test(product.rawName||product.name||''));
- if(!resolved.path&&!knownSpecial)return {category:before,filled:[],missing:LOTTE_CATEGORY_FIELDS.filter(key=>!before[key]?.trim()),message:'상품 형태에 맞는 실제 분류 경로가 확인되지 않았습니다. 남은 공란을 확인해 주세요.'};
- const proposed=resolved.category,label=value=>String(value||'').replace(/^\w+\s*[:：]\s*/,'').replace(/\s/g,'');
+ // A known first-category type (for example a coat under MEN / ALL) is
+ // sufficient for an editable second path, even without a length in the title.
+ const firstBridge=!resolved.path&&!knownSpecial?bridgeLotteCategory({...product,category:suggested.category}):null;
+ if(!resolved.path&&!knownSpecial&&!firstBridge?.complete)return {category:before,filled:[],missing:LOTTE_CATEGORY_FIELDS.filter(key=>!before[key]?.trim()),message:'상품 형태에 맞는 실제 분류 경로가 확인되지 않았습니다. 남은 공란을 확인해 주세요.'};
+ const proposed=firstBridge?.complete?firstBridge.category:resolved.category,label=value=>String(value||'').replace(/^\w+\s*[:：]\s*/,'').replace(/\s/g,'');
  // Fill a coherent path only; never change a partial manual selection or attach
  // a guessed child/code beneath a conflicting parent.
  const conflicts=['commonMajor','commonMiddle','commonSmall','channelMajor','channelMiddle','channelSmall','channelDetail'].some(key=>label(before[key])&&label(proposed[key])!==label(before[key]));

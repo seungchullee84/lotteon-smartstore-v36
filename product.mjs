@@ -75,9 +75,9 @@ export function productClassification(html) {
   }
   if(gender){
     const title=itemTitle;
-    if(/코트/.test(title)&&sourceCategory.includes('OUTER')){
-      const small=/트렌치/.test(title)?'트렌치코트':/패딩|다운/.test(title)?'패딩/다운코트':/하프|숏|쇼트/.test(title)?'하프코트':'롱코트';
-      Object.assign(category,{commonMiddle:gender+'의류아우터',commonSmall:gender+'코트',channelMiddle:'자켓/코트',channelSmall:small});
+    if(/코트/.test(title)&&!/머플러|스카프|벨트|가방/.test(title)){
+      const small=/트렌치/.test(title)?'트렌치코트':/패딩|다운/.test(title)?'패딩/다운코트':/하프|숏|쇼트/.test(title)?'하프코트':/롱/.test(title)?'롱코트':'코트';
+      Object.assign(category,{commonMiddle:gender+'의류아우터',commonSmall:gender+(/트렌치/.test(title)?'트렌치코트':'코트'),channelMiddle:'자켓/코트',channelSmall:small});
     }
   }
   if(gender&&sourceCategory.includes('OUTER')){
