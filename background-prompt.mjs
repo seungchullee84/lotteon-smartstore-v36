@@ -2,7 +2,8 @@ import path from 'node:path';
 
 export function backgroundPrompt(result,{root,nodePath}){
  const helper=path.join(root,'background-finish.mjs');
- const command=action=>'& '+JSON.stringify(nodePath)+' '+JSON.stringify(helper)+' '+action+' --job '+result.jobId;
+ const quote=value=>"'"+String(value).replaceAll("'","''")+"'";
+ const command=action=>'& '+quote(nodePath)+' '+quote(helper)+' '+action+' --job '+result.jobId;
  return [
   '등록기의 합성 진행 버튼으로 사용자가 승인한 품번 '+result.style+'의 '+result.key+' 원본 배경 확장 요청입니다. 요청 번호: '+result.jobId+'. 이 요청 한 건만 처리하고 종료하세요. 코드/설정/다른 상품/판매처를 수정하지 마세요.',
   '먼저 다음 명령으로 현재 상품·사진 선택·원본을 검증해 주세요: '+command('inspect'),
