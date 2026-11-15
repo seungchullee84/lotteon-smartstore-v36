@@ -30,15 +30,16 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
  function rememberReview(s){manualReview={...s,invalid:false,staged:undefined,previews:s.previews};persistReview(manualReview);}
  function invalidate(message='상품 또는 작업이 변경되어 이전 합성 요청을 취소했습니다.'){
   epoch++;
+  const invalidated=active||manualReview;
   if(manualReview){manualReview.invalid=true;persistReview(manualReview,{allowed:false,status:'cancelled',message});}
-  if(active){active.invalid=true;view={...timing(active,true),status:'cancelled',style:active.style,key:active.key,message};onInvalidate({jobId:active.jobId});}
+  if(invalidated){invalidated.invalid=true;view={...timing(invalidated,true),status:'cancelled',style:invalidated.style,key:invalidated.key,jobId:invalidated.jobId,requestId:invalidated.requestId,sourceUrl:invalidated.sourceUrl,message};onInvalidate({jobId:invalidated.jobId});}
  }
  function cancel({requestId}={}){
   if(!validId(requestId))throw Error('합성 요청 번호를 확인해 주세요.');
   cancelled.add(requestId);
   // Keep all cancellations for this process: a delayed HTTP request must not
   // become valid again merely because other requests were made afterwards.
-  const matches=active?.requestId===requestId;
+  const matches=active?.requestId===requestId||manualReview?.requestId===requestId;
   if(matches)invalidate();
   return {ok:true,cancelled:matches};
  }
@@ -173,8 +174,52 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   atomic(path.join(current.folder,'background-selection.json'),JSON.stringify({style,key,selectionId:id()}));
   return {ok:true,key};
  }
+ function review(jobId){const s=manualReview?.jobId===jobId?manualReview:active?.jobId===jobId?active:null;if(!s)throw changed();assertCurrent(s);return s;}
+ function previewBytes(s,attempt){
+  if(!Number.isInteger(attempt)||attempt<1||attempt>maxAttempts)throw Error('확인할 합성 회차를 선택해 주세요.');
+  const entry=s.previews?.find(p=>p.attempt===attempt);
+  if(!entry||!previewFile(s.jobId,attempt,entry.file)||!/^[a-f0-9]{64}$/.test(entry.hash))throw Error('저장된 합성 미리보기를 확인해 주세요.');
+  const file=path.join(s.folder,entry.file),details=fs.lstatSync(file);
+  if(!details.isFile()||details.isSymbolicLink()||details.size>40*1024*1024)throw changed();
+  const bytes=fs.readFileSync(file);if(hash(bytes)!==entry.hash)throw changed();return bytes;
+ }
+ function preview({jobId,attempt}){return previewBytes(review(jobId),attempt);}
+ function manualApply({jobId,attempt,userApproved}){
+  if(userApproved!==true)throw Error('합성 결과를 직접 확인하고 선택한 사진 적용을 승인해 주세요.');
+  const s=review(jobId),bytes=previewBytes(s,attempt);
+  if(!manualReview||manualReview.jobId!==jobId)manualReview={...s,invalid:false,staged:undefined};
+  manualReview.selectedAttempt=attempt;
+  if(active?.jobId===jobId){active.invalid=true;active=null;onInvalidate({jobId});}
+  const waiting=applicationWait({...manualReview,attempt});
+  if(waiting){view={...view,manual:true,selectedAttempt:attempt};persistReview(manualReview);return {...waiting,manual:true,selectedAttempt:attempt};}
+  return activate(manualReview,bytes,{manual:true,selectedAttempt:attempt});
+ }
+ function manualFail({jobId,message}){
+  if(manualReview?.jobId!==jobId)return;
+  manualReview.invalid=true;view={...timing({...manualReview,attempt:manualReview.selectedAttempt||manualReview.attempt},true),status:'error',style:manualReview.style,key:manualReview.key,jobId,requestId:manualReview.requestId,sourceUrl:manualReview.sourceUrl,message,manual:true};persistReview(manualReview,{allowed:false});
+ }
+ function restoreReview(){
+  if(active)return {ok:true,restored:false};
+  const current=getState();if(!current.folder||!current.product)return {ok:true,restored:false};
+  try{
+   const record=JSON.parse(fs.readFileSync(path.join(current.folder,'background-review.json'),'utf8'));
+   if(record.version!==1||record.allowed!==true||!validId(record.jobId)||!validId(record.requestId)||record.folder!==current.folder||!keys.includes(record.key)||!Number.isFinite(record.startedAt)||!Number.isInteger(record.attempt)||record.attempt<1||record.attempt>maxAttempts||!Array.isArray(record.previews)||!record.previews.length||record.previews.length>maxAttempts||!/^[a-f0-9]{64}$/.test(record.sourceHash)||!/^[a-f0-9]{64}$/.test(record.selectionHash)||typeof record.sourceStamp!=='string'||typeof record.selectionStamp!=='string')return {ok:true,restored:false};
+   const seen=new Set();for(const p of record.previews){if(!Number.isInteger(p.attempt)||p.attempt<1||p.attempt>maxAttempts||seen.has(p.attempt)||!previewFile(record.jobId,p.attempt,p.file)||!/^[a-f0-9]{64}$/.test(p.hash))return {ok:true,restored:false};seen.add(p.attempt);}
+   const s={...record,epoch,invalid:false,sourcePath:path.join(current.folder,record.key+'.jpg'),selectionPath:path.join(current.folder,'background-selection.json'),started:performance.now()-Math.max(0,Date.now()-record.startedAt)};
+   assertCurrent(s);for(const p of s.previews)previewBytes(s,p.attempt);
+   manualReview=s;
+   view={...timing({...s,attempt:s.selectedAttempt||s.attempt},true),status:record.status==='complete'?'complete':'error',style:s.style,key:s.key,sourceUrl:s.sourceUrl,jobId:s.jobId,requestId:s.requestId,message:record.message||'이전 합성 결과를 직접 확인하고 적용할 사진을 선택해 주세요.',...(Number.isFinite(record.elapsedMs)?{elapsedMs:record.elapsedMs}:{})};
+   return {ok:true,restored:true,jobId:s.jobId};
+  }catch{return {ok:true,restored:false};}
+ }
  function inspect({jobId}){const s=job(jobId);return {ok:true,jobId,style:s.style,key:s.key,sourcePath:s.sourcePath,sourceHash:s.sourceHash,attempt:s.attempt,maxAttempts,previewPath:s.staged?.previewPath};}
  function dispatch({jobId}){const s=job(jobId);if(s.dispatched||s.cachedBytes)throw Error('이미 진행 중이거나 재사용할 수 있는 합성 요청입니다.');s.dispatched=true;view={...timing(s),status:'generating',style:s.style,key:s.key,message:'Codex가 원본을 확인하고 배경 합성을 진행합니다.'};return inspect({jobId});}
- function fail({jobId,message}){if(active?.jobId!==jobId||active.invalid)return;active.invalid=true;view={...timing(active,true),status:'error',style:active.style,key:active.key,sourceUrl:active.sourceUrl,jobId:active.jobId,requestId:active.requestId,message};active=null;}
- return {prepare,stage,retry,complete,select,cancel,invalidate,inspect,dispatch,fail,status:()=>view?{...view,jobId:view.jobId||active?.jobId,requestId:view.requestId||active?.requestId,sourceUrl:view.sourceUrl||active?.sourceUrl}:null};
+ function fail({jobId,message}){if(active?.jobId!==jobId||active.invalid)return;view={...timing(active,true),status:'error',style:active.style,key:active.key,sourceUrl:active.sourceUrl,jobId:active.jobId,requestId:active.requestId,message};if(active.previews.length){const last=active.previews.find(p=>p.attempt===active.attempt);if(last)last.reason=String(message||'품질 확인 필요').slice(0,300);rememberReview(active);}active.invalid=true;active=null;}
+ function status(){
+  if(!view)return null;
+  const jobId=view.jobId||active?.jobId,s=manualReview?.jobId===jobId?manualReview:active?.jobId===jobId?active:null;
+  let manualAvailable=false;if(s?.previews?.length)try{assertCurrent(s);manualAvailable=true;}catch{}
+  return {...view,jobId,requestId:view.requestId||active?.requestId,sourceUrl:view.sourceUrl||active?.sourceUrl,manualAvailable,previews:(s?.previews||[]).map(p=>({attempt:p.attempt,url:'/api/background-preview?jobId='+encodeURIComponent(jobId)+'&attempt='+p.attempt,...(p.reason?{reason:p.reason}:{})}))};
+ }
+ return {prepare,stage,retry,complete,select,cancel,invalidate,inspect,dispatch,fail,preview,manualApply,manualFail,restoreReview,status};
 }
