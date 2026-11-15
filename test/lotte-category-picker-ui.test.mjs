@@ -77,7 +77,7 @@ test('changing first category reconnects second; cancel, stale product and old-s
  assert.equal(await page.locator('#lotteCategoryPickerApply').isDisabled(),true);
  await page.getByLabel('1차 소분류',{exact:true}).selectOption('00847');
  await page.getByText('2차를 자동으로 연결했어요. 다르면 아래 목록에서 직접 선택하세요.',{exact:true}).waitFor();
- assert.equal(await page.getByLabel('2차 중분류',{exact:true}).locator('option:checked').innerText().then(x=>x.split('  ·  ')[0]),'가디건/조끼');
+ assert.equal(await page.getByLabel('2차 중분류',{exact:true}).locator('option:checked').innerText().then(x=>x.split(/\s*·\s*/)[0]),'가디건/조끼');
  assert.equal(await page.locator('[name=commonSmall]').inputValue(),base.category.commonSmall,'modal edits remain draft until Apply');
  await page.getByRole('button',{name:'취소',exact:true}).click();
  assert.equal(await page.locator('[name=commonSmall]').inputValue(),base.category.commonSmall);
