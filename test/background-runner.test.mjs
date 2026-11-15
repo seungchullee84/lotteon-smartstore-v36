@@ -5,7 +5,7 @@ import {PassThrough,Writable} from 'node:stream';
 import {mkdtemp,readFile,stat,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
-import {createBackgroundRunner,createExecutableResolver} from '../background-runner.mjs';
+import {createBackgroundRunner,createExecutableResolver,backgroundRunnerEnvironment} from '../background-runner.mjs';
 
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 async function fixture(t,options={}){
@@ -28,11 +28,46 @@ test('prompt is sent through stdin, executable/arguments never use a shell, and 
  assert.equal(call.executable,'C:/Program Files/Codex/codex.exe');assert.equal(call.config.shell,false);assert.equal(call.config.windowsHide,true);assert.equal(call.config.cwd,directory);
  assert.deepEqual(call.args,['exec','--ephemeral','--skip-git-repo-check','--sandbox','workspace-write','-c','sandbox_workspace_write.network_access=true','--json','--output-last-message',path.join(directory,'result.txt'),'-']);
  assert(!call.args.includes(prompt));assert.equal(f.children[0].input(),prompt);
- const expected={...before};delete expected.CODEX_THREAD_ID;assert.deepEqual(call.config.env,expected);assert.deepEqual({...process.env},before);
+ const expected={...before};delete expected.CODEX_THREAD_ID;delete expected.CODEX_WINDOWS_REGISTERED_CORE;assert.deepEqual(call.config.env,expected);assert.deepEqual({...process.env},before);
  assert.equal(f.runner.status().running,true);assert.equal(f.runner.status().jobId,'job_123456');
  f.children[0].emit('close',0,null);assert.equal(f.runner.status().phase,'exited');assert.equal(f.runner.status().running,false);
- assert.deepEqual(f.exits,[{jobId:'job_123456',code:0,signal:null}]);assert.deepEqual(f.failures,[]);
+ assert.deepEqual(f.exits,[{jobId:'job_123456',code:0,signal:null,phase:'exited',message:'생성 작업이 종료되었습니다. 적용 결과를 확인합니다.'}]);assert.deepEqual(f.failures,[]);
  assert(!JSON.stringify(f.runner.status()).includes('완료'),'process exit does not claim image application success');
+});
+
+test('standalone workers drop packaged-app identity without changing sandbox settings or the parent environment',()=>{
+ const parent={PATH:'tools',CODEX_THREAD_ID:'parent-chat',CODEX_WINDOWS_REGISTERED_CORE:'1',CODEX_WINDOWS_SANDBOX_PACKAGE_FAMILY:'OpenAI.Codex_test',CODEX_APP_RUNTIME_CLI_PATH:'C:/Codex/codex.exe',CODEX_PERMISSION_PROFILE:':workspace'};
+ const child=backgroundRunnerEnvironment(Object.freeze(parent));
+ assert.equal(child.CODEX_WINDOWS_REGISTERED_CORE,undefined);assert.equal(child.CODEX_THREAD_ID,undefined);
+ assert.equal(child.CODEX_WINDOWS_SANDBOX_PACKAGE_FAMILY,parent.CODEX_WINDOWS_SANDBOX_PACKAGE_FAMILY);
+ assert.equal(child.CODEX_PERMISSION_PROFILE,':workspace');assert.equal(child.PATH,'tools');
+ assert.equal(parent.CODEX_WINDOWS_REGISTERED_CORE,'1');assert.equal(parent.CODEX_THREAD_ID,'parent-chat');
+});
+
+test('Core launch errors stop the worker and report a safe cause even if it later exits with code zero',async t=>{
+ const f=await fixture(t);await f.runner.start({jobId:'job_core12',prompt:'request'});
+ const event=JSON.stringify({type:'item.completed',item:{type:'command_execution',status:'failed',exit_code:-1,aggregated_output:'PRIVATE token=secret\nFailed to create unified exec process: registered Core launch requires an installed app'}})+'\n';
+ f.children[0].stdout.write(event.slice(0,20));f.children[0].stdout.write(event.slice(20));
+ await tick();f.children[0].emit('close',0,null);
+ assert.equal(f.runner.status().phase,'failed');assert.equal(f.failures.length,1);assert.equal(f.exits.length,1);assert.deepEqual(f.kills,[4200]);
+ assert.match(f.failures[0].message,/Windows 실행환경.*Codex 앱 실행 연결 오류/);
+ assert.match(f.failures[0].message,/대표이미지는 유지/);assert.equal(f.exits[0].phase,'failed');
+ assert(!JSON.stringify([f.runner.status(),f.failures,f.exits]).match(/PRIVATE|secret/));
+});
+
+test('split stderr and node_repl launch diagnostics also preserve the specific failure',async t=>{
+ for(const kind of ['stderr','mcp']){
+  const f=await fixture(t);await f.runner.start({jobId:'job_diag12',prompt:'request'});
+  if(kind==='stderr'){f.children[0].stderr.write('windows sandbox failed: registered Core launch ');f.children[0].stderr.write('requires an installed app\n');}
+  else f.children[0].stdout.write(JSON.stringify({type:'item.completed',item:{type:'mcp_tool_call',status:'failed',result:{content:[{type:'text',text:'node_repl kernel exited unexpectedly: registered Core launch requires an installed app'}]}}})+'\n');
+  await tick();assert.equal(f.runner.status().phase,'failed');assert.equal(f.failures.length,1);assert.match(f.failures[0].message,/Codex 앱 실행 연결 오류/);
+ }
+});
+
+test('an agent quoting the diagnostic or a successful command does not cause a false launch failure',async t=>{
+ const f=await fixture(t);await f.runner.start({jobId:'job_quote1',prompt:'request'});
+ for(const item of [{type:'agent_message',text:'registered Core launch requires an installed app'},{type:'command_execution',status:'completed',exit_code:0,aggregated_output:'registered Core launch requires an installed app'}])f.children[0].stdout.write(JSON.stringify({type:'item.completed',item})+'\n');
+ assert.equal(f.runner.status().running,true);assert.deepEqual(f.kills,[]);f.children[0].emit('close',0,null);assert.deepEqual(f.failures,[]);
 });
 
 test('explicit danger-full-access is passed as one sandbox argument without workspace-only configuration',async t=>{

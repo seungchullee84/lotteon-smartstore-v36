@@ -8,6 +8,15 @@ const failureMessage='배경 합성 작업을 마치지 못했습니다. 현재 
 const executableMessage='Codex 실행 파일을 찾지 못했습니다. Codex 앱 설치와 실행 경로를 확인해 주세요.';
 const missingExecutable=()=>Object.assign(Error(executableMessage),{code:'CODEX_EXECUTABLE_NOT_FOUND'});
 const isFile=file=>{try{return fs.statSync(file).isFile();}catch{return false;}};
+export function backgroundRunnerEnvironment(parent=process.env){
+ const env={...parent};
+ delete env.CODEX_THREAD_ID;
+ // A standalone CLI process has no packaged-app identity. Inheriting this
+ // desktop-only switch breaks both shell and node_repl startup before any
+ // command runs. Keep the configured sandbox and its package-family setting.
+ delete env.CODEX_WINDOWS_REGISTERED_CORE;
+ return env;
+}
 export function createExecutableResolver({platform=process.platform,execFileImpl=execFile,isFileImpl=isFile}={}){
  let cached=null,pending=null;
  const read=(file,args)=>new Promise((resolve,reject)=>execFileImpl(file,args,{windowsHide:true,shell:false,encoding:'utf8',timeout:10000,maxBuffer:65536},(error,stdout)=>error?reject(error):resolve(String(stdout||''))));
@@ -54,16 +63,31 @@ export function createBackgroundRunner({root,nodePath,executable,resolveExecutab
   if(job.finished)return;
   job.finished=true;clearTimeout(job.timer);
   for(const fd of job.logs)try{fs.closeSync(fd);}catch{}
-  let phase=job.stopReason||((error||code!==0)?'failed':'exited');
+  let phase=job.stopReason||((error||code!==0||job.failureMessage)?'failed':'exited');
   const message=phase==='cancelled'?'배경 합성 작업을 중단했습니다.':phase==='timed-out'?'배경 합성 작업 시간이 초과되어 중단했습니다.':phase==='failed'?(job.failureMessage||failureMessage):'생성 작업이 종료되었습니다. 적용 결과를 확인합니다.';
   if(active===job){active=null;view={running:false,jobId:job.jobId,phase,code,message};}
   if(phase==='failed'||phase==='timed-out')notify(onFailure,{jobId:job.jobId,code,message});
-  notify(onExit,{jobId:job.jobId,code,signal});job.resolveDone();
+  notify(onExit,{jobId:job.jobId,code,signal,phase,message});job.resolveDone();
+ }
+ function executionFailure(job,diagnostic){
+  if(job.finished||job.stopReason||typeof diagnostic!=='string')return;
+  // Match only a known launch failure and expose fixed copy, never raw tool
+  // output, prompts, local paths or credentials from stdout/stderr.
+  if(!diagnostic.includes('registered Core launch requires an installed app'))return;
+  job.failureMessage='합성 작업의 Windows 실행환경을 시작하지 못했습니다(Codex 앱 실행 연결 오류). 현재 대표이미지는 유지했습니다.';
+  void stop(job,'failed').catch(()=>{});
  }
  function progressLine(job,line){
   if(job.finished||job.stopReason)return;
   let event;try{event=JSON.parse(line);}catch{return;}
   const item=event.item||{},kind=String(item.type||event.type||''),tool=String(item.name||item.tool||item.tool_name||'');
+  if(event.type==='item.completed'&&kind==='command_execution'&&(item.status==='failed'||item.exit_code<0))executionFailure(job,item.aggregated_output);
+  if(event.type==='item.completed'&&kind==='mcp_tool_call'&&item.status==='failed'){
+   executionFailure(job,item.error?.message);
+   for(const block of item.result?.content||[])if(block.type==='text')executionFailure(job,block.text);
+  }
+  if(event.type==='turn.failed'||event.type==='error')executionFailure(job,event.error?.message||event.message);
+  if(job.finished||job.stopReason)return;
   if(/image_generation|image_gen\.imagegen|imagegen/.test(kind+' '+tool))update(job,'running','배경 이미지를 생성하고 있습니다.');
   else if(event.type==='turn.started')update(job,'running','배경 합성 작업을 시작했습니다.');
   else if(event.type==='item.started'&&kind==='command_execution')update(job,'running','원본 보존과 적용을 위한 로컬 처리를 진행하고 있습니다.');
@@ -73,7 +97,10 @@ export function createBackgroundRunner({root,nodePath,executable,resolveExecutab
   const bytes=Buffer.isBuffer(chunk)?chunk:Buffer.from(chunk);
   const count=Math.min(bytes.length,Math.max(0,logLimitBytes-job.written[kind]));
   if(count){try{fs.writeSync(fd,bytes,0,count);job.written[kind]+=count;}catch{void stop(job,'failed').catch(()=>{});}}
-  if(kind!=='stdout')return;
+  if(kind==='stderr'){
+   job.stderrTail=(job.stderrTail+bytes.toString('utf8')).slice(-4096);
+   executionFailure(job,job.stderrTail);return;
+  }
   const parts=bytes.toString('utf8').split('\n');
   for(let i=0;i<parts.length;i++){
    if(!job.skipLine){if(job.line.length+parts[i].length>65536){job.line='';job.skipLine=true;}else job.line+=parts[i];}
@@ -99,7 +126,7 @@ export function createBackgroundRunner({root,nodePath,executable,resolveExecutab
  async function start({jobId,prompt}={}){
   if(active)throw Error('이미 배경 합성 작업이 진행 중입니다.');
   if(typeof jobId!=='string'||!jobIdPattern.test(jobId)||typeof prompt!=='string'||!prompt.trim())throw Error('합성 요청 번호와 내용을 확인해 주세요.');
-  const job={jobId,logs:[],written:{stdout:0,stderr:0},line:'',skipLine:false,finished:false};
+  const job={jobId,logs:[],written:{stdout:0,stderr:0},line:'',stderrTail:'',skipLine:false,finished:false};
   job.done=new Promise(resolve=>{job.resolveDone=resolve;});active=job;update(job,'starting','배경 합성 작업을 준비하고 있습니다.');
   const directory=path.join(jobsRoot,jobId);
   try{
@@ -107,7 +134,7 @@ export function createBackgroundRunner({root,nodePath,executable,resolveExecutab
    await mkdir(directory,{recursive:true});if(job.finished)throw Error('합성 작업이 취소되었습니다.');
    for(const name of ['stdout.jsonl','stderr.log'])job.logs.push(fs.openSync(path.join(directory,name),'w'));
    const args=['exec','--ephemeral','--skip-git-repo-check','--sandbox',sandboxMode,...(sandboxMode==='workspace-write'?['-c','sandbox_workspace_write.network_access=true']:[]),'--json','--output-last-message',path.join(directory,'result.txt'),'-'];
-   const env={...process.env};delete env.CODEX_THREAD_ID;
+   const env=backgroundRunnerEnvironment();
    const child=spawnImpl(command,args,{cwd:directory,env,windowsHide:true,shell:false,stdio:['pipe','pipe','pipe']});job.child=child;
    await new Promise((resolve,reject)=>{
     child.stdout?.on('data',chunk=>consume(job,job.logs[0],'stdout',chunk));
