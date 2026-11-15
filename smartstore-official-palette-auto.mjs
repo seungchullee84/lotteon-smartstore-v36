@@ -48,7 +48,7 @@ export async function prepareOfficialPalette(product,prepared,{folder,dataRoot,s
  const missing=(product.colors||[]).filter(color=>!prepared.paletteImages?.[color]),result={filled:[],reused:[],pending:[]};
  if(!missing.length)return result;
  prepared.palettePendingReasons||={};
- const defer=(color,reason)=>{const text=message(reason);prepared.palettePendingReasons[color]=text;result.pending.push({color,message:text});};
+ const defer=(color,reason)=>{const text=message(reason);prepared.palettePendingReasons[color]=text;const existing=result.pending.find(item=>item.color===color);if(existing)existing.message=text;else result.pending.push({color,message:text});};
  const identity=productIdentity(product);
  if(!identity){for(const color of missing)defer(color,'현재 품번의 공식 상품 주소와 색상 정보를 확인해 주세요.');return result;}
  abort(signal);
@@ -62,18 +62,44 @@ export async function prepareOfficialPalette(product,prepared,{folder,dataRoot,s
  return serialized(cacheRoot,async()=>{
   await current();let cache={identity:snapshot,entries:{},failures:{}};
   try{const saved=JSON.parse(await readFile(manifestFile,'utf8'));if(JSON.stringify(saved.identity)===JSON.stringify(snapshot)&&saved.entries&&saved.failures)cache=saved;}catch(error){if(error.code!=='ENOENT'&&!(error instanceof SyntaxError))throw error;}
+  const owners=new Map(),cachedImages=new Map(),attached=new Map(),blocked=new Set();
+  const own=(hash,color)=>{if(!owners.has(hash))owners.set(hash,new Set());owners.get(hash).add(color);};
+  for(const color of identity.colors){
+   const entry=cache.entries[color],cached=entry&&associatedEntry(entry.source,entry.evidence,identity,color)?await readCached(cacheRoot,entry):null;
+   if(cached){cachedImages.set(color,cached);own(entry.hash,color);}
+   const src=prepared.paletteImages?.[color],file=prepared.photoFiles?.[src];
+   if(src&&prepared.paletteSources?.[color]==='official'&&typeof file==='string'&&path.basename(file)===file){try{own(digest(await readFile(path.join(folder,file))),color);}catch(error){if(error.code!=='ENOENT')throw error;}}
+  }
+  const rejectShared=(color,hash)=>{
+   const others=[...(owners.get(hash)||[])].filter(other=>other!==color);if(!others.length)return false;
+   const reason='서로 다른 색상에 같은 공식 사진 원본이 연결되어 확인이 필요합니다.';
+   for(const affected of [color,...others.filter(other=>missing.includes(other))]){
+    blocked.add(affected);delete cache.entries[affected];cache.failures[affected]={at:Date.now(),message:reason};
+    const previous=attached.get(affected);
+    if(previous){
+     delete prepared.paletteImages[affected];delete prepared.paletteSources[affected];
+     if(previous.file===undefined)delete prepared.photoFiles[previous.src];else prepared.photoFiles[previous.src]=previous.file;
+     if(previous.mime===undefined)delete prepared.photoMimeTypes[previous.src];else prepared.photoMimeTypes[previous.src]=previous.mime;
+     attached.delete(affected);result.filled=result.filled.filter(value=>value!==affected);result.reused=result.reused.filter(value=>value!==affected);
+    }
+    defer(affected,reason);
+   }
+   return true;
+  };
   const attach=async(color,bytes,format,reused)=>{
    await current();if(prepared.paletteImages?.[color])return;
    const hash=digest(bytes),src='/smartstore-photo/'+hash.slice(0,24),file='smartstore-photo-'+hash.slice(0,24)+'.'+format.extension;
+   if(rejectShared(color,hash))return;
    await writeOriginal(path.join(folder,file),bytes);await current();
    prepared.paletteImages||={};prepared.paletteSources||={};prepared.photoFiles||={};prepared.photoMimeTypes||={};
+   attached.set(color,{src,file:prepared.photoFiles[src],mime:prepared.photoMimeTypes[src]});own(hash,color);
    prepared.paletteImages[color]=src;prepared.paletteSources[color]='official';prepared.photoFiles[src]=file;prepared.photoMimeTypes[src]=format.mime;delete prepared.palettePendingReasons[color];
    result[reused?'reused':'filled'].push(color);
   };
   const needed=[];
   for(const color of missing){
-   if(prepared.paletteImages?.[color])continue;
-   const entry=cache.entries[color],validAssociation=entry&&associatedEntry(entry.source,entry.evidence,identity,color),cached=validAssociation?await readCached(cacheRoot,entry):null;
+   if(prepared.paletteImages?.[color]||blocked.has(color))continue;
+   const cached=cachedImages.get(color);
    if(cached){await attach(color,cached.bytes,cached.format,true);continue;}
    delete cache.entries[color];const failure=cache.failures[color];
    if(failure&&Number.isFinite(failure.at)&&Date.now()-failure.at>=0&&Date.now()-failure.at<FAILURE_TTL_MS){defer(color,failure.message);continue;}
@@ -85,6 +111,7 @@ export async function prepareOfficialPalette(product,prepared,{folder,dataRoot,s
    try{source=await collectSources(product,{html,colors:needed,fetchImpl,signal,timeoutMs:15000});await current();}
    catch(error){await current();for(const color of needed){defer(color,error);cache.failures[color]={at:Date.now(),message:message(error)};}}
    if(source)for(const color of needed){
+    if(blocked.has(color))continue;
     try{
      const entries=source.colors?.filter(entry=>entry.color===color)||[],entry=entries.length===1?entries[0]:null;
      if(!entry)throw Error(source.failures?.find(failure=>failure.color===color)?.message||'공식 색상 사진을 확인하지 못했습니다.');

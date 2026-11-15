@@ -70,3 +70,19 @@ test('invalid product identity, missing detail and cancellation do not trigger f
 test('concurrent callers serialize the same identity and share verified originals',async t=>{
  const f=await fixture(t);const results=await Promise.all([prepareOfficialPalette(f.product,f.makePrepared(),f.options),prepareOfficialPalette(f.product,f.makePrepared(),f.options)]);assert.equal(f.calls,1);assert.equal(f.downloads,2);assert.equal(results[0].filled.length,2);assert.equal(results[1].reused.length,2);
 });
+
+test('different official URLs with identical bytes cannot mark two colors complete, including an already reused cache image',async t=>{
+ for(const mode of ['new','cached','existing-official'])await t.test(mode,async sub=>{
+  const f=await fixture(sub);let prepared=f.makePrepared();
+  if(mode!=='new'){
+   await prepareOfficialPalette(f.product,prepared,f.options);const [manifest]=await f.manifests(),record=JSON.parse(await readFile(manifest));delete record.entries['04블랙'];await writeFile(manifest,JSON.stringify(record));
+   if(mode==='cached')prepared=f.makePrepared();else {delete prepared.paletteImages['04블랙'];delete prepared.paletteSources['04블랙'];}
+  }
+  f.images.set('04블랙',f.images.get('01그레이'));
+  const result=await prepareOfficialPalette(f.product,prepared,f.options);
+  assert.equal(prepared.paletteImages['04블랙'],undefined);assert.match(prepared.palettePendingReasons['04블랙'],/같은 공식 사진 원본/);
+  if(mode==='existing-official')assert(prepared.paletteImages['01그레이'],'preserve an official tile that existed before this call');
+  else {assert.equal(prepared.paletteImages['01그레이'],undefined);assert.deepEqual(result.filled,[]);assert.deepEqual(result.reused,[]);assert.equal(result.pending.length,2);}
+  assert.equal(prepared.paletteImages['02라떼'],'/smartstore-photo/latte');
+ });
+});
