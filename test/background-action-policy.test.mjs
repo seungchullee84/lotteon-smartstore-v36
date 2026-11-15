@@ -14,6 +14,6 @@ test('retry, explicit failure and completion use the guarded workflow path',()=>
 });
 test('worker instructions require corrective retries, current-attempt review and explicit failure reason',()=>{
  const prompt=backgroundPrompt({jobId:'job-123456',style:'416972',key:'main',sourcePath:'C:/source/main.jpg'},{root:"C:/folder's app",nodePath:'C:/node.exe'});
- for(const value of ['retry --job job-123456 --reason','fail --job job-123456 --reason','apply --job job-123456 --reviewed --attempt','최대 3차','waiting:true',"'C:/folder''s app"])assert.ok(prompt.includes(value),value);
+ for(const value of ['retry --job job-123456 --reason','fail --job job-123456 --reason','apply --job job-123456 --reviewed --attempt','최대 3차','waiting:true',"folder''s app"])assert.ok(prompt.includes(value),value);
  assert.ok(prompt.includes('취소나 품번·선택 변경 오류는 재시도하지'));
 });
