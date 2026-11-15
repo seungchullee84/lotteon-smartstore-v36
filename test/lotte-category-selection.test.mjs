@@ -8,6 +8,7 @@ import os from 'node:os';
 import {suggestMissingLotteCategory} from '../lotte-category-suggest.mjs';
 import {validateLotteCategory} from '../lotte-category-validation.mjs';
 import {bridgeLotteCategory} from '../lotte-category-bridge.mjs';
+import {createManualLotteCategory} from '../lotte-category-choice.mjs';
 
 async function botPage(browser){
  const page=await browser.newPage();page.setDefaultTimeout(1000);
@@ -159,4 +160,17 @@ test('first-category broader matches still select and add a second category with
  let additions=0;bot.addStandardCategory=async()=>{additions++;};
  await bot.selectMatchedChannelCategory(p);
  assert.deepEqual(selected,[planned.category.channelMajor,planned.category.channelMiddle,planned.category.channelSmall]);assert.equal(additions,1);
+});
+test('manual registrar selection reaches all portal levels unchanged without reranking by the product title',async t=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'lotte-manual-'));t.after(()=>rm(root,{recursive:true,force:true}));
+ const p={style:'375908',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=test',gender:'여성',rawName:'패딩',category:{}};
+ p.category=createManualLotteCategory(p,{common:['L0011','M0066','00856'],channel:['BC34000000','BC34110000','BC34110100','']});
+ const chosen=structuredClone(p.category),bot=new LotteAutomation(root,()=>{}),selected=[];
+ bot.page={waitForTimeout:async()=>{}};bot.settle=bot.assertChannelStyle=async()=>{};
+ bot.similarCategoryClick=async(name,level,{code})=>{selected.push({name,level,code});};
+ let additions=0;bot.addStandardCategory=async(major,middle,small,detail,codes)=>{additions++;assert.equal(small,chosen.channelSmall);assert.deepEqual(codes,chosen.channelCodes);};
+ await bot.selectMatchedChannelCategory(p);
+ assert.deepEqual(p.category,chosen);assert.equal(additions,1);
+ assert.deepEqual(selected.map(s=>s.name),[chosen.channelMajor,chosen.channelMiddle,chosen.channelSmall]);
+ assert.deepEqual(selected.map(s=>s.code),[chosen.channelCodes.major,chosen.channelCodes.middle,chosen.channelCodes.small]);
 });

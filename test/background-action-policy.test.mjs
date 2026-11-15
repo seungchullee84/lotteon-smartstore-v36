@@ -4,7 +4,7 @@ import {backgroundActionKind} from '../background-action-policy.mjs';
 import {backgroundPrompt} from '../background-prompt.mjs';
 
 test('same-product input, metadata, export and navigation hold application without cancelling generation',()=>{
- for(const action of ['run','open','continue','stop','save-main-image','save-detail-images','notice-region-text','price-changer/open','smartstore-detail-only','smartstore-extra-only','smartstore-template','smartstore-template-headline','smartstore-point-selection','learn-washing-icon','browser-login-settings','naver-keywords','lotte-current-brushed-category'])assert.equal(backgroundActionKind('/api/'+action),'concurrent',action);
+ for(const action of ['run','open','continue','stop','save-main-image','save-detail-images','notice-region-text','price-changer/open','smartstore-detail-only','smartstore-extra-only','smartstore-template','smartstore-template-headline','smartstore-point-selection','learn-washing-icon','browser-login-settings','naver-keywords','lotte-current-brushed-category','lotte-category-selection'])assert.equal(backgroundActionKind('/api/'+action),'concurrent',action);
 });
 test('product/photo changes, shutdown and unknown mutations invalidate old work before mutation',()=>{
  for(const action of ['collect','smartstore-auto','smartstore-import-photos','smartstore-import-photos-apply','smartstore-photo-review','smartstore-combine-photos','exclude-extra-image','shutdown','future-photo-replacement'])assert.equal(backgroundActionKind('/api/'+action),'source-change',action);
