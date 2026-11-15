@@ -44,6 +44,12 @@
   return nodes;
  }
  function complete(kind){const nodes=selectedNodes(kind);return kind==='common'?nodes.length===3:nodes.length>=3&&!(nodes.at(-1)?.children||[]).length;}
+ function matchesChoice(category){
+  if(!category)return false;
+  return commonKeys.every((key,i)=>category[key]===selectedNodes('common')[i]?.code+' : '+selectedNodes('common')[i]?.name)&&
+   channelKeys.every((key,i)=>(category[key]||'')===(selectedNodes('channel')[i]?.name||''))&&
+   levels.every((key,i)=>(category.channelCodes?.[key]||'')===(draft.channel[i]||''));
+ }
  function readPath(kind,category){
   let siblings=catalog?.[kind]||[];draft[kind]=[];
   for(const [index,key] of (kind==='common'?commonKeys:channelKeys).entries()){
@@ -109,6 +115,8 @@
    const result=await post('lotte-category-selection',{...body,manualChoice:{common:[...draft.common],channel:[...draft.channel]}});
    if(id!==epoch||!current()){sync();return false;}
    if(!result.manualSupported||!result.selectionSaved||!result.bridge?.complete||!result.category?.manualSelection)throw Error('선택한 분류의 반영을 확인하지 못했어요. 다시 반영해 주세요.');
+   const saved=result.category.manualSelection;
+   if(saved.version!==1||saved.style!==snapshot.style||saved.sourceUrl!==(snapshot.sourceUrl||'')||saved.gender!==snapshot.gender||!matchesChoice(result.category)||!matchesChoice(saved.category))throw Error('선택한 분류와 응답이 달라 반영하지 않았어요. 다시 반영해 주세요.');
    product.category={...product.category,...result.category};
    for(const key of lotteCategoryFields){byId('form').elements[key].value=result.category[key]||'';rememberProductField(key,result.category[key]||'');}
    rememberProductField('lotteCategorySelection',JSON.stringify(result.category.manualSelection));

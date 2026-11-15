@@ -949,6 +949,13 @@ header>.bar #refreshPage{margin-left:0}
 .lotte-category-summary .lotte-category-inline-choice:focus-within{outline:3px solid #99b3a3;outline-offset:2px}
 .lotte-category-summary .lotte-category-inline-choice.is-disabled{opacity:.62}
 .lotte-category-summary .lotte-category-inline-select:disabled{cursor:default}
+.lotte-category-summary .lotte-category-step{container:lotte-category-step / inline-size}
+@container lotte-category-step (max-width:330px){
+ .lotte-category-summary .lotte-category-step dd.lotte-category-levels{grid-template-columns:minmax(0,1fr);gap:9px}
+ .lotte-category-summary label.lotte-category-level{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;gap:8px;border:0;padding:0}
+ .lotte-category-summary .lotte-category-level-label{margin:0}
+ .lotte-category-summary .lotte-category-level:nth-child(n+4){grid-column:auto}
+}
 .lotte-category-summary .lotte-category-level[hidden],.lotte-category-summary .lotte-category-inline-note button[hidden]{display:none!important}
 .lotte-category-summary .lotte-category-inline-note{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;margin-top:12px}
 .lotte-category-summary .lotte-category-inline-note p{flex:1 1 220px;margin:0;font-size:12px;line-height:1.7;color:#68796c;word-break:keep-all}
