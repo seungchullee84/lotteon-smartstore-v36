@@ -17,7 +17,7 @@ const images=Promise.all([
  sharp({create:{width:1500,height:1500,channels:3,background:'#b8cdb1'}}).jpeg().toBuffer()
 ]);
 
-async function fixture(t,{compose,realCompose=false}={}){
+async function fixture(t,{compose,realCompose=false,onInvalidate}={}){
  const root=await mkdtemp(path.join(os.tmpdir(),'background-workflow-'));
  t.after(()=>rm(root,{recursive:true,force:true}));
  const [original,extra,generated,output]=await images;
@@ -38,7 +38,7 @@ async function fixture(t,{compose,realCompose=false}={}){
  await writeFile(generatedPath,generated);
  let calls=0,sequence=0;
  const composeImpl=async input=>{calls++;return compose?compose(input):realCompose?composeBackground(input):output;};
- const options={getState:()=>state,cacheRoot,compose:composeImpl};
+ const options={getState:()=>state,cacheRoot,compose:composeImpl,onInvalidate};
  const workflow=createBackgroundWorkflow(options);
  const prepare=(overrides={})=>workflow.prepare({style:state.product.style,key:'main',sourceUrl:state.product.sourceUrl,revision:state.revision,requestId:'request_'+String(++sequence).padStart(8,'0'),...overrides});
  const stage=request=>workflow.stage({jobId:request.jobId,generatedPath});
@@ -82,6 +82,7 @@ test('reviewed cache survives a new workflow and collection folder without compo
  assert.equal(result.cached,true);
  assert.equal(result.applied,false);
  assert.ok(result.jobId);
+ assert.throws(()=>restarted.dispatch({jobId:result.jobId}),/이미 진행 중이거나 재사용/);
  assert.equal(f.calls(),1);
  await f.unapplied();
  const applied=restarted.complete({jobId:result.jobId,reuse:true});
@@ -246,4 +247,62 @@ test('cancellation before prepare, after stage and a newer request cannot resurr
  assert.throws(()=>f.complete(older),stale);
  await f.stage(newer);f.complete(newer);
  assert.equal((await f.manifest()).reviewed,true);
+});
+
+test('dispatch returns the exact current source once and reports generation without applying anything',async t=>{
+ const f=await fixture(t),request=await f.prepare();
+ const dispatched=f.workflow.dispatch({jobId:request.jobId});
+ assert.deepEqual(dispatched,f.workflow.inspect({jobId:request.jobId}));
+ assert.equal(dispatched.sourcePath,path.join(f.folder,'main.jpg'));
+ assert.equal(dispatched.sourceHash,digest(f.original));
+ assert.equal(dispatched.style,f.state.product.style);
+ assert.equal(dispatched.key,'main');
+ assert.equal(f.workflow.status().status,'generating');
+ assert.throws(()=>f.workflow.dispatch({jobId:request.jobId}),/이미 진행 중이거나 재사용/);
+ assert.equal(f.calls(),0);
+ await f.unapplied();
+});
+
+test('invalidation callbacks identify the displaced worker for explicit invalidation, cancellation and replacement',async t=>{
+ for(const mode of ['invalidate','cancel','replacement'])await t.test(mode,async t=>{
+  const invalidated=[];
+  const f=await fixture(t,{onInvalidate:event=>invalidated.push(event)});
+  const request=await f.prepare({requestId:'request_worker_callback'});
+  f.workflow.dispatch({jobId:request.jobId});
+  assert.deepEqual(invalidated,[]);
+  if(mode==='invalidate')f.workflow.invalidate();
+  if(mode==='cancel')f.workflow.cancel({requestId:'request_worker_callback'});
+  if(mode==='replacement')await f.prepare();
+  assert.deepEqual(invalidated,[{jobId:request.jobId}]);
+  assert.throws(()=>f.workflow.inspect({jobId:request.jobId}),stale);
+  await f.unapplied();
+ });
+});
+
+test('a late old-worker failure leaves the new request intact while its own failure terminates it',async t=>{
+ const f=await fixture(t),older=await f.prepare();
+ f.workflow.dispatch({jobId:older.jobId});
+ const newer=await f.prepare();
+ f.workflow.dispatch({jobId:newer.jobId});
+ const before=f.workflow.status();
+ f.workflow.fail({jobId:older.jobId,message:'late old worker exit'});
+ assert.deepEqual(f.workflow.status(),before);
+ assert.equal(f.workflow.inspect({jobId:newer.jobId}).jobId,newer.jobId);
+ f.workflow.fail({jobId:newer.jobId,message:'current worker failed'});
+ assert.equal(f.workflow.status().status,'error');
+ assert.equal(f.workflow.status().message,'current worker failed');
+ assert.throws(()=>f.workflow.inspect({jobId:newer.jobId}),stale);
+ assert.throws(()=>f.complete(newer),stale);
+ await f.unapplied();
+});
+
+test('a worker exit reported after successful completion cannot replace success or the applied image',async t=>{
+ const f=await fixture(t),request=await f.prepare();
+ f.workflow.dispatch({jobId:request.jobId});
+ await f.stage(request);f.complete(request);
+ const completed=f.workflow.status(),manifest=await readFile(path.join(f.folder,'background-image.json'),'utf8');
+ f.workflow.fail({jobId:request.jobId,message:'worker exited after apply'});
+ assert.equal(f.workflow.status().status,'complete');
+ assert.deepEqual(f.workflow.status(),completed);
+ assert.equal(await readFile(path.join(f.folder,'background-image.json'),'utf8'),manifest);
 });

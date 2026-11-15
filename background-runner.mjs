@@ -45,7 +45,7 @@ export function createBackgroundRunner({root,nodePath,executable='codex.exe',spa
   if(job.finished)return;
   const bytes=Buffer.isBuffer(chunk)?chunk:Buffer.from(chunk);
   const count=Math.min(bytes.length,Math.max(0,logLimitBytes-job.written[kind]));
-  if(count){try{fs.writeSync(fd,bytes,0,count);job.written[kind]+=count;}catch{void stop(job,'failed');}}
+  if(count){try{fs.writeSync(fd,bytes,0,count);job.written[kind]+=count;}catch{void stop(job,'failed').catch(()=>{});}}
   if(kind!=='stdout')return;
   const parts=bytes.toString('utf8').split('\n');
   for(let i=0;i<parts.length;i++){

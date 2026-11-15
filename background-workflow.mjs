@@ -108,7 +108,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
    fs.writeFileSync(previewPath,bytes,{flag:'wx'});s.staged={bytes,hash:hash(bytes),previewPath};
    view={status:'review',style:s.style,key:s.key,message:'원본 합성을 마쳤습니다. 최종 이미지 검수 후 자동 적용합니다.'};
    return {ok:true,jobId,previewPath,width:1500,height:1500,originalPreserved:true};
-  }catch(error){if(active===s){view={status:'error',style:s.style,key:s.key,message:error.message};}throw error;}
+  }catch(error){if(active===s&&!s.invalid){view={status:'error',style:s.style,key:s.key,message:error.message};}throw error;}
   finally{s.processing=false;}
  }
  function complete({jobId,reviewed,reuse}){
@@ -135,6 +135,6 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
  }
  function inspect({jobId}){const s=job(jobId);return {ok:true,jobId,style:s.style,key:s.key,sourcePath:s.sourcePath,sourceHash:s.sourceHash,previewPath:s.staged?.previewPath};}
  function dispatch({jobId}){const s=job(jobId);if(s.dispatched||s.cachedBytes)throw Error('이미 진행 중이거나 재사용할 수 있는 합성 요청입니다.');s.dispatched=true;view={status:'generating',style:s.style,key:s.key,message:'Codex가 원본을 확인하고 배경 합성을 진행합니다.'};return inspect({jobId});}
- function fail({jobId,message}){if(active?.jobId!==jobId)return;active.invalid=true;view={status:'error',style:active.style,key:active.key,jobId:active.jobId,requestId:active.requestId,message};active=null;}
+ function fail({jobId,message}){if(active?.jobId!==jobId||active.invalid)return;active.invalid=true;view={status:'error',style:active.style,key:active.key,jobId:active.jobId,requestId:active.requestId,message};active=null;}
  return {prepare,stage,complete,select,cancel,invalidate,inspect,dispatch,fail,status:()=>view?{...view,jobId:view.jobId||active?.jobId,requestId:view.requestId||active?.requestId}:null};
 }
