@@ -582,20 +582,22 @@ for(const button of document.querySelectorAll('.notice-copy'))button.onclick=()=
 $('openNoticeText').onclick=()=>{syncNoticeCopy();$('noticeCopyStatus').textContent='';$('noticeTextDialog').showModal();};$('closeNoticeText').onclick=()=>$('noticeTextDialog').close();
 
 const backgroundLabels={main:'대표이미지',extra1:'추가이미지 1',extra2:'추가이미지 2'};
-let backgroundRequest=null,backgroundEpoch=0,backgroundPreparing=false,backgroundSelectionPending=false;
+let backgroundRequest=null,backgroundEpoch=0,backgroundPreparing=false,backgroundSelectionPending=false,backgroundWorkActive=false;
 let backgroundCancellation=Promise.resolve(),backgroundStyleInput=$('style').value;
+const cancelledBackgroundRequests=new Set();
 function syncBackgroundControls(){
- $('openBackgroundRequest').disabled=backgroundPreparing||backgroundSelectionPending||serverBusy||requestLock;
- $('openBackgroundRequest').setAttribute('aria-busy',String(backgroundPreparing));
+ $('openBackgroundRequest').disabled=backgroundPreparing||backgroundSelectionPending||backgroundWorkActive||serverBusy||requestLock;
+ $('openBackgroundRequest').setAttribute('aria-busy',String(backgroundPreparing||backgroundWorkActive));
 }
 function cancelBackgroundRequest(){
  const request=backgroundRequest;
  backgroundEpoch++;
  backgroundRequest=null;
  backgroundPreparing=false;
- $('backgroundChatFallback')?.remove();
+ backgroundWorkActive=false;
  syncBackgroundControls();
  if(!request)return backgroundCancellation;
+ cancelledBackgroundRequests.add(request.requestId);
  backgroundCancellation=post('background-cancel',{requestId:request.requestId});
  backgroundCancellation.catch(error=>{
   if(!backgroundRequest)$('backgroundStatus').textContent='이전 합성 요청 취소 확인이 필요합니다. '+error.message;
@@ -607,10 +609,10 @@ function backgroundRequestIsCurrent(request){
   product?.style===request.style&&product?.sourceUrl===request.sourceUrl&&
   selectedBackgroundImage===request.key&&$('style').value===request.input&&!serverBusy&&!requestLock;
 }
-function backgroundInputMatchesProduct(){
+function backgroundInputMatchesProduct(current=product){
  const input=$('style').value.trim();
- if(!input||input===product?.style)return true;
- try{return new URL(input).href===new URL(product.sourceUrl).href;}catch{return false;}
+ if(!input||input===current?.style)return true;
+ try{return new URL(input).href===new URL(current.sourceUrl).href;}catch{return false;}
 }
 $('style').addEventListener('input',()=>{
  const value=$('style').value;
@@ -624,6 +626,7 @@ document.addEventListener('register-state',event=>{
 });
 function syncBackgroundImage(s){
  if(activeChannel()!=='lotte')return;
+ if(backgroundRequest&&(s.product?.sourceUrl!==backgroundRequest.sourceUrl||s.backgroundSelection&&s.backgroundSelection!==backgroundRequest.key))void cancelBackgroundRequest();
  const chip=s.colorChipStatus;
  $('colorChipStatus').textContent=chip?(chip.position?'색상칩 자동 배치: 오른쪽 '+(chip.position==='bottom-right'?'하단':'중단'):'여백 부족으로 색상칩 생략'):'공식 색상칩은 수집 후 여백이 있을 때 자동 배치합니다.';
  if(!$('backgroundDialog').open){
@@ -638,17 +641,25 @@ function syncBackgroundImage(s){
   if(version){$(key).src='/image/'+key+'?t='+Date.now();$('backgroundStatus').textContent='합성 완료 — '+backgroundLabels[key]+'를 변경했습니다.';announce(backgroundLabels[key]+'를 변경했습니다.','success');}
  }
  const work=s.backgroundWork;
- if(backgroundRequest&&work?.style===backgroundRequest.style&&work.key===backgroundRequest.key&&['processing','complete','error','cancelled'].includes(work.status)){
-  $('backgroundStatus').textContent=work.message;
+ if(!backgroundRequest&&!backgroundSelectionPending&&work?.jobId&&work.requestId&&!cancelledBackgroundRequests.has(work.requestId)&&
+  ['waiting','generating','processing','review'].includes(work.status)){
+  backgroundRequest={requestId:work.requestId,jobId:work.jobId,epoch:backgroundEpoch,style:work.style,key:work.key,sourceUrl:work.sourceUrl,input:$('style').value};
+  backgroundStyleInput=backgroundRequest.input;
+  if(work.style!==s.product?.style||work.sourceUrl!==s.product?.sourceUrl||work.key!==selectedBackgroundImage||!backgroundInputMatchesProduct(s.product))void cancelBackgroundRequest();
+ }
+ if(backgroundRequest&&!backgroundPreparing&&work?.jobId===backgroundRequest.jobId&&work.requestId===backgroundRequest.requestId&&
+  work.style===backgroundRequest.style&&work.sourceUrl===backgroundRequest.sourceUrl&&work.key===backgroundRequest.key&&['waiting','generating','processing','review','complete','error','cancelled'].includes(work.status)){
+  backgroundWorkActive=['waiting','generating','processing','review'].includes(work.status);
+  backgroundRequest.message=work.message||'합성 작업 상태: '+work.status;
+  $('backgroundStatus').textContent=backgroundRequest.message;
  }
  syncBackgroundControls();
 }
-function backgroundGuide(){return '선택한 사진: '+backgroundLabels[selectedBackgroundImage]+'. 합성하기 복사 버튼으로 동일 원본의 완료된 결과를 확인하고 새 합성 요청을 준비합니다.';}
+function backgroundGuide(){return '선택한 사진: '+backgroundLabels[selectedBackgroundImage]+'. 합성 진행을 누르면 동일 원본의 완료된 결과를 확인하고, 새 합성이 필요하면 자동으로 진행합니다.';}
 function showBackgroundChoice(){
- $('backgroundChatFallback')?.remove();
  $('backgroundOriginal').src='/image/'+selectedBackgroundImage+'-original?t='+Date.now();
  $('backgroundOriginal').alt='합성할 '+backgroundLabels[selectedBackgroundImage]+' 원본';
- $('backgroundStatus').textContent=backgroundGuide();
+ $('backgroundStatus').textContent=backgroundRequest?.message||backgroundGuide();
 }
 $('extendBackground').onclick=()=>{
  if(!product){announce('먼저 상품을 수집해 주세요.','failed');return;}
@@ -674,14 +685,13 @@ $('backgroundImageChoice').onchange=async()=>{
 };
 $('closeBackground').onclick=()=>$('backgroundDialog').close();
 $('openBackgroundRequest').onclick=async()=>{
- if(backgroundPreparing||backgroundSelectionPending||requestLock||serverBusy)return;
+ if(backgroundPreparing||backgroundSelectionPending||backgroundWorkActive||requestLock||serverBusy)return;
  if(activeChannel()!=='lotte'||!product||!product.images[selectedBackgroundImage]){
   $('backgroundStatus').textContent='롯데ON에서 현재 상품의 원본 사진을 선택해 주세요.';return;
  }
  if(!backgroundInputMatchesProduct()){
   $('backgroundStatus').textContent='입력한 품번 또는 공식 URL의 상품을 먼저 수집해 주세요.';return;
  }
- const button=$('openBackgroundRequest');
  const cancellation=cancelBackgroundRequest();
  const request={requestId:globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),epoch:backgroundEpoch,
   style:product.style,key:selectedBackgroundImage,sourceUrl:product.sourceUrl,revision:lastRevision>=0?lastRevision:undefined,input:$('style').value};
@@ -694,26 +704,25 @@ $('openBackgroundRequest').onclick=async()=>{
   if(!backgroundRequestIsCurrent(request))return;
   const result=await post('background-prepare',{style:request.style,key:request.key,sourceUrl:request.sourceUrl,revision:request.revision,requestId:request.requestId});
   if(!backgroundRequestIsCurrent(request))return;
+  if(result.ok!==true)throw Error(result.message||'합성 작업을 준비하지 못했습니다. 다시 눌러 주세요.');
   if(result.cached){
    if(result.applied!==false||typeof result.jobId!=='string'||!result.jobId)throw Error('이전 합성 결과의 적용 정보를 확인하지 못했습니다. 다시 눌러 주세요.');
    const completed=await post('background-complete',{jobId:result.jobId,reuse:true});
    if(!backgroundRequestIsCurrent(request))return;
    if(completed.ok!==true)throw Error(completed.message||'이전 합성 결과를 적용하지 못했습니다.');
-   $('backgroundStatus').textContent=completed.message||'동일 원본의 완료된 합성을 대표이미지에 적용했습니다.';
+   request.message=completed.message||'동일 원본의 완료된 합성을 대표이미지에 적용했습니다.';
+   $('backgroundStatus').textContent=request.message;
    announce($('backgroundStatus').textContent,'success');await refresh();return;
   }
-  if(typeof result.prompt!=='string'||!result.prompt.trim())throw Error('합성 요청 문구를 받지 못했습니다. 다시 눌러 주세요.');
-  try{
-   await navigator.clipboard.writeText(result.prompt);
-   if(backgroundRequestIsCurrent(request))$('backgroundStatus').textContent='✓ 합성 요청을 복사했습니다. 이 채팅에 붙여넣어 보내 주세요.';
-  }catch{
-   if(!backgroundRequestIsCurrent(request))return;
-   let fallback=$('backgroundChatFallback');
-   if(!fallback){fallback=document.createElement('textarea');fallback.id='backgroundChatFallback';fallback.readOnly=true;fallback.setAttribute('aria-label','복사할 합성 요청');button.after(fallback);}
-   fallback.value=result.prompt;fallback.focus();fallback.select();
-   $('backgroundStatus').textContent='자동 복사가 제한되었습니다. 선택된 요청 문구를 Ctrl+C로 복사해 주세요.';
-  }
- }catch(error){if(backgroundRequestIsCurrent(request))$('backgroundStatus').textContent=error.message;}
+  if(typeof result.jobId!=='string'||!result.jobId)throw Error('합성 작업 정보를 받지 못했습니다. 다시 눌러 주세요.');
+  request.jobId=result.jobId;
+  const dispatched=await post('background-dispatch',{jobId:request.jobId});
+  if(!backgroundRequestIsCurrent(request))return;
+  if(dispatched.ok!==true||dispatched.started!==true)throw Error(dispatched.message||'합성을 시작하지 못했습니다. 다시 눌러 주세요.');
+  backgroundWorkActive=true;backgroundPreparing=false;
+  request.message=dispatched.message||'합성을 시작했습니다. 생성·검수 후 대표이미지에 자동 적용합니다.';
+  $('backgroundStatus').textContent=request.message;syncBackgroundControls();await refresh();
+ }catch(error){if(backgroundRequestIsCurrent(request)){void cancelBackgroundRequest();$('backgroundStatus').textContent=error.message;}}
  finally{
   if(backgroundRequest===request){
    if(!backgroundRequestIsCurrent(request))void cancelBackgroundRequest();
