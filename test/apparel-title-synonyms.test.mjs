@@ -59,6 +59,19 @@ test('다른 품목·반대 의미와 미확인 특성을 동의어로 바꾸지
  assert(!expandedTitleCandidates(plain).some(word=>/민소매|슬리브리스|목폴라|누빔|퀼팅/.test(word)));
 });
 
+test('헨리넥과 공식 설명의 립 원단을 보존하고 근거 없는 상품에는 추가하지 않는다',()=>{
+ const p={style:'326924',name:'여성 기모 헨리넥 긴팔티 326924',rawName:'[문가영] 기모 헨리넥 긴팔티',gender:'여성',officialDescription:'265g/㎡ 중량의 폴리 레이온 혼방 립 원단을 사용했습니다.',smartstoreName:'직접 정한 상품명 326924',smartstoreNameUserEdited:true};
+ const before=structuredClone(p),candidates=expandedTitleCandidates(p);
+ for(const term of ['여성헨리넥티셔츠','여성골지티셔츠','여성리브드티셔츠'])assert(candidates.includes(term),term);
+ for(const garment of ['티','티셔츠']){
+  const ranking=[{keyword:'여성'+garment,score:100},{keyword:'여성기모'+garment,score:40},{keyword:'여성긴팔'+garment,score:30},{keyword:'여성골지'+garment,score:20}];
+  const r=composePopularTitle(p,ranking);assert.match(r.title,/헨리넥/);assert.match(r.title,/골지/);assert(r.length>=27&&r.length<=39);assert(!hasDuplicateTitleMeaning(p,r.title));
+ }
+ assert.deepEqual(p,before,'manual title and official material remain untouched');
+ const plain={...p,name:'여성 긴팔티 326925',rawName:'긴팔티',style:'326925',officialDescription:'립스틱 컬러와 매치하기 좋은 티셔츠입니다.'};
+ assert(!expandedTitleCandidates(plain).some(term=>/헨리넥|골지|리브드/.test(term)));
+});
+
 test('면·코튼은 각 상품과 품목의 API 순위에 따라 자동 선택하고 면100% 사실을 보존한다',async()=>{
  for(const [i,kind] of ['티셔츠','맨투맨','니트','슬랙스'].entries())for(const winner of ['면','코튼']){
   const p=product('레귤러핏 '+kind,String(510000+i)),before=structuredClone(p),requested=new Set();

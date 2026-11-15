@@ -5,6 +5,26 @@ import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {createNaverTitleOptimizer} from '../naver-title.mjs';
 
+test('상품명 길이 부족을 API 조회 실패와 구분하고 입력된 이름을 보존한다',async t=>{
+ const browser=await chromium.launch({headless:true});t.after(()=>browser.close());
+ const page=await browser.newPage();
+ await page.setContent('<form id="form"><input name="name" value="여성 기모 헨리넥 긴팔티"><input name="gender" value="여성"></form><input id="smartstoreName" value="사용자가 정한 이름 326924"><button id="smartstoreOptimizeTitle"></button><p id="naverTitleResult"></p><p id="naverTitleDetail"></p><ul id="naverTitleCandidates"></ul>');
+ const source=await readFile(new URL('../public/app.js',import.meta.url),'utf8');
+ const code=source.slice(source.indexOf('async function optimizeSmartstoreTitle('),source.indexOf("$('smartstoreOptimizeTitle').onclick="));
+ await page.addScriptTag({content:'const $=id=>document.getElementById(id);let requestLock=false,serverBusy=false,product={style:"326924"};function syncButtons(){}async function post(){throw Error(window.failMessage);}'+code});
+ for(const [message,label] of [
+  ['스마트스토어 상품명은 품번·공백 포함 27~39자입니다. 현재 24자입니다. 공식 상품정보에 근거한 특징을 보강해 주세요.','상품명 길이 확인 필요'],
+  ['네이버 API 인증 실패','네이버 조회 실패'],
+  ['상품명에 의미가 중복된 표현이 있습니다.','상품명 최적화 실패']
+ ]){
+  await page.evaluate(async message=>{window.failMessage=message;await optimizeSmartstoreTitle({remember:true});},message);
+  assert((await page.locator('#naverTitleResult').innerText()).startsWith(label));
+  assert.equal(await page.locator('#smartstoreName').inputValue(),'사용자가 정한 이름 326924');
+  assert.equal(await page.evaluate(()=>requestLock),false);
+  if(label==='상품명 길이 확인 필요')assert.match(await page.locator('#naverTitleDetail').innerText(),/등록기의 자동 상품명 작성 기준/);
+ }
+});
+
 test('전용 상품명·API 조회·실패·키 설정 UI가 롯데ON 값과 저장 정책을 보존',async()=>{
  const product={style:'356956',rawName:'남성 아가일 브이넥 니트',name:'남성 아가일 브이넥 니트 356956',gender:'남성',consumerPrice:59800,colors:['01블랙'],sizes:['M'],material:'면 100%',country:'베트남',washing:'손세탁',manufactured:'2026-08',keywords:'지오다노,남성니트',category:{},images:{detail:'https://www.giordano.co.kr/detail.jpg'},warnings:[]};
  let autoRequest;
