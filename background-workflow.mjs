@@ -18,12 +18,19 @@ const validId=value=>typeof value==='string'&&/^[a-zA-Z0-9_-]{8,100}$/.test(valu
 // No generation service or seller automation is called here. Jobs are scoped to
 // this server lifetime; a restart can never accept an old completion command.
 export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBackground,onInvalidate=()=>{}}){
- let epoch=0,active=null,view=null;
+ let epoch=0,active=null,manualReview=null,view=null;
  const cancelled=new Set();
  const cacheSettings={version:1,composition:BACKGROUND_COMPOSITE_VERSION,generation:'builtin-reviewed-background-v1',width:1500,height:1500,format:'jpeg',quality:95};
  const timing=(s,terminal=false)=>({startedAt:s.startedAt,attempt:s.attempt,maxAttempts,...(terminal?{elapsedMs:Math.round(performance.now()-s.started)}:{})});
+ const previewFile=(jobId,attempt,file)=>file==='background-preview-'+jobId+'-attempt-'+attempt+'.jpg'||attempt===1&&file==='background-preview-'+jobId+'.jpg';
+ function persistReview(s,{allowed=!s.invalid,status=view?.status,message=view?.message}={}){
+  if(!s.previews?.length)return;
+  atomic(path.join(s.folder,'background-review.json'),JSON.stringify({version:1,allowed,folder:s.folder,jobId:s.jobId,requestId:s.requestId,style:s.style,key:s.key,sourceUrl:s.sourceUrl,sourceImageUrl:s.sourceImageUrl,sourceHash:s.sourceHash,sourceStamp:s.sourceStamp,selectionHash:s.selectionHash,selectionStamp:s.selectionStamp,startedAt:s.startedAt,attempt:s.attempt,maxAttempts,status,message,elapsedMs:view?.elapsedMs,selectedAttempt:s.selectedAttempt,previews:s.previews}));
+ }
+ function rememberReview(s){manualReview={...s,invalid:false,staged:undefined,previews:s.previews};persistReview(manualReview);}
  function invalidate(message='상품 또는 작업이 변경되어 이전 합성 요청을 취소했습니다.'){
   epoch++;
+  if(manualReview){manualReview.invalid=true;persistReview(manualReview,{allowed:false,status:'cancelled',message});}
   if(active){active.invalid=true;view={...timing(active,true),status:'cancelled',style:active.style,key:active.key,message};onInvalidate({jobId:active.jobId});}
  }
  function cancel({requestId}={}){
@@ -61,7 +68,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   const selection=fs.readFileSync(selectionPath),selected=JSON.parse(selection);
   if(selected.key!==key||selected.style!==style)throw changed();
   const original=fs.readFileSync(sourcePath),sourceHash=hash(original);
-  const s={epoch,requestId,jobId:id(),style,key,sourceUrl:current.product.sourceUrl,sourceImageUrl:current.product.images[key],product:current.product,folder,revision:current.revision,sourcePath,sourceHash,original,sourceStamp:stamp(sourcePath),selectionPath,selectionHash:hash(selection),selectionStamp:stamp(selectionPath),started:performance.now(),startedAt:Date.now(),attempt:1};
+  const s={epoch,requestId,jobId:id(),style,key,sourceUrl:current.product.sourceUrl,sourceImageUrl:current.product.images[key],product:current.product,folder,revision:current.revision,sourcePath,sourceHash,original,sourceStamp:stamp(sourcePath),selectionPath,selectionHash:hash(selection),selectionStamp:stamp(selectionPath),started:performance.now(),startedAt:Date.now(),attempt:1,previews:[]};
   s.cacheKey=hash(JSON.stringify({style,key,sourceUrl:s.sourceUrl,sourceHash,settings:cacheSettings}));
   assertCurrent(s);return s;
  }
@@ -76,16 +83,18 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
    return m.width===1500&&m.height===1500&&m.format==='jpeg'?bytes:null;
   }catch{return null;}
  }
- function activate(s,bytes,{reused=false}={}){
+ function activate(s,bytes,{reused=false,manual=false,selectedAttempt}={}){
   // Nothing asynchronous is allowed between this final validation and rename.
   // Node cannot interleave another product/selection mutation in this section.
   assertCurrent(s);
   const outputHash=hash(bytes),file='main-composite-'+id()+'.jpg';
   fs.writeFileSync(path.join(s.folder,file),bytes,{flag:'wx'});
   assertCurrent(s);
-  atomic(path.join(s.folder,'background-image.json'),JSON.stringify({file,style:s.style,sourceUrl:s.sourceUrl,sourceKey:s.key,sourceHash:s.sourceHash,outputHash,cacheKey:s.cacheKey,settings:cacheSettings,reviewed:true,createdAt:new Date().toISOString()}));
-  const result={ok:true,cached:reused,file,elapsedMs:Math.round(performance.now()-s.started),message:reused?'같은 원본의 검수된 합성 결과를 대표이미지에 적용했습니다.':'원본을 보존한 1500×1500 합성 결과를 대표이미지에 적용했습니다.'};
-  view={...timing(s),status:'complete',style:s.style,key:s.key,sourceUrl:s.sourceUrl,jobId:s.jobId,requestId:s.requestId,...result};active=null;
+  const selected=s.previews?.find(p=>p.attempt===selectedAttempt);
+  atomic(path.join(s.folder,'background-image.json'),JSON.stringify({file,style:s.style,sourceUrl:s.sourceUrl,sourceKey:s.key,sourceHash:s.sourceHash,outputHash,cacheKey:manual?undefined:s.cacheKey,settings:manual?{...cacheSettings,composition:selected?.recipe||'legacy-manual-preview'}:cacheSettings,reviewed:true,...(manual?{manual:true,reviewer:'user',selectedAttempt}:{}),createdAt:new Date().toISOString()}));
+  const result={ok:true,cached:reused,file,elapsedMs:Math.round(performance.now()-s.started),...(manual?{manual:true,selectedAttempt}:{}),message:manual?'직접 선택하고 승인한 합성 결과를 대표이미지에 적용했습니다.':reused?'같은 원본의 검수된 합성 결과를 대표이미지에 적용했습니다.':'원본을 보존한 1500×1500 합성 결과를 대표이미지에 적용했습니다.'};
+  view={...timing(manual?{...s,attempt:selectedAttempt}:s),status:'complete',style:s.style,key:s.key,sourceUrl:s.sourceUrl,jobId:s.jobId,requestId:s.requestId,...result};active=null;
+  if(s.previews?.length){manualReview={...s,invalid:false,staged:undefined};persistReview(manualReview);}
   return result;
  }
  async function prepare(input){
@@ -114,7 +123,9 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
    if(m.width!==1500||m.height!==1500||m.format!=='jpeg')throw Error('합성 결과 규격이 올바르지 않습니다.');
    const previewPath=path.join(s.folder,'background-preview-'+s.jobId+'-attempt-'+s.attempt+'.jpg');
    fs.writeFileSync(previewPath,bytes,{flag:'wx'});s.staged={bytes,hash:hash(bytes),previewPath,attempt:s.attempt};
+   s.previews.push({attempt:s.attempt,file:path.basename(previewPath),hash:s.staged.hash,recipe:BACKGROUND_COMPOSITE_VERSION});
    view={...timing(s),status:'review',style:s.style,key:s.key,message:'원본 합성을 마쳤습니다. 최종 이미지 검수 후 자동 적용합니다.'};
+   rememberReview(s);
    return {ok:true,jobId,attempt:s.attempt,maxAttempts,previewPath,width:1500,height:1500,originalPreserved:true};
   }catch(error){if(active===s&&!s.invalid){view={...timing(s,true),status:'error',style:s.style,key:s.key,message:error.message};}throw error;}
   finally{s.processing=false;}
@@ -125,8 +136,10 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   const qualityReason=typeof reason==='string'?reason.replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,160):'';
   if(!qualityReason)throw Error('보완할 이미지 품질 문제를 구체적으로 입력해 주세요.');
   if(s.attempt>=maxAttempts)throw Object.assign(Error('총 '+maxAttempts+'회 합성 후에도 품질 보완이 필요합니다: '+qualityReason+'. 원본 대표이미지는 유지됩니다.'),{code:'BACKGROUND_QUALITY_RETRY_LIMIT'});
+  s.previews.find(p=>p.attempt===s.attempt).reason=qualityReason;
   s.attempt++;s.staged=null;s.retryReason=qualityReason;
   view={...timing(s),status:'generating',style:s.style,key:s.key,message:'배경 합성 '+s.attempt+'/'+maxAttempts+'회 · 보완: '+qualityReason};
+  rememberReview(s);
   return {...inspect({jobId}),reason:qualityReason,message:view.message};
  }
  function applicationWait(s){
