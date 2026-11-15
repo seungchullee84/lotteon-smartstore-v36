@@ -56,6 +56,7 @@ test('legacy third-attempt history remains viewable and manually applicable afte
  assert.equal(restored.status().maxAttempts,3);assert.deepEqual(restored.preview({jobId:f.jobId,attempt:3}),f.outputs[2]);
  assert.throws(()=>restored.retry({jobId:f.jobId,reason:'old automatic job'}),/변경/);
  restored.manualApply({jobId:f.jobId,attempt:3,userApproved:true});
+ assert.equal(JSON.parse(await readFile(f.reviewFile)).maxAttempts,3);
  assert.equal(JSON.parse(await readFile(path.join(f.folder,'background-image.json'))).outputHash,hash(f.outputs[2]));
  assert.deepEqual(await readFile(path.join(f.folder,'extra1.jpg')),f.source);
 });

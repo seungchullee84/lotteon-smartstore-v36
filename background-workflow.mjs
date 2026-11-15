@@ -27,7 +27,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
  const previewFile=(jobId,attempt,file)=>file==='background-preview-'+jobId+'-attempt-'+attempt+'.jpg'||attempt===1&&file==='background-preview-'+jobId+'.jpg';
  function persistReview(s,{allowed=!s.invalid,status=view?.status,message=view?.message}={}){
   if(!s.previews?.length)return;
-  atomic(path.join(s.folder,'background-review.json'),JSON.stringify({version:1,allowed,folder:s.folder,jobId:s.jobId,requestId:s.requestId,style:s.style,key:s.key,sourceUrl:s.sourceUrl,sourceImageUrl:s.sourceImageUrl,sourceHash:s.sourceHash,sourceStamp:s.sourceStamp,selectionHash:s.selectionHash,selectionStamp:s.selectionStamp,startedAt:s.startedAt,attempt:s.attempt,maxAttempts,status,message,elapsedMs:view?.elapsedMs,selectedAttempt:s.selectedAttempt,previews:s.previews}));
+  atomic(path.join(s.folder,'background-review.json'),JSON.stringify({version:1,allowed,folder:s.folder,jobId:s.jobId,requestId:s.requestId,style:s.style,key:s.key,sourceUrl:s.sourceUrl,sourceImageUrl:s.sourceImageUrl,sourceHash:s.sourceHash,sourceStamp:s.sourceStamp,selectionHash:s.selectionHash,selectionStamp:s.selectionStamp,startedAt:s.startedAt,attempt:s.attempt,maxAttempts:Math.max(maxAttempts,s.attempt),status,message,elapsedMs:view?.elapsedMs,selectedAttempt:s.selectedAttempt,previews:s.previews}));
  }
  function rememberReview(s){manualReview={...s,invalid:false,staged:undefined,previews:s.previews};persistReview(manualReview);}
  function invalidate(message='상품 또는 작업이 변경되어 이전 합성 요청을 취소했습니다.'){
