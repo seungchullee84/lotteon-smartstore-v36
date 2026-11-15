@@ -17,11 +17,11 @@ test('모든 품번은 구매 장점 2~4개와 사진 연결을 모두 확인한
  }
 });
 
-test('공식 색상 사진 조회 실패는 원인을 표시하고 채워진 팔레트는 다시 막지 않는다',()=>{
- const detail={photoCount:5,sellingPoints:[{},{},{}],paletteImages:{},palettePendingReasons:{'04블랙':'공식 사진 조회 시간이 초과되었습니다.'}};
+test('선택적 공식 사진이 없어도 나머지 준비는 계속하고 누락 사유만 보관한다',()=>{
+ const detail={photoCount:5,sellingPoints:[{},{},{}],paletteImages:{},palettePendingReasons:{'04블랙':'공식 사진 조회 시간이 초과되었습니다.'},galleryPendingReasons:{'04블랙':'공식 사진이 없습니다.'}};
  const listing={extras:[],manifest:{photoReview:{status:'ready'}}};
  const pending=smartstorePreparationStatus({style:'356946',smartstoreDetail:detail},listing);
- assert.equal(pending.templateReady,false);assert.deepEqual(pending.palettePendingColors,['04블랙']);assert.match(pending.message,/04블랙.*조회 시간/);
+ assert.equal(pending.templateReady,true);assert.equal(pending.status,'ready');assert.deepEqual(pending.palettePendingColors,['04블랙']);assert.equal(pending.message,undefined);assert.match(pending.optionalPhotoNotes.join(' '),/04블랙.*조회 시간/);assert.match(pending.optionalPhotoNotes.join(' '),/공식 사진이 없습니다/);
  const ready=smartstorePreparationStatus({style:'356946',smartstoreDetail:{...detail,paletteImages:{'04블랙':'/smartstore-photo/current'}}},listing);
  assert.equal(ready.templateReady,true);assert.deepEqual(ready.palettePendingColors,[]);
 });
