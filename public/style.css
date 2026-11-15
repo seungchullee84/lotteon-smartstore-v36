@@ -921,9 +921,15 @@ header>.bar #refreshPage{margin-left:0}
 .lotte-category-summary .channel .lotte-category-step-number{background:#dfeae1;color:#42664f}
 .lotte-category-summary .lotte-category-step dt small{margin-left:auto;color:#738279;font-size:11px;font-weight:400}
 .lotte-category-summary .lotte-category-step dd{margin:0;min-width:0}
-.lotte-category-summary .lotte-category-parents{display:block;margin:0 0 4px;color:#79756e;font-size:12px;font-weight:400;line-height:1.7;word-break:keep-all;overflow-wrap:anywhere}
-.lotte-category-summary .lotte-category-selected{display:block;color:#383c35;font-size:21px;font-weight:750;line-height:1.4;letter-spacing:-.025em;word-break:keep-all;overflow-wrap:anywhere}
-.lotte-category-summary .channel .lotte-category-selected{color:#345440}
+.lotte-category-summary .lotte-category-step dd.lotte-category-levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.lotte-category-summary .lotte-category-level{display:block;min-width:0;padding-left:10px;border-left:1px solid #e2dbd0}
+.lotte-category-summary .lotte-category-level:first-child{padding-left:0;border-left:0}
+.lotte-category-summary .channel .lotte-category-level{border-left-color:#d4dfd6}
+.lotte-category-summary .lotte-category-level-label{display:block;margin-bottom:5px;color:#817a6f;font-size:11px;font-weight:500;line-height:1.5}
+.lotte-category-summary .channel .lotte-category-level-label{color:#768479}
+.lotte-category-summary .lotte-category-level-value{display:block;color:#393d36;font-size:14px;font-weight:650;line-height:1.65;letter-spacing:-.02em;word-break:keep-all;overflow-wrap:anywhere}
+.lotte-category-summary .channel .lotte-category-level-value{color:#345440}
+.lotte-category-summary .lotte-category-level:nth-child(n+4){grid-column:1/-1;padding:10px 0 0;border-left:0;border-top:1px solid #d4dfd6}
 .lotte-category-summary #lotteCategoryValidationMessage{padding:10px 12px;margin:0 0 14px;border-radius:7px;background:#fff1de;color:#82561e;font-size:12px;line-height:1.65}
 .lotte-category-summary #lotteCategoryValidationMessage[hidden],.lotte-category-summary #lotteCategoryValidationIssues[hidden],.lotte-category-summary #lotteCategorySuggestionStatus[hidden]{display:none!important}
 .lotte-category-summary .lotte-category-summary-footer{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding-top:14px;margin-top:16px;border-top:1px solid #e9e3d9}
@@ -933,4 +939,4 @@ header>.bar #refreshPage{margin-left:0}
 .lotte-category-summary .lotte-category-reference p{margin:9px 0 0;color:#77756e;font-size:11px;line-height:1.8;word-break:keep-all;overflow-wrap:anywhere}
 .lotte-category-summary #lotteCategorySuggest{flex:0 0 auto;width:auto;min-height:30px;margin:0;padding:4px 0;border:0;border-radius:0;background:transparent;color:#666e64;font-size:12px;line-height:1.6;text-decoration:underline;text-underline-offset:3px;box-shadow:none}
 .lotte-category-summary #lotteCategorySuggest:hover:not(:disabled){color:#3b5544}
-@media(max-width:540px){.lotte-category-validation.lotte-category-summary{padding:15px}.lotte-category-summary .lotte-category-summary-header{gap:8px}.lotte-category-summary .lotte-category-summary-title{display:block}.lotte-category-summary h4{margin-bottom:6px;font-size:17px}.lotte-category-summary #lotteCategoryValidationSummary{font-size:11px}.lotte-category-summary .lotte-category-step{padding:12px}.lotte-category-summary .lotte-category-selected{font-size:20px}.lotte-category-summary .lotte-category-step dt small{margin-left:0}}
+@media(max-width:540px){.lotte-category-validation.lotte-category-summary{padding:15px}.lotte-category-summary .lotte-category-summary-header{gap:8px}.lotte-category-summary .lotte-category-summary-title{display:block}.lotte-category-summary h4{margin-bottom:6px;font-size:17px}.lotte-category-summary #lotteCategoryValidationSummary{font-size:11px}.lotte-category-summary .lotte-category-step{padding:12px}.lotte-category-summary .lotte-category-step dd.lotte-category-levels{gap:7px}.lotte-category-summary .lotte-category-level{padding-left:7px}.lotte-category-summary .lotte-category-level-value{font-size:13px}.lotte-category-summary .lotte-category-step dt small{margin-left:0}}

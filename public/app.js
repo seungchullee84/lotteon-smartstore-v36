@@ -243,9 +243,15 @@ function renderLotteCategoryPath(element,values){
  const path=values.map(value=>String(value||'미지정')),signature=JSON.stringify(path);
  if(element.dataset.path===signature)return;
  const names=path.map(value=>value.replace(/^[A-Z0-9]+\s*[:：]\s*/i,''));
- const parents=document.createElement('span');parents.className='lotte-category-parents';parents.textContent=names.slice(0,-1).join(' › ');
- const selected=document.createElement('strong');selected.className='lotte-category-selected';selected.textContent=names.at(-1)||'미지정';
- element.replaceChildren(parents,selected);element.title=path.join(' → ');element.dataset.path=signature;
+ const levels=['대분류','중분류','소분류','세분류'];
+ element.classList.add('lotte-category-levels');
+ element.replaceChildren(...names.map((name,index)=>{
+  const field=document.createElement('span');field.className='lotte-category-level';field.title=path[index];
+  const label=document.createElement('span');label.className='lotte-category-level-label';label.textContent=levels[index]||'세부 분류';
+  const value=document.createElement('strong');value.className='lotte-category-level-value';value.textContent=name;
+  field.append(label,value);return field;
+ }));
+ element.title=path.join(' → ');element.dataset.path=signature;
 }
 function renderLotteCategoryValidation(validation,status=validation?.status||'pending'){
  const panel=$('lotteCategoryValidation'),snapshot=lotteCategorySnapshot(),category=snapshot?.category||{};
