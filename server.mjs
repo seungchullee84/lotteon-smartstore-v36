@@ -61,7 +61,8 @@ import {execFile,spawn} from 'node:child_process';
 import {createProductEditStore} from './product-edits.mjs';
 import {validateTemplateHeadline,templateHeadlineEdits} from './smartstore-template-headline.mjs';
 import {suggestMissingLotteCategory} from './lotte-category-suggest.mjs';
-import {validateLotteCategory,assertLotteCategory} from './lotte-category-validation.mjs';
+import {validateLotteCategory} from './lotte-category-validation.mjs';
+import {bridgeLotteCategory,requireLotteCategoryBridge} from './lotte-category-bridge.mjs';
 import {searchProductTags,saveSelectedProductTags,selectedProductTagResearch,removeProductTag} from './smartstore-tag-selection.mjs';
 import {applyCollectedMaterial,assertAdultProduct,collect,parseProductInput,buildKeywords,repairCategoryFields} from './product.mjs';
 import {LotteAutomation} from './automation.mjs';
@@ -870,9 +871,10 @@ const server=http.createServer(async(req,res)=>{
         if(b.category&&Object.hasOwn(b.category,'channelCodes'))category.channelCodes=b.category.channelCodes&&typeof b.category.channelCodes==='object'?Object.fromEntries(['major','middle','small','detail'].map(key=>[key,String(b.category.channelCodes[key]||'').slice(0,40)])):undefined;
         const current={...state.product,category,...(typeof b.gender==='string'?{gender:b.gender.slice(0,20)}:{}),...(typeof b.name==='string'?{name:b.name.slice(0,300)}:{})};
         const result=b.validateOnly===true?{category,filled:[],missing:[],message:'현재 입력한 분류를 확인했습니다.'}:suggestMissingLotteCategory(current);
+        const bridge=bridgeLotteCategory({...current,category:result.category});
+        result.category=bridge.category;
         const validation=validateLotteCategory({...current,category:result.category});
-        if(validation.ready)result.category=validation.category;
-        return json(res,200,{...result,validation});
+        return json(res,200,{...result,validation,bridge});
       }
       if(url.pathname==='/api/lotte-current-brushed-category'){
         if(state.busy||!state.product||b.style!==state.product.style)throw Error('현재 상품과 작업 상태를 확인해 주세요.');
@@ -884,7 +886,7 @@ const server=http.createServer(async(req,res)=>{
         if(state.busy)return json(res,409,{error:'진행 중인 작업이 있습니다.'});
         if(!state.product||b.product?.style!==state.product.style)throw Error('먼저 해당 품번 정보를 수집해 주세요.');
         // Source images are server-owned: edited client data cannot redirect uploads or HTML.
-        const p={...b.product,images:state.product.images,colorImages:state.product.colorImages,originalDetailUrl:state.product.originalDetailUrl,sourceCategory:state.product.sourceCategory,sourceUrl:state.product.sourceUrl,missingOriginalDetailUrl:state.product.missingOriginalDetailUrl,detailFallbackApproved:state.product.detailFallbackApproved};p.category={...state.product.category,...p.category};validateProduct(p);p.category=assertLotteCategory(p);
+        const p={...b.product,images:state.product.images,colorImages:state.product.colorImages,originalDetailUrl:state.product.originalDetailUrl,sourceCategory:state.product.sourceCategory,sourceUrl:state.product.sourceUrl,missingOriginalDetailUrl:state.product.missingOriginalDetailUrl,detailFallbackApproved:state.product.detailFallbackApproved};p.category=requireLotteCategoryBridge({...p,category:{...state.product.category,...p.category}});validateProduct(p,{preserveCategory:true});
         await writeFile(path.join(state.folder,'reviewed.json'),JSON.stringify(p,null,2));
         state.product=p;job('register',()=>bot.run(p,state.folder,b.finalize===true));return json(res,202,{ok:true});
       }

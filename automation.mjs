@@ -1,5 +1,6 @@
 import {requireMaterialInput} from './notice.mjs';
-import {assertLotteCategory,sameCategoryLabel} from './lotte-category-validation.mjs';
+import {sameCategoryLabel} from './lotte-category-validation.mjs';
+import {requireLotteCategoryBridge} from './lotte-category-bridge.mjs';
 import {categoryKey,saveCategoryMatch} from './category-cache.mjs';
 import {BrowserAutomation} from './browser-connection.mjs';
 import {createBrowserLoginStore} from './browser-login-store.mjs';
@@ -321,8 +322,8 @@ export class LotteAutomation extends BrowserAutomation {
   }
   async run(p,folder,finalize){
     validateStyle(p.style);this.stopped=false;
-    p={...p,category:assertLotteCategory(p)};
-    this.log('1차·2차 분류 매칭 확인: '+p.category.commonSmall+' / '+p.category.channelMiddle+' > '+p.category.channelSmall);
+    p={...p,category:requireLotteCategoryBridge(p)};
+    this.log('1차 기준 2차 분류 연결: '+p.category.commonSmall+' / '+p.category.channelMiddle+' > '+p.category.channelSmall+' · 세부 분류 수정 가능');
     const login=!this.page||this.page.isClosed()||this.browser&&!this.browser.isConnected()?await this.open():await this.ensureLogin();
     if(login.status==='expired')throw Error(LOTTE_SESSION_EXPIRED);
     p={...p,material:requireMaterialInput(p.material)};
@@ -898,7 +899,7 @@ export class LotteAutomation extends BrowserAutomation {
     this.log('더블클릭 후 동일 품번의 2차 채널 창 확인: '+p.style);
   }
   async selectMatchedChannelCategory(p){
-    p.category=assertLotteCategory(p);
+    p.category=requireLotteCategoryBridge(p);
     const c=p.category;
     for(let attempt=1;attempt<=3;attempt++){
       this.check();await this.assertChannelStyle(p);
@@ -985,14 +986,14 @@ export class LotteAutomation extends BrowserAutomation {
         /_body_gridrow_(\d+)_cell_\1_2$/.test(cell.id)&&!!cell.textContent.trim())));
   }
   async channel(p,folder,{resume=false}={}){
-    p={...p,category:assertLotteCategory(p)};await this.waitChannelReady();await this.assertChannelStyle(p);
+    p={...p,category:requireLotteCategoryBridge(p)};await this.waitChannelReady();await this.assertChannelStyle(p);
     const optionBlock=this.page.locator('[id$="div_input12_div_body"]').filter({visible:true}).last();
     if(resume&&await this.canResumeChannelOptions(p)){
       const c=p.category;
       if(!await this.hasStandardCategory(c.channelMajor,c.channelMiddle,c.channelSmall,c.channelDetail,c.channelCodes)){
         const rows=await this.locator('div_input05_div_body_grd_Dspctgr').locator('[id]').evaluateAll(es=>es.filter(e=>/body_gridrow_\d+GridAreaContainerElement_inner$/.test(e.id)).length);
-        if(rows)throw Error('기존 2차 분류가 현재 1차와 매칭되지 않습니다. 기존 입력을 보존했으니 분류를 확인해 주세요.');
-        await this.selectMatchedChannelCategory(p);
+        if(rows)this.log('기존 2차 분류 유지 · 필요한 세부 분류는 직접 수정할 수 있습니다. 나머지 입력을 계속합니다.');
+        else await this.selectMatchedChannelCategory(p);
       }
       this.log('기존 색상·사이즈 입력을 확인했습니다. 롯데ON 옵션 선택부터 이어갑니다.');
     }else{
