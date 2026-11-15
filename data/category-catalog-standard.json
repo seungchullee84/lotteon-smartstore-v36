@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "https://together.lotteshopping.com/EMDV3/index.html",
-  "collectedAt": "2026-10-20T05:04:41.000Z",
+  "collectedAt": "2026-10-20T05:04:41Z",
   "scope": "브랜드여성의류·브랜드남성의류 중·소·세분류",
   "complete": true,
   "majors": [
@@ -854,7 +854,6 @@
     {
       "code": "BC35000000",
       "name": "브랜드잡화/넥타이",
-      "partial": true,
       "middles": [
         {
           "code": "BC35100000",
@@ -877,11 +876,587 @@
               "details": []
             }
           ]
+        },
+        {
+          "code": "BC35030000",
+          "name": "모자",
+          "smalls": [
+            {
+              "code": "BC35030100",
+              "name": "귀달이모자",
+              "details": []
+            },
+            {
+              "code": "BC35030200",
+              "name": "벙거지/버킷햇",
+              "details": []
+            },
+            {
+              "code": "BC35030300",
+              "name": "베레모",
+              "details": []
+            },
+            {
+              "code": "BC35030400",
+              "name": "두건",
+              "details": []
+            },
+            {
+              "code": "BC35030500",
+              "name": "썬캡/썬바이저",
+              "details": []
+            },
+            {
+              "code": "BC35030600",
+              "name": "스냅백",
+              "details": []
+            },
+            {
+              "code": "BC35030700",
+              "name": "왕골/밀집모자",
+              "details": []
+            },
+            {
+              "code": "BC35030800",
+              "name": "털모자",
+              "details": []
+            },
+            {
+              "code": "BC35030900",
+              "name": "페도라/중절모",
+              "details": []
+            },
+            {
+              "code": "BC35031000",
+              "name": "귀마개",
+              "details": []
+            },
+            {
+              "code": "BC35031100",
+              "name": "헌팅캡",
+              "details": []
+            },
+            {
+              "code": "BC35031200",
+              "name": "비니",
+              "details": []
+            },
+            {
+              "code": "BC35031300",
+              "name": "야구모자",
+              "details": []
+            }
+          ]
+        },
+        {
+          "code": "BC35070000",
+          "name": "양말",
+          "smalls": [
+            {
+              "code": "BC35070100",
+              "name": "남성양말",
+              "details": []
+            },
+            {
+              "code": "BC35070200",
+              "name": "여성양말",
+              "details": []
+            }
+          ]
+        },
+        {
+          "code": "BC35120000",
+          "name": "패션장갑",
+          "smalls": [
+            {
+              "code": "BC35120100",
+              "name": "남성장갑",
+              "details": []
+            },
+            {
+              "code": "BC35120200",
+              "name": "아동장갑",
+              "details": []
+            },
+            {
+              "code": "BC35120300",
+              "name": "여성장갑",
+              "details": []
+            }
+          ]
         }
       ],
       "verifiedAt": "2026-10-28T04:01:10.795Z",
-      "verification": "롯데 실제 채널 분류 목록 선택 확인 · 상품 저장/변경 안 함"
+      "verification": "롯데 실제 채널 분류 목록 선택 확인 · 상품 저장/변경 안 함",
+      "partial": true,
+      "observedAt": "2026-11-15T06:15:15.515Z",
+      "evidence": "2026-11-15 실제 채널 표준카테고리 목록 조회; 상품 추가·저장 없음"
+    },
+    {
+      "code": "BC33000000",
+      "name": "브랜드언더웨어",
+      "middles": [
+        {
+          "code": "BC33050000",
+          "name": "남성팬티",
+          "smalls": [
+            {
+              "code": "BC33050100",
+              "name": "기능성팬티",
+              "details": []
+            },
+            {
+              "code": "BC33050200",
+              "name": "드로즈",
+              "details": []
+            },
+            {
+              "code": "BC33050300",
+              "name": "삼각팬티",
+              "details": []
+            },
+            {
+              "code": "BC33050400",
+              "name": "트렁크",
+              "details": []
+            },
+            {
+              "code": "BC33050500",
+              "name": "팬티런닝세트",
+              "details": []
+            }
+          ]
+        },
+        {
+          "code": "BC33020000",
+          "name": "남성내의",
+          "smalls": [
+            {
+              "code": "BC33020100",
+              "name": "내의",
+              "details": []
+            },
+            {
+              "code": "BC33020200",
+              "name": "모시메리",
+              "details": []
+            },
+            {
+              "code": "BC33020300",
+              "name": "발열내의",
+              "details": []
+            },
+            {
+              "code": "BC33020400",
+              "name": "타이즈",
+              "details": []
+            }
+          ]
+        },
+        {
+          "code": "BC33030000",
+          "name": "남성런닝",
+          "smalls": [
+            {
+              "code": "BC33030100",
+              "name": "런닝세트",
+              "details": []
+            },
+            {
+              "code": "BC33030200",
+              "name": "민소매",
+              "details": []
+            },
+            {
+              "code": "BC33030300",
+              "name": "반팔",
+              "details": []
+            }
+          ]
+        },
+        {
+          "code": "BC33060000",
+          "name": "보정속옷",
+          "smalls": [
+            {
+              "code": "BC33060100",
+              "name": "거들/힙업팬티",
+              "details": []
+            },
+            {
+              "code": "BC33060200",
+              "name": "니퍼/복대",
+              "details": []
+            },
+            {
+              "code": "BC33060300",
+              "name": "바디쉐이퍼/올인원",
+              "details": []
+            }
+          ]
+        },
+        {
+          "code": "BC33070000",
+          "name": "브라",
+          "smalls": [
+            {
+              "code": "BC33070100",
+              "name": "노와이어",
+              "details": []
+            },
+            {
+              "code": "BC33070200",
+              "name": "누드브라",
+              "details": []
+            },
+            {
+              "code": "BC33070300",
+              "name": "누디/노라인",
+              "details": []
+            },
+            {
+              "code": "BC33070400",
+              "name": "몰드/볼륨업",
+              "details": []
+            },
+            {
+              "code": "BC33070500",
+              "name": "브라렛",
+              "details": []
+            },
+            {
+              "code": "BC33070600",
+              "name": "섹시브라(19)",
+              "details": []
+            },
+            {
+              "code": "BC33070700",
+              "name": "자수/레이스",
+              "details": []
+            }
+          ]
+        },
+        {
+          "code": "BC33080000",
+          "name": "브라팬티세트",
+          "smalls": [
+            {
+              "code": "BC33080100",
+              "name": "노와이어",
+              "details": []
+            },
+            {
+              "code": "BC33080200",
+              "name": "누디/노라인",
+              "details": []
+            },
+            {
+              "code": "BC33080300",
+              "name": "몰드/볼륨업",
+              "details": []
+            },
+            {
+              "code": "BC33080400",
+              "name": "브라렛",
+              "details": []
+            },
+            {
+              "code": "BC33080500",
+              "name": "섹시란제리(19)",
+              "details": []
+            },
+            {
+              "code": "BC33080600",
+              "name": "자수/레이스",
+              "details": []
+            }
+          ]
+        },
+        {
+          "code": "BC33090000",
+          "name": "여성내의",
+          "smalls": [
+            {
+              "code": "BC33090100",
+              "name": "내의",
+              "details": []
+            },
+            {
+              "code": "BC33090200",
+              "name": "모시메리",
+              "details": []
+            },
+            {
+              "code": "BC33090300",
+              "name": "발열내의",
+              "details": []
+            },
+            {
+              "code": "BC33090400",
+              "name": "타이즈",
+              "details": []
+            }
+          ]
+        },
+        {
+          "code": "BC33100000",
+          "name": "여성런닝/속바지",
+          "smalls": [
+            {
+              "code": "BC33100100",
+              "name": "런닝/나시",
+              "details": []
+            },
+            {
+              "code": "BC33100200",
+              "name": "브라탑",
+              "details": []
+            },
+            {
+              "code": "BC33100300",
+              "name": "속바지/속치마",
+              "details": []
+            },
+            {
+              "code": "BC33100400",
+              "name": "슬립",
+              "details": []
+            }
+          ]
+        },
+        {
+          "code": "BC33130000",
+          "name": "여성팬티",
+          "smalls": [
+            {
+              "code": "BC33130100",
+              "name": "노라인/햄팬티",
+              "details": []
+            },
+            {
+              "code": "BC33130200",
+              "name": "삼각팬티",
+              "details": []
+            },
+            {
+              "code": "BC33130300",
+              "name": "섹시팬티(19)",
+              "details": []
+            },
+            {
+              "code": "BC33130400",
+              "name": "위생팬티",
+              "details": []
+            },
+            {
+              "code": "BC33130500",
+              "name": "팬티세트",
+              "details": []
+            }
+          ]
+        },
+        {
+          "code": "BC33140000",
+          "name": "잠옷",
+          "smalls": [
+            {
+              "code": "BC33140200",
+              "name": "원피스잠옷",
+              "details": []
+            },
+            {
+              "code": "BC33140500",
+              "name": "커플잠옷",
+              "details": []
+            },
+            {
+              "code": "BC33140600",
+              "name": "상하세트잠옷",
+              "details": []
+            },
+            {
+              "code": "BC33140700",
+              "name": "잠옷상의",
+              "details": []
+            },
+            {
+              "code": "BC33140800",
+              "name": "잠옷하의",
+              "details": []
+            }
+          ]
+        },
+        {
+          "code": "BC33160000",
+          "name": "홈웨어/이지웨어",
+          "smalls": [
+            {
+              "code": "BC33160400",
+              "name": "홈웨어원피스",
+              "details": []
+            },
+            {
+              "code": "BC33160600",
+              "name": "가운",
+              "details": []
+            },
+            {
+              "code": "BC33160700",
+              "name": "홈웨어상의",
+              "details": []
+            },
+            {
+              "code": "BC33160800",
+              "name": "홈웨어세트",
+              "details": []
+            },
+            {
+              "code": "BC33160900",
+              "name": "홈웨어하의",
+              "details": []
+            }
+          ]
+        },
+        {
+          "code": "BC33150000",
+          "name": "커플속옷",
+          "smalls": [
+            {
+              "code": "BC33150100",
+              "name": "커플속옷",
+              "details": []
+            }
+          ]
+        },
+        {
+          "code": "BC33010000",
+          "name": "기타",
+          "smalls": [
+            {
+              "code": "BC33010100",
+              "name": "기타",
+              "details": []
+            }
+          ]
+        }
+      ],
+      "partial": true,
+      "observedAt": "2026-11-15T06:15:15.515Z",
+      "evidence": "2026-11-15 실제 채널 표준카테고리 목록 조회; 상품 추가·저장 없음"
+    },
+    {
+      "code": "BC30000000",
+      "name": "브랜드가방",
+      "middles": [
+        {
+          "code": "BC30040000",
+          "name": "벨트",
+          "smalls": [
+            {
+              "code": "BC30040100",
+              "name": "남성벨트",
+              "details": []
+            },
+            {
+              "code": "BC30040200",
+              "name": "여성벨트",
+              "details": []
+            }
+          ]
+        },
+        {
+          "code": "BC30030000",
+          "name": "남성가방",
+          "smalls": [
+            {
+              "code": "BC30030100",
+              "name": "백팩",
+              "details": []
+            },
+            {
+              "code": "BC30030200",
+              "name": "서류가방",
+              "details": []
+            },
+            {
+              "code": "BC30030300",
+              "name": "숄더백",
+              "details": []
+            },
+            {
+              "code": "BC30030400",
+              "name": "크로스백",
+              "details": []
+            },
+            {
+              "code": "BC30030500",
+              "name": "클러치",
+              "details": []
+            },
+            {
+              "code": "BC30030600",
+              "name": "토트백",
+              "details": []
+            }
+          ]
+        },
+        {
+          "code": "BC30050000",
+          "name": "여성가방",
+          "smalls": [
+            {
+              "code": "BC30050100",
+              "name": "백팩",
+              "details": []
+            },
+            {
+              "code": "BC30050200",
+              "name": "쇼퍼백",
+              "details": []
+            },
+            {
+              "code": "BC30050300",
+              "name": "숄더백",
+              "details": []
+            },
+            {
+              "code": "BC30050400",
+              "name": "에코백",
+              "details": []
+            },
+            {
+              "code": "BC30050500",
+              "name": "이너백",
+              "details": []
+            },
+            {
+              "code": "BC30050600",
+              "name": "크로스백",
+              "details": []
+            },
+            {
+              "code": "BC30050700",
+              "name": "클러치",
+              "details": []
+            },
+            {
+              "code": "BC30050800",
+              "name": "토트백",
+              "details": []
+            },
+            {
+              "code": "BC30050900",
+              "name": "화장품가방/파우치",
+              "details": []
+            }
+          ]
+        }
+      ],
+      "partial": true,
+      "observedAt": "2026-11-15T06:15:15.515Z",
+      "evidence": "2026-11-15 실제 채널 표준카테고리 목록 조회; 상품 추가·저장 없음"
     }
   ],
-  "completedAt": "2026-10-20T05:07:58.551Z"
+  "completedAt": "2026-10-20T05:07:58.551Z",
+  "latestPartialObservation": "2026-11-15T06:15:15.515Z"
 }
