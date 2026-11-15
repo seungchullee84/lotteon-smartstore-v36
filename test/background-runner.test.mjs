@@ -67,6 +67,18 @@ test('timeout terminates the process and never reports successful completion',as
  await new Promise(resolve=>setTimeout(resolve,60));assert.equal(f.runner.status().phase,'timed-out');assert.deepEqual(f.kills,[4200]);assert.equal(f.failures.length,1);assert.equal(f.exits.length,1);
 });
 
+test('failed cancellation keeps the process slot occupied until actual exit',async t=>{
+ const f=await fixture(t,{killTreeImpl:async()=>{throw Error('private kill failure');}});await f.runner.start({jobId:'job_kill12',prompt:'request'});
+ await assert.rejects(f.runner.cancel(),/중단을 확인하지 못했습니다/);assert.equal(f.runner.status().running,true);
+ await assert.rejects(f.runner.start({jobId:'job_next12',prompt:'request'}),/이미.*진행/);assert.equal(f.calls.length,1);assert.equal(f.failures.length,1);
+ f.children[0].emit('close',null,'SIGTERM');assert.equal(f.runner.status().running,false);
+});
+
+test('cancel during preparation never starts a child process',async t=>{
+ const f=await fixture(t),starting=f.runner.start({jobId:'job_early1',prompt:'request'});
+ assert.deepEqual(await f.runner.cancel(),{cancelled:true});await assert.rejects(starting,/취소/);assert.equal(f.calls.length,0);assert.equal(f.runner.status().phase,'cancelled');
+});
+
 test('stdout/stderr logs are bounded and progress never exposes arbitrary tool output',async t=>{
  const f=await fixture(t,{logLimitBytes:160});await f.runner.start({jobId:'job_logs12',prompt:'request'});
  const child=f.children[0],event=JSON.stringify({type:'item.started',item:{type:'image_generation',output:'SECRET IMAGE CONTENT'}})+'\n';
