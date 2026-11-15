@@ -29,7 +29,7 @@ export function createPendingBackgroundApply({workflow,onComplete=()=>{},onFailu
    try{
     if(!matches(record)){cancel();return;}
     // Do not await between checking ownership and invoking the workflow.
-    const result=workflow.complete(record.payload);
+    const result=record.manual?workflow.manualApply(record.payload):workflow.complete(record.payload);
     if(pending!==record)return;
     if(result?.waiting===true){
      if(matches(record))arm(record);else cancel();
@@ -42,10 +42,14 @@ export function createPendingBackgroundApply({workflow,onComplete=()=>{},onFailu
   },delayMs);
   record.timer?.unref?.();
  }
- function schedule({jobId,reviewed,reuse,attempt}={}){
-  if(typeof jobId!=='string'||!jobId||(reviewed!==true&&reuse!==true)||
+ function schedule({jobId,reviewed,reuse,attempt,userApproved}={}){
+  const manual=userApproved===true;
+  if(typeof jobId!=='string'||!jobId||(userApproved!==undefined&&!manual)||
+   (!manual&&reviewed!==true&&reuse!==true)||
+   (manual&&(typeof workflow.manualApply!=='function'||!Number.isInteger(attempt)))||
    (attempt!==undefined&&(!Number.isInteger(attempt)||attempt<1)))throw Error('검수한 합성 적용 요청을 확인해 주세요.');
-  const record={payload:Object.freeze({jobId,reviewed,reuse,attempt}),expectedAttempt:attempt??workflow.status()?.attempt,timer:null};
+  const payload=manual?{jobId,attempt,userApproved:true}:{jobId,reviewed,reuse,attempt};
+  const record={payload:Object.freeze(payload),manual,expectedAttempt:attempt??workflow.status()?.attempt,timer:null};
   if(!matches(record))return false;
   cancel();pending=record;
   try{arm(record);}catch(error){failure(record,error);return false;}

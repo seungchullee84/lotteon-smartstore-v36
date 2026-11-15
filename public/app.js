@@ -772,7 +772,7 @@ $('extendBackground').onclick=()=>{
 };
 $('backgroundProgressOpen').onclick=()=>$('extendBackground').click();
 function backgroundFailureIsCurrent(failure){
- return backgroundFailure===failure&&failure.style===product?.style&&failure.sourceUrl===product?.sourceUrl&&failure.key===selectedBackgroundImage&&backgroundInputMatchesProduct();
+ return !!failure&&backgroundFailure===failure&&failure.style===product?.style&&failure.sourceUrl===product?.sourceUrl&&failure.key===selectedBackgroundImage&&backgroundInputMatchesProduct();
 }
 $('viewBackgroundFailure').onclick=()=>{
  if(!backgroundFailureIsCurrent(backgroundFailure))return;

@@ -22,16 +22,21 @@ function fakeClock(){
  return {setTimeoutImpl,clearTimeoutImpl,tick,history,count:()=>timers.size,unrefs:()=>unrefs};
 }
 function mockFixture(){
- const clock=fakeClock(),completed=[],failed=[],calls=[],failCalls=[];
+ const clock=fakeClock(),completed=[],failed=[],calls=[],manualCalls=[],failCalls=[];
  let status={jobId:'job-old-001',status:'applying-wait',attempt:1},busy=true,guardError=null;
  const workflow={status:()=>status,complete(payload){
   calls.push({...payload});
   if(guardError)throw guardError;
   if(busy)return {ok:true,waiting:true,jobId:payload.jobId};
   status={...status,status:'complete'};return {ok:true,file:'main-result.jpg'};
+ },manualApply(payload){
+  manualCalls.push({...payload});
+  if(guardError)throw guardError;
+  if(busy)return {ok:true,waiting:true,jobId:payload.jobId,attempt:payload.attempt};
+  status={...status,status:'complete'};return {ok:true,file:'manual-preview-attempt-'+payload.attempt+'.jpg'};
  },fail(value){failCalls.push(value);if(status.jobId===value.jobId)status={...status,status:'error'};}};
  const pending=createPendingBackgroundApply({workflow,...clock,onComplete:value=>completed.push(value),onFailure:value=>failed.push(value)});
- return {clock,workflow,pending,completed,failed,calls,failCalls,
+ return {clock,workflow,pending,completed,failed,calls,manualCalls,failCalls,
   setStatus:value=>{status=value;},idle:()=>{busy=false;},guardFails:()=>{guardError=Error('source changed');}};
 }
 
@@ -115,6 +120,43 @@ test('notification errors do not turn successful application into a workflow fai
  pending.schedule({jobId:'job-old-001',reviewed:true});f.idle();
  assert.doesNotThrow(()=>f.clock.tick());
  assert.equal(f.workflow.status().status,'complete');assert.equal(f.failCalls.length,0);
+});
+
+test('manual queue snapshots explicit approval and applies the chosen earlier preview only when idle',()=>{
+ const f=mockFixture();f.setStatus({jobId:'job-old-001',status:'applying-wait',attempt:1,latestAttempt:3});
+ const payload={jobId:'job-old-001',attempt:1,userApproved:true,reviewed:true,reuse:true};
+ assert.equal(f.pending.schedule(payload),true);
+ payload.attempt=3;payload.userApproved=false;
+ f.clock.tick();assert.equal(f.completed.length,0);assert.equal(f.pending.has('job-old-001'),true);
+ f.idle();f.clock.tick();
+ assert.deepEqual(f.manualCalls,[{jobId:'job-old-001',attempt:1,userApproved:true},{jobId:'job-old-001',attempt:1,userApproved:true}]);
+ assert.equal(f.calls.length,0,'manual approval must never use automatic complete');
+ assert.equal(f.completed[0].file,'manual-preview-attempt-1.jpg');
+ assert.equal(f.clock.count(),0);
+});
+
+test('manual approval must be literal true and include the selected attempt',()=>{
+ const f=mockFixture();
+ for(const userApproved of [false,'true',1])assert.throws(()=>f.pending.schedule({jobId:'job-old-001',attempt:1,userApproved,reviewed:true}),/검수한 합성/);
+ assert.throws(()=>f.pending.schedule({jobId:'job-old-001',userApproved:true}),/검수한 합성/);
+ assert.equal(f.clock.count(),0);assert.equal(f.manualCalls.length,0);assert.equal(f.calls.length,0);
+});
+
+test('cancelled manual callbacks and changed chosen attempts cannot fall back to automatic apply',()=>{
+ for(const mode of ['cancel','attempt','job']){
+  const f=mockFixture();f.pending.schedule({jobId:'job-old-001',attempt:1,userApproved:true});
+  const callback=f.clock.history[0].callback;
+  if(mode==='cancel'){f.pending.cancel();callback();}
+  else{f.setStatus({jobId:mode==='job'?'job-new-002':'job-old-001',status:'applying-wait',attempt:2});f.clock.tick();}
+  assert.equal(f.manualCalls.length,0);assert.equal(f.calls.length,0);assert.equal(f.completed.length,0);assert.equal(f.failed.length,0);assert.equal(f.clock.count(),0);
+ }
+});
+
+test('manual preview guard failure ends the pending job without trying automatic completion',()=>{
+ const f=mockFixture();f.pending.schedule({jobId:'job-old-001',attempt:1,userApproved:true});
+ f.guardFails();f.clock.tick();
+ assert.deepEqual(f.failCalls,[{jobId:'job-old-001',message:'source changed'}]);
+ assert.deepEqual(f.failed,f.failCalls);assert.equal(f.calls.length,0);assert.equal(f.completed.length,0);assert.equal(f.clock.count(),0);
 });
 
 async function actualFixture(t){

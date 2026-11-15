@@ -8,8 +8,9 @@ async function waitForPending(pending){
  assert.ok(pending.length,'준비 응답 대기 상태에 도달해야 한다');
 }
 
-async function fixture(browser){
+async function fixture(browser,options={}){
  const page=await browser.newPage();page.setDefaultTimeout(5000);
+ if(options.clock)await page.clock.install({time:new Date()});
  const errors=[],posts=[],pending=[],pendingComplete=[],pendingDispatch=[];
  page.on('pageerror',error=>errors.push(error.message));
  const product={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=background',rawName:'공식 상품',name:'남성 공식 상품',gender:'남성',consumerPrice:29900,colors:['01검정'],sizes:['M'],material:'면',country:'대한민국',manufactured:'2026-01',washing:'손세탁',keywords:'지오다노,티셔츠',category:{},images:{main:'main.jpg',extra1:'extra1.jpg',extra2:'extra2.jpg'},warnings:[]};
@@ -48,6 +49,13 @@ async function fixture(browser){
     control.backgroundWork={jobId:'cached-job',requestId:prepared.requestId,style:prepared.style,sourceUrl:prepared.sourceUrl,key:prepared.key,status:'applying-wait',message:'합성 완료 · 다른 작업이 끝나면 대표이미지에 적용합니다.',startedAt:Date.now()};
     body={ok:true,waiting:true,jobId:'cached-job',message:control.backgroundWork.message};
    }else body={ok:true,cached:true,file:'main-composite.jpg',elapsedMs:12,message:'동일 원본의 완료된 합성을 대표이미지에 적용했습니다.'};
+  }else if(url.pathname==='/api/background-preview'){
+   body=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aOt0AAAAASUVORK5CYII=','base64');contentType='image/png';
+  }else if(url.pathname==='/api/background-apply-preview'){
+   const selected=route.request().postDataJSON();
+   control.backgroundWork={...control.backgroundWork,status:control.manualWaiting?'applying-wait':'complete',manual:true,selectedAttempt:selected.attempt,message:control.manualWaiting?'합성 완료 · 다른 작업이 끝나면 대표이미지에 적용합니다.':'선택한 결과를 대표이미지에 적용했습니다.'};
+   body={ok:true,waiting:!!control.manualWaiting,message:control.backgroundWork.message};
+   if(!control.manualWaiting)control.imageVersions={main:'manual-result'};
   }else if(!url.pathname.startsWith('/api/')){
    const name=url.pathname==='/'?'index.html':url.pathname.slice(1);
    if(/^[a-z0-9-]+\.(html|js|mjs|css|png)$/.test(name)){
