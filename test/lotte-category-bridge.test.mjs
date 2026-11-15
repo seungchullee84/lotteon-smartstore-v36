@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {bridgeLotteCategory,requireLotteCategoryBridge} from '../lotte-category-bridge.mjs';
 import {allLotteStandardPaths} from '../lotte-category-validation.mjs';
+import {validateProduct} from '../product-validation.mjs';
 const common=JSON.parse(readFileSync(new URL('../data/category-catalog-common.json',import.meta.url),'utf8'));
 
 test('every one of the 83 first-category leaves produces a non-empty selectable second path',()=>{
@@ -36,4 +37,17 @@ test('broader paths are labelled editable rather than falsely claiming exact sub
 });
 test('missing first category is not disguised as a completed bridge',()=>{
  assert.equal(bridgeLotteCategory({gender:'남성',category:{}}).complete,false);
+});
+
+test('known legacy male shirt labels and separately collected accessories receive complete pairs',()=>{
+ const shirt=bridgeLotteCategory({gender:'남성',rawName:'옥스포드 셔츠',category:{commonMiddle:'남성의류상의',commonSmall:'남성셔츠'}});
+ assert.equal(shirt.category.channelMiddle,'캐주얼셔츠');assert.equal(shirt.category.channelSmall,'솔리드셔츠');assert.ok(shirt.category.channelCodes.small);
+ for(const [gender,commonMiddle,commonSmall,channelSmall] of [['남성','벨트','남성벨트','남성벨트'],['여성','벨트','여성벨트','여성벨트'],['여성','패션액세서리','머플러','머플러']]){
+  const result=bridgeLotteCategory({gender,category:{commonMiddle,commonSmall}});assert.equal(result.complete,true);assert.equal(result.category.channelSmall,channelSmall);
+ }
+});
+test('server product validation preserves the first-derived pair instead of reclassifying it from title',()=>{
+ const p={style:'000000',name:'여성 라운드 반팔티 000000',rawName:'라운드 반팔티',sourceCategory:['WOMEN','TOP'],gender:'여성',material:'면 100%',country:'베트남',washing:'손세탁',manufactured:'2026-08',consumerPrice:59800,colors:['01블랙'],sizes:['M'],keywords:'지오다노,가디건',category:{commonMiddle:'M0210 : 여성의류상의',commonSmall:'00847 : 여성가디건'}};
+ p.category=requireLotteCategoryBridge(p);const before=structuredClone(p.category);
+ assert.doesNotThrow(()=>validateProduct(p,{preserveCategory:true}));assert.deepEqual(p.category,before);
 });

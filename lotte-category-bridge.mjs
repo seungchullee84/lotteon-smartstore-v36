@@ -7,7 +7,7 @@ import {sameCategoryLabel,validateLotteCategory} from './lotte-category-validati
 
 const read=name=>JSON.parse(readFileSync(new URL('./data/'+name,import.meta.url),'utf8'));
 const label=s=>String(s||'').replace(/^[A-Z0-9]+\s*[:：]\s*/i,'').replace(/\s/g,'');
-const aliases=s=>new Set(categoryAlternatives(String(s||'')).map(label));
+const aliases=s=>new Set([...categoryAlternatives(String(s||'')),...(label(s)==='남성셔츠'?['남성남방셔츠']:[])].map(label));
 function commonPath(product,common){
  const c=product.category||{},group=common.genders.find(g=>g.gender===product.gender);
  if(!group||c.commonMajor&&!sameCategoryLabel(c.commonMajor,group.major))return null;
@@ -39,6 +39,7 @@ function broaderCandidates(common,paths,gender){
  if(/사파리/.test(leaf))return pick('점퍼/패딩/야상','야상/사파리점퍼');
  if(leaf==='여성스웨트셔츠/후드/집업')return pick('티셔츠/맨투맨').filter(p=>/맨투맨|후드/.test(p.small.name));
  if(leaf==='남성패션트레이닝복')return pick('바지','기모팬츠');
+ if(leaf==='남성피혁의류')return pick('자켓/코트','가죽자켓');
  if(/밍크|기타모피/.test(leaf))return pick('가죽/모피','모피/퍼코트');
  if(/기타.*아우터/.test(leaf))return pick('점퍼/패딩/야상',gender==='남성'?'집업점퍼':'집업/야구/항공점퍼');
  if(/의류세트/.test(leaf))return pick(gender==='여성'?'트레이닝복':'정장',gender==='여성'?'트레이닝세트':'정장세트');
@@ -50,6 +51,11 @@ export function bridgeLotteCategory(product,{standard=loadCatalog(),common=read(
  const before={...product.category},first=commonPath(product,common);
  if(!before.commonMiddle?.trim()||!before.commonSmall?.trim())return {complete:false,review:true,category:before,message:'1차 공통분류를 먼저 채워 주세요.'};
  if(!first){
+  if(/머플러$/.test(label(before.commonSmall))){
+   const major=standard?.majors.find(m=>m.name==='브랜드잡화/넥타이'),middle=major?.middles.find(m=>m.name==='워머/목도리'),small=middle?.smalls.find(s=>s.name==='머플러');
+   if(small)return {complete:true,review:false,category:withPath(before,{major,middle,small}),message:'1차 머플러 기준 2차 연결 완료'};
+  }
+  if(/^(남성|여성)벨트$/.test(label(before.commonSmall)))return {complete:true,review:product.gender==='여성',category:{...before,channelMajor:'브랜드가방',channelMiddle:'벨트',channelSmall:label(before.commonSmall),channelDetail:'',channelCodes:undefined},message:'1차 벨트 기준 2차 연결 · 세부 분류 수정 가능'};
   // Individually collected accessory paths remain outside the apparel tree.
   const verified=validateLotteCategory(product);
   if(verified.ready)return {complete:true,review:false,category:verified.category,message:'1차 기준 2차 분류 연결 완료'};
