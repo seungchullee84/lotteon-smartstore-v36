@@ -2,7 +2,7 @@ import {excludedPhotoReason} from './smartstore-photo-exclusions.mjs';
 import {savePhotoMappings} from './smartstore-photo-mapping-cache.mjs';
 import {extractLongMannequinPhotos} from './smartstore-long-photo-import.mjs';
 import {createWorker} from 'tesseract.js';
-import {readFile,writeFile,mkdir,rename,unlink} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,rename} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
@@ -220,32 +220,18 @@ export async function applyImportedPhotos(product,folder,choices,{dataRoot,deskt
  }
  // Validate the entire batch before touching the style folder. Existing photos are never overwritten.
  desktop||=path.dirname(await imageDownloadFolder());const parent=path.join(desktop,'상품등록기사진폴더'),folders=await resolveStylePhotoFolders(parent,product.style);if(folders.length>1)throw Error('같은 품번의 사진 폴더가 여러 개입니다. 기존 상품 사진을 가져올 폴더를 하나로 정리해 주세요.');const target=folders[0]||path.join(parent,product.style);await mkdir(target,{recursive:true});
- const originals=await findPhotos(product,{desktop});let hasMain=originals.some(p=>/^1(?:번)?\.(jpe?g|png|webp)$/i.test(p.name));
- if(!automatic&&!hasMain&&!selected.some(p=>p.role==='front'))throw Error('대표사진이 없으므로 정면 사진을 한 장 선택해 주세요.');
+ const originals=await findPhotos(product,{desktop,dataRoot});
  const root=path.join(dataRoot,'smartstore-details',product.style);await mkdir(root,{recursive:true});let old;
  try{old=JSON.parse(await readFile(path.join(root,'draft.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(old&&(old.style!==product.style||old.sourceUrl!==product.sourceUrl))throw Error('기존 사진 매칭 자료의 품번·출처를 다시 확인해 주세요.');
- const records=(old?.photoMapping?.files||[]).map(r=>{const code=r.source==='seller-detail'&&r.name?.match(/^기존상품_(\d{2})_/)?.[1],color=code&&product.colors.find(c=>c.startsWith(code));return color?{...r,color}:r;});let count=0,importedMainPhoto=old?.importedMainPhoto;
- const main=originals.find(p=>/^1(?:번)?\.(jpe?g|png|webp)$/i.test(p.name));
- signal?.throwIfAborted();
- if(automatic&&main&&importedMainPhoto?.version===1&&importedMainPhoto.style===product.style&&importedMainPhoto.sourceUrl===product.sourceUrl&&importedMainPhoto.name===main.name&&importedMainPhoto.hash===hash(main.bytes)&&!selected.some(p=>p.sha256===importedMainPhoto.hash)){
-  // Replace only a main image created by this importer and still byte-identical.
-  // User-supplied/modified 1.jpg files have no matching ownership record.
-  const next=selected[0],name='1'+path.extname(next.file),destination=path.join(target,name),archive=path.join(root,'imported-originals',importedMainPhoto.hash+path.extname(main.name));
-  if(hash(await readFile(main.file))!==importedMainPhoto.hash)throw Error('대표사진이 변경되어 자동 교체하지 않았습니다.');
-  if(destination!==main.file&&originals.some(p=>p.file===destination))throw Error('대표 1번 사진이 여러 개여서 자동 교체하지 않았습니다.');
-  await mkdir(path.dirname(archive),{recursive:true});await writeFile(archive,main.bytes,{flag:'wx'}).catch(async e=>{if(e.code!=='EEXIST'||hash(await readFile(archive))!==importedMainPhoto.hash)throw e;});
-  signal?.throwIfAborted();const temporary=destination+'.import-tmp';await writeFile(temporary,next.bytes);await rename(temporary,destination);if(destination!==main.file)await unlink(main.file);
-  originals.splice(originals.indexOf(main),1);originals.unshift({name,file:destination,bytes:next.bytes,id:next.id});
-  importedMainPhoto={version:1,style:product.style,sourceUrl:product.sourceUrl,name,hash:next.sha256};count++;
- }
+ const records=(old?.photoMapping?.files||[]).map(r=>{const code=r.source==='seller-detail'&&r.name?.match(/^기존상품_(\d{2})_/)?.[1],color=code&&product.colors.find(c=>c.startsWith(code));return color?{...r,color}:r;});let count=0;
  for(const p of selected){
   signal?.throwIfAborted();const known=originals.find(f=>hash(f.bytes)===p.sha256&&records.some(r=>r.name===f.name&&r.hash===p.sha256&&r.color===p.color));let name=known?.name;
-  if(!name){name=!hasMain&&(automatic||p.role==='front')?'1'+path.extname(p.file):'기존상품_'+p.color.slice(0,2)+'_'+p.id+path.extname(p.file);await writeFile(path.join(target,name),p.bytes,{flag:'wx'}).catch(async e=>{if(e.code!=='EEXIST'||hash(await readFile(path.join(target,name)))!==p.sha256)throw e;});if(/^1\./.test(name)){hasMain=true;importedMainPhoto={version:1,style:product.style,sourceUrl:product.sourceUrl,name,hash:p.sha256};}count++;}
+  if(!name){name='기존상품_'+p.color.slice(0,2)+'_'+p.id+path.extname(p.file);await writeFile(path.join(target,name),p.bytes,{flag:'wx'}).catch(async e=>{if(e.code!=='EEXIST'||hash(await readFile(path.join(target,name)))!==p.sha256)throw e;});count++;}
   const record={name,hash:p.sha256,color:p.color,role:p.role,source:'seller-detail',sourceUrl:p.url,...(!automatic?{reviewed:true,reviewedAt:new Date().toISOString(),reviewBasis:'user-photo-selection',reviewedBy:'user'}:{})};const i=records.findIndex(r=>r.name===name&&r.hash===p.sha256);if(i>=0)records[i]=record;else records.push(record);
  }
  const importedColorPhotos=[];for(const p of selected){let group=importedColorPhotos.find(g=>g.color===p.color);if(!group){group={color:p.color,hashes:[]};importedColorPhotos.push(group);}group.hashes.push(p.sha256);}
- const draft={...old,style:product.style,sourceUrl:product.sourceUrl,importedMainPhoto,importedColorPhotos,photoMapping:{...old?.photoMapping,files:records}};
+ const draft={...old,style:product.style,sourceUrl:product.sourceUrl,importedColorPhotos,photoMapping:{...old?.photoMapping,files:records}};
  await writeFile(path.join(root,'draft.json.tmp'),JSON.stringify(draft,null,2));await rename(path.join(root,'draft.json.tmp'),path.join(root,'draft.json'));
  await savePhotoMappings(dataRoot,product,records);
  return {count,selectedCount:selected.length,target};

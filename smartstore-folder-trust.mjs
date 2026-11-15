@@ -47,7 +47,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  signal?.throwIfAborted();
  const imported=null; // Every current folder file is authoritative.
  const active=p=>!imported||imported.get(p.color)?.includes(hash(p.bytes));
- const garments=reviewed.filter(p=>p.role!=='care-label'),main=[await selectedMainPhoto(garments,product,dataRoot)];main[0].mainSelected=true;
+ const garments=reviewed.filter(p=>p.role!=='care-label'),main=[await selectedMainPhoto(garments,product,dataRoot)];for(const photo of reviewed)photo.mainSelected=photo===main[0];
  let extras;
  if(product.colors.includes(main[0].color)){
   const frontColors=new Set(garments.filter(p=>p.role==='front').map(p=>p.color));frontColors.add(main[0].color);
@@ -56,7 +56,7 @@ export async function prepareTrustedFolder(product,folder,{dataRoot,photos,mappe
  const listingImages={...await saveListingSelection(root,{main:main[0],extras}),trustedFolder:true};
  const groups=[],providedPhotos=[],records=[];
  const roleOrder=['front','side','detail','back','provided','care-label'];
- const detailPhotos=[...reviewed].sort((a,b)=>Number(/^1(?:번)?\./i.test(b.name))-Number(/^1(?:번)?\./i.test(a.name))||roleOrder.indexOf(a.role)-roleOrder.indexOf(b.role));
+ const detailPhotos=[...reviewed].sort((a,b)=>Number(b.mainSelected===true)-Number(a.mainSelected===true)||roleOrder.indexOf(a.role)-roleOrder.indexOf(b.role));
  for(const p of detailPhotos){
   const digest=hash(p.bytes),prior=old?.photoMapping?.files?.find(r=>r.name===p.name&&r.hash===digest);records.push({...prior,name:p.name,hash:digest,color:p.color,role:p.role,automatic:!!p.automatic,autoValidated:p.autoValidated===true,evidence:p.evidence,...(p.reviewed===true?{reviewed:true,reviewedAt:p.reviewedAt,reviewBasis:p.reviewBasis,reviewedBy:p.reviewedBy}:{})});
   if(p.role==='care-label')continue;

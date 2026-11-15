@@ -12,6 +12,7 @@ import {styleFromDetail,assertAdultProduct,assertAdultProductPage} from './produ
 import {imageDownloadFolder} from './desktop-downloads.mjs';
 import {prepareSmartstoreDetail} from './smartstore-detail-files.mjs';
 import {chooseListingPhotos,saveListingSelection} from './smartstore-listing-images.mjs';
+import {selectedMainPhoto} from './smartstore-main-selection.mjs';
 import {prepareTrustedFolder} from './smartstore-folder-trust.mjs';
 import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 import {appendDistinctSellingPoints,usableSellingPoints} from './smartstore-selling-points.mjs';
@@ -82,10 +83,11 @@ async function prepareSmartstoreAutoImpl(product,folder,{dataRoot,apiKey,signal,
   if(!trustFolder&&ignored.has(hash(photo.bytes))&&known.get(hash(photo.bytes))?.role!=='care-label')continue;
   const reason=trustFolder?null:await excludedPhotoReason(photo.bytes,{dataRoot});if(reason){log('착용사진 제외 · '+photo.name+' · '+reason);continue;}found.push(photo);
  }
- // Only this style's folder is read; keep original bytes for visual-review hashes.
- for(const photo of found){signal?.throwIfAborted();await workingProductPhoto(photo,product,{dataRoot});}
  const photos=found;
  if(!photos.length){const error=Error('현재 품번 '+product.style+' 폴더에 상품사진을 넣어 주세요. 이전 품번이나 삭제된 사진은 사용하지 않습니다.');error.code='PHOTO_FOLDER_EMPTY';throw error;}
+ const selectedMain=await selectedMainPhoto(photos,product,dataRoot);
+ // Validate the saved choice before analysis; keep original bytes for visual-review hashes.
+ for(const photo of photos){photo.mainSelected=photo===selectedMain;signal?.throwIfAborted();await workingProductPhoto(photo,product,{dataRoot});}
  const unknown=[];const mapped=[];
  for(const file of photos){const digest=hash(file.bytes),cached=known.get(digest);const previous=cached?.reviewed===true?cached:previousFiles.find(r=>r.name===file.name&&r.hash===digest&&r.role!=='provided')||cached;if(previous?.automatic===true&&previous.reviewed!==true){unknown.push({...file});continue;}if(previous&&previous.role==='detail'&&previous.reviewed!==true&&product.colors.includes(previous.color)&&(!detailHash||previous.externalAnalysisDetailHash!==detailHash)){unknown.push({...file,colorHint:previous.color,existingMapping:previous});continue;}if(previous&&previous.role!=='provided'){mapped.push({...file,color:previous.color,role:previous.role,...(previous.automatic===true?{automatic:true,autoValidated:previous.autoValidated===true,evidence:previous.evidence}:{}),...(previous.reviewed===true?{reviewed:true,reviewedAt:previous.reviewedAt,reviewBasis:previous.reviewBasis,reviewedBy:previous.reviewedBy}:{})});continue;}
   const parent=norm(path.basename(path.dirname(file.file)));const exact=product.colors.find(color=>[norm(color),norm(color).replace(/^\d+/, '')].includes(parent));
@@ -103,7 +105,7 @@ async function prepareSmartstoreAutoImpl(product,folder,{dataRoot,apiKey,signal,
   const updated={...old,sourceUrl:product.sourceUrl,listingImages,careLabels:await saveCareLabelSelection(root,mapped.filter(p=>p.role==='care-label'))};
   await writeFile(path.join(root,'draft.json.tmp'),JSON.stringify(updated,null,2));await rename(path.join(root,'draft.json.tmp'),path.join(root,'draft.json'));
   log('확인된 실사 사진·소구점 재사용 · 본사 원본 변경 없음');
-  return applyGarmentReview(await prepareSmartstoreDetail(product,folder,{dataRoot,signal,log}),folder,{dataRoot,photoRoots,desktop});
+  return applyGarmentReview(await prepareSmartstoreDetail(product,folder,{dataRoot,signal,log,photoRoots,desktop}),folder,{dataRoot,photoRoots,desktop});
  }
  if(!apiKey){const error=Error('사진 '+photos.length+'장은 확인됐습니다. 새 사진의 색상·각도 자동 분석 연결이 필요합니다. 설정에서 사진분석 연결을 완료해 주세요.');error.code='PHOTO_ANALYSIS_REQUIRED';error.photoCount=photos.length;error.unknownCount=unknown.length;throw error;}
  const content=[{type:'input_text',text:JSON.stringify({style:product.style,name:product.rawName,colors:product.colors,material:product.material,officialDescription:description,photoIds:unknown.map(f=>f.id),photoHints:unknown.filter(f=>f.colorHint||f.roleHint).map(f=>({id:f.id,color:f.colorHint,role:f.roleHint}))})}];
@@ -120,7 +122,7 @@ async function prepareSmartstoreAutoImpl(product,folder,{dataRoot,apiKey,signal,
  const listingImages=await saveListingSelection(root,chooseListingPhotos(mapped,product));
  const imported=importedPhotoSelection(product,old);
  const groups=[],records=mapped.map(p=>({...previousFiles.find(r=>r.hash===hash(p.bytes)),name:p.name,color:p.color,role:p.role,hash:hash(p.bytes),confidence:p.confidence??1,...(p.externalAnalysisDetailHash?{externalAnalysisDetailHash:p.externalAnalysisDetailHash}:{})}));
- for(const color of product.colors){const files=[];const order=imported?.get(color)||[];const selected=mapped.filter(p=>p.color===color&&p.role!=='care-label'&&(!imported||order.includes(hash(p.bytes)))).sort((a,b)=>imported?order.indexOf(hash(a.bytes))-order.indexOf(hash(b.bytes)):Number(/^1(?:번)?\./i.test(b.name))-Number(/^1(?:번)?\./i.test(a.name))||['front','side','detail'].indexOf(a.role)-['front','side','detail'].indexOf(b.role));for(const p of selected){const relative='auto/'+hash(p.bytes).slice(0,24)+'.jpg';await mkdir(path.join(root,'auto'),{recursive:true});const bytes=await sharp(p.bytes).rotate().jpeg({quality:97}).toBuffer();await writeFile(path.join(root,relative),bytes);records.find(r=>r.hash===hash(p.bytes)).preparedHash=hash(bytes);files.push(relative);}if(files.length)groups.push({color,files});}
+ for(const color of product.colors){const files=[];const order=imported?.get(color)||[];const selected=mapped.filter(p=>p.color===color&&p.role!=='care-label'&&(!imported||order.includes(hash(p.bytes)))).sort((a,b)=>imported?order.indexOf(hash(a.bytes))-order.indexOf(hash(b.bytes)):Number(b.mainSelected===true)-Number(a.mainSelected===true)||['front','side','detail'].indexOf(a.role)-['front','side','detail'].indexOf(b.role));for(const p of selected){const relative='auto/'+hash(p.bytes).slice(0,24)+'.jpg';await mkdir(path.join(root,'auto'),{recursive:true});const bytes=await sharp(p.bytes).rotate().jpeg({quality:97}).toBuffer();await writeFile(path.join(root,relative),bytes);records.find(r=>r.hash===hash(p.bytes)).preparedHash=hash(bytes);files.push(relative);}if(files.length)groups.push({color,files});}
  const existing=old?.style===product.style&&old.sourceUrl===product.sourceUrl&&old.officialDetailHash===detailHash
   ?(old.sellingPoints||[]).filter(point=>usableSellingPoints([point],description)):[];
  const analyzed=analysis.points.map(point=>({...point,evidence:point.evidence+' / '+product.sourceUrl}));
@@ -130,7 +132,7 @@ async function prepareSmartstoreAutoImpl(product,folder,{dataRoot,apiKey,signal,
  await savePhotoMappings(dataRoot,product,records);
  log('사진 '+mapped.length+'장 · '+groups.length+'개 색상 대조 완료 · 공식 설명 근거 소구점 '+analysis.points.length+'개');
  if(analysis.attributes)await saveGarmentReview(product,folder,analysis.attributes,{dataRoot,photoRoots,desktop});
- const prepared=await applyGarmentReview(await prepareSmartstoreDetail(product,folder,{dataRoot,signal,log}),folder,{dataRoot,photoRoots,desktop});
+ const prepared=await applyGarmentReview(await prepareSmartstoreDetail(product,folder,{dataRoot,signal,log,photoRoots,desktop}),folder,{dataRoot,photoRoots,desktop});
  return {...prepared,officialDescription:description};
 }
 

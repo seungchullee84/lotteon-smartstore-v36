@@ -2,7 +2,7 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {findPhotos} from './smartstore-photo-files.mjs';
-import {selectedMainPhoto} from './smartstore-main-selection.mjs';
+import {readMainSelection,selectedMainPhoto} from './smartstore-main-selection.mjs';
 import {workingProductPhoto} from './smartstore-photo-work.mjs';
 import {readListingDraft} from './smartstore-listing-draft-cache.mjs';
 const hash=b=>createHash('sha256').update(b).digest('hex');
@@ -14,10 +14,10 @@ function withOfficialMain(product,manifest){
  return {...manifest,extras:[{role:'official-main',color:'공식몰 대표사진',sourceName:'공식몰 대표사진',sourceUrl:source.href},...provided.slice(0,8)],detailRevision:hash(Buffer.from((manifest.detailRevision||'')+'|official-main-first-v1|'+source.href))};
 }
 export function chooseListingPhotos(photos,product){
- const picked=photos.filter(p=>p.mainSelected===true),main=picked.length?picked:photos.filter(p=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(p.name||''));
- if(main.length!==1)throw Error('품번 폴더에서 대표로 사용할 사진 한 장의 파일명을 1.jpg 또는 1번.jpg로 지정해 주세요.');
+ const main=photos.filter(p=>p.mainSelected===true);
+ if(main.length!==1)throw Object.assign(Error('사진 선택 창에서 대표사진을 한 장 지정해 주세요.'),{code:'MAIN_PHOTO_SELECTION_REQUIRED'});
  const selected=main[0],same=p=>hash(p.bytes)===hash(selected.bytes);
- if(selected.role==='care-label'||!product.colors.includes(selected.color))throw Error('1번 대표사진의 상품·색상을 확인해 주세요. 케어라벨은 대표로 사용하지 않습니다.');
+ if(['care-label','excluded'].includes(selected.role)||!product.colors.includes(selected.color))throw Error('선택한 대표사진의 상품·색상을 확인해 주세요. 케어라벨·사용 안 함 사진은 대표로 사용하지 않습니다.');
  const side=photos.find(p=>p.color===selected.color&&p.role==='side'&&!same(p));
  // Only a visually verified full front of the same color can substitute for an absent side.
  const alternative=side?null:photos.find(p=>p.color===selected.color&&p.role==='front'&&(p.reviewed===true||p.autoValidated===true)&&!same(p));
@@ -35,6 +35,8 @@ export async function listingManifest(product,{dataRoot}){
  const {draft,detailRevision}=snapshot;
  if(String(draft.style)!==String(product.style)||draft.sourceUrl!==product.sourceUrl)return null;
  if(!draft.listingImages)return null;
+ const selected=await readMainSelection(product,dataRoot);
+ if(!selected||!draft.listingImages.main?.sourceHash||draft.listingImages.main.sourceHash!==selected.sourceHash)return null;
  const records=draft.photoMapping?.files||[],unclassified=records.filter(r=>r.role!=='care-label'&&(!product.colors?.includes(r.color)||r.role==='provided')).length;
  const mainColor=draft.listingImages.main?.color;
  const missingFrontColors=(product.colors||[]).filter(color=>color!==mainColor&&records.some(r=>r.color===color)&&!records.some(r=>r.color===color&&r.role==='front'));
@@ -44,10 +46,18 @@ export async function listingManifest(product,{dataRoot}){
  return withOfficialMain(product,{...structuredClone(draft.listingImages),photoReview,detailRevision});
 }
 export async function listingPreview(product,options){
- const manifest=await listingManifest(product,options);if(manifest)return manifest;
- const main=await findPhotos(product,{...options,acceptName:name=>/^1(?:번)?\.(?:jpe?g|png|webp)$/i.test(name)});
- if(main.length!==1)return null;
- return {main:{sourceName:main[0].name,color:'색상 대조 전'},extras:[],previewOnly:true};
+ const manifest=await listingManifest(product,options);
+ const dataRoot=options.dataRoot||path.resolve('data');
+ const saved=await readMainSelection(product,dataRoot);if(!saved)return null;
+ let main;
+ try{
+  const named=await findPhotos(product,{...options,acceptName:name=>name===saved.sourceName});
+  try{main=await selectedMainPhoto(named,product,dataRoot);}
+  catch(error){if(error.code!=='MAIN_PHOTO_SELECTION_CHANGED')throw error;main=await selectedMainPhoto(await findPhotos(product,options),product,dataRoot);}
+ }
+ catch(error){if(['MAIN_PHOTO_SELECTION_REQUIRED','MAIN_PHOTO_SELECTION_CHANGED'].includes(error.code))return null;throw error;}
+ if(manifest&&hash(main.bytes)===manifest.main?.sourceHash)return {...manifest,main:{...manifest.main,sourceName:main.name}};
+ return {main:{sourceName:main.name,color:'색상 대조 전'},extras:[],previewOnly:true};
 }
 export async function originalListingMain(product,options){
  const original=await selectedMainPhoto(await findPhotos(product,options),product,options.dataRoot||path.resolve('data'));

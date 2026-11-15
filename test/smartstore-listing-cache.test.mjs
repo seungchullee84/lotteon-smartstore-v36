@@ -9,6 +9,9 @@ import {listingPreview} from '../smartstore-listing-images.mjs';
 import {findPhotos} from '../smartstore-photo-files.mjs';
 import {savePhotoFileSelection} from '../smartstore-photo-file-selection.mjs';
 import {photoDigest} from '../smartstore-photo-files.mjs';
+import {saveMainSelection} from '../smartstore-main-selection.mjs';
+import {createHash} from 'node:crypto';
+const mainHash=createHash('sha256').update('main').digest('hex');
 
 async function fixture(t) {
   const root = await fs.mkdtemp(path.join(tmpdir(),'listing-cache-'));
@@ -16,15 +19,17 @@ async function fixture(t) {
   const product = {style:'123456',sourceUrl:'https://www.giordano.co.kr/current',colors:['01블랙','02화이트']};
   const folder = path.join(root,'smartstore-details',product.style);
   await fs.mkdir(folder,{recursive:true});
-  return {root,product,file:path.join(folder,'draft.json')};
+  const photos=path.join(root,'photos');await fs.mkdir(photos);await fs.writeFile(path.join(photos,'1.jpg'),'main');
+  await saveMainSelection(product,{name:'1.jpg',bytes:Buffer.from('main')},root);
+  return {root,product,file:path.join(folder,'draft.json'),options:{dataRoot:root,photoRoots:[photos]}};
 }
 
 function draftFor(product) {
-  return {...product,listingImages:{main:{sourceName:'1.jpg',color:'01블랙'},extras:[{sourceName:'2.jpg',color:'02화이트',role:'front'}]}};
+  return {...product,listingImages:{main:{sourceName:'1.jpg',sourceHash:mainHash,color:'01블랙'},extras:[{sourceName:'2.jpg',color:'02화이트',role:'front'}]}};
 }
 
 test('concurrent draft reads share the snapshot and listing polls return independent manifests',async t=>{
-  const {root,product,file} = await fixture(t);
+  const {root,product,file,options} = await fixture(t);
   const draft = {...draftFor(product),photos:Array.from({length:500},(_,i)=>({name:i+'.jpg',hash:'a'.repeat(64)}))};
   await fs.writeFile(file,JSON.stringify(draft));
   let reads = 0;
@@ -36,19 +41,19 @@ test('concurrent draft reads share the snapshot and listing polls return indepen
   for(let i=0;i<30;i++)assert.equal(await readDraft(file),snapshots[0]);
   assert.equal(reads,1,'50 unchanged polls, including 20 concurrent polls, share one read/parse/hash');
   for(const snapshot of snapshots)assert.equal(snapshot,snapshots[0]);
-  const results = await Promise.all(Array.from({length:20},()=>listingPreview(product,{dataRoot:root})));
+  const results = await Promise.all(Array.from({length:20},()=>listingPreview(product,options)));
   results[0].main.sourceName='mutated.jpg';
   results[0].extras[0].sourceName='mutated-extra.jpg';
-  const next = await listingPreview(product,{dataRoot:root});
+  const next = await listingPreview(product,options);
   assert.equal(next.main.sourceName,'1.jpg');
   assert.equal(next.extras[0].sourceName,'2.jpg');
   assert.equal(next.detailRevision,results[1].detailRevision);
-  const noWhite = await listingPreview({...product,colors:['01블랙']},{dataRoot:root});
+  const noWhite = await listingPreview({...product,colors:['01블랙']},options);
   assert.deepEqual(noWhite.extras,[],'current product colors are evaluated even when draft is cached');
   const differentProduct = {...product,sourceUrl:'https://www.giordano.co.kr/other'};
   assert.equal(await listingPreview(differentProduct,{dataRoot:root,photoRoots:[]}),null);
   const changedImage = {...product,images:{main:'https://www.giordano.co.kr/new.jpg'}};
-  const official = await listingPreview(changedImage,{dataRoot:root});
+  const official = await listingPreview(changedImage,options);
   assert.equal(official.extras[0].sourceUrl,changedImage.images.main);
 });
 
@@ -108,10 +113,10 @@ test('same-size edits with restored mtime still invalidate through ctime',async(
   assert.equal((await reader('draft')).draft.version,2);
 });
 
-test('pre-draft preview reads only main candidates and reflects external selection and folder edits',async t=>{
+test('pre-draft preview follows explicit selection and excludes unavailable originals',async t=>{
   const {root,product} = await fixture(t);
   const photos = path.join(root,'photos');
-  await fs.mkdir(photos);
+  await fs.mkdir(photos,{recursive:true});
   await fs.writeFile(path.join(photos,'1.jpg'),'main');
   await fs.writeFile(path.join(photos,'detail.jpg'),'detail');
   const originalRead = fs.readFile;
@@ -124,14 +129,14 @@ test('pre-draft preview reads only main candidates and reflects external selecti
   t.after(()=>{t.mock.restoreAll();syncBuiltinESMExports();});
   const options = {dataRoot:root,photoRoots:[photos]};
   assert.equal((await listingPreview(product,options)).main.sourceName,'1.jpg');
-  assert.deepEqual(imageReads,['1.jpg']);
+  assert.deepEqual(imageReads,['1.jpg'],'unchanged saved filename only reads the selected original');
   const main = (await findPhotos(product,options)).find(photo=>photo.name==='1.jpg');
   await savePhotoFileSelection(root,product,[{id:main.id,hash:photoDigest(main.bytes),role:'excluded',color:''}]);
   assert.equal(await listingPreview(product,options),null);
   await savePhotoFileSelection(root,product,[]);
   await fs.mkdir(path.join(photos,'nested'));
   await fs.writeFile(path.join(photos,'nested','1번.png'),'another main');
-  assert.equal(await listingPreview(product,options),null,'ambiguous candidate names remain rejected');
+  assert.equal((await listingPreview(product,options)).main.sourceName,'1.jpg','another numbered file does not change the explicit selection');
   await fs.unlink(path.join(photos,'nested','1번.png'));
   assert.equal((await listingPreview(product,options)).main.sourceName,'1.jpg');
   await fs.unlink(path.join(photos,'1.jpg'));

@@ -7,7 +7,7 @@ import {readPhotoBytes} from './smartstore-photo-byte-cache.mjs';
 import {readPhotoMappings,savePhotoMappings} from './smartstore-photo-mapping-cache.mjs';
 import {saveCareLabelSelection} from './smartstore-care-label.mjs';
 import sharp from 'sharp';
-import {readMainSelection,saveMainSelection} from './smartstore-main-selection.mjs';
+import {selectedMainPhoto,saveMainSelection} from './smartstore-main-selection.mjs';
 import {photoReviewChips} from './smartstore-photo-review-chips.mjs';
 import {readPhotoFileSelection,savePhotoFileSelection} from './smartstore-photo-file-selection.mjs';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -22,17 +22,20 @@ export async function photoReview(product,{dataRoot,officialFolder,...options}){
  const [photos,draft,saved]=await Promise.all([findPhotos(product,{...options,dataRoot,includeExcluded:true}),draftFor(dataRoot,product),readPhotoMappings(dataRoot,product)]);
  const key=inventoryKey(product,{...options,dataRoot}),inventory=new Map(await Promise.all(photos.map(async p=>[p.id,{file:p.file,stamp:stamp(await stat(p.file))}])));
  inventories.delete(key);inventories.set(key,inventory);while(inventories.size>3)inventories.delete(inventories.keys().next().value);
- const items=photos.map(p=>{const id=photoDigest(p.bytes),mapping=saved.find(r=>r.hash===id&&r.reviewed)||draft.photoMapping?.files?.find(r=>r.hash===id);const care=draft.careLabels?.some(r=>r.sourceHash===id);return {id:p.id,hash:id,name:p.name,main:/^1(?:번)?\.(jpe?g|png|webp)$/i.test(p.name),color:mapping?.color||'',role:care?'care-label':roles.has(mapping?.role)?mapping.role:'',reviewed:!!mapping?.reviewed};});
+ const items=photos.map(p=>{const id=photoDigest(p.bytes),mapping=saved.find(r=>r.hash===id&&r.reviewed)||draft.photoMapping?.files?.find(r=>r.hash===id);const care=draft.careLabels?.some(r=>r.sourceHash===id);return {id:p.id,hash:id,name:p.name,main:false,color:mapping?.color||'',role:care?'care-label':roles.has(mapping?.role)?mapping.role:'',reviewed:!!mapping?.reviewed};});
  const applied=new Map((await readPhotoFileSelection(dataRoot,product)).map(item=>[item.id,item]));
  for(const item of items){const choice=applied.get(item.id);if(choice?.hash===item.hash){item.role=choice.role;item.color=choice.color;item.reviewed=true;}}
- const mainSelection=await readMainSelection(product,dataRoot);let mainId=mainSelection?items.find(p=>p.hash===mainSelection.sourceHash&&p.name===mainSelection.sourceName)?.id:items.filter(p=>p.main).length===1?items.find(p=>p.main).id:null;
+ let mainId=null;
+ try{mainId=(await selectedMainPhoto(photos,product,dataRoot)).id;}
+ catch(error){if(!['MAIN_PHOTO_SELECTION_REQUIRED','MAIN_PHOTO_SELECTION_CHANGED'].includes(error.code))throw error;}
  const revision=hash(JSON.stringify([product.style,product.sourceUrl,product.colors,items.map(p=>[p.id,p.name])]));
  let automatic;try{automatic=JSON.parse(await readFile(path.join(dataRoot,'smartstore-photo-color-drafts',product.style+'.json'),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(automatic?.sourceUrl===product.sourceUrl&&JSON.stringify(automatic.colors)===JSON.stringify(product.colors))for(const item of items){const suggested=automatic.files.find(p=>p.hash===item.hash);if(suggested&&!item.reviewed){if(!item.color&&product.colors.includes(suggested.color)){item.color=suggested.color;item.colorSuggested=true;}if(suggested.careLabel){item.role='care-label';item.color='';item.labelSuggested=true;}}}
  let selection;try{selection=JSON.parse(await readFile(selectionFile(dataRoot,product),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  const match=selection?.sourceUrl===product.sourceUrl&&selection.revision===revision;
  if(match)for(const item of items){const saved=selection.items.find(i=>i.id===item.id);if(saved&&(saved.color===''||product.colors.includes(saved.color))&&(saved.role===''||roles.has(saved.role))){if(saved.color||saved.colorOverride){item.color=saved.color;item.colorSuggested=false;}if(saved.role&&(!item.labelSuggested||saved.roleOverride!==false||saved.colorOverride))item.role=saved.role;item.colorOverride=!!saved.colorOverride;item.roleOverride=saved.roleOverride??true;}}
- if(match&&selection.mainId&&items.some(p=>p.id===selection.mainId))mainId=selection.mainId;for(const item of items)item.main=item.id===mainId;
+ // Older drafts could contain an automatic filename-based choice. Only explicit drafts override an applied selection.
+ if(match&&selection.mainSelectionVersion===2&&Object.hasOwn(selection,'mainId')&&(selection.mainId===null||items.some(p=>p.id===selection.mainId)))mainId=selection.mainId;for(const item of items)item.main=item.id===mainId;
  // This is a user-requested initial choice, not a confirmed angle analysis.
  for(const item of items)if(!item.role){item.role='detail';item.roleDefaulted=true;}
  const savedOrder=match?selection.items.map(item=>item.id):null;
@@ -46,10 +49,11 @@ export async function savePhotoReviewDraft(product,input,options){
  if(input.channel!=='smartstore'||input.style!==current.style||input.sourceUrl!==current.sourceUrl||input.revision!==current.revision)throw Error('상품 또는 사진 폴더가 변경됐습니다. 다시 열어 주세요.');
  if(!Array.isArray(input.items)||input.items.length!==current.items.length)throw Error('사진 선택 목록을 다시 확인해 주세요.');
  const ids=new Set();for(const i of input.items){if(ids.has(i.id)||!current.items.some(p=>p.id===i.id)||(i.color!==''&&!current.colors.includes(i.color))||(i.role!==''&&!roles.has(i.role)))throw Error('사진 선택 값을 확인해 주세요.');ids.add(i.id);}
- if(input.mainId&&!current.items.some(p=>p.id===input.mainId))throw Error('대표사진 선택을 확인해 주세요.');
+ const mainId=Object.hasOwn(input,'mainId')?input.mainId:current.mainId;
+ if(mainId!==null&&!current.items.some(p=>p.id===mainId))throw Error('대표사진 선택을 확인해 주세요.');
  assignPhotoRolesByOrder(input.items);
  const file=selectionFile(options.dataRoot,product),temporary=file+'.'+randomUUID()+'.tmp',savedAt=new Date().toISOString();
- await mkdir(path.dirname(file),{recursive:true});await writeFile(temporary,JSON.stringify({style:product.style,sourceUrl:product.sourceUrl,revision:current.revision,savedAt,mainId:input.mainId||null,items:input.items.map(({id,color,role,colorOverride,roleOverride})=>({id,color,role,colorOverride:!!colorOverride,roleOverride:roleOverride??true}))},null,2));await rename(temporary,file);return {savedAt};
+ await mkdir(path.dirname(file),{recursive:true});await writeFile(temporary,JSON.stringify({style:product.style,sourceUrl:product.sourceUrl,revision:current.revision,savedAt,mainSelectionVersion:2,mainId,items:input.items.map(({id,color,role,colorOverride,roleOverride})=>({id,color,role,colorOverride:!!colorOverride,roleOverride:roleOverride??true}))},null,2));await rename(temporary,file);current.mainId=mainId;for(const item of current.items)item.main=item.id===mainId;return {savedAt};
 }
 export async function photoReviewThumbnail(product,id,options){
  const key=inventoryKey(product,options);if(!inventories.has(key))await photoReview(product,options);
@@ -73,13 +77,14 @@ export function validatePhotoReview(current,input){
   duplicates.set(photo.hash,{selection,name:photo.name});
  }
  if(input.items.filter(p=>p.role==='care-label').length>3)throw Error('케어라벨은 최대 3장입니다.');
- const mainId=input.mainId||current.mainId;const main=input.items.find(i=>i.id===mainId);if(!main||['care-label','excluded'].includes(main.role))throw Error('대표사진을 한 장 선택해 주세요. 케어라벨·사용 안 함 사진은 대표가 될 수 없습니다.');
+ const mainId=Object.hasOwn(input,'mainId')?input.mainId:current.mainId;const main=input.items.find(i=>i.id===mainId);if(!main||['care-label','excluded'].includes(main.role))throw Object.assign(Error('대표사진을 한 장 선택해 주세요. 케어라벨·사용 안 함 사진은 대표가 될 수 없습니다.'),{code:'MAIN_PHOTO_SELECTION_REQUIRED'});
  return input.items;
 }
 export async function savePhotoReview(product,input,{dataRoot,...options}){
  const current=await photoReview(product,{dataRoot,...options});const items=validatePhotoReview(current,input);
  const photos=await findPhotos(product,{...options,dataRoot,includeExcluded:true});if(hash(JSON.stringify([product.style,product.sourceUrl,product.colors,photos.map(p=>[p.id,p.name])]))!==current.revision)throw Error('사진 폴더가 변경됐습니다. 다시 열어 주세요.');
- await saveMainSelection(product,photos.find(p=>p.id===(input.mainId||current.mainId)),dataRoot);
+ const mainId=Object.hasOwn(input,'mainId')?input.mainId:current.mainId;
+ await saveMainSelection(product,photos.find(p=>p.id===mainId),dataRoot);
  const reviewedAt=new Date().toISOString(),root=path.join(dataRoot,'smartstore-details',product.style),draft=await draftFor(dataRoot,product);
  const activeHashes=new Set(items.filter(item=>item.role!=='excluded').map(item=>current.items.find(photo=>photo.id===item.id).hash));
  const mappings=items.filter(item=>item.role!=='excluded'||!activeHashes.has(current.items.find(photo=>photo.id===item.id).hash));
@@ -89,7 +94,7 @@ export async function savePhotoReview(product,input,{dataRoot,...options}){
  draft.careLabels=await saveCareLabelSelection(root,photos.filter(p=>items.find(i=>i.id===p.id)?.role==='care-label'));
  draft.manualPhotoOrder={style:product.style,sourceUrl:product.sourceUrl,groups:current.colors.map(color=>({color,hashes:items.filter(item=>item.color===color&&!['care-label','excluded'].includes(item.role)).map(item=>current.items.find(photo=>photo.id===item.id).hash)}))};
  await mkdir(root,{recursive:true});await writeFile(path.join(root,'draft.json'),JSON.stringify({...draft,style:product.style,sourceUrl:product.sourceUrl},null,2));
- await savePhotoReviewDraft(product,{...input,mainId:input.mainId||current.mainId},{dataRoot,...options});
+ await savePhotoReviewDraft(product,{...input,mainId},{dataRoot,...options});
  await savePhotoFileSelection(dataRoot,product,items.map(item=>({...item,hash:current.items.find(photo=>photo.id===item.id).hash,name:current.items.find(photo=>photo.id===item.id).name})));
  return {count:items.length};
 }

@@ -1,4 +1,5 @@
 import {originalListingMain} from './smartstore-listing-images.mjs';
+import {readMainSelection} from './smartstore-main-selection.mjs';
 import {attachOfficialPalette} from './smartstore-official-palette.mjs';
 import {findPhotos,resolveStylePhotoFolders} from './smartstore-photo-files.mjs';
 import {mannequinPhotoRegions,registerLongPhotoLayout} from './smartstore-long-photo-import.mjs';
@@ -173,17 +174,15 @@ export async function prepareSmartstoreDetail(product,folder,{dataRoot=path.join
    if(index>=0&&!prepared.paletteImages[entry.color])prepared.paletteImages[entry.color]=prepared.colorImages[entry.color][index];
   }
  }
- // The product folder's selected 1번 mannequin photo is shared by both templates.
- prepared.heroImage=Object.entries(prepared.colorImages).find(([color,urls])=>prepared.colorSources[color]!=='official'&&urls.length)?.[1][0]||null;
- try{
+ // Intro photos use the same explicit selection as the listing main image.
+ prepared.heroImage=null;
+ if(await readMainSelection(product,dataRoot)){
   const main=await originalListingMain(product,{dataRoot,photoRoots:await configuredPhotoRoots()});
   const bytes=await readFile(main),id=createHash('sha256').update(bytes).digest('hex').slice(0,24);
   const name='smartstore-photo-'+id+'.jpg',src='/smartstore-photo/'+id;
   await writeFile(path.join(folder,name),bytes);prepared.photoFiles[src]=name;prepared.heroImage=src;
- }catch(error){
-  if(!/1.jpg 또는 1번.jpg 한 장/.test(error.message))throw error;
+  prepared.heroSource='store-mannequin';
  }
- prepared.heroSource='store-mannequin';
  prepared.storeColorPhotoCounts=Object.fromEntries(Object.entries(prepared.colorImages).map(([color,urls])=>[color,urls.length]));
  // Official fallback photos are separate from seller options and store mannequin claims.
  if(draft?.officialPhotos?.length){

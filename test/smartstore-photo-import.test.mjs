@@ -4,6 +4,7 @@ import {preparePhotoSourceList,editorPhotoPositions,naverPhotoUrl,exactSellerRow
 import {prepareTrustedFolder} from '../smartstore-folder-trust.mjs';
 import {prepareSmartstoreDetail} from '../smartstore-detail-files.mjs';
 import {findPhotos} from '../smartstore-photo-files.mjs';
+import {saveMainSelection,readMainSelection} from '../smartstore-main-selection.mjs';
 import {createHash} from 'node:crypto';
 
 test('재수집 후에도 현재 품번 폴더의 모든 원본을 상세에 보존한다',async()=>{
@@ -15,24 +16,39 @@ test('재수집 후에도 현재 품번 폴더의 모든 원본을 상세에 보
  const options={recognizePhoto:async()=>'',fetchImpl:async url=>new Response(buffers[Number(new URL(url).pathname.slice(1,-4))],{headers:{'Content-Type':'image/jpeg'}})};
  const readDraft=async()=>JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,'draft.json'),'utf8'));
  const prepare=async()=>{const old=await readDraft(),photos=await findPhotos(product,{desktop});return prepareTrustedFolder(product,folder,{dataRoot,photos,mapped:photos.map(p=>({...p,...old.photoMapping.files.find(r=>r.name===p.name&&r.hash===createHash('sha256').update(p.bytes).digest('hex'))})),old,description:'',detailHash:null,recognizePhoto:()=>assert.fail('사진 해시 확인 결과를 재사용해야 합니다.')});};
- const first=await stageImportedPhotos({...product,sellerCode:product.style,candidates},folder,options);await applyImportedPhotos(product,folder,allImportedPhotoChoices(first,product),{dataRoot,desktop,automatic:true});assert.equal((await prepare()).smartstoreDetail.photoCount,8);
- const mainPath=path.join(desktop,'상품등록기사진폴더',product.style,'1.jpg'),main=await readFile(mainPath);
+ const first=await stageImportedPhotos({...product,sellerCode:product.style,candidates},folder,options);await applyImportedPhotos(product,folder,allImportedPhotoChoices(first,product),{dataRoot,desktop,automatic:true});
+ const mainPhoto=(await findPhotos(product,{desktop})).find(photo=>createHash('sha256').update(photo.bytes).digest('hex')===first.candidates[0].sha256);
+ const mainPath=mainPhoto.file,main=mainPhoto.bytes;
+ await saveMainSelection(product,mainPhoto,dataRoot);
+ const mainSelection=await readMainSelection(product,dataRoot);
+ assert.equal((await prepare()).smartstoreDetail.photoCount,8);
  const latest=await stageImportedPhotos({...product,sellerCode:product.style,candidates:[candidates[2],candidates[1]]},folder,options),choices=allImportedPhotoChoices(latest,product);
  await applyImportedPhotos(product,folder,choices,{dataRoot,desktop,automatic:true});
  // Preview/export can be opened before another automatic preparation.
  const preview=await prepareSmartstoreDetail(product,folder,{dataRoot,photoRoots:[path.join(desktop,'상품등록기사진폴더',product.style)]});assert.equal(preview.smartstoreDetail.photoCount,8);assert.equal(preview.smartstoreDetail.colorImages['02화이트'].length,4);
  for(let i=0;i<2;i++){const prepared=await prepare();assert.equal(prepared.smartstoreDetail.photoCount,8);assertImportedPhotoCoverage(latest,prepared,choices,{requireSellingPoints:false});}
- assert.deepEqual(await readFile(mainPath),buffers[2]);assert.deepEqual(await readFile(path.join(dataRoot,'smartstore-details',product.style,'imported-originals',createHash('sha256').update(main).digest('hex')+'.jpg')),main);assert.equal((await readdir(path.dirname(mainPath))).length,8,'이전 대표 원본은 백업하고 최신 대표만 갱신한다');
+ assert.deepEqual(await readFile(mainPath),main);
+ assert.deepEqual(await readMainSelection(product,dataRoot),mainSelection);
+ assert.equal((await readdir(path.dirname(mainPath))).length,8,'재수집은 기존 원본과 선택한 대표를 보존한다');
+ assert(!(await readdir(path.dirname(mainPath))).some(name=>/^1(?:번)?\./.test(name)));
  }finally{await rm(dir,{recursive:true,force:true});}
 });
 
-test('사용자가 직접 넣거나 수정한 대표 1번은 재수집해도 덮어쓰지 않는다',async()=>{
+test('과거 자동 대표 기록이 있어도 가져오기는 기존 파일과 대표 선택을 보존한다',async()=>{
  const dir=await mkdtemp(path.join(os.tmpdir(),'import-user-main-'));try{
  const product={style:'326922',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=1',colors:['01블랙']},folder=path.join(dir,'collected'),dataRoot=path.join(dir,'data'),desktop=path.join(dir,'desktop'),target=path.join(desktop,'상품등록기사진폴더',product.style);await mkdir(folder,{recursive:true});await mkdir(target,{recursive:true});
  const bytes=await sharp({create:{width:750,height:1000,channels:3,background:'#333'}}).jpeg().toBuffer(),custom=await sharp({create:{width:750,height:1000,channels:3,background:'#777'}}).jpeg().toBuffer();
  const source={...product,sellerCode:product.style,candidates:[{colorHint:'01블랙',url:'https://shop-phinf.pstatic.net/test.jpg'}]},options={recognizePhoto:async()=>'',fetchImpl:async()=>new Response(bytes,{headers:{'Content-Type':'image/jpeg'}})};
  const stage=await stageImportedPhotos(source,folder,options);await applyImportedPhotos(product,folder,allImportedPhotoChoices(stage,product),{dataRoot,desktop,automatic:true});
- await writeFile(path.join(target,'1.jpg'),custom);await applyImportedPhotos(product,folder,allImportedPhotoChoices(stage,product),{dataRoot,desktop,automatic:true});assert.deepEqual(await readFile(path.join(target,'1.jpg')),custom);
+ await writeFile(path.join(target,'1.jpg'),custom);
+ const draftFile=path.join(dataRoot,'smartstore-details',product.style,'draft.json'),draft=JSON.parse(await readFile(draftFile,'utf8'));
+ draft.importedMainPhoto={version:1,style:product.style,sourceUrl:product.sourceUrl,name:'1.jpg',hash:createHash('sha256').update(custom).digest('hex')};
+ await writeFile(draftFile,JSON.stringify(draft));
+ await saveMainSelection(product,{name:'1.jpg',bytes:custom},dataRoot);
+ const saved=await readMainSelection(product,dataRoot);
+ await applyImportedPhotos(product,folder,allImportedPhotoChoices(stage,product),{dataRoot,desktop,automatic:true});
+ assert.deepEqual(await readFile(path.join(target,'1.jpg')),custom);
+ assert.deepEqual(await readMainSelection(product,dataRoot),saved);
  }finally{await rm(dir,{recursive:true,force:true});}
 });
 
@@ -58,6 +74,7 @@ test('색상 아래 1~4컷은 선택 단계 없이 전부 연결하며 미확인
  await applyImportedPhotos(product,folder,choices,{dataRoot,desktop,automatic:true});
  const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details/326922/draft.json'),'utf8'));
  const photos=await findPhotos(product,{desktop});const mapped=photos.map(p=>({...p,...draft.photoMapping.files.find(r=>r.name===p.name)}));
+ await saveMainSelection(product,photos.find(photo=>createHash('sha256').update(photo.bytes).digest('hex')===stage.candidates[0].sha256),dataRoot);
  const prepared=await prepareTrustedFolder(product,folder,{dataRoot,photos,mapped,old:draft,description:'공식 터틀넥 설명',detailHash:null,recognizePhoto:()=>assert.fail('확인된 사진 OCR 불필요')});
  assert.equal(prepared.smartstoreDetail.photoCount,8);const saved=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details/326922/draft.json'),'utf8'));
  for(const group of saved.photos){const expected=draft.importedColorPhotos.find(g=>g.color===group.color).hashes;assert.deepEqual(prepared.smartstoreDetail.storeColorPhotoHashes[group.color],expected);}
@@ -76,6 +93,7 @@ test('12색 48장은 적용·폴더 재조회·상세 연결에서 총 40장 제
  await applyImportedPhotos(product,folder,choices,{dataRoot,desktop,automatic:true});
  const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details/326922/draft.json'),'utf8'));
  const photos=await findPhotos(product,{desktop});const mapped=photos.map(p=>({...p,...draft.photoMapping.files.find(r=>r.name===p.name)}));
+ await saveMainSelection(product,photos.find(photo=>createHash('sha256').update(photo.bytes).digest('hex')===stage.candidates[0].sha256),dataRoot);
  const prepared=await prepareTrustedFolder(product,folder,{dataRoot,photos,mapped,old:draft,description:'공식 터틀넥 설명',detailHash:null,recognizePhoto:()=>assert.fail('확인된 사진 OCR 불필요')});
  assert.equal(prepared.smartstoreDetail.photoCount,48);const saved=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details/326922/draft.json'),'utf8'));
  for(const group of saved.photos){const expected=draft.importedColorPhotos.find(g=>g.color===group.color).hashes;assert.deepEqual(prepared.smartstoreDetail.storeColorPhotoHashes[group.color],expected);}
@@ -101,9 +119,10 @@ test('HTML 응답은 거부하고 색상이 다른 동일 원본을 보존하며
  const c=stage.candidates[0];assert.deepEqual(await readFile(path.join(folder,'smartstore-photo-import',c.file)),bytes);
  await assert.rejects(applyImportedPhotos({...product,style:'326923'},folder,[{id:c.id,color:'01화이트',role:'front'}],{dataRoot,desktop}),/품번/);
  await assert.rejects(applyImportedPhotos(product,folder,[{id:c.id,color:'01화이트',role:''}],{dataRoot,desktop}),/각도|정면/);
- const choices=[{id:c.id,color:'01화이트',role:'front'}];await applyImportedPhotos(product,folder,choices,{dataRoot,desktop});await applyImportedPhotos(product,folder,choices,{dataRoot,desktop});
- const target=path.join(desktop,'상품등록기사진폴더/326922');assert.deepEqual(await readdir(target),['1.jpg']);assert.deepEqual(await readFile(path.join(target,'1.jpg')),bytes);
- const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details/326922/draft.json'),'utf8'));assert.equal(draft.photoMapping.files.length,1);assert.equal(draft.photoMapping.files[0].role,'front');assert.equal(draft.photoMapping.files[0].reviewed,true,'직접 선택한 정면·옆면은 미확정 자동 분류보다 우선');
+ const choices=[{id:c.id,color:'01화이트',role:'side'}];await applyImportedPhotos(product,folder,choices,{dataRoot,desktop});await applyImportedPhotos(product,folder,choices,{dataRoot,desktop});
+ const name='기존상품_01_'+c.id+'.jpg',target=path.join(desktop,'상품등록기사진폴더/326922');assert.deepEqual(await readdir(target),[name]);assert.deepEqual(await readFile(path.join(target,name)),bytes);
+ assert.equal(await readMainSelection(product,dataRoot),null,'가져온 사진을 대표로 자동 지정하지 않는다');
+ const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details/326922/draft.json'),'utf8'));assert.equal(draft.photoMapping.files.length,1);assert.equal(draft.photoMapping.files[0].role,'side');assert.equal(draft.photoMapping.files[0].reviewed,true,'직접 선택한 정면·옆면은 미확정 자동 분류보다 우선');
  }finally{await rm(dir,{recursive:true,force:true});}
 });
 
@@ -160,6 +179,7 @@ for(const [style,name] of [['116925','남성 치노 바지'],['326922','여성 �
    await applyImportedPhotos(product,folder,allImportedPhotoChoices(stage,product),{dataRoot,desktop,automatic:true});
    const draft=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',style,'draft.json'),'utf8'));
    const photos=await findPhotos(product,{desktop});assert.equal(photos.length,8);
+   if(pass===0)await saveMainSelection(product,photos.find(photo=>createHash('sha256').update(photo.bytes).digest('hex')===stage.candidates[0].sha256),dataRoot);
    const mapped=photos.map(p=>({...p,...draft.photoMapping.files.find(r=>r.name===p.name)}));
    const prepared=await prepareTrustedFolder(product,folder,{dataRoot,photos,mapped,old:draft,description:'공식 설명',detailHash:null,recognizePhoto:async()=>''});
    assert.equal(prepared.smartstoreDetail.photoCount,8);assertImportedPhotoCoverage(stage,prepared,undefined,{requireSellingPoints:false});

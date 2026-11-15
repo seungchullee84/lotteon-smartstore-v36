@@ -8,6 +8,7 @@ import {buildSmartstoreDetail} from '../smartstore-detail.mjs';
 import {careLabelText} from '../smartstore-folder-trust.mjs';
 import {readPhotoMappings,savePhotoMappings} from '../smartstore-photo-mapping-cache.mjs';
 import {listingPreview} from '../smartstore-listing-images.mjs';
+import {saveMainSelection} from '../smartstore-main-selection.mjs';
 test('품번 폴더를 API 없이 신뢰하되 미매칭 사진도 색상명 없이 자동 연결하고 라벨을 분리한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'trusted-folder-'));try{
   const folder=path.join(root,'collected'),pictures=path.join(root,'photos'),dataRoot=path.join(root,'data');await mkdir(folder);await mkdir(pictures);
@@ -15,6 +16,7 @@ test('품번 폴더를 API 없이 신뢰하되 미매칭 사진도 색상명 없
   await writeFile(path.join(folder,'smartstore-official.html'),'<body>STYLE. 05326931<div class="prd_detail_content_gio">가벼운 하프집업 상품입니다.</div></body>');
   const bytes=await Promise.all(['#abc','#def','#123'].map(background=>sharp({create:{width:80,height:100,channels:3,background}}).jpeg().toBuffer()));
   for(const [i,name]of ['1.jpg','20261025_001.jpg','20261025_002.jpg'].entries())await writeFile(path.join(pictures,name),bytes[i]);await writeFile(path.join(folder,'detail.jpg'),bytes[0]);
+  await saveMainSelection(product,{name:'1.jpg',bytes:bytes[0]},dataRoot);
   const digest=b=>createHash('sha256').update(b).digest('hex');let calls=0;const options={dataRoot,photoRoots:[pictures],apiKey:'',fetchImpl:()=>{throw Error('외부 사진분석 호출 금지');},recognizePhoto:async b=>{calls++;return digest(b)===digest(bytes[2])?'제조국 베트남 제조연월 2026.08 혼용률 면 60%':'';}};
   const prepared=await prepareSmartstoreAuto(product,folder,options),files=await prepareListingImages(prepared,folder,options);
   assert.equal(files.extras.length,0,'미확정 각도 사진은 추가에 섞지 않음');assert.equal(prepared.smartstoreDetail.photoCount,2);assert.equal(prepared.smartstoreDetail.providedImages.length,2);assert.equal(prepared.smartstoreDetail.pendingPhotoCount,0);assert.deepEqual(prepared.smartstoreDetail.colorImages,{});
@@ -41,9 +43,10 @@ test('정면·옆면 시각 확인은 과거 detail보다 우선하고 재수집
   const dataRoot=path.join(root,'data'),folder=path.join(root,'collected'),pictures=path.join(root,'photos');await mkdir(folder);await mkdir(pictures);
   const product={style:'326931',rawName:'여성 패딩',name:'여성 패딩 326931',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=reviewed',colors:['01블랙','02그레이','03브라운'],images:{main:'https://www.giordano.co.kr/official-main.jpg',detail:'https://www.giordano.co.kr/detail.jpg'}};
   await writeFile(path.join(folder,'smartstore-official.html'),'<body>STYLE. 05326931<div class="prd_detail_content_gio">가벼운 원단으로 편안하게 입을 수 있습니다.</div></body>');
-  const definitions=[['1.jpg',0,'front','#111'],['side.jpg',0,'side','#222'],['gray.jpg',1,'front','#888'],['brown.jpg',2,'front','#963'],['detail.jpg',0,'detail','#333'],['20261029_001.jpg',1,'front','#888']];
+  const definitions=[['chosen.jpg',0,'front','#111'],['side.jpg',0,'side','#222'],['gray.jpg',1,'front','#888'],['brown.jpg',2,'front','#963'],['1.jpg',0,'detail','#333'],['20261029_001.jpg',1,'front','#888']];
   const records=[];for(const [name,index,role,background]of definitions){const bytes=await sharp({create:{width:75,height:100,channels:3,background}}).jpeg().toBuffer();await writeFile(path.join(pictures,name),bytes);records.push({name,hash:createHash('sha256').update(bytes).digest('hex'),color:product.colors[index],role,reviewed:true,reviewBasis:'fixture-visual-review'});}
-  const main=await readFile(path.join(pictures,'1.jpg'));await writeFile(path.join(folder,'detail.jpg'),main);await writeFile(path.join(folder,'main.jpg'),main);await writeFile(path.join(folder,'product.json'),JSON.stringify(product));
+  const main=await readFile(path.join(pictures,'chosen.jpg'));await writeFile(path.join(folder,'detail.jpg'),main);await writeFile(path.join(folder,'main.jpg'),main);await writeFile(path.join(folder,'product.json'),JSON.stringify(product));
+  await saveMainSelection(product,{name:'chosen.jpg',bytes:main},dataRoot);
   const draftRoot=path.join(dataRoot,'smartstore-details',product.style);await mkdir(draftRoot,{recursive:true});const draft={style:product.style,sourceUrl:product.sourceUrl,photos:[],importedColorPhotos:product.colors.map(color=>({color,hashes:[records.find(r=>r.color===color).hash]})),photoMapping:{files:records.map(r=>({...r,role:'detail',reviewed:false}))}};await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft));
   await savePhotoMappings(dataRoot,product,records);await savePhotoMappings(dataRoot,product,records.map(r=>({...r,role:'detail',reviewed:false})));
   assert.equal((await readPhotoMappings(dataRoot,product)).find(r=>r.hash===records[1].hash).role,'side');
@@ -51,9 +54,11 @@ test('정면·옆면 시각 확인은 과거 detail보다 우선하고 재수집
   const options={dataRoot,photoRoots:[pictures],apiKey:'',fetchImpl:()=>assert.fail('외부 서비스 호출 금지'),recognizePhoto:()=>assert.fail('확인한 사진 재분석 금지')};
   for(let pass=0;pass<2;pass++){
    const prepared=await prepareSmartstoreAuto(product,folder,options),preview=await listingPreview(prepared,options),upload=await prepareListingImages(prepared,folder,options);
+   assert.equal(preview.main.sourceName,'chosen.jpg','1.jpg가 있어도 직접 저장한 대표를 유지');
    assert.equal(prepared.smartstoreDetail.photoCount,definitions.length,'중복 바이트·날짜형 파일명도 상세 전체에 연결');assert.deepEqual(preview.extras.map(p=>p.role),['official-main','side','front','front']);assert.deepEqual(preview.extras.map(p=>p.color),['공식몰 대표사진',...product.colors]);assert.equal(upload.extras.length,4);assert.equal(preview.photoReview.status,'ready');
    for(const color of product.colors)assert.ok(prepared.smartstoreDetail.paletteImages[color],color+' 확인된 정면은 팔레트에 연결');
    const after=JSON.parse(await readFile(path.join(draftRoot,'draft.json'),'utf8'));assert.equal(after.photoMapping.files.length,definitions.length);assert(after.photoMapping.files.every(r=>r.reviewed===true));
+   assert.deepEqual(await readFile(path.join(draftRoot,after.photos.find(p=>p.color===product.colors[0]).files[0])),main,'상세 첫 사진도 1.jpg보다 저장한 대표 원본을 우선');
    for(const record of records)assert.equal(createHash('sha256').update(await readFile(path.join(pictures,record.name))).digest('hex'),record.hash,'사용자 원본 불변');
    after.listingImages.extras=[];await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(after));const paletteOnly=await prepareSmartstoreDetail(product,folder,options);for(const color of product.colors)assert.ok(paletteOnly.smartstoreDetail.paletteImages[color],'추가이미지에 없어도 확인된 정면을 팔레트에 연결');
    after.photoMapping.files=after.photoMapping.files.map(r=>({...r,role:'detail',reviewed:false}));after.listingImages.extras=[];await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(after));

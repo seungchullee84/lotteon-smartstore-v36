@@ -10,6 +10,7 @@ import {smartstoreUploadParts,smartstoreMediaOrder} from '../smartstore-detail-u
 import {requireChannel} from '../channel-routing.mjs';
 import {loadSmartstoreAIKey,saveSmartstoreAIKey} from '../smartstore-ai-settings.mjs';
 import {prepareVideo} from './helpers/brand-video.mjs';
+import {saveMainSelection} from '../smartstore-main-selection.mjs';
 const product={style:'375908',name:'여성 경량 패딩 375908',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=test',colors:['02화이트','05블랙'],images:{detail:'https://www.giordano.co.kr/_gio_on/2025/05375908.jpg'}};
 const description='가벼운 나일론 원단을 사용한 경량 패딩입니다.';
 test('수집·사진대조·합성·상세생성 성공 후에만 업로드 완료를 알린다',async()=>{
@@ -79,17 +80,20 @@ test('사진 내용이 같으면 재실행 시 확인된 색상을 유지하고 
  const root=await mkdtemp(path.join(os.tmpdir(),'smartstore-analysis-'));
  try{
   const folder=path.join(root,'product'),pictures=path.join(root,'photos'),dataRoot=path.join(root,'data');await mkdir(folder);await mkdir(pictures);await mkdir(dataRoot);
-  const jpg=await sharp({create:{width:180,height:240,channels:3,background:'#454'}}).jpeg({quality:88}).toBuffer();await writeFile(path.join(folder,'detail.jpg'),jpg);await writeFile(path.join(pictures,'1.jpg'),jpg);await writeFile(path.join(pictures,'side.jpg'),await sharp({create:{width:180,height:240,channels:3,background:'#455'}}).jpeg().toBuffer());
+  const jpg=await sharp({create:{width:180,height:240,channels:3,background:'#454'}}).jpeg({quality:88}).toBuffer();await writeFile(path.join(folder,'detail.jpg'),jpg);await writeFile(path.join(pictures,'chosen.jpg'),jpg);await writeFile(path.join(pictures,'1.jpg'),await sharp({create:{width:180,height:240,channels:3,background:'#455'}}).jpeg().toBuffer());
+  await saveMainSelection(product,{name:'chosen.jpg',bytes:jpg},dataRoot);
   const photoCounts=[];
   const fetchImpl=async(url,request)=>{
    if(url===product.sourceUrl)return new Response('<body>STYLE. 05375908<div class="prd_detail_content_gio">'+description+'</div></body>');
    assert.equal(url,'https://api.openai.com/v1/responses');const body=JSON.parse(request.body);assert.equal(body.store,false);
    const supplied=JSON.parse(body.input[0].content[0].text);photoCounts.push(supplied.photoIds.length);
-   const analysis={attributes:{sleeve:'긴팔',neckline:'스텐드/차이나칼라',evidence:'공식 상세 사진의 소매·칼라 확인'},points:[{title:'경량',description:'가벼운 나일론 원단.',evidence:'가벼운 나일론 원단'}],photos:supplied.photoIds.map((id,i)=>({id,color:'05블랙',confidence:.99,sameProduct:true,role:i===0?'front':'side'}))};
+   const analysis={attributes:{sleeve:'긴팔',neckline:'스텐드/차이나칼라',evidence:'공식 상세 사진의 소매·칼라 확인'},points:[{title:'경량',description:'가벼운 나일론 원단.',evidence:'가벼운 나일론 원단'}],photos:supplied.photoIds.map((id,i)=>({id,color:'05블랙',confidence:.99,sameProduct:true,role:i===1?'front':'side'}))};
    return Response.json({status:'completed',output:[{content:[{type:'output_text',text:JSON.stringify(analysis)}]}]});
   };
   const draftFile=path.join(dataRoot,'smartstore-details',product.style,'draft.json');
   for(let i=0;i<2;i++){const prepared=await prepareSmartstoreAuto(product,folder,{trustFolder:false,dataRoot,apiKey:'private',photoRoots:[pictures],fetchImpl});assert.equal(prepared.smartstoreDetail.photoCount,2);assert.ok(prepared.smartstoreDetail.colorImages['05블랙']);if(i===0){const draft=JSON.parse(await readFile(draftFile));await writeFile(draftFile,JSON.stringify({...draft,includeBrandVideo:false}));}else assert.equal(prepared.smartstoreDetail.includeBrandVideo,true);}
+  const selectedDraft=JSON.parse(await readFile(draftFile));assert.equal(selectedDraft.listingImages.main.sourceName,'chosen.jpg');assert.equal(selectedDraft.listingImages.extras[0].sourceName,'1.jpg');assert.deepEqual(await readFile(path.join(pictures,'chosen.jpg')),jpg);
+  assert.equal(selectedDraft.photos[0].files[0],'auto/'+selectedDraft.photoMapping.files.find(p=>p.name==='chosen.jpg').hash.slice(0,24)+'.jpg','상세 사진도 1.jpg보다 선택 대표를 우선');
   assert.deepEqual(photoCounts,[2]);assert.throws(()=>officialDescription('<body>STYLE. 05326920</body>',product),/품번/);
   await writeFile(path.join(folder,'detail.jpg'),await sharp({create:{width:180,height:240,channels:3,background:'#678'}}).jpeg().toBuffer());
   const reanalysed=await prepareSmartstoreAuto(product,folder,{trustFolder:false,dataRoot,apiKey:'private',photoRoots:[pictures],fetchImpl});
@@ -109,6 +113,7 @@ test('채팅에서 원본 바이트로 확인한 사진은 변환 해시 없이�
  const front=await sharp({create:{width:180,height:240,channels:3,background:'#123'}}).jpeg().toBuffer(),side=await sharp({create:{width:180,height:240,channels:3,background:'#456'}}).jpeg().toBuffer();
  await writeFile(path.join(folder,'detail.jpg'),front);await writeFile(path.join(folder,'smartstore-official.html'),'<body>STYLE. 05375908<div class="prd_detail_content_gio">'+description+'</div></body>');
  for(const [name,bytes]of [['1.jpg',front],['side.jpg',side]]){await writeFile(path.join(photos,name),bytes);await writeFile(path.join(draftRoot,name),bytes);}
+ await saveMainSelection(product,{name:'1.jpg',bytes:front},dataRoot);
  const draft={style:product.style,sourceUrl:product.sourceUrl,officialDetailHash:digest(front),photos:[{color:'05블랙',files:['1.jpg','side.jpg']}],sellingPoints:[{title:'경량',description:'가벼운 원단',evidence:description}],photoMapping:{files:[{hash:digest(front),color:'05블랙',role:'front'},{hash:digest(side),color:'05블랙',role:'side'}]}};
  await writeFile(path.join(draftRoot,'draft.json'),JSON.stringify(draft));
  const p=await prepareSmartstoreAuto(product,folder,{trustFolder:false,dataRoot,photoRoots:[photos],fetchImpl:()=>{throw Error('API를 호출하면 안 됨');}});
@@ -122,6 +127,7 @@ test('첫 품번도 사진을 자동 분석해 저장하고 상세 최대 컷을
   await writeFile(path.join(folder,'detail.jpg'),await sharp({create:{width:80,height:100,channels:3,background:'#eee'}}).jpeg().toBuffer());
   await writeFile(path.join(folder,'smartstore-official.html'),'<body>STYLE. 05375908<div class="prd_detail_content_gio">'+description+'</div></body>');
   for(let i=0;i<4;i++)await writeFile(path.join(photos,i===0?'1.jpg':'date-'+i+'.jpg'),await sharp({create:{width:80,height:100,channels:3,background:['#123','#234','#345','#456'][i]}}).jpeg().toBuffer());
+  await saveMainSelection(product,{name:'1.jpg',bytes:await readFile(path.join(photos,'1.jpg'))},dataRoot);
   let calls=0;const fetchImpl=async(_,request)=>{calls++;const body=JSON.parse(request.body),input=JSON.parse(body.input[0].content[0].text);return Response.json({status:'completed',output:[{content:[{type:'output_text',text:JSON.stringify({attributes:{sleeve:'긴팔',neckline:'스텐드/차이나칼라',evidence:'공식·실사 사진 대조'},points:[{title:'경량',description:'가벼운 나일론 원단.',evidence:'가벼운 나일론 원단'}],photos:input.photoIds.map((id,i)=>({id,color:'05블랙',role:i===0?'front':'detail',sameProduct:true,confidence:1}))})}]}]});};
   const options={trustFolder:false,dataRoot,photoRoots:[photos],apiKey:'test',fetchImpl};
   const first=await prepareSmartstoreAuto(product,folder,options);assert.equal(first.smartstoreDetail.photoCount,4);
@@ -135,6 +141,8 @@ test('새 사진이 있고 분석 연결만 없는 상태를 사진 없음과 �
   const folder=path.join(root,'product'),photos=path.join(root,'photos'),dataRoot=path.join(root,'data');await mkdir(folder);await mkdir(photos);
   await writeFile(path.join(folder,'smartstore-official.html'),'<body>STYLE. 05375908<div class="prd_detail_content_gio">'+description+'</div></body>');
   const bytes=await sharp({create:{width:80,height:100,channels:3,background:'#123'}}).jpeg().toBuffer();await writeFile(path.join(folder,'detail.jpg'),bytes);await writeFile(path.join(photos,'1.jpg'),bytes);
+  await assert.rejects(()=>prepareSmartstoreAuto(product,folder,{trustFolder:false,dataRoot,photoRoots:[photos],apiKey:'',fetchImpl:()=>assert.fail('대표 미선택은 사진 분석 전 중단')}),e=>e.code==='MAIN_PHOTO_SELECTION_REQUIRED');
+  await saveMainSelection(product,{name:'1.jpg',bytes},dataRoot);
   await assert.rejects(()=>prepareSmartstoreAuto(product,folder,{trustFolder:false,dataRoot,photoRoots:[photos],apiKey:''}),e=>e.code==='PHOTO_ANALYSIS_REQUIRED'&&e.photoCount===1&&e.unknownCount===1);
  }finally{await rm(root,{recursive:true,force:true});}
 });

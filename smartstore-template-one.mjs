@@ -69,7 +69,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  const headlineBody=titleText?officialTemplateTitle({rawName:titleText,style:p.style}):'';
  const headline='지오다노'+(headlineBody?' '+headlineBody:'');
 
- const hero=draft?.heroImage?.startsWith('/smartstore-photo/')?draft.heroImage:groups.find(g=>draft?.colorSources?.[g.color]!=='official'&&g.urls[0]?.startsWith('/smartstore-photo/'))?.urls[0];
+ const hero=draft?.heroImage?.startsWith('/smartstore-photo/')?draft.heroImage:null;
  const heroAlt='현재 상품 '+p.style+' 매장 마네킹 착용 모습';
  const introLead=sellingPointIntro(points);
  const styleNumber=p.style?'<small data-style-number style="display:block;margin:0 0 16px;font-size:14px;letter-spacing:.07em;color:#53694d;">STYLE NO. '+esc(p.style)+'</small>':'';
