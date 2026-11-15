@@ -2,7 +2,7 @@ import {templateMainHeadline} from './smartstore-template-headline.mjs';
 import {buildDetailContent} from './detail-html.mjs';
 import {colorCaption} from './smartstore-color-copy.mjs';
 import {displaySellingPoints} from './smartstore-selling-points.mjs';
-import {mannequinWearingNote,productSellingPoints,STORE_SHIPPING_PROMO_ASSET,STORE_SHIPPING_PROMO_ALT,shippingPromoSection,OFFICIAL_DETAIL_TITLE} from './smartstore-template-one.mjs';
+import {colorPhotoDetailLabel,mannequinWearingNote,productSellingPoints,STORE_SHIPPING_PROMO_ASSET,STORE_SHIPPING_PROMO_ALT,shippingPromoSection,OFFICIAL_DETAIL_TITLE} from './smartstore-template-one.mjs';
 import {officialTemplateTitle} from './smartstore-template-title.mjs';
 import {productVideoUrl,BRAND_VIDEO_HEADING_HEIGHT} from './smartstore-brand-video.mjs';
 import {STORE_BANNER_URL} from './smartstore-store-banner.mjs';
@@ -38,7 +38,16 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
   body+='</div><p class="ss2-source-note">촬영 조명과 화면 설정에 따라 실제 색상과 차이가 있을 수 있습니다.</p></section>';
   const hasStorePhotos=groups.some(g=>draft?.colorImages?.[g.color]?.length&&draft.colorSources?.[g.color]!=='official');
   if(hasStorePhotos){body+='<div class="ss2-photo-heading" data-mannequin-intro>매장 마네킹 실제 착용사진</div>';const wearing=mannequinWearingNote(p);if(wearing)body+='<p data-mannequin-size class="ss2-source-note" style="padding:0 5%">'+esc(wearing)+'</p>';}
-  for(const g of groups){if(!g.urls.length)continue;const official=draft?.colorSources?.[g.color]==='official';body+=`<section id="smartstore-color-${g.index}" data-color-name="${esc(g.color)}" data-color-source="${official?'official':'store'}" class="ss2-color"><div class="ss2-color-head"><span class="ss2-color-number">${esc(g.color.match(/^\s*(\d+)/)?.[1]||String(g.index+1).padStart(2,'0'))}</span><h2>${esc(g.color.replace(/^\s*\d+\s*/,''))}</h2><span class="ss2-caption">${esc(colorCaption(g.color,{style:p.style}))}</span></div>${official?'<p class="ss2-source-note">지오다노 공식 상품 사진</p>':''}<div class="ss2-color-photos"${g.urls.length>3?' data-count-many':''}>${g.urls.map((url,i)=>'<figure>'+photo(url,g.color+' '+(official?'공식 상품 사진':i===0?'착용 모습':'디테일'))+(draft?.photoSources?.[url]==='official-model'?'<p data-official-model-note class="ss2-source-note">지오다노 공식 모델 착용사진</p>':'')+'</figure>').join('')}</div></section>`;}
+  for(const g of groups){
+   if(!g.urls.length)continue;
+   const official=draft?.colorSources?.[g.color]==='official';
+   const photos=g.urls.map((url,i)=>{
+    const alt=g.color+' '+(official?'공식 상품 사진':i===0?'착용 모습':'디테일');
+    const note=draft?.photoSources?.[url]==='official-model'?'<p data-official-model-note class="ss2-source-note">지오다노 공식 모델 착용사진</p>':'';
+    return '<figure>'+photo(url,alt)+note+'</figure>';
+   }).join('');
+   body+=`<section id="smartstore-color-${g.index}" data-color-name="${esc(g.color)}" data-color-source="${official?'official':'store'}" class="ss2-color"><div class="ss2-color-head"><span class="ss2-color-number">${esc(g.color.match(/^\s*(\d+)/)?.[1]||String(g.index+1).padStart(2,'0'))}</span><h2>${esc(g.color.replace(/^\s*\d+\s*/,''))}</h2><span class="ss2-caption">${esc(colorCaption(g.color,{style:p.style}))}</span></div>${official?'<p class="ss2-source-note">지오다노 공식 상품 사진</p>':''}<div class="ss2-color-photos"${g.urls.length>3?' data-count-many':''}>${photos}</div>${colorPhotoDetailLabel(g.urls.length)}</section>`;
+  }
  }
  if(draft?.acceptAllFolderPhotos&&draft.providedImages?.length)body+='<div data-folder-photos>'+draft.providedImages.map(src=>photo(src,'현재 상품 '+p.style+' 착용사진')).join('')+'</div>';
  if(points.length)body+=`<section class="ss2-points"><h2 data-product-point-heading class="ss2-section-title">이 옷을 고르는 이유</h2><div data-product-points data-point-count="${points.length}" class="ss2-point-grid">${points.map(point=>'<div><h3>'+esc(point.title)+'</h3><p>'+esc(point.description)+'</p></div>').join('')}</div></section>`;

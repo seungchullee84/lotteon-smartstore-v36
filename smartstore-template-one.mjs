@@ -20,6 +20,10 @@ const style='font-family:GowunDodum,\'Malgun Gothic\',sans-serif;color:#25372e;w
 const openingBackground='#f4f3ec';
 const colorSectionBackground=index=>index%2?'#f6f3ef':'#fff';
 
+export function colorPhotoDetailLabel(photoCount){
+ return photoCount>1?'<p data-photo-note style="font-size:19px;margin:16px 4% 0;line-height:1.9;">DETAIL</p>':'';
+}
+
 export function shippingPromoSection(image,{start='#fff',end='#fff'}={}){
  const background='linear-gradient(180deg,'+start+','+end+')';
  return '<section data-shipping-promo style="background:'+background+';"><div style="mask-image:linear-gradient(180deg,transparent,#000 8%,#000 89%,transparent);">'+image+'</div></section>';
@@ -96,7 +100,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
     : group.urls.length===3
     ? '<div data-photo-layout="three"><div>'+photo(group.urls[0],photoAlt(0),'border-radius:14px;')+'</div><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin-top:4px;align-items:start;">'+group.urls.slice(1).map(url=>'<div>'+photo(url,photoAlt(1),'border-radius:14px;')+'</div>').join('')+'</div></div>'
     : `<div style="display:flex;gap:4px;align-items:start;"><div style="flex:1;min-width:0;">${photo(group.urls[0],photoAlt(0),'border-radius:14px;')}</div>${group.urls.length>1?`<div style="flex:1;min-width:0;">${group.urls.slice(1).map(url=>photo(url,photoAlt(1),'margin-bottom:0;border-radius:14px;')).join('')}</div>`:''}</div>`;
-   body+=`<section id="smartstore-color-${group.index}" style="padding:52px 0;background:${colorSectionBackground(group.index)};"><div style="padding:0 4%;">${header(colorCaption(group.color,{style:p.style}),esc(group.color),{emphasized:true,kickerTone:draft?.captionTones?.[group.color]})}${sourceLabel}</div>${photos}${group.urls.length>1?'<p data-photo-note style="font-size:19px;margin:16px 4% 0;line-height:1.9;">DETAIL</p>':''}</section>`;
+   body+=`<section id="smartstore-color-${group.index}" style="padding:52px 0;background:${colorSectionBackground(group.index)};"><div style="padding:0 4%;">${header(colorCaption(group.color,{style:p.style}),esc(group.color),{emphasized:true,kickerTone:draft?.captionTones?.[group.color]})}${sourceLabel}</div>${photos}${colorPhotoDetailLabel(group.urls.length)}</section>`;
   }
  }
  const folderPhotos=draft?.acceptAllFolderPhotos?(draft.providedImages||[]):[];

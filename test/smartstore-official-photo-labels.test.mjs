@@ -13,6 +13,7 @@ for(const detailTemplate of [1,2])test('템플릿 '+detailTemplate+' 공식 사�
   assert.deepEqual(section.find('img').map((_,image)=>$(image).attr('src')).get(),product.smartstoreDetail.colorImages[color]);
   assert.ok(section.find('img').toArray().every(image=>$(image).attr('alt')===color+' 공식 상품 사진'));
   if(count)assert.match(section.text(),/지오다노 공식 상품 사진/);
+  assert.deepEqual(section.find('[data-photo-note]').map((_,note)=>$(note).text()).get(),count>1?['DETAIL']:[]);
   assert.deepEqual(product,original);
  }
 });
@@ -21,4 +22,5 @@ for(const detailTemplate of [1,2])test('템플릿 '+detailTemplate+' 매장 사�
  const $=load(buildSmartstoreDetail(product).html),groups=$('section[id^="smartstore-color-"]');
  assert.equal($('[data-mannequin-intro]').length,1);assert.equal($('[data-mannequin-size]').length,1);assert.equal(groups.eq(0).find('img').length,1);assert.equal(groups.eq(1).find('img').length,3);
  assert.equal(groups.eq(0).find('img').attr('alt'),color+' 공식 상품 사진');assert.match(groups.eq(1).find('img').first().attr('alt'),/착용 모습/);
+ assert.deepEqual(groups.eq(1).find('[data-photo-note]').map((_,note)=>$(note).text()).get(),['DETAIL']);
 });
