@@ -597,7 +597,10 @@ function syncBackgroundProgress(){
  if(!backgroundProgress)return;
  const work=backgroundProgress,active=['preparing','waiting','generating','processing','review'].includes(work.status);
  panel.dataset.status=work.status;panel.classList.toggle('active',active);
- setText($('backgroundProgressHeading'),active?'합성 진행 중 · '+backgroundStageLabels[work.status]:backgroundStageLabels[work.status]||'합성 상태');
+ const retry=work.status==='generating'&&Number.isInteger(work.attempt)&&work.attempt>1;
+ const heading=retry?'합성 보정 재시도 중 · '+work.attempt+(Number.isInteger(work.maxAttempts)?'/'+work.maxAttempts:'')+'회':
+  active?'합성 진행 중 · '+backgroundStageLabels[work.status]:backgroundStageLabels[work.status]||'합성 상태';
+ setText($('backgroundProgressHeading'),heading);
  setText($('backgroundProgressMessage'),(work.style?'품번 '+work.style+' · ':'')+(work.message||''));
  $('backgroundProgressHint').hidden=!active;
  const startedAt=typeof work.startedAt==='number'?work.startedAt:Date.parse(work.startedAt);
