@@ -118,7 +118,8 @@ export function composePopularTitle(product,ranking){
  // Remove compound source spellings before adding their measured equivalent.
  words=words.join(' ').replace(/풀\s*(?:집업|집|지퍼)/g,'풀집업').split(' ');
  words=words.filter(word=>!choices.some(f=>f.variants.includes(word))&&word!=='폴로');
- words=words.filter(word=>word===neck||aliases.includes(word)||['자켓','재킷','점퍼'].includes(word)||factualWord.test(word)||/^(긴팔|반팔)티(?:셔츠)?$/.test(word));
+ const supportedFeatureWords=new Set(features.flatMap(feature=>feature.variants));
+ words=words.filter(word=>word===neck||aliases.includes(word)||['자켓','재킷','점퍼'].includes(word)||supportedFeatureWords.has(word)||factualWord.test(word)||/^(긴팔|반팔)티(?:셔츠)?$/.test(word));
  if(kind==='티셔츠')words=words.flatMap(word=>/^(긴팔|반팔)티(?:셔츠)?$/.test(word)?[word.slice(0,2),primary]:[word]);
  const materialIds=['wool','cotton','cashmere','linen'];
  words.unshift(...[...choices].sort((a,b)=>Number(materialIds.includes(b.id))-Number(materialIds.includes(a.id))).map(f=>f.ranked[0]));

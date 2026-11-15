@@ -1061,7 +1061,7 @@ async function optimizeSmartstoreTitle({remember=false}={}){
  if(requestLock||serverBusy||!product)return;
  const current=product,field=$('smartstoreName');
  const snapshot={style:product.style,name:$('form').elements.name.value,gender:$('form').elements.gender.value,smartstoreName:field.value};
- requestLock=true;syncButtons();$('smartstoreOptimizeTitle').textContent='상품명 최적화 중…';$('naverTitleResult').textContent='네이버 검색 관심도를 조회하고 있습니다…';$('naverTitleCandidates').replaceChildren();
+ requestLock=true;syncButtons();$('smartstoreOptimizeTitle').textContent='상품명 최적화 중…';$('naverTitleResult').textContent='네이버 검색 관심도를 조회하고 있습니다…';$('naverTitleDetail').textContent='';$('naverTitleCandidates').replaceChildren();
  try{
    const result=await post('smartstore-optimize-title',{product:snapshot});
    const stale=product!==current||field.value!==snapshot.smartstoreName||$('form').elements.name.value!==snapshot.name||$('form').elements.gender.value!==snapshot.gender;
@@ -1072,7 +1072,12 @@ async function optimizeSmartstoreTitle({remember=false}={}){
    $('naverTitleResult').textContent=result.period?result.period.startDate+' ~ '+result.period.endDate+' · 후보 '+result.candidates.length+'개 비교':result.source;
    for(const entry of result.candidates){const li=document.createElement('li');li.textContent=entry.keyword+': '+(result.expanded?'비교 기준 대비 검색 관심도 '+entry.score.toFixed(3):entry.mean===null?'자료 없음':'반환된 일별 상대지수 평균 '+entry.mean.toFixed(2)+' · '+entry.pointCount+'일');$('naverTitleCandidates').append(li);}
    $('error').textContent='';
- }catch(e){$('naverTitleResult').textContent='네이버 조회 실패 · 기존 상품명 유지 · '+e.message;}
+ }catch(e){
+   const lengthFailure=/^스마트스토어 상품명은 품번·공백 포함 27~39자/.test(e.message);
+   const label=lengthFailure?'상품명 길이 확인 필요':/네이버|NAVER|API|검색 자료|인증|권한/.test(e.message)?'네이버 조회 실패':'상품명 최적화 실패';
+   $('naverTitleResult').textContent=label+' · 기존 상품명 유지 · '+e.message;
+   if(lengthFailure)$('naverTitleDetail').textContent='27~39자는 등록기의 자동 상품명 작성 기준입니다. 공식 상품정보에서 확인된 특징만 보강합니다.';
+ }
  finally{requestLock=false;$('smartstoreOptimizeTitle').textContent='상품명 자동 최적화';syncButtons();}
 }
 $('smartstoreOptimizeTitle').onclick=async()=>{
