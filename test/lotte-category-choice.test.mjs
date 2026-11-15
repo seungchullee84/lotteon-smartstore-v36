@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,mkdtempSync,rmSync} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {lotteCategoryChoices,createManualLotteCategory,readManualLotteCategory} from '../lotte-category-choice.mjs';
+import {lotteCategoryChoices,createManualLotteCategory,readManualLotteCategory,saveManualLotteCategory} from '../lotte-category-choice.mjs';
 import {bridgeLotteCategory,requireLotteCategoryBridge} from '../lotte-category-bridge.mjs';
 import {allLotteStandardPaths} from '../lotte-category-validation.mjs';
 import {createProductEditStore,applyProductEdits} from '../product-edits.mjs';
@@ -54,4 +54,12 @@ test('manual choice persists per product and source; fresh images and unrelated 
   assert.equal(changed.category.channelSmall,fresh.category.channelSmall);assert.equal(changed.category.manualSelection,undefined);assert.equal(changed.userEditedFields.channelSmall,undefined);assert.equal(changed.name,fields.name);
   const cleared=applyProductEdits({...base,category},{style:base.style,fields:{lotteCategorySelection:''}});assert.equal(cleared.category.manualSelection,undefined);
  }finally{rmSync(root,{recursive:true,force:true});}
+});
+test('explicit Apply saves locally, while a busy or changed product is never updated',async()=>{
+ const category=createManualLotteCategory(base,manualChoice);let state={product:base,folder:'folder-a',busy:false},saved;
+ const updated=await saveManualLotteCategory({getState:()=>({...state}),editStore:{save:async record=>{saved=record;}},product:base,category});
+ assert.equal(saved.style,base.style);assert.deepEqual(updated.category,category);assert.equal(state.product,base,'caller must apply only a successful response');
+ await assert.rejects(saveManualLotteCategory({getState:()=>({...state,busy:true}),editStore:{save:async()=>assert.fail('busy must not save')},product:base,category}),/작업 상태/);
+ await assert.rejects(saveManualLotteCategory({getState:()=>({...state}),editStore:{save:async()=>{state={product:{...base,style:'375909'},folder:'folder-b',busy:false};}},product:base,category}),/바뀌어/);
+ assert.equal(state.product.style,'375909');assert.equal(state.product.category.manualSelection,undefined);
 });

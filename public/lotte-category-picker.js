@@ -10,7 +10,7 @@
  const dialog=document.createElement('dialog');dialog.id='lotteCategoryPicker';dialog.className='lotte-category-dialog';dialog.setAttribute('aria-labelledby','lotteCategoryPickerTitle');
  dialog.innerHTML='<header><div><small id="lotteCategoryPickerStyle"></small><h2 id="lotteCategoryPickerTitle">상품분류 선택</h2><p>대분류부터 순서대로 선택하세요. 1차를 바꾸면 2차가 자동으로 연결돼요.</p></div><button type="button" class="secondary" id="lotteCategoryPickerClose" aria-label="분류 선택 닫기">×</button></header><div class="lotte-category-modal-body"><section><div class="lotte-category-picker-heading"><h3>1차 공통분류</h3><span>상품의 기본 종류</span></div><div id="lotteCommonColumns" class="lotte-category-columns common"></div><p id="lotteCommonChoice" class="lotte-category-choice-path"></p></section><section><div class="lotte-category-picker-heading"><h3>2차 채널분류</h3><button id="lotteCategoryReconnect" type="button" class="secondary">1차 기준으로 다시 연결</button></div><div id="lotteChannelColumns" class="lotte-category-columns"></div><p id="lotteChannelChoice" class="lotte-category-choice-path"></p></section><p id="lotteCategoryPickerMessage" role="status" aria-live="polite"></p><p id="lotteCategoryPickerScope" class="note"></p></div><footer><span>등록기 분류에만 반영돼요.</span><div><button type="button" class="secondary" id="lotteCategoryPickerCancel">취소</button><button type="button" id="lotteCategoryPickerApply">선택한 분류 적용</button></div></footer>';
  document.body.append(dialog);
- let catalog=null,draft={common:[],channel:[]},snapshot=null,signature='',epoch=0,pending=false,watch=null;
+ let catalog=null,draft={common:[],channel:[]},snapshot=null,signature='',epoch=0,pending=false,saving=false,watch=null;
  const controls={common:[],channel:[]};
  for(const [kind,count,container] of [['common',3,'lotteCommonColumns'],['channel',4,'lotteChannelColumns']]){
   for(let i=0;i<count;i++){
@@ -19,7 +19,15 @@
    select.addEventListener('change',()=>change(kind,i,select.value));label.append(select);byId(container).append(label);controls[kind].push(select);
   }
  }
- function current(){return dialog.open&&snapshot&&activeChannel()==='lotte'&&!serverBusy&&JSON.stringify(lotteCategorySnapshot())===signature;}
+ function current(){
+  if(!dialog.open||!snapshot||activeChannel()!=='lotte'||serverBusy)return false;
+  const now=lotteCategorySnapshot();if(JSON.stringify(now)===signature)return true;
+  // A state poll may acknowledge this same saved selection before the POST returns.
+  if(!saving||!now||['style','sourceUrl','input','gender','name'].some(key=>now[key]!==snapshot[key])||!now.category.manualSelection)return false;
+  const first=['commonMajor','commonMiddle','commonSmall'].map(key=>String(now.category[key]||'').match(/^([A-Z0-9]+)\s*[:：]/i)?.[1]||'');
+  const second=['major','middle','small','detail'].map(key=>now.category.channelCodes?.[key]||'');
+  return first.every((code,i)=>code===draft.common[i])&&second.every((code,i)=>code===(draft.channel[i]||''));
+ }
  function message(text,error=false){const box=byId('lotteCategoryPickerMessage');box.textContent=text;box.classList.toggle('is-error',error);}
  function selectedNodes(kind){
   const nodes=[];let siblings=catalog?.[kind]||[];
@@ -43,6 +51,7 @@
   }
   byId('lotteCategoryPickerApply').disabled=!current()||pending||!complete('common')||!complete('channel');
   byId('lotteCategoryReconnect').disabled=!current()||pending||!complete('common');
+  byId('lotteCategoryPickerClose').disabled=saving;byId('lotteCategoryPickerCancel').disabled=saving;
  }
  function setChannel(category){
   const keys=['channelMajor','channelMiddle','channelSmall','channelDetail'],levels=['major','middle','small','detail'];let siblings=catalog.channel;draft.channel=[];
@@ -74,7 +83,7 @@
   if(kind==='common'){draft.channel=[];render();if(complete('common'))void recommend();else message('1차 소분류까지 선택하면 2차를 자동으로 연결해요.');}
   else{render();message(complete('channel')?'직접 고른 2차 분류를 적용할 준비가 됐어요.':'2차 분류를 끝까지 선택해 주세요.');}
  }
- function close(){++epoch;pending=false;clearInterval(watch);if(dialog.open)dialog.close();snapshot=null;openButton.focus();}
+ function close(){if(saving)return;++epoch;pending=false;clearInterval(watch);if(dialog.open)dialog.close();snapshot=null;openButton.focus();}
  async function open(){
   if(!product||activeChannel()!=='lotte'||serverBusy){if(typeof announce==='function')announce('상품을 수집하고 현재 작업이 끝난 뒤 분류를 수정해 주세요.','failed');return;}
   snapshot=lotteCategorySnapshot();signature=JSON.stringify(snapshot);const id=++epoch;pending=true;catalog=null;draft={common:[],channel:[]};
@@ -101,7 +110,7 @@
  }
  async function apply(){
   if(!current()||pending||!complete('common')||!complete('channel'))return;
-  const id=++epoch;pending=true;render();message('선택한 이름과 분류 코드를 확인하고 있어요.');
+  const id=++epoch;pending=true;saving=true;render();message('선택한 이름과 분류 코드를 확인하고 있어요.');
   try{
    const {input,...body}=snapshot;
    const result=await post('lotte-category-selection',{...body,manualChoice:{common:draft.common,channel:draft.channel}});
@@ -114,9 +123,9 @@
    lotteCategoryChecked=JSON.stringify(lotteCategorySnapshot());
    renderLotteCategoryValidation({...result.validation,summary:result.bridge.message},'manual');
    byId('lotteCategorySuggestionStatus').textContent='직접 고른 분류를 반영했어요. 다음 입력에도 이 선택을 유지해요.';
-   highlightReviewFields();close();
+   highlightReviewFields();saving=false;close();
   }catch(error){if(id===epoch&&current())message(error.message,true);}
-  finally{if(id===epoch){pending=false;render();}}
+  finally{saving=false;if(id===epoch)pending=false;render();}
  }
  openButton.addEventListener('click',()=>void open());
  byId('lotteCategoryPickerClose').onclick=close;byId('lotteCategoryPickerCancel').onclick=close;
