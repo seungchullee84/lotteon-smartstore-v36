@@ -5,7 +5,23 @@ import os from 'node:os';
 import path from 'node:path';
 import {suggestMissingLotteCategory,LOTTE_CATEGORY_FIELDS} from '../lotte-category-suggest.mjs';
 import {saveCategoryMatch,loadCategoryCache,categoryKey} from '../category-cache.mjs';
+import {productClassification} from '../product.mjs';
+import {bridgeLotteCategory} from '../lotte-category-bridge.mjs';
 const product=(gender,rawName,section='TOP')=>({gender,rawName,name:rawName,sourceCategory:[gender==='남성'?'MEN':'WOMEN',section],category:{commonMiddle:'',commonSmall:'',channelMiddle:'',channelSmall:''}});
+
+test('076916 and other coats under MEN/WOMEN ALL get a complete first-derived automatic path',()=>{
+ for(const [style,gender,title] of [['076916','남성','[변우석] 울캐시미어 발마칸 코트'],['076917','남성','울캐시미어 롱 코트'],['375916','여성','울 블렌드 코트']]){
+  const p={...product(gender,title,'ALL'),style},result=suggestMissingLotteCategory(p);
+  assert.deepEqual(result.missing,[],style);
+  assert.match(result.category.commonSmall,new RegExp(gender+'코트$'));
+  const bridged=bridgeLotteCategory({...p,category:result.category});assert.equal(bridged.complete,true);
+  assert.equal(bridged.category.channelMajor,'브랜드'+gender+'의류');assert.equal(bridged.category.channelMiddle,'자켓/코트');
+  assert.ok(bridged.category.channelCodes.small);assert.equal(bridged.category.manualSelection,undefined);
+  const classified=productClassification('<div class="navi"><a>Home</a><a class="prdpath1">'+(gender==='남성'?'MEN':'WOMEN')+'</a><a>ALL</a><a>'+title+'</a></div>');
+  assert.match(classified.category.commonSmall,new RegExp(gender+'코트$'));
+ }
+ assert.notEqual(suggestMissingLotteCategory(product('남성','트리코트 팬츠','ALL')).category.channelMiddle,'자켓/코트');
+});
 test('남성 플리스 집업은 실제 집업점퍼 경로를 적용하고 다른 형태와 구분한다',()=>{
  const current={...product('남성','NEW 플리스 목넥 집업'),style:'026992',sourceCategory:['신상품','남성']};
  const similar={...product('남성','후리스 하이넥 집업 재킷','OUTER'),sourceCategory:['MEN','OUTER','캐주얼재킷']};

@@ -13,6 +13,8 @@ test('every one of the 83 first-category leaves produces a non-empty selectable 
   const result=bridgeLotteCategory(p),c=result.category;total++;
   assert.equal(result.complete,true,small);assert.equal(c.commonSmall,small);assert.equal(c.commonMiddle,middle.middle);
   for(const key of ['channelMajor','channelMiddle','channelSmall'])assert.ok(c[key],small+' '+key);
+  const opposite=group.gender==='남성'?'여성':'남성';
+  for(const key of ['channelMajor','channelMiddle','channelSmall','channelDetail'])assert.equal(new RegExp('^(?:브랜드)?'+opposite).test(c[key]||''),false,small+' must not connect to the opposite gender');
   assert.ok(paths.some(path=>path.major.code===c.channelCodes.major&&path.middle.code===c.channelCodes.middle&&path.small.code===c.channelCodes.small&&path.small.name===c.channelSmall),small+' must refer to a real stored leaf');
   assert.deepEqual(requireLotteCategoryBridge({...p,category:c}),c,'second-stage repetition must retain the chosen pair');
  }

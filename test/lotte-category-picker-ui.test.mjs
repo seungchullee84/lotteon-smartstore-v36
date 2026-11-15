@@ -20,14 +20,14 @@ async function fixture(t,{initial=base,catalogs}={}){
  let catalogFailure=false;
  await page.route('http://register.test/**',async route=>{
   if(new URL(route.request().url()).pathname==='/api/lotte-category-choices')return catalogFailure?route.fulfill({status:503,body:'unavailable'}):route.fulfill({json:lotteCategoryChoices(catalogs)});
-  return route.fulfill({contentType:'text/html',body:'<html><body data-channel="lotte"><input id="style" value="375908"><input id="smartstoreName"><form id="form">'+fields.map(n=>'<label>'+n+'<input name="'+n+'"></label>').join('')+section+'</form></body></html>'});
+  return route.fulfill({contentType:'text/html',body:'<html><body data-channel="lotte"><input id="style" value="'+initial.style+'"><input id="smartstoreName"><form id="form">'+fields.map(n=>'<label>'+n+'<input name="'+n+'"></label>').join('')+section+'</form></body></html>'});
  });
  await page.goto('http://register.test/');
  let gate=null,release=null,legacy=false,failure=false,wrongSelection=false;
  await page.exposeFunction('categoryRequest',async (route,body)=>{
   requests.push({route,body});if(gate===route){gate=null;await new Promise(r=>release=r);}
   if(failure&&route==='lotte-category-selection')throw Error('연결이 끊어졌어요.');
-  let p={...base,...body};if(body.manualChoice)p.category=createManualLotteCategory(p,wrongSelection?{common:['L0011','M0066','00856'],channel:['major','middle','small','detail'].map(key=>base.category.channelCodes[key]||'')}:body.manualChoice,catalogs);
+  let p={...initial,...body};if(body.manualChoice)p.category=createManualLotteCategory(p,wrongSelection?{common:['L0011','M0066','00856'],channel:['major','middle','small','detail'].map(key=>base.category.channelCodes[key]||'')}:body.manualChoice,catalogs);
   const bridge=bridgeLotteCategory(p,catalogs);return {category:bridge.category,bridge,validation:validateLotteCategory({...p,category:bridge.category},catalogs),manualSupported:!legacy,selectionSaved:!!body.manualChoice&&!legacy};
  });
  const source=await readFile(new URL('../public/app.js',import.meta.url),'utf8');
@@ -46,6 +46,30 @@ async function fixture(t,{initial=base,catalogs}={}){
 }
 const select=(page,label)=>page.getByLabel(label,{exact:true});
 const saves=f=>f.requests.filter(r=>r.route==='lotte-category-selection');
+
+test('MEN ALL coats get initial defaults with the running-server bridge and cannot choose women paths',async t=>{
+ const initial={style:'076916',gender:'남성',sourceCategory:['MEN','ALL'],sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=coat',rawName:'울캐시미어 발마칸 코트',name:'남성 울캐시미어 발마칸 코트 076916',category:{commonMiddle:'',commonSmall:'',channelMiddle:'',channelSmall:''}};
+ const f=await fixture(t,{initial}),{page}=f;
+ assert.equal(await select(page,'1차 소분류').inputValue(),'00685');
+ assert.equal(await select(page,'2차 대분류').locator('option:checked').innerText(),'브랜드남성의류');
+ assert.equal(await select(page,'1차 대분류').locator('option[value=L0011]').count(),0);
+ assert.equal(await select(page,'2차 대분류').locator('option[value=BC34000000]').count(),0);
+ assert.equal(saves(f).length,0);
+ assert.equal(await page.evaluate(()=>product.category.manualSelection),undefined);
+ assert.equal(await page.evaluate(()=>fillMissingLotteCategory()),true);
+});
+
+test('a saved male coat with a female manual root is discarded before first display',async t=>{
+ const common={commonMajor:'L0014 : 남성의류',commonMiddle:'M0010 : 남성의류아우터',commonSmall:'00685 : 남성코트'};
+ const category={...base.category,...common},initial={...base,style:'076916',gender:'남성',sourceCategory:['MEN','ALL'],rawName:'울캐시미어 발마칸 코트',name:'남성 발마칸 코트',category};
+ const manual={version:1,style:initial.style,sourceUrl:initial.sourceUrl,gender:initial.gender,category:{...category}};
+ initial.category.manualSelection=manual;initial.userEditedFields={lotteCategorySelection:JSON.stringify(manual),channelMiddle:category.channelMiddle,channelSmall:category.channelSmall};
+ const f=await fixture(t,{initial}),{page}=f;
+ assert.equal(await select(page,'2차 대분류').locator('option:checked').innerText(),'브랜드남성의류');
+ assert.equal(await page.evaluate(()=>currentProductEdits()?.fields.lotteCategorySelection),undefined);
+ assert.equal(await page.evaluate(()=>product.category.manualSelection),null);
+ assert.equal(saves(f).length,0,'validation must not secretly persist a replacement');
+});
 
 test('automatic defaults appear inline without any edit button or manual-save request',async t=>{
  const f=await fixture(t,{initial:{...raw,category:{...raw.category}}}),{page}=f;

@@ -29,6 +29,23 @@ test('explicit manual paths survive bridge and repeated input preparation despit
  assert.deepEqual(requireLotteCategoryBridge({...p,rawName:'다른 이름 패딩 다운'}),category);
  assert.deepEqual(bridgeLotteCategory({...p,category:requireLotteCategoryBridge(p)}).category,category);
 });
+
+test('opposite-gender overrides are rejected even when all names and codes form real paths',()=>{
+ const male={...base,style:'076916',gender:'남성',sourceCategory:['MEN','ALL'],rawName:'울캐시미어 발마칸 코트',category:{commonMajor:'L0014 : 남성의류',commonMiddle:'M0010 : 남성의류아우터',commonSmall:'00685 : 남성코트'}};
+ const wrong={common:['L0014','M0010','00685'],channel:manualChoice.channel};
+ assert.throws(()=>createManualLotteCategory(male,wrong),error=>error.code==='LOTTE_CATEGORY_GENDER_CONFLICT');
+ const womenCategory=createManualLotteCategory(base,manualChoice);
+ const mixed={...womenCategory,...male.category};mixed.manualSelection={version:1,style:male.style,sourceUrl:male.sourceUrl,gender:male.gender,category:{...mixed,manualSelection:undefined}};
+ const stale={...male,category:mixed};assert.equal(bridgeLotteCategory(stale).complete,false);
+ assert.ok(validateLotteCategory(stale).issues.some(issue=>issue.code==='channel-gender'));
+ const fresh={...male,category:bridgeLotteCategory(male).category,images:{main:'preserved.jpg'}};
+ const loaded=applyProductEdits(fresh,{style:male.style,fields:{lotteCategorySelection:JSON.stringify(mixed.manualSelection),commonMiddle:mixed.commonMiddle,commonSmall:mixed.commonSmall,channelMiddle:mixed.channelMiddle,channelSmall:mixed.channelSmall,name:'수정한 상품명'}});
+ assert.equal(loaded.category.channelMajor,'브랜드남성의류');assert.equal(loaded.category.manualSelection,undefined);assert.equal(loaded.name,'수정한 상품명');assert.deepEqual(loaded.images,fresh.images);
+ const malePath=bridgeLotteCategory(male).category;
+ assert.throws(()=>createManualLotteCategory(base,{common:manualChoice.common,channel:['major','middle','small','detail'].map(k=>malePath.channelCodes[k])}),/성별/);
+ const femaleUnderwear=allLotteStandardPaths().find(p=>p.major.name==='브랜드언더웨어'&&p.middle.name==='여성내의');
+ assert.throws(()=>createManualLotteCategory(male,{common:wrong.common,channel:['major','middle','small','detail'].map(k=>femaleUnderwear[k]?.code||'')}),/성별/);
+});
 test('unknown or swapped parents, required detail, changed identity and modified codes never silently become another category',()=>{
  assert.throws(()=>createManualLotteCategory(base,{...manualChoice,common:['L0014','M0066','00856']}),/1차/);
  assert.throws(()=>createManualLotteCategory(base,{...manualChoice,channel:['BC31000000',...manualChoice.channel.slice(1)]}),/2차/);

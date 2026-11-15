@@ -125,6 +125,9 @@
  }
  async function apply(id){
   if(id!==epoch||!current()||!complete('common')||!complete('channel'))return false;
+  const chosen={...draftCategory(),...Object.fromEntries(channelKeys.map((key,i)=>[key,selectedNodes('channel')[i]?.name||'']))};
+  const conflict=lotteCategoryGenderConflict(chosen,snapshot.gender);
+  if(conflict){saveError=conflict;draftStatus('성별 확인 필요','error');message(conflict,true);render();return false;}
   saving=true;saveError='';draftStatus('분류 반영 중…');message('선택한 분류를 등록기에 반영하고 있어요.');render();
   try{
    const {input,...body}=snapshot;
