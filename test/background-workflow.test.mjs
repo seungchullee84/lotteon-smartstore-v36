@@ -48,6 +48,33 @@ async function fixture(t,{compose,realCompose=false,onInvalidate}={}){
  return {root,folder,cacheRoot,generatedPath,original,extra,output,state,workflow,options,prepare,stage,complete,manifest,unapplied,seedFolder,calls:()=>calls};
 }
 
+test('original wall-clock start survives every phase while terminal elapsed time uses the monotonic clock',async t=>{
+ let now=1800000000000,release;t.mock.method(Date,'now',()=>now);
+ const f=await fixture(t,{compose:()=>new Promise(resolve=>{release=()=>resolve(f.output);})});
+ const preparing=f.prepare(),startedAt=now;
+ const check=phase=>{const status=f.workflow.status();assert.equal(status.status,phase);assert.equal(status.startedAt,startedAt);return status;};
+ check('checking');const request=await preparing;now+=60000;check('waiting');
+ f.workflow.dispatch({jobId:request.jobId});now+=60000;check('generating');
+ const staging=f.stage(request);now+=60000;check('processing');release();await staging;check('review');
+ now+=60000;const result=f.complete(request),complete=check('complete');assert.equal(complete.elapsedMs,result.elapsedMs);assert(Number.isFinite(complete.elapsedMs)&&complete.elapsedMs>=0&&complete.elapsedMs<60000,'elapsed time must not follow the simulated wall-clock jump');
+ now+=60000;assert.deepEqual(f.workflow.status(),complete,'terminal timer remains frozen');
+ const reused=await f.prepare();assert.equal(reused.cached,true);assert.equal(f.workflow.status().startedAt,now);assert.notEqual(f.workflow.status().startedAt,startedAt);
+ f.workflow.complete({jobId:reused.jobId,reuse:true});assert.equal(f.workflow.status().startedAt,now);assert(Number.isFinite(f.workflow.status().elapsedMs));
+});
+
+test('cancellation, composition errors and worker errors retain original start and freeze elapsed time',async t=>{
+ let now=1800000000000;t.mock.method(Date,'now',()=>now);
+ for(const mode of ['cancel','stage-error','worker-error'])await t.test(mode,async sub=>{
+  const f=await fixture(sub,{compose:async()=>{throw Error('composition failed');}}),request=await f.prepare(),startedAt=f.workflow.status().startedAt;
+  now+=60000;
+  if(mode==='cancel')f.workflow.cancel({requestId:f.workflow.status().requestId});
+  else if(mode==='stage-error')await assert.rejects(f.stage(request),/composition failed/);
+  else f.workflow.fail({jobId:request.jobId,message:'worker failed'});
+  const terminal=f.workflow.status();assert.equal(terminal.startedAt,startedAt);assert.equal(terminal.status,mode==='cancel'?'cancelled':'error');assert(Number.isFinite(terminal.elapsedMs)&&terminal.elapsedMs>=0&&terminal.elapsedMs<60000);
+  now+=60000;assert.deepEqual(f.workflow.status(),terminal);
+ });
+});
+
 test('reviewed composition from an extra source becomes the main image and preserves every original',async t=>{
  const f=await fixture(t,{realCompose:true});
  f.workflow.select({style:f.state.product.style,key:'extra2'});

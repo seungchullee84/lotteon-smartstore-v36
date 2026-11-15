@@ -20,9 +20,10 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
  let epoch=0,active=null,view=null;
  const cancelled=new Set();
  const cacheSettings={version:1,composition:BACKGROUND_COMPOSITE_VERSION,generation:'builtin-reviewed-background-v1',width:1500,height:1500,format:'jpeg',quality:95};
+ const timing=(s,terminal=false)=>({startedAt:s.startedAt,...(terminal?{elapsedMs:Math.round(performance.now()-s.started)}:{})});
  function invalidate(message='상품 또는 작업이 변경되어 이전 합성 요청을 취소했습니다.'){
   epoch++;
-  if(active){active.invalid=true;view={status:'cancelled',style:active.style,key:active.key,message};onInvalidate({jobId:active.jobId});}
+  if(active){active.invalid=true;view={...timing(active,true),status:'cancelled',style:active.style,key:active.key,message};onInvalidate({jobId:active.jobId});}
  }
  function cancel({requestId}={}){
   if(!validId(requestId))throw Error('합성 요청 번호를 확인해 주세요.');
@@ -54,7 +55,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   const selection=fs.readFileSync(selectionPath),selected=JSON.parse(selection);
   if(selected.key!==key||selected.style!==style)throw changed();
   const original=fs.readFileSync(sourcePath),sourceHash=hash(original);
-  const s={epoch,requestId,jobId:id(),style,key,sourceUrl:current.product.sourceUrl,sourceImageUrl:current.product.images[key],product:current.product,folder,revision:current.revision,sourcePath,sourceHash,original,sourceStamp:stamp(sourcePath),selectionPath,selectionHash:hash(selection),selectionStamp:stamp(selectionPath),started:performance.now()};
+  const s={epoch,requestId,jobId:id(),style,key,sourceUrl:current.product.sourceUrl,sourceImageUrl:current.product.images[key],product:current.product,folder,revision:current.revision,sourcePath,sourceHash,original,sourceStamp:stamp(sourcePath),selectionPath,selectionHash:hash(selection),selectionStamp:stamp(selectionPath),started:performance.now(),startedAt:Date.now()};
   s.cacheKey=hash(JSON.stringify({style,key,sourceUrl:s.sourceUrl,sourceHash,settings:cacheSettings}));
   assertCurrent(s);return s;
  }
@@ -78,20 +79,20 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   assertCurrent(s);
   atomic(path.join(s.folder,'background-image.json'),JSON.stringify({file,style:s.style,sourceUrl:s.sourceUrl,sourceKey:s.key,sourceHash:s.sourceHash,outputHash,cacheKey:s.cacheKey,settings:cacheSettings,reviewed:true,createdAt:new Date().toISOString()}));
   const result={ok:true,cached:reused,file,elapsedMs:Math.round(performance.now()-s.started),message:reused?'같은 원본의 검수된 합성 결과를 대표이미지에 적용했습니다.':'원본을 보존한 1500×1500 합성 결과를 대표이미지에 적용했습니다.'};
-  view={status:'complete',style:s.style,key:s.key,sourceUrl:s.sourceUrl,jobId:s.jobId,requestId:s.requestId,...result};active=null;
+  view={...timing(s),status:'complete',style:s.style,key:s.key,sourceUrl:s.sourceUrl,jobId:s.jobId,requestId:s.requestId,...result};active=null;
   return result;
  }
  async function prepare(input){
   if(!validId(input.requestId)||cancelled.has(input.requestId))throw changed();
   invalidate('새 합성 요청으로 이전 요청을 취소했습니다.');
   const s=snapshot(input);active=s;
-  view={status:'checking',style:s.style,key:s.key,message:'원본과 재사용 가능한 결과를 확인합니다.'};
+  view={...timing(s),status:'checking',style:s.style,key:s.key,message:'원본과 재사용 가능한 결과를 확인합니다.'};
   try{
    const bytes=await cached(s);assertCurrent(s);
-   if(bytes){s.cachedBytes=bytes;view={status:'checking',style:s.style,key:s.key,message:'같은 원본의 검수된 결과를 찾았습니다. 현재 화면을 재확인합니다.'};return {ok:true,cached:true,applied:false,jobId:s.jobId,message:view.message};}
-   view={status:'waiting',style:s.style,key:s.key,message:'채팅에서 배경 생성 후 검수된 결과를 자동 처리합니다.'};
+   if(bytes){s.cachedBytes=bytes;view={...timing(s),status:'checking',style:s.style,key:s.key,message:'같은 원본의 검수된 결과를 찾았습니다. 현재 화면을 재확인합니다.'};return {ok:true,cached:true,applied:false,jobId:s.jobId,message:view.message};}
+   view={...timing(s),status:'waiting',style:s.style,key:s.key,message:'채팅에서 배경 생성 후 검수된 결과를 자동 처리합니다.'};
    return {ok:true,cached:false,jobId:s.jobId,sourcePath:s.sourcePath,style:s.style,key:s.key,sourceHash:s.sourceHash};
-  }catch(error){if(active===s){view={status:'cancelled',style:s.style,key:s.key,sourceUrl:s.sourceUrl,jobId:s.jobId,requestId:s.requestId,message:error.message};active=null;}throw error;}
+  }catch(error){if(active===s){view={...timing(s,true),status:'cancelled',style:s.style,key:s.key,sourceUrl:s.sourceUrl,jobId:s.jobId,requestId:s.requestId,message:error.message};active=null;}throw error;}
  }
  function job(jobId){if(!active||active.jobId!==jobId)throw changed();assertCurrent(active);return active;}
  async function stage({jobId,generatedPath}){
@@ -99,7 +100,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   if(s.processing||s.staged)throw Error('이 요청의 합성 결과가 이미 준비 중이거나 검수 대기 중입니다.');
   if(typeof generatedPath!=='string'||!path.isAbsolute(generatedPath)||!/^\.(png|jpe?g|webp)$/i.test(path.extname(generatedPath)))throw Error('생성된 이미지의 절대 경로를 확인해 주세요.');
   if(fs.statSync(generatedPath).size>40*1024*1024)throw Error('생성 이미지 파일이 너무 큽니다.');
-  s.processing=true;view={status:'processing',style:s.style,key:s.key,message:'원본 보존 합성과 규격 검사를 진행합니다.'};
+  s.processing=true;view={...timing(s),status:'processing',style:s.style,key:s.key,message:'원본 보존 합성과 규격 검사를 진행합니다.'};
   try{
    const bytes=await compose({original:s.original,generated:fs.readFileSync(generatedPath)});
    assertCurrent(s);
@@ -107,9 +108,9 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
    if(m.width!==1500||m.height!==1500||m.format!=='jpeg')throw Error('합성 결과 규격이 올바르지 않습니다.');
    const previewPath=path.join(s.folder,'background-preview-'+s.jobId+'.jpg');
    fs.writeFileSync(previewPath,bytes,{flag:'wx'});s.staged={bytes,hash:hash(bytes),previewPath};
-   view={status:'review',style:s.style,key:s.key,message:'원본 합성을 마쳤습니다. 최종 이미지 검수 후 자동 적용합니다.'};
+   view={...timing(s),status:'review',style:s.style,key:s.key,message:'원본 합성을 마쳤습니다. 최종 이미지 검수 후 자동 적용합니다.'};
    return {ok:true,jobId,previewPath,width:1500,height:1500,originalPreserved:true};
-  }catch(error){if(active===s&&!s.invalid){view={status:'error',style:s.style,key:s.key,message:error.message};}throw error;}
+  }catch(error){if(active===s&&!s.invalid){view={...timing(s,true),status:'error',style:s.style,key:s.key,message:error.message};}throw error;}
   finally{s.processing=false;}
  }
  function complete({jobId,reviewed,reuse}){
@@ -135,7 +136,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   return {ok:true,key};
  }
  function inspect({jobId}){const s=job(jobId);return {ok:true,jobId,style:s.style,key:s.key,sourcePath:s.sourcePath,sourceHash:s.sourceHash,previewPath:s.staged?.previewPath};}
- function dispatch({jobId}){const s=job(jobId);if(s.dispatched||s.cachedBytes)throw Error('이미 진행 중이거나 재사용할 수 있는 합성 요청입니다.');s.dispatched=true;view={status:'generating',style:s.style,key:s.key,message:'Codex가 원본을 확인하고 배경 합성을 진행합니다.'};return inspect({jobId});}
- function fail({jobId,message}){if(active?.jobId!==jobId||active.invalid)return;active.invalid=true;view={status:'error',style:active.style,key:active.key,sourceUrl:active.sourceUrl,jobId:active.jobId,requestId:active.requestId,message};active=null;}
+ function dispatch({jobId}){const s=job(jobId);if(s.dispatched||s.cachedBytes)throw Error('이미 진행 중이거나 재사용할 수 있는 합성 요청입니다.');s.dispatched=true;view={...timing(s),status:'generating',style:s.style,key:s.key,message:'Codex가 원본을 확인하고 배경 합성을 진행합니다.'};return inspect({jobId});}
+ function fail({jobId,message}){if(active?.jobId!==jobId||active.invalid)return;active.invalid=true;view={...timing(active,true),status:'error',style:active.style,key:active.key,sourceUrl:active.sourceUrl,jobId:active.jobId,requestId:active.requestId,message};active=null;}
  return {prepare,stage,complete,select,cancel,invalidate,inspect,dispatch,fail,status:()=>view?{...view,jobId:view.jobId||active?.jobId,requestId:view.requestId||active?.requestId,sourceUrl:view.sourceUrl||active?.sourceUrl}:null};
 }
