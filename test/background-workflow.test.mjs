@@ -42,7 +42,7 @@ async function fixture(t,{compose,realCompose=false,onInvalidate}={}){
  const workflow=createBackgroundWorkflow(options);
  const prepare=(overrides={})=>workflow.prepare({style:state.product.style,key:'main',sourceUrl:state.product.sourceUrl,revision:state.revision,requestId:'request_'+String(++sequence).padStart(8,'0'),...overrides});
  const stage=request=>workflow.stage({jobId:request.jobId,generatedPath});
- const complete=request=>workflow.complete({jobId:request.jobId,reviewed:true});
+ const complete=request=>workflow.complete({jobId:request.jobId,reviewed:true,attempt:workflow.inspect({jobId:request.jobId}).attempt});
  const manifest=()=>readFile(path.join(state.folder,'background-image.json'),'utf8').then(JSON.parse);
  const unapplied=()=>assert.rejects(readFile(path.join(state.folder,'background-image.json')),{code:'ENOENT'});
  return {root,folder,cacheRoot,generatedPath,original,extra,output,state,workflow,options,prepare,stage,complete,manifest,unapplied,seedFolder,calls:()=>calls};
@@ -262,6 +262,8 @@ test('quality retry keeps the source and start time, retains prior previews and 
  assert.throws(()=>f.complete(request),/시각 검수/);await f.unapplied();assert.deepEqual(await readFile(first.previewPath),priorBytes);
  const second=await f.stage(request);assert.notEqual(second.previewPath,first.previewPath);assert.equal(second.attempt,2);
  assert.throws(()=>f.workflow.complete({jobId:request.jobId,reviewed:false}),/시각 검수/);
+ for(const attempt of [undefined,1,3,'2',NaN])assert.throws(()=>f.workflow.complete({jobId:request.jobId,reviewed:true,attempt}),e=>e.code==='BACKGROUND_REVIEW_ATTEMPT_CHANGED');
+ await f.unapplied();
  f.complete(request);const entry=await f.manifest();assert.equal(entry.outputHash,digest(outputs[1]));assert.notEqual(entry.outputHash,digest(outputs[0]));
  assert.equal(f.workflow.status().attempt,2);assert.equal(f.workflow.status().startedAt,startedAt);assert.deepEqual(await readFile(path.join(f.folder,'main.jpg')),f.original);assert.deepEqual(await readFile(first.previewPath),priorBytes);
 });

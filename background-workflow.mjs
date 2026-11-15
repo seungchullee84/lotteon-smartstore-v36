@@ -124,10 +124,11 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   view={...timing(s),status:'generating',style:s.style,key:s.key,message:'배경 합성 '+s.attempt+'/'+maxAttempts+'회 · 보완: '+qualityReason};
   return {...inspect({jobId}),reason:qualityReason,message:view.message};
  }
- function complete({jobId,reviewed,reuse}){
+ function complete({jobId,reviewed,reuse,attempt}){
   const s=job(jobId);
   if(reuse===true){if(!s.cachedBytes)throw Error('재사용할 검수 결과가 없습니다.');return activate(s,s.cachedBytes,{reused:true});}
   if(reviewed!==true||!s.staged)throw Error('최종 합성 이미지의 시각 검수 후 적용해 주세요.');
+  if((s.attempt>1||attempt!==undefined)&&(!Number.isInteger(attempt)||attempt!==s.staged.attempt))throw Object.assign(Error('검수한 합성 차수가 현재 결과와 다릅니다. '+s.attempt+'회차 이미지를 확인한 뒤 적용해 주세요.'),{code:'BACKGROUND_REVIEW_ATTEMPT_CHANGED'});
   if(hash(fs.readFileSync(s.staged.previewPath))!==s.staged.hash)throw changed();
   assertCurrent(s);
   const bytes=s.staged.bytes;
