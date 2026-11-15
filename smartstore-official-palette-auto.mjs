@@ -141,3 +141,74 @@ async function preparePaletteOnly(product,prepared,{folder,dataRoot,signal,log=(
   await current();await atomic(manifestFile,JSON.stringify(cache,null,2));return result;
  });
 }
+
+// Reuse the palette source evidence and main original for the lower gallery.
+// Empty colors receive up to two distinct originals; a missing second image is
+// informational, and existing store/official groups are never replaced.
+export async function prepareOfficialGallery(product,prepared,{folder,dataRoot,signal,log=()=>{},fetchImpl=fetch,collectSources=collectDefault}={}){
+ const missing=(product.colors||[]).filter(color=>!prepared.colorImages?.[color]?.length),result={filled:[],reused:[],pending:[]};
+ if(!missing.length)return result;
+ prepared.galleryPendingReasons||={};
+ const defer=(color,reason)=>{const text=message(reason);prepared.galleryPendingReasons[color]=text;result.pending.push({color,message:text});};
+ const identity=productIdentity(product);if(!identity){for(const color of missing)defer(color,'현재 품번의 공식 상품 주소와 색상 정보를 확인해 주세요.');return result;}
+ abort(signal);let detail;
+ try{detail=await readFile(path.join(folder,'detail.jpg'));}catch(error){if(error.code!=='ENOENT')throw error;for(const color of missing)defer(color,'현재 상품의 공식 상세 원본이 필요합니다.');return result;}
+ const snapshot={version:VERSION,...identity,sourceDetailHash:digest(detail)},cacheRoot=path.join(dataRoot,'smartstore-details',identity.style,'official-palette-auto',digest(JSON.stringify(snapshot))),manifestFile=path.join(cacheRoot,'manifest.json');
+ const current=async()=>{abort(signal);if(JSON.stringify(productIdentity(product))!==JSON.stringify(identity)||digest(await readFile(path.join(folder,'detail.jpg')))!==snapshot.sourceDetailHash)throw Object.assign(Error('공식 사진 보완 중 상품 또는 상세 원본이 변경됐습니다. 다시 확인해 주세요.'),{code:'OFFICIAL_PALETTE_SOURCE_CHANGED'});};
+ const temporary={...prepared,acceptAllFolderPhotos:true,paletteImages:{...prepared.paletteImages},paletteSources:{...prepared.paletteSources},photoFiles:{...prepared.photoFiles},photoMimeTypes:{...prepared.photoMimeTypes},palettePendingReasons:{}};
+ for(const color of missing)delete temporary.paletteImages[color];
+ // Mark non-target colors satisfied only inside this temporary palette view.
+ for(const color of identity.colors)if(!missing.includes(color)&&!temporary.paletteImages[color])temporary.paletteImages[color]='/smartstore-photo/existing-gallery';
+ const mains=await preparePaletteOnly(product,temporary,{folder,dataRoot,signal,fetchImpl,collectSources});await current();
+ return serialized(cacheRoot,async()=>{
+  await current();let cache;
+  try{cache=JSON.parse(await readFile(manifestFile,'utf8'));}catch(error){if(error.code!=='ENOENT'&&!(error instanceof SyntaxError))throw error;}
+  if(!cache||JSON.stringify(cache.identity)!==JSON.stringify(snapshot)){for(const color of missing)defer(color,temporary.palettePendingReasons[color]||'공식 색상 사진이 없어 건너뛰었습니다.');return result;}
+  cache.galleryFailures||={};
+  const owners=new Map(),urlOwners=new Map(),originals=new Map();
+  const own=(map,key,color)=>{if(!map.has(key))map.set(key,new Set());map.get(key).add(color);};
+  for(const color of identity.colors){
+   const entry=cache.entries[color];if(!entry||!associatedEntry(entry.source,entry.evidence,identity,color))continue;
+   const main=await readCached(cacheRoot,entry);if(!main)continue;originals.set(color,main);own(owners,entry.hash,color);
+   for(const image of entry.evidence.images)if(validImageUrl(image.url))own(urlOwners,image.url,color);
+   for(const image of entry.gallery||[]){if(!entry.evidence.images.some(item=>item.url===image.url))continue;const cached=await readCached(cacheRoot,image);if(cached)own(owners,image.hash,color);}
+  }
+  for(const color of identity.colors){
+   const urls=[...(prepared.colorSources?.[color]==='official'?prepared.colorImages?.[color]||[]:[]),...(prepared.paletteSources?.[color]==='official'?[prepared.paletteImages?.[color]]:[])];
+   for(const src of urls){const file=prepared.photoFiles?.[src];if(typeof file!=='string'||path.basename(file)!==file)continue;try{own(owners,digest(await readFile(path.join(folder,file))),color);}catch(error){if(error.code!=='ENOENT')throw error;}}
+  }
+  for(const color of missing){
+   await current();if(prepared.colorImages?.[color]?.length)continue;
+   const entry=cache.entries[color],main=originals.get(color);
+   if(!entry||!main){defer(color,temporary.palettePendingReasons[color]||'공식 색상 사진이 없어 건너뛰었습니다.');continue;}
+   if([...(owners.get(entry.hash)||[])].some(other=>other!==color)){defer(color,'다른 색상과 같은 공식 사진 원본이어서 건너뛰었습니다.');continue;}
+   const chosen=[{...main,file:entry.file,hash:entry.hash,url:entry.evidence.mainImageUrl}],candidates=[...new Set(entry.evidence.images.map(image=>image.url))].filter(url=>url!==entry.evidence.mainImageUrl&&validImageUrl(url));
+   let downloaded=mains.filled.includes(color),reason='',failed=false;
+   const recent=cache.galleryFailures[color],waiting=recent&&Date.now()-recent.at>=0&&Date.now()-recent.at<FAILURE_TTL_MS;
+   for(const url of candidates){
+    if(chosen.length>=2)break;
+    if([...(urlOwners.get(url)||[])].some(other=>other!==color)){reason='다른 색상과 공유된 추가 사진은 제외했습니다.';continue;}
+    try{
+     const record=entry.gallery?.find(image=>image.url===url),stored=record?await readCached(cacheRoot,record):null;
+     if(!stored&&waiting){reason=recent.message;continue;}
+     const image=stored||await downloadOriginal(url,{fetchImpl,signal,sourceUrl:identity.sourceUrl});await current();
+     const hash=digest(image.bytes);if(chosen.some(item=>item.hash===hash)){reason='중복 원본을 제외하여 공식 사진 한 장만 사용했습니다.';continue;}
+     if([...(owners.get(hash)||[])].some(other=>other!==color)){reason='다른 색상과 같은 추가 원본은 제외했습니다.';continue;}
+     const file=hash+'.'+image.format.extension;if(!stored){await writeOriginal(path.join(cacheRoot,file),image.bytes);downloaded=true;}
+     chosen.push({...image,file,hash,url});own(owners,hash,color);
+    }catch(error){await current();failed=true;reason=message(error);}
+   }
+   if(chosen.length<2)reason||='공식 원본이 한 장만 확인되어 한 장으로 진행합니다.';
+   entry.gallery=chosen.map(({file,hash,url})=>({file,hash,url}));
+   if(chosen.length<2&&(failed||waiting))cache.galleryFailures[color]={at:waiting?recent.at:Date.now(),message:reason};else delete cache.galleryFailures[color];
+   const files=[];
+   for(const image of chosen){const src='/smartstore-photo/'+image.hash.slice(0,24),file='smartstore-photo-'+image.hash.slice(0,24)+'.'+image.format.extension;await writeOriginal(path.join(folder,file),image.bytes);files.push({src,file,mime:image.format.mime});}
+   await current();if(prepared.colorImages?.[color]?.length)continue;
+   prepared.colorImages||={};prepared.colorSources||={};prepared.photoFiles||={};prepared.photoMimeTypes||={};
+   for(const image of files){prepared.photoFiles[image.src]=image.file;prepared.photoMimeTypes[image.src]=image.mime;}
+   prepared.colorImages[color]=files.map(image=>image.src);prepared.colorSources[color]='official';delete prepared.galleryPendingReasons[color];
+   result[downloaded?'filled':'reused'].push(color);if(reason&&chosen.length<2)defer(color,reason);log('공식 색상 사진 보완: '+color+' '+chosen.length+'장');
+  }
+  await current();await atomic(manifestFile,JSON.stringify(cache,null,2));return result;
+ });
+}
