@@ -236,7 +236,7 @@ function lotteCategorySnapshot(){
 function renderLotteCategoryValidation(validation,status=validation?.status||'pending'){
  const panel=$('lotteCategoryValidation'),snapshot=lotteCategorySnapshot(),category=snapshot?.category||{};
  panel.dataset.status=status;
- const label=status==='ready'?'저장 목록 대조 통과':status==='loading'?'상품분류 확인 중…':status==='pending'?'입력값 변경 · 다시 확인 중':status==='error'?'분류 확인 실패':'상품분류 확인 필요';
+ const label=status==='ready'?'1차 기준 2차 연결 완료':status==='review'?'2차 연결 완료 · 세부 수정 가능':status==='loading'?'상품분류 연결 중…':status==='pending'?'입력값 변경 · 다시 연결 중':status==='error'?'분류 연결 확인 실패':'1차 상품분류 확인 필요';
  setText($('lotteCategoryValidationSummary'),label);
  setText($('lotteCategoryValidationMessage'),validation?.summary||'현재 공통·채널 분류를 저장된 롯데 목록과 대조합니다.');
  setText($('lotteCategoryCommonPath'),(validation?.commonPath||[category.commonMajor,category.commonMiddle,category.commonSmall]).map(value=>value||'미지정').join(' → '));
@@ -258,24 +258,24 @@ async function checkLotteCategory({fillMissing=false}={}){
   const {input,...body}=snapshot;
   const result=await post('lotte-category-suggest',{...body,validateOnly:!fillMissing});
   if(!current())return false;
-  if(!result.validation||typeof result.validation.ready!=='boolean')throw Error('분류 사전 확인 결과를 받지 못했습니다. 다시 확인해 주세요.');
+  if(!result.bridge||typeof result.bridge.complete!=='boolean')throw Error('분류 연결 결과를 받지 못했습니다. 다시 확인해 주세요.');
   if(fillMissing&&result.category){
    const category={...result.category};
    for(const key of lotteCategoryFields){
-    category[key]=snapshot.category[key]||category[key]||'';
+    category[key]=category[key]||snapshot.category[key]||'';
     const field=$('form').elements[key];if(field.value!==category[key])field.value=category[key];
     field.classList.toggle('field-missing',!category[key]);
    }
    product.category={...product.category,...category};
-   if(lotteCategoryFields.some(key=>category[key]!==result.category[key]))return await checkLotteCategory();
   }
-  if(result.validation.ready&&result.validation.category)product.category={...product.category,...result.validation.category};
+  if(fillMissing&&result.bridge.complete)product.category={...product.category,...result.category};
   lotteCategoryChecked=JSON.stringify(lotteCategorySnapshot());
-  renderLotteCategoryValidation(result.validation);
-  setText($('lotteCategorySuggestionStatus'),fillMissing?result.message||'':'');
-  return result.validation.ready&&result.validation.status==='ready';
+  const display={...result.validation,summary:result.bridge.message,commonPath:[result.category.commonMajor,result.category.commonMiddle,result.category.commonSmall],channelPath:[result.category.channelMajor,result.category.channelMiddle,result.category.channelSmall,...(result.category.channelDetail?[result.category.channelDetail]:[])]};
+  renderLotteCategoryValidation(display,result.bridge.complete?(result.bridge.review?'review':'ready'):'blocked');
+  setText($('lotteCategorySuggestionStatus'),fillMissing?result.bridge.message||'':'');
+  return result.bridge.complete;
  }catch(error){
-  if(current()){lotteCategoryChecked=signature;renderLotteCategoryValidation({summary:error.message,issues:[{code:'CHECK_FAILED',message:'분류 확인에 실패하여 상품 입력을 시작하지 않습니다. 다시 확인해 주세요.'}]},'error');}
+  if(current()){lotteCategoryChecked=signature;renderLotteCategoryValidation({summary:error.message,issues:[{code:'CHECK_FAILED',message:'분류 연결을 다시 시도해 주세요.'}]},'error');}
   return false;
  }finally{if(request===lotteCategoryRequest){lotteCategoryPending=false;$('lotteCategorySuggest').disabled=false;}}
 }

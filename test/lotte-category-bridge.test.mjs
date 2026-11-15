@@ -1,0 +1,39 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {bridgeLotteCategory,requireLotteCategoryBridge} from '../lotte-category-bridge.mjs';
+import {allLotteStandardPaths} from '../lotte-category-validation.mjs';
+const common=JSON.parse(readFileSync(new URL('../data/category-catalog-common.json',import.meta.url),'utf8'));
+
+test('every one of the 83 first-category leaves produces a non-empty selectable second path',()=>{
+ const paths=allLotteStandardPaths();let total=0;
+ for(const group of common.genders)for(const middle of group.middles)for(const small of middle.children){
+  const p={gender:group.gender,rawName:'세부 형태 미상',category:{commonMajor:group.major,commonMiddle:middle.middle,commonSmall:small}};
+  const result=bridgeLotteCategory(p),c=result.category;total++;
+  assert.equal(result.complete,true,small);assert.equal(c.commonSmall,small);assert.equal(c.commonMiddle,middle.middle);
+  for(const key of ['channelMajor','channelMiddle','channelSmall'])assert.ok(c[key],small+' '+key);
+  if(small==='00715 : 남성내의'){assert.deepEqual([c.channelMajor,c.channelMiddle,c.channelSmall],['남성의류','남성속옷','남성내의']);continue;}
+  assert.ok(paths.some(path=>path.major.code===c.channelCodes.major&&path.middle.code===c.channelCodes.middle&&path.small.code===c.channelCodes.small&&path.small.name===c.channelSmall),small+' must refer to a real stored leaf');
+  assert.deepEqual(requireLotteCategoryBridge({...p,category:c}),c,'second-stage repetition must retain the chosen pair');
+ }
+ assert.equal(total,83);
+});
+test('243801 short sleeves and 345504 generic women shirts are mapped from their first category without a confidence stop',()=>{
+ const short={gender:'남성',rawName:'3팩 반팔티 패키지',category:{commonMiddle:'남성의류상의',commonSmall:'남성티셔츠',channelMiddle:'긴팔티셔츠/맨투맨',channelSmall:'라운드넥티셔츠'}};
+ const shirt={gender:'여성',rawName:'포플린 크롭 스트링 셔츠',category:{commonMiddle:'여성의류상의',commonSmall:'여성셔츠',channelMiddle:'셔츠/남방',channelSmall:'셔츠'}};
+ const a=bridgeLotteCategory(short),b=bridgeLotteCategory(shirt);
+ assert.equal(a.complete,true);assert.equal(a.category.channelSmall,'라운드넥반팔티');
+ assert.equal(b.complete,true);assert.equal(b.category.commonSmall,'00844 : 여성남방셔츠');assert.equal(b.category.channelMiddle,'블라우스/셔츠');assert.equal(b.category.channelSmall,'솔리드셔츠');
+});
+test('first category wins over conflicting product-name guesses and stale second-category codes',()=>{
+ const p={gender:'여성',rawName:'라운드 반팔티',category:{commonMiddle:'M0210 : 여성의류상의',commonSmall:'00847 : 여성가디건',channelMiddle:'티셔츠/맨투맨',channelSmall:'라운드넥티셔츠',channelCodes:{small:'OLD'},channelDetail:'오래된 세분류'}};
+ const result=bridgeLotteCategory(p);
+ assert.equal(result.complete,true);assert.equal(result.category.commonSmall,p.category.commonSmall);assert.equal(result.category.channelMiddle,'가디건/조끼');assert.notEqual(result.category.channelCodes.small,'OLD');assert.equal(result.category.channelDetail,'');
+});
+test('broader paths are labelled editable rather than falsely claiming exact subtype verification',()=>{
+ const result=bridgeLotteCategory({gender:'여성',rawName:'내의',category:{commonMiddle:'M0205 : 여성속옷',commonSmall:'00709 : 여성내의'}});
+ assert.equal(result.complete,true);assert.equal(result.review,true);assert.equal(result.broad,true);assert.equal(result.category.channelSmall,'기타');assert.match(result.message,/수정 가능/);
+});
+test('missing first category is not disguised as a completed bridge',()=>{
+ assert.equal(bridgeLotteCategory({gender:'남성',category:{}}).complete,false);
+});
