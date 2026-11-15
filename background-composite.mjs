@@ -1,33 +1,36 @@
 import sharp from 'sharp';
 
-export const BACKGROUND_COMPOSITE_VERSION='original-center-outside-match96-1500-jpeg-q95-444-v2';
+export const BACKGROUND_COMPOSITE_VERSION='original-center-outside-match96-1500-jpeg-q95-444-smooth16-v3';
 const size=1500;
 const correctionWidth=96;
 const decode={limitInputPixels:80000000,failOn:'error'};
 
-// Correct only newly generated pixels. The nearest outside pixel matches the
-// original edge, then a zero-slope smoothstep fades the RGB offset to zero.
+// Correct only broad lighting differences outside the original. Smoothing the
+// offset along each edge prevents source texture from being stretched into bands.
 function matchOutsideEdges(canvas,source,width,height,left,top){
- const correct=(sourceIndex,edgeIndex,span,indexAt)=>{
+ const correctEdge=(length,span,sourceAt,edgeAt,indexAt)=>{
   if(span<=0)return;
-  const delta=[0,1,2].map(c=>source[sourceIndex+c]-canvas[edgeIndex+c]);
-  for(let distance=0;distance<span;distance++){
-   const t=span===1?0:distance/(span-1),weight=1-t*t*(3-2*t),index=indexAt(distance);
-   for(let c=0;c<3;c++)canvas[index+c]=Math.round(Math.max(0,Math.min(255,canvas[index+c]+delta[c]*weight)));
+  const deltas=new Float64Array(length*3),radius=16;
+  for(let point=0;point<length;point++)for(let c=0;c<3;c++)deltas[point*3+c]=source[sourceAt(point)+c]-canvas[edgeAt(point)+c];
+  for(let point=0;point<length;point++){
+   const delta=[0,0,0];let total=0;
+   for(let offset=-radius;offset<=radius;offset++){
+    const neighbor=point+offset;if(neighbor<0||neighbor>=length)continue;
+    const weight=Math.exp(-offset*offset/128);total+=weight;
+    for(let c=0;c<3;c++)delta[c]+=deltas[neighbor*3+c]*weight;
+   }
+   for(let c=0;c<3;c++)delta[c]/=total;
+   for(let distance=0;distance<span;distance++){
+    const t=span===1?0:distance/(span-1),weight=1-t*t*(3-2*t),index=indexAt(point,distance);
+    for(let c=0;c<3;c++)canvas[index+c]=Math.round(Math.max(0,Math.min(255,canvas[index+c]+delta[c]*weight)));
+   }
   }
  };
- for(let y=0;y<height;y++){
-  const row=(top+y)*size;
-  correct(y*width*3,(row+left-1)*3,Math.min(correctionWidth,left),distance=>(row+left-1-distance)*3);
-  const right=left+width;
-  correct((y*width+width-1)*3,(row+right)*3,Math.min(correctionWidth,size-right),distance=>(row+right+distance)*3);
- }
- for(let x=0;x<width;x++){
-  const column=left+x;
-  correct(x*3,((top-1)*size+column)*3,Math.min(correctionWidth,top),distance=>((top-1-distance)*size+column)*3);
-  const bottom=top+height;
-  correct(((height-1)*width+x)*3,(bottom*size+column)*3,Math.min(correctionWidth,size-bottom),distance=>((bottom+distance)*size+column)*3);
- }
+ const right=left+width,bottom=top+height;
+ correctEdge(height,Math.min(correctionWidth,left),y=>y*width*3,y=>((top+y)*size+left-1)*3,(y,d)=>((top+y)*size+left-1-d)*3);
+ correctEdge(height,Math.min(correctionWidth,size-right),y=>(y*width+width-1)*3,y=>((top+y)*size+right)*3,(y,d)=>((top+y)*size+right+d)*3);
+ correctEdge(width,Math.min(correctionWidth,top),x=>x*3,x=>((top-1)*size+left+x)*3,(x,d)=>((top-1-d)*size+left+x)*3);
+ correctEdge(width,Math.min(correctionWidth,size-bottom),x=>((height-1)*width+x)*3,x=>(bottom*size+left+x)*3,(x,d)=>((bottom+d)*size+left+x)*3);
 }
 
 // The caller validates the current product/selection and reviews the background seam.
