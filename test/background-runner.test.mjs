@@ -35,6 +35,20 @@ test('prompt is sent through stdin, executable/arguments never use a shell, and 
  assert(!JSON.stringify(f.runner.status()).includes('완료'),'process exit does not claim image application success');
 });
 
+test('explicit danger-full-access is passed as one sandbox argument without workspace-only configuration',async t=>{
+ const f=await fixture(t,{sandboxMode:'danger-full-access'}),prompt='원본과 현재 상품 검증 후 합성';
+ await f.runner.start({jobId:'job_access',prompt});
+ const call=f.calls[0],directory=path.join(f.root,'data','background-jobs','job_access');
+ assert.deepEqual(call.args,['exec','--ephemeral','--skip-git-repo-check','--sandbox','danger-full-access','--json','--output-last-message',path.join(directory,'result.txt'),'-']);
+ assert(!call.args.includes('sandbox_workspace_write.network_access=true'));assert(!call.args.includes('--dangerously-bypass-approvals-and-sandbox'));
+ assert.equal(call.config.shell,false);assert.equal(call.config.windowsHide,true);assert.equal(f.children[0].input(),prompt);
+ f.children[0].emit('close',0,null);assert.equal(f.runner.status().phase,'exited');assert.deepEqual(f.failures,[]);
+});
+
+test('unknown or malformed sandbox modes are rejected before resolving or spawning Codex',()=>{
+ for(const sandboxMode of ['',null,false,0,{},'invalid','danger-full-access --extra','workspace-write; whoami'])assert.throws(()=>createBackgroundRunner({root:process.cwd(),sandboxMode,resolveExecutableImpl:()=>assert.fail('invalid mode must not resolve executable'),spawnImpl:()=>assert.fail('invalid mode must not spawn')}),/허용된 Codex 실행 환경/);
+});
+
 test('only one process can run, including while startup is pending',async t=>{
  const f=await fixture(t),first=f.runner.start({jobId:'job_first1',prompt:'first'});
  await assert.rejects(f.runner.start({jobId:'job_second',prompt:'second'}),/이미.*진행/);await first;
