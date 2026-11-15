@@ -41,11 +41,24 @@ async function serialized(key,operation){
  const previous=pending.get(key)||Promise.resolve(),run=previous.catch(()=>{}).then(operation);pending.set(key,run);
  try{return await run;}finally{if(pending.get(key)===run)pending.delete(key);}
 }
+async function downloadOriginal(url,{fetchImpl,signal,sourceUrl}){
+ abort(signal);const timeout=AbortSignal.timeout(15000),response=await fetchImpl(url,{signal:signal?AbortSignal.any([signal,timeout]):timeout,redirect:'error',headers:{Referer:sourceUrl}});
+ if(!response.ok)throw Error('공식 사진 다운로드 실패 ('+response.status+')');
+ if(response.url&&response.url!==url)throw Error('공식 사진 응답 주소가 선택한 원본과 다릅니다.');
+ if(Number(response.headers.get('content-length'))>MAX_BYTES)throw Error('공식 사진 파일 크기를 확인해 주세요.');
+ const bytes=Buffer.from(await response.arrayBuffer());return {bytes,format:await imageFormat(bytes)};
+}
+
+export async function prepareOfficialPalette(product,prepared,options={}){
+ const result=await preparePaletteOnly(product,prepared,options);
+ if(options.includeGallery)result.gallery=await prepareOfficialGallery(product,prepared,options);
+ return result;
+}
 
 // Official color-selection evidence supplies one original image per missing
 // palette tile. It never changes seller options, store photos or listing images.
-export async function prepareOfficialPalette(product,prepared,{folder,dataRoot,signal,log=()=>{},fetchImpl=fetch,collectSources=collectDefault}={}){
- const missing=(product.colors||[]).filter(color=>!prepared.paletteImages?.[color]),result={filled:[],reused:[],pending:[]};
+async function preparePaletteOnly(product,prepared,{folder,dataRoot,signal,log=()=>{},fetchImpl=fetch,collectSources=collectDefault}={}){
+ const missing=(product.colors||[]).filter(color=>!prepared.paletteImages?.[color]&&(prepared.acceptAllFolderPhotos||!prepared.colorImages?.[color]?.length)),result={filled:[],reused:[],pending:[]};
  if(!missing.length)return result;
  prepared.palettePendingReasons||={};
  const defer=(color,reason)=>{const text=message(reason);prepared.palettePendingReasons[color]=text;const existing=result.pending.find(item=>item.color===color);if(existing)existing.message=text;else result.pending.push({color,message:text});};
@@ -118,11 +131,7 @@ export async function prepareOfficialPalette(product,prepared,{folder,dataRoot,s
      if(!entry)throw Error(source.failures?.find(failure=>failure.color===color)?.message||'공식 색상 사진을 확인하지 못했습니다.');
      if(!associatedEntry(source,entry,identity,color))throw Error('공식 사진의 품번·색상 선택 근거가 현재 상품과 일치하지 않습니다.');
      if(source.colors.some(other=>other.color!==color&&other.mainImageUrl===entry.mainImageUrl))throw Error('서로 다른 색상에 같은 공식 사진이 연결되어 확인이 필요합니다.');
-     abort(signal);const timeout=AbortSignal.timeout(15000),response=await fetchImpl(entry.mainImageUrl,{signal:signal?AbortSignal.any([signal,timeout]):timeout,redirect:'error',headers:{Referer:identity.sourceUrl}});
-     if(!response.ok)throw Error('공식 사진 다운로드 실패 ('+response.status+')');
-     if(response.url&&response.url!==entry.mainImageUrl)throw Error('공식 사진 응답 주소가 선택한 원본과 다릅니다.');
-     if(Number(response.headers.get('content-length'))>MAX_BYTES)throw Error('공식 사진 파일 크기를 확인해 주세요.');
-     const bytes=Buffer.from(await response.arrayBuffer()),format=await imageFormat(bytes);await current();
+     const {bytes,format}=await downloadOriginal(entry.mainImageUrl,{fetchImpl,signal,sourceUrl:identity.sourceUrl});await current();
      const hash=digest(bytes),file=hash+'.'+format.extension;await writeOriginal(path.join(cacheRoot,file),bytes);
      cache.entries[color]={file,hash,source:{style:source.style,sourceUrl:source.sourceUrl,sourceProductHash:source.sourceProductHash,productHash:source.productHash},evidence:entry};delete cache.failures[color];
      if(await attach(color,bytes,format,false))log('공식 팔레트 원본 보완: '+color+' 1장');
