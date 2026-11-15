@@ -48,3 +48,14 @@ export function readManualLotteCategory(product,selection=product.category?.manu
  if(checkCurrent&&levels.some(level=>String(product.category?.channelCodes?.[level]||'')!==category.channelCodes[level]))throw Error('직접 선택한 분류 코드가 변경됐습니다. 분류를 다시 선택해 주세요.');
  return {...product.category,...category};
 }
+export async function saveManualLotteCategory({getState,editStore,product,category}){
+ const captured=getState();
+ if(captured.busy||!captured.product||captured.product.style!==product.style||captured.product.sourceUrl!==product.sourceUrl)throw Error('현재 상품과 작업 상태가 바뀌었습니다. 분류를 다시 열어 주세요.');
+ const checked=readManualLotteCategory({...product,category});
+ if(!checked)throw Error('직접 선택한 분류가 없습니다.');
+ const fields={lotteCategorySelection:JSON.stringify(checked.manualSelection),gender:product.gender,...Object.fromEntries(['commonMiddle','commonSmall','channelMiddle','channelSmall'].map(key=>[key,checked[key]]))};
+ await editStore.save({style:product.style,fields},product.style);
+ const current=getState();
+ if(current.product!==captured.product||current.folder!==captured.folder||current.busy)throw Error('상품 또는 작업 상태가 바뀌어 화면에 적용하지 않았습니다. 현재 상품에서 다시 확인해 주세요.');
+ return {...captured.product,gender:product.gender,category:checked,userEditedFields:{...captured.product.userEditedFields,...fields}};
+}

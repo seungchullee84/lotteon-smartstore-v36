@@ -64,7 +64,7 @@ import {validateTemplateHeadline,templateHeadlineEdits} from './smartstore-templ
 import {suggestMissingLotteCategory} from './lotte-category-suggest.mjs';
 import {validateLotteCategory} from './lotte-category-validation.mjs';
 import {bridgeLotteCategory,requireLotteCategoryBridge} from './lotte-category-bridge.mjs';
-import {lotteCategoryChoices,createManualLotteCategory} from './lotte-category-choice.mjs';
+import {lotteCategoryChoices,createManualLotteCategory,saveManualLotteCategory} from './lotte-category-choice.mjs';
 import {searchProductTags,saveSelectedProductTags,selectedProductTagResearch,removeProductTag} from './smartstore-tag-selection.mjs';
 import {applyCollectedMaterial,assertAdultProduct,collect,parseProductInput,buildKeywords,repairCategoryFields} from './product.mjs';
 import {LotteAutomation} from './automation.mjs';
@@ -870,7 +870,7 @@ const server=http.createServer(async(req,res)=>{
           log('수집 완료. 고시 이미지와 입력값을 검토해 주세요.'+(Object.keys(product.userEditedFields||{}).length?' · 직접 수정한 항목 유지':''));
         });return json(res,202,{ok:true});
       }
-      if(url.pathname==='/api/lotte-category-suggest'){
+      if(url.pathname==='/api/lotte-category-suggest'||url.pathname==='/api/lotte-category-selection'){
         if(!state.product||b.style!==state.product.style)throw Error('현재 수집한 상품의 분류만 확인할 수 있습니다.');
         if(b.sourceUrl!==undefined&&b.sourceUrl!==state.product.sourceUrl)throw Error('공식 상품 주소가 변경됐습니다. 현재 상품에서 분류를 다시 열어 주세요.');
         const category={...state.product.category};for(const key of ['commonMajor','commonMiddle','commonSmall','channelMajor','channelMiddle','channelSmall','channelDetail'])if(typeof b.category?.[key]==='string')category[key]=b.category[key].slice(0,200);
@@ -882,7 +882,12 @@ const server=http.createServer(async(req,res)=>{
         const bridge=bridgeLotteCategory({...current,category:result.category});
         result.category=bridge.category;
         const validation=validateLotteCategory({...current,category:result.category});
-        return json(res,200,{...result,validation,bridge,manualSupported:true});
+        const saveSelection=url.pathname==='/api/lotte-category-selection';
+        if(saveSelection){
+          if(!b.manualChoice||!bridge.complete||!bridge.manual)throw Error('선택한 전체 분류를 다시 확인해 주세요.');
+          state.product=await saveManualLotteCategory({getState:()=>({...state}),editStore:productEdits,product:current,category:result.category});state.revision++;
+        }
+        return json(res,200,{...result,validation,bridge,manualSupported:true,selectionSaved:saveSelection});
       }
       if(url.pathname==='/api/lotte-current-brushed-category'){
         if(state.busy||!state.product||b.style!==state.product.style)throw Error('현재 상품과 작업 상태를 확인해 주세요.');

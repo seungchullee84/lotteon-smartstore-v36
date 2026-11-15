@@ -25,7 +25,7 @@ async function fixture(t){
  await page.exposeFunction('categoryRequest',async body=>{
   requests.push(body);if(gate){gate=null;await new Promise(r=>release=r);}
   let p={...base,...body};if(body.manualChoice)p.category=createManualLotteCategory(p,body.manualChoice);
-  const bridge=bridgeLotteCategory(p);return {category:bridge.category,bridge,validation:validateLotteCategory({...p,category:bridge.category}),manualSupported:!legacy};
+  const bridge=bridgeLotteCategory(p);return {category:bridge.category,bridge,validation:validateLotteCategory({...p,category:bridge.category}),manualSupported:!legacy,selectionSaved:!!body.manualChoice&&!legacy};
  });
  const source=await readFile(new URL('../public/app.js',import.meta.url),'utf8');
  const categoryCode=source.slice(source.indexOf('const lotteCategoryFields='),source.indexOf('function populate('));

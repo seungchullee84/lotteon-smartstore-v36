@@ -104,9 +104,9 @@
   const id=++epoch;pending=true;render();message('선택한 이름과 분류 코드를 확인하고 있어요.');
   try{
    const {input,...body}=snapshot;
-   const result=await post('lotte-category-suggest',{...body,manualChoice:{common:draft.common,channel:draft.channel}});
+   const result=await post('lotte-category-selection',{...body,manualChoice:{common:draft.common,channel:draft.channel}});
    if(id!==epoch||!current())return;
-   if(!result.manualSupported||!result.bridge?.complete||!result.category?.manualSelection)throw Error('직접 선택한 분류의 반영을 확인하지 못했어요. 기존 분류를 유지합니다.');
+   if(!result.manualSupported||!result.selectionSaved||!result.bridge?.complete||!result.category?.manualSelection)throw Error('직접 선택한 분류의 반영을 확인하지 못했어요. 기존 분류를 유지합니다.');
    product.category={...product.category,...result.category};
    for(const key of lotteCategoryFields){byId('form').elements[key].value=result.category[key]||'';rememberProductField(key,result.category[key]||'');}
    rememberProductField('lotteCategorySelection',JSON.stringify(result.category.manualSelection));
