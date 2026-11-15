@@ -16,13 +16,13 @@ const validId=value=>typeof value==='string'&&/^[a-zA-Z0-9_-]{8,100}$/.test(valu
 
 // No generation service or seller automation is called here. Jobs are scoped to
 // this server lifetime; a restart can never accept an old completion command.
-export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBackground}){
+export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBackground,onInvalidate=()=>{}}){
  let epoch=0,active=null,view=null;
  const cancelled=new Set();
  const cacheSettings={version:1,composition:BACKGROUND_COMPOSITE_VERSION,generation:'builtin-reviewed-background-v1',width:1500,height:1500,format:'jpeg',quality:95};
  function invalidate(message='상품 또는 작업이 변경되어 이전 합성 요청을 취소했습니다.'){
   epoch++;
-  if(active){active.invalid=true;view={status:'cancelled',style:active.style,key:active.key,message};}
+  if(active){active.invalid=true;view={status:'cancelled',style:active.style,key:active.key,message};onInvalidate({jobId:active.jobId});}
  }
  function cancel({requestId}={}){
   if(!validId(requestId))throw Error('합성 요청 번호를 확인해 주세요.');
@@ -134,5 +134,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   return {ok:true,key};
  }
  function inspect({jobId}){const s=job(jobId);return {ok:true,jobId,style:s.style,key:s.key,sourcePath:s.sourcePath,sourceHash:s.sourceHash,previewPath:s.staged?.previewPath};}
- return {prepare,stage,complete,select,cancel,invalidate,inspect,status:()=>view};
+ function dispatch({jobId}){const s=job(jobId);if(s.dispatched||s.cachedBytes)throw Error('이미 진행 중이거나 재사용할 수 있는 합성 요청입니다.');s.dispatched=true;view={status:'generating',style:s.style,key:s.key,message:'Codex가 원본을 확인하고 배경 합성을 진행합니다.'};return inspect({jobId});}
+ function fail({jobId,message}){if(active?.jobId!==jobId)return;active.invalid=true;view={status:'error',style:active.style,key:active.key,message};active=null;}
+ return {prepare,stage,complete,select,cancel,invalidate,inspect,dispatch,fail,status:()=>view};
 }

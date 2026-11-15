@@ -35,6 +35,7 @@ import {requireChannel} from './channel-routing.mjs';
 import {verifyNaver,createKeywordOptimizer} from './naver-keywords.mjs';
 import {createBackgroundWorkflow} from './background-workflow.mjs';
 import {backgroundPrompt} from './background-prompt.mjs';
+import {createBackgroundRunner} from './background-runner.mjs';
 import {createReleaseTracker} from './app-release.mjs';
 import {startGithubSync} from './github-sync.mjs';
 import {startBenefitResearch} from './benefit-research.mjs';
@@ -101,8 +102,10 @@ let backgroundApiKey=await loadSmartstoreAIKey(dataRoot);
 const protectedBranding=brandingLock(dataRoot);
 const state={busy:false,phase:'idle',logs:[],product:null,folder:null,error:null,paused:null,revision:Date.now(),collectionInput:null,detailFallbackRequest:null,photoPreparation:null};
 let backgroundMutations=0;
-const backgroundWorkflow=createBackgroundWorkflow({getState:()=>({...state,busy:state.busy||backgroundMutations>0}),cacheRoot:path.join(dataRoot,'background-cache')});
-const backgroundWorkflowEndpoints=new Set(['/api/background-selection','/api/background-prepare','/api/background-inspect','/api/background-result','/api/background-complete','/api/background-cancel']);
+let backgroundRunner;
+const backgroundWorkflow=createBackgroundWorkflow({getState:()=>({...state,busy:state.busy||backgroundMutations>0}),cacheRoot:path.join(dataRoot,'background-cache'),onInvalidate:()=>{void backgroundRunner?.cancel();}});
+backgroundRunner=createBackgroundRunner({root,nodePath:process.execPath,onFailure:failure=>backgroundWorkflow.fail(failure),onExit:({jobId})=>backgroundWorkflow.fail({jobId,message:'Codex 합성이 적용 완료 전에 종료되었습니다. 현재 대표이미지는 유지됩니다. 다시 확인해 주세요.'})});
+const backgroundWorkflowEndpoints=new Set(['/api/background-selection','/api/background-prepare','/api/background-dispatch','/api/background-inspect','/api/background-result','/api/background-complete','/api/background-cancel']);
 const newProductResearch=startNewProductResearch(root,{isBusy:()=>state.busy||state.photoPreparation?.status==='preparing'});
 const benefitResearch=startNewListingMonitor(root,{onSnapshot:website=>{void newProductResearch.observe(website);}});
 benefitResearch.state.folderResearch=newProductResearch.state;
@@ -343,6 +346,14 @@ const server=http.createServer(async(req,res)=>{
         return json(res,200,result.cached?result:{...result,prompt:backgroundPrompt(result,{root,nodePath:process.execPath})});
       }
       if(url.pathname==='/api/background-result')return json(res,200,await backgroundWorkflow.stage(b));
+      if(url.pathname==='/api/background-dispatch'){
+        const current=backgroundWorkflow.dispatch(b);
+        try{
+          await backgroundRunner.start({jobId:b.jobId,prompt:backgroundPrompt(current,{root,nodePath:process.execPath})});
+          backgroundWorkflow.inspect(b);
+          return json(res,200,{ok:true,started:true,message:'Codex가 배경 생성·원본 보존 합성·검수를 진행합니다. 완료되면 대표이미지에 자동 적용합니다.'});
+        }catch(error){backgroundWorkflow.fail({jobId:b.jobId,message:error.message});throw error;}
+      }
       if(url.pathname==='/api/background-complete'){
         const result=backgroundWorkflow.complete(b);log(result.message);return json(res,200,result);
       }
