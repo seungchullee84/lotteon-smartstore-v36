@@ -175,6 +175,10 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   return {ok:true,key};
  }
  function review(jobId){const s=manualReview?.jobId===jobId?manualReview:active?.jobId===jobId?active:null;if(!s)throw changed();assertCurrent(s);return s;}
+ function assertPreviewContext(s){
+  if(!stateMatches(s)||hash(fs.readFileSync(s.sourcePath))!==s.sourceHash)throw changed();
+  const current=getState();if(!current.busy&&current.photoPreparation?.status!=='preparing'){const disk=JSON.parse(fs.readFileSync(path.join(s.folder,'product.json'),'utf8'));if(disk.style!==s.style||disk.sourceUrl!==s.sourceUrl)throw changed();}
+ }
  function previewBytes(s,attempt){
   if(!Number.isInteger(attempt)||attempt<1||attempt>maxAttempts)throw Error('확인할 합성 회차를 선택해 주세요.');
   const entry=s.previews?.find(p=>p.attempt===attempt);
@@ -183,7 +187,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   if(!details.isFile()||details.isSymbolicLink()||details.size>40*1024*1024)throw changed();
   const bytes=fs.readFileSync(file);if(hash(bytes)!==entry.hash)throw changed();return bytes;
  }
- function preview({jobId,attempt}){return previewBytes(review(jobId),attempt);}
+ function preview({jobId,attempt}){const s=manualReview?.jobId===jobId?manualReview:active?.jobId===jobId?active:null;if(!s)throw changed();assertPreviewContext(s);return previewBytes(s,attempt);}
  function manualApply({jobId,attempt,userApproved}){
   if(userApproved!==true)throw Error('합성 결과를 직접 확인하고 선택한 사진 적용을 승인해 주세요.');
   const s=review(jobId),bytes=previewBytes(s,attempt);
@@ -203,10 +207,11 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   const current=getState();if(!current.folder||!current.product)return {ok:true,restored:false};
   try{
    const record=JSON.parse(fs.readFileSync(path.join(current.folder,'background-review.json'),'utf8'));
-   if(record.version!==1||record.allowed!==true||!validId(record.jobId)||!validId(record.requestId)||record.folder!==current.folder||!keys.includes(record.key)||!Number.isFinite(record.startedAt)||!Number.isInteger(record.attempt)||record.attempt<1||record.attempt>maxAttempts||!Array.isArray(record.previews)||!record.previews.length||record.previews.length>maxAttempts||!/^[a-f0-9]{64}$/.test(record.sourceHash)||!/^[a-f0-9]{64}$/.test(record.selectionHash)||typeof record.sourceStamp!=='string'||typeof record.selectionStamp!=='string')return {ok:true,restored:false};
+   if(record.version!==1||typeof record.allowed!=='boolean'||!validId(record.jobId)||!validId(record.requestId)||record.folder!==current.folder||!keys.includes(record.key)||!Number.isFinite(record.startedAt)||!Number.isInteger(record.attempt)||record.attempt<1||record.attempt>maxAttempts||!Array.isArray(record.previews)||!record.previews.length||record.previews.length>maxAttempts||!/^[a-f0-9]{64}$/.test(record.sourceHash)||!/^[a-f0-9]{64}$/.test(record.selectionHash)||typeof record.sourceStamp!=='string'||typeof record.selectionStamp!=='string')return {ok:true,restored:false};
    const seen=new Set();for(const p of record.previews){if(!Number.isInteger(p.attempt)||p.attempt<1||p.attempt>maxAttempts||seen.has(p.attempt)||!previewFile(record.jobId,p.attempt,p.file)||!/^[a-f0-9]{64}$/.test(p.hash))return {ok:true,restored:false};seen.add(p.attempt);}
-   const s={...record,epoch,invalid:false,sourcePath:path.join(current.folder,record.key+'.jpg'),selectionPath:path.join(current.folder,'background-selection.json'),started:performance.now()-Math.max(0,Date.now()-record.startedAt)};
-   assertCurrent(s);for(const p of s.previews)previewBytes(s,p.attempt);
+   const s={...record,epoch,invalid:!record.allowed,sourcePath:path.join(current.folder,record.key+'.jpg'),selectionPath:path.join(current.folder,'background-selection.json'),started:performance.now()-Math.max(0,Date.now()-record.startedAt)};
+   assertPreviewContext(s);for(const p of s.previews)previewBytes(s,p.attempt);
+   if(record.allowed)try{assertCurrent(s);}catch{s.invalid=true;persistReview(s,{allowed:false,status:record.status,message:record.message});}
    manualReview=s;
    view={...timing({...s,attempt:s.selectedAttempt||s.attempt},true),status:record.status==='complete'?'complete':'error',style:s.style,key:s.key,sourceUrl:s.sourceUrl,jobId:s.jobId,requestId:s.requestId,message:record.message||'이전 합성 결과를 직접 확인하고 적용할 사진을 선택해 주세요.',...(Number.isFinite(record.elapsedMs)?{elapsedMs:record.elapsedMs}:{})};
    return {ok:true,restored:true,jobId:s.jobId};
@@ -219,7 +224,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   if(!view)return null;
   const jobId=view.jobId||active?.jobId,s=manualReview?.jobId===jobId?manualReview:active?.jobId===jobId?active:null;
   let manualAvailable=false;if(s?.previews?.length)try{assertCurrent(s);manualAvailable=true;}catch{}
-  return {...view,jobId,requestId:view.requestId||active?.requestId,sourceUrl:view.sourceUrl||active?.sourceUrl,manualAvailable,previews:(s?.previews||[]).map(p=>({attempt:p.attempt,url:'/api/background-preview?jobId='+encodeURIComponent(jobId)+'&attempt='+p.attempt,...(p.reason?{reason:p.reason}:{})}))};
+  return {...view,jobId,requestId:view.requestId||active?.requestId,sourceUrl:view.sourceUrl||active?.sourceUrl,manualAvailable,...(s?.previews?.length&&!manualAvailable?{manualUnavailableReason:'사진 선택이나 원본 상태가 바뀌어 이 결과는 미리보기만 가능합니다.'}:{}),previews:(s?.previews||[]).map(p=>({attempt:p.attempt,url:'/api/background-preview?jobId='+encodeURIComponent(jobId)+'&attempt='+p.attempt,...(p.reason?{reason:p.reason}:{})}))};
  }
  return {prepare,stage,retry,complete,select,cancel,invalidate,inspect,dispatch,fail,preview,manualApply,manualFail,restoreReview,status};
 }
