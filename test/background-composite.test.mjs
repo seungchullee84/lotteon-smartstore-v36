@@ -45,7 +45,22 @@ test('EXIF orientation is respected without dropping any source edge',async()=>{
 
 test('square source covers the generated image completely and output is deterministic',async()=>{
  const original=await sourcePhoto(120,120),first=await composeBackground({original,generated:await background('#ff0000')}),second=await composeBackground({original,generated:await background('#00ff00')});
- assert.deepEqual(first,second);assert.match(BACKGROUND_COMPOSITE_VERSION,/original-center-1500/);
+ assert.deepEqual(first,second);assert.match(BACKGROUND_COMPOSITE_VERSION,/original-center-outside-match96-1500/);
+});
+
+for(const [label,width,height] of [['portrait',120,200],['landscape',200,120]])test(`${label}: boundary RGB correction stays outside and fades to untouched background within 96px`,async()=>{
+ const original=await sharp({create:{width,height,channels:3,background:'#e6dcb4'}}).jpeg({quality:100,chromaSubsampling:'4:4:4'}).toBuffer(),generated=await background('#7896aa');
+ const before=Buffer.from(original),output=await pixels(await composeBackground({original,generated}));
+ const scaled=await sharp(original).resize(1500,1500,{fit:'inside'}).raw().toBuffer({resolveWithObject:true}),left=(1500-scaled.info.width)/2,top=(1500-scaled.info.height)/2;
+ const sourcePixel=pixel(scaled,scaled.info.width/2,scaled.info.height/2),far=[120,150,170];
+ const sample=(side,distance)=>width<height?pixel(output,side==='before'?left-1-distance:left+scaled.info.width+distance,750):pixel(output,750,side==='before'?top-1-distance:top+scaled.info.height+distance);
+ for(const side of ['before','after']){
+  close(sample(side,0),sourcePixel,3);close(sample(side,95),far,3);close(sample(side,110),far,3);
+  const middle=sample(side,47);for(let c=0;c<3;c++)assert(middle[c]>=Math.min(sourcePixel[c],far[c])-2&&middle[c]<=Math.max(sourcePixel[c],far[c])+2);
+  const boundaryError=sample(side,0).reduce((sum,value,c)=>sum+Math.abs(value-sourcePixel[c]),0);assert(boundaryError<9,'old hard boundary is matched without changing source');
+ }
+ close(pixel(output,left+2,top+2),pixel(scaled,2,2),3);close(pixel(output,left+scaled.info.width-3,top+scaled.info.height-3),pixel(scaled,scaled.info.width-3,scaled.info.height-3),3);
+ assert.deepEqual(original,before);
 });
 
 test('invalid inputs, non-JPEG originals and non-square generated backgrounds are rejected',async()=>{
