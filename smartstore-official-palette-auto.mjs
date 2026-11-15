@@ -95,6 +95,7 @@ export async function prepareOfficialPalette(product,prepared,{folder,dataRoot,s
    attached.set(color,{src,file:prepared.photoFiles[src],mime:prepared.photoMimeTypes[src]});own(hash,color);
    prepared.paletteImages[color]=src;prepared.paletteSources[color]='official';prepared.photoFiles[src]=file;prepared.photoMimeTypes[src]=format.mime;delete prepared.palettePendingReasons[color];
    result[reused?'reused':'filled'].push(color);
+   return true;
   };
   const needed=[];
   for(const color of missing){
@@ -124,7 +125,7 @@ export async function prepareOfficialPalette(product,prepared,{folder,dataRoot,s
      const bytes=Buffer.from(await response.arrayBuffer()),format=await imageFormat(bytes);await current();
      const hash=digest(bytes),file=hash+'.'+format.extension;await writeOriginal(path.join(cacheRoot,file),bytes);
      cache.entries[color]={file,hash,source:{style:source.style,sourceUrl:source.sourceUrl,sourceProductHash:source.sourceProductHash,productHash:source.productHash},evidence:entry};delete cache.failures[color];
-     await attach(color,bytes,format,false);log('공식 팔레트 원본 보완: '+color+' 1장');
+     if(await attach(color,bytes,format,false))log('공식 팔레트 원본 보완: '+color+' 1장');
     }catch(error){await current();defer(color,error);cache.failures[color]={at:Date.now(),message:message(error)};}
    }
   }
