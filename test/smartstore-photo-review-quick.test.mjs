@@ -67,8 +67,7 @@ test('사진 목록 앞에서 선택한 소구점과 공식 근거를 확인하�
   const picker=page.locator('#photoPointPicker');
   await page.waitForFunction(()=>document.querySelector('#photoPointSummary').textContent.includes('2개 선택'));
   assert.ok((await picker.boundingBox()).y<(await page.locator('#manualPhotoReviewGrid').boundingBox()).y);
-  assert.match(await page.locator('#photoPointSummary').textContent(),/부드러운 착용감/);
-  await picker.locator('summary').click();
+  assert.equal(await picker.getByText('부드러운 착용감',{exact:true}).first().isVisible(),true);
   assert.equal(await page.getByText('공식 근거: 공식 설명 2',{exact:true}).isVisible(),true);
   await picker.locator('input[value="2"]').check();
   await picker.locator('#photoPointApply').click();
@@ -76,7 +75,7 @@ test('사진 목록 앞에서 선택한 소구점과 공식 근거를 확인하�
  }finally{await browser.close();}
 });
 
-test('함께 선택·Shift 범위 색상 지정은 대표와 위치를 유지하고 사진 드래그도 계속 동작한다',async()=>{
+test('Shift 범위의 색상 변경은 해당 묶음으로 이동하고 대표와 드래그를 유지한다',async()=>{
  const browser=await chromium.launch({headless:true});
  try{
   const {page,card,ids,selected,saved,drafts,errors}=await fixture(browser);
@@ -85,8 +84,8 @@ test('함께 선택·Shift 범위 색상 지정은 대표와 위치를 유지하
   await page.getByLabel('main.jpg 일괄 색상 지정',{exact:true}).check();
   await page.getByLabel('detail.jpg 일괄 색상 지정',{exact:true}).click({modifiers:['Shift']});
   assert.deepEqual(await selected(),['a','b','c']);
-  const before=await ids(),autosaved=saved();await black.click();await autosaved;
-  assert.deepEqual(await ids(),before,'일괄 색상 변경은 카드를 즉시 이동하지 않는다');
+  const autosaved=saved();await black.click();await autosaved;
+  assert.deepEqual(await ids(),['d','a','b','c','e'],'바뀐 사진은 대상 색상 묶음 뒤로 이동한다');
   for(const id of ['a','b','c'])assert.equal(await card(id).locator('[data-field=color]').inputValue(),'02블랙');
   assert.equal(await card('a').locator('input[type=radio]').isChecked(),true);
   assert.equal(drafts.at(-1).mainId,'a');
@@ -97,7 +96,7 @@ test('함께 선택·Shift 범위 색상 지정은 대표와 위치를 유지하
   const dragged=saved();
   await card('c').locator(':scope > img').dragTo(card('a').locator(':scope > img'),{targetPosition:{x:10,y:100}});
   await dragged;
-  assert.deepEqual(await ids(),['c','a','b','d','e']);
+  assert.deepEqual(await ids(),['d','c','a','b','e']);
   assert.equal(drafts.at(-1).mainId,'a','순서를 옮겨도 대표사진은 바뀌지 않는다');
   assert.deepEqual(await selected(),[],'사진 드래그가 일괄 선택을 만들지 않는다');
   assert.deepEqual(errors,[]);
@@ -126,16 +125,19 @@ test('직접 지정한 후면은 초안·재열기에도 유지하고 순서대�
  }finally{await browser.close();}
 });
 
-test('색상 변경 중 위치는 그대로이며 정렬 버튼을 누를 때만 색상별로 모아 저장한다',async()=>{
+test('개별 색상을 바꾸면 묶음을 즉시 옮기고 기존 묶음의 순서를 유지한다',async()=>{
  const browser=await chromium.launch({headless:true});
  try{
   const {page,card,ids,saved,drafts,errors}=await fixture(browser);
-  const before=await ids(),edited=saved();await card('a').locator('[data-field=color]').selectOption('02블랙');await edited;
-  assert.deepEqual(await ids(),before);
-  assert.deepEqual(drafts.at(-1).items.map(item=>item.id),before);
+  const edited=saved();await card('a').locator('[data-field=color]').selectOption('02블랙');await edited;
+  assert.deepEqual(await ids(),['b','c','d','a','e']);
+  assert.deepEqual(drafts.at(-1).items.map(item=>item.id),['b','c','d','a','e']);
   const sorted=saved();await page.locator('#manualPhotoReviewSort').click();await sorted;
+  assert.deepEqual(await ids(),['b','c','d','a','e']);
+  assert.deepEqual(drafts.at(-1).items.map(item=>item.id),['b','c','d','a','e']);
+  assert.equal(drafts.at(-1).mainId,'a');
+  const movedUp=saved();await card('a').locator('[data-field=color]').selectOption('01화이트');await movedUp;
   assert.deepEqual(await ids(),['b','c','a','d','e']);
-  assert.deepEqual(drafts.at(-1).items.map(item=>item.id),['b','c','a','d','e']);
   assert.equal(drafts.at(-1).mainId,'a');
   assert.deepEqual(errors,[]);
  }finally{await browser.close();}

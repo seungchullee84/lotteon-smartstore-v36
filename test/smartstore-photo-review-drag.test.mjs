@@ -22,25 +22,25 @@ test('같은 색상 드래그는 순서를 저장·복원하며 1번은 정면�
  await autosaved;assert.deepEqual(lastSaved.items.map(i=>i.id),['b','a','c']);assert.equal(lastSaved.mainId,'a');assert.equal(lastSaved.items.find(i=>i.id==='b').role,'front');assert.equal(lastSaved.items.find(i=>i.id==='a').role,'side');
  await page.locator('[data-photo-id="b"]').dragTo(page.locator('[data-photo-id="c"]'));assert.deepEqual(await ids(),['b','a','c']);
  await page.locator('#manualPhotoReviewClose').click();await page.locator('#manualPhotoReviewOpen').click();await cards.first().waitFor();assert.deepEqual(await ids(),['b','a','c']);assert.equal(await page.locator('[data-photo-id="a"] input[type=radio]').isChecked(),true);await page.locator('[data-photo-id="a"]').dragTo(page.locator('[data-photo-id="b"]'),{targetPosition:{x:10,y:100}});assert.deepEqual(await ids(),['a','b','c']);assert.equal(await page.locator('[data-photo-id="a"] [data-field=role]').inputValue(),'front');assert.equal(await page.locator('[data-photo-id="c"] [data-field=role]').inputValue(),'front');await page.locator('[data-photo-id="a"] [data-field=role]').selectOption('back');assert.deepEqual(await ids(),['a','b','c']);assert.equal(await page.locator('[data-photo-id="b"] [data-field=role]').inputValue(),'side');assert.equal(await page.locator('[data-field=order]').count(),0);
- // Color edits preserve the current positions; explicit sorting groups the cards.
+ // Color edits move the photo into the new group without taking keyboard focus.
  const colorSelect=page.locator('[data-photo-id="a"] [data-field=color]');await colorSelect.focus();
  const colorSaved=page.waitForResponse(r=>r.url().endsWith('/api/smartstore-photo-review-draft'));
- await colorSelect.selectOption('02블랙');assert.deepEqual(await ids(),['a','b','c']);
+ await colorSelect.selectOption('02블랙');assert.deepEqual(await ids(),['b','c','a']);
  assert.equal(await colorSelect.evaluate(n=>n===document.activeElement),true);
- assert.equal(await page.locator('[data-photo-id="c"] [data-field=role]').inputValue(),'side');
- assert.equal(await page.locator('[data-photo-id="a"] [data-field=role]').inputValue(),'front');
+ assert.equal(await page.locator('[data-photo-id="c"] [data-field=role]').inputValue(),'front');
+ assert.equal(await page.locator('[data-photo-id="a"] [data-field=role]').inputValue(),'side');
  await colorSaved;
- assert.deepEqual(lastSaved.items.map(i=>i.id),['a','b','c']);
+ assert.deepEqual(lastSaved.items.map(i=>i.id),['b','c','a']);
  assert.equal(lastSaved.items.find(i=>i.id==='a').colorOverride,true);
- const sorted=page.waitForResponse(r=>r.url().endsWith('/api/smartstore-photo-review-draft'));await page.locator('#manualPhotoReviewSort').click();await sorted;assert.deepEqual(await ids(),['b','a','c']);
- await page.locator('#manualPhotoReviewClose').click();await page.locator('#manualPhotoReviewOpen').click();await cards.first().waitFor();assert.deepEqual(await ids(),['b','a','c']);
+ const sorted=page.waitForResponse(r=>r.url().endsWith('/api/smartstore-photo-review-draft'));await page.locator('#manualPhotoReviewSort').click();await sorted;assert.deepEqual(await ids(),['b','c','a']);
+ await page.locator('#manualPhotoReviewClose').click();await page.locator('#manualPhotoReviewOpen').click();await cards.first().waitFor();assert.deepEqual(await ids(),['b','c','a']);
  await page.locator('[data-photo-id="b"] [data-field=color]').selectOption('02블랙');assert.match(await page.locator('#manualPhotoReviewLegend [data-color="01화이트"]').textContent(),/0장.*사진 없음/);
  // A late automatic label suggestion replaces an untouched default role.
  await page.locator('[data-photo-id="c"] [data-field=color]').selectOption('');
  await page.evaluate(()=>{const c=document.querySelector('[data-photo-id="c"]');c.dataset.colorOverride='false';c.dataset.roleOverride='false';});
  data.items.find(i=>i.id==='c').role='care-label';data.items.find(i=>i.id==='c').color='';
  await page.evaluate(style=>document.dispatchEvent(new CustomEvent('register-state',{detail:{photoColorDraft:{style,status:'ready',updatedAt:'test-ready',message:'자동 구분 완료'}}})),data.style);
- await page.waitForFunction(()=>document.querySelector('[data-photo-id="c"] [data-field=role]').value==='care-label');assert.deepEqual(await ids(),['b','a','c']);
+ await page.waitForFunction(()=>document.querySelector('[data-photo-id="c"] [data-field=role]').value==='care-label');assert.deepEqual(await ids(),['a','b','c']);
  const headings=page.locator('#manualPhotoReviewGrid .photo-group-heading');
  await page.locator('#manualPhotoReviewSort').click();
  assert.deepEqual(await headings.allTextContents(),['02블랙','케어라벨']);

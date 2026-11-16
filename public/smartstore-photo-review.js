@@ -10,8 +10,11 @@
   <div class="photo-bulk-tools"><strong id="manualPhotoSelectedCount">일괄 색상 · 0장</strong><span>사진을 체크한 뒤 아래 색상을 누르세요.</span><button type="button" class="secondary" id="manualPhotoSelectionClear">체크 해제</button></div>
   <div id="manualPhotoReviewLegend" aria-label="선택한 사진에 적용할 상품 색상"></div>
  </div><div class="photo-review-body">
+  <section id="photoPointPicker" aria-labelledby="photoPointHeading" hidden>
+   <div class="photo-point-heading"><h3 id="photoPointHeading">소구점 확인</h3><small id="photoPointSummary"></small><button id="photoPointApply" type="button">소구점 반영</button></div>
+   <div id="photoPointCandidates"></div><p id="photoPointMessage" role="status"></p>
+  </section>
   <div class="photo-review-order">
-   <details id="photoPointPicker"><summary><span>소구점 확인</span><small id="photoPointSummary"></small></summary><p>공식 근거에서 구매 장점 2~4개를 고르세요.</p><div id="photoPointCandidates"></div><p id="photoPointMessage" role="status"></p><button id="photoPointApply" type="button">소구점 반영</button></details>
    <p class="photo-order-guide">사진을 끌어 순서를 바꿀 수 있어요. 직접 고른 구도는 유지돼요.</p>
    <button type="button" class="secondary" id="manualPhotoReviewSort" title="수정한 색상에 맞춰 사진을 다시 모아요">색상별 정렬</button>
   </div>
@@ -19,7 +22,7 @@
   <p id="manualPhotoReviewMessage" role="status"></p>
  </div>`;
  document.body.append(dialog);let current=null,loading=false,stale=false,openSequence=0,selectionAnchor=null,manualLayout=false,observedStyle=null;const grid=dialog.querySelector('#manualPhotoReviewGrid'),message=dialog.querySelector('#manualPhotoReviewMessage'),apply=dialog.querySelector('#manualPhotoReviewApply');
- const sortButton=dialog.querySelector('#manualPhotoReviewSort');
+ const sortButton=dialog.querySelector('#manualPhotoReviewSort'),pointPanel=dialog.querySelector('#photoPointPicker');
  let draftTimer=null,draftQueue=Promise.resolve(),pendingDraft=null,draftVersion=0;
  let photoDrag=null;
  const dragGroup=card=>{const role=card?.querySelector('[data-field=role]')?.value,color=card?.querySelector('[data-field=color]')?.value;return color&&!['care-label','excluded'].includes(role)?color:null;};
@@ -28,7 +31,27 @@
  const checkedCards=()=>photoCards().filter(card=>card.querySelector('[data-select-photo]')?.checked);
  function updateBulkSelection(){const cards=photoCards(),selected=checkedCards();for(const card of cards)card.dataset.selected=String(selected.includes(card));dialog.querySelector('#manualPhotoSelectedCount').textContent='일괄 색상 · '+selected.length+'장';dialog.querySelector('#manualPhotoSelectionClear').disabled=loading||stale||!selected.length;for(const badge of dialog.querySelectorAll('#manualPhotoReviewLegend button'))badge.disabled=loading||stale||!!photoDrag||!selected.length;sortButton.disabled=loading||stale||!!photoDrag;}
  function markUnsorted(){manualLayout=true;for(const heading of grid.querySelectorAll('.photo-group-heading')){heading.replaceChildren(document.createTextNode('색상 정리 전 · 각 사진의 색상 확인'));heading.classList.add('photo-group-pending');}}
- function setSelectedColor(color){if(loading||stale||photoDrag||!current?.colors.includes(color))return;const usable=checkedCards().filter(card=>!['care-label','excluded'].includes(card.querySelector('[data-field=role]').value));if(!usable.length){message.textContent='케어라벨·사용 안 함 사진은 색상을 지정하지 않습니다.';return;}for(const card of usable){card.querySelector('[data-field=color]').value=color;card.dataset.colorOverride='true';card.refreshPhotoView?.();}markUnsorted();updatePhotoSummary();rememberSelection();message.textContent=usable.length+'장에 '+color+' 지정 · 위치는 그대로입니다. 색상별 정렬로 모아 보세요.';}
+ function groupAfterColorChange(movedCards){
+  const top=dialog.scrollTop,focused=document.activeElement;
+  manualLayout=true;
+  arrangePhotoGroups(movedCards);
+  if(grid.contains(focused))focused.focus({preventScroll:true});
+  dialog.scrollTop=top;
+  rememberSelection();
+ }
+ function setSelectedColor(color){
+  if(loading||stale||photoDrag||!current?.colors.includes(color))return;
+  const usable=checkedCards().filter(card=>!['care-label','excluded'].includes(card.querySelector('[data-field=role]').value));
+  if(!usable.length){message.textContent='케어라벨·사용 안 함 사진은 색상을 지정하지 않습니다.';return;}
+  const moved=usable.filter(card=>card.querySelector('[data-field=color]').value!==color);
+  for(const card of usable){
+   card.querySelector('[data-field=color]').value=color;
+   card.dataset.colorOverride='true';
+   card.refreshPhotoView?.();
+  }
+  groupAfterColorChange(moved);
+  message.textContent=usable.length+'장을 '+color+' 묶음에 배치했어요.';
+ }
  dialog.querySelector('#manualPhotoSelectionClear').onclick=()=>{if(loading||stale)return;for(const card of photoCards())card.querySelector('[data-select-photo]').checked=false;selectionAnchor=null;updateBulkSelection();};
  function photoDropAt(x,y,drag){
   const hit=document.elementFromPoint(x,y);
@@ -146,15 +169,15 @@
  let pointData=null,pointRequest=0;
  function updatePointSummary(){
   const summary=dialog.querySelector('#photoPointSummary');
-  const titles=pointData?.candidates.filter(candidate=>pointData.selectedIds.includes(candidate.id)).map(candidate=>candidate.title)||[];
-  summary.textContent=titles.length?titles.length+'개 선택 · '+titles.join(' · '):pointData?'후보 '+pointData.candidates.length+'개':'';
+  summary.textContent=pointData?pointData.selectedIds.length+'개 선택 · 후보 '+pointData.candidates.length+'개':'';
  }
  async function loadPointChoices(style){
-  const sequence=++pointRequest,list=dialog.querySelector('#photoPointCandidates'),status=dialog.querySelector('#photoPointMessage'),save=dialog.querySelector('#photoPointApply');pointData=null;updatePointSummary();list.replaceChildren();save.disabled=true;status.textContent='공식 소구점 후보를 확인하고 있습니다…';
-  try{const r=await fetch('/api/smartstore-point-picker?channel=smartstore&style='+style),data=await r.json();if(sequence!==pointRequest||current?.style!==style)return;if(!r.ok)throw Error(data.error);pointData=data;
+  const sequence=++pointRequest,session=openSequence,list=dialog.querySelector('#photoPointCandidates'),status=dialog.querySelector('#photoPointMessage'),save=dialog.querySelector('#photoPointApply');pointData=null;updatePointSummary();list.replaceChildren();save.disabled=true;status.textContent='';
+  try{const r=await fetch('/api/smartstore-point-picker?channel=smartstore&style='+style),data=await r.json();if(sequence!==pointRequest||session!==openSequence||stale||current?.style!==style)return;if(!r.ok)throw Error(data.error);pointData=data;
    for(const candidate of data.candidates){const label=document.createElement('label'),box=document.createElement('input'),body=document.createElement('span'),title=document.createElement('strong'),description=document.createElement('span'),evidence=document.createElement('small');box.type='checkbox';box.value=candidate.id;box.checked=data.selectedIds.includes(candidate.id);title.textContent=candidate.title;description.textContent=candidate.displayReady===false?'표시 문구 확인이 필요합니다.':candidate.displayDescription??candidate.description;evidence.textContent='공식 근거: '+candidate.evidence;body.append(title,description,evidence);label.append(box,body);list.append(label);box.onchange=()=>{const selected=list.querySelectorAll('input:checked').length;if(selected>4){box.checked=false;status.textContent='최대 4개까지 적용할 수 있습니다.';return;}status.textContent=selected+'개 선택 · 적용 버튼을 눌러 저장하세요.';};}
    updatePointSummary();status.textContent=data.message;save.disabled=data.candidates.length<2;
-  }catch(e){if(sequence===pointRequest)status.textContent=e.message;}
+   pointPanel.hidden=!data.candidates.length&&!data.message;
+  }catch(e){if(sequence===pointRequest&&session===openSequence&&!stale){status.textContent=e.message;pointPanel.hidden=false;}}
  }
  dialog.querySelector('#photoPointApply').onclick=async()=>{if(!current||!pointData||current.style!==pointData.style)return;const button=dialog.querySelector('#photoPointApply'),status=dialog.querySelector('#photoPointMessage');const selectedIds=[...dialog.querySelectorAll('#photoPointCandidates input:checked')].map(e=>e.value);if(selectedIds.length<2||selectedIds.length>4){status.textContent='공식 근거에서 서로 다른 구매 장점 2~4개를 선택해 주세요.';return;}button.disabled=true;try{const r=await fetch('/api/smartstore-point-selection',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({style:current.style,channel:'smartstore',revision:pointData.revision,selectedIds})}),result=await r.json();if(!r.ok)throw Error(result.error);pointData.selectedIds=selectedIds;updatePointSummary();status.textContent='✓ 구매 장점 '+result.count+'개 저장 완료 · '+(result.previewReady?'템플릿에 반영했습니다.':'사진 선택·반영 시 템플릿에 적용됩니다.');if(typeof refresh==='function')refresh();}catch(e){status.textContent=e.message;}finally{button.disabled=false;}};
  function decorateColor(node,index){
@@ -163,13 +186,12 @@
   const old=node.querySelector(':scope > .photo-official-chip');if(old)old.remove();
   if(!node.dataset.photoId&&chip?.image&&/^data:image\/jpeg;base64,/.test(chip.image)){const image=document.createElement('img');image.className='photo-official-chip';image.src=chip.image;image.alt=color+' 공식 색상칩';image.draggable=false;node.prepend(image);}
  }
- function arrangePhotoGroups(movedCard){
+ function arrangePhotoGroups(movedCards=[]){
   const sectionNames=[...current.colors,'색상 선택 필요','케어라벨','사용 안 함'];
   const unassigned=current.colors.length;
   const groups=sectionNames.map(()=>[]);
-  const orderedCards=[...grid.querySelectorAll(':scope > [data-photo-id]')];
-  const movedIndex=orderedCards.indexOf(movedCard);
-  if(movedIndex>=0)orderedCards.push(...orderedCards.splice(movedIndex,1));
+  const moved=new Set(movedCards);
+  const orderedCards=[...photoCards().filter(card=>!moved.has(card)),...movedCards];
   for(const card of orderedCards){
    const role=card.querySelector('[data-field=role]').value;
    const index=current.colors.indexOf(dragGroup(card));
@@ -246,7 +268,7 @@
  new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['data-channel','class']});document.addEventListener('register-state',sync);sync();
  dialog.querySelector('#manualPhotoReviewClose').onclick=()=>dialog.close();
  button.onclick=async()=>{
-  if(loading||dialog.open||!isSmartstore())return;const session=++openSequence;loading=true;stale=false;current=null;selectionAnchor=null;manualLayout=false;button.disabled=true;message.textContent='사진 목록을 불러오는 중…';selectionStatus.textContent='사진 목록을 불러오는 중…';grid.replaceChildren();dialog.querySelector('#manualPhotoReviewLegend').replaceChildren();updateBulkSelection();apply.disabled=true;dialog.showModal();
+  if(loading||dialog.open||!isSmartstore())return;const session=++openSequence;loading=true;stale=false;current=null;selectionAnchor=null;manualLayout=false;pointPanel.hidden=true;button.disabled=true;message.textContent='사진 목록을 불러오는 중…';selectionStatus.textContent='사진 목록을 불러오는 중…';grid.replaceChildren();dialog.querySelector('#manualPhotoReviewLegend').replaceChildren();updateBulkSelection();apply.disabled=true;dialog.showModal();
   try{const state=await(await fetch('/api/state?channel=smartstore')).json();if(state.busy)throw Error('현재 작업이 끝난 뒤 열어 주세요.');if(!state.product)throw Error('상품을 먼저 수집해 주세요.');if(session!==openSequence||!dialog.open)return;observedStyle=state.product.style;const r=await fetch('/api/smartstore-photo-review?channel=smartstore&style='+encodeURIComponent(state.product.style));const data=await r.json();if(!r.ok)throw Error(data.error);if(session!==openSequence||!dialog.open||!isSmartstore())return;if(data.style!==state.product.style||data.style!==observedStyle)throw Error('품번이 변경됐습니다. 다시 열어 주세요.');current=data;loadPointChoices(data.style);let localSelection=null;try{localSelection=JSON.parse(localStorage.getItem('smartstore.photo-selection.v1.'+data.style));}catch{}const restoreLocal=localSelection?.sourceUrl===data.sourceUrl&&localSelection.revision===data.revision&&Date.parse(localSelection.savedAt)>Date.parse(data.selectionSavedAt||'1970-01-01');if(restoreLocal&&localSelection.mainSelectionVersion===2&&(localSelection.mainId===null||data.items.some(i=>i.id===localSelection.mainId))){data.mainId=localSelection.mainId;for(const i of data.items)i.main=i.id===data.mainId;}if(restoreLocal)for(const item of data.items){const saved=localSelection.items?.find(i=>i.id===item.id);if(saved){if(saved.color||saved.colorOverride)item.color=saved.color;if(saved.role&&(!item.labelSuggested||saved.roleOverride!==false||saved.colorOverride)){item.role=saved.role;item.roleDefaulted=false;}item.colorOverride=!!saved.colorOverride;item.roleOverride=saved.roleOverride??true;item.roleMode=localSelection.roleSelectionVersion===2&&saved.roleMode==='manual'?'manual':'order';}}selectionStatus.textContent=restoreLocal?'브라우저에 보관한 선택을 복원했습니다.':data.selectionSavedAt?'✓ 저장한 선택을 불러왔습니다.':'선택은 자동 저장됩니다. 확인 후 사진 반영을 눌러 주세요.';
    if(restoreLocal){const order=new Map(localSelection.items.map((item,index)=>[item.id,index]));data.items.sort((a,b)=>(order.get(a.id)??Infinity)-(order.get(b.id)??Infinity));}
    const legend=dialog.querySelector('#manualPhotoReviewLegend');legend.replaceChildren();for(const [index,c] of data.colors.entries()){const badge=document.createElement('button');badge.type='button';badge.className='photo-color-badge';badge.dataset.color=c;badge.textContent=c;badge.title='함께 선택한 사진에 '+c+' 적용';badge.onclick=()=>setSelectedColor(c);decorateColor(badge,index);const count=document.createElement('small');count.className='photo-color-count';badge.append(count);legend.append(badge);}
@@ -311,8 +333,7 @@
      if(loading||stale||photoDrag)return;
      card.dataset.colorOverride='true';
      update();
-     markUnsorted();updatePhotoSummary();
-     rememberSelection();
+     groupAfterColorChange([card]);
     };
     card.refreshPhotoView=update;update();
     const cardTop=document.createElement('div');cardTop.className='photo-card-top';cardTop.append(choiceLabel,badge,mainLabel);
