@@ -627,8 +627,8 @@ body[data-channel="lotte"] #collectionCard .workspace-moment {
 }
 body[data-channel="lotte"] #collectionCard .moment-scene {
   flex: 0 0 160px;
-  transform: scale(.55);
-  margin: -21px -36px;
+  transform: scale(.65);
+  margin: -17.5px -28px;
 }
 body[data-channel="lotte"] #collectionCard .workspace-moment p { margin: 0; }
 body[data-channel="lotte"] #collectionCard .giordano-signature {
@@ -638,7 +638,7 @@ body[data-channel="lotte"] #collectionCard .giordano-signature {
   padding: 0;
   border: 0;
 }
-body[data-channel="lotte"] #collectionCard .giordano-official-logo { width: 120px; }
+body[data-channel="lotte"] #collectionCard .giordano-official-logo { width: 140px; }
 body[data-channel="lotte"] #collectionCard .maker-credit {
   gap: 4px;
   margin: 0;
@@ -658,12 +658,12 @@ body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete 
   min-width: 0;
   max-width: 100%;
   margin: 0;
-  padding: 7px 11px;
+  padding: 8px 13px;
   border: 1px solid #b1cbb7;
   border-radius: 8px;
   background: #eef6ed;
   color: #285638;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.35;
 }
 body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete:not([hidden]) ~ .workspace-moment {
@@ -693,6 +693,7 @@ body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete:
   }
   body[data-channel="lotte"] #collectionCard .workspace-moment p { font-size: 12px; }
   body[data-channel="lotte"] #collectionCard .workspace-moment p span { display: none; }
+  body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete { font-size: 14px; }
 }
 @media (max-width: 420px) {
   body[data-channel="lotte"] #collectionCard { padding: 16px; gap: 12px 8px; }
@@ -706,6 +707,10 @@ body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete:
   }
   body[data-channel="lotte"] #collectionCard .giordano-signature { width: 94px; }
   body[data-channel="lotte"] #collectionCard .giordano-official-logo { width: 90px; }
+  body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete {
+    padding-inline: 9px;
+    font-size: 13px;
+  }
   body[data-channel="lotte"] #collectionCard .collection-search-field #style {
     min-height: 68px;
     padding-top: 36px;
