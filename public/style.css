@@ -603,6 +603,7 @@ body[data-channel="lotte"] #collectionCard #collect {
   min-height: 0;
   margin: 0;
   padding: 6px;
+  font-size: 15px;
   line-height: 1.25;
 }
 body[data-channel="lotte"] #collectionCard #collect.working { padding-inline: 24px 5px; }
@@ -613,15 +614,16 @@ body[data-channel="lotte"] #collectionCard #collect.working::before {
   height: 10px;
 }
 body[data-channel="lotte"] #collectionCard .collection-search-field label {
-  top: 5px;
+  top: 6px;
   right: 10px;
+  font-size: 13px;
   line-height: 1.25;
 }
 body[data-channel="lotte"] #collectionCard .collection-search-field #style {
-  min-height: 54px;
-  padding-top: 22px;
+  min-height: 62px;
+  padding-top: 26px;
   padding-bottom: 5px;
-  font-size: 17px;
+  font-size: 21px;
 }
 body[data-channel="lotte"] #collectionCard .workspace-moment {
   grid-column: 2;
@@ -640,8 +642,8 @@ body[data-channel="lotte"] #collectionCard .workspace-moment {
 }
 body[data-channel="lotte"] #collectionCard .moment-scene {
   flex: 0 0 160px;
-  transform: scale(.65);
-  margin: -17.5px -28px;
+  transform: scale(.72);
+  margin: -14px -22.5px;
 }
 body[data-channel="lotte"] #collectionCard .workspace-moment p { display: none; }
 body[data-channel="lotte"] #collectionCard .giordano-signature {
@@ -652,7 +654,7 @@ body[data-channel="lotte"] #collectionCard .giordano-signature {
   padding: 0;
   border: 0;
 }
-body[data-channel="lotte"] #collectionCard .giordano-official-logo { width: 140px; }
+body[data-channel="lotte"] #collectionCard .giordano-official-logo { width: 156px; }
 body[data-channel="lotte"] #collectionCard .maker-credit {
   gap: 4px;
   margin: 0;
@@ -671,7 +673,7 @@ body[data-channel="lotte"] #collectionCard > #collectionStatus {
   padding: 8px 13px;
   border-width: 1px;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.35;
   transition: background-color .22s ease, border-color .22s ease, color .22s ease;
 }
@@ -686,12 +688,12 @@ body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete 
   body[data-channel="lotte"] #collectionCard .collection-tools .search { grid-column: 1 / -1; }
 }
 @media (max-width: 760px) {
-  body[data-channel="lotte"] #collectionCard .giordano-signature { width: 116px; }
+  body[data-channel="lotte"] #collectionCard .giordano-signature { width: 126px; }
   body[data-channel="lotte"] #collectionCard .moment-scene {
-    transform: scale(.45);
-    margin: -24px -44px;
+    transform: scale(.51);
+    margin: -22px -39px;
   }
-  body[data-channel="lotte"] #collectionCard > #collectionStatus { font-size: 14px; }
+  body[data-channel="lotte"] #collectionCard > #collectionStatus { font-size: 15px; }
 }
 @media (max-width: 420px) {
   body[data-channel="lotte"] #collectionCard {
@@ -704,16 +706,16 @@ body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete 
   body[data-channel="lotte"] #collectionCard .workspace-moment .moment-scene {
     margin-inline: -52px;
   }
-  body[data-channel="lotte"] #collectionCard .giordano-signature { width: 94px; }
-  body[data-channel="lotte"] #collectionCard .giordano-official-logo { width: 90px; }
+  body[data-channel="lotte"] #collectionCard .giordano-signature { width: 100px; }
+  body[data-channel="lotte"] #collectionCard #collect { font-size: 14px; }
   body[data-channel="lotte"] #collectionCard > #collectionStatus {
-    padding: 4px 9px;
-    font-size: 13px;
-    line-height: 1.2;
+    padding: 4px 7px;
+    font-size: 14px;
+    line-height: 1.15;
   }
   body[data-channel="lotte"] #collectionCard .collection-search-field #style {
-    min-height: 68px;
-    padding-top: 36px;
+    min-height: 74px;
+    padding-top: 39px;
   }
 }
 .collection-search-field {
