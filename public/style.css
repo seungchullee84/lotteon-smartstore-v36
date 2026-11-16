@@ -561,16 +561,31 @@ body[data-channel="lotte"] #collectionCard {
   display: grid;
   grid-template-columns: minmax(0, 1fr) max-content;
   align-items: center;
-  gap: 10px 16px;
-  padding: 18px 22px;
+  gap: 14px 20px;
+  padding: 24px clamp(22px, 3vw, 40px);
 }
 body[data-channel="lotte"] #collectionCard > * { grid-column: 1 / -1; }
 body[data-channel="lotte"] #collectionCard > :is(h2,p:first-of-type) { margin: 0; }
+body[data-channel="lotte"] #collectionCard > h2 {
+  grid-area: 1 / 1 / auto / -2;
+}
+body[data-channel="lotte"] #collectionCard > #browserLoginSettings {
+  grid-area: 1 / -2 / auto / -1;
+  justify-self: end;
+  min-height: 34px;
+  margin: 0;
+  padding: 5px 10px;
+  border: 1px solid #d8cec2;
+  background: #fffcf8;
+  color: #604c3d;
+  font-size: 12px;
+}
 body[data-channel="lotte"] #collectionCard .collection-tools {
-  grid-template-columns: max-content max-content minmax(0, 1fr);
-  gap: 8px;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 12px;
   width: 100%;
-  max-width: 920px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e7ded2;
 }
 body[data-channel="lotte"] #collectionCard .collection-tools > button {
   margin: 0;
@@ -580,7 +595,7 @@ body[data-channel="lotte"] #collectionCard .collection-tools .search {
   grid-column: auto;
   flex-direction: row;
   flex-wrap: nowrap;
-  gap: 8px;
+  gap: 12px;
 }
 body[data-channel="lotte"] #collectionCard #collect {
   flex: 0 0 clamp(68px, 33%, 144px);
@@ -643,13 +658,20 @@ body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete 
   min-width: 0;
   max-width: 100%;
   margin: 0;
-  padding: 6px 9px;
+  padding: 7px 11px;
+  border: 1px solid #b1cbb7;
+  border-radius: 8px;
+  background: #eef6ed;
+  color: #285638;
   font-size: 13px;
   line-height: 1.35;
 }
 body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete:not([hidden]) ~ .workspace-moment {
   grid-column: 2;
   padding-inline: 0;
+  border-color: transparent;
+  background: transparent;
+  overflow: visible;
 }
 body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete:not([hidden]) ~ .workspace-moment p {
   display: none;
@@ -658,9 +680,12 @@ body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete:
   grid-column: 3;
   justify-self: end;
 }
-@media (max-width: 760px) {
-  body[data-channel="lotte"] #collectionCard .collection-tools { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 620px) {
+  body[data-channel="lotte"] #collectionCard .collection-tools { grid-template-columns: minmax(0, 1fr); }
+  body[data-channel="lotte"] #collectionCard .collection-tools #open { justify-self: start; }
   body[data-channel="lotte"] #collectionCard .collection-tools .search { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
   body[data-channel="lotte"] #collectionCard .giordano-signature { width: 116px; }
   body[data-channel="lotte"] #collectionCard .moment-scene {
     transform: scale(.45);
@@ -670,7 +695,9 @@ body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete:
   body[data-channel="lotte"] #collectionCard .workspace-moment p span { display: none; }
 }
 @media (max-width: 420px) {
-  body[data-channel="lotte"] #collectionCard { padding: 14px; gap: 8px; }
+  body[data-channel="lotte"] #collectionCard { padding: 16px; gap: 12px 8px; }
+  body[data-channel="lotte"] #collectionCard > h2 { font-size: 16px; gap: 6px; }
+  body[data-channel="lotte"] #collectionCard > #browserLoginSettings { font-size: 11px; padding-inline: 7px; }
   body[data-channel="lotte"] #collectionCard:has(> #collectionStatus.collect-complete:not([hidden])) {
     grid-template-columns: minmax(0, 1fr) max-content max-content;
   }
