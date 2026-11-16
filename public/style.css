@@ -1065,6 +1065,9 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
   --workspace-max-width: 1520px;
   --workspace-gutter: clamp(14px, 2vw, 24px);
 }
+@media (min-width: 1600px) {
+  :root { --workspace-max-width: 1760px; }
+}
 header, main {
   max-width: var(--workspace-max-width);
   padding-inline: var(--workspace-gutter);
