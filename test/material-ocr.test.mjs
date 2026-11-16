@@ -62,3 +62,15 @@ test('agreed bare 100 textile readings retain each garment part',()=>{
  assert.equal(recoverUnmarkedNoticeMaterial(notice),true);
  assert.equal(notice.material,'겉감: 나일론 100% / 안감: 나일론 100% / 충전재: 폴리에스터 100%');
 });
+
+test('matching unmarked blend ratios are formatted without changing the numbers',()=>{
+ const row='나일론55,모30,아크릴15';
+ const notice={ocrText:'제품 소재 '+row+'\n색상 블랙'};
+ assert.equal(recoverUnmarkedNoticeMaterial({...notice}),false);
+ assert.equal(recoverUnmarkedNoticeMaterial({...notice,rapidMaterialOCR:'나일론50,모35,아크릴15'}),false);
+ assert.equal(recoverUnmarkedNoticeMaterial({...notice,rapidMaterialOCR:row,materialRecheck:'나일론50,모35,아크릴15'}),false);
+ assert.equal(recoverUnmarkedNoticeMaterial({...notice,ocrText:'제품 소재 나일론55,모30\n색상 블랙',rapidMaterialOCR:'나일론55,모30'}),false);
+ const matching={...notice,rapidMaterialOCR:row};
+ assert.equal(recoverUnmarkedNoticeMaterial(matching),true);
+ assert.equal(matching.material,'나일론 55%, 모 30%, 아크릴 15%');
+});

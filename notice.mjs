@@ -68,12 +68,13 @@ export function parseMaterialText(text,options){
  if(!parts||!validMaterialTotals(parts))return '';
  return parts.map(({label,fibers})=>(label?label+': ':'')+fibers.map(match=>match[1]+' '+match[2]+'%').join(', ')).join(' / ');
 }
-function readUnmarkedPureMaterial(text){
+function readUnmarkedMaterial(text){
  const clean=cleanMaterialInput(text);
  if(!clean||clean.includes('%'))return '';
  const parts=readMaterialParts(clean);
  if(!parts||new Set(parts.map(part=>part.label)).size!==parts.length||
-    !parts.every(({fibers})=>fibers.length===1&&fibers[0][2]==='100'&&!/가죽|피혁/.test(fibers[0][1])))return '';
+    parts.some(({fibers})=>fibers.some((fiber,index)=>/가죽|피혁/.test(fiber[1])||
+      fibers.findIndex(other=>other[1]===fiber[1])!==index)))return '';
  return parseMaterialText(clean);
 }
 function materialRow(ocrText){
@@ -81,11 +82,12 @@ function materialRow(ocrText){
 }
 export function recoverUnmarkedNoticeMaterial(notice){
  if(!notice||notice.material||notice.materialCandidates?.length)return false;
- const unmarked=readUnmarkedPureMaterial(materialRow(notice.ocrText));
- if(!unmarked||unmarked!==readUnmarkedPureMaterial(notice.materialOCR)||
-    unmarked!==readUnmarkedPureMaterial(notice.materialRecheck))return false;
+ const unmarked=readUnmarkedMaterial(materialRow(notice.ocrText));
+ const readings=[notice.rapidMaterialOCR,notice.materialOCR,notice.materialRecheck]
+  .map(text=>verifiedOcrMaterial(text)||readUnmarkedMaterial(text)).filter(Boolean);
+ if(!unmarked||!readings.length||readings.some(reading=>reading!==unmarked))return false;
  notice.material=unmarked;
- notice.fieldStatus={...notice.fieldStatus,material:'공식 고시 OCR 일치 · 부위별 100을 100%로 표기'};
+ notice.fieldStatus={...notice.fieldStatus,material:'공식 고시 OCR 일치 · 부위별 혼용률 합계 100 · %로 표기'};
  return true;
 }
 export function reviewMaterialOCR(text){
