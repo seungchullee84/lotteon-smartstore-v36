@@ -526,7 +526,7 @@ body[data-channel="smartstore"] .collection-search-field {
   position: absolute;
   inset: 9px auto auto 14px;
   margin: 0;
-  color: var(--search-text);
+  color: #b63d14;
   font-size: 12px;
   font-weight: 700;
   line-height: 1.4;
