@@ -69,7 +69,7 @@ header h1{font-family:'Segoe UI','Malgun Gothic','맑은 고딕',sans-serif;font
 
 header .workspace-subtitle{color:#203d63;font-weight:750;opacity:1}
 
-header>.bar{display:flex;align-items:center;justify-content:flex-start;gap:10px;flex-wrap:wrap}header>.bar .tag{margin-right:auto}header>.bar #refreshPage{margin-left:auto;flex-shrink:0}header>.bar #shutdownApp{flex-shrink:0}@media(max-width:600px){header>.bar .tag{flex-basis:100%;margin-right:0}header>.bar #refreshPage{margin-left:auto}}
+header>.bar{display:flex;align-items:center;justify-content:flex-start;gap:10px;flex-wrap:wrap}header>.bar .tag{margin-right:auto}header>.bar #refreshPage{margin-left:auto;flex-shrink:0}header>.bar #shutdownApp{flex-shrink:0}@media(max-width:600px){header>.bar .tag{flex-basis:100%;margin-right:0}header>.bar #refreshPage{margin-left:0}}
 
 
 /* Unified workspace layout */
@@ -203,7 +203,7 @@ header h1{font-size:35px}header .workspace-subtitle{font-size:17px}@media(max-wi
 header .release-info{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:8px 0 6px;font-size:12px;line-height:1.6;color:#74624f}header .release-info>span:first-child{font-weight:700;color:#203d63;background:#ece4d8;padding:3px 10px;border-radius:6px}
 
 
-header>.bar .release-info{margin:0 8px 0 0;gap:7px;font-size:11px;justify-content:flex-end}header>.bar #refreshPage{margin-left:0}@media(max-width:600px){header>.bar .release-info{margin-left:auto;margin-right:0;flex-basis:100%;justify-content:flex-end}}
+header>.bar .release-info{margin:0 8px 0 0;gap:7px;font-size:11px;justify-content:flex-end}header>.bar #refreshPage{margin-left:auto}@media(max-width:600px){header>.bar .release-info{margin-left:auto;margin-right:0;flex-basis:100%;justify-content:flex-end}}
 
 
 header h1 .lotteon-brand{color:#e60023}
@@ -1072,40 +1072,29 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
   --workspace-max-width: 1520px;
   --workspace-gutter: clamp(14px, 2vw, 24px);
 }
-#progressDialog {
-  width: min(720px, calc(100% - 28px));
-  max-height: 85vh;
-  padding: clamp(14px, 3vw, 24px);
-  border: 1px solid #d4cdc2;
-  border-radius: 14px;
-  background: #fffdfa;
-  color: #283f3b;
-  overflow: auto;
+body[data-channel="smartstore"] #collectionTimeline { display: none; }
+body[data-channel="lotte"] #collectionCard #collectionTimeline {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #e5dcd1;
+  border-radius: 9px;
+  background: #faf7f1;
 }
-#progressDialog::backdrop { background: #16282666; }
-.progress-dialog-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+#collectionTimelineTitle {
+  margin: 0 0 6px;
+  color: #4e5046;
+  font-size: 13px;
 }
-.progress-dialog-heading h2 { margin: 0; }
-#progressDialogStatus {
-  margin: 10px 0;
-  font-weight: 700;
-}
-#progressDialogError { color: #982e31; overflow-wrap: anywhere; }
-#progressDialogLogs {
-  max-height: 54vh;
+#collectionTimelineLogs {
+  min-height: 64px;
+  max-height: 136px;
+  margin: 0;
+  padding: 2px 3px;
   overflow: auto;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  padding: 12px 14px;
-  border: 1px solid #e4ded4;
-  border-radius: 8px;
-  background: #f6f3ee;
-  color: #293b38;
-  font: 13px/1.65 Consolas, "Malgun Gothic", monospace;
+  color: #35413a;
+  font: 13px/1.6 Consolas, "Malgun Gothic", monospace;
 }
 @media (min-width: 1600px) {
   :root { --workspace-max-width: 1760px; }
