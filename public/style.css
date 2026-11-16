@@ -546,10 +546,23 @@ body[data-channel="smartstore"] .collection-tools .search {
   gap: 12px;
 }
 #collectionCard .collection-tools .search { grid-column: 1 / -1; }
+body[data-channel="lotte"] main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+body[data-channel="lotte"] :is(#collectionCard,#review) {
+  width: 100%;
+  margin: 0;
+}
+body[data-channel="lotte"] #collectionCard {
+  position: static;
+  min-height: 0;
+}
 body[data-channel="lotte"] #collectionCard .collection-tools .search {
   flex-direction: row;
   flex-wrap: nowrap;
-  gap: 8px;
+  gap: 12px;
 }
 body[data-channel="lotte"] #collectionCard #collect {
   flex: 0 0 clamp(68px, 33%, 144px);
@@ -560,9 +573,11 @@ body[data-channel="lotte"] #collectionCard .collection-search-field label {
   right: 10px;
   line-height: 1.25;
 }
-body[data-channel="lotte"] #collectionCard .collection-search-field #style {
-  min-height: 74px;
-  padding-top: 40px;
+@media (max-width: 420px) {
+  body[data-channel="lotte"] #collectionCard .collection-search-field #style {
+    min-height: 74px;
+    padding-top: 40px;
+  }
 }
 .collection-search-field {
   --search-border: #895834;
