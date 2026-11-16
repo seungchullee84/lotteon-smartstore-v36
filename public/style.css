@@ -1072,6 +1072,41 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
   --workspace-max-width: 1520px;
   --workspace-gutter: clamp(14px, 2vw, 24px);
 }
+#progressDialog {
+  width: min(720px, calc(100% - 28px));
+  max-height: 85vh;
+  padding: clamp(14px, 3vw, 24px);
+  border: 1px solid #d4cdc2;
+  border-radius: 14px;
+  background: #fffdfa;
+  color: #283f3b;
+  overflow: auto;
+}
+#progressDialog::backdrop { background: #16282666; }
+.progress-dialog-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.progress-dialog-heading h2 { margin: 0; }
+#progressDialogStatus {
+  margin: 10px 0;
+  font-weight: 700;
+}
+#progressDialogError { color: #982e31; overflow-wrap: anywhere; }
+#progressDialogLogs {
+  max-height: 54vh;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 12px 14px;
+  border: 1px solid #e4ded4;
+  border-radius: 8px;
+  background: #f6f3ee;
+  color: #293b38;
+  font: 13px/1.65 Consolas, "Malgun Gothic", monospace;
+}
 @media (min-width: 1600px) {
   :root { --workspace-max-width: 1760px; }
 }

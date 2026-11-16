@@ -389,8 +389,6 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
   const actualStyle=styleFromDetail(await page.content());
   if(actualStyle!==style)throw Error('입력 품번 '+style+'와 공식몰 상품 품번 '+actualStyle+'가 다릅니다.');
   assertAdultProductPage(await page.content(),page.url());
-  await page.locator('img[src*="'+style+'info."]').first().waitFor({state:'attached',timeout:20000});
-
   await page.waitForLoadState('load');
   const detailHtml=await page.content();
   const product=parseProduct(detailHtml,url,style);
@@ -405,8 +403,9 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
   if(cancelled()) throw Error('사용자가 중단했습니다.');
   let infoFailure;
   const downloads=Object.entries(product.images).filter(([,src])=>!!src);
-  for(let offset=0;offset<downloads.length;offset+=3){
-  const completed=await Promise.allSettled(downloads.slice(offset,offset+3).map(async([key,url])=>{
+  let downloaded=0;
+  log('공식 사진 원본 다운로드 시작 · '+downloads.length+'장 확인');
+  const downloadImage=async([key,url])=>{
     if(new URL(url).origin!==OFFICIAL)throw Error('공식몰 이미지 주소를 확인해 주세요.');
     let bytes=key==='detail'?originalDetailBytes:null,issue;
     for(const candidate of sourceImageCandidates(url,product)){
@@ -416,7 +415,11 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
         bytes=await readSourceImage(response);
         if(candidate!==url){product.images[key]=candidate;product.imageSourceRepairs||=[];product.imageSourceRepairs.push({key,original:url,resolved:candidate,basis:'같은 품번의 공식 이미지 주소에 표시된 단일 연도 폴더'});log('공식몰 '+key+' 이미지 주소 보정 · 같은 품번의 공식 연도 폴더 확인');}
         break;
-      }catch(e){issue=e;if(cancelled())throw Error('사용자가 중단했습니다.');}
+      }catch(e){
+        issue=e;
+        if(cancelled()||signal?.aborted)throw Error('사용자가 중단했습니다.');
+        if(/\bHTTP (404|410)\b/.test(e.message))break;
+      }
     }
     if(bytes)break;
     }
@@ -428,9 +431,20 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
       delete product.images[key];log('수집 불가 이미지를 제외하고 진행: '+key);return;
     }
     await writeFile(path.join(folder,`${key}.jpg`),bytes);
+    downloaded++;
+    log('공식 사진 원본 '+downloaded+'/'+downloads.length+'장 확보');
+  };
+  let nextImage=0,downloadError;
+  await Promise.all(Array.from({length:Math.min(3,downloads.length)},async()=>{
+    while(!downloadError&&nextImage<downloads.length){
+      try{
+        signal?.throwIfAborted();
+        if(cancelled())throw Error('사용자가 중단했습니다.');
+        await downloadImage(downloads[nextImage++]);
+      }catch(error){downloadError??=error;}
+    }
   }));
-  const failed=completed.find(r=>r.status==='rejected');if(failed)throw failed.reason;
-  }
+  if(downloadError)throw downloadError;
   if(!product.images.info){
     if(!product.images.detail)throw Error('공식몰 필수 이미지 수집 실패: info — '+(infoFailure?.message||'별도 정보고시와 상세 원본이 없습니다.'));
     try{const recovered=await extractEmbeddedNotice(product,await readFile(path.join(folder,'detail.jpg')),{signal});await writeFile(path.join(folder,'info.jpg'),recovered.bytes);product.noticeSource=recovered.source;product.images.info=product.images.detail;log('별도 고시 누락 대비책 적용 · 같은 품번의 상세 하단 INFORMATION 확인');}
