@@ -9,7 +9,7 @@ async function waitForPending(queue){
  assert.ok(queue.length,'제어할 지연 응답이 있어야 한다');
 }
 
-async function fixture(browser,{legacy=false}={}){
+async function fixture(browser,{legacy=false,points=null}={}){
  const [js,css]=await Promise.all(['smartstore-photo-review.js','smartstore-photo-review.css'].map(name=>readFile(new URL('../public/'+name,import.meta.url),'utf8')));
  const page=await browser.newPage({viewport:{width:1200,height:1000}});page.setDefaultTimeout(5000);
  const data={style:'123456',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=quick',revision:'quick-one',roleSelectionVersion:2,colors:['01화이트','02블랙'],mainId:'a',items:[
@@ -43,7 +43,8 @@ async function fixture(browser,{legacy=false}={}){
    body={ok:true,savedAt:new Date().toISOString()};
   }else if(url.pathname==='/api/smartstore-photo-review'&&request.method()==='POST'){
    applies.push(request.postDataJSON());control.applied=true;body={ok:true};
-  }else if(url.pathname==='/api/smartstore-point-picker')body={style:control.data.style,candidates:[],selectedIds:[],message:''};
+  }else if(url.pathname==='/api/smartstore-point-picker')body={style:control.data.style,candidates:[],selectedIds:[],message:'',...points};
+  else if(url.pathname==='/api/smartstore-point-selection')body={count:request.postDataJSON().selectedIds.length,previewReady:true};
   else if(url.pathname.startsWith('/smartstore-review-photo/')){body=pixel;contentType='image/png';}
   await route.fulfill({status:200,contentType,body:typeof body==='string'||Buffer.isBuffer(body)?body:JSON.stringify(body)});
  });
@@ -56,14 +57,33 @@ async function fixture(browser,{legacy=false}={}){
  return {page,control,errors,drafts,applies,pendingDraft,pendingReview,cards,card,ids,selected,saved};
 }
 
+test('사진 목록 앞에서 선택한 소구점과 공식 근거를 확인하고 반영한다',async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  const candidates=['부드러운 착용감','움직이기 편해요','가볍게 입어요'].map((title,index)=>({
+   id:String(index),title,description:title,evidence:'공식 설명 '+index,
+  }));
+  const {page}=await fixture(browser,{points:{revision:'points-one',candidates,selectedIds:['0','1']}});
+  const picker=page.locator('#photoPointPicker');
+  await page.waitForFunction(()=>document.querySelector('#photoPointSummary').textContent.includes('2개 선택'));
+  assert.ok((await picker.boundingBox()).y<(await page.locator('#manualPhotoReviewGrid').boundingBox()).y);
+  assert.match(await page.locator('#photoPointSummary').textContent(),/부드러운 착용감/);
+  await picker.locator('summary').click();
+  assert.equal(await page.getByText('공식 근거: 공식 설명 2',{exact:true}).isVisible(),true);
+  await picker.locator('input[value="2"]').check();
+  await picker.locator('#photoPointApply').click();
+  await page.waitForFunction(()=>document.querySelector('#photoPointSummary').textContent.includes('3개 선택'));
+ }finally{await browser.close();}
+});
+
 test('함께 선택·Shift 범위 색상 지정은 대표와 위치를 유지하고 사진 드래그도 계속 동작한다',async()=>{
  const browser=await chromium.launch({headless:true});
  try{
   const {page,card,ids,selected,saved,drafts,errors}=await fixture(browser);
   const black=page.locator('#manualPhotoReviewLegend button[data-color="02블랙"]');
   assert.equal(await black.isDisabled(),true,'선택한 사진이 없으면 색상 일괄 적용을 막는다');
-  await page.getByLabel('main.jpg 함께 선택',{exact:true}).check();
-  await page.getByLabel('detail.jpg 함께 선택',{exact:true}).click({modifiers:['Shift']});
+  await page.getByLabel('main.jpg 일괄 색상 지정',{exact:true}).check();
+  await page.getByLabel('detail.jpg 일괄 색상 지정',{exact:true}).click({modifiers:['Shift']});
   assert.deepEqual(await selected(),['a','b','c']);
   const before=await ids(),autosaved=saved();await black.click();await autosaved;
   assert.deepEqual(await ids(),before,'일괄 색상 변경은 카드를 즉시 이동하지 않는다');
@@ -151,7 +171,7 @@ test('닫았다 다시 연 세션에 이전 목록 응답이 늦게 도착해도
  const browser=await chromium.launch({headless:true});
  try{
   const {page,control,pendingReview,ids,selected,errors}=await fixture(browser);
-  await page.getByLabel('main.jpg 함께 선택',{exact:true}).check();
+  await page.getByLabel('main.jpg 일괄 색상 지정',{exact:true}).check();
   await page.locator('#manualPhotoReviewClose').click();
   control.holdNextReview=true;await page.locator('#manualPhotoReviewOpen').click();await waitForPending(pendingReview);
   await page.locator('#manualPhotoReviewClose').click();
