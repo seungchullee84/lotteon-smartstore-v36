@@ -634,11 +634,14 @@ body[data-channel="lotte"] #collectionCard .maker-credit .lsc-mark {
   font-size: 12px;
 }
 body[data-channel="lotte"] #collectionCard:has(> #collectionStatus.collect-complete:not([hidden])) {
-  grid-template-columns: minmax(0, max-content) max-content minmax(90px, 1fr);
-  column-gap: clamp(14px, 3vw, 40px);
+  grid-template-columns: minmax(0, 1fr) max-content minmax(0, 1fr);
+  column-gap: clamp(14px, 2vw, 28px);
 }
 body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete {
   grid-column: 1;
+  justify-self: start;
+  min-width: 0;
+  max-width: 100%;
   margin: 0;
   padding: 6px 9px;
   font-size: 13px;
@@ -653,7 +656,7 @@ body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete:
 }
 body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete:not([hidden]) ~ .giordano-signature {
   grid-column: 3;
-  justify-self: start;
+  justify-self: end;
 }
 @media (max-width: 760px) {
   body[data-channel="lotte"] #collectionCard .collection-tools { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -668,6 +671,12 @@ body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete:
 }
 @media (max-width: 420px) {
   body[data-channel="lotte"] #collectionCard { padding: 14px; gap: 8px; }
+  body[data-channel="lotte"] #collectionCard:has(> #collectionStatus.collect-complete:not([hidden])) {
+    grid-template-columns: minmax(0, 1fr) max-content max-content;
+  }
+  body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete:not([hidden]) ~ .workspace-moment .moment-scene {
+    margin-inline: -52px;
+  }
   body[data-channel="lotte"] #collectionCard .giordano-signature { width: 94px; }
   body[data-channel="lotte"] #collectionCard .giordano-official-logo { width: 90px; }
   body[data-channel="lotte"] #collectionCard .collection-search-field #style {
