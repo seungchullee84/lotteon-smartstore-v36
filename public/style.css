@@ -635,6 +635,7 @@ body[data-channel="lotte"] #collectionCard .maker-credit .lsc-mark {
 }
 body[data-channel="lotte"] #collectionCard:has(> #collectionStatus.collect-complete:not([hidden])) {
   grid-template-columns: minmax(0, max-content) max-content minmax(90px, 1fr);
+  column-gap: clamp(14px, 3vw, 40px);
 }
 body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete {
   grid-column: 1;
