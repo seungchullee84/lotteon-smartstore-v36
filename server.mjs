@@ -930,7 +930,7 @@ const server=http.createServer(async(req,res)=>{
   finally{if(backgroundMutation){backgroundMutations--;if(backgroundSourceChange)backgroundWorkflow.invalidate();}}
 });
 function prepareStartupTools(){
- if(process.platform!=='win32')return;
+ if(process.platform!=='win32'||process.env.REGISTER_NO_TOOL_DOWNLOADS==='1')return;
  const powershell=path.join(process.env.SystemRoot||'C:\\Windows','System32','WindowsPowerShell','v1.0','powershell.exe');
  const env=Object.fromEntries(Object.entries(process.env).filter(([name])=>!/^(?:REGISTER_|NAVER_|LOTTE_|SMARTSTORE_|OMB_|OPENMAUSBOT_|NPM_CONFIG_|NODE_AUTH_TOKEN$|NPM_TOKEN$|OPENAI_API_KEY$|NODE_OPTIONS$)/i.test(name)));
  const messages={

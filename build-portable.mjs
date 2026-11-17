@@ -1,10 +1,9 @@
 // Windows x64 portable distribution. Uses an explicit public-data allowlist.
-import {cp,mkdir,readFile,writeFile,readdir,realpath,access} from 'node:fs/promises';
+import {cp,mkdir,readFile,writeFile,realpath,access} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
-import {createHash} from 'node:crypto';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const destination=path.resolve(process.argv[2]||'');
 if(!process.argv[2]||destination===root||destination.startsWith(root+path.sep))throw Error('프로젝트 밖의 새 배포 폴더를 지정하세요.');
@@ -13,7 +12,9 @@ const browserSource=process.env.PLAYWRIGHT_BROWSERS_PATH;
 if(!browserSource)throw Error('PLAYWRIGHT_BROWSERS_PATH를 지정하세요.');
 const files=execFileSync('git',['ls-files','-z'],{cwd:root,encoding:'utf8',windowsHide:true}).split('\0').filter(Boolean);
 const publicData=['category-catalog-common.json','category-catalog-standard.json','category-crosswalk.json','category-matches.json','category-itemscout-verified.json','washing-icon-library.json'].map(f=>'data/'+f);
-const safe=files.filter(f=>publicData.includes(f)||f.startsWith('public/')||(!f.includes('/')&&/\.(mjs|json|md|traineddata|ico|png)$/.test(f)&&!f.startsWith('.'))||f==='.app-release.json'||f==='tools-setup.ps1');
+const safe=files.filter(f=>publicData.includes(f)||f.startsWith('public/')||
+ /^(?:research\/apparel-tags\/index\.json|research\/official-benefits\/(?:manifest|shard-[0-9a-f])\.json)$/.test(f)||
+ (!f.includes('/')&&/\.(mjs|json|md|traineddata|ico|png)$/.test(f)&&!f.startsWith('.'))||f==='.app-release.json'||f==='tools-setup.ps1');
 const app=path.join(destination,'app');await mkdir(app,{recursive:true});
 for(const file of safe)await cp(path.join(root,file),path.join(app,file),{recursive:true});
 await mkdir(path.join(destination,'runtime'));await cp(process.execPath,path.join(destination,'runtime','node.exe'));
@@ -49,8 +50,14 @@ const pkg=JSON.parse(await readFile(path.join(root,'package.json'),'utf8'));
 for(const name of Object.keys(pkg.dependencies))await install(name,root);
 console.log('의존성 '+installed.size+'개 포함');
 await mkdir(path.join(destination,'browsers'));
-for(const entry of await readdir(browserSource,{withFileTypes:true})){
- if(entry.isDirectory()&&/^(chromium|chromium_headless_shell|ffmpeg|winldd)-\d+$/.test(entry.name))await cp(path.join(browserSource,entry.name),path.join(destination,'browsers',entry.name),{recursive:true,dereference:true});
+const {location:playwrightHome}=await resolvePackage('playwright',root);
+const {location:coreHome}=await resolvePackage('playwright-core',playwrightHome);
+const {browsers}=JSON.parse(await readFile(path.join(coreHome,'browsers.json'),'utf8'));
+for(const name of ['chromium','chromium-headless-shell','ffmpeg']){
+ const browser=browsers.find(entry=>entry.name===name);
+ if(!browser)throw Error('Playwright 브라우저 버전을 확인하지 못했습니다: '+name);
+ const folder=name.replaceAll('-','_')+'-'+browser.revision;
+ await cp(path.join(browserSource,folder),path.join(destination,'browsers',folder),{recursive:true,dereference:true});
 }
 const launcher=String.raw`using System;
 using System.IO;
@@ -76,6 +83,7 @@ class Launcher {
     start.WorkingDirectory=Path.Combine(home,"app");start.UseShellExecute=false;start.CreateNoWindow=true;
     start.RedirectStandardOutput=true;start.RedirectStandardError=true;start.StandardOutputEncoding=Encoding.UTF8;start.StandardErrorEncoding=Encoding.UTF8;
     start.EnvironmentVariables["REGISTER_PORTABLE"]="1";
+    start.EnvironmentVariables["REGISTER_NO_TOOL_DOWNLOADS"]="1";
     start.EnvironmentVariables["PLAYWRIGHT_BROWSERS_PATH"]=Path.Combine(home,"browsers");
     foreach(string key in new[]{"REGISTER_DESKTOP","REGISTER_RESTORE","NAVER_CLIENT_ID","NAVER_CLIENT_SECRET","OPENAI_API_KEY"})start.EnvironmentVariables.Remove(key);
     child=new Process {StartInfo=start,EnableRaisingEvents=true};
