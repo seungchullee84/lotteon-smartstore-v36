@@ -10,6 +10,9 @@ if(!process.argv[2]||destination===root||destination.startsWith(root+path.sep))t
 try{await access(destination);throw Error('배포 폴더가 이미 있습니다. 새 경로를 지정하세요.');}catch(e){if(e.code!=='ENOENT')throw e;}
 const browserSource=process.env.PLAYWRIGHT_BROWSERS_PATH;
 if(!browserSource)throw Error('PLAYWRIGHT_BROWSERS_PATH를 지정하세요.');
+const priceSource=process.env.PRICE_CHANGER_BUILD_ROOT&&path.resolve(process.env.PRICE_CHANGER_BUILD_ROOT);
+const pythonSource=process.env.PORTABLE_PYTHON_HOME&&path.resolve(process.env.PORTABLE_PYTHON_HOME);
+if(priceSource&&!pythonSource)throw Error('가격변경기 엑셀 기능에 사용할 PORTABLE_PYTHON_HOME을 지정하세요.');
 const files=execFileSync('git',['ls-files','-z'],{cwd:root,encoding:'utf8',windowsHide:true}).split('\0').filter(Boolean);
 const publicData=['category-catalog-common.json','category-catalog-standard.json','category-crosswalk.json','category-matches.json','category-itemscout-verified.json','washing-icon-library.json'].map(f=>'data/'+f);
 const safe=files.filter(f=>publicData.includes(f)||f.startsWith('public/')||
@@ -20,7 +23,7 @@ for(const file of safe)await cp(path.join(root,file),path.join(app,file),{recurs
 await mkdir(path.join(destination,'runtime'));await cp(process.execPath,path.join(destination,'runtime','node.exe'));
 // Flatten pnpm's junction-based store into real portable directories. Resolve
 // dependencies in their original package context, nesting conflicting versions.
-const installed=new Map();const moduleRoot=path.join(app,'node_modules');
+const installed=new Map();
 async function resolvePackage(name,from){
  const req=createRequire(path.join(from,'package.json'));
  for(const base of req.resolve.paths(name)||[]){
@@ -28,7 +31,7 @@ async function resolvePackage(name,from){
  }
  throw Error('의존성을 찾을 수 없습니다: '+name);
 }
-async function install(name,from,parent=app){
+async function install(name,from,parent=app,moduleRoot=path.join(app,'node_modules')){
  const {location,pkg}=await resolvePackage(name,from);
  let target=path.join(moduleRoot,name);
  if(installed.has(target)&&installed.get(target)!==pkg.version)target=path.join(parent,'node_modules',name);
@@ -43,21 +46,45 @@ async function install(name,from,parent=app){
    if(resolved.pkg.os&&!resolved.pkg.os.includes('win32'))continue;
    if(resolved.pkg.cpu&&!resolved.pkg.cpu.includes('x64'))continue;
   }
-  await install(dependency,location,target);
+  await install(dependency,location,target,moduleRoot);
  }
 }
 const pkg=JSON.parse(await readFile(path.join(root,'package.json'),'utf8'));
 for(const name of Object.keys(pkg.dependencies))await install(name,root);
 console.log('의존성 '+installed.size+'개 포함');
 await mkdir(path.join(destination,'browsers'));
-const {location:playwrightHome}=await resolvePackage('playwright',root);
-const {location:coreHome}=await resolvePackage('playwright-core',playwrightHome);
-const {browsers}=JSON.parse(await readFile(path.join(coreHome,'browsers.json'),'utf8'));
-for(const name of ['chromium','chromium-headless-shell','ffmpeg']){
- const browser=browsers.find(entry=>entry.name===name);
- if(!browser)throw Error('Playwright 브라우저 버전을 확인하지 못했습니다: '+name);
- const folder=name.replaceAll('-','_')+'-'+browser.revision;
- await cp(path.join(browserSource,folder),path.join(destination,'browsers',folder),{recursive:true,dereference:true});
+const copiedBrowsers=new Set();
+async function copyBrowsers(source,names){
+ const {location:playwrightHome}=await resolvePackage('playwright',source);
+ const {location:coreHome}=await resolvePackage('playwright-core',playwrightHome);
+ const {browsers}=JSON.parse(await readFile(path.join(coreHome,'browsers.json'),'utf8'));
+ for(const name of names){
+  const browser=browsers.find(entry=>entry.name===name);
+  if(!browser)throw Error('Playwright 브라우저 버전을 확인하지 못했습니다: '+name);
+  const folder=name.replaceAll('-','_')+'-'+browser.revision;
+  if(copiedBrowsers.has(folder))continue;
+  await cp(path.join(browserSource,folder),path.join(destination,'browsers',folder),{recursive:true,dereference:true});
+  copiedBrowsers.add(folder);
+ }
+}
+await copyBrowsers(root,['chromium','chromium-headless-shell','ffmpeg']);
+let priceCommit;
+if(priceSource){
+ const priceApp=path.join(app,'price-changer');
+ await mkdir(priceApp);
+ for(const file of ['app.js','index.html','styles.css','ledger.mjs','memo.mjs','portal.mjs','server.mjs','read-xlsx.py','package.json','package-lock.json']){
+  await cp(path.join(priceSource,file),path.join(priceApp,file));
+ }
+ await install('playwright',priceSource,priceApp,path.join(priceApp,'node_modules'));
+ await copyBrowsers(priceSource,['chromium','ffmpeg']);
+ const pythonHome=path.join(destination,'python');
+ await mkdir(pythonHome);
+ for(const file of ['python.exe','python3.dll','python312.dll','vcruntime140.dll','vcruntime140_1.dll','LICENSE.txt','DLLs','Lib']){
+  await cp(path.join(pythonSource,file),path.join(pythonHome,file),{
+   recursive:true,dereference:true,filter:src=>!['site-packages','__pycache__'].includes(path.basename(src)),
+  });
+ }
+ priceCommit=execFileSync('git',['rev-parse','HEAD'],{cwd:priceSource,encoding:'utf8',windowsHide:true}).trim();
 }
 const launcher=String.raw`using System;
 using System.IO;
@@ -84,6 +111,8 @@ class Launcher {
     start.RedirectStandardOutput=true;start.RedirectStandardError=true;start.StandardOutputEncoding=Encoding.UTF8;start.StandardErrorEncoding=Encoding.UTF8;
     start.EnvironmentVariables["REGISTER_PORTABLE"]="1";
     start.EnvironmentVariables["REGISTER_NO_TOOL_DOWNLOADS"]="1";
+    if(Directory.Exists(Path.Combine(home,"app","price-changer")))start.EnvironmentVariables["REGISTER_BUNDLED_PRICE_CHANGER"]="1";
+    else start.EnvironmentVariables.Remove("REGISTER_BUNDLED_PRICE_CHANGER");
     start.EnvironmentVariables["PLAYWRIGHT_BROWSERS_PATH"]=Path.Combine(home,"browsers");
     foreach(string key in new[]{"REGISTER_DESKTOP","REGISTER_RESTORE","NAVER_CLIENT_ID","NAVER_CLIENT_SECRET","OPENAI_API_KEY"})start.EnvironmentVariables.Remove(key);
     child=new Process {StartInfo=start,EnableRaisingEvents=true};
@@ -104,6 +133,8 @@ const compiler=path.join(process.env.WINDIR,'Microsoft.NET','Framework64','v4.0.
 execFileSync(compiler,['/nologo','/target:winexe','/platform:x64','/codepage:65001','/reference:System.Windows.Forms.dll','/reference:System.Drawing.dll','/win32icon:'+path.join(root,'rocket.ico'),'/out:'+path.join(destination,'상품등록기.exe'),sourceFile],{windowsHide:true,stdio:'pipe'});
 await writeFile(path.join(destination,'사용방법.txt'),'Windows 10/11 64비트용\r\n\r\n1. ZIP 파일을 폴더 전체로 압축 해제합니다. ZIP 안에서 바로 실행하지 마세요.\r\n2. 상품등록기.exe를 더블클릭합니다. Node.js 설치는 필요 없습니다.\r\n3. 상단 설정에서 네이버 API Client ID와 Client Secret을 처음 한 번 입력합니다.\r\n4. 판매처 로그인 창에서 직접 로그인합니다.\r\n5. 종료할 때 실행 창의 종료 버튼을 누릅니다.\r\n\r\nexe만 옮기지 말고 app, runtime, browsers 폴더를 함께 보관하세요.\r\n키와 로그인 정보는 app/data에 해당 PC용으로 저장됩니다.\r\n이 배포 파일에는 기존 PC의 키·로그인·상품 작업 자료가 들어 있지 않습니다.\r\n스마트스토어 상품명은 품번·공백 포함 27~39자이며 공식 상품정보와 네이버 검색 관심도를 참고합니다. 롯데온 상품명은 유지합니다.\r\n인터넷 연결이 필요합니다. 배포판은 GitHub 소스를 자동 수정하거나 업로드하지 않습니다.\r\n');
 const sha=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8',windowsHide:true}).trim();
-const manifest={version:pkg.version,sourceCommit:sha,platform:'win32-x64',builtAt:new Date().toISOString(),publicData,dependencies:installed.size,node:process.version};
+if(priceCommit)await writeFile(path.join(destination,'사용방법.txt'),
+ (await readFile(path.join(destination,'사용방법.txt'),'utf8'))+'\r\n가격변경기는 상품등록기 상단의 가격변경기 버튼에서 열 수 있습니다.\r\n가격변경기 목록과 예약 기록은 이 배포 폴더에 별도로 저장됩니다.\r\n');
+const manifest={version:pkg.version,sourceCommit:sha,priceChangerCommit:priceCommit,platform:'win32-x64',builtAt:new Date().toISOString(),publicData,dependencies:installed.size,node:process.version};
 await writeFile(path.join(destination,'build-manifest.json'),JSON.stringify(manifest,null,2));
 console.log(JSON.stringify({destination,...manifest}));

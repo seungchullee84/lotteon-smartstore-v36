@@ -10,7 +10,7 @@ const KEY = /^[a-f0-9]{48}$/;
 function sessionUrl(text, port) {
   try {
     const url = new URL(text.trim());
-    if (url.protocol !== 'http:' || url.hostname !== '127.0.0.1' || Number(url.port) !== port ||
+    if (url.protocol !== 'http:' || url.hostname !== '127.0.0.1' || !url.port || (port && Number(url.port) !== port) ||
         url.pathname !== '/' || url.username || url.password || url.hash ||
         [...url.searchParams.keys()].length !== 1 || !KEY.test(url.searchParams.get('key') || '')) return null;
     return url.href;
@@ -22,13 +22,14 @@ export function createPriceChangerLauncher({
   appDir = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'lotte-price-changer'),
   port = 49428,
   registrarRoot,
+  bundledPython,
   fetchImpl = fetch,
   spawnImpl = spawn,
   startupTimeoutMs = 15000,
   requestTimeoutMs = 1200,
   pollMs = 250,
 } = {}) {
-  if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('가격변경기 포트 설정을 확인해 주세요.');
+  if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error('가격변경기 포트 설정을 확인해 주세요.');
   const origin = `http://127.0.0.1:${port}`;
   const dataDir = path.join(appDir, 'data');
   const readyFile = path.join(dataDir, 'desktop-session.txt');
@@ -48,17 +49,19 @@ export function createPriceChangerLauncher({
 
   async function credentials() {
     const [saved, key] = await Promise.all([readText(readyFile), readText(path.join(dataDir, 'local-auth.key'))]);
-    return [...new Set([sessionUrl(saved, port), KEY.test(key) ? `${origin}/?key=${key}` : null].filter(Boolean))];
+    return [...new Set([sessionUrl(saved, port), port && KEY.test(key) ? `${origin}/?key=${key}` : null].filter(Boolean))];
   }
 
   async function probe() {
     const urls = await credentials();
     let reachable = false;
+    if (!port && !urls.length) return { url: null, reachable };
     for (const url of urls.length ? urls : [null]) {
       try {
-        const response = await fetchImpl(`${origin}/api/state`, {
+        const parsed = url && new URL(url);
+        const response = await fetchImpl(`${parsed?.origin || origin}/api/state`, {
           method: 'GET', redirect: 'manual', signal: AbortSignal.timeout(requestTimeoutMs),
-          headers: url ? { Cookie: `price_changer_${port}=${new URL(url).searchParams.get('key')}` } : {},
+          headers: parsed ? { Cookie: `price_changer_${parsed.port}=${parsed.searchParams.get('key')}` } : {},
         });
         reachable = true;
         if (!url || !response.ok) { await response.body?.cancel(); continue; }
@@ -73,7 +76,7 @@ export function createPriceChangerLauncher({
   async function launch() {
     const current = await probe();
     if (current.url) return { url: current.url, reused: true };
-    if (current.reachable) throw new Error('가격변경기 접속 정보를 확인하지 못했습니다. 기존 실행 창을 확인해 주세요.');
+    if (current.reachable && port) throw new Error('가격변경기 접속 정보를 확인하지 못했습니다. 기존 실행 창을 확인해 주세요.');
     try { await access(path.join(appDir, 'server.mjs')); }
     catch { throw new Error('이 컴퓨터에 가격변경기가 설치되어 있지 않습니다. 가격변경기 설치 폴더를 확인해 주세요.'); }
 
@@ -82,7 +85,8 @@ export function createPriceChangerLauncher({
       const child = spawnImpl(process.execPath, ['server.mjs'], {
         cwd: appDir, windowsHide: true, detached: true, stdio: 'ignore',
         env: { ...process.env, PRICE_CHANGER_NO_OPEN: '1', PRICE_CHANGER_PORT: String(port),
-          PRICE_CHANGER_DATA: dataDir, PRICE_CHANGER_READY_FILE: readyFile },
+          PRICE_CHANGER_DATA: dataDir, PRICE_CHANGER_READY_FILE: readyFile,
+          ...(bundledPython ? { PRICE_CHANGER_PYTHON: bundledPython, PRICE_CHANGER_BUNDLED_BROWSER: '1' } : {}) },
       });
       child.once('error', () => { failed = true; });
       child.unref();

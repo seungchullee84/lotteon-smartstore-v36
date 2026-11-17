@@ -82,7 +82,10 @@ const smartstoreCollectionOptions={
  recognizeMaterial:readRapidOcrMaterial,prepareMain:false,
 };
 const productEdits=createProductEditStore(dataRoot);
-const priceChanger=createPriceChangerLauncher({registrarRoot:root});
+const bundledPriceChanger=process.env.REGISTER_BUNDLED_PRICE_CHANGER==='1';
+const priceChanger=createPriceChangerLauncher({registrarRoot:root,...(bundledPriceChanger?{
+ appDir:path.join(root,'price-changer'),port:0,bundledPython:path.join(root,'..','python','python.exe'),
+}:{})});
 const browserLogins={lotte:createBrowserLoginStore(dataRoot),smartstore:createBrowserLoginStore(dataRoot,{channel:'smartstore'})};
 function browserLoginFor(channel='lotte'){if(!Object.hasOwn(browserLogins,channel))throw Error('자동 로그인 판매채널을 확인해 주세요.');return browserLogins[channel];}
 let naverCredentials={clientId:process.env.NAVER_CLIENT_ID?.trim()||'',clientSecret:process.env.NAVER_CLIENT_SECRET?.trim()||''};
