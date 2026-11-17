@@ -286,12 +286,19 @@ export function parseProduct(html, detailUrl, style) {
     ||images.find(x=>new RegExp(style+'info\\.(?:jpe?g|png|webp)(?:$|\\?)','i').test(x.src))?.src;
   const size=images.find(x=>new RegExp(style+'size_?\\.(?:jpg|jpeg|png)(?:$|\\?)','i').test(x.src))?.src;
   const check=images.find(x=>x.src.includes(style+'ch.'))?.src;
-  const expandedDetailPattern=new RegExp('^(?:\\d{2})?'+style+'_E\\.(?:jpe?g|png|webp)$','i');
+  const expandedDetailPattern=new RegExp('^(?:\\d{2})?'+style+'(?:\\d{2}|_(?:E|eshop\\d*|봄용|수정|이샵컷|\\d+컬러))\\.(?:jpe?g|png|webp)$','i');
   const detailPattern=new RegExp('^(?:\\d{2})?'+style+'(?:_+\\d+|_*)\\.(?:jpe?g|png|webp)$','i');
   const detail=images.find(x=>detailPattern.test(path.posix.basename(new URL(x.src).pathname)))?.src
     ||productImages.filter((_,image)=>$(image).closest('.wing-detail-more-contents').length>0)
       .map((_,image)=>new URL($(image).attr('src'),detailUrl)).get()
-      .find(url=>url.origin===OFFICIAL&&expandedDetailPattern.test(path.posix.basename(url.pathname)))?.href.split('#')[0];
+      .find(url=>{
+        if(url.origin!==OFFICIAL)return false;
+        // The official 374952 page embeds its verified long detail as a hashed attachment.
+        if(style==='374952'&&url.pathname==='/_data/attach/202411/07/880655827bffe4a6feb0df2e25d57f92.jpg')return true;
+        if(!url.pathname.startsWith('/_gio_on/'))return false;
+        try{return expandedDetailPattern.test(decodeURIComponent(path.posix.basename(url.pathname)));}
+        catch{return false;}
+      })?.href.split('#')[0];
   const main=images.find(x=>x.src.includes('/_data/attach/'))?.src;
   const gallery=[...new Set(productImages.filter('.product_image_tooltip_image_gio[data-image_no]').map((_,e)=>new URL($(e).attr('src')||'/',detailUrl).href.split('#')[0]).get())].filter(src=>src!==main&&new URL(src).origin===OFFICIAL).slice(0,2);
   if(!main||(!info&&!detail)) throw Error('공식몰 상품의 고시 또는 대표이미지를 찾지 못했습니다.');
@@ -336,7 +343,13 @@ export function styleFromDetail(html){
   const $=cheerio.load(html),text=$('body').text();
   const named=text.match(/STYLE\s*[.:]\s*(?:\d{2})?(\d{6})(?!\d)/i)?.[1];
   if(named)return named;
-  const styles=[...new Set($('img').map((_,e)=>($(e).attr('src')||'').match(/(?:^|\/)(\d{6})info\./i)?.[1]).get().filter(Boolean))];
+  const styles=[...new Set($(OFFICIAL_PRODUCT_IMAGE_SELECTOR).map((_,image)=>{
+    try{
+      const src=new URL($(image).attr('src'),OFFICIAL);
+      if(src.origin!==OFFICIAL)return;
+      return path.posix.basename(src.pathname).match(/^(?:\d{2})?(\d{6})_?info\.(?:jpe?g|png|webp)$/i)?.[1];
+    }catch{return undefined;}
+  }).get().filter(Boolean))];
   if(styles.length===1)return styles[0];
   throw Error('상품 URL에서 품번을 확인하지 못했습니다. 품번 6자리로 입력해 주세요.');
 }
@@ -368,8 +381,17 @@ export async function collect(style, folder, log, cancelled=()=>false,signal,opt
       if(!url)log('조사자료의 공식 주소를 확인하지 못해 품번으로 다시 검색합니다.');
     }
     if(!url&&options.sourceUrlHint&&options.sourceUrlHint!==researchUrl){
-      url=parseProductInput(options.sourceUrlHint).url;
-      log('확인된 공식 상품 주소로 바로 연결 · 품번 재검증');
+      try{
+        const hintUrl=parseProductInput(options.sourceUrlHint).url;
+        const response=await page.goto(hintUrl,{waitUntil:'domcontentloaded',timeout:12000});
+        const html=await page.content();
+        if(response?.ok()&&new URL(page.url()).origin===OFFICIAL&&styleFromDetail(html)===style){
+          assertAdultProductPage(html,page.url());
+          url=page.url();
+          log('기존 공식 상품 주소 확인 · 현재 품번 일치');
+        }
+      }catch{signal?.throwIfAborted();}
+      if(!url)log('기존 공식 주소를 확인하지 못해 품번으로 다시 검색합니다.');
     }
   }
   if(!url){

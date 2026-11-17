@@ -1,5 +1,23 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {validateStyle,koreanTitle,baseColor,matchColor,applyOCR,parseProduct,productClassification,easyProductName,buildKeywords} from '../product.mjs';
+import {validateStyle,koreanTitle,baseColor,matchColor,applyOCR,parseProduct,productClassification,easyProductName,buildKeywords,styleFromDetail} from '../product.mjs';
+test('공식 고시 이미지에서 품번을 확인하고 충돌하거나 외부 출처이면 거부한다',()=>{
+ const belt='<img src="/_gio_on/2021/01134600_info.jpg">';
+ const jacket='<img src="/_gio_on/2026/05375920info.jpg">';
+ assert.equal(styleFromDetail(belt),'134600');
+ assert.equal(styleFromDetail(jacket),'375920');
+ assert.throws(()=>styleFromDetail(belt+jacket));
+ assert.throws(()=>styleFromDetail('<img src="https://example.org/01134600_info.jpg">'));
+});
+test('검증된 해시 이름의 공식 상세는 같은 품번의 확장 상세에서만 연결한다',()=>{
+ const url='https://www.giordano.co.kr/shop/detail.php?pno=example';
+ const attachment='/_data/attach/202411/07/880655827bffe4a6feb0df2e25d57f92.jpg';
+ const base='<img src="/_data/attach/main.jpg"><img src="/374952info.jpg"><img src="/374953info.jpg">';
+ const detail='<img src="'+attachment+'">';
+ const expanded='<div class="wing-detail-more-contents">'+detail+'</div>';
+ assert.equal(parseProduct(base+expanded,url,'374952').images.detail,new URL(attachment,url).href);
+ assert.equal(parseProduct(base+detail,url,'374952').images.detail,undefined);
+ assert.equal(parseProduct(base+expanded,url,'374953').images.detail,undefined);
+});
 test('상품명은 기모·라운드·바지처럼 쉬운 표현 사용',()=>{
  assert.equal(koreanTitle('브러시드 크루넥 긴팔티','남성','026993'),'남성 기모 라운드 긴팔티 026993');
  assert.equal(easyProductName('여성 브러쉬드 밴딩 팬츠 416581'),'여성 기모 밴딩 바지 416581');
@@ -115,4 +133,25 @@ test('공식 상세 원본의 밑줄 두 개를 인식하고 고시·이벤트 �
  const product=parseProduct('<title>와이드 팬츠</title><img src="/_data/attach/main.jpg"><img src="/_gio_on/2026/event_01116958__.jpg"><img src="/_gio_on/2026/01116958info.jpg"><img src="/_gio_on/2026/01116958__.jpg">',url,'116958');
  assert.equal(product.images.detail,'https://www.giordano.co.kr/_gio_on/2026/01116958__.jpg');
  assert.equal(product.originalDetailUrl,product.images.detail);
+});
+test('공식 확장 상세 안의 eshop 원본만 사용한다',()=>{
+ const url='https://www.giordano.co.kr/shop/detail.php?pno=CD0DCE8FCA267BF1FB86CF43E18D5598';
+ const base='<title>리버서블 벨트</title><img src="/_data/attach/belt.jpg"><img src="/_gio_on/2021/01134600_info.jpg">';
+ const image='<img src="/_gio_on/2021/01134600_eshop.jpg">';
+ assert.equal(parseProduct(base+image,url,'134600').images.detail,undefined);
+ const product=parseProduct(base+'<div class="wing-detail-more-contents">'+image+'</div>',url,'134600');
+ assert.equal(product.images.detail,'https://www.giordano.co.kr/_gio_on/2021/01134600_eshop.jpg');
+ assert.match(product.images.info,/_info\.jpg$/);
+});
+test('공식 확장 상세에서 확인된 파일 변형을 동일 품번으로 연결한다',()=>{
+ const url='https://www.giordano.co.kr/shop/detail.php?pno=example';
+ for(const [style,name] of [
+  ['115512','01115512_봄용.jpg'],['115932','0111593201.jpg'],['070925','01070925_eshop2.jpg'],
+  ['026503','01026503_수정.jpg'],['024920','01024920_이샵컷.jpg'],['115522','01115522_9컬러.jpg'],
+ ]){
+  const file='/_gio_on/2025/'+encodeURIComponent(name);
+  const html='<title>공식 상품</title><img src="/_data/attach/main.jpg"><img src="/_gio_on/2025/'+style+'info.jpg">'+
+   '<div class="wing-detail-more-contents"><img src="/_gio_on/2025/'+style+'_룰렛이벤트.jpg"><img src="'+file+'"></div>';
+  assert.equal(parseProduct(html,url,style).images.detail,new URL(file,url).href);
+ }
 });
