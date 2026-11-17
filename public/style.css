@@ -1202,3 +1202,47 @@ header>.bar #refreshPage{margin-left:0}
 @media(max-width:540px){.lotte-category-summary .lotte-category-inline-value{font-size:13px;padding-left:6px;padding-right:21px}.lotte-category-summary .lotte-category-inline-choice::after{right:8px}.lotte-category-summary .lotte-category-inline-note p{font-size:11px}}
 @media(max-width:540px){.lotte-category-validation.lotte-category-summary{padding:15px}.lotte-category-summary .lotte-category-summary-header{gap:8px}.lotte-category-summary .lotte-category-summary-title{display:block}.lotte-category-summary h4{margin-bottom:6px;font-size:17px}.lotte-category-summary #lotteCategoryValidationSummary{font-size:11px}.lotte-category-summary .lotte-category-step{padding:12px}.lotte-category-summary .lotte-category-step dd.lotte-category-levels{gap:7px}.lotte-category-summary .lotte-category-level-value{font-size:13px}.lotte-category-summary .lotte-category-step dt small{margin-left:0}}
 @media(min-width:1150px){body[data-channel="lotte"] #review>.columns{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+
+/* Keep the registration controls grouped in the Codex side panel. */
+@media (max-width: 760px) {
+  body > header {
+    padding-block: 16px;
+  }
+
+  body > header > .bar {
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  body > header h1 {
+    font-size: clamp(23px, 5vw, 32px);
+    line-height: 1.3;
+  }
+
+  body > header .header-details {
+    gap: 7px 16px;
+  }
+
+  .channel-switcher {
+    margin-top: 10px;
+    margin-inline: auto;
+    padding: 12px;
+  }
+
+  .channel-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .channel-buttons .channel-button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .channel-buttons #openGiordanoHome {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-left: 0;
+  }
+}
