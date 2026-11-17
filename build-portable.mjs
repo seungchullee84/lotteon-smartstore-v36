@@ -1,5 +1,5 @@
 // Windows x64 portable distribution. Uses an explicit public-data allowlist.
-import {cp,mkdir,readFile,writeFile,realpath,access} from 'node:fs/promises';
+import {cp,mkdir,readFile,writeFile,readdir,realpath,access} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
@@ -82,6 +82,14 @@ if(priceSource){
  for(const file of ['python.exe','python3.dll','python312.dll','vcruntime140.dll','vcruntime140_1.dll','LICENSE.txt','DLLs','Lib']){
   await cp(path.join(pythonSource,file),path.join(pythonHome,file),{
    recursive:true,dereference:true,filter:src=>!['site-packages','__pycache__'].includes(path.basename(src)),
+  });
+ }
+ const sitePackages=path.join(pythonSource,'Lib','site-packages');
+ const excelPackages=await readdir(sitePackages);
+ for(const name of ['openpyxl','et_xmlfile']){
+  const files=[name,...excelPackages.filter(file=>file.startsWith(name+'-')&&file.endsWith('.dist-info'))];
+  for(const file of files)await cp(path.join(sitePackages,file),path.join(pythonHome,'Lib','site-packages',file),{
+   recursive:true,dereference:true,filter:src=>path.basename(src)!=='__pycache__',
   });
  }
  priceCommit=execFileSync('git',['rev-parse','HEAD'],{cwd:priceSource,encoding:'utf8',windowsHide:true}).trim();
