@@ -287,7 +287,8 @@ export function parseProduct(html, detailUrl, style) {
   const size=images.find(x=>new RegExp(style+'size_?\\.(?:jpg|jpeg|png)(?:$|\\?)','i').test(x.src))?.src;
   const check=images.find(x=>x.src.includes(style+'ch.'))?.src;
   const expandedDetailPattern=new RegExp('^(?:\\d{2})?'+style+'_E\\.(?:jpe?g|png|webp)$','i');
-  const detail=images.find(x=>new RegExp(style+'(?:_\\d+|_)?\\.jpg(?:$|\\?)','i').test(x.src))?.src
+  const detailPattern=new RegExp('^(?:\\d{2})?'+style+'(?:_+\\d+|_*)\\.(?:jpe?g|png|webp)$','i');
+  const detail=images.find(x=>detailPattern.test(path.posix.basename(new URL(x.src).pathname)))?.src
     ||productImages.filter((_,image)=>$(image).closest('.wing-detail-more-contents').length>0)
       .map((_,image)=>new URL($(image).attr('src'),detailUrl)).get()
       .find(url=>url.origin===OFFICIAL&&expandedDetailPattern.test(path.posix.basename(url.pathname)))?.href.split('#')[0];

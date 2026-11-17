@@ -110,3 +110,9 @@ test('롯데ON 살몬은 계절 표기·번호와 무관하게 사용자 지정 
  for(const raw of ['살몬','03살몬(AW)','03 살몬（AW）','SALMON','03SALMON(FW)'])assert.equal(matchColor(raw,['핑크','피치','살구','코랄']),'살구');
  assert.equal(matchColor('03살몬(AW)',['핑크','피치','코랄']),null);
 });
+test('공식 상세 원본의 밑줄 두 개를 인식하고 고시·이벤트 파일과 구분한다',()=>{
+ const url='https://www.giordano.co.kr/shop/detail.php?pno=8117D556776D833047457F85437FD954';
+ const product=parseProduct('<title>와이드 팬츠</title><img src="/_data/attach/main.jpg"><img src="/_gio_on/2026/event_01116958__.jpg"><img src="/_gio_on/2026/01116958info.jpg"><img src="/_gio_on/2026/01116958__.jpg">',url,'116958');
+ assert.equal(product.images.detail,'https://www.giordano.co.kr/_gio_on/2026/01116958__.jpg');
+ assert.equal(product.originalDetailUrl,product.images.detail);
+});
