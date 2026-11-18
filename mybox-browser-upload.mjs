@@ -24,11 +24,10 @@ try{
   const chooserPromise=page.waitForFileChooser({timeout:10000});
   await page.click('text="파일 올리기"',{label:'Select latest update archive'});
   const chooser=await chooserPromise;await chooser.setFiles(request.zipPath);
-  await page.waitForFunction(()=>/같은 이름|덮어|올리는 중|업로드 성공/.test(document.body.innerText),undefined,{timeout:20000});
+  await page.waitForFunction(()=>/같은 이름|덮어|업로드 성공/.test(document.body.innerText),undefined,{timeout:120000});
   const initial=await page.evaluate(()=>document.body.innerText);
   if(/같은 이름|덮어/.test(initial)){
-    console.log((await page.snapshot()).slice(0,10000));
-    throw Error('MYBOX 중복 파일 교체 화면 확인이 필요합니다.');
+    await page.click('text="덮어쓰기"',{label:'Replace latest update archive'});
   }
   await page.waitForFunction(()=>document.body.innerText.includes('업로드 성공')&&/1\s*\/\s*1개 완료/.test(document.body.innerText),undefined,{timeout:120000});
   const text=await page.evaluate(()=>document.body.innerText);
