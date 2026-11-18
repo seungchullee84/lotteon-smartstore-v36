@@ -214,6 +214,19 @@ export function matchCategoryLabel(choice, labels) {
 export function baseColor(value) {
   return value.replace(/\d+/g,'').split(/[+＋/]/)[0].replace(/\s+/g,'').replace(/(?:STR|ST)$/gi,'');
 }
+// Official color-chip review for uncommon Giordano names. Targets are LotteON labels.
+const lotteColorAliases=Object.freeze({
+  '마룬':'버건디','모카':'브라운','듄':'카멜','제이드':'청록','JADE':'청록',
+  '시나몬':'브라운','드라이로즈':'핑크','어텀체크':'브라운','터콰이즈체크':'청록',
+  '헤더오트':'오트밀','앰버탄':'카멜','오커':'오렌지','건메탈':'차콜',
+  '라떼':'베이지','초콜렛':'초코','초콜릿':'초코','피스타치오':'민트',
+  // Prefer the specific LotteON color over the first broad family in the name.
+  '크림슨':'레드','그레이시블루':'블루','크림옐로우':'옐로우','크림체크':'크림',
+  '민트그린':'민트','다크올리브':'올리브','워시드올리브':'올리브',
+  '올리브카키':'올리브','라이트카키':'카키','브리티쉬카키':'카키','아미그린':'카키',
+  '머스타드옐로우':'머스타드','브릭레드':'브릭','체리레드':'체리',
+  '스카이블루':'스카이','라벤더':'라벤다','헤더차콜':'차콜',
+});
 export function matchColor(raw, choices) {
   const families=[
     ['블랙','검정','검정색','검은색','BLACK'],['화이트','흰색','백색','WHITE'],
@@ -224,7 +237,7 @@ export function matchColor(raw, choices) {
     ['그린','초록','초록색','녹색','카키','올리브','GREEN'],['옐로우','노랑','노란색','YELLOW'],
     ['레드','빨강','빨간색','적색','버건디','와인','RED'],['오렌지','주황','주황색','ORANGE']
   ];
-  const norm=s=>baseColor(s).toUpperCase().replace(/[()（）_-]/g,'');
+  const norm=s=>baseColor(s.replace(/[（(]\s*(?:AW|FW|SS)\s*[)）]\s*$/i,'')).toUpperCase().replace(/[()（）_-]/g,'');
   const base=norm(raw);
   // User-approved LotteON mapping, including the official seasonal suffix.
   if(/^(살몬|SALMON)(?:AW|FW|SS)?$/.test(base))return choices.find(c=>norm(c)==='살구')||null;
@@ -242,6 +255,7 @@ export function matchColor(raw, choices) {
   if(/세이지|SAGE/.test(base)){
     for(const preferred of ['연두','올리브']){const match=choices.find(c=>norm(c)===preferred);if(match)return match;}
   }
+  if(Object.hasOwn(lotteColorAliases,base))return choices.find(c=>norm(c)===lotteColorAliases[base])||null;
   const family=s=>families.find(g=>g.some(a=>s.includes(a.toUpperCase())));
   const group=family(base);if(!group)return null;
   const same=choices.find(c=>family(norm(c))===group);if(same)return same;

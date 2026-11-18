@@ -123,3 +123,29 @@ test('에스프레소는 사용자 지정 롯데ON 통합색상 커피로 매칭
   }
   assert.equal(matchColor('01에스프레소',['브라운','밤색','초코','블랙']),null);
 });
+
+test('공식 색상칩을 대조한 미연결 색상 15개를 실제 롯데ON 색상으로 연결',()=>{
+  const labels='베이지 아이보리 스킨 오트밀 크림 오크베이지 골드 샴페인 로즈골드 브론즈 브라운 카키브라운 머드 밤색 초코 커피 카멜 월넛 메이플 오크 우드 옹이 화이트 밀크 핑크 연분홍 피치 살구 핫핑크 바이올렛 라벤다 자주 블루 인디고블루 스카이 아쿠아 에메랄드 코발트블루 데님 그린 민트 연두 올리브 라임 카키 형광그린 오렌지 주황 코랄 형광오렌지 레드 와인 버건디 루비 브릭 체리 실버 메탈 그레이 차콜 애쉬 네이비 군청 블랙 옐로우 머스타드 형광노랑 멀티 퍼플 내추럴 투명 라일락 청록'.split(' ');
+  const expected=[['마룬','버건디'],['모카','브라운'],['듄','카멜'],['제이드','청록'],
+    ['시나몬','브라운'],['드라이로즈','핑크'],['어텀체크','브라운'],['터콰이즈체크','청록'],
+    ['헤더오트','오트밀'],['앰버탄','카멜'],['오커','오렌지'],['건메탈','차콜'],
+    ['라떼','베이지'],['초콜렛','초코'],['피스타치오','민트']];
+  for(const [name,target] of expected){
+    assert.equal(matchColor('01 '+name,labels),target,name);
+    assert.equal(matchColor('01 '+name+'（AW）',labels),target,name+' seasonal');
+    assert.equal(matchColor(name,labels.filter(label=>label!==target)),null,name+' target missing');
+    assert.equal(matchColor(name,[...labels].reverse()),target,name+' candidate order');
+  }
+  assert.equal(matchColor('20 JADE',labels),'청록');
+});
+
+test('다른 색 이름의 일부 문자열과 계절 표기로 통합색상이 잘못 바뀌지 않는다',()=>{
+  assert.equal(matchColor('12크림슨',['아이보리','크림','레드']),'레드');
+  assert.equal(matchColor('12크림슨',['아이보리','크림']),null);
+  assert.equal(matchColor('04그레이시블루',['그레이','블루']),'블루');
+  assert.equal(matchColor('01버건디(AW)',['레드','버건디']),'버건디');
+  assert.equal(matchColor('03크림옐로우',['아이보리','크림','옐로우']),'옐로우');
+  assert.equal(matchColor('13민트그린',['그린','민트']),'민트');
+  assert.equal(matchColor('17다크올리브',['그린','올리브']),'올리브');
+  assert.equal(matchColor('01헤더차콜',['그레이','차콜']),'차콜');
+});
