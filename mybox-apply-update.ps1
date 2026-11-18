@@ -9,9 +9,9 @@ if(-not $InstallRoot){
 }
 $InstallRoot=[IO.Path]::GetFullPath($InstallRoot)
 $app=[IO.Path]::Combine($InstallRoot,'app')
-$manifest=Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot 'update-manifest.json') | ConvertFrom-Json
-$installed=Get-Content -Raw -LiteralPath (Join-Path $app 'package.json') | ConvertFrom-Json
-$build=Get-Content -Raw -LiteralPath (Join-Path $InstallRoot 'build-manifest.json') | ConvertFrom-Json
+$manifest=Get-Content -Raw -Encoding UTF8 -LiteralPath (Join-Path $PSScriptRoot 'update-manifest.json') | ConvertFrom-Json
+$installed=Get-Content -Raw -Encoding UTF8 -LiteralPath (Join-Path $app 'package.json') | ConvertFrom-Json
+$build=Get-Content -Raw -Encoding UTF8 -LiteralPath (Join-Path $InstallRoot 'build-manifest.json') | ConvertFrom-Json
 if($manifest.format -ne 1 -or $manifest.project -ne $installed.name){throw '업데이트 대상 프로그램이 다릅니다.'}
 if($build.sourceCommit -ne $manifest.baseCommit -and $build.baseCommit -ne $manifest.baseCommit -and $build.sourceCommit -ne 'e66a04e1015ff1a9aa05381019bef0261a795f1f'){throw '11월 17일 통합 실행판 이후 버전이 필요합니다.'}
 if(($installed.dependencies | ConvertTo-Json -Compress) -ne ($manifest.dependencies | ConvertTo-Json -Compress)){throw '실행 환경이 달라 통합 실행판 업데이트가 필요합니다.'}

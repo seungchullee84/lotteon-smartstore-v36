@@ -1,6 +1,6 @@
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {readFile,writeFile,mkdir,mkdtemp,copyFile,rename} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,mkdtemp,copyFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import path from 'node:path';
@@ -36,7 +36,7 @@ export async function buildMyboxUpdate(root,sha,{base=MYBOX_BASE,outputRoot=path
   }
   const manifest={format:1,project:newPackage.name,baseCommit:base,sourceCommit:sha,version:newPackage.version,builtAt:new Date().toISOString(),dependencies:newPackage.dependencies,files,deleted};
   await writeFile(path.join(stage,'update-manifest.json'),JSON.stringify(manifest,null,2));
-  await copyFile(path.join(root,'mybox-apply-update.ps1'),path.join(stage,'apply-update.ps1'));
+  await writeFile(path.join(stage,'apply-update.ps1'),Buffer.concat([Buffer.from([0xef,0xbb,0xbf]),await readFile(path.join(root,'mybox-apply-update.ps1'))]));
   await writeFile(path.join(stage,'업데이트.cmd'),'@echo off\r\nchcp 65001 >nul\r\npowershell.exe -NoProfile -File "%~dp0apply-update.ps1"\r\npause\r\n');
   await writeFile(path.join(stage,'사용방법.txt'),'ZIP 전체를 별도 폴더에 압축 해제한 뒤 업데이트.cmd를 실행하세요. 기존 통합 실행판 폴더(상품등록기.exe가 있는 폴더)를 선택하세요. 등록기를 종료한 상태에서 적용하며 기존 파일은 app/data/update-backups에 백업합니다. 설정·로그인·상품자료는 업데이트 대상이 아닙니다. Windows 실행 정책이 차단하면 해당 정책을 변경하지 말고 관리자에게 문의하세요.\r\n','utf8');
   const temporary=path.join(outputRoot,sha+'.zip');
@@ -56,13 +56,13 @@ export async function createMyboxDeployment(root,{publish,build=buildMyboxUpdate
     if((await git(root,['status','--porcelain','--untracked-files=no'])).length)throw Error('수정 중인 파일이 있어 배포를 보류합니다.');
   }
   const runChecks=check||(()=>exec(process.execPath,['--test','test/product.test.mjs','test/color-options.test.mjs','test/mybox-deploy.test.mjs'],{cwd:root,windowsHide:true,timeout:180000,maxBuffer:4000000}));
-  const upload=publish||async request=>{
+  const upload=publish||(async request=>{
     const requestFile=path.join(home,'upload-request.json');await writeFile(requestFile,JSON.stringify(request,null,2));
     const entry=pathToFileURL(path.join(root,'mybox-browser-upload.mjs')).href;
     const result=await exec('ego-browser',['nodejs','-e',`await import(${JSON.stringify(entry)})`],{windowsHide:true,timeout:240000,maxBuffer:2000000});
     const line=result.stdout.split(/\r?\n/).find(line=>line.startsWith('MYBOX_RESULT '));
     if(!line||!JSON.parse(line.slice(13)).ok)throw Error('MYBOX 업로드 완료를 확인하지 못했습니다. 브라우저 연결과 로그인을 확인해 주세요.');
-  };
+  });
   async function drain(){
     if(running||stopped||!state.enabled||!pending)return;
     running=true;const sha=pending;pending=null;
