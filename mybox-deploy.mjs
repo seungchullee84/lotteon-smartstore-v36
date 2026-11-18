@@ -1,10 +1,11 @@
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {readFile,writeFile,mkdir,mkdtemp,copyFile} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,mkdtemp,copyFile,readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import path from 'node:path';
 import {publishable} from './github-sync.mjs';
+import {writeUpdateZip} from './mybox-zip.mjs';
 
 const exec=promisify(execFile);
 export const MYBOX_BASE='82e1285378109e4795669aad0946c9e1bc9a9a5c';
@@ -36,11 +37,13 @@ export async function buildMyboxUpdate(root,sha,{base=MYBOX_BASE,outputRoot=path
   }
   const manifest={format:1,project:newPackage.name,baseCommit:base,sourceCommit:sha,version:newPackage.version,builtAt:new Date().toISOString(),dependencies:newPackage.dependencies,files,deleted};
   await writeFile(path.join(stage,'update-manifest.json'),JSON.stringify(manifest,null,2));
-  await writeFile(path.join(stage,'apply-update.ps1'),Buffer.concat([Buffer.from([0xef,0xbb,0xbf]),await readFile(path.join(root,'mybox-apply-update.ps1'))]));
-  await writeFile(path.join(stage,'업데이트.cmd'),'@echo off\r\nchcp 65001 >nul\r\npowershell.exe -NoProfile -File "%~dp0apply-update.ps1"\r\npause\r\n');
-  await writeFile(path.join(stage,'사용방법.txt'),'ZIP 전체를 별도 폴더에 압축 해제한 뒤 업데이트.cmd를 실행하세요. 기존 통합 실행판 폴더(상품등록기.exe가 있는 폴더)를 선택하세요. 등록기를 종료한 상태에서 적용하며 기존 파일은 app/data/update-backups에 백업합니다. 설정·로그인·상품자료는 업데이트 대상이 아닙니다. Windows 실행 정책이 차단하면 해당 정책을 변경하지 말고 관리자에게 문의하세요.\r\n','utf8');
+  await copyFile(path.join(root,'mybox-apply-update.mjs'),path.join(stage,'apply-update.mjs'));
+  await writeFile(path.join(stage,'업데이트.cmd'),'@echo off\r\nchcp 65001 >nul\r\nset /p "target=기존 상품등록기 폴더 경로를 입력하세요: "\r\nif not exist "%target%\\runtime\\node.exe" (echo 실행 환경을 찾지 못했습니다.& pause& exit /b 1)\r\n"%target%\\runtime\\node.exe" "%~dp0apply-update.mjs" "%target%"\r\npause\r\n');
+  await writeFile(path.join(stage,'사용방법.txt'),'ZIP 전체를 별도 폴더에 압축 해제한 뒤 업데이트.cmd를 실행하세요. 기존 통합 실행판 폴더(상품등록기.exe가 있는 폴더)의 경로를 입력하세요. 등록기를 종료한 상태에서 적용하며 기존 파일은 app/data/update-backups에 백업합니다. 설정·로그인·상품자료는 업데이트 대상이 아닙니다.\r\n','utf8');
   const temporary=path.join(outputRoot,sha+'.zip');
-  await exec('powershell.exe',['-NoProfile','-NonInteractive','-File',path.join(root,'mybox-zip.ps1'),'-Source',stage,'-Destination',temporary],{windowsHide:true,timeout:120000});
+  const entries=[];
+  async function walk(directory){for(const entry of await readdir(directory,{withFileTypes:true})){const file=path.join(directory,entry.name);if(entry.isDirectory())await walk(file);else entries.push({name:path.relative(stage,file).replaceAll('\\','/'),bytes:await readFile(file)});}}
+  await walk(stage);await writeUpdateZip(temporary,entries);
   return {manifest,stage,zipPath:temporary};
 }
 

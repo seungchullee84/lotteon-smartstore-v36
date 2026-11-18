@@ -6,6 +6,7 @@ import {fileURLToPath} from 'node:url';
 import os from 'node:os';
 import path from 'node:path';
 import {buildMyboxUpdate,createMyboxDeployment,updateFileAllowed} from '../mybox-deploy.mjs';
+import {applyMyboxUpdate} from '../mybox-apply-update.mjs';
 const source=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const git=(root,...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8',windowsHide:true,stdio:['ignore','pipe','pipe']}).trim();
 async function fixture(){
@@ -15,7 +16,7 @@ async function fixture(){
   await writeFile(path.join(root,'package.json'),JSON.stringify({name:'giordano-lotte-register',version:'1.0.0',dependencies:{}}));
   await writeFile(path.join(root,'server.mjs'),'// original');
   await writeFile(path.join(root,'removed.mjs'),'// removed');
-  for(const file of ['mybox-apply-update.ps1','mybox-zip.ps1'])await copyFile(path.join(source,file),path.join(root,file));
+  await copyFile(path.join(source,'mybox-apply-update.mjs'),path.join(root,'mybox-apply-update.mjs'));
   git(root,'add','.');git(root,'commit','-m','base');const base=git(root,'rev-parse','HEAD');
   await writeFile(path.join(root,'server.mjs'),'// newest');await rm(path.join(root,'removed.mjs'));
   await mkdir(path.join(root,'public'));await writeFile(path.join(root,'public','extra.js'),'// new');
@@ -36,7 +37,7 @@ test('cumulative package contains missed updates and deletions from the fixed ba
     assert.ok(result.manifest.files.some(file=>file.path==='public/extra.js'));
     assert.deepEqual(result.manifest.deleted,['removed.mjs']);
     assert.notEqual(result.manifest.sourceCommit,sha);
-    assert.deepEqual([...((await readFile(path.join(result.stage,'apply-update.ps1'))).subarray(0,3))],[239,187,191]);
+    assert.equal((await readFile(result.zipPath)).readUInt32LE(0),0x04034b50);
   }finally{await rm(root,{recursive:true,force:true});}
 });
 test('dependency changes require a full distribution before anything is uploaded',async()=>{
@@ -69,15 +70,14 @@ test('applying an update preserves PC settings and backs up replaced code',async
     await writeFile(path.join(app,'server.mjs'),'// original');await writeFile(path.join(app,'removed.mjs'),'// removed');
     await writeFile(path.join(app,'data','browser-login-settings.json'),'preserve-this-PC');
     await writeFile(path.join(install,'build-manifest.json'),JSON.stringify({sourceCommit:base,version:'1.0.0'}));
-    const command=['-NoProfile','-NonInteractive','-File',path.join(built.stage,'apply-update.ps1'),'-InstallRoot',install];
-    execFileSync('powershell.exe',command,{windowsHide:true,encoding:'utf8'});
+    await applyMyboxUpdate(built.stage,install);
     assert.equal(await readFile(path.join(app,'server.mjs'),'utf8'),'// newest');
     assert.equal(await readFile(path.join(app,'data','browser-login-settings.json'),'utf8'),'preserve-this-PC');
     await assert.rejects(readFile(path.join(app,'removed.mjs')),/ENOENT/);
     assert.equal(JSON.parse(await readFile(path.join(install,'build-manifest.json'),'utf8')).sourceCommit,sha);
     // A damaged payload must fail before modifying the installed source.
     await writeFile(path.join(built.stage,'payload','server.mjs'),'damaged');
-    assert.throws(()=>execFileSync('powershell.exe',command,{windowsHide:true,stdio:'pipe'}));
+    await assert.rejects(applyMyboxUpdate(built.stage,install),/손상/);
     assert.equal(await readFile(path.join(app,'server.mjs'),'utf8'),'// newest');
   }finally{await rm(root,{recursive:true,force:true});}
 });
