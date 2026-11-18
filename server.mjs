@@ -256,6 +256,12 @@ const server=http.createServer(async(req,res)=>{
     if(['GET','HEAD'].includes(req.method)&&url.pathname==='/smartstore-brand-video.mp4')return await serveBrandVideo(req,res,dataRoot,url.searchParams.get('variant')==='women'?{filename:'women.mp4',expectedHash:WOMEN_VIDEO_HASH}:undefined);
     if(req.method==='GET'&&url.pathname==='/api/branding')return json(res,200,await protectedBranding.get());
     if(req.method==='GET'&&url.pathname==='/api/mybox-deploy')return json(res,200,{...myboxDeploy.state,portable:process.env.REGISTER_PORTABLE==='1'});
+    if(req.method==='POST'&&url.pathname==='/api/mybox-deploy'){
+      if(process.env.REGISTER_PORTABLE==='1')throw Error('자동배포 설정은 코드 수정 PC에서 변경해 주세요.');
+      const b=await body(req);await myboxDeploy.configure(b.enabled);
+      if(b.enabled)myboxDeploy.schedule(githubSync.state?.sha,{force:true});
+      return json(res,200,myboxDeploy.state);
+    }
     if(req.method==='GET'&&url.pathname==='/api/lotte-category-choices')return json(res,200,lotteCategoryChoices());
     if(req.method==='GET'&&url.pathname==='/api/background-preview'){
       const bytes=backgroundWorkflow.preview({jobId:url.searchParams.get('jobId'),attempt:Number(url.searchParams.get('attempt'))});
@@ -362,12 +368,6 @@ const server=http.createServer(async(req,res)=>{
       const backgroundAction=backgroundActionKind(url.pathname);
       if(backgroundAction!=='workflow'){backgroundMutation=true;backgroundMutations++;backgroundSourceChange=backgroundAction==='source-change';if(backgroundSourceChange)backgroundWorkflow.invalidate('품번 또는 사진을 변경하는 작업이 시작되어 이전 합성을 취소했습니다.');}
       const b=await body(req);
-      if(url.pathname==='/api/mybox-deploy'){
-        if(process.env.REGISTER_PORTABLE==='1')throw Error('자동배포 설정은 코드 수정 PC에서 변경해 주세요.');
-        await myboxDeploy.configure(b.enabled);
-        if(b.enabled)myboxDeploy.schedule(githubSync.state?.sha);
-        return json(res,200,myboxDeploy.state);
-      }
       if(url.pathname==='/api/background-cancel'){
         const result=backgroundWorkflow.cancel(b);
         if(result.cancelled)await backgroundRunner.cancel();

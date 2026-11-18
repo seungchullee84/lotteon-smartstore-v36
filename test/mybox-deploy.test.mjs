@@ -52,7 +52,7 @@ test('deployment remembers success, suppresses repeated commits and stops on tes
   try{
     const build=async()=>({manifest:{version:'1.0.1'},zipPath:path.join(root,'sample.zip')});
     await writeFile(path.join(root,'sample.zip'),'archive');
-    const service=await createMyboxDeployment(root,{base,build,publish:async()=>{uploads++;},check:async()=>{}});
+    const service=await createMyboxDeployment(root,{base,build,publish:async()=>{uploads++;service.schedule(sha);},check:async()=>{}});
     await service.configure(true);
     // Generated data is ignored, and the fixture archive is deliberately untracked.
     await service.runNow(sha);assert.equal(uploads,1);assert.equal(service.state.status,'synced');

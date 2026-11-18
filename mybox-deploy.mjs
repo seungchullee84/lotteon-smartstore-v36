@@ -51,7 +51,7 @@ export async function createMyboxDeployment(root,{publish,build=buildMyboxUpdate
   const home=path.join(root,'data','mybox-deploy');await mkdir(home,{recursive:true});
   const settingsFile=path.join(home,'settings.json'),statusFile=path.join(home,'status.json');
   const load=async file=>{try{return JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;return {};}};
-  let settings=await load(settingsFile),saved=await load(statusFile),pending=null,running=false,timer,stopped=false;
+  let settings=await load(settingsFile),saved=await load(statusFile),pending=null,running=false,timer,stopped=false,attemptedSha=null,activeSha=null;
   const state={enabled:!!settings.enabled,status:'idle',message:settings.enabled?'GitHub 반영 후 MYBOX 자동배포 대기':'MYBOX 자동배포 꺼짐',lastSuccess:saved.lastSuccess||null};
   const persist=()=>writeFile(statusFile,JSON.stringify({lastSuccess:state.lastSuccess},null,2));
   async function validate(sha){
@@ -68,7 +68,7 @@ export async function createMyboxDeployment(root,{publish,build=buildMyboxUpdate
   });
   async function drain(){
     if(running||stopped||!state.enabled||!pending)return;
-    running=true;const sha=pending;pending=null;
+    running=true;const sha=pending;pending=null;activeSha=sha;attemptedSha=sha;
     try{
       state.status='testing';state.message='MYBOX 배포 전 테스트 중';
       await validate(sha);await runChecks();await validate(sha);
@@ -76,16 +76,17 @@ export async function createMyboxDeployment(root,{publish,build=buildMyboxUpdate
       state.status='packing';state.message='누적 업데이트 파일 생성 중';
       const built=await build(root,sha,{base,outputRoot:home});
       await validate(sha);if(pending&&pending!==sha)return;
+      if(stopped||!state.enabled)return;
       const fixed=path.join(home,filename);await copyFile(built.zipPath,fixed);
       state.status='uploading';state.message='MYBOX 최신 업데이트 교체 중';
       await upload({zipPath:fixed,sourceCommit:sha,folder:'상품등록기',filename,folderUrl:settings.folderUrl});
       state.lastSuccess={sha,version:built.manifest.version,at:new Date().toISOString(),filename};
       await persist();state.status='synced';state.message='MYBOX 최신 업데이트 반영 완료';
     }catch(error){state.status='error';state.message=error.message.startsWith('Command failed:')?'자동배포 실패 · 테스트 또는 MYBOX 연결을 확인해 주세요.':error.message;}
-    finally{running=false;if(pending&&!stopped&&state.enabled){clearTimeout(timer);timer=setTimeout(drain,delayMs);timer.unref();}}
+    finally{running=false;activeSha=null;if(pending&&!stopped&&state.enabled){clearTimeout(timer);timer=setTimeout(drain,delayMs);timer.unref();}}
   }
   function schedule(sha,{force=false}={}){
-    if(!state.enabled||stopped||!sha||!force&&(sha===state.lastSuccess?.sha||sha===pending))return;
+    if(!state.enabled||stopped||!sha||!force&&(sha===state.lastSuccess?.sha||sha===pending||sha===activeSha||sha===attemptedSha))return;
     pending=sha;clearTimeout(timer);timer=setTimeout(drain,delayMs);timer.unref();
     if(!running){state.status='pending';state.message='수정이 안정되면 MYBOX에 자동배포합니다.';}
   }
