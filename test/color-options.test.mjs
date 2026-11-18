@@ -115,3 +115,11 @@ test('체리래커는 롯데ON 통합색상 체리로 매칭',()=>{
   assert.equal(matchColor('04 체리 래커',['루비','체리']),'체리');
   assert.equal(matchColor('04체리래커',['레드','와인','루비']),null);
 });
+
+test('에스프레소는 사용자 지정 롯데ON 통합색상 커피로 매칭',()=>{
+  const choices=['브라운','밤색','초코','커피','블랙'];
+  for(const raw of ['01에스프레소','01 에스프레소','에스프레소','01ESPRESSO','01에스프레소(AW)']){
+    assert.equal(matchColor(raw,choices),'커피');
+  }
+  assert.equal(matchColor('01에스프레소',['브라운','밤색','초코','블랙']),null);
+});
