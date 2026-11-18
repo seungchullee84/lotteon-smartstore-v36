@@ -75,7 +75,7 @@ export async function createMyboxDeployment(root,{publish,build=buildMyboxUpdate
       await validate(sha);if(pending&&pending!==sha)return;
       const fixed=path.join(home,filename);await copyFile(built.zipPath,fixed);
       state.status='uploading';state.message='MYBOX 최신 업데이트 교체 중';
-      await upload({zipPath:fixed,sourceCommit:sha,folder:'상품등록기',filename});
+      await upload({zipPath:fixed,sourceCommit:sha,folder:'상품등록기',filename,folderUrl:settings.folderUrl});
       state.lastSuccess={sha,version:built.manifest.version,at:new Date().toISOString(),filename};
       await persist();state.status='synced';state.message='MYBOX 최신 업데이트 반영 완료';
     }catch(error){state.status='error';state.message=error.message.startsWith('Command failed:')?'자동배포 실패 · 테스트 또는 MYBOX 연결을 확인해 주세요.':error.message;}
@@ -88,7 +88,7 @@ export async function createMyboxDeployment(root,{publish,build=buildMyboxUpdate
   }
   return {state,schedule,async runNow(sha){if(running)throw Error('MYBOX 배포가 진행 중입니다.');pending=sha;clearTimeout(timer);await drain();return {...state};},async configure(enabled){
     if(typeof enabled!=='boolean')throw Error('자동배포 설정을 확인해 주세요.');
-    settings={enabled};await writeFile(settingsFile,JSON.stringify(settings));state.enabled=enabled;
+    settings={...settings,enabled};await writeFile(settingsFile,JSON.stringify(settings));state.enabled=enabled;
     if(!enabled){pending=null;clearTimeout(timer);state.message=running?'현재 배포가 끝나면 자동배포를 중지합니다.':'MYBOX 자동배포 꺼짐';}
     else{state.message='GitHub 반영 후 MYBOX 자동배포 대기';}
     return {...state};

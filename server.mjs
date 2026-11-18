@@ -1,4 +1,5 @@
 import {startNewListingMonitor} from './homepage-new-list.mjs';
+import {createMyboxDeployment} from './mybox-deploy.mjs';
 import {registerCookieName,validRegisterCookie} from './register-session.mjs';
 import {createPriceChangerLauncher} from './price-changer-launcher.mjs';
 import {startNewProductResearch} from './new-product-research.mjs';
@@ -75,7 +76,8 @@ import sharp from 'sharp';
 import {saveIconMeaning,iconWashingResult} from './washing-icons.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const releases=createReleaseTracker(root);await releases.get();
-const githubSync=process.env.REGISTER_PORTABLE==='1'?{state:{status:'portable',message:'배포 실행판'},stop(){}}:startGithubSync(root,{beforeSync:()=>releases.get()});
+const myboxDeploy=await createMyboxDeployment(root);
+const githubSync=process.env.REGISTER_PORTABLE==='1'?{state:{status:'portable',message:'배포 실행판'},stop(){}}:startGithubSync(root,{beforeSync:()=>releases.get(),onSynced:sha=>myboxDeploy.schedule(sha)});
 const dataRoot=path.join(root,'data');await mkdir(dataRoot,{recursive:true});
 const smartstoreCollectionOptions={
  saveSmartstoreSource:true,noticeCacheRoot:path.join(dataRoot,'smartstore-notice-cache'),
@@ -253,6 +255,7 @@ const server=http.createServer(async(req,res)=>{
     if(!cookie)return json(res,403,{error:'시작 화면의 전용 링크로 접속해 주세요.'});
     if(['GET','HEAD'].includes(req.method)&&url.pathname==='/smartstore-brand-video.mp4')return await serveBrandVideo(req,res,dataRoot,url.searchParams.get('variant')==='women'?{filename:'women.mp4',expectedHash:WOMEN_VIDEO_HASH}:undefined);
     if(req.method==='GET'&&url.pathname==='/api/branding')return json(res,200,await protectedBranding.get());
+    if(req.method==='GET'&&url.pathname==='/api/mybox-deploy')return json(res,200,{...myboxDeploy.state,portable:process.env.REGISTER_PORTABLE==='1'});
     if(req.method==='GET'&&url.pathname==='/api/lotte-category-choices')return json(res,200,lotteCategoryChoices());
     if(req.method==='GET'&&url.pathname==='/api/background-preview'){
       const bytes=backgroundWorkflow.preview({jobId:url.searchParams.get('jobId'),attempt:Number(url.searchParams.get('attempt'))});
@@ -359,6 +362,12 @@ const server=http.createServer(async(req,res)=>{
       const backgroundAction=backgroundActionKind(url.pathname);
       if(backgroundAction!=='workflow'){backgroundMutation=true;backgroundMutations++;backgroundSourceChange=backgroundAction==='source-change';if(backgroundSourceChange)backgroundWorkflow.invalidate('품번 또는 사진을 변경하는 작업이 시작되어 이전 합성을 취소했습니다.');}
       const b=await body(req);
+      if(url.pathname==='/api/mybox-deploy'){
+        if(process.env.REGISTER_PORTABLE==='1')throw Error('자동배포 설정은 코드 수정 PC에서 변경해 주세요.');
+        await myboxDeploy.configure(b.enabled);
+        if(b.enabled)myboxDeploy.schedule(githubSync.state?.sha);
+        return json(res,200,myboxDeploy.state);
+      }
       if(url.pathname==='/api/background-cancel'){
         const result=backgroundWorkflow.cancel(b);
         if(result.cancelled)await backgroundRunner.cancel();
@@ -833,6 +842,7 @@ const server=http.createServer(async(req,res)=>{
       if(url.pathname==='/api/shutdown'){
         if(state.busy)return json(res,409,{error:'작업 중에는 종료할 수 없습니다. 중단 후 작업이 멈추면 다시 눌러 주세요.'});
         if(state.folder&&state.product)await writeFile(path.join(state.folder,'shutdown-draft.json'),JSON.stringify({product:state.product,form:b.form||null,savedAt:new Date().toISOString()},null,2));
+        myboxDeploy.stop();
         uploadWarmup?.controller.abort();colorDraftAbort?.abort();noticeReviewAbort?.abort();stopOpenMausReview();newProductResearch.stop();benefitResearch.stop();
         res.once('finish',()=>{server.close(()=>process.exit(0));setTimeout(()=>process.exit(0),1500).unref();});
         return json(res,200,{ok:true});
