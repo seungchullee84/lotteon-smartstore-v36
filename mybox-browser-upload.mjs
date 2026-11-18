@@ -33,7 +33,7 @@ try{
   await page.waitForFunction(()=>document.body.innerText.includes('업로드 성공')&&/1\s*\/\s*1개 완료/.test(document.body.innerText),undefined,{timeout:120000});
   const text=await page.evaluate(()=>document.body.innerText);
   if(!text.includes(request.filename)||!text.includes('업로드 성공'))throw Error('MYBOX 업로드 결과가 일치하지 않습니다.');
-  await writeFile(path.join(root,'data','mybox-deploy','upload-receipt.json'),JSON.stringify({sha:request.sourceCommit,filename:request.filename,folderUrl:destination.href,uploadedAt:new Date().toISOString()},null,2));
+  await writeFile(path.join(root,'data','mybox-deploy','upload-receipt.json'),JSON.stringify({attemptId:request.attemptId,sha:request.sourceCommit,filename:request.filename,folderUrl:destination.href,uploadedAt:new Date().toISOString()},null,2));
   await task.finish({keep:[]});
   console.log('MYBOX_RESULT '+JSON.stringify({ok:true,sha:request.sourceCommit}));
 }catch(error){console.log('MYBOX_RESULT '+JSON.stringify({ok:false,error:error.message,spaceId:task.spaceId}));throw error;}

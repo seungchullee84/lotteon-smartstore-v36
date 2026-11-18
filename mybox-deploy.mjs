@@ -1,7 +1,7 @@
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {readFile,writeFile,mkdir,mkdtemp,copyFile,readdir} from 'node:fs/promises';
-import {createHash} from 'node:crypto';
+import {createHash,randomUUID} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import path from 'node:path';
 import {publishable} from './github-sync.mjs';
@@ -31,15 +31,14 @@ export async function buildMyboxUpdate(root,sha,{base=MYBOX_BASE,outputRoot=path
     let bytes;
     try{bytes=await git(root,['show',sha+':'+file]);}
     catch{await git(root,['cat-file','-e',sha+'^{commit}']);const present=(await git(root,['ls-tree','--name-only',sha,'--',file])).toString().trim();if(present)throw Error('배포 파일을 읽지 못했습니다: '+file);deleted.push(file);continue;}
-    const output=path.join(stage,'payload',file);
+    const output=path.join(stage,'app',file);
     await mkdir(path.dirname(output),{recursive:true});await writeFile(output,bytes);
     files.push({path:file,sha256:digest(bytes),bytes:bytes.length});
   }
+  if(deleted.length)throw Error('파일 삭제가 필요한 변경은 통합 실행판으로 배포해 주세요.');
   const manifest={format:1,project:newPackage.name,baseCommit:base,sourceCommit:sha,version:newPackage.version,builtAt:new Date().toISOString(),dependencies:newPackage.dependencies,files,deleted};
-  await writeFile(path.join(stage,'update-manifest.json'),JSON.stringify(manifest,null,2));
-  await copyFile(path.join(root,'mybox-apply-update.mjs'),path.join(stage,'apply-update.mjs'));
-  await writeFile(path.join(stage,'업데이트.cmd'),'@echo off\r\nchcp 65001 >nul\r\nset /p "target=기존 상품등록기 폴더 경로를 입력하세요: "\r\nif not exist "%target%\\runtime\\node.exe" (echo 실행 환경을 찾지 못했습니다.& pause& exit /b 1)\r\n"%target%\\runtime\\node.exe" "%~dp0apply-update.mjs" "%target%"\r\npause\r\n');
-  await writeFile(path.join(stage,'사용방법.txt'),'ZIP 전체를 별도 폴더에 압축 해제한 뒤 업데이트.cmd를 실행하세요. 기존 통합 실행판 폴더(상품등록기.exe가 있는 폴더)의 경로를 입력하세요. 등록기를 종료한 상태에서 적용하며 기존 파일은 app/data/update-backups에 백업합니다. 설정·로그인·상품자료는 업데이트 대상이 아닙니다.\r\n','utf8');
+  await writeFile(path.join(outputRoot,sha+'.manifest.json'),JSON.stringify(manifest,null,2));
+  await writeFile(path.join(stage,'복사경로.txt'),'복사 위치: 기존 상품등록기.exe가 있는 폴더\r\n\r\n등록기 종료 → 압축 해제 → app 폴더 복사 → 위 위치에 붙여넣기·덮어쓰기 → 등록기 다시 실행\r\napp 폴더를 삭제하지 말고 같은 이름의 폴더에 합쳐 넣으세요.\r\n버전: '+newPackage.version+' / '+sha.slice(0,8)+'\r\n','utf8');
   const temporary=path.join(outputRoot,sha+'.zip');
   const entries=[];
   async function walk(directory){for(const entry of await readdir(directory,{withFileTypes:true})){const file=path.join(directory,entry.name);if(entry.isDirectory())await walk(file);else entries.push({name:path.relative(stage,file).replaceAll('\\','/'),bytes:await readFile(file)});}}
@@ -60,11 +59,12 @@ export async function createMyboxDeployment(root,{publish,build=buildMyboxUpdate
   }
   const runChecks=check||(()=>exec(process.execPath,['--test','test/product.test.mjs','test/color-options.test.mjs','test/mybox-deploy.test.mjs'],{cwd:root,windowsHide:true,timeout:180000,maxBuffer:4000000}));
   const upload=publish||(async request=>{
+    request.attemptId=randomUUID();
     const requestFile=path.join(home,'upload-request.json');await writeFile(requestFile,JSON.stringify(request,null,2));
     const entry=pathToFileURL(path.join(root,'mybox-browser-upload.mjs')).href;
-    const result=await exec('ego-browser',['nodejs','-e',`await import(${JSON.stringify(entry)})`],{windowsHide:true,timeout:240000,maxBuffer:2000000});
-    const line=result.stdout.split(/\r?\n/).find(line=>line.startsWith('MYBOX_RESULT '));
-    if(!line||!JSON.parse(line.slice(13)).ok)throw Error('MYBOX 업로드 완료를 확인하지 못했습니다. 브라우저 연결과 로그인을 확인해 주세요.');
+    await exec('ego-browser',['nodejs','-e',`await import(${JSON.stringify(entry)})`],{windowsHide:true,timeout:240000,maxBuffer:2000000}).catch(()=>{});
+    const receipt=await load(path.join(home,'upload-receipt.json'));
+    if(receipt.attemptId!==request.attemptId||receipt.sha!==request.sourceCommit)throw Error('MYBOX 업로드 완료를 확인하지 못했습니다. 브라우저 연결과 로그인을 확인해 주세요.');
   });
   async function drain(){
     if(running||stopped||!state.enabled||!pending)return;
