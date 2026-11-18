@@ -46,7 +46,7 @@ export async function buildMyboxUpdate(root,sha,{base=MYBOX_BASE,outputRoot=path
   return {manifest,stage,zipPath:temporary};
 }
 
-export async function createMyboxDeployment(root,{publish,build=buildMyboxUpdate,check,delayMs=60000,base=MYBOX_BASE}={}){
+export async function createMyboxDeployment(root,{publish,build=buildMyboxUpdate,check,isBusy=()=>false,delayMs=60000,base=MYBOX_BASE}={}){
   const home=path.join(root,'data','mybox-deploy');await mkdir(home,{recursive:true});
   const settingsFile=path.join(home,'settings.json'),statusFile=path.join(home,'status.json');
   const load=async file=>{try{return JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;return {};}};
@@ -68,11 +68,16 @@ export async function createMyboxDeployment(root,{publish,build=buildMyboxUpdate
   });
   async function drain(){
     if(running||stopped||!state.enabled||!pending)return;
+    if(isBusy()){
+      state.status='pending';state.message='상품 작업이 끝나면 MYBOX에 배포합니다.';
+      clearTimeout(timer);timer=setTimeout(drain,delayMs);timer.unref();return;
+    }
     running=true;const sha=pending;pending=null;activeSha=sha;attemptedSha=sha;
     try{
       state.status='testing';state.message='MYBOX 배포 전 테스트 중';
       await validate(sha);await runChecks();await validate(sha);
       if(pending&&pending!==sha)return;
+      if(isBusy()){pending||=sha;state.status='pending';state.message='상품 작업이 끝나면 MYBOX에 배포합니다.';return;}
       state.status='packing';state.message='누적 업데이트 파일 생성 중';
       const built=await build(root,sha,{base,outputRoot:home});
       await validate(sha);if(pending&&pending!==sha)return;

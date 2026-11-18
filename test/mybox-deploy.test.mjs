@@ -73,3 +73,12 @@ test('copying the app folder updates code while retaining existing PC settings',
     assert.equal(await readFile(path.join(app,'public','extra.js'),'utf8'),'// new');
   }finally{await rm(root,{recursive:true,force:true});}
 });
+
+test('product work defers deployment before tests or upload begin',async()=>{
+  const {root,base,sha}=await fixture();let checks=0,uploads=0;
+  try{
+    const service=await createMyboxDeployment(root,{base,isBusy:()=>true,check:async()=>{checks++;},publish:async()=>{uploads++;}});
+    await service.configure(true);await service.runNow(sha);
+    assert.equal(service.state.status,'pending');assert.equal(checks,0);assert.equal(uploads,0);service.stop();
+  }finally{await rm(root,{recursive:true,force:true});}
+});
