@@ -79,7 +79,8 @@ export async function createMyboxDeployment(root,{publish,build=buildMyboxUpdate
       if(stopped||!state.enabled)return;
       const fixed=path.join(home,filename);await copyFile(built.zipPath,fixed);
       state.status='uploading';state.message='MYBOX 최신 업데이트 교체 중';
-      await upload({zipPath:fixed,sourceCommit:sha,folder:'상품등록기',filename,folderUrl:settings.folderUrl});
+      const latestSettings=await load(settingsFile);
+      await upload({zipPath:fixed,sourceCommit:sha,filename,folderUrl:latestSettings.folderUrl});
       state.lastSuccess={sha,version:built.manifest.version,at:new Date().toISOString(),filename};
       await persist();state.status='synced';state.message='MYBOX 최신 업데이트 반영 완료';
     }catch(error){state.status='error';state.message=error.message.startsWith('Command failed:')?'자동배포 실패 · 테스트 또는 MYBOX 연결을 확인해 주세요.':error.message;}

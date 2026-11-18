@@ -11,7 +11,7 @@
       current=await response.json();button.hidden=!!current.portable;status.hidden=!!current.portable;
       status.textContent=current.message;
       button.textContent=current.enabled?'MYBOX 자동배포 켜짐':'MYBOX 자동배포 꺼짐';
-      button.title='GitHub 반영 후 테스트하고 상품등록기/최신업데이트.zip을 교체합니다.';
+      button.title='GitHub 반영 후 테스트하고 MYBOX 내 파일의 최신업데이트.zip을 교체합니다.';
     }catch{status.textContent='MYBOX 배포 상태 연결 대기';}
   }
   button.onclick=async()=>{

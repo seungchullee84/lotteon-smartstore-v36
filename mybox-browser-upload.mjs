@@ -5,7 +5,7 @@ import path from 'node:path';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const request=JSON.parse(await readFile(path.join(root,'data','mybox-deploy','upload-request.json'),'utf8'));
 const destination=new URL(request.folderUrl);
-if(destination.origin!=='https://mybox.naver.com'||destination.pathname!=='/main/web/my'||!destination.searchParams.get('resourceKey'))throw Error('MYBOX 배포 폴더 주소를 확인해 주세요.');
+if(destination.origin!=='https://mybox.naver.com'||destination.pathname!=='/main/web/my')throw Error('MYBOX 배포 위치를 확인해 주세요.');
 if(path.basename(request.zipPath)!=='최신업데이트.zip')throw Error('고정 업데이트 파일명을 확인해 주세요.');
 const name='MYBOX automatic deployment setup';
 const existing=(await listTaskSpaces()).find(space=>space.name===name);
