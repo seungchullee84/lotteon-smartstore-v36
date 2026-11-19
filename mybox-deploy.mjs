@@ -15,7 +15,7 @@ const filename='최신업데이트.zip';
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const git=(root,args)=>exec('git',args,{cwd:root,windowsHide:true,timeout:45000,maxBuffer:32000000,encoding:'buffer'}).then(r=>r.stdout);
 export function updateFileAllowed(file){
-  return publishable(file)&&!file.startsWith('test/')&&!/\.(?:md|cmd)$/.test(file)&&!['.gitignore','.gitattributes'].includes(file);
+  return publishable(file)&&!file.startsWith('test/')&&!/\.(?:md|cmd)$/.test(file)&&!['.gitignore','.gitattributes','mybox-apply-update.mjs'].includes(file);
 }
 export async function buildMyboxUpdate(root,sha,{base=MYBOX_BASE,outputRoot=path.join(root,'data','mybox-deploy')}={}){
   if(!/^[a-f0-9]{40}$/.test(sha)||!/^[a-f0-9]{40}$/.test(base))throw Error('배포 커밋을 확인해 주세요.');
@@ -27,7 +27,8 @@ export async function buildMyboxUpdate(root,sha,{base=MYBOX_BASE,outputRoot=path
   }
   await mkdir(outputRoot,{recursive:true});
   const stage=await mkdtemp(path.join(outputRoot,'package-'));
-  const names=(await git(root,['diff','--name-only','--no-renames','-z',base,sha])).toString('utf8').split('\0').filter(updateFileAllowed);
+  const changed=(await git(root,['diff','--name-only','--no-renames','-z',base,sha])).toString('utf8').split('\0').filter(updateFileAllowed);
+  const names=[...new Set([...changed,'package.json'])];
   const files=[],deleted=[];
   for(const file of names){
     let bytes;
@@ -38,9 +39,18 @@ export async function buildMyboxUpdate(root,sha,{base=MYBOX_BASE,outputRoot=path
     files.push({path:file,sha256:digest(bytes),bytes:bytes.length});
   }
   if(deleted.length)throw Error('파일 삭제가 필요한 변경은 통합 실행판으로 배포해 주세요.');
-  const manifest={format:1,project:newPackage.name,baseCommit:base,sourceCommit:sha,version:newPackage.version,builtAt:new Date().toISOString(),dependencies:newPackage.dependencies,files,deleted};
+  const manifest={format:1,project:newPackage.name,baseCommit:base,sourceCommit:sha,minimumVersion:oldPackage.version,version:newPackage.version,builtAt:new Date().toISOString(),dependencies:newPackage.dependencies,files,deleted};
   await writeFile(path.join(outputRoot,sha+'.manifest.json'),JSON.stringify(manifest,null,2));
-  await writeFile(path.join(stage,'복사경로.txt'),'복사 위치: 기존 상품등록기.exe가 있는 폴더\r\n\r\n등록기 종료 → 압축 해제 → app 폴더 복사 → 위 위치에 붙여넣기·덮어쓰기 → 같은 상품등록기.exe 다시 실행\r\n폴더를 합친 뒤 상품등록기.exe 옆 app 폴더 안에 server.mjs가 있어야 합니다.\r\n적용 대상: '+oldPackage.version+' 이후의 호환 Windows 통합 실행판\r\n업데이트 버전: '+newPackage.version+' / '+sha.slice(0,8)+'\r\n','utf8');
+  await writeFile(path.join(stage,'업데이트 정보.json'),JSON.stringify(manifest,null,2));
+  await copyFile(new URL('./mybox-apply-update.mjs',import.meta.url),path.join(stage,'mybox-apply-update.mjs'));
+  const launcher=String.raw`@echo off
+setlocal
+set "MYBOX_UPDATE_DIR=%~dp0"
+powershell.exe -NoProfile -STA -Command "[Console]::OutputEncoding=[Text.Encoding]::UTF8; Add-Type -AssemblyName System.Windows.Forms; $d=New-Object Windows.Forms.OpenFileDialog; $d.Filter='Windows executable (*.exe)|*.exe'; if($d.ShowDialog() -ne 'OK'){exit 0}; $node=Join-Path ([IO.Path]::GetDirectoryName($d.FileName)) 'runtime\node.exe'; if(!(Test-Path -LiteralPath $node -PathType Leaf)){Write-Error 'Select the launcher in the existing registrar folder.'; exit 1}; & $node (Join-Path $env:MYBOX_UPDATE_DIR 'mybox-apply-update.mjs') $d.FileName; exit $LASTEXITCODE"
+pause
+`;
+  await writeFile(path.join(stage,'업데이트 적용.cmd'),launcher.replace(/\r?\n/g,'\r\n'));
+  await writeFile(path.join(stage,'복사경로.txt'),'등록기 종료 → 압축 풀기 → 업데이트 적용.cmd 실행 → 기존 상품등록기.exe 선택 → 완료 버전 확인 → 같은 상품등록기.exe 실행\r\n\r\n직접 복사할 때에는 압축의 app 안 파일을 기존 상품등록기.exe 옆 app 안에 덮어쓰세요.\r\n적용 대상: '+oldPackage.version+' 이후의 호환 Windows 통합 실행판\r\n업데이트 버전: '+newPackage.version+' / '+sha.slice(0,8)+'\r\n','utf8');
   const temporary=path.join(outputRoot,sha+'.zip');
   const entries=[];
   async function walk(directory){for(const entry of await readdir(directory,{withFileTypes:true})){const file=path.join(directory,entry.name);if(entry.isDirectory())await walk(file);else entries.push({name:path.relative(stage,file).replaceAll('\\','/'),bytes:await readFile(file)});}}
