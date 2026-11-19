@@ -6,6 +6,7 @@ import {fileURLToPath} from 'node:url';
 import os from 'node:os';
 import path from 'node:path';
 import {buildMyboxUpdate,createMyboxDeployment,updateFileAllowed} from '../mybox-deploy.mjs';
+import {applyMyboxUpdate} from '../mybox-apply-update.mjs';
 const source=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const git=(root,...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8',windowsHide:true,stdio:['ignore','pipe','pipe']}).trim();
 async function fixture(){
@@ -32,7 +33,7 @@ test('cumulative package contains missed updates and only copyable app files plu
     assert.equal(await readFile(path.join(result.stage,'app','server.mjs'),'utf8'),'// newest');
     assert.ok(result.manifest.files.some(file=>file.path==='later.mjs'));
     assert.ok(result.manifest.files.some(file=>file.path==='public/extra.js'));
-    assert.deepEqual((await readdir(result.stage)).sort(),['app','복사경로.txt'].sort());
+    assert.deepEqual((await readdir(result.stage)).sort(),['app','복사경로.txt','업데이트 적용.cmd','업데이트 정보.json','mybox-apply-update.mjs'].sort());
     assert.notEqual(result.manifest.sourceCommit,sha);
     assert.equal((await readFile(result.zipPath)).readUInt32LE(0),0x04034b50);
   }finally{await rm(root,{recursive:true,force:true});}
@@ -71,6 +72,34 @@ test('copying the app folder updates code while retaining existing PC settings',
     assert.equal(await readFile(path.join(app,'server.mjs'),'utf8'),'// newest');
     assert.equal(await readFile(path.join(app,'data','browser-login-settings.json'),'utf8'),'preserve-this-PC');
     assert.equal(await readFile(path.join(app,'public','extra.js'),'utf8'),'// new');
+  }finally{await rm(root,{recursive:true,force:true});}
+});
+
+test('MYBOX 적용은 기존 실행 파일 옆 코드만 바꾸고 손상된 패키지는 막는다',async()=>{
+  const {root,base}=await fixture();
+  try{
+    const pkg={name:'giordano-lotte-register',version:'1.1.0',dependencies:{}};
+    await writeFile(path.join(root,'package.json'),JSON.stringify(pkg));
+    git(root,'add','.');git(root,'commit','-m','release');
+    const {stage}=await buildMyboxUpdate(root,git(root,'rev-parse','HEAD'),{base});
+    const install=path.join(root,'기존 등록기'),app=path.join(install,'app'),launcher=path.join(install,'상품등록기.exe');
+    await mkdir(path.join(app,'data'),{recursive:true});await mkdir(path.join(install,'runtime'));
+    await writeFile(launcher,'launcher');await writeFile(path.join(install,'runtime','node.exe'),'runtime');
+    await writeFile(path.join(app,'package.json'),JSON.stringify({...pkg,version:'1.0.0'}));
+    await writeFile(path.join(app,'server.mjs'),'// original');
+    await writeFile(path.join(app,'data','browser-login-settings.json'),'local-only');
+    const pending=path.join(stage,'app','public','extra.js');
+    await writeFile(pending,'damaged');
+    await assert.rejects(applyMyboxUpdate(stage,launcher),/손상/);
+    assert.equal(await readFile(path.join(app,'server.mjs'),'utf8'),'// original');
+    await writeFile(pending,'// new');
+    const updated=await applyMyboxUpdate(stage,launcher);
+    assert.equal(updated.version,'1.1.0');
+    assert.equal(await readFile(path.join(app,'server.mjs'),'utf8'),'// newest');
+    assert.equal(await readFile(path.join(app,'public','extra.js'),'utf8'),'// new');
+    assert.equal(await readFile(path.join(app,'data','browser-login-settings.json'),'utf8'),'local-only');
+    await assert.rejects(readFile(path.join(app,'app','server.mjs')), {code:'ENOENT'});
+    assert.equal((await applyMyboxUpdate(stage,launcher)).version,'1.1.0');
   }finally{await rm(root,{recursive:true,force:true});}
 });
 

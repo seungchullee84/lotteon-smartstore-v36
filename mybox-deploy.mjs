@@ -45,6 +45,7 @@ export async function buildMyboxUpdate(root,sha,{base=MYBOX_BASE,outputRoot=path
   await copyFile(new URL('./mybox-apply-update.mjs',import.meta.url),path.join(stage,'mybox-apply-update.mjs'));
   const launcher=String.raw`@echo off
 setlocal
+chcp 65001 >nul
 set "MYBOX_UPDATE_DIR=%~dp0"
 powershell.exe -NoProfile -STA -Command "[Console]::OutputEncoding=[Text.Encoding]::UTF8; Add-Type -AssemblyName System.Windows.Forms; $d=New-Object Windows.Forms.OpenFileDialog; $d.Filter='Windows executable (*.exe)|*.exe'; if($d.ShowDialog() -ne 'OK'){exit 0}; $node=Join-Path ([IO.Path]::GetDirectoryName($d.FileName)) 'runtime\node.exe'; if(!(Test-Path -LiteralPath $node -PathType Leaf)){Write-Error 'Select the launcher in the existing registrar folder.'; exit 1}; & $node (Join-Path $env:MYBOX_UPDATE_DIR 'mybox-apply-update.mjs') $d.FileName; exit $LASTEXITCODE"
 pause

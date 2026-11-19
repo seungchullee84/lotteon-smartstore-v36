@@ -8,7 +8,10 @@ import {isDeepStrictEqual} from 'node:util';
 const readJson=async file=>JSON.parse(await readFile(file,'utf8'));
 const stat=async file=>lstat(file).catch(error=>{if(error.code==='ENOENT')return null;throw error;});
 const versionParts=value=>typeof value==='string'&&/^\d+\.\d+\.\d+$/.test(value)?value.split('.').map(Number):null;
-const earlier=(a,b)=>a.some((value,index)=>value!==b[index]&&a.slice(0,index).every((part,i)=>part===b[i])&&value<b[index]);
+function earlier(a,b){
+ for(const [index,value] of a.entries()){if(value!==b[index])return value<b[index];}
+ return false;
+}
 const publicData=new Set(['category-catalog-common','category-catalog-standard','category-crosswalk','category-matches','category-itemscout-verified','washing-icon-library'].map(name=>'data/'+name+'.json'));
 
 function updatePath(file){
