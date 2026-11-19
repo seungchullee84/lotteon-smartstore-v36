@@ -227,7 +227,7 @@ export function friendlyBenefitDescription(value){
   if(action){const [,subject,verb]=action,object=/(?:으로|로|을|를|게|에|에서|에도|없이)$/.test(subject)?subject:subject+(hasFinalConsonant(subject)?'을':'를');return object+' '+({제공:'제공해요',유지:'유지해요',조절:'조절할 수 있어요',연출:'연출할 수 있어요',구현:'구현했어요',확보:'확보했어요',완성:'완성해요',강화:'강화했어요',최소화:'최소화했어요',지지:'받쳐줘요',활용:'활용할 수 있어요',수납:'수납할 수 있어요',커버:'커버해줘요',사용:'사용했어요',선사:'선사해요'}[verb])+'.';}
   if(/(?:습니다|니다)$/.test(text))return '';
   // Only known noun phrases take 이에요/예요; unknown fragments stay out of copy.
-  if(/(?:착용감|촉감|터치감|감촉|보온성|복원력|신축성|내구성|활동성|두께감|실루엣|디자인|원단|소재|스판|충전재|외피|겉감|안감|텍스처|짜임|패턴|기장|핏|아이템|스웨터|가디건|머플러|디테일|포인트|컬러|색감|구조)$/.test(text))return text+(hasFinalConsonant(text)?'이에요.':'예요.');
+  if(/(?:착용감|촉감|터치감|감촉|보온성|복원력|신축성|내구성|활동성|두께감|조직감|실루엣|디자인|원단|소재|스판|충전재|외피|겉감|안감|텍스처|짜임|패턴|기장|핏|아이템|스웨터|가디건|머플러|디테일|포인트|컬러|색감|구조)$/.test(text))return text+(hasFinalConsonant(text)?'이에요.':'예요.');
   return '';
  };
  return String(value||'').split(/(?<=[.!?])\s+/).map(sentence).filter(Boolean).join(' ');
