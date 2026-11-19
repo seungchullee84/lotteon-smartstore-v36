@@ -17,6 +17,11 @@ const points=[
  {title:'세탁 후에도 깔끔하게',description:'세탁 후 변형 부담을 줄여 깔끔하게.',evidence:'세탁 후에도 형태 변형 최소화'},
 ];
 const source=points.map(point=>point.evidence).join('\n');
+const knitWarmth={
+ title:'쌀쌀할 때도 따뜻하게',
+ description:'부드럽고 포근한 착용감과 탄탄한 조직감.',
+ evidence:'부드럽고 포근한 착용감과 탄탄한 조직감',
+};
 const doubleKnitText='적당한 여유감이 있는 레귤러 핏의 12gg 더블니트 크루넥 스웨터입니다. 소매와 밑단 부분 스판사를 넣은 립조직으로 마감하였으며, 목에 잘 맞는 네크라인과 립 폭으로 제작되었습니다. 탄탄하면서 유연한 12gg 더블니트 조직으로 맨살에 입어도 될 만큼의 부드러운 촉감이 인상적이며, 더블니트 조직으로 짜여져 실루엣이 무너지지 않고 형태감을 잘 살려줍니다.';
 const base={style:'326924',sourceUrl:'https://www.giordano.co.kr/shop/detail.php?pno=test',name:'여성 기모 헨리넥 긴팔티',gender:'여성',images:{},colors:[],sizes:['S','M','L']};
 async function fixture(run){
@@ -81,6 +86,24 @@ test('두 개 또는 세 개의 명시적 선택을 재검토가 임의로 추�
   assert.deepEqual(reviewed.points,saved.points);
   const reopened=await pointPicker(base,dataRoot,options);
   assert.deepEqual(reopened.selectedIds,selectedIds);
+ }
+}));
+
+test('공식 설명이 조직감으로 끝나도 선택한 두 소구점을 모두 저장하고 표시한다',async()=>fixture(async({dataRoot,root,options,selection})=>{
+ selection.points=[points[0],knitWarmth];
+ await writeFile(path.join(root,'selling-point-selection.json'),JSON.stringify(selection));
+ options.sourceOverride.text+='\n'+knitWarmth.evidence;
+ const picker=await pointPicker(base,dataRoot,options);
+ const saved=await savePointSelection(base,dataRoot,{channel:'smartstore',style:base.style,revision:picker.revision,selectedIds:picker.selectedIds},options);
+ assert.deepEqual(saved.points,selection.points);
+ const reviewed=await reviewSellingPoints(base,options.sourceOverride.text,{dataRoot,detailHash:selection.detailHash,supplement:true});
+ assert.equal(reviewed.status,'ready');
+ const detail={style:base.style,sellingPoints:reviewed.points,sellingPointReview:reviewed,photoCount:1};
+ assert.equal(smartstorePreparationStatus({...base,smartstoreDetail:detail},{extras:[]}).templateReady,true);
+ for(const detailTemplate of [1,2]){
+  const $=load(buildSmartstoreDetail({...base,detailTemplate,smartstoreDetail:detail},{includeVideo:false}).html);
+  assert.equal($('[data-product-points] h3').length,2);
+  assert.match($('[data-product-points]').text(),/탄탄한 조직감이에요/);
  }
 }));
 
