@@ -80,7 +80,8 @@ export function officialProsePoints(source,existing=[],limit=4){
 }
 // Display copy is brief; full official sentences remain in evidence only.
 export function compactSellingPoint(point){
- return !!point?.title&&!!point?.description&&point.title.length<=18&&point.description.length<=42&&point.title!==point.description&&!genericTitle.test(point.title)&&cleanSource(point.title+' '+point.description)&&completeCopy(point.description)&&benefitPattern.test(point.title+' '+point.description)&&(!point.evidence||(cleanSource(point.evidence)&&benefitPattern.test(point.evidence)))&&!/[.…]$/.test(point.title)&&!/[.…]$/.test(point.description.replace(/\.$/,''));
+ const benefit=text=>benefitPattern.test(text)||/일자로\s*떨어|깊(?:은|이\s*있는)\s*(?:색감|컬러)/.test(text);
+ return !!point?.title&&!!point?.description&&point.title.length<=18&&point.description.length<=42&&point.title!==point.description&&!genericTitle.test(point.title)&&cleanSource(point.title+' '+point.description)&&completeCopy(point.description)&&benefit(point.title+' '+point.description)&&(!point.evidence||(cleanSource(point.evidence)&&benefit(point.evidence)))&&!/[.…]$/.test(point.title)&&!/[.…]$/.test(point.description.replace(/\.$/,''));
 }
 function extractOfficialSellingPoints(description,limit=4){
  const text=String(description||'').replace(/\s+/g,' ');const points=[],covered=new Set(),labels=new Map();
@@ -168,7 +169,7 @@ export function usableSellingPoints(points,source){
 export function appendDistinctSellingPoints(points,additions,source,{limit=4}={}){
  const result=points.slice(0,limit);
  if(result.length>=limit)return result;const norm=s=>String(s||'').replace(/[\s.!?,，]+/g,'');
- const topics=[/부드|소프트|촉감|터치|결감/,/보온|따뜻|포근/,/편안|편하게|여유|넉넉|릴렉스/,/스타일링|코디|매치|레이어드|연출/,/내구|오래\s*입/,/통기|흡습|속건|쾌적/,/조절/,/수납|포켓/,/신축|유연|움직임|활동성/,/가벼|가볍|경량/,/수축|변형|워싱|형태/,/찬바람|바람.*차단/,/보풀/];
+ const topics=[/부드|소프트|촉감|터치|결감/,/보온|따뜻|포근/,/편안|(?<!간)편하게|여유|넉넉|릴렉스/,/스타일링|코디|매치|레이어드|연출/,/내구|오래\s*입/,/통기|흡습|속건|쾌적/,/조절/,/수납|포켓/,/신축|유연|움직임|활동성/,/가벼|가볍|경량/,/수축|변형|워싱|형태/,/찬바람|바람.*차단/,/보풀/];
  const kinds=p=>topics.flatMap((rule,i)=>rule.test(p.title)?[i]:[]),covered=new Set(result.flatMap(kinds));
  const brushedWarmth=p=>/기모|브러시드|브러쉬드/.test(p.description)&&/따뜻|포근|보온/.test(p.title+' '+p.description);
  for(const point of additions){

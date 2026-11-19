@@ -3,7 +3,7 @@ import {createHash,randomUUID} from 'node:crypto';import path from 'node:path';
 import {officialPointSource} from './smartstore-selling-point-review.mjs';
 import {completeSellingPoints,officialSellingPoints,usableSellingPoints,displaySellingPoints,assertSellingPointDisplay} from './smartstore-selling-points.mjs';
 const hash=value=>createHash('sha256').update(value).digest('hex');
-const benefitTopics=[/부드|소프트|촉감|터치/,/편안|편하게|여유|넉넉/,/스타일링|코디|매치|레이어드/,/내구|오래\s*입/,/흡습|속건|통기|쾌적/,/보온|따뜻|포근/,/조절/,/수납|포켓/,/신축|유연|움직임/,/가벼|가볍|경량/,/수축|변형|워싱/];
+const benefitTopics=[/부드|소프트|촉감|터치/,/편안|(?<!간)편하게|여유|넉넉/,/스타일링|코디|매치|레이어드/,/내구|오래\s*입/,/흡습|속건|통기|쾌적/,/보온|따뜻|포근/,/조절/,/수납|포켓/,/신축|유연|움직임/,/가벼|가볍|경량/,/수축|변형|워싱/];
 const topics=point=>benefitTopics.flatMap((pattern,index)=>pattern.test(point.title+' '+point.description)?[index]:[]);
 async function appliedPointSelection(product,identity,text,dataRoot){
  const matches=record=>record?.style===identity.style&&record.sourceUrl===identity.sourceUrl&&record.detailHash===identity.detailHash&&(identity.detailHash||record.textHash===identity.textHash);
