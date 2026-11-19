@@ -1,6 +1,14 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {officialSellingPoints,usableSellingPoints,displaySellingPoints,friendlyBenefitDescription} from '../smartstore-selling-points.mjs';
 
+test('깨진 중량부만 화면에서 빼고 공식 근거는 그대로 유지한다',()=>{
+ const evidence='2308/07^중량의 톡톡하고 탄탄한 폴리 혼방 원단 사용';
+ const point={title:'탄탄한 착용감',description:evidence,evidence};
+ const [display]=displaySellingPoints([point]);
+ assert.equal(display.description,'톡톡하고 탄탄한 폴리 혼방 원단을 사용했어요.');
+ assert.equal(display.evidence,evidence);
+});
+
 test('가볍고를 74 1 또는 741로 오독한 문장과 쾌적한으로 끊긴 문장은 노출하지 않는다',()=>{
  for(const noise of ['고밀도 경량 원단을 사용하여 74 1 내구성이 뛰어나 쾌적한','고밀도 경량 원단을 사용하여 741 내구성이 뛰어나 쾌적한 착용감을 제공합니다.','쾌적한','보온성이 우수한']){
   assert(!usableSellingPoints([{title:'쾌적한 착용감',description:noise+'.',evidence:noise}],noise));

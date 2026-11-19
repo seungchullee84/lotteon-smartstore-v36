@@ -48,7 +48,7 @@ export async function reviewSellingPoints(product,source,{dataRoot,detailHash=nu
   let points=preserveSelection?record.points.slice(0,4):completeSellingPoints(record.points,text);
   if(supplement&&!preserveSelection){
    const preserved=(record.method==='user-selected-official-points'||record.method==='visual-official-detail'?record.points:existing)||[];
-   points=completeSellingPoints([...preserved,...points],text);
+   if(preserved.length)points=completeSellingPoints([...preserved,...points],text);
    const supplemented=await supplementSellingPoints(product,points,text,{dataRoot,detailHash,signal,log});
    if(supplemented!==points)points=completeSellingPoints(supplemented,text);
   }

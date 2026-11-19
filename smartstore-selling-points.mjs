@@ -204,7 +204,8 @@ export function friendlyBenefitDescription(value){
   text=text.replace(/^\d+(?:\.\d+)?\s*g\s*\/\s*m[*?]\s*(?:중량의\s*)?/i,'')
    .replace(/^\d{2,}\s*\/\s*\d{2,}\s*\^?\s*(?:적당한\s*중량감이?\s*있는\s*|중량(?:의)?\s*)/,'')
    .replace(/피부에\s*당는/g,'피부에 닿는').replace(/폴리ㆍ레이온/g,'폴리·레이온')
-   .replace(/레글러\s*핏/g,'레귤러 핏').replace(/실루를/g,'실루엣을');
+   .replace(/레글러\s*핏/g,'레귤러 핏').replace(/실루를/g,'실루엣을')
+   .replace(/^시즌\s+다양한\s*스타일에/,'다양한 스타일에');
   if(!text||/\d{2,}\s*\/\s*\d{2,}(?:\s*\^|\s*(?:중량|적당한))|[\^*?]\s*중량|스탠다드\s*\d\s*기장/.test(text))return '';
   // Repair old display copy too. A verb/adjective stem is never a noun predicate.
   text=text.replace(/(포근|따뜻|편안|탄탄|쾌적|유연|시원|지지|제공|유지|조절|연출|구현|확보|완성|강화|최소화|활용|수납|커버|가능)(?:이에요|예요)$/,'$1');

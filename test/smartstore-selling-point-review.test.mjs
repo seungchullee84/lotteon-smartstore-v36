@@ -67,9 +67,28 @@ test('구매 장점 기준 이전의 준비 완료 캐시도 모든 품번에서
  for(const style of ['123456','654321','456789']){
   const p={...product,style},dir=path.join(root,'smartstore-details',style);await mkdir(dir,{recursive:true});
   await writeFile(path.join(dir,'selling-point-review.json'),JSON.stringify({version:5,method:'local-official-text',style,sourceUrl:p.sourceUrl,textHash:createHash('sha256').update(source).digest('hex'),detailHash:null,status:'ready',points:[{title:'핏과 실루엣',description:'슬림핏 레글러핏 루즈핏.',evidence:'슬림핏 레글러핏 루즈핏.'}]}));
-  const result=await reviewSellingPoints(p,source,{dataRoot:root});assert.equal(result.version,14);assert.equal(result.points.length,1);assert.equal(result.points[0].title,'부드러운 착용감');
+  const result=await reviewSellingPoints(p,source,{dataRoot:root});assert.equal(result.version,15);assert.equal(result.points.length,1);assert.equal(result.points[0].title,'부드러운 착용감');
  }
  }finally{await rm(root,{recursive:true,force:true});}
+});
+test('자동 검토는 표시할 수 없는 후보를 제외하고 직접 선택한 항목은 확인을 요청한다',async()=>{
+ const dataRoot=await mkdtemp(path.join(os.tmpdir(),'display-ready-benefit-'));
+ try{
+  const points=[
+   {title:'편안한 착용감',description:'여유 있는 핏으로 편안하게 입어요.',evidence:'여유 있는 핏으로 편안하게 입습니다.'},
+   {title:'소지품을 간편하게',description:'옆 포켓으로 간편하게 수납해요.',evidence:'옆 포켓으로 간편하게 수납합니다.'},
+   {title:'쌀쌀할 때도 따뜻하게',description:'보온성을 더한 따뜻한 감성.',evidence:'따뜻한 보온성을 제공해요.'},
+  ];
+  const source=points.map(p=>p.evidence).join('\n'),root=path.join(dataRoot,'smartstore-details',product.style);
+  const identity={style:product.style,sourceUrl:product.sourceUrl,detailHash:null,textHash:createHash('sha256').update(source).digest('hex')};
+  await mkdir(root,{recursive:true});
+  await writeFile(path.join(root,'selling-point-review.json'),JSON.stringify({...identity,version:15,method:'local-official-text',points}));
+  const automatic=await reviewSellingPoints(product,source,{dataRoot,persist:false});
+  assert.equal(automatic.status,'ready');assert.deepEqual(automatic.points,points.slice(0,2));
+  await writeFile(path.join(root,'selling-point-selection.json'),JSON.stringify({...identity,method:'user-selected-official-points',points}));
+  const selected=await reviewSellingPoints(product,source,{dataRoot,persist:false});
+  assert.equal(selected.status,'needs-review');assert.deepEqual(selected.points,points);assert.match(selected.message,/쌀쌀할 때도 따뜻하게/);
+ }finally{await rm(dataRoot,{recursive:true,force:true});}
 });
 test('본문에 특징이 있어도 모든 품번의 공식 이미지 문장을 먼저 확인하고 네 특징을 보존한다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'all-image-points-'));try{
