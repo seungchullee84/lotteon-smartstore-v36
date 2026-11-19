@@ -39,6 +39,32 @@ test('선택표와 품질보증 문구를 제외하고 표시가 확인된 시�
  assert.deepEqual(new Set(names),new Set(['울니트','케이블니트','겨울니트']));
 });
 
+test('울트라·어울리는 표현과 캐시미어 촉감 비교에서 소재를 추정하지 않는다',()=>{
+ const tags=['울자켓','울니트','캐시미어니트','반집업니트'].map((name,i)=>tag(name,i+1));
+ const recommend=product=>matchResearchTags(product,{tags}).map(t=>t.name);
+ assert.deepEqual(recommend({rawName:'울트라 웜 경량 패딩 자켓',officialDescription:'일상에 어울리는 디자인'}),[]);
+ const knit={rawName:'하프집 니트 스웨터',officialDescription:'캐시미어처럼 부드러운 터치'};
+ assert.deepEqual(recommend(knit),['반집업니트']);
+ assert.deepEqual(recommend({...knit,officialDescription:'울 혼방 원사에 캐시미어와 유사한 촉감',material:'폴리에스터 74%, 아크릴 15%, 나일론 11%',noticeVerified:true}),['반집업니트']);
+ assert.deepEqual(new Set(recommend({...knit,material:'겉감: 모 90%, 캐시미어 10%',noticeVerified:true})),new Set(['울니트','캐시미어니트','반집업니트']));
+});
+
+test('맨투맨 카테고리의 테리·플리스 풀오버를 니트와 구분한다',()=>{
+ const tags=['반집업맨투맨','반집업니트','니트','맨투맨'].map((name,i)=>tag(name,i+1));
+ const recommend=(rawName,sourceCategory=['MEN','TOP','맨투맨/후드'])=>matchResearchTags({rawName,sourceCategory},{tags}).map(t=>t.name);
+ for(const rawName of ['플리스 목넥 하프집업 배색 풀오버','브러시드 테리 하프집업 풀오버']){
+  assert.deepEqual(recommend(rawName),['반집업맨투맨','맨투맨']);
+ }
+ assert.deepEqual(recommend('하프집 니트 풀오버'),['반집업니트','니트']);
+});
+
+test('솔리드와 스트라이프 옵션이 섞이면 공통 품목 태그를 추천한다',()=>{
+ const tags=['스트라이프티셔츠','긴팔티셔츠'].map((name,i)=>tag(name,i+1));
+ const recommend=(rawName,officialDescription)=>matchResearchTags({rawName,officialDescription},{tags}).map(t=>t.name);
+ assert.deepEqual(recommend('배색 레이어드 긴팔티 (SLD, STR)','솔리드와 스트라이프 구성'),['긴팔티셔츠']);
+ assert.deepEqual(recommend('스트라이프 긴팔티'),['긴팔티셔츠','스트라이프티셔츠']);
+});
+
 test('허리 부분의 묘사와 면 같은 촉감을 상품 핏·혼용률로 사용하지 않는다',()=>{
  const tags=['슬림핏바지','스트레이트바지','와이드팬츠','세미와이드팬츠','면자켓','나일론자켓','여성가을바지','겨울바지','스판티셔츠'].map((name,i)=>tag(name,i+1));
  const recommendations=product=>new Set(matchResearchTags(product,{tags}).map(t=>t.name));

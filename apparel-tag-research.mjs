@@ -56,10 +56,16 @@ export function matchResearchTags(product,index,{limit=60}={}){
  for(const match of String(name||'').matchAll(/(?:^|[\s(/])(봄|여름|가을|겨울|썸머)(?:용)?(?=$|[\s/)])/g))seasons.add(match[1]==='썸머'?'여름':match[1]);
  const verified=product.noticeVerified||/^(?:공식 이미지 대조 완료$|공식 고시 RapidOCR · 소재·혼용률 확인$|공식 고시 OCR 일치 · )/.test(product.fieldStatus?.material||'');
  const material=verified?normalize(product.material):'';
+ const fabricText=[name,description].join('\n');
+ const wool=material?/(?:울|양모|(?<![가-힣])모)\d/.test(material):/(?<![가-힣])(?:울|양모)(?=$|[\s,%)\d]|혼방|캐시미어|원단|원사|소재|니트|코트|자켓|가디건|스웨터)/.test(fabricText);
+ const cashmere=material?/캐시미어\d/.test(material):/캐시미어(?!\s*(?:처럼|같은|느낌|터치|라이크|에\s*준|와\s*유사))(?=$|[\s,%)\d]|혼방|원단|원사|소재|니트|코트|자켓|가디건|스웨터)/.test(fabricText);
+ const mixedStripe=/\bSLD\b/i.test(name)&&/\bSTR\b/i.test(name)||/솔리드(?:와|및|[,·/])\s*스트라이프/.test(description);
  const tokens=[];const add=(names,allowed,type='feature')=>{for(const name of names){const term=normalize(name),negative=new RegExp('(?:무|비|노)'+term+'|'+term+'(?:이|가|는|은)?(?:없|아님|아닌|미사용|불포함|제외)');tokens.push({name:term,allowed:!!allowed&&!negative.test(facts),type});}};
  const kinds=[['브리프',/브리프|삼각팬티/,['브리프','팬티','속옷']],['드로즈',/드로즈/,['드로즈','팬티','속옷']],['탱크탑',/탱크탑|머슬티|캐미솔|뷔스티에/,['탱크탑','캐미솔','뷔스티에','나시','나시티','나시티셔츠','티셔츠','티','상의']],['후드집업',/후드(?:풀)?집업|집업후드|후드지퍼|후디집업/,['후드집업','집업후드','집업후드티','자켓','재킷','점퍼']],['원피스',/원피스|드레스/,['원피스','드레스']],['스커트',/스커트|치마/,['스커트','치마']],['레깅스',/레깅스/,['레깅스','팬츠','바지']],['래쉬가드',/래쉬가드|래시가드/,['래쉬가드','래시가드','수영복']],['수영복',/수영복/,['수영복']],['잠옷',/잠옷|파자마/,['잠옷','파자마','홈웨어']],['블라우스',/블라우스/,['블라우스','셔츠','상의']],['바람막이',/바람막이|윈드브레이커/,['바람막이','윈드브레이커','자켓','재킷','점퍼','아우터']],['조거팬츠',/조거팬츠|조거바지/,['조거팬츠','조거바지','팬츠','바지']],['반바지',/반바지|쇼츠/,['반바지','쇼츠','팬츠','바지']],['슬랙스',/슬랙스/,['슬랙스','팬츠','바지']],['청바지',/청바지|데님팬츠|데님바지|데님(?=$|[（(])/,['청바지','데님팬츠','데님바지','팬츠','바지']],['맨투맨',/맨투맨|스웨트셔츠|스웻셔츠/,['맨투맨','스웨트셔츠','스웻셔츠','티셔츠','티']],['가디건',/가디건|카디건/,['가디건','카디건']],['조끼',/조끼|베스트/,['조끼','베스트']],['후드티',/후드티|후디/,['후드티','티셔츠','티']],['티셔츠',/티셔츠|긴팔티|반팔티|카라티|폴로티/,['티셔츠','티']],['니트',/니트(?!릴)|스웨터|풀오버/,['니트','스웨터','풀오버']],['셔츠',/(?<!티)셔츠|남방/,['셔츠','남방']],['패딩',/패딩|푸퍼|다운자켓|다운점퍼/,['패딩','푸퍼']],['코트',/코트/,['코트']],['자켓',/자켓|재킷|점퍼|블레이저|셔켓|파카|야상|(?:플리스|후리스)집업/,['자켓','재킷','점퍼','블레이저','야상']],['바지',/팬츠|바지/,['바지','팬츠']]];
  const hoodPullover=/후드풀오버/.test(source)&&!/니트|스웨터/.test(source);
- const kind=hoodPullover?kinds.find(([name])=>name==='후드티'):kinds.find(([,re])=>re.test(source));if(!kind)return [];
+ const sweatshirtPullover=/풀오버/.test(source)&&/플리스|후리스|테리|쭈리/.test(source)&&!/니트|스웨터/.test(source)&&product.sourceCategory?.some?.(category=>/맨투맨/.test(category));
+ const detectedKind=hoodPullover?'후드티':sweatshirtPullover?'맨투맨':null;
+ const kind=detectedKind?kinds.find(([type])=>type===detectedKind):kinds.find(([,re])=>re.test(source));if(!kind)return [];
  const garments=new Set(kind[2]);
  if(kind[0]==='가디건'&&/니트|스웨터/.test(source))garments.add('니트');
  if(['코트','자켓','가디건','후드집업'].includes(kind[0]))garments.add('아우터');
@@ -70,7 +76,7 @@ export function matchResearchTags(product,index,{limit=60}={}){
  add(['남성','남자','남성용','남자용'],product.gender==='남성','gender');add(['여성','여자','여성용','여자용'],product.gender==='여성','gender');add(['남녀공용','공용','유니섹스'],/남녀공용|유니섹스/.test(facts),'gender');
  const rules=[
   [['트레이닝'],/트레이닝/.test(facts)],[['오버사이즈'],/오버핏|루즈핏|오버사이즈/.test(facts)],
-  [['반집업','하프집업'],/반집업|하프집업/.test(facts)],[['크롭','크롭핏'],/크롭/.test(facts)],[['하이웨스트'],/하이웨스트/.test(facts)],[['부츠컷'],/부츠컷/.test(facts)],
+  [['반집업','하프집업'],/반집업|하프집|쿼터집/.test(facts)],[['크롭','크롭핏'],/크롭/.test(facts)],[['하이웨스트'],/하이웨스트/.test(facts)],[['부츠컷'],/부츠컷/.test(facts)],
   [['스키니','스키니핏'],/스키니/.test(facts)],[['배기','배기핏'],/배기/.test(facts)],[['스트레이트','스트레이트핏','일자'],/스트레이트|일자/.test(facts)],
   [['퀼팅','누빔'],/퀼팅|누빔/.test(facts)],[['나일론'],/나일론/.test(facts+material)],[['폴리에스터','폴리에스테르'],/폴리에스터|폴리에스테르/.test(facts+material)],
   [['아크릴'],/아크릴/.test(facts+material)],[['레이온','인견'],/레이온|인견/.test(facts+material)],[['모달'],/모달/.test(facts+material)],
@@ -80,11 +86,11 @@ export function matchResearchTags(product,index,{limit=60}={}){
   [['쭈리'],/쭈리|프렌치테리|frenchterry/.test(facts)],[['기모'],/기모|브러시드/.test(facts)],[['양기모'],/양기모/.test(facts)],[['히든밴딩'],/히든밴딩/.test(facts)],[['밴딩'],/밴딩/.test(facts)],
   [['테이퍼드','테이퍼드핏'],/테이퍼드/.test(facts)],[['레귤러핏','스탠다드핏'],/레귤러핏|스탠다드핏/.test(facts)],[['와이드','와이드핏'],/(?<!세미)와이드/.test(facts)],[['세미와이드'],/세미와이드/.test(facts)],[['슬림','슬림핏'],/슬림/.test(source)||/슬림핏|슬림한실루엣/.test(facts)],[['오버핏','루즈핏'],/오버핏|루즈핏|오버사이즈/.test(facts)],
   [['긴팔','긴소매'],/긴팔|긴소매/.test(facts)],[['반팔','반소매'],/반팔|반소매/.test(facts)],[['민소매','슬리브리스'],/민소매|슬리브리스/.test(facts)],
-  [['후드','후디'],/후드|후디/.test(facts)],[['집업','지퍼'],/집업|지퍼|풀집/.test(facts)],[['풀집업'],/풀집업|풀집|fullzip/.test(facts)],[['카라','칼라','폴로'],/카라|칼라|폴로/.test(facts)],
+  [['후드','후디'],/후드|후디/.test(facts)],[['집업','지퍼'],/집업|지퍼|풀집|하프집|쿼터집/.test(facts)],[['풀집업'],/풀집업|풀집|fullzip/.test(facts)],[['카라','칼라','폴로'],/카라|칼라|폴로/.test(facts)],
   [['라운드','라운드넥','크루넥'],/라운드|크루넥/.test(facts)],[['브이넥','v넥'],/브이넥|v넥/.test(facts)],[['터틀넥','목폴라'],/터틀넥|목폴라/.test(facts)],
-  [['꽈배기','케이블'],/꽈배기|케이블/.test(facts)],[['골지','리브드'],/골지|리브드/.test(facts)],[['체크'],/체크/.test(facts)],[['스트라이프','단가라'],/스트라이프|단가라/.test(facts)],
+  [['꽈배기','케이블'],/꽈배기|케이블/.test(facts)],[['골지','리브드'],/골지|리브드/.test(facts)],[['체크'],/체크/.test(facts)],[['스트라이프','단가라'],!mixedStripe&&/스트라이프|단가라/.test(facts)],
   [['숏','쇼트'],/숏|쇼트/.test(facts)],[['롱'],/롱/.test(facts)],[['경량'],/경량/.test(facts)],[['단추','버튼'],/단추|버튼/.test(facts)],[['빅사이즈'],/빅사이즈/.test(facts)],
-  [['면','코튼'],/코튼(?!라이크)|면\d/.test(source)||(/코튼|면\d/.test(material))||(!verified&&/코튼(?:혼방|원단|소재)|면\d/.test(facts))],[['울','모직'],/(?<!겨)울|모직/.test(facts)||/(?:^|,)모\d/.test(material)],[['캐시미어'],/캐시미어/.test(facts+material)],[['린넨','리넨'],/린넨|리넨/.test(facts+material)],
+  [['면','코튼'],/코튼(?!라이크)|면\d/.test(source)||(/코튼|면\d/.test(material))||(!verified&&/코튼(?:혼방|원단|소재)|면\d/.test(facts))],[['울','모직'],wool],[['캐시미어'],cashmere],[['린넨','리넨'],/린넨|리넨/.test(facts+material)],
   [['스판','스트레치'],/스판|스트레치/.test(facts)||/폴리우레탄[1-9]/.test(material)],[['데님'],/데님|청바지/.test(facts)],[['플리스','후리스'],/플리스|후리스/.test(facts)],
   [['봄'],seasons.has('봄')],[['여름','썸머'],seasons.has('여름')],[['가을'],seasons.has('가을')],[['겨울'],seasons.has('겨울')]
  ];
@@ -111,7 +117,7 @@ export function matchResearchTags(product,index,{limit=60}={}){
 
 export function researchForProduct(product){
  const index=loadTagResearch();if(!index)return {configured:false,count:0,candidates:[],titleTerms:[]};
- const key=JSON.stringify([stamp,product.style,product.sourceUrl,product.rawName,product.name,product.gender,product.material,product.noticeVerified,product.fieldStatus?.material,product.officialDescription,product.researchFacts]);
+ const key=JSON.stringify([stamp,product.style,product.sourceUrl,product.rawName,product.name,product.gender,product.sourceCategory,product.material,product.noticeVerified,product.fieldStatus?.material,product.officialDescription,product.researchFacts]);
  if(matches.has(key))return matches.get(key);
  const candidates=matchResearchTags(product,index),result={configured:true,count:index.observedCount,sourceHash:index.sourceHash,candidates,titleTerms:candidates.filter(t=>t.features.length&&t.name.length<=16).slice(0,8).map(t=>t.name)};
  if(matches.size>=100)matches.clear();matches.set(key,result);return result;
