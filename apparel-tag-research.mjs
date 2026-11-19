@@ -99,7 +99,9 @@ export function matchResearchTags(product,index,{limit=60}={}){
   const garment=parts.some(t=>t.type==='garment');
   if(!valid||!parts.length||((tag.kind==='garment'||scopeException)&&!garment)||(tag.kind==='conditional_attribute'&&(garment||!parts.some(t=>t.type==='feature'))))continue;
   const features=parts.filter(t=>t.type==='feature').map(t=>t.name);
-  result.push({id:tag.id,name:tag.name,recordId:tag.recordId,features,parent:parts.some(t=>t.type==='garment'&&t.name!==normalize(kind[0])),gender:parts.some(t=>t.type==='gender'),score:features.length*10+(normalize(tag.name).endsWith(normalize(kind[0]))?20:0)+parts.filter(t=>t.type==='gender').length*8-Math.max(0,parts.filter(t=>t.type==='garment').length-1)*3});
+  // Fit, fabric and construction describe the item more precisely than a season.
+  const featureScore=features.reduce((score,feature)=>score+(/[봄]|^(?:여름|썸머|가을|겨울)$/.test(feature)?1:10),0);
+  result.push({id:tag.id,name:tag.name,recordId:tag.recordId,features,parent:parts.some(t=>t.type==='garment'&&t.name!==normalize(kind[0])),gender:parts.some(t=>t.type==='gender'),score:featureScore+(normalize(tag.name).endsWith(normalize(kind[0]))?20:0)+parts.filter(t=>t.type==='gender').length*8-Math.max(0,parts.filter(t=>t.type==='garment').length-1)*3});
  }
  result.sort((a,b)=>b.score-a.score||a.name.length-b.name.length||Number(a.id)-Number(b.id));
  const genderParent=result.filter(t=>t.parent&&t.gender&&!t.features.length).sort((a,b)=>Number(b.name.startsWith(product.gender||' '))-Number(a.name.startsWith(product.gender||' '))||Number(b.name.endsWith('티셔츠'))-Number(a.name.endsWith('티셔츠')))[0];
