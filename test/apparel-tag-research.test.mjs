@@ -40,9 +40,10 @@ test('선택표와 품질보증 문구를 제외하고 표시가 확인된 시�
 });
 
 test('허리 부분의 묘사와 면 같은 촉감을 상품 핏·혼용률로 사용하지 않는다',()=>{
- const tags=['슬림핏바지','스트레이트바지','와이드팬츠','세미와이드팬츠','면자켓','나일론자켓','가을바지','겨울바지','스판티셔츠'].map((name,i)=>tag(name,i+1));
+ const tags=['슬림핏바지','스트레이트바지','와이드팬츠','세미와이드팬츠','면자켓','나일론자켓','여성가을바지','겨울바지','스판티셔츠'].map((name,i)=>tag(name,i+1));
  const recommendations=product=>new Set(matchResearchTags(product,{tags}).map(t=>t.name));
- assert.deepEqual(recommendations({rawName:'코듀로이 스트레이트 팬츠',officialDescription:'슬림한 허리·힙 라인과 스트레이트 실루엣. F/W 시즌 아이템.'}),new Set(['스트레이트바지','가을바지','겨울바지']));
+ const pants={rawName:'코듀로이 스트레이트 팬츠',gender:'여성',officialDescription:'슬림한 허리·힙 라인과 스트레이트 실루엣. F/W 시즌 아이템.'};
+ assert.deepEqual([...recommendations(pants)],['스트레이트바지','여성가을바지','겨울바지']);
  assert.deepEqual(recommendations({rawName:'세미와이드 팬츠'}),new Set(['세미와이드팬츠']));
  assert.deepEqual(recommendations({rawName:'경량 패딩 자켓',officialDescription:'코튼 라이크 원사로 제작한 나일론 자켓'}),new Set(['나일론자켓']));
  assert.deepEqual(recommendations({rawName:'기모 긴팔티',material:'폴리에스터 95%, 폴리우레탄 5%',fieldStatus:{material:'공식 고시 RapidOCR · 소재·혼용률 확인'}}),new Set(['스판티셔츠']));
