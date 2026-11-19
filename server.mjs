@@ -75,7 +75,7 @@ import {prepareMainImage,backgroundImageStatus,backgroundSelection,applyExtraExc
 import sharp from 'sharp';
 import {saveIconMeaning,iconWashingResult} from './washing-icons.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
-const releases=createReleaseTracker(root);await releases.get();
+const releases=createReleaseTracker(root,{portable:process.env.REGISTER_PORTABLE==='1'});await releases.get();
 const myboxDeploy=await createMyboxDeployment(root,{isBusy:()=>state.busy});
 const githubSync=process.env.REGISTER_PORTABLE==='1'?{state:{status:'portable',message:'배포 실행판'},stop(){}}:startGithubSync(root,{beforeSync:()=>releases.get(),onSynced:sha=>myboxDeploy.schedule(sha)});
 const dataRoot=path.join(root,'data');await mkdir(dataRoot,{recursive:true});

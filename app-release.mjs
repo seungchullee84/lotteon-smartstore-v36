@@ -31,8 +31,12 @@ async function fingerprint(root,cache){
  }
  return {hash:hash.digest('hex'),modified};
 }
-export function createReleaseTracker(root,{interval=5000,initialVersion=39}={}){
+export function createReleaseTracker(root,{interval=5000,initialVersion=39,portable=false}={}){
  const file=path.join(root,'.app-release.json'),fingerprints=new Map();let cached=null,nextCheck=0,inflight=null;
+ if(portable)return {async get(){
+  cached??=JSON.parse(await readFile(file,'utf8'));
+  return {...cached,displayDate:formatReleaseDate(cached.updatedAt)};
+ }};
  async function check(){
   let previous=cached;
   if(!previous){try{previous=JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}}

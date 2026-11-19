@@ -5,6 +5,21 @@ import path from 'node:path';
 import os from 'node:os';
 import {createReleaseTracker,formatReleaseDate} from '../app-release.mjs';
 
+test('Windows 실행판은 배포 버전을 표시하고 로컬 파일을 수정하지 않는다',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'portable-app-release-'));
+ try{
+  const release={version:1503,updatedAt:'2026-11-19T10:00:00.000Z',hash:'source-checkout-hash'};
+  const manifest=JSON.stringify(release),pkg=JSON.stringify({version:'0.1503.0'});
+  const file=path.join(root,'.app-release.json'),packageFile=path.join(root,'package.json');
+  await writeFile(file,manifest);await writeFile(packageFile,pkg);
+  await writeFile(path.join(root,'server.mjs'),'// portable subset');
+  const tracker=createReleaseTracker(root,{portable:true});
+  assert.equal((await tracker.get()).version,1503);
+  assert.equal(await readFile(file,'utf8'),manifest);
+  assert.equal(await readFile(packageFile,'utf8'),pkg);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
+
 test('최종 수정일은 한국 시간과 요일로 표시',()=>{
  assert.equal(formatReleaseDate('2026-10-22T13:20:00Z'),'2026.10.22 (목) 22:20');
  assert.equal(formatReleaseDate('2026-10-22T15:00:00Z'),'2026.10.23 (금) 00:00');
