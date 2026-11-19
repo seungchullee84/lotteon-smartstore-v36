@@ -28,7 +28,7 @@ export function selectedProductTagResearch(product,{dataRoot=defaultRoot,index=l
  if(record.style!==product.style||record.sourceUrl!==product.sourceUrl)return automatic;
  const allowed=manualTags(index);
  const candidates=(record.tags||[]).filter(t=>allowed.get(t.id)===t.name);
- return {...automatic,candidates,manual:true,manualTags:record.tags,needsReview:candidates.length!==(record.tags||[]).length,titleTerms:automatic.titleTerms};
+ return {...automatic,automaticCandidates:automatic.candidates,candidates,manual:true,manualTags:record.tags,needsReview:candidates.length!==(record.tags||[]).length};
 }
 export async function removeProductTag(product,tag,options={}){
  if(!tag||!/^\d+$/.test(tag.id)||typeof tag.name!=='string')throw Error('삭제할 태그를 확인해 주세요.');

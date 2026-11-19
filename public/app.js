@@ -1458,7 +1458,16 @@ function syncEnhancedFeatures(state){
  const status=state.photoPreparation?.style===p.style?state.photoPreparation:null;
  photoPreparationStatus.textContent=status?.message||state.smartstoreListing?.photoReview?.message|| (status?.status==='ready'?'사진 연결 확인 · 대표 1장 · 추가 '+status.extraCount+'장 · 상세사진 '+status.detailCount+'장':status?.status==='preparing'?'품번 폴더 사진을 추가이미지·상세 미리보기에 연결 중…':status?.message||(!state.smartstoreListing?'현재 품번 폴더의 사진을 확인해 주세요.':state.smartstoreListing.previewOnly?'대표사진만 우선 표시 중 · 정보 수집 또는 시작을 누르면 추가·상세사진을 연결합니다.':'품번 폴더 사진을 추가이미지·상세 미리보기에 연결했습니다.'));
  if(manualTagStyle!==p.style){manualTagStyle=p.style;manualTagHasSelection=!!state.tagResearch?.manual;manualTagChoices=new Map((state.tagResearch?.manualTags||[]).map(t=>[t.id,t]));let saved;try{saved=JSON.parse(localStorage.getItem('smartstore-tags.v1.'+p.style));}catch{}if(saved?.sourceUrl===p.sourceUrl&&Array.isArray(saved.tags)&&saved.tags.length<=10){manualTagHasSelection=true;manualTagChoices=new Map(saved.tags.map(t=>[t.id,t]));}$('manualTagSaveStatus').textContent=manualTagHasSelection?'선택한 태그를 등록기에 적용했습니다. 네이버 입력은 태그 자동입력 또는 시작을 누르세요.':'';$('manualTagResults').replaceChildren();tagPicker.hidden=!manualTagHasSelection;drawManualTagChoices();}
- const selectedResearch=effectiveTagResearch(state);if(selectedResearch?.manual){const pairs=tags=>(tags||[]).map(t=>t.id+'\t'+t.name).sort().join('\n');const verified=state.tagResult?.searchTagsVerified&&pairs(state.tagResult.selectedTags)===pairs(selectedResearch.candidates);$('researchTagStatus').textContent='직접 선택한 태그 '+selectedResearch.candidates.length+'/10개 · '+(verified?'최근 검색 적용 확인':'입력 시 네이버 검색 적용 재검증');}
+ const selectedResearch=effectiveTagResearch(state);
+ if(selectedResearch?.manual){
+  const pairs=tags=>(tags||[]).map(t=>t.id+'\t'+t.name).sort().join('\n');
+  const verified=state.tagResult?.searchTagsVerified&&pairs(state.tagResult.selectedTags)===pairs(selectedResearch.candidates);
+  const automatic=state.tagResearch?.manual?state.tagResearch.automaticCandidates:state.tagResearch?.candidates;
+  const recommended=new Set(automatic?.map(t=>t.id));
+  const review=automatic?selectedResearch.candidates.filter(t=>!recommended.has(t.id)).map(t=>'#'+t.name):[];
+  const status='직접 선택한 태그 '+selectedResearch.candidates.length+'/10개 · '+(verified?'최근 검색 적용 확인':'입력 시 네이버 검색 적용 재검증');
+  $('researchTagStatus').textContent=status+(review.length?' · 상품 근거 다시 확인 '+review.join(', '):'');
+ }
  $('manualTagSearch').disabled=!!state.busy||!state.capabilities?.manualTags;$('applyManualTags').disabled=!!state.busy||!manualTagHasSelection;
 }
 $('manualTagSearch').onclick=async()=>{

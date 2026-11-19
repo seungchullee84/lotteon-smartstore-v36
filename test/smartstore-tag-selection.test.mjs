@@ -15,7 +15,10 @@ test('직접 선택은 상품 근거 없음도 원본 사전 ID로 보관하며 
   for(const invalid of [[{id:'1',name:'남성후드티'}],[{id:'9',name:'기모후드티코디'}],[...tags,tags[0]]])await assert.rejects(()=>saveSelectedProductTags(product,invalid,{dataRoot,index}));
   await removeProductTag(product,tags[0],{dataRoot,index});assert.deepEqual(selectedProductTagResearch(product,{dataRoot,index}).candidates,[tags[1]]);
   await removeProductTag(product,tags[1],{dataRoot,index});const empty=selectedProductTagResearch(product,{dataRoot,index});assert.equal(empty.manual,true);assert.deepEqual(empty.candidates,[],'삭제한 태그를 자동으로 다시 채우지 않음');
-  const unrelated=[{id:'3',name:'남성후드티'},{id:'4',name:'여성니트'}];await saveSelectedProductTags(product,unrelated,{dataRoot,index});assert.deepEqual(selectedProductTagResearch(product,{dataRoot,index}).candidates,unrelated);
+  const unrelated=[{id:'3',name:'남성후드티'},{id:'4',name:'여성니트'}];await saveSelectedProductTags(product,unrelated,{dataRoot,index});
+  const saved=selectedProductTagResearch(product,{dataRoot,index});
+  assert.deepEqual(saved.candidates,unrelated);
+  assert.deepEqual(new Set(saved.automaticCandidates.map(t=>t.name)),new Set(['여성후드티','기모후드티']));
   assert(!selectedProductTagResearch({...product,style:'026982'},{dataRoot,index}).candidates.some(t=>t.id==='3'||t.id==='4'));
  }finally{await rm(dataRoot,{recursive:true,force:true});}
 });
