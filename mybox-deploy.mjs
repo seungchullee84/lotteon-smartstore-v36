@@ -8,7 +8,9 @@ import {publishable} from './github-sync.mjs';
 import {writeUpdateZip} from './mybox-zip.mjs';
 
 const exec=promisify(execFile);
-export const MYBOX_BASE='82e1285378109e4795669aad0946c9e1bc9a9a5c';
+// The oldest verified portable bundle still in use. Include modules added
+// after that bundle even if they have not changed in the latest release.
+export const MYBOX_BASE='e9afe1b6cb345f4d22227af705fa51f6fddbe641';
 const filename='최신업데이트.zip';
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const git=(root,args)=>exec('git',args,{cwd:root,windowsHide:true,timeout:45000,maxBuffer:32000000,encoding:'buffer'}).then(r=>r.stdout);
@@ -38,7 +40,7 @@ export async function buildMyboxUpdate(root,sha,{base=MYBOX_BASE,outputRoot=path
   if(deleted.length)throw Error('파일 삭제가 필요한 변경은 통합 실행판으로 배포해 주세요.');
   const manifest={format:1,project:newPackage.name,baseCommit:base,sourceCommit:sha,version:newPackage.version,builtAt:new Date().toISOString(),dependencies:newPackage.dependencies,files,deleted};
   await writeFile(path.join(outputRoot,sha+'.manifest.json'),JSON.stringify(manifest,null,2));
-  await writeFile(path.join(stage,'복사경로.txt'),'복사 위치: 기존 상품등록기.exe가 있는 폴더\r\n\r\n등록기 종료 → 압축 해제 → app 폴더 복사 → 위 위치에 붙여넣기·덮어쓰기 → 등록기 다시 실행\r\napp 폴더를 삭제하지 말고 같은 이름의 폴더에 합쳐 넣으세요.\r\n버전: '+newPackage.version+' / '+sha.slice(0,8)+'\r\n','utf8');
+  await writeFile(path.join(stage,'복사경로.txt'),'복사 위치: 기존 상품등록기.exe가 있는 폴더\r\n\r\n등록기 종료 → 압축 해제 → app 폴더 복사 → 위 위치에 붙여넣기·덮어쓰기 → 같은 상품등록기.exe 다시 실행\r\n폴더를 합친 뒤 상품등록기.exe 옆 app 폴더 안에 server.mjs가 있어야 합니다.\r\n적용 대상: '+oldPackage.version+' 이후의 호환 Windows 통합 실행판\r\n업데이트 버전: '+newPackage.version+' / '+sha.slice(0,8)+'\r\n','utf8');
   const temporary=path.join(outputRoot,sha+'.zip');
   const entries=[];
   async function walk(directory){for(const entry of await readdir(directory,{withFileTypes:true})){const file=path.join(directory,entry.name);if(entry.isDirectory())await walk(file);else entries.push({name:path.relative(stage,file).replaceAll('\\','/'),bytes:await readFile(file)});}}
