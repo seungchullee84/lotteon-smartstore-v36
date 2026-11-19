@@ -170,16 +170,19 @@ export function appendDistinctSellingPoints(points,additions,source,{limit=4}={}
  if(result.length>=limit)return result;const norm=s=>String(s||'').replace(/[\s.!?,，]+/g,'');
  const topics=[/부드|소프트|촉감|터치|결감/,/보온|따뜻|포근/,/편안|편하게|여유|넉넉|릴렉스/,/스타일링|코디|매치|레이어드|연출/,/내구|오래\s*입/,/통기|흡습|속건|쾌적/,/조절/,/수납|포켓/,/신축|유연|움직임|활동성/,/가벼|가볍|경량/,/수축|변형|워싱|형태/,/찬바람|바람.*차단/,/보풀/];
  const kinds=p=>topics.flatMap((rule,i)=>rule.test(p.title)?[i]:[]),covered=new Set(result.flatMap(kinds));
+ const brushedWarmth=p=>/기모|브러시드|브러쉬드/.test(p.description)&&/따뜻|포근|보온/.test(p.title+' '+p.description);
  for(const point of additions){
   if(!usableSellingPoints([point],source))continue;
   const keys=kinds(point);
-  if(result.some(p=>norm(p.title)===norm(point.title)||norm(p.description)===norm(point.description))||(keys.length&&keys.every(k=>covered.has(k))))continue;
+  if(result.some(p=>norm(p.title)===norm(point.title)||norm(p.description)===norm(point.description)||(brushedWarmth(p)&&brushedWarmth(point)))||(keys.length&&keys.every(k=>covered.has(k))))continue;
   result.push(point);for(const k of keys)covered.add(k);if(result.length>=limit)break;
  }
  return result;
 }
 export function completeSellingPoints(points,source,{limit=4}={}){
- return appendDistinctSellingPoints([], [...(points||[]),...officialSellingPoints(source,{limit:12})],source,{limit});
+ const candidates=[...(points||[]),...officialSellingPoints(source,{limit:12})];
+ const ready=candidates.filter(point=>displaySellingPoints([point]).length===1);
+ return appendDistinctSellingPoints([],ready,source,{limit});
 }
 export function assertRequiredSellingPoints(detail){
  if(detail?.sellingPointReview?.status==='needs-review'||!Array.isArray(detail?.sellingPoints)||detail.sellingPoints.length<2||detail.sellingPoints.length>4)throw Error('공식 상품 설명과 상세이미지에서 서로 다른 구매 장점 2~4개를 확인해야 합니다.');
@@ -198,7 +201,11 @@ export function friendlyBenefitDescription(value){
   let text=part.trim().replace(/[.!?]+$/,'');if(!text||!completeCopy(text)||!cleanSource(text))return '';
   // Keep the evidence untouched. Omit an unreadable weight unit instead of
   // guessing its exponent, and correct this unambiguous OCR phrase in copy only.
-  text=text.replace(/^\d+(?:\.\d+)?\s*g\s*\/\s*m[*?]\s*(?:중량의\s*)?/i,'').replace(/피부에\s*당는/g,'피부에 닿는').replace(/폴리ㆍ레이온/g,'폴리·레이온');
+  text=text.replace(/^\d+(?:\.\d+)?\s*g\s*\/\s*m[*?]\s*(?:중량의\s*)?/i,'')
+   .replace(/^\d{2,}\s*\/\s*\d{2,}\s*\^?\s*(?:적당한\s*중량감이?\s*있는\s*|중량(?:의)?\s*)/,'')
+   .replace(/피부에\s*당는/g,'피부에 닿는').replace(/폴리ㆍ레이온/g,'폴리·레이온')
+   .replace(/레글러\s*핏/g,'레귤러 핏').replace(/실루를/g,'실루엣을');
+  if(!text||/\d{2,}\s*\/\s*\d{2,}(?:\s*\^|\s*(?:중량|적당한))|[\^*?]\s*중량|스탠다드\s*\d\s*기장/.test(text))return '';
   // Repair old display copy too. A verb/adjective stem is never a noun predicate.
   text=text.replace(/(포근|따뜻|편안|탄탄|쾌적|유연|시원|지지|제공|유지|조절|연출|구현|확보|완성|강화|최소화|활용|수납|커버|가능)(?:이에요|예요)$/,'$1');
   if(/요$/.test(text))return text+'.';

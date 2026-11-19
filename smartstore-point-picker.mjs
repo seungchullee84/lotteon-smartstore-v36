@@ -32,11 +32,12 @@ export async function pointPicker(product,folder,{dataRoot,sourceOverride}={}){
   let reviewed;try{reviewed=JSON.parse(await readFile(path.join(dataRoot,'smartstore-details',product.style,name),'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
   if(reviewed?.style===product.style&&reviewed.sourceUrl===product.sourceUrl&&reviewed.detailHash===detailHash&&usableSellingPoints(reviewed.points,text))seed.push(...reviewed.points);
  }
- const defaults=valid&&selected.points.length>=2?selected.points:!valid&&applied?applied:completeSellingPoints(seed,text);
+ const ready=point=>displaySellingPoints([point]).length===1;
+ const defaults=valid&&selected.points.length>=2?selected.points:!valid&&applied?.every(ready)?applied:completeSellingPoints(seed,text);
  const pool=[...defaults];
- for(const p of seed)if(!pool.some(q=>q.title===p.title||q.description===p.description))pool.push(p);
+ for(const p of seed.filter(ready))if(!pool.some(q=>q.title===p.title||q.description===p.description))pool.push(p);
  for(const p of officialSellingPoints(text,{limit:5})){
-  if(pool.some(q=>q.title===p.title||q.description===p.description))continue;
+  if(!ready(p)||pool.some(q=>q.title===p.title||q.description===p.description))continue;
   const kinds=topics(p),covered=new Set(seed.flatMap(topics));
   if(kinds.length&&kinds.every(kind=>covered.has(kind)))continue;
   pool.push(p);

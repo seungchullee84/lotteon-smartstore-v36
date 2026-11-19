@@ -1,5 +1,5 @@
 // Reusable wording recipes. Each requires matching evidence in THIS product.
-export const BENEFIT_RECIPE_VERSION='official-benefit-recipes-4';
+export const BENEFIT_RECIPE_VERSION='official-benefit-recipes-5';
 export function sourceBenefitRecipes(source){
  const text=String(source||'').replace(/\s+/g,' '),points=[];
  const rules=[
@@ -11,6 +11,11 @@ export function sourceBenefitRecipes(source){
   {id:'relaxed-clean',pattern:/릴렉스\s*핏과\s*목넥\s*디자인으로\s*편안하면서도\s*깔끔한\s*실루엣을\s*연출/,title:'편안하고 깔끔한 실루엣',description:'릴렉스 핏과 목넥으로 편안하고 깔끔하게.',covered:/릴렉스|깔끔한.*실루엣/},
   {id:'light-warm-filling',pattern:/가벼운\s*착용감과\s*풍성한\s*볼륨감\s*[,，]?\s*뛰어난\s*보온성을\s*제공/,title:'가볍고 따뜻한 착용감',description:'가벼운 착용감에 풍성한 볼륨과 보온성을 더했어요.',covered:/가벼|가볍|경량|보온/},
   {id:'wind-entry',pattern:/내부\s*인\s*플라켓과\s*소매\s*안쪽\s*이밴드로\s*찬바람\s*유입을\s*차단/,title:'찬바람 유입을 줄여 따뜻하게',description:'내부 플라켓과 소매 안쪽 밴드로 찬바람을 차단해요.',covered:/찬바람|바람.*차단/},
+  {id:'straight-leg',pattern:/허벅지부터\s*밑단까지\s*(?:여유\s*있게\s*)?일자로\s*떨어지는\s*(?:스트레이트\s*핏|실루엣)/,title:'깔끔하게 떨어지는 일자핏',description:'허벅지부터 밑단까지 일자로 떨어져요.',covered:/일자|스트레이트/},
+  {id:'garment-wash-colour',pattern:/가먼트\s*워싱을\s*더해\s*자연스럽고\s*깊이\s*있는\s*컬러와\s*빈티지한\s*무드를\s*완성/,title:'깊은 색감의 워싱',description:'가먼트 워싱으로 자연스럽고 깊은 색감을 더했어요.',covered:/워싱.*색감|빈티지|깊은.*색감/},
+  {id:'corduroy-stretch',pattern:/신축성이\s*있는\s*\d+골\s*코듀로이\s*소재/,title:'움직임에 맞춰 유연하게',description:'신축성 있는 코듀로이로 편안하게 움직여요.',covered:/신축|유연|사방.*스판|움직임/},
+  {id:'neck-fullzip-warmth',pattern:/목을\s*감싸는\s*목넥\s*디자인과\s*전면\s*풀\s*집업으로\s*보온성과\s*편의성\s*강화/,title:'목까지 감싸는 풀집업',description:'목을 감싸는 디자인과 풀집업으로 따뜻하게 입어요.',covered:/목.*감싸|보온|따뜻|포근/},
+  {id:'anti-pilling-finish',pattern:/안티필링\s*가공을\s*적용해[^.]{0,42}?보풀\s*방지\s*기능\s*제공/,title:'보풀을 줄이는 가공',description:'보풀이 덜 생기도록 안티필링 가공을 더했어요.',covered:/보풀|안티필링/},
 
   {id:'soft-touch',pattern:/(?:부드러운\s*(?:촉감|터치감)|부드럽고\s*(?:실키한|쾌적한)\s*(?:촉감|터치감)|소프트한\s*(?:촉감|터치감|텍스처))[^.]{0,60}?(?:제공|선사|특징|느껴|우수합니다|우수하며|더했|살렸|갖추)/,title:'부드럽게 닿는 촉감',description:'부드러운 촉감이 느껴지는 원단.',covered:/부드|소프트|실키/},
   {id:'bare-skin-soft',pattern:/맨살에\s*입어도\s*될\s*만큼(?:의)?\s*부드러운\s*(?:촉감|감촉)/,title:'맨살에도 부드러운 촉감',description:'맨살에 닿아도 부드러운 촉감이에요.',covered:/부드|소프트|실키/},

@@ -3,7 +3,7 @@ import {catalogImageSource,saveRegistrationBenefits} from './official-benefit-ca
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {officialSellingPoints,usableSellingPoints,officialImageBenefitText,completeSellingPoints,appendDistinctSellingPoints,displaySellingPoints} from './smartstore-selling-points.mjs';
+import {usableSellingPoints,officialImageBenefitText,completeSellingPoints,displaySellingPoints} from './smartstore-selling-points.mjs';
 import {enrichOfficialProductFacts} from './apparel-product-facts.mjs';
 const digest=text=>createHash('sha256').update(text).digest('hex');
 const sourceJobs=new Map();
@@ -42,15 +42,15 @@ export async function saveOfficialImagePointReview(product,folder,{text,points,d
 }
 export async function reviewSellingPoints(product,source,{dataRoot,detailHash=null,signal,existing,supplement=false,persist=true,log}={}){
  signal?.throwIfAborted();
- const identity={version:14,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
+ const identity={version:15,method:'local-official-text',style:product.style,sourceUrl:product.sourceUrl,textHash:digest(source),detailHash};
  const root=path.join(dataRoot,'smartstore-details',product.style),file=path.join(root,'selling-point-review.json');
  const finish=async(record,text=source,{preserveSelection=false}={})=>{
-  let points=preserveSelection||record.points?.length>=3?record.points.slice(0,4):completeSellingPoints(record.points,text);
+  let points=preserveSelection?record.points.slice(0,4):completeSellingPoints(record.points,text);
   if(supplement&&!preserveSelection){
    const preserved=(record.method==='user-selected-official-points'||record.method==='visual-official-detail'?record.points:existing)||[];
-   const verified=preserved.filter(point=>usableSellingPoints([point],text));
-   points=appendDistinctSellingPoints(verified,points,text);
-   points=await supplementSellingPoints(product,points,text,{dataRoot,detailHash,signal,log});
+   points=completeSellingPoints([...preserved,...points],text);
+   const supplemented=await supplementSellingPoints(product,points,text,{dataRoot,detailHash,signal,log});
+   if(supplemented!==points)points=completeSellingPoints(supplemented,text);
   }
   signal?.throwIfAborted();
   const missing=points.filter(point=>displaySellingPoints([point]).length!==1);
@@ -70,5 +70,5 @@ export async function reviewSellingPoints(product,source,{dataRoot,detailHash=nu
  }
  let cached;try{cached=JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT'&&!(e instanceof SyntaxError))throw e;}
  if(Object.entries(identity).every(([key,value])=>cached?.[key]===value)&&usableSellingPoints(cached.points,source))return finish(cached);
- return finish({...identity,points:completeSellingPoints([],source),reviewedAt:new Date().toISOString()});
+ return finish({...identity,points:[],reviewedAt:new Date().toISOString()});
 }
