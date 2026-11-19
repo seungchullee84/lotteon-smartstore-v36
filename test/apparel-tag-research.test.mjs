@@ -30,6 +30,24 @@ test('테리 후드 풀오버는 후드티로 분류하고 실제 니트 후드 
  const knit=matchResearchTags({...hoodie,rawName:'울 니트 후드 풀오버'},i).map(t=>t.name);assert(knit.includes('여성니트'));assert(!knit.includes('여성후드티'));
 });
 
+test('선택표와 품질보증 문구를 제외하고 표시가 확인된 시즌만 추천한다',()=>{
+ const rawName='울혼방 케이블 스웨터',style='056940',sourceUrl='official';
+ const officialDescription='크루넥 케이블 스웨터\n착용시기 [ ]\n봄 여름 가을 겨울\n안감 없음 기모\n상의 핏 슬림핏 레귤러핏 루즈핏\n스타일코드 01056940\n소비자 분쟁해결 기준: 부자재(단추, 지퍼, 심지 등)';
+ const researchFacts={style,sourceUrl,text:officialDescription,features:['기모','레귤러핏'],seasonTableSelection:['겨울']};
+ const tags=['울니트','케이블니트','겨울니트','봄니트','여름니트','가을니트','집업니트','기모니트','슬림핏니트','루즈핏니트'].map((name,i)=>tag(name,i+1));
+ const names=matchResearchTags({rawName,style,sourceUrl,officialDescription,researchFacts},{tags}).map(t=>t.name);
+ assert.deepEqual(new Set(names),new Set(['울니트','케이블니트','겨울니트']));
+});
+
+test('허리 부분의 묘사와 면 같은 촉감을 상품 핏·혼용률로 사용하지 않는다',()=>{
+ const tags=['슬림핏바지','스트레이트바지','와이드팬츠','세미와이드팬츠','면자켓','나일론자켓','가을바지','겨울바지','스판티셔츠'].map((name,i)=>tag(name,i+1));
+ const recommendations=product=>new Set(matchResearchTags(product,{tags}).map(t=>t.name));
+ assert.deepEqual(recommendations({rawName:'코듀로이 스트레이트 팬츠',officialDescription:'슬림한 허리·힙 라인과 스트레이트 실루엣. F/W 시즌 아이템.'}),new Set(['스트레이트바지','가을바지','겨울바지']));
+ assert.deepEqual(recommendations({rawName:'세미와이드 팬츠'}),new Set(['세미와이드팬츠']));
+ assert.deepEqual(recommendations({rawName:'경량 패딩 자켓',officialDescription:'코튼 라이크 원사로 제작한 나일론 자켓'}),new Set(['나일론자켓']));
+ assert.deepEqual(recommendations({rawName:'기모 긴팔티',material:'폴리에스터 95%, 폴리우레탄 5%',fieldStatus:{material:'공식 고시 RapidOCR · 소재·혼용률 확인'}}),new Set(['스판티셔츠']));
+});
+
 test('조사자료는 원본 ID·명칭·근거를 검사해 로컬 인덱스로 가져온다',async()=>{
  const root=await mkdtemp(path.join(os.tmpdir(),'tag-research-'));
  try{

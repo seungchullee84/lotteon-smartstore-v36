@@ -51,12 +51,9 @@ export function matchResearchTags(product,index,{limit=60}={}){
  const verifiedFacts=product.researchFacts?.style===product.style&&product.researchFacts?.sourceUrl===product.sourceUrl?product.researchFacts:null;
  const description=productDescription(product.officialDescription),imageText=productDescription(verifiedFacts?.text);
  const features=verifiedFacts?.text?explicitDetailFacts(imageText):verifiedFacts?.features||[];
- const facts=[source,description,imageText,...features,...(verifiedFacts?.visualFeatures||[])].map(normalize).join(' ');
- const seasons=new Set([...explicitSeasonFacts([name,description,imageText].join('\n')),...(verifiedFacts?.seasonTableSelection||[])]);
- if(/^봄(?:용|\s)|\s봄(?:용|\s|$)/.test(name||''))seasons.add('봄');
- if(/^여름|\s여름|썸머/.test(name||''))seasons.add('여름');
- if(/^가을|\s가을/.test(name||''))seasons.add('가을');
- if(/^겨울|\s겨울/.test(name||''))seasons.add('겨울');
+ const facts=[source,description,...features,...(verifiedFacts?.visualFeatures||[])].map(normalize).join(' ');
+ const seasons=new Set([...explicitSeasonFacts([name,description].join('\n')),...features,...(verifiedFacts?.seasonTableSelection||[])]);
+ for(const match of String(name||'').matchAll(/(?:^|[\s(/])(봄|여름|가을|겨울|썸머)(?:용)?(?=$|[\s/)])/g))seasons.add(match[1]==='썸머'?'여름':match[1]);
  const verified=product.noticeVerified||/^(?:공식 이미지 대조 완료$|공식 고시 RapidOCR · 소재·혼용률 확인$|공식 고시 OCR 일치 · )/.test(product.fieldStatus?.material||'');
  const material=verified?normalize(product.material):'';
  const tokens=[];const add=(names,allowed,type='feature')=>{for(const name of names){const term=normalize(name),negative=new RegExp('(?:무|비|노)'+term+'|'+term+'(?:이|가|는|은)?(?:없|아님|아닌|미사용|불포함|제외)');tokens.push({name:term,allowed:!!allowed&&!negative.test(facts),type});}};
