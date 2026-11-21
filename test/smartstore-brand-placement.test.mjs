@@ -8,8 +8,8 @@ test('두 템플릿 모두 구매 이유와 공식 상세 다음 하단에 영�
   for(const selector of ['[data-brand-video-heading]','[data-brand-video]','[data-product-point-heading]'])assert.equal($(selector).length,1);
   const promo=$('[data-shipping-promo]');
   assert.equal(promo.length,1);assert.doesNotMatch(html,/MATERIAL & SIZE|소재와 사이즈/);
-  assert.match(promo.find('header').text(),/롯데백화점 동탄점 · 지오다노/);
-  assert.match(promo.find('h2').text(),/주말에 고른 옷도, 동탄점에서 보내드려요/);
+  assert.equal(promo.find('header p').text(),'동탄 롯데 지오다노');
+  assert.equal(promo.find('h2').text(),'주말과 공휴일에도 매장에서 직접 보내드려요.');
   assert.match(promo.find('img').attr('alt'),/공휴일 포함 주 7일 배송.*오전 11시 30분.*정기휴무일.*2~3일/);
   assert.equal(promo.nextAll('section').first().is('[data-official-detail]'),true);
   const asset=detailTemplate===1||gender==='공용'?'shipping-promo.png':gender==='남성'?'shipping-promo-men.png':'shipping-promo-women.png';

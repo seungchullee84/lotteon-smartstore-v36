@@ -28,8 +28,8 @@ export function shippingPromoSection(image,{start='#fff',end='#fff'}={}){
  const background='linear-gradient(180deg,'+start+','+end+')';
  return `<section data-shipping-promo aria-labelledby="store-shipping-heading" style="background:${background};">
   <header style="padding:clamp(24px,5vw,42px) 6% clamp(12px,3vw,24px);text-align:center;color:inherit;">
-   <p style="margin:0 0 8px;font-size:clamp(14px,2.4vw,19px);line-height:1.6;font-weight:700;">롯데백화점 동탄점 · 지오다노</p>
-   <h2 id="store-shipping-heading" style="margin:0;font-size:clamp(21px,3.8vw,31px);line-height:1.45;word-break:keep-all;">주말에 고른 옷도, 동탄점에서 보내드려요.</h2>
+   <p style="margin:0 0 8px;font-size:clamp(14px,2.4vw,19px);line-height:1.6;font-weight:700;">동탄 롯데 지오다노</p>
+   <h2 id="store-shipping-heading" style="margin:0;font-size:clamp(21px,3.8vw,31px);line-height:1.45;word-break:keep-all;">주말과 공휴일에도 매장에서 직접 보내드려요.</h2>
   </header>
   <div style="mask-image:linear-gradient(180deg,transparent,#000 4%,#000 96%,transparent);">${image}</div>
  </section>`;
