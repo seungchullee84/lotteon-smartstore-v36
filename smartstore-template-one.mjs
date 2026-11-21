@@ -10,7 +10,7 @@ import {officialTemplateTitle} from './smartstore-template-title.mjs';
 
 export const SMARTSTORE_DETAIL_TEMPLATE='dongtan-aida-lower-film-20261101';
 export const STORE_SHIPPING_PROMO_ASSET='shipping-promo.png';
-export const STORE_SHIPPING_PROMO_ALT='공휴일 포함 주 7일 배송. 주말 출고 상품은 배송 상황에 따라 월요일 수령 가능. 오전 11시 30분까지 구매 시 당일 발송. 백화점 정기휴무일 하루 제외. 매장에 재고가 없으면 발송까지 2~3일 더 걸릴 수 있어요.';
+export const STORE_SHIPPING_PROMO_ALT='롯데백화점 동탄점 지오다노의 공휴일 포함 주 7일 배송 안내. 주말 출고 상품은 배송 상황에 따라 월요일에 받으실 수 있어요. 오전 11시 30분까지 구매하시면 당일 발송해요. 백화점 정기휴무일은 제외하며, 매장에 재고가 없으면 발송까지 2~3일 더 걸릴 수 있어요.';
 export const OFFICIAL_DETAIL_TITLE='디테일까지, 차근차근 살펴보세요.';
 const STORE_BENEFITS_ASSET='benefits-store-reasons.jpg';
 export const TEMPLATE_ASSET_NAMES=['giordano-official.png','lotte-department-official.png','benefits.jpg',STORE_BENEFITS_ASSET,STORE_SHIPPING_PROMO_ASSET,'shipping.jpg','returns.jpg','store.jpg',...STORE_BANNER_ASSET_NAMES,'GowunDodum-Regular.ttf'];
@@ -26,7 +26,13 @@ export function colorPhotoDetailLabel(photoCount){
 
 export function shippingPromoSection(image,{start='#fff',end='#fff'}={}){
  const background='linear-gradient(180deg,'+start+','+end+')';
- return '<section data-shipping-promo style="background:'+background+';"><div style="mask-image:linear-gradient(180deg,transparent,#000 8%,#000 89%,transparent);">'+image+'</div></section>';
+ return `<section data-shipping-promo aria-labelledby="store-shipping-heading" style="background:${background};">
+  <header style="padding:clamp(24px,5vw,42px) 6% clamp(12px,3vw,24px);text-align:center;color:inherit;">
+   <p style="margin:0 0 8px;font-size:clamp(14px,2.4vw,19px);line-height:1.6;font-weight:700;">롯데백화점 동탄점 · 지오다노</p>
+   <h2 id="store-shipping-heading" style="margin:0;font-size:clamp(21px,3.8vw,31px);line-height:1.45;word-break:keep-all;">주말에 고른 옷도, 동탄점에서 보내드려요.</h2>
+  </header>
+  <div style="mask-image:linear-gradient(180deg,transparent,#000 4%,#000 96%,transparent);">${image}</div>
+ </section>`;
 }
 
 export function mannequinWearingNote(p){
@@ -113,7 +119,7 @@ export function buildSmartstoreDetail(p,{assetBase=TEMPLATE_ASSET_BASE,imageUrl=
  if(!folderPhotos.length&&lastColorGroup)shippingStart=colorSectionBackground(lastColorGroup.index);
  if(!folderPhotos.length&&!lastColorGroup&&!points.length&&!palette)shippingStart=openingBackground;
  body+=shippingPromoSection(common(STORE_SHIPPING_PROMO_ASSET,STORE_SHIPPING_PROMO_ALT),{start:shippingStart});
- body+=`<section data-official-detail data-aida="desire"><div style="padding:var(--official-detail-top,156px) 6% var(--official-detail-bottom,24px);"><div data-section-heading style="border-left:5px solid #294c3b;padding-left:18px;"><h2 style="font-size:30px;line-height:1.5;margin:0;color:#213c2e;">${OFFICIAL_DETAIL_TITLE}</h2></div></div>`;
+ body+=`<section data-official-detail data-aida="desire"><div style="padding:var(--official-detail-top,80px) 6% var(--official-detail-bottom,24px);"><div data-section-heading style="border-left:5px solid #294c3b;padding-left:18px;"><h2 style="font-size:30px;line-height:1.5;margin:0;color:#213c2e;">${OFFICIAL_DETAIL_TITLE}</h2></div></div>`;
  // Preserve the complete original, including size/INFORMATION. Never crop or substitute it.
  const embedded=new Set(p.images.detail?(draft?.embeddedOfficialSections||[]).map(key=>p.images[key]).filter(Boolean):[]);
  const officialSources=(p.images.detail||!groups.length?original.sources:[...new Set(['size','check','info'].map(key=>p.images[key]).filter(Boolean))]).filter(src=>src===p.images.detail||!embedded.has(src));
@@ -132,11 +138,11 @@ export function smartstoreDetailDocument(p,options={}){
  const font=options.fontUrl;
  return {...result,html:`<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(p.style)} · 스마트스토어 상세페이지</title><style>${font?`@font-face{font-family:GowunDodum;src:url('${esc(font)}') format('truetype');font-weight:400;font-display:swap}`:''}*{box-sizing:border-box}html{scrollbar-width:none}html::-webkit-scrollbar{display:none}body{margin:0;background:#ecebe7}body>div{max-width:860px!important}img{max-width:100%}h1,h2,h3,b,strong{font-weight:700}p{font-weight:500;line-height:2.1;-webkit-text-stroke:.24px currentColor}h1,h2,h3{word-break:keep-all;overflow-wrap:break-word;text-wrap:pretty}@media(max-width:600px){[data-product-points]{flex-direction:column;gap:12px!important}[data-product-points]>div{padding:18px 20px!important}[data-product-points] h3{margin:6px 0!important}h1{font-size:36px!important}h2{font-size:27px!important}h3{font-size:19px!important}p{font-size:16px!important}b{font-size:15px!important}}
 section[id^="smartstore-color-"]+[data-shipping-promo],
-[data-folder-photos]+[data-shipping-promo]{padding-top:var(--shipping-gallery-gap,150px)}
+[data-folder-photos]+[data-shipping-promo]{padding-top:var(--shipping-gallery-gap,72px)}
 [data-attention-benefit]:empty{display:none}
 @media(max-width:600px){
- [data-shipping-promo]{--shipping-gallery-gap:134px}
- [data-official-detail]{--official-detail-top:128px;--official-detail-bottom:16px}
+ [data-shipping-promo]{--shipping-gallery-gap:44px}
+ [data-official-detail]{--official-detail-top:56px;--official-detail-bottom:16px}
  [data-product-intro]{padding:28px 6% 32px!important}
  [data-product-intro-layout]{grid-template-columns:minmax(0,1fr)!important;gap:20px!important}
  [data-header-logos]{gap:12px!important;margin-bottom:22px!important}
