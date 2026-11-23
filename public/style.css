@@ -1072,12 +1072,14 @@ body[data-channel="smartstore"][data-workflow-ready="false"] .registration-foote
   --workspace-max-width: 1520px;
   --workspace-gutter: clamp(14px, 2vw, 24px);
 }
-body[data-channel="smartstore"] #collectionTimeline { display: none; }
-body[data-channel="lotte"] #collectionCard #collectionTimeline {
+body[data-channel="smartstore"] #collectionTimeline,
+#collectionTimeline[hidden] { display: none; }
+body[data-channel="lotte"] #collectionTimeline {
   min-width: 0;
-  padding: 10px 12px;
-  border: 1px solid #e5dcd1;
-  border-radius: 9px;
+  margin: 0 0 14px;
+  padding: 12px 16px;
+  border: 1px solid #d9cfc2;
+  border-radius: 12px;
   background: #faf7f1;
 }
 #collectionTimelineTitle {
