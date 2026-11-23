@@ -721,7 +721,7 @@ body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete 
 .collection-search-field {
   --search-border: #895834;
   --search-surface: #fff8ed;
-  --search-text: #493020;
+  --search-text: #1d4ed8;
   --search-focus: #89583433;
   position: relative;
   flex: 1 1 0;
@@ -730,7 +730,7 @@ body[data-channel="lotte"] #collectionCard > #collectionStatus.collect-complete 
 body[data-channel="smartstore"] .collection-search-field {
   --search-border: #258052;
   --search-surface: #eff9f2;
-  --search-text: #17462e;
+  --search-text: #1d4ed8;
   --search-focus: #25805233;
 }
 #collectionCard .collection-search-field label {
@@ -764,7 +764,7 @@ body[data-channel="smartstore"] .collection-search-field {
 }
 body[data-channel="smartstore"] #collectionCard .collection-search-field #style[data-numeric] {
   background: #fff;
-  color: #14241b;
+  color: #1d4ed8;
   font-family: Consolas, 'Courier New', monospace;
   font-size: 26px;
   font-variant-numeric: tabular-nums slashed-zero;
