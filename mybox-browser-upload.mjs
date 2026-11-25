@@ -94,7 +94,7 @@ async function performUpload(page,request,destination){
   await page.waitForFunction(
     ()=>{
       const text=document.body?.innerText||'';
-      return (text.includes('업로드 성공')||text.includes('업로드 완료'))&&(/1\s*\/\s*1개\s*완료/.test(text)||text.includes('최신업데이트.zip'));
+      return (text.includes('업로드 성공')||text.includes('업로드 완료'))&&/1\s*\/\s*1개\s*완료/.test(text);
     },
     undefined,
     {timeout:120000}

@@ -7,6 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {buildMyboxUpdate,createMyboxDeployment,updateFileAllowed} from '../mybox-deploy.mjs';
 import {applyMyboxUpdate} from '../mybox-apply-update.mjs';
+import {validateMyboxRequest,isMyboxLoginUrl} from '../mybox-browser-upload.mjs';
 const source=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const git=(root,...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8',windowsHide:true,stdio:['ignore','pipe','pipe']}).trim();
 async function fixture(){
@@ -110,4 +111,14 @@ test('product work defers deployment before tests or upload begin',async()=>{
     await service.configure(true);await service.runNow(sha);
     assert.equal(service.state.status,'pending');assert.equal(checks,0);assert.equal(uploads,0);service.stop();
   }finally{await rm(root,{recursive:true,force:true});}
+});
+
+test('Playwright MYBOX uploader validates fixed destination, fixed archive name and login URLs',()=>{
+  const dest=validateMyboxRequest({folderUrl:'https://mybox.naver.com/main/web/my',zipPath:'C:/tmp/최신업데이트.zip'});
+  assert.equal(dest.href,'https://mybox.naver.com/main/web/my');
+  assert.throws(()=>validateMyboxRequest({folderUrl:'https://example.com/main/web/my',zipPath:'C:/tmp/최신업데이트.zip'}),/MYBOX 배포 위치/);
+  assert.throws(()=>validateMyboxRequest({folderUrl:'https://mybox.naver.com/main/web/my',zipPath:'C:/tmp/other.zip'}),/고정 업데이트 파일명/);
+  assert.equal(isMyboxLoginUrl('https://nid.naver.com/nidlogin.login'),true);
+  assert.equal(isMyboxLoginUrl('https://mybox.naver.com/about/introduce'),true);
+  assert.equal(isMyboxLoginUrl('https://mybox.naver.com/main/web/my'),false);
 });
