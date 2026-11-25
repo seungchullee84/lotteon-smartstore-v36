@@ -3,10 +3,15 @@ import {spawn} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {chromium} from 'playwright';
+import {prepareRegistrarChromeAppearance} from './browser-appearance.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
-const deployHome=path.join(root,'data','mybox-deploy');
-const profileDir=path.join(deployHome,'browser-profile');
+const dataRoot=path.join(root,'data');
+const deployHome=path.join(dataRoot,'mybox-deploy');
+// Reuse the registrar's existing SmartStore/Lotte Chrome profile so no separate MYBOX login is needed.
+const sharedChromeProfile=path.join(dataRoot,'browser-profile-chrome-v2');
+
+const stripAnsi=value=>String(value||'').replace(/\x1b\[[0-9;]*m/g,'').replace(/\s+/g,' ').trim();
 
 export function validateMyboxRequest(request){
   if(!request||typeof request!=='object')throw Error('MYBOX 업로드 요청 정보가 비어 있습니다.');
@@ -32,104 +37,48 @@ async function resolveChromeExecutable(){
   for(const file of candidates){
     try{await access(file);return file;}catch{}
   }
-  return undefined;
+  return chromium.executablePath();
 }
 
-async function openHeadlessContext(){
-  await mkdir(profileDir,{recursive:true});
-  const executablePath=await resolveChromeExecutable();
-  const options={
-    headless:true,
-    viewport:{width:1366,height:900},
-    locale:'ko-KR',
-    args:['--no-first-run','--no-default-browser-check','--disable-blink-features=AutomationControlled']
-  };
-  if(executablePath)options.executablePath=executablePath;
-  try{
-    return await chromium.launchPersistentContext(profileDir,options);
-  }catch(error){
-    if(options.executablePath){
-      delete options.executablePath;
-      return await chromium.launchPersistentContext(profileDir,options);
-    }
-    throw error;
-  }
-}
-
-async function openVisibleChromeSession(initialUrl){
-  await mkdir(profileDir,{recursive:true});
-  const portFile=path.join(profileDir,'DevToolsActivePort');
+async function connectSharedChrome(initialUrl){
+  await mkdir(sharedChromeProfile,{recursive:true});
+  const portFile=path.join(sharedChromeProfile,'DevToolsActivePort');
   const connect=async()=>{
     const port=Number((await readFile(portFile,'utf8')).split('\n')[0]);
-    if(!Number.isInteger(port)||port<1024||port>65535)throw Error('크롬 포트 확인 실패');
-    const browser=await chromium.connectOverCDP('http://127.0.0.1:'+port,{timeout:2000});
+    if(!Number.isInteger(port)||port<1024||port>65535)throw Error('전용 크롬 포트 확인 실패');
+    const browser=await chromium.connectOverCDP('http://127.0.0.1:'+port,{timeout:2500});
     const context=browser.contexts()[0];
-    return {browser,context,child:null};
+    if(!context)throw Error('전용 크롬 컨텍스트 확인 실패');
+    return {browser,context,launched:false};
   };
   try{
-    const existing=await connect();
-    const page=existing.context.pages()[0]||await existing.context.newPage();
-    await page.goto(initialUrl,{waitUntil:'domcontentloaded',timeout:30000}).catch(()=>{});
-    await page.bringToFront().catch(()=>{});
-    return {...existing,page};
+    return await connect();
   }catch{}
   await rm(portFile,{force:true}).catch(()=>{});
-  const exe=(await resolveChromeExecutable())||chromium.executablePath();
+  const exe=await resolveChromeExecutable();
+  await prepareRegistrarChromeAppearance(sharedChromeProfile).catch(()=>{});
   const args=[
-    '--user-data-dir='+profileDir,
+    '--user-data-dir='+sharedChromeProfile,
     '--remote-debugging-port=0',
     '--remote-debugging-address=127.0.0.1',
     '--no-first-run',
     '--no-default-browser-check',
-    '--new-window',
+    '--restore-last-session',
     initialUrl
   ];
   const child=spawn(exe,args,{detached:true,windowsHide:false,stdio:'ignore'});
   let launchError;
   child.on('error',e=>{launchError=e;});
   child.unref();
-  for(let n=0;n<40;n++){
-    if(launchError)throw Error('MYBOX 로그인용 Chrome을 실행하지 못했습니다: '+launchError.message);
+  for(let n=0;n<35;n++){
+    if(launchError)throw Error('전용 크롬을 실행하지 못했습니다: '+launchError.message);
     try{
       const connected=await connect();
-      const page=connected.context.pages()[0]||await connected.context.newPage();
-      await page.bringToFront().catch(()=>{});
-      return {...connected,child,page};
-    }catch{await new Promise(r=>setTimeout(r,350));}
+      return {...connected,launched:true};
+    }catch{await new Promise(r=>setTimeout(r,400));}
   }
-  throw Error('MYBOX 로그인용 Chrome 창에 연결하지 못했습니다.');
+  throw Error('전용 크롬에 연결하지 못했습니다. 상품등록기의 스마트스토어 로그인 창을 한 번 열어 주세요.');
 }
-
-async function closeVisibleChromeSession(session){
-  if(!session)return;
-  try{
-    const pages=session.context?.pages?.()||[];
-    for(const p of pages)await p.close().catch(()=>{});
-  }catch{}
-  try{await session.browser?.close?.();}catch{}
-}
-
-async function waitForMyboxReady(page,timeoutMs,{stopOnLogin=false}={}){
-  const deadline=Date.now()+timeoutMs;
-  let loginSeenAt=0;
-  while(Date.now()<deadline){
-    if(page.isClosed())throw Error('MYBOX 로그인 창이 닫혔습니다.');
-    const currentUrl=page.url();
-    if(isMyboxLoginUrl(currentUrl)){
-      if(stopOnLogin){
-        if(!loginSeenAt)loginSeenAt=Date.now();
-        if(Date.now()-loginSeenAt>1500)return false;
-      }
-    }else{
-      const ready=await page.evaluate(()=>document.body?.innerText?.includes('올리기')).catch(()=>false);
-      if(ready)return true;
-    }
-    await page.waitForTimeout(500);
-  }
-  return false;
-}
-
-const stripAnsi=value=>String(value||'').replace(/\x1b\[[0-9;]*m/g,'').replace(/\s+/g,' ').trim();
 
 async function clickFirstVisible(page,selectors,timeoutMs=15000){
   const deadline=Date.now()+timeoutMs;
@@ -148,6 +97,24 @@ async function clickFirstVisible(page,selectors,timeoutMs=15000){
     await page.waitForTimeout(250);
   }
   throw Error('MYBOX 화면에서 클릭할 버튼을 찾지 못했습니다: '+selectors[0]);
+}
+
+async function waitForMyboxReady(page,timeoutMs){
+  const deadline=Date.now()+timeoutMs;
+  let loginSeenAt=0;
+  while(Date.now()<deadline){
+    if(page.isClosed())throw Error('MYBOX 탭이 닫혔습니다.');
+    const currentUrl=page.url();
+    if(isMyboxLoginUrl(currentUrl)){
+      if(!loginSeenAt)loginSeenAt=Date.now();
+      if(Date.now()-loginSeenAt>2000)return false;
+    }else{
+      const ready=await page.evaluate(()=>document.body?.innerText?.includes('올리기')).catch(()=>false);
+      if(ready)return true;
+    }
+    await page.waitForTimeout(400);
+  }
+  return false;
 }
 
 async function performUpload(page,request,destination){
@@ -198,64 +165,33 @@ async function writeReceipt(request,destination){
 }
 
 async function runCli(){
-  const args=new Set(process.argv.slice(2));
-  const forceVisible=args.has('--visible')||args.has('--login');
-  const loginOnly=args.has('--login');
-  const settingsPath=path.join(deployHome,'settings.json');
   const requestPath=path.join(deployHome,'upload-request.json');
+  const request=JSON.parse(await readFile(requestPath,'utf8'));
+  const destination=validateMyboxRequest(request);
 
-  let request;
-  let destination;
-  if(loginOnly){
-    const settings=JSON.parse(await readFile(settingsPath,'utf8').catch(()=>'{"folderUrl":"https://mybox.naver.com/main/web/my"}'));
-    destination=new URL(settings.folderUrl||'https://mybox.naver.com/main/web/my');
-  }else{
-    request=JSON.parse(await readFile(requestPath,'utf8'));
-    destination=validateMyboxRequest(request);
-  }
-
-  let headlessContext=null;
-  let visibleSession=null;
+  let connection=null;
+  let tab=null;
+  let keepTabOpen=false;
   try{
-    if(!forceVisible){
-      headlessContext=await openHeadlessContext();
-      const page=headlessContext.pages()[0]||await headlessContext.newPage();
-      await page.goto(destination.href,{waitUntil:'domcontentloaded',timeout:30000});
-      const ready=await waitForMyboxReady(page,12000,{stopOnLogin:true});
-      if(ready){
-        await performUpload(page,request,destination);
-        await writeReceipt(request,destination);
-        console.log('MYBOX_RESULT '+JSON.stringify({ok:true,mode:'headless',sha:request.sourceCommit}));
-        return;
-      }
-      await headlessContext.close().catch(()=>{});
-      headlessContext=null;
-    }
-
-    const loginUrl='https://nid.naver.com/nidlogin.login?url='+encodeURIComponent(destination.href);
-    visibleSession=await openVisibleChromeSession(destination.href);
-    const page=visibleSession.page;
-    let ready=await waitForMyboxReady(page,4000,{stopOnLogin:true});
+    connection=await connectSharedChrome(destination.href);
+    // Open a dedicated temporary tab so existing Lotte/SmartStore tabs are never touched.
+    tab=await connection.context.newPage();
+    await tab.goto(destination.href,{waitUntil:'domcontentloaded',timeout:30000});
+    const ready=await waitForMyboxReady(tab,15000);
     if(!ready){
-      if(isMyboxLoginUrl(page.url())&&!page.url().includes('nid.naver.com')){
-        await page.goto(loginUrl,{waitUntil:'domcontentloaded',timeout:30000}).catch(()=>{});
-      }
-      ready=await waitForMyboxReady(page,180000);
+      keepTabOpen=true;
+      throw Error('전용 크롬의 네이버 로그인이 필요합니다. 스마트스토어 전용 크롬에서 네이버 로그인 후 자동배포를 다시 켜 주세요.');
     }
-    if(!ready)throw Error('MYBOX 로그인이 필요합니다. 열린 Chrome 창에서 로그인을 완료해 주세요.');
-    if(loginOnly){
-      console.log('MYBOX_RESULT '+JSON.stringify({ok:true,mode:'login-only'}));
-      return;
-    }
-    await performUpload(page,request,destination);
+    await performUpload(tab,request,destination);
     await writeReceipt(request,destination);
-    console.log('MYBOX_RESULT '+JSON.stringify({ok:true,mode:'visible',sha:request.sourceCommit}));
+    console.log('MYBOX_RESULT '+JSON.stringify({ok:true,mode:'shared-chrome',sha:request.sourceCommit}));
   }catch(error){
     console.log('MYBOX_RESULT '+JSON.stringify({ok:false,error:stripAnsi(error.message)}));
     throw error;
   }finally{
-    if(headlessContext)await headlessContext.close().catch(()=>{});
-    if(visibleSession)await closeVisibleChromeSession(visibleSession);
+    // Close only our temporary MYBOX tab; never close the user's shared Chrome window.
+    if(tab&&!keepTabOpen&&!tab.isClosed())await tab.close().catch(()=>{});
+    if(connection?.browser)await connection.browser.close().catch(()=>{});
   }
 }
 

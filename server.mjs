@@ -76,7 +76,6 @@ import {saveIconMeaning,iconWashingResult} from './washing-icons.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const releases=createReleaseTracker(root,{portable:process.env.REGISTER_PORTABLE==='1'});await releases.get();
 const myboxDeploy=await createMyboxDeployment(root,{isBusy:()=>state.busy});
-let myboxLoginProcess=null;
 const githubSync=process.env.REGISTER_PORTABLE==='1'?{state:{status:'portable',message:'배포 실행판'},stop(){}}:startGithubSync(root,{beforeSync:()=>releases.get(),onSynced:sha=>myboxDeploy.schedule(sha)});
 const dataRoot=path.join(root,'data');await mkdir(dataRoot,{recursive:true});
 const smartstoreCollectionOptions={
@@ -259,19 +258,6 @@ const server=http.createServer(async(req,res)=>{
       const b=await body(req);await myboxDeploy.configure(b.enabled);
       if(b.enabled)myboxDeploy.schedule(githubSync.state?.sha,{force:true});
       return json(res,200,myboxDeploy.state);
-    }
-    if(req.method==='POST'&&url.pathname==='/api/mybox-login'){
-      if(process.env.REGISTER_PORTABLE==='1')throw Error('자동배포 로그인은 코드 수정 PC에서 진행해 주세요.');
-      if(myboxLoginProcess&&myboxLoginProcess.exitCode===null)return json(res,200,{ok:true,message:'이미 MYBOX 로그인 창이 열려 있습니다. 열린 Chrome에서 로그인을 완료해 주세요.'});
-      const child=spawn(process.execPath,[path.join(root,'mybox-browser-upload.mjs'),'--login'],{cwd:root,stdio:'ignore',windowsHide:true});
-      myboxLoginProcess=child;
-      child.once('exit',code=>{
-        if(myboxLoginProcess===child)myboxLoginProcess=null;
-        if(code===0&&myboxDeploy.state.enabled&&githubSync.state?.sha){
-          void myboxDeploy.runNow(githubSync.state.sha).catch(()=>{});
-        }
-      });
-      return json(res,200,{ok:true,message:'Chrome에서 네이버 MYBOX 로그인 창을 열었습니다. 로그인 완료 시 최신 버전을 자동 업로드합니다.'});
     }
     if(req.method==='GET'&&url.pathname==='/api/lotte-category-choices')return json(res,200,lotteCategoryChoices());
     if(req.method==='GET'&&url.pathname==='/api/background-preview'){
