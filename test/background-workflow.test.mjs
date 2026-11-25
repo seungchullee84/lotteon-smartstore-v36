@@ -446,3 +446,36 @@ test('a worker exit reported after successful completion cannot replace success 
  assert.deepEqual(f.workflow.status(),completed);
  assert.equal(await readFile(path.join(f.folder,'background-image.json'),'utf8'),manifest);
 });
+
+test('pending reports the active Gemini chat request accurately and clears on completion or source change',async t=>{
+ const f=await fixture(t);
+ assert.deepEqual(f.workflow.pending(),{ok:true,pending:false});
+ const request=await f.prepare();
+ assert.equal(f.workflow.pending().pending,true);
+ assert.equal(f.workflow.pending().dispatched,false);
+ f.workflow.dispatch({jobId:request.jobId});
+ const active=f.workflow.pending();
+ assert.equal(active.ok,true);
+ assert.equal(active.pending,true);
+ assert.equal(active.dispatched,true);
+ assert.equal(active.jobId,request.jobId);
+ assert.equal(active.style,f.state.product.style);
+ assert.equal(active.key,'main');
+ assert.equal(active.sourcePath,path.join(f.folder,'main.jpg'));
+ assert.equal(active.sourceHash,digest(f.original));
+ assert.equal(active.attempt,1);
+ assert.equal(active.maxAttempts,2);
+ await f.stage(request);
+ assert.ok(f.workflow.pending().previewPath);
+ f.complete(request);
+ assert.deepEqual(f.workflow.pending(),{ok:true,pending:false});
+ const next=await f.prepare({key:'main'});
+ assert.equal(next.cached,true);
+ assert.deepEqual(f.workflow.pending(),{ok:true,pending:false},'캐시 재사용 대기 건은 새 생성 요청으로 노출하지 않는다');
+ f.workflow.select({style:f.state.product.style,key:'extra1'});
+ const extraReq=await f.prepare({key:'extra1'});
+ f.workflow.dispatch({jobId:extraReq.jobId});
+ assert.equal(f.workflow.pending().jobId,extraReq.jobId);
+ f.state.product.style='999999';
+ assert.deepEqual(f.workflow.pending(),{ok:true,pending:false},'품번이 바뀐 요청은 대기 목록에서 즉시 제외한다');
+});
