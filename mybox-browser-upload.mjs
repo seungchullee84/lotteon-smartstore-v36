@@ -129,15 +129,34 @@ async function waitForMyboxReady(page,timeoutMs,{stopOnLogin=false}={}){
   return false;
 }
 
+const stripAnsi=value=>String(value||'').replace(/\x1b\[[0-9;]*m/g,'').replace(/\s+/g,' ').trim();
+
+async function clickFirstVisible(page,selectors,timeoutMs=15000){
+  const deadline=Date.now()+timeoutMs;
+  while(Date.now()<deadline){
+    for(const selector of selectors){
+      const loc=page.locator(selector);
+      const count=await loc.count().catch(()=>0);
+      for(let i=0;i<count;i++){
+        const item=loc.nth(i);
+        if(await item.isVisible().catch(()=>false)){
+          await item.click({timeout:Math.max(2000,deadline-Date.now())});
+          return true;
+        }
+      }
+    }
+    await page.waitForTimeout(250);
+  }
+  throw Error('MYBOX 화면에서 클릭할 버튼을 찾지 못했습니다: '+selectors[0]);
+}
+
 async function performUpload(page,request,destination){
   const expectedKey=destination.searchParams.get('resourceKey');
   const currentKey=new URL(page.url()).searchParams.get('resourceKey');
   if(expectedKey&&currentKey!==expectedKey)throw Error('MYBOX 배포 폴더에 진입하지 못했습니다.');
-  await page.locator('button:has-text("올리기"), a:has-text("올리기"), [role="button"]:has-text("올리기")').first().click({timeout:15000});
-  const fileUploadOption=page.locator('text="파일 올리기"').first();
-  await fileUploadOption.waitFor({state:'visible',timeout:10000});
-  const chooserPromise=page.waitForFileChooser({timeout:10000});
-  await fileUploadOption.click();
+  await clickFirstVisible(page,['button:has-text("올리기")','text="올리기"','a:has-text("올리기")','[role="button"]:has-text("올리기")'],15000);
+  const chooserPromise=page.waitForFileChooser({timeout:15000});
+  await clickFirstVisible(page,['text="파일 올리기"','button:has-text("파일 올리기")','li:has-text("파일 올리기")','[role="menuitem"]:has-text("파일 올리기")'],10000);
   const chooser=await chooserPromise;
   await chooser.setFiles(request.zipPath);
 
@@ -148,8 +167,7 @@ async function performUpload(page,request,destination){
   );
   const afterSelectText=await page.evaluate(()=>document.body?.innerText||'');
   if(/같은 이름|덮어쓰기/.test(afterSelectText)){
-    const overwrite=page.locator('button:has-text("덮어쓰기"), text="덮어쓰기"').first();
-    if(await overwrite.isVisible().catch(()=>false))await overwrite.click({timeout:10000});
+    await clickFirstVisible(page,['button:has-text("덮어쓰기")','text="덮어쓰기"'],10000).catch(()=>{});
   }
   await page.waitForFunction(
     ()=>{
@@ -233,7 +251,7 @@ async function runCli(){
     await writeReceipt(request,destination);
     console.log('MYBOX_RESULT '+JSON.stringify({ok:true,mode:'visible',sha:request.sourceCommit}));
   }catch(error){
-    console.log('MYBOX_RESULT '+JSON.stringify({ok:false,error:error.message}));
+    console.log('MYBOX_RESULT '+JSON.stringify({ok:false,error:stripAnsi(error.message)}));
     throw error;
   }finally{
     if(headlessContext)await headlessContext.close().catch(()=>{});
