@@ -7,7 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {buildMyboxUpdate,createMyboxDeployment,updateFileAllowed} from '../mybox-deploy.mjs';
 import {applyMyboxUpdate} from '../mybox-apply-update.mjs';
-import {validateMyboxRequest,isMyboxLoginUrl} from '../mybox-browser-upload.mjs';
+import {validateMyboxRequest,isMyboxLoginUrl,isGoogleLoginUrl,detectUploadProvider} from '../mybox-browser-upload.mjs';
 const source=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const git=(root,...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8',windowsHide:true,stdio:['ignore','pipe','pipe']}).trim();
 async function fixture(){
@@ -113,12 +113,17 @@ test('product work defers deployment before tests or upload begin',async()=>{
   }finally{await rm(root,{recursive:true,force:true});}
 });
 
-test('Playwright MYBOX uploader validates fixed destination, fixed archive name and login URLs',()=>{
-  const dest=validateMyboxRequest({folderUrl:'https://mybox.naver.com/main/web/my',zipPath:'C:/tmp/최신업데이트.zip'});
-  assert.equal(dest.href,'https://mybox.naver.com/main/web/my');
-  assert.throws(()=>validateMyboxRequest({folderUrl:'https://example.com/main/web/my',zipPath:'C:/tmp/최신업데이트.zip'}),/MYBOX 배포 위치/);
-  assert.throws(()=>validateMyboxRequest({folderUrl:'https://mybox.naver.com/main/web/my',zipPath:'C:/tmp/other.zip'}),/고정 업데이트 파일명/);
+test('Playwright uploader validates Google Drive and MYBOX destinations, fixed archive name and login URLs',()=>{
+  const driveDest=validateMyboxRequest({folderUrl:'https://drive.google.com/drive/folders/AbCdEfGhIjKlMnOpQrSt',zipPath:'C:/tmp/최신업데이트.zip'});
+  assert.equal(detectUploadProvider(driveDest.href),'gdrive');
+  const myboxDest=validateMyboxRequest({folderUrl:'https://mybox.naver.com/main/web/my',zipPath:'C:/tmp/최신업데이트.zip'});
+  assert.equal(detectUploadProvider(myboxDest.href),'mybox');
+  assert.throws(()=>validateMyboxRequest({folderUrl:'https://example.com/drive/folders/AbCdEfGhIjKlMnOpQrSt',zipPath:'C:/tmp/최신업데이트.zip'}),/허용된 배포 위치/);
+  assert.throws(()=>validateMyboxRequest({folderUrl:'https://drive.google.com/drive/u/0/trash',zipPath:'C:/tmp/최신업데이트.zip'}),/Google 드라이브 배포 폴더/);
+  assert.throws(()=>validateMyboxRequest({folderUrl:'https://drive.google.com/drive/folders/AbCdEfGhIjKlMnOpQrSt',zipPath:'C:/tmp/other.zip'}),/고정 업데이트 파일명/);
   assert.equal(isMyboxLoginUrl('https://nid.naver.com/nidlogin.login'),true);
   assert.equal(isMyboxLoginUrl('https://mybox.naver.com/about/introduce'),true);
   assert.equal(isMyboxLoginUrl('https://mybox.naver.com/main/web/my'),false);
+  assert.equal(isGoogleLoginUrl('https://accounts.google.com/v3/signin'),true);
+  assert.equal(isGoogleLoginUrl('https://drive.google.com/drive/folders/AbCdEfGhIjKlMnOpQrSt'),false);
 });

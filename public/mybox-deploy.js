@@ -1,7 +1,7 @@
 (() => {
   const anchor=document.getElementById('githubSyncStatus');
   if(!anchor)return;
-  const button=document.createElement('button');button.type='button';button.textContent='MYBOX 자동배포';
+  const button=document.createElement('button');button.type='button';button.textContent='드라이브 자동배포';
   const status=document.createElement('span');status.style.marginLeft='8px';status.setAttribute('role','status');
   anchor.after(button,status);
   let current;
@@ -9,10 +9,11 @@
     try{
       const response=await fetch('/api/mybox-deploy');if(!response.ok)return;
       current=await response.json();button.hidden=!!current.portable;status.hidden=!!current.portable;
+      const label=current.provider==='gdrive'?'Google 드라이브':'MYBOX';
       status.textContent=current.message;
-      button.textContent=current.enabled?'MYBOX 자동배포 켜짐':'MYBOX 자동배포 꺼짐';
-      button.title='GitHub 반영 후 테스트하고 기존 전용 크롬 세션으로 MYBOX 내 파일의 최신업데이트.zip을 교체합니다.';
-    }catch{status.textContent='MYBOX 배포 상태 연결 대기';}
+      button.textContent=current.enabled?label+' 자동배포 켜짐':label+' 자동배포 꺼짐';
+      button.title='GitHub 반영 후 테스트하고 '+label+'의 최신업데이트.zip을 자동으로 덮어씁니다.';
+    }catch{status.textContent='자동배포 상태 연결 대기';}
   }
   button.onclick=async()=>{
     if(!current)return;button.disabled=true;

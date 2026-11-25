@@ -66,7 +66,9 @@ export async function createMyboxDeployment(root,{publish,build=buildMyboxUpdate
   const settingsFile=path.join(home,'settings.json'),statusFile=path.join(home,'status.json');
   const load=async file=>{try{return JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;return {};}};
   let settings=await load(settingsFile),saved=await load(statusFile),pending=null,running=false,timer,stopped=false,attemptedSha=null,activeSha=null;
-  const state={enabled:!!settings.enabled,status:'idle',message:settings.enabled?'GitHub 반영 후 MYBOX 자동배포 대기':'MYBOX 자동배포 꺼짐',lastSuccess:saved.lastSuccess||null};
+  const targetLabel=(cfg=settings)=>/drive\.google\.com/i.test(String(cfg?.folderUrl||''))?'Google 드라이브':'MYBOX';
+  const targetProvider=(cfg=settings)=>/drive\.google\.com/i.test(String(cfg?.folderUrl||''))?'gdrive':'mybox';
+  const state={enabled:!!settings.enabled,provider:targetProvider(),status:'idle',message:settings.enabled?'GitHub 반영 후 '+targetLabel()+' 자동배포 대기':targetLabel()+' 자동배포 꺼짐',lastSuccess:saved.lastSuccess||null};
   const persist=()=>writeFile(statusFile,JSON.stringify({lastSuccess:state.lastSuccess},null,2));
   async function validate(sha){
     if((await git(root,['rev-parse','HEAD'])).toString().trim()!==sha)throw Error('새 수정이 있어 다음 GitHub 반영을 기다립니다.');
@@ -86,43 +88,50 @@ export async function createMyboxDeployment(root,{publish,build=buildMyboxUpdate
       if(matched){try{const parsed=JSON.parse(matched[1]);if(parsed?.error)uploadError=String(parsed.error);}catch{}}
     }
     const receipt=await load(path.join(home,'upload-receipt.json'));
-    if(receipt.attemptId!==request.attemptId||receipt.sha!==request.sourceCommit)throw Error(uploadError||'MYBOX 업로드 완료를 확인하지 못했습니다. 브라우저 연결과 로그인을 확인해 주세요.');
+    if(receipt.attemptId!==request.attemptId||receipt.sha!==request.sourceCommit)throw Error(uploadError||targetLabel(request)+' 업로드 완료를 확인하지 못했습니다. 브라우저 연결과 로그인을 확인해 주세요.');
   });
   async function drain(){
     if(running||stopped||!state.enabled||!pending)return;
+    const latestSettings=await load(settingsFile);
+    settings={...settings,...latestSettings};
+    state.provider=targetProvider(settings);
+    const label=targetLabel(settings);
     if(isBusy()){
-      state.status='pending';state.message='상품 작업이 끝나면 MYBOX에 배포합니다.';
+      state.status='pending';state.message='상품 작업이 끝나면 '+label+'에 배포합니다.';
       clearTimeout(timer);timer=setTimeout(drain,delayMs);timer.unref();return;
     }
     running=true;const sha=pending;pending=null;activeSha=sha;attemptedSha=sha;
     try{
-      state.status='testing';state.message='MYBOX 배포 전 테스트 중';
+      state.status='testing';state.message=label+' 배포 전 테스트 중';
       await validate(sha);await runChecks();await validate(sha);
       if(pending&&pending!==sha)return;
-      if(isBusy()){pending||=sha;state.status='pending';state.message='상품 작업이 끝나면 MYBOX에 배포합니다.';return;}
+      if(isBusy()){pending||=sha;state.status='pending';state.message='상품 작업이 끝나면 '+label+'에 배포합니다.';return;}
       state.status='packing';state.message='누적 업데이트 파일 생성 중';
       const built=await build(root,sha,{base,outputRoot:home});
       await validate(sha);if(pending&&pending!==sha)return;
       if(stopped||!state.enabled)return;
       const fixed=path.join(home,filename);await copyFile(built.zipPath,fixed);
-      state.status='uploading';state.message='MYBOX 최신 업데이트 교체 중';
-      const latestSettings=await load(settingsFile);
-      await upload({zipPath:fixed,sourceCommit:sha,filename,folderUrl:latestSettings.folderUrl});
-      state.lastSuccess={sha,version:built.manifest.version,at:new Date().toISOString(),filename};
-      await persist();state.status='synced';state.message='MYBOX 최신 업데이트 반영 완료';
-    }catch(error){state.status='error';state.message=error.message.startsWith('Command failed:')?'자동배포 실패 · 테스트 또는 MYBOX 연결을 확인해 주세요.':error.message;}
+      state.status='uploading';state.message=label+' 최신 업데이트 교체 중';
+      const currentSettings=await load(settingsFile);
+      state.provider=targetProvider(currentSettings);
+      await upload({zipPath:fixed,sourceCommit:sha,filename,folderUrl:currentSettings.folderUrl,folderName:currentSettings.folderName});
+      state.lastSuccess={sha,version:built.manifest.version,at:new Date().toISOString(),filename,provider:state.provider};
+      await persist();state.status='synced';state.message=targetLabel(currentSettings)+' 최신 업데이트 반영 완료';
+    }catch(error){state.status='error';state.message=error.message.startsWith('Command failed:')?'자동배포 실패 · 테스트 또는 '+label+' 연결을 확인해 주세요.':error.message;}
     finally{running=false;activeSha=null;if(pending&&!stopped&&state.enabled){clearTimeout(timer);timer=setTimeout(drain,delayMs);timer.unref();}}
   }
   function schedule(sha,{force=false}={}){
     if(!state.enabled||stopped||!sha||!force&&(sha===state.lastSuccess?.sha||sha===pending||sha===activeSha||sha===attemptedSha))return;
     pending=sha;clearTimeout(timer);timer=setTimeout(drain,delayMs);timer.unref();
-    if(!running){state.status='pending';state.message='수정이 안정되면 MYBOX에 자동배포합니다.';}
+    if(!running){state.status='pending';state.message='수정이 안정되면 '+targetLabel()+'에 자동배포합니다.';}
   }
-  return {state,schedule,async runNow(sha){if(running)throw Error('MYBOX 배포가 진행 중입니다.');pending=sha;clearTimeout(timer);await drain();return {...state};},async configure(enabled){
+  return {state,schedule,async runNow(sha){if(running)throw Error(targetLabel()+' 배포가 진행 중입니다.');pending=sha;clearTimeout(timer);await drain();return {...state};},async configure(enabled){
     if(typeof enabled!=='boolean')throw Error('자동배포 설정을 확인해 주세요.');
-    settings={...settings,enabled};await writeFile(settingsFile,JSON.stringify(settings));state.enabled=enabled;
-    if(!enabled){pending=null;clearTimeout(timer);state.message=running?'현재 배포가 끝나면 자동배포를 중지합니다.':'MYBOX 자동배포 꺼짐';}
-    else{state.message='GitHub 반영 후 MYBOX 자동배포 대기';}
+    const latest=await load(settingsFile);
+    settings={...latest,enabled};await writeFile(settingsFile,JSON.stringify(settings,null,2));state.enabled=enabled;state.provider=targetProvider(settings);
+    const label=targetLabel(settings);
+    if(!enabled){pending=null;clearTimeout(timer);state.message=running?'현재 배포가 끝나면 자동배포를 중지합니다.':label+' 자동배포 꺼짐';}
+    else{state.message='GitHub 반영 후 '+label+' 자동배포 대기';}
     return {...state};
   },stop(){stopped=true;pending=null;clearTimeout(timer);}};
 }
