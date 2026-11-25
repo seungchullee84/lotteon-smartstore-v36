@@ -2,7 +2,6 @@ import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {readFile,writeFile,mkdir,mkdtemp,copyFile,readdir} from 'node:fs/promises';
 import {createHash,randomUUID} from 'node:crypto';
-import {pathToFileURL} from 'node:url';
 import path from 'node:path';
 import {publishable} from './github-sync.mjs';
 import {writeUpdateZip} from './mybox-zip.mjs';
@@ -77,10 +76,17 @@ export async function createMyboxDeployment(root,{publish,build=buildMyboxUpdate
   const upload=publish||(async request=>{
     request.attemptId=randomUUID();
     const requestFile=path.join(home,'upload-request.json');await writeFile(requestFile,JSON.stringify(request,null,2));
-    const entry=pathToFileURL(path.join(root,'mybox-browser-upload.mjs')).href;
-    await exec('ego-browser',['nodejs','-e',`await import(${JSON.stringify(entry)})`],{windowsHide:true,timeout:240000,maxBuffer:2000000}).catch(()=>{});
+    const script=path.join(root,'mybox-browser-upload.mjs');
+    let uploadError='';
+    try{
+      await exec(process.execPath,[script],{cwd:root,windowsHide:true,timeout:300000,maxBuffer:2000000});
+    }catch(error){
+      const output=String(error.stdout||'')+'\n'+String(error.stderr||'');
+      const matched=output.match(/MYBOX_RESULT\s+(\{[^\r\n]+\})/);
+      if(matched){try{const parsed=JSON.parse(matched[1]);if(parsed?.error)uploadError=String(parsed.error);}catch{}}
+    }
     const receipt=await load(path.join(home,'upload-receipt.json'));
-    if(receipt.attemptId!==request.attemptId||receipt.sha!==request.sourceCommit)throw Error('MYBOX 업로드 완료를 확인하지 못했습니다. 브라우저 연결과 로그인을 확인해 주세요.');
+    if(receipt.attemptId!==request.attemptId||receipt.sha!==request.sourceCommit)throw Error(uploadError||'MYBOX 업로드 완료를 확인하지 못했습니다. 브라우저 연결과 로그인을 확인해 주세요.');
   });
   async function drain(){
     if(running||stopped||!state.enabled||!pending)return;
