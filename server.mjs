@@ -37,7 +37,6 @@ import {requireChannel} from './channel-routing.mjs';
 import {verifyNaver,createKeywordOptimizer} from './naver-keywords.mjs';
 import {createBackgroundWorkflow} from './background-workflow.mjs';
 import {backgroundPrompt} from './background-prompt.mjs';
-import {createBackgroundRunner} from './background-runner.mjs';
 import {backgroundActionKind} from './background-action-policy.mjs';
 import {createPendingBackgroundApply} from './background-pending-apply.mjs';
 import {createReleaseTracker} from './app-release.mjs';
