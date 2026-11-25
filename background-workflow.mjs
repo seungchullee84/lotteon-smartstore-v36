@@ -225,7 +225,7 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   try{assertCurrent(active);}catch{return {ok:true,pending:false};}
   return {ok:true,pending:true,status:view?.status||'waiting',dispatched:!!active.dispatched,jobId:active.jobId,requestId:active.requestId,style:active.style,key:active.key,sourceUrl:active.sourceUrl,sourcePath:active.sourcePath,sourceHash:active.sourceHash,attempt:active.attempt,maxAttempts,previewPath:active.staged?.previewPath||null,retryReason:active.retryReason||null};
  }
- function dispatch({jobId}){const s=job(jobId);if(s.dispatched||s.cachedBytes)throw Error('이미 진행 중이거나 재사용할 수 있는 합성 요청입니다.');s.dispatched=true;view={...timing(s),status:'generating',style:s.style,key:s.key,message:'제미나이(Antigravity) 합성 대기 중 · 채팅에 "배경 합성해줘"를 보내면 생성·검수 후 대표이미지에 적용합니다.'};return inspect({jobId});}
+ function dispatch({jobId}){const s=job(jobId);if(s.dispatched||s.cachedBytes)throw Error('이미 진행 중이거나 재사용할 수 있는 합성 요청입니다.');s.dispatched=true;view={...timing(s),status:'generating',style:s.style,key:s.key,message:'제미나이(Antigravity)가 원본을 확인하고 배경 합성을 진행합니다.'};return inspect({jobId});}
  function fail({jobId,message}){if(active?.jobId!==jobId||active.invalid)return;view={...timing(active,true),status:'error',style:active.style,key:active.key,sourceUrl:active.sourceUrl,jobId:active.jobId,requestId:active.requestId,message};if(active.previews.length){const last=active.previews.find(p=>p.attempt===active.attempt);if(last)last.reason=String(message||'품질 확인 필요').slice(0,300);rememberReview(active);}active.invalid=true;active=null;}
  function status(){
   if(!view)return null;

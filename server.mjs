@@ -389,8 +389,8 @@ const server=http.createServer(async(req,res)=>{
       if(url.pathname==='/api/background-result')return json(res,200,await backgroundWorkflow.stage(b));
       if(url.pathname==='/api/background-dispatch'){
         const current=backgroundWorkflow.dispatch(b);
-        log('제미나이(Antigravity) 배경 합성 요청 접수 · 품번 '+current.style+' ('+current.key+') · 요청 '+current.jobId);
-        return json(res,200,{ok:true,started:true,mode:'gemini-chat',jobId:current.jobId,style:current.style,key:current.key,message:'제미나이(Antigravity) 합성 요청을 접수했습니다. 채팅에 "배경 합성해줘"라고 보내면 생성·원본 보존 합성·검수 후 대표이미지에 자동 적용합니다.'});
+        log('제미나이(Antigravity) 배경 합성 시작 · 품번 '+current.style+' ('+current.key+') · 요청 '+current.jobId);
+        return json(res,200,{ok:true,started:true,mode:'gemini-chat',jobId:current.jobId,style:current.style,key:current.key,message:'제미나이(Antigravity)가 배경 생성·원본 보존 합성·검수를 진행합니다. 완료되면 대표이미지에 자동 적용합니다.'});
       }
       if(url.pathname==='/api/background-complete'){
         const result=backgroundWorkflow.complete(b);if(result.waiting)backgroundPendingApply.schedule(b);log(result.message);return json(res,200,result);

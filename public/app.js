@@ -906,7 +906,7 @@ function syncBackgroundWork(s){
  }
  syncBackgroundControls();
 }
-function backgroundGuide(){return '선택한 사진: '+backgroundLabels[selectedBackgroundImage]+'. 합성 진행을 누르면 동일 원본의 완료된 결과를 바로 적용하고, 새 합성이 필요하면 제미나이(Antigravity) 채팅 요청을 접수합니다.';}
+function backgroundGuide(){return '선택한 사진: '+backgroundLabels[selectedBackgroundImage]+'. 합성 진행을 누르면 동일 원본의 완료된 결과를 바로 적용하고, 새 합성이 필요하면 제미나이(Antigravity)가 자동으로 진행합니다.';}
 function showBackgroundChoice(){
  setText($('backgroundOriginalHeading'),'현재 선택 원본 · '+backgroundLabels[selectedBackgroundImage]);
  $('backgroundOriginal').src='/image/'+selectedBackgroundImage+'-original?t='+Date.now();
