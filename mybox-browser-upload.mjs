@@ -1,4 +1,5 @@
-import {access,mkdir,readFile,rename,writeFile} from 'node:fs/promises';
+import {access,mkdir,readFile,rename,rm,writeFile} from 'node:fs/promises';
+import {spawn} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {chromium} from 'playwright';
@@ -34,11 +35,11 @@ async function resolveChromeExecutable(){
   return undefined;
 }
 
-async function openContext({headless}){
+async function openHeadlessContext(){
   await mkdir(profileDir,{recursive:true});
   const executablePath=await resolveChromeExecutable();
   const options={
-    headless,
+    headless:true,
     viewport:{width:1366,height:900},
     locale:'ko-KR',
     args:['--no-first-run','--no-default-browser-check','--disable-blink-features=AutomationControlled']
@@ -55,16 +56,75 @@ async function openContext({headless}){
   }
 }
 
-async function waitForMyboxReady(page,timeoutMs){
+async function openVisibleChromeSession(initialUrl){
+  await mkdir(profileDir,{recursive:true});
+  const portFile=path.join(profileDir,'DevToolsActivePort');
+  const connect=async()=>{
+    const port=Number((await readFile(portFile,'utf8')).split('\n')[0]);
+    if(!Number.isInteger(port)||port<1024||port>65535)throw Error('크롬 포트 확인 실패');
+    const browser=await chromium.connectOverCDP('http://127.0.0.1:'+port,{timeout:2000});
+    const context=browser.contexts()[0];
+    return {browser,context,child:null};
+  };
+  try{
+    const existing=await connect();
+    const page=existing.context.pages()[0]||await existing.context.newPage();
+    await page.goto(initialUrl,{waitUntil:'domcontentloaded',timeout:30000}).catch(()=>{});
+    await page.bringToFront().catch(()=>{});
+    return {...existing,page};
+  }catch{}
+  await rm(portFile,{force:true}).catch(()=>{});
+  const exe=(await resolveChromeExecutable())||chromium.executablePath();
+  const args=[
+    '--user-data-dir='+profileDir,
+    '--remote-debugging-port=0',
+    '--remote-debugging-address=127.0.0.1',
+    '--no-first-run',
+    '--no-default-browser-check',
+    '--new-window',
+    initialUrl
+  ];
+  const child=spawn(exe,args,{detached:true,windowsHide:false,stdio:'ignore'});
+  let launchError;
+  child.on('error',e=>{launchError=e;});
+  child.unref();
+  for(let n=0;n<40;n++){
+    if(launchError)throw Error('MYBOX 로그인용 Chrome을 실행하지 못했습니다: '+launchError.message);
+    try{
+      const connected=await connect();
+      const page=connected.context.pages()[0]||await connected.context.newPage();
+      await page.bringToFront().catch(()=>{});
+      return {...connected,child,page};
+    }catch{await new Promise(r=>setTimeout(r,350));}
+  }
+  throw Error('MYBOX 로그인용 Chrome 창에 연결하지 못했습니다.');
+}
+
+async function closeVisibleChromeSession(session){
+  if(!session)return;
+  try{
+    const pages=session.context?.pages?.()||[];
+    for(const p of pages)await p.close().catch(()=>{});
+  }catch{}
+  try{await session.browser?.close?.();}catch{}
+}
+
+async function waitForMyboxReady(page,timeoutMs,{stopOnLogin=false}={}){
   const deadline=Date.now()+timeoutMs;
+  let loginSeenAt=0;
   while(Date.now()<deadline){
     if(page.isClosed())throw Error('MYBOX 로그인 창이 닫혔습니다.');
     const currentUrl=page.url();
-    if(!isMyboxLoginUrl(currentUrl)){
+    if(isMyboxLoginUrl(currentUrl)){
+      if(stopOnLogin){
+        if(!loginSeenAt)loginSeenAt=Date.now();
+        if(Date.now()-loginSeenAt>1500)return false;
+      }
+    }else{
       const ready=await page.evaluate(()=>document.body?.innerText?.includes('올리기')).catch(()=>false);
       if(ready)return true;
     }
-    await page.waitForTimeout(600);
+    await page.waitForTimeout(500);
   }
   return false;
 }
@@ -136,36 +196,35 @@ async function runCli(){
     destination=validateMyboxRequest(request);
   }
 
-  let context=null;
+  let headlessContext=null;
+  let visibleSession=null;
   try{
     if(!forceVisible){
-      context=await openContext({headless:true});
-      const page=context.pages()[0]||await context.newPage();
+      headlessContext=await openHeadlessContext();
+      const page=headlessContext.pages()[0]||await headlessContext.newPage();
       await page.goto(destination.href,{waitUntil:'domcontentloaded',timeout:30000});
-      const ready=await waitForMyboxReady(page,12000);
+      const ready=await waitForMyboxReady(page,12000,{stopOnLogin:true});
       if(ready){
         await performUpload(page,request,destination);
         await writeReceipt(request,destination);
         console.log('MYBOX_RESULT '+JSON.stringify({ok:true,mode:'headless',sha:request.sourceCommit}));
         return;
       }
-      await context.close().catch(()=>{});
-      context=null;
+      await headlessContext.close().catch(()=>{});
+      headlessContext=null;
     }
 
-    // Session missing or expired: open visible window for user login (up to 3 minutes).
-    context=await openContext({headless:false});
-    const page=context.pages()[0]||await context.newPage();
     const loginUrl='https://nid.naver.com/nidlogin.login?url='+encodeURIComponent(destination.href);
-    await page.goto(destination.href,{waitUntil:'domcontentloaded',timeout:30000});
-    let ready=await waitForMyboxReady(page,5000);
+    visibleSession=await openVisibleChromeSession(destination.href);
+    const page=visibleSession.page;
+    let ready=await waitForMyboxReady(page,4000,{stopOnLogin:true});
     if(!ready){
       if(isMyboxLoginUrl(page.url())&&!page.url().includes('nid.naver.com')){
         await page.goto(loginUrl,{waitUntil:'domcontentloaded',timeout:30000}).catch(()=>{});
       }
       ready=await waitForMyboxReady(page,180000);
     }
-    if(!ready)throw Error('MYBOX 로그인이 필요합니다. 열린 브라우저에서 로그인을 완료해 주세요.');
+    if(!ready)throw Error('MYBOX 로그인이 필요합니다. 열린 Chrome 창에서 로그인을 완료해 주세요.');
     if(loginOnly){
       console.log('MYBOX_RESULT '+JSON.stringify({ok:true,mode:'login-only'}));
       return;
@@ -177,7 +236,8 @@ async function runCli(){
     console.log('MYBOX_RESULT '+JSON.stringify({ok:false,error:error.message}));
     throw error;
   }finally{
-    if(context)await context.close().catch(()=>{});
+    if(headlessContext)await headlessContext.close().catch(()=>{});
+    if(visibleSession)await closeVisibleChromeSession(visibleSession);
   }
 }
 
