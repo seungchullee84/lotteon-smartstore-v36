@@ -220,7 +220,12 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   }catch{return {ok:true,restored:false};}
  }
  function inspect({jobId}){const s=job(jobId);return {ok:true,jobId,style:s.style,key:s.key,sourcePath:s.sourcePath,sourceHash:s.sourceHash,attempt:s.attempt,maxAttempts,previewPath:s.staged?.previewPath};}
- function dispatch({jobId}){const s=job(jobId);if(s.dispatched||s.cachedBytes)throw Error('이미 진행 중이거나 재사용할 수 있는 합성 요청입니다.');s.dispatched=true;view={...timing(s),status:'generating',style:s.style,key:s.key,message:'Codex가 원본을 확인하고 배경 합성을 진행합니다.'};return inspect({jobId});}
+ function pending(){
+  if(!active||active.invalid||active.cachedBytes)return {ok:true,pending:false};
+  try{assertCurrent(active);}catch{return {ok:true,pending:false};}
+  return {ok:true,pending:true,status:view?.status||'waiting',dispatched:!!active.dispatched,jobId:active.jobId,requestId:active.requestId,style:active.style,key:active.key,sourceUrl:active.sourceUrl,sourcePath:active.sourcePath,sourceHash:active.sourceHash,attempt:active.attempt,maxAttempts,previewPath:active.staged?.previewPath||null,retryReason:active.retryReason||null};
+ }
+ function dispatch({jobId}){const s=job(jobId);if(s.dispatched||s.cachedBytes)throw Error('이미 진행 중이거나 재사용할 수 있는 합성 요청입니다.');s.dispatched=true;view={...timing(s),status:'generating',style:s.style,key:s.key,message:'제미나이(Antigravity) 합성 대기 중 · 채팅에 "배경 합성해줘"를 보내면 생성·검수 후 대표이미지에 적용합니다.'};return inspect({jobId});}
  function fail({jobId,message}){if(active?.jobId!==jobId||active.invalid)return;view={...timing(active,true),status:'error',style:active.style,key:active.key,sourceUrl:active.sourceUrl,jobId:active.jobId,requestId:active.requestId,message};if(active.previews.length){const last=active.previews.find(p=>p.attempt===active.attempt);if(last)last.reason=String(message||'품질 확인 필요').slice(0,300);rememberReview(active);}active.invalid=true;active=null;}
  function status(){
   if(!view)return null;
@@ -228,5 +233,5 @@ export function createBackgroundWorkflow({getState,cacheRoot,compose=composeBack
   let manualAvailable=false;if(s?.previews?.length)try{assertCurrent(s);manualAvailable=true;}catch{}
   return {...view,jobId,requestId:view.requestId||active?.requestId,sourceUrl:view.sourceUrl||active?.sourceUrl,manualAvailable,...(s?.previews?.length&&!manualAvailable?{manualUnavailableReason:'사진 선택이나 원본 상태가 바뀌어 이 결과는 미리보기만 가능합니다.'}:{}),previews:(s?.previews||[]).map(p=>({attempt:p.attempt,url:'/api/background-preview?jobId='+encodeURIComponent(jobId)+'&attempt='+p.attempt,...(p.reason?{reason:p.reason}:{})}))};
  }
- return {prepare,stage,retry,complete,select,cancel,invalidate,inspect,dispatch,fail,preview,manualApply,manualFail,restoreReview,status};
+ return {prepare,stage,retry,complete,select,cancel,invalidate,inspect,pending,dispatch,fail,preview,manualApply,manualFail,restoreReview,status};
 }
