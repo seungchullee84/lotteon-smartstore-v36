@@ -32,7 +32,22 @@
 - **자동 저장(인수인계) 단축 규칙**: 사용자가 **"대화내역 저장해줘"**, **"지금 내용 저장해줘"**, **"작업 저장해줘"** 등 유사한 표현을 말하면, 에이전트는 API 키·비밀번호·토큰·개인정보 등 민감정보를 제외한 핵심 결정 사항과 다음 할 일을 이 파일(`GEMINI.md`)의 **최근 작업 이력**에 한국어로 요약 기록하고 `main` 브랜치에 커밋·푸시한다.
 - 의미 있는 기능 개선이나 논의 정리를 마칠 때마다 아래 **최근 작업 이력**을 갱신해 두면 다음 PC에서 바로 이어서 작업할 수 있다.
 
+## 4-1. 제미나이(Antigravity) 사진합성(롯데ON 배경 늘리기) 자동 실행 규칙
+- 상품등록기의 `🖼 배경 늘리기·합성` → **`합성 진행`**은 **Codex(`codex.exe`)를 절대 실행하지 않고**, Antigravity(제미나이) 채팅 대기 요청으로 접수한다.
+- 사용자가 **"배경 합성해줘"**, **"사진 합성해줘"**, **"배경 늘려줘"**(또는 유사 표현)를 요청하면, 에이전트는 재확인 질문 없이 즉시 아래 순서로 처리한다:
+  1. `node background-finish.mjs pending`으로 현재 상품등록기에 대기 중인 요청(`jobId`, `style`, `key`, `sourcePath`, `sourceHash`, `attempt`)을 조회한다. *(대기 요청이 없으면 등록기에서 `🖼 배경 늘리기·합성` → `합성 진행` 버튼을 먼저 눌러 달라고 짧게 안내한다.)*
+  2. `read_file`로 `sourcePath` 원본 사진을 직접 확인한 뒤, **`image-generator` 서브에이전트**로 원본을 참조해 **1:1 정사각형 배경 확장 이미지**를 생성한다. (원본 인물·옷·색상·비율·전체 영역을 변형/자르지 않고, 원본을 중앙에 두었을 때 바깥 여백의 벽·바닥·조명·그림자만 자연스럽게 연장하도록 지시. 생성 결과 파일은 `<Artifact Directory Path>/scratch/`에 저장.)
+  3. `node background-finish.mjs stage --job <jobId> --image "<생성이미지절대경로>"`를 실행해 `background-composite.mjs`가 원본 영역 전체를 무손상으로 중앙 합성한 1500×1500 JPEG(`previewPath`)를 만든다. *(원본 파일 절대 무손상)*
+  4. 반환된 `previewPath`를 **`read_file`로 직접 시각 검수**한다.
+     - 경계선·줄눈·그림자·색감 이질감이 있으면 `node background-finish.mjs retry --job <jobId> --reason "<확인한 문제>"` 실행 후 원본+1차 미리보기를 참조해 최대 2차까지 보정 생성·`stage`·재검수한다.
+     - 자연스럽고 원본 보존이 완벽하면 `node background-finish.mjs apply --job <jobId> --reviewed --attempt <회차>`를 실행해 롯데ON 대표이미지에 자동 적용 및 캐시 저장을 완료한다. (`waiting: true`면 다른 작업 종료 후 서버가 자동 적용.)
+     - 2차까지도 자동 검수 기준에 미달하면 `node background-finish.mjs fail --job <jobId> --reason "<시도한 보완과 남은 문제>"`를 남겨 사용자가 등록기에서 1·2차 미리보기를 직접 비교·수동 선택 적용할 수 있게 한다.
+  5. 어떤 경우에도 실제 판매처 저장·등록은 실행하지 않는다.
+
 ## 5. 최근 작업 이력 (인수인계 로그)
+- **2026-11-25 (롯데ON 사진합성 기능 Codex 제거 → 제미나이 Antigravity 채팅 직접 합성 전환)**:
+  - `server.mjs`, `background-workflow.mjs`, `background-finish.mjs`, `background-prompt.mjs`, `public/index.html`, `public/app.js`: `codex.exe` 백그라운드 호출을 완전 제거하고 제미나이(Antigravity) 채팅 대기 방식으로 전환. `GET /api/background-pending` 및 `node background-finish.mjs pending` 조회 추가(요청 번호 복사 없이 채팅에 "배경 합성해줘" 한마디로 원본 보존 합성·시각 검수·자동 적용 가능).
+  - 기존 원본 100% 무손상 중앙 합성(`background-composite.mjs`), 캐시 재사용, 최대 2차 보정, 실패 회차 미리보기·수동 선택 적용, 다른 작업 병행 대기(`applying-wait`) 및 단위/UI 테스트 전수 유지.
 - **2026-11-23 (`0.1513.0`)**:
   - 품번 입력칸(`#style`) 글씨 색상을 파란색(`#1d4ed8`)으로 변경 (`public/style.css`, 롯데ON·스마트스토어 공통)
   - `수집 진행 기록` (`#collectionTimeline`) 영역을 `로그인과 상품 수집` 카드(`#collectionCard`) 위쪽으로 이동 (`public/index.html`, `public/style.css`)
