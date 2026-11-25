@@ -187,12 +187,21 @@ async function performGoogleDriveUpload(request,destination){
   const driveRoot=findGoogleDriveDesktopRoot();
   if(driveRoot){
     const targetDir=path.join(driveRoot,folderName);
-    await mkdir(targetDir,{recursive:true});
     const dest=path.join(targetDir,request.filename);
     const tmp=dest+'.'+Date.now()+'.tmp';
-    await copyFile(request.zipPath,tmp);
-    await rename(tmp,dest);
-    return {mode:'gdrive-desktop',dest};
+    try{
+      await mkdir(targetDir,{recursive:true});
+      try{
+        await copyFile(request.zipPath,tmp);
+        await rename(tmp,dest);
+      }catch{
+        await rm(tmp,{force:true}).catch(()=>{});
+        await copyFile(request.zipPath,dest);
+      }
+      return {mode:'gdrive-desktop',dest};
+    }catch{
+      await rm(tmp,{force:true}).catch(()=>{});
+    }
   }
 
   // 2순위: 숏츠등록기와 공유하는 Google 로그인 전용 Chrome(CDP 9229) 임시 탭으로 덮어쓰기 업로드
@@ -379,7 +388,7 @@ async function writeReceipt(request,destination,meta={}){
 
 async function runCli(){
   const requestPath=path.join(deployHome,'upload-request.json');
-  const request=JSON.parse(await readFile(requestPath,'utf8'));
+  const request=JSON.parse((await readFile(requestPath,'utf8')).replace(/^\uFEFF/,''));
   const destination=validateMyboxRequest(request);
   const provider=detectUploadProvider(destination.href);
   try{

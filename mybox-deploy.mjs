@@ -64,7 +64,7 @@ exit /b %UPDATE_EXIT%
 export async function createMyboxDeployment(root,{publish,build=buildMyboxUpdate,check,isBusy=()=>false,delayMs=60000,base=MYBOX_BASE}={}){
   const home=path.join(root,'data','mybox-deploy');await mkdir(home,{recursive:true});
   const settingsFile=path.join(home,'settings.json'),statusFile=path.join(home,'status.json');
-  const load=async file=>{try{return JSON.parse(await readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;return {};}};
+  const load=async file=>{try{return JSON.parse((await readFile(file,'utf8')).replace(/^\uFEFF/,''));}catch(e){if(e.code!=='ENOENT')throw e;return {};}};
   let settings=await load(settingsFile),saved=await load(statusFile),pending=null,running=false,timer,stopped=false,attemptedSha=null,activeSha=null;
   const targetLabel=(cfg=settings)=>/drive\.google\.com/i.test(String(cfg?.folderUrl||''))?'Google 드라이브':'MYBOX';
   const targetProvider=(cfg=settings)=>/drive\.google\.com/i.test(String(cfg?.folderUrl||''))?'gdrive':'mybox';

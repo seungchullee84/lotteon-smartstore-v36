@@ -127,3 +127,25 @@ test('Playwright uploader validates Google Drive and MYBOX destinations, fixed a
   assert.equal(isGoogleLoginUrl('https://accounts.google.com/v3/signin'),true);
   assert.equal(isGoogleLoginUrl('https://drive.google.com/drive/folders/AbCdEfGhIjKlMnOpQrSt'),false);
 });
+
+test('UTF-8 BOM이 포함된 settings.json도 오류 없이 로드하고 Google 드라이브 배포를 실행한다',async()=>{
+  const {root,base,sha}=await fixture();let uploaded=null;
+  try{
+    const home=path.join(root,'data','mybox-deploy');await mkdir(home,{recursive:true});
+    await writeFile(path.join(home,'settings.json'),'\uFEFF'+JSON.stringify({
+      enabled:true,
+      provider:'gdrive',
+      folderName:'지오다노_상품등록기',
+      folderUrl:'https://drive.google.com/drive/folders/AbCdEfGhIjKlMnOpQrSt'
+    },null,2),'utf8');
+    const build=async()=>({manifest:{version:'1.0.2'},zipPath:path.join(root,'sample.zip')});
+    await writeFile(path.join(root,'sample.zip'),'archive');
+    const service=await createMyboxDeployment(root,{base,build,check:async()=>{},publish:async req=>{uploaded=req;}});
+    assert.equal(service.state.enabled,true);
+    assert.equal(service.state.provider,'gdrive');
+    await service.runNow(sha);
+    assert.equal(service.state.status,'synced');
+    assert.equal(uploaded?.folderName,'지오다노_상품등록기');
+    service.stop();
+  }finally{await rm(root,{recursive:true,force:true});}
+});
