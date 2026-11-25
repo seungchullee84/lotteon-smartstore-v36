@@ -17,7 +17,7 @@
 
 ## 3. 자동화 연동 구조 (다른 PC에서도 동일하게 유지)
 - **GitHub 자동 반영 (`github-sync.mjs`)**: 등록기 실행 중 소스(`*.mjs`, `public/*`, `*.md` 등)를 수정하면 2~4초 후 `main` 브랜치에 자동 커밋·푸시된다. `data/`의 API 키·로그인 세션·프로필은 자동 제외된다.
-- **MYBOX 자동배포 (`mybox-deploy.mjs`, `mybox-browser-upload.mjs`)**: GitHub 반영 후 60초 뒤 테스트 → `최신업데이트.zip` 생성 → 상품등록기 기존 전용 크롬(`data/browser-profile-chrome-v2`, 스마트스토어 네이버 로그인 세션 재사용 · 별도 MYBOX 로그인 불필요)에 임시 탭 1개만 열어 네이버 MYBOX `내 파일`(`https://mybox.naver.com/main/web/my`)에 자동 덮어쓰기 업로드 후 해당 탭만 닫는다. *(Codex 전용 `ego-browser` 완전 제거. 기존 롯데ON/스마트스토어 탭과 창은 유지.)*
+- **Google 드라이브 자동배포 (`mybox-deploy.mjs`, `mybox-browser-upload.mjs`)**: GitHub 반영 후 60초 뒤 테스트 → `최신업데이트.zip` 생성 → Google 드라이브 전용 폴더(`지오다노_상품등록기`, 폴더 URL/ID는 GitHub 미업로드 `data/mybox-deploy/settings.json`에만 저장)에 자동 덮어쓰기 업로드한다. 1순위 로컬 Google Drive 데스크톱 폴더 복사, 2순위 숏츠등록기와 공유하는 Google 로그인 전용 Chrome(`CDP 9229`)에 공통 파일 락(`giordano-google-drive-upload.lock`)·자동 2회 재시도·`"기존 파일 바꾸기"` 처리 후 임시 탭만 자동 종료. *(Codex 전용 `ego-browser` 완전 제거 · MYBOX URL 하위 호환 유지.)*
   - `data/mybox-deploy/settings.json`에 `{"enabled": true, "folderUrl": "https://mybox.naver.com/main/web/my"}` 필요 (로컬 파일, GitHub 미업로드).
   - 신규 클론 PC에서는 `git fetch --unshallow`로 기준 커밋(`e9afe1b6...`) 포함 전체 이력이 있어야 패키징 가능하다.
 - **25분 신상품 자동 감시 (`homepage-new-list.mjs`, `new-product-research.mjs`)**: 등록기 실행 중 25분 간격으로 공식몰 신상품 목록을 확인하고, 신규 상품 발견 시 백그라운드로 소구점 조사를 진행한다.
