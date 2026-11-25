@@ -112,11 +112,9 @@ let backgroundApiKey=await loadSmartstoreAIKey(dataRoot);
 const protectedBranding=brandingLock(dataRoot);
 const state={busy:false,phase:'idle',logs:[],product:null,folder:null,error:null,paused:null,revision:Date.now(),collectionInput:null,detailFallbackRequest:null,photoPreparation:null};
 let backgroundMutations=0;
-let backgroundRunner,backgroundPendingApply;
-const backgroundRunnerSettings=await readFile(path.join(dataRoot,'background-runner-settings.json'),'utf8').then(JSON.parse).catch(error=>{if(error.code==='ENOENT')return {};throw error;});
-const backgroundWorkflow=createBackgroundWorkflow({getState:()=>({...state,busy:state.busy||backgroundMutations>0}),cacheRoot:path.join(dataRoot,'background-cache'),onInvalidate:()=>{backgroundPendingApply?.cancel();void backgroundRunner?.cancel().catch(()=>{});}});
+let backgroundPendingApply;
+const backgroundWorkflow=createBackgroundWorkflow({getState:()=>({...state,busy:state.busy||backgroundMutations>0}),cacheRoot:path.join(dataRoot,'background-cache'),onInvalidate:()=>{backgroundPendingApply?.cancel();}});
 backgroundPendingApply=createPendingBackgroundApply({workflow:backgroundWorkflow,onComplete:result=>log(result.message),onFailure:failure=>log(failure.message)});
-backgroundRunner=createBackgroundRunner({root,nodePath:process.execPath,sandboxMode:backgroundRunnerSettings.sandboxMode||'workspace-write',onFailure:failure=>{if(!backgroundPendingApply.has(failure.jobId))backgroundWorkflow.fail(failure);},onExit:({jobId,phase})=>{if(phase==='exited'&&!backgroundPendingApply.has(jobId))backgroundWorkflow.fail({jobId,message:'합성 작업 연결이 완료 전에 종료되었습니다. 현재 대표이미지는 유지했습니다. 다시 시도해 주세요.'});}});
 const newProductResearch=startNewProductResearch(root,{isBusy:()=>state.busy||state.photoPreparation?.status==='preparing'});
 const benefitResearch=startNewListingMonitor(root,{onSnapshot:website=>{void newProductResearch.observe(website);}});
 benefitResearch.state.folderResearch=newProductResearch.state;
@@ -266,6 +264,7 @@ const server=http.createServer(async(req,res)=>{
       const bytes=backgroundWorkflow.preview({jobId:url.searchParams.get('jobId'),attempt:Number(url.searchParams.get('attempt'))});
       res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'no-store'});return res.end(bytes);
     }
+    if(req.method==='GET'&&url.pathname==='/api/background-pending')return json(res,200,backgroundWorkflow.pending());
     if(req.method==='GET'&&url.pathname==='/api/browser-login-status')return json(res,200,await browserLoginFor(url.searchParams.get('channel')||'lotte').status());
     if(req.method==='GET'&&url.pathname==='/api/naver-status')return json(res,200,{configured:!!(naverCredentials.clientId&&naverCredentials.clientSecret),...naverVerification,researchConfigured:state.product?researchForProduct(state.product).configured:false,lastAttempt:naverLastAttempt});
     if(req.method==='GET'&&url.pathname==='/api/state'){
